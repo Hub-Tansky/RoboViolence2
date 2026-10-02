@@ -423,10 +423,6 @@ void Server::recvPacket(char * buffer, int typeID, unsigned long bbnetID)
 				// broadcast the info at remote admins
 				if( master ) master->RA_NewPlayer( textColorLess(playerInfo.playerName).s, playerInfo.playerIP, (long)playerInfo.playerID );
 
-				// if we are using the pro client/serv, generate a new hash query
-				m_checksumQueries.push_back( new CChecksumQuery(playerInfo.playerID,bbnetID) );
-
-
 				// Password is transfered sans null terminator, already MD5'd
 				char pw[33];
 				memcpy(pw, playerInfo.password, 32);
@@ -1146,45 +1142,6 @@ void Server::recvPacket(char * buffer, int typeID, unsigned long bbnetID)
 			}
 			break;
 		}
-	case NET_SVCL_HASH_SEED_REPLY:
-		{
-			net_svcl_hash_seed hashseed;
-			memcpy(&hashseed, buffer, sizeof(net_svcl_hash_seed));
-
-			// find associated checksum query
-			for( unsigned int y=0; y<m_checksumQueries.size(); y++ )
-			{
-				if( m_checksumQueries[y]->GetBBid() == bbnetID )
-				{
-					// we found it
-					if( m_checksumQueries[y]->isValid( hashseed ) )
-					{
-						// this client is good
-						console->add(CString("\x9> Player %s was successfully authenticated", game->players[m_checksumQueries[y]->GetID()]->name.s));
-					}
-					else
-					{
-						console->add(CString("\x9> Player %s was NOT successfully authenticated", game->players[m_checksumQueries[y]->GetID()]->name.s));
-						// this client isnt good, log IP + Name in the local database
-						sqlite3 *DB=0;
-						sqlite3_open("bv2.db",&DB);
-						char	SQL[300];
-						
-						sprintf(SQL,"Insert into BadChecksum(IP,Name) Values('%s','%s')", game->players[m_checksumQueries[y]->GetID()]->playerIP,game->players[m_checksumQueries[y]->GetID()]->name.s);
-						sqlite3_exec(DB,SQL,0,0,0);
-						
-						sqlite3_close(DB);						
-					}
-					delete m_checksumQueries[y];
-					m_checksumQueries.erase( m_checksumQueries.begin() + y );
-					return;
-				}
-			}
-			// if we arrive here, thats abnormal, kick the client
-
-			break;
-		}
-
 	case NET_CLSV_SVCL_PLAYER_UPDATE_SKIN:
 		{
 			net_clsv_svcl_player_update_skin updateSkin;

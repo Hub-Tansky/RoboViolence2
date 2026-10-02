@@ -412,21 +412,6 @@ struct net_svcl_player_update_stats
 	float timePlayedCurGame;
 };
 
-#define NET_SVCL_BAD_CHECKSUM_ENTITY 134
-struct net_svcl_bad_checksum_entity
-{
-	int id;
-	char name[32];
-	char playerIP[16];
-};
-
-#define NET_SVCL_BAD_CHECKSUM_INFO 135
-struct net_svcl_bad_checksum_info
-{
-	int number;
-};
-
-
 // Le client recois son ID, il envoit ses info (player name, etc), 
 // et le server le renvois aux autres
 #define NET_CLSV_SVCL_PLAYER_INFO 201
@@ -585,21 +570,6 @@ struct net_svcl_broadcast_game_info
 	char		key[16];	//unique bv2 key for broadcasting
 	stBV2row	GameInfo;	
 };
-
-
-
-// things specific to the pro client
-
-	#define NET_SVCL_HASH_SEED 404
-	struct net_svcl_hash_seed
-	{
-		short s1;
-		short s2;
-		short s3;
-		short s4;
-	};
-
-	#define NET_SVCL_HASH_SEED_REPLY 405
 
 
 

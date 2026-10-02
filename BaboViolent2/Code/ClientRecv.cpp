@@ -24,8 +24,6 @@
 #include "md5.h"
 #include "CStatus.h"
 
-	#include "md5_2.h"
-
 extern Scene * scene;
 
 //
@@ -76,49 +74,6 @@ void Client::sendJoinHandshake()
 void Client::recvPacket(char * buffer, int typeID)
 {
    
-	if( typeID == NET_SVCL_HASH_SEED )
-	{
-		// we receive an hash seed, we need to send a response back
-		net_svcl_hash_seed hashseed;
-		memcpy(&hashseed, buffer, sizeof(net_svcl_hash_seed));
-
-		int output[4];
-      // Client side, lets just grab the local executable name
-#ifdef WIN32
-      char pFile[512+1];
-      GetModuleFileName(NULL, pFile, 512);
-		int result = md5_file(pFile, (unsigned char*)&output);		
-#else 
-		int result = md5_file("./bv2.exe", (unsigned char*)&output);
-#endif
-
-		//console->add(CString("\x03> client MD5 Output1 : %i",output[0]));
-		//console->add(CString("\x03> client MD5 Output2 : %i",output[1]));
-		//console->add(CString("\x03> client MD5 Output3 : %i",output[2]));
-		//console->add(CString("\x03> client MD5 Output4 : %i",output[3]));
-		
-		int hashedOutput[4];
-		hashedOutput[0] = output[0] ^ (int)hashseed.s1;
-		hashedOutput[1] = output[1] ^ (int)hashseed.s2;
-		hashedOutput[2] = output[2] ^ (int)hashseed.s3;
-		hashedOutput[3] = output[3] ^ (int)hashseed.s4;
-
-		//console->add(CString("\x03> client MD5 HashedOutput1 : %i",hashedOutput[0]));
-		//console->add(CString("\x03> client MD5 HashedOutput2 : %i",hashedOutput[1]));
-		//console->add(CString("\x03> client MD5 HashedOutput3 : %i",hashedOutput[2]));
-		//console->add(CString("\x03> client MD5 HashedOutput4 : %i",hashedOutput[3]));
-
-		// answer back with our result
-		net_svcl_hash_seed newHash;
-		newHash.s1 = (short)hashedOutput[0];
-		newHash.s2 = (short)hashedOutput[1];
-		newHash.s3 = (short)hashedOutput[2];
-		newHash.s4 = (short)hashedOutput[3];
-
-		bb_clientSend(uniqueClientID, (char*)&newHash, sizeof(net_svcl_hash_seed), NET_SVCL_HASH_SEED_REPLY);
-	}
-
-
 	// Answer heartbeats immediately, even while joining or in menus: a late pong
 	// got players kicked ("no respond since 3sec") right after team pick / spawn.
 	if (typeID == NET_SVCL_PING)
@@ -1239,22 +1194,6 @@ void Client::recvPacket(char * buffer, int typeID)
 		
 			break;
 		}
-
-	case NET_SVCL_BAD_CHECKSUM_ENTITY:
-		{
-			net_svcl_bad_checksum_entity bce;
-			memcpy(&bce, buffer, sizeof(net_svcl_bad_checksum_entity));
-			console->add(CString("%i) %s, IP: %s", bce.id, bce.name, bce.playerIP));
-		}
-		break;
-
-	case NET_SVCL_BAD_CHECKSUM_INFO:
-		{
-			net_svcl_bad_checksum_info bci;
-			memcpy(&bci, buffer, sizeof(net_svcl_bad_checksum_info));
-			console->add(CString(">> %i", bci.number));
-		}
-		break;
 
 	}
 }

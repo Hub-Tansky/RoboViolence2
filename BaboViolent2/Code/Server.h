@@ -27,9 +27,9 @@
 	#include "platform_types.h"
     #include <string>
 #endif
-	#include "ChecksumQuery.h"
-	#include <vector>
-   #define GAME_VERSION_SV 21100
+#include <vector>
+
+#define GAME_VERSION_SV 21100
 
 #define GAME_UPDATE_DELAY 20
 
@@ -44,13 +44,6 @@ struct cachedPlayer
 	char macAddr[20];
 };
 
-struct invalidChecksumEntity
-{
-	int id;
-	char name[32];
-	char playerIP[16];
-};
-
 class Server
 {
 public:
@@ -61,8 +54,6 @@ public:
 	// La font
 	unsigned int font;
 #endif
-
-		std::vector<CChecksumQuery *> m_checksumQueries;
 
 	// Si le server run
 	bool isRunning;
@@ -138,10 +129,6 @@ public:
 	void removemap(CString & mapName);
 	std::vector<CString> populateMapList(bool all = false);
 
-	std::vector<invalidChecksumEntity> getInvalidChecksums(unsigned long bbnetID, int number, int offsetFromEnd);
-	//void sendInvalidChecksums(unsigned long bbnetID, int number, int offsetFromEnd);
-	void deleteInvalidChecksums();
-	int getNumberOfInvalidChecksums();
 
 	// Le voting validity
 	bool validateVote(CString vote);

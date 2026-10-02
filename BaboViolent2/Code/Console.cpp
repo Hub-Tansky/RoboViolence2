@@ -2283,62 +2283,6 @@ void Console::sendCommand(CString commandLine, bool isAdmin, unsigned long bbnet
 		// "Unkown command" ;)
 	}
 
-	// getinvalidchecksums [offsetFromEnd=50 [number=50]]
-	// request number(max 50) of entries from BadChecksums starting from number of entries-offsetFromEnd
-	if (command == "getinvalidchecksums")
-	{
-		if (scene && scene->server)
-		{
-			int num = -1, offsetFromEnd = 50;
-			CString offsetFromEndStr = tokenize.getFirstToken(' ');
-			if (offsetFromEndStr != "")
-				offsetFromEnd = offsetFromEndStr.toInt();
-			CString numStr = tokenize.getFirstToken(' ');
-			if (numStr != "")
-				num = numStr.toInt();
-			//scene->server->sendInvalidChecksums(bbnetID, num, offsetFromEnd);
-			std::vector<invalidChecksumEntity> list = scene->server->getInvalidChecksums(bbnetID, num, offsetFromEnd);
-			for (int i = 0; i < (int)list.size(); i++)
-			{
-#ifdef CONSOLE
-				net_svcl_bad_checksum_entity bce;
-				memset(&bce, 0, sizeof(net_svcl_bad_checksum_entity));
-				strcpy(bce.name, list[i].name);
-				strcpy(bce.playerIP, list[i].playerIP);
-				bce.id = list[i].id;
-				bb_serverSend((char*)&bce, sizeof(net_svcl_bad_checksum_entity), NET_SVCL_BAD_CHECKSUM_ENTITY, bbnetID);
-#else
-				console->add(CString("%i) %s, IP: %s", list[i].id, list[i].name, list[i].playerIP));
-#endif //CONSOLE
-			}
-		}
-		return;
-	}
-
-	if (command == "deleteinvalidchecksums")
-	{
-		if (scene && scene->server)
-			scene->server->deleteInvalidChecksums();
-		return;
-	}
-
-	if (command == "invalidchecksumsinfo")
-	{
-
-		if (scene && scene->server)
-		{
-#ifdef CONSOLE
-			net_svcl_bad_checksum_info bci;
-			bci.number = scene->server->getNumberOfInvalidChecksums();
-			bb_serverSend((char*)&bci, sizeof(net_svcl_bad_checksum_info), NET_SVCL_BAD_CHECKSUM_INFO, bbnetID);
-#else
-			console->add(CString(">> %i", scene->server->getNumberOfInvalidChecksums()));
-#endif //CONSOLE
-		}
-		return;
-	}
-
-
 #ifdef _DEBUG
 #ifndef CONSOLE
 	if (command == "status")
