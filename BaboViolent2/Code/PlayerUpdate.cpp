@@ -94,13 +94,11 @@ void Player::update(float delay)
 	lastCF = currentCF; // On garde une copie du dernier coordFrame
 	currentCF.frameID++; // Ça ça reste inchangé
 
-#ifdef _PRO_
 	if (minibot)
 	{
 		minibot->lastCF = minibot->currentCF;
 		minibot->currentCF.frameID++;
 	}
-#endif
 
 	// Rapid-fire hack detection
 	secondPassed += delay;
@@ -192,7 +190,6 @@ void Player::update(float delay)
 		timeAlive += delay;
 		timePlayedCurGame += delay;
 
-#ifdef _PRO_
 		if (minibot)
 		{
 			//--- Control it if it's server, else do as a remote entity
@@ -236,7 +233,6 @@ void Player::update(float delay)
 				minibot = 0;
 			}
 		}
-#endif
 
 		if (remoteEntity)
 		{
@@ -307,9 +303,7 @@ void Player::update(float delay)
 					playerCoordFrame.mousePos[1] = (short)(currentCF.mousePosOnMap[1] * 100);
 					playerCoordFrame.mousePos[2] = (short)(currentCF.mousePosOnMap[2] * 100);
 					playerCoordFrame.babonetID = babonetID;
-#ifdef _PRO_
 					playerCoordFrame.camPosZ = (int)game->map->camPos[2];
-#endif
 					bb_clientSend(scene->client->uniqueClientID, (char*)&playerCoordFrame, sizeof(net_clsv_svcl_player_coord_frame), NET_CLSV_SVCL_PLAYER_COORD_FRAME, NET_UDP);
 
 					sendPosFrame = 0;
@@ -359,7 +353,6 @@ void Player::update(float delay)
 			}
 		}
 
-#ifdef _PRO_
 		if (minibot)
 		{
 			// On l'oriente
@@ -384,7 +377,6 @@ void Player::update(float delay)
 				minibot->matrix.normalize();
 			}
 		}
-#endif
 	}
 	else if ((
 		teamID == PLAYER_TEAM_BLUE || 
@@ -402,14 +394,9 @@ void Player::update(float delay)
 			if (isThisPlayer)
 			{
 				// On check si on peut requester le spawn, sauf si on est en s&d (là c le server qui choisi ;))
-#ifdef _PRO_
             if ((gameVar.sv_forceRespawn || ((dkiGetState(gameVar.k_shoot) == DKI_DOWN && !scene->client->showMenu) && !scene->client->chatting.haveFocus())) && !spawnRequested)
-#else
-            if ((gameVar.sv_forceRespawn || ((dkiGetState(gameVar.k_shoot) == DKI_DOWN && !scene->client->showMenu) && !scene->client->chatting.haveFocus())) && !spawnRequested && game->gameType != GAME_TYPE_SND)
-#endif				
 				{
 
-         #ifdef _PRO_
             if (gameVar.sv_subGameType == SUBGAMETYPE_RANDOMWEAPON)
             {
             nextSpawnWeapon = rand(0, WEAPON_FLAME_THROWER+1);
@@ -419,7 +406,6 @@ void Player::update(float delay)
                nextMeleeWeapon = WEAPON_SHIELD;
             }
 
-         #endif
 
 					// Ici on le call juste une fois, isshh sinon ça sera pas trop bon...
 					// On request to spawn
@@ -584,9 +570,7 @@ void Player::controlIt(float delay)
 	}
 
 	// SECONDARY FIRE (Melee weapon)
-#ifdef _PRO_
 	if (!minibot)
-#endif
 	if (dkiGetState(gameVar.k_melee) && grenadeDelay == 0 && meleeDelay == 0 && gameVar.sv_enableSecondary)
 	{
 		if (meleeWeapon && grenadeDelay == 0) 

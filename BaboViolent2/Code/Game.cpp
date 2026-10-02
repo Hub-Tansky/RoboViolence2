@@ -408,11 +408,7 @@ void Game::update(float delay)
 							{
 								if (j != i)
 								{
-#ifdef _PRO_
 									if (players[j]->status == PLAYER_STATUS_ALIVE && (players[j]->teamID != players[i]->teamID || gameType == GAME_TYPE_DM || gameType == GAME_TYPE_SND || gameVar.sv_friendlyFire || gameVar.sv_reflectedDamage))
-#else
-									if (players[j]->status == PLAYER_STATUS_ALIVE && (players[j]->teamID != players[i]->teamID || gameType == GAME_TYPE_DM || gameVar.sv_friendlyFire))
-#endif
 									{
 										// Ray to sphere test
 										if (segmentToSphere(players[i]->p1, p3, players[j]->currentCF.position, .35f))
@@ -521,7 +517,6 @@ void Game::update(float delay)
 								players[i]->switchMeleeWeapon(SelectToAvailableMeleeWeapon(), true);
 							}
 						}
-#ifdef _PRO_
 						if (players[i]->meleeWeapon->weaponID == WEAPON_MINIBOT)
 						{
 							if (!gameVar.sv_enableMinibot)
@@ -529,14 +524,12 @@ void Game::update(float delay)
 								players[i]->switchMeleeWeapon(SelectToAvailableMeleeWeapon(), true);
 							}
 						}
-#endif
 					}
 				}
 			}
 		}
 	}
 
-#ifdef _PRO_
 	//--- Perform bot collisions with walls
 	if (isServerGame)
 	{
@@ -555,7 +548,6 @@ void Game::update(float delay)
 			}
 		}
 	}
-#endif
 
 	// Si on tiens tab, on montre les stats
 #ifndef CONSOLE
@@ -881,9 +873,7 @@ int Game::assignPlayerTeam(int playerID, char teamRequested, Client * client)
 {
 	if (players[playerID])
 	{
-#ifdef _PRO_
    players[playerID]->spawnSlot = -1;
-#endif
 
 		if (teamRequested == PLAYER_TEAM_AUTO_ASSIGN)
 		{
@@ -1115,15 +1105,9 @@ void Game::shoot(const CVector3f & position, const CVector3f & direction, float 
 			playerShoot.p1[0] = (short)(position[0] * 100);
 			playerShoot.p1[1] = (short)(position[1] * 100);
 			playerShoot.p1[2] = (short)(position[2] * 100);
-#ifdef _PRO_
 			playerShoot.p2[0] = (short)(direction[0] * 100);
 			playerShoot.p2[1] = (short)(direction[1] * 100);
 			playerShoot.p2[2] = (short)(direction[2] * 100);
-#else
-			playerShoot.p2[0] = (short)(p2[0] * 100);
-			playerShoot.p2[1] = (short)(p2[1] * 100);
-			playerShoot.p2[2] = (short)(p2[2] * 100);
-#endif
 			playerShoot.weaponID = from->weapon->weaponID;
 			bb_clientSend(scene->client->uniqueClientID, (char*)&playerShoot,sizeof(net_clsv_player_shoot),NET_CLSV_PLAYER_SHOOT);
 		}
@@ -1234,7 +1218,6 @@ void Game::shootSV(net_clsv_player_shoot & playerShoot)
 	p2[2] = (float)playerShoot.p2[2] / 100.0f;
 	player->weapon->shotFrom = p1;
 
-#ifdef _PRO_
 	if (player->weapon->weaponID == WEAPON_SHOTGUN)
 	{
 		// ves's suggestion
@@ -1276,7 +1259,6 @@ void Game::shootSV(net_clsv_player_shoot & playerShoot)
 			shootSV(playerShoot.playerID, playerShoot.nuzzleID, imp, p1, p2);
    }
    else
-#endif
 	{
 		player->weapon->currentImp += 3;
 		if (player->weapon->currentImp > player->weapon->impressision)
@@ -1286,7 +1268,6 @@ void Game::shootSV(net_clsv_player_shoot & playerShoot)
 	}
 }
 
-#ifdef _PRO_
 void Game::shootMinibotSV(CMiniBot * minibot, float imp, CVector3f p1, CVector3f p2)
 {
 	CVector3f normal;
@@ -1355,7 +1336,6 @@ void Game::shootMinibotSV(CMiniBot * minibot, float imp, CVector3f p1, CVector3f
 	playerShootSV.weaponID = WEAPON_MINIBOT_WEAPON;
 	bb_serverSend((char*)&playerShootSV,sizeof(net_svcl_player_shoot),NET_SVCL_PLAYER_SHOOT,0);
 }
-#endif
 
 void Game::shootSV(int playerID, int nuzzleID, float imp, CVector3f p1, CVector3f p2)
 {
@@ -1390,7 +1370,6 @@ void Game::shootSV(int playerID, int nuzzleID, float imp, CVector3f p1, CVector3
 	{
 		imp = 3.5f;
 	}
-#ifdef _PRO_
 	CVector3f dir = p2;
     
 	if (player->weapon->projectileType == PROJECTILE_DIRECT && player->weapon->weaponID == WEAPON_FLAME_THROWER)
@@ -1416,7 +1395,6 @@ void Game::shootSV(int playerID, int nuzzleID, float imp, CVector3f p1, CVector3
 	p2 = rotateAboutAxis(p2, rand(0.0f, 360.0f), dir);
 	p2[2] *= .5f;
 	p2 += p1;
-#endif
 
 	CVector3f normal;
 
@@ -1490,11 +1468,7 @@ void Game::shootSV(int playerID, int nuzzleID, float imp, CVector3f p1, CVector3
 			{
 				if (i != player->playerID)
 				{
-#ifdef _PRO_
                if (players[i]->status == PLAYER_STATUS_ALIVE && (players[i]->teamID != player->teamID || gameType == GAME_TYPE_DM || gameType == GAME_TYPE_SND || gameVar.sv_friendlyFire || gameVar.sv_reflectedDamage))
-#else
-               if (players[i]->status == PLAYER_STATUS_ALIVE && (players[i]->teamID != player->teamID || gameType == GAME_TYPE_DM || gameVar.sv_friendlyFire))
-#endif					
 					{
 						// Ray to sphere test
 						if (segmentToSphere(p1, p3, players[i]->currentCF.position, (player->weapon->weaponID == WEAPON_FLAME_THROWER)?.50f:.25f))

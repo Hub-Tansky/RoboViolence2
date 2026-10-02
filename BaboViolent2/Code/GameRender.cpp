@@ -351,10 +351,6 @@ void Game::render()
 				}
 
 				// Lui on a pas le choix de l'afficher vu que ça fait parti du gameplay
-#ifdef _PRO_
-#else
-            if (gameType == GAME_TYPE_SND) map->renderBombMark();
-#endif
 
 				// On render les shadows des projectiles
 				if (gameVar.r_projectileShadow)

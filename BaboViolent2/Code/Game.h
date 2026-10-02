@@ -671,9 +671,7 @@ public:
 	// Pour spawner des particules sur le murs l'hors d'un impact
 	void spawnImpact(CVector3f & p1, CVector3f & p2, CVector3f & normal, Weapon*weapon, float damage, int team);
 	void spawnBlood(CVector3f & position, float damage);
-#ifdef _PRO_
 	void spawnBloodMinibot(CVector3f & position, float damage);
-#endif
 	void spawnExplosion(CVector3f & position, CVector3f & normal, float size);
 
 	// Pour afficher la minimap (ouff, je mélange pomal les affaires, tk)

@@ -530,40 +530,15 @@ void Client::render(float & alphaScope)
 					break;
 				case GAME_TYPE_SND:
 
-#ifdef _PRO_
                printLeftText(5,5,64,CString("%01i:%02i", (int)((game->gameTimeLeft+1)/60), (int)(game->gameTimeLeft+1)%60));
                printLeftText(5,5+64,64,CString("%01i:%02i", (int)((game->roundTimeLeft+1)/60), (int)(game->roundTimeLeft+1)%60));
 
-#else
-					// Round Time left
-					printLeftText(5,5,64,CString("%01i:%02i", (int)((game->roundTimeLeft+1)/60), (int)(game->roundTimeLeft+1)%60));
-					// win left
-
-					if (game->blueWin >= game->redWin)
-					{
-						renderTexturedQuad(5,5+64,64,64,tex_blueFlag);
-						printLeftText(5+64+5,5+64,64,CString("%i/%i", game->blueWin, gameVar.sv_winLimit));
-						renderTexturedQuad(5,5+64+64,64,64,tex_redFlag);
-						printLeftText(5+64+5,5+64+64,64,CString("%i/%i", game->redWin, gameVar.sv_winLimit));
-					}
-					else
-					{
-						renderTexturedQuad(5,5+64,64,64,tex_redFlag);
-						printLeftText(5+64+5,5+64,64,CString("%i/%i", game->redWin, gameVar.sv_winLimit));
-						renderTexturedQuad(5,5+64+64,64,64,tex_blueFlag);
-						printLeftText(5+64+5,5+64+64,64,CString("%i/%i", game->blueWin, gameVar.sv_winLimit));
-					}
-
-
-#endif
 
 					break;
 				}
          
-#ifdef _PRO_	      
 
             float textSize = (float)gameVar.r_chatTextSize;
-#endif
 
             float xPos = ((float)res[0] / 800.0f) * 128 + 40;
 				float yPos = res[1] - (((float)res[1] / 600.0f) * 128 + 40)-60;
@@ -582,7 +557,6 @@ void Client::render(float & alphaScope)
 					glBegin(GL_QUADS);
 
          
-#ifdef _PRO_	      
                float chatWidth = dkfGetStringWidth(textSize, chatMessages[i].message.s);
 
 					glVertex2f(8,yPos - (float)((chatMessages.size() - i - 1) * textSize)+1);
@@ -590,13 +564,6 @@ void Client::render(float & alphaScope)
 					glColor4f(0,0,0,0);
 					glVertex2f(8+chatWidth,yPos - (float)((chatMessages.size() - i - 1) * textSize)+textSize-1);
 					glVertex2f(8+chatWidth,yPos - (float)((chatMessages.size() - i - 1) * textSize)+1);
-#else
-					glVertex2f(8,yPos - (float)(chatMessages.size() - i - 1) * 28+1);
-					glVertex2f(8,yPos - (float)(chatMessages.size() - i - 1) * 28+27);
-					glColor4f(0,0,0,0);
-					glVertex2f(500,yPos - (float)(chatMessages.size() - i - 1) * 28+27);
-					glVertex2f(500,yPos - (float)(chatMessages.size() - i - 1) * 28+1);
-#endif
 
 					glEnd();
 					if (chatMessages[i].duration > 1)
@@ -610,11 +577,7 @@ void Client::render(float & alphaScope)
 					// On l'écris à peut pret au tier de l'écran à gauche
 					glEnable(GL_TEXTURE_2D);
 
-#ifdef _PRO_	
 					printLeftText(10,yPos - (float)(chatMessages.size() - i - 1) * textSize, textSize, chatMessages[i].message);
-#else
-               printLeftText(10,yPos - (float)(chatMessages.size() - i - 1) * 28, 28, chatMessages[i].message);
-#endif
 				}
 
 				// Si on est apres chatter
@@ -657,16 +620,12 @@ void Client::render(float & alphaScope)
 					}
 					// On l'écris à peut pret au 2 tier de l'écran à gauche
 
-#ifdef _PRO_	                  
             float eventTextSize = (float)gameVar.r_eventTextSize;
 
             if (gameVar.r_showEventText)
             {
                printLeftText(xPos,(float)res[1] - (float)(eventMessages.size() - i - 1) * eventTextSize-20-eventTextSize, eventTextSize, eventMessages[i].message);
             }
-#else
-            printLeftText(xPos,(float)res[1] - (float)(eventMessages.size() - i - 1) * 28-20-28, 28, eventMessages[i].message);
-#endif
 
 					
 				}
@@ -757,13 +716,8 @@ void Client::render(float & alphaScope)
 					printCenterText(400, 5+88, 32, gameVar.lang_captureTheFlagD);
 					break;
 				case GAME_TYPE_SND:
-#ifdef _PRO_
 					printCenterText(400, 5, 64, gameVar.lang_championC);
 					printCenterText(400, 5+88, 32, gameVar.lang_championD);
-#else
-					printCenterText(400, 5, 64, gameVar.lang_counterBaboristC);
-					printCenterText(400, 5+88, 32, gameVar.lang_counterBaboristD);
-#endif
 					break;
 				}
 				CString mapInfo (game->map->mapName);

@@ -476,7 +476,6 @@ Map::Map(CString mapFilename, Game * _game, unsigned int font, bool editor, int 
 		delete dkoFile;
 	}
 
-#ifdef _PRO_
 	//--- Create the A* path
 	if (aStar) delete aStar;
 	aStar = new CAStar();
@@ -525,7 +524,6 @@ Map::Map(CString mapFilename, Game * _game, unsigned int font, bool editor, int 
 	}
 
 	delete [] passables;
-#endif
 
 	if (isServer)
 	{
@@ -1782,13 +1780,7 @@ bool IsMapValid(const Map & map, int gameType)
 		// there must be at least 1 item in blue_spawns
 		// there must be at least 1 item in red_spawns
 		// both objectives (bombs) must be set
-#ifdef _PRO_
       isGoodMap = (map.dm_spawns.size() >= 1);
-#else
-		isGoodMap = (map.blue_spawns.size() >= 1) && (map.red_spawns.size() >= 1)
-			&& (map.objective[0] != CVector3f(0.0f, 0.0f, 0.0f))
-			&& (map.objective[1] != CVector3f(0.0f, 0.0f, 0.0f));
-#endif
 		break;
 	}
 	return isGoodMap;

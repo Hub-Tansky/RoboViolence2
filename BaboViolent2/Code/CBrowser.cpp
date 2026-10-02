@@ -132,11 +132,7 @@ void CBrowser::updatePerso(float delay)
 				gameType = "Capture the Flag";
 				break;
 			case 3:
-#ifdef _PRO_
             gameType = "Champion";
-#else
-				gameType = "Counter Baborist";
-#endif
 				break;
 			}
 			CControl* gameRow = new CControl(lst_browseList, CVector2i(10, 10 + nbGames*30), CVector2i(676,30), "", this, "LABEL");

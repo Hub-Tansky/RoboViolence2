@@ -24,9 +24,7 @@
 #include "md5.h"
 #include "CStatus.h"
 
-#ifdef _PRO_
 	#include "md5_2.h"
-#endif
 
 extern Scene * scene;
 
@@ -77,7 +75,6 @@ void Client::sendJoinHandshake()
 //
 void Client::recvPacket(char * buffer, int typeID)
 {
-#ifdef _PRO_
    
 	if( typeID == NET_SVCL_HASH_SEED )
 	{
@@ -120,7 +117,6 @@ void Client::recvPacket(char * buffer, int typeID)
 
 		bb_clientSend(uniqueClientID, (char*)&newHash, sizeof(net_svcl_hash_seed), NET_SVCL_HASH_SEED_REPLY);
 	}
-#endif
 
 
 	// Answer heartbeats immediately, even while joining or in menus: a late pong
@@ -533,7 +529,6 @@ void Client::recvPacket(char * buffer, int typeID)
 			}
 			break;
 		}
-#ifdef _PRO_
 	case NET_SVCL_MINIBOT_COORD_FRAME:
 		{
 			net_svcl_minibot_coord_frame minibotCoordFrame;
@@ -562,7 +557,6 @@ void Client::recvPacket(char * buffer, int typeID)
 			}
 			break;
 		}
-#endif
 	case NET_SVCL_PROJECTILE_COORD_FRAME:
 		{
 			net_svcl_projectile_coord_frame projectileCoordFrame;

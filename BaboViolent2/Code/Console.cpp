@@ -27,9 +27,7 @@
 #include <algorithm>
 #include <string>
 
-#ifdef _PRO_
 	#include "md5.h"
-#endif
 
 
 // Notre module principal
@@ -728,7 +726,6 @@ void Console::sendCommand(CString commandLine, bool isAdmin, unsigned long bbnet
 			return;
 		}
 #ifndef CONSOLE
-#ifdef _PRO_
 		if (scene->client)
 		{
 			CString login = tokenize.getFirstToken(' ');
@@ -756,16 +753,6 @@ void Console::sendCommand(CString commandLine, bool isAdmin, unsigned long bbnet
 				add(CString("\x9> Invalid arguments"));
 			}
 		}
-#else
-		if (scene->client)
-		{
-			if (tokenize.isNull())
-			{
-				scene->client->isAdmin = false;
-			}
-			bb_clientSend(scene->client->uniqueClientID, tokenize.s, tokenize.len() + 1, NET_CLSV_ADMIN_REQUEST);
-		}
-#endif //_PRO_
 #endif
 		return;
 	}
@@ -2296,7 +2283,6 @@ void Console::sendCommand(CString commandLine, bool isAdmin, unsigned long bbnet
 		// "Unkown command" ;)
 	}
 
-#ifdef _PRO_
 	// getinvalidchecksums [offsetFromEnd=50 [number=50]]
 	// request number(max 50) of entries from BadChecksums starting from number of entries-offsetFromEnd
 	if (command == "getinvalidchecksums")
@@ -2352,7 +2338,6 @@ void Console::sendCommand(CString commandLine, bool isAdmin, unsigned long bbnet
 		return;
 	}
 
-#endif //_PRO_
 
 #ifdef _DEBUG
 #ifndef CONSOLE

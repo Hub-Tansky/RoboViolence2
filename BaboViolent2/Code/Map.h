@@ -24,9 +24,7 @@
 #include <vector>
 #include "GameVar.h"
 #include "Player.h"
-#ifdef _PRO_
 #include "CAStar.h"
-#endif
 
 #ifndef CONSOLE
 #include "CMeshBuilder.h"
@@ -172,10 +170,8 @@ class Map
 public:
 	// Sa grosseur
 	CVector2i size;
-#ifdef _PRO_
 
 	CAStar * aStar;
-#endif
 	// Ses cells
 	map_cell * cells;
 #ifndef CONSOLE

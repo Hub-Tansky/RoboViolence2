@@ -360,7 +360,6 @@ void Map::renderGround()
 	glDepthMask(GL_TRUE);
 	glPopAttrib();
 
-#ifdef _PRO_
 	//--- Render path finding
 	if (aStar && gameVar.d_showNodes)
 	{
@@ -379,7 +378,6 @@ void Map::renderGround()
 		}
 		glPopAttrib();
 	}
-#endif
 }
 
 void Map::renderShadow()

@@ -254,7 +254,6 @@ void CMainTab::Click(CControl * control)
 		{
 			scene->client->game->thisPlayer->updateSkin();
 
-#ifdef _PRO_
             Player* tplayer = scene->client->game->thisPlayer;
 			net_clsv_svcl_player_update_skin updateSkin;
 			updateSkin.playerID = tplayer->playerID;
@@ -269,7 +268,6 @@ void CMainTab::Click(CControl * control)
 			updateSkin.redDecal[1] = (unsigned char)(tplayer->redDecal[1] * 255.0f);
 			updateSkin.redDecal[2] = (unsigned char)(tplayer->redDecal[2] * 255.0f);
 			bb_clientSend(scene->client->uniqueClientID, (char*)&updateSkin, sizeof(net_clsv_svcl_player_update_skin), NET_CLSV_SVCL_PLAYER_UPDATE_SKIN);
-#endif
 		}
 
 		menuManager.root->visible = false;

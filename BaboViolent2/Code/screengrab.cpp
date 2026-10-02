@@ -17,7 +17,6 @@
 */
 
 #ifndef CONSOLE
-#ifdef _PRO_
 #include "screengrab.h"
 #include "Zeven.h"
 #include "GameVar.h"
@@ -182,5 +181,4 @@ bool SaveScreenGrab(const char* filename) {
 	return true;
 }
 
-#endif
 #endif
