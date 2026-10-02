@@ -2,7 +2,7 @@
 #include "Extended.h"
 #include "GameVar.h"
 #include "Console.h"
-#include "helper.h"
+#include "Helper.h"
 
 
 

@@ -44,7 +44,7 @@
 #include <gl/gl.h> 
 #include <gl/glu.h> 
 //#include <gl/glext.h>
-#include "gl/glext.h" // [dsl] I just put it inside our folder
+#include "glext.h" // [dsl] I just put it inside our folder
 #else
 #define DLL_API
 #include "LinuxHeader.h"

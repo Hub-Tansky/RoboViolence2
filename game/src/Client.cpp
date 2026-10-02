@@ -25,7 +25,7 @@
 #include "Scene.h"
 #include "CStatus.h"
 
-#include "Screengrab.h"
+#include "screengrab.h"
 
 extern Scene * scene;
 
