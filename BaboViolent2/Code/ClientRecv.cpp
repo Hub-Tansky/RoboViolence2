@@ -31,6 +31,48 @@
 extern Scene * scene;
 
 //
+// Join handshake: PLAYER_INFO then GAMEVERSION_ACCEPTED. Needs game->thisPlayer.
+//
+void Client::sendJoinHandshake()
+{
+	if (!game || !game->thisPlayer)
+		return;
+
+	net_clsv_svcl_player_info playerInfo;
+
+	// on pogne notre mac adress
+	unsigned char mac[8];		// unsigned here is very important
+	bb_getMyMAC( mac );
+	sprintf( playerInfo.macAddr , "%.2x-%.2x-%.2x-%.2x-%.2x-%.2x" , (int)mac[0], (int)mac[1],(int)mac[2],(int)mac[3],(int)mac[4],(int)mac[5] );
+	
+	// On send le playerInfo
+	playerInfo.playerID = game->thisPlayer->playerID;
+	memcpy(playerInfo.playerName, game->thisPlayer->name.s, game->thisPlayer->name.len() + 1);
+
+	gameVar.cl_accountUsername.resize(20);
+	memcpy(playerInfo.username, gameVar.cl_accountUsername.s, gameVar.cl_accountUsername.len() + 1);
+
+	RSA::MD5 pw((unsigned char*)gameVar.cl_accountPassword.s);
+	char* hex_digest = pw.hex_digest();
+	memcpy(playerInfo.password, hex_digest, 32);
+	delete[] hex_digest;
+
+	bb_clientSend(uniqueClientID, (char*)&playerInfo, sizeof(net_clsv_svcl_player_info), NET_CLSV_SVCL_PLAYER_INFO);
+
+	net_clsv_gameversion_accepted gameVersionAccepted;
+	gameVersionAccepted.playerID = game->thisPlayer->playerID;
+	if (scene->server) //--- We are also server, retreive password
+	{
+		strcpy(gameVersionAccepted.password, gameVar.sv_password.s);
+	}
+	else
+	{
+		strcpy(gameVersionAccepted.password, m_password.s);
+	}
+	bb_clientSend(uniqueClientID, (char*)&gameVersionAccepted, sizeof(net_clsv_gameversion_accepted), NET_CLSV_GAMEVERSION_ACCEPTED);
+}
+
+//
 // On a reçu un message yéé !
 //
 void Client::recvPacket(char * buffer, int typeID)
@@ -80,6 +122,20 @@ void Client::recvPacket(char * buffer, int typeID)
 	}
 #endif
 
+
+	// Answer heartbeats immediately, even while joining or in menus: a late pong
+	// got players kicked ("no respond since 3sec") right after team pick / spawn.
+	if (typeID == NET_SVCL_PING)
+	{
+		net_svcl_ping ping;
+		memcpy(&ping, buffer, sizeof(net_svcl_ping));
+		net_clsv_pong pong;
+		memset(&pong, 0, sizeof(pong));
+		pong.playerID = ping.playerID;
+		bb_clientSend(uniqueClientID, (char*)&pong, sizeof(net_clsv_pong), NET_CLSV_PONG);
+		bb_clientUpdate(uniqueClientID, 0.f, UPDATE_SEND);
+		return;
+	}
 
 	if (!gotGameState || !isConnected)
 	{
@@ -247,6 +303,11 @@ void Client::recvPacket(char * buffer, int typeID)
 				game->thisPlayer = game->players[newPlayer.newPlayerID];
 				game->thisPlayer->setThisPlayerInfo();
 			}
+			if (pendingVersionAccept && game->thisPlayer)
+			{
+				pendingVersionAccept = false;
+				sendJoinHandshake();
+			}
 			break;
 		}
 	case NET_SVCL_GAMEVERSION:
@@ -255,42 +316,18 @@ void Client::recvPacket(char * buffer, int typeID)
 			memcpy(&gameVersion, buffer, sizeof(net_svcl_gameversion));
 			if (gameVersion.gameVersion == GAME_VERSION_CL && game->thisPlayer)
 			{
-				net_clsv_svcl_player_info playerInfo;
-
-				// on pogne notre mac adress
-				unsigned char mac[8];		// unsigned here is very important
-				bb_getMyMAC( mac );
-				sprintf( playerInfo.macAddr , "%.2x-%.2x-%.2x-%.2x-%.2x-%.2x" , (int)mac[0], (int)mac[1],(int)mac[2],(int)mac[3],(int)mac[4],(int)mac[5] );
-				
-				// On send le playerInfo
-				playerInfo.playerID = game->thisPlayer->playerID;
-				memcpy(playerInfo.playerName, game->thisPlayer->name.s, game->thisPlayer->name.len() + 1);
-
-				gameVar.cl_accountUsername.resize(20);
-				memcpy(playerInfo.username, gameVar.cl_accountUsername.s, gameVar.cl_accountUsername.len() + 1);
-
-				RSA::MD5 pw((unsigned char*)gameVar.cl_accountPassword.s);
-				char* hex_digest = pw.hex_digest();
-				memcpy(playerInfo.password, hex_digest, 32);
-				delete[] hex_digest;
-
-				bb_clientSend(uniqueClientID, (char*)&playerInfo, sizeof(net_clsv_svcl_player_info), NET_CLSV_SVCL_PLAYER_INFO);
-
+				pendingVersionAccept = false;
+				sendJoinHandshake();
 				console->add(CString("\x3> Same game version. Server is : %01i.%02i.%02i", (int)gameVersion.gameVersion/10000, (int)(gameVersion.gameVersion%10000)/100, ((int)gameVersion.gameVersion%100)));
-				net_clsv_gameversion_accepted gameVersionAccepted;
-				gameVersionAccepted.playerID = game->thisPlayer->playerID;
-				if (scene->server) //--- We are also server, retreive password
-				{
-					strcpy(gameVersionAccepted.password, gameVar.sv_password.s);
-				}
-				else
-				{
-					strcpy(gameVersionAccepted.password, m_password.s);
-				}
-				bb_clientSend(uniqueClientID, (char*)&gameVersionAccepted, sizeof(net_clsv_gameversion_accepted), NET_CLSV_GAMEVERSION_ACCEPTED);
+			}
+			else if (gameVersion.gameVersion == GAME_VERSION_CL)
+			{
+				// Our slot (NET_SVCL_NEWPLAYER) isn't known yet: answer when it arrives.
+				pendingVersionAccept = true;
 			}
 			else
 			{
+				pendingVersionAccept = false;
 				// On disconnect
 				console->add(CString("\x4> Wrong game version. Server is : %01i.%02i.%02i", (int)gameVersion.gameVersion/10000, (int)(gameVersion.gameVersion%10000)/100, ((int)gameVersion.gameVersion%100)));
 				this->needToShutDown = true;
@@ -449,16 +486,6 @@ void Client::recvPacket(char * buffer, int typeID)
 			if (game->players[playerPing.playerID])
 			{
 				game->players[playerPing.playerID]->ping = (int)playerPing.ping;
-			}
-			break;
-		}
-	case NET_SVCL_PING:
-		{
-			if (game->thisPlayer)
-			{
-				net_clsv_pong pong;
-				pong.playerID = game->thisPlayer->playerID;
-				bb_clientSend(uniqueClientID, (char*)&pong, sizeof(net_clsv_pong), NET_CLSV_PONG);
 			}
 			break;
 		}

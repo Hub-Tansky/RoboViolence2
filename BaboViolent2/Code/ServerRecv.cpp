@@ -315,6 +315,10 @@ void Server::recvPacket(char * buffer, int typeID, unsigned long bbnetID)
 					break;
 				}
 
+				// Handshake done: restart the ping watchdog so pre-accept time doesn't count.
+				game->players[gameVersionAccepted.playerID]->waitForPong = false;
+				game->players[gameVersionAccepted.playerID]->currentPingFrame = 0;
+
 				// On envoi �CE player l'info sur la game
 				net_svcl_server_info serverInfo;
 				serverInfo.mapSeed = 0; // Pour l'instant on mettra rien (on va mettre le non dla map bientot)
@@ -643,6 +647,8 @@ void Server::recvPacket(char * buffer, int typeID, unsigned long bbnetID)
 						cacheStats(game->players[teamRequest.playerID], oldTeam);
 						game->players[teamRequest.playerID]->reinit();
 					}
+					game->players[teamRequest.playerID]->waitForPong = false;
+					game->players[teamRequest.playerID]->currentPingFrame = 0;
 					teamRequest.teamRequested = newTeam;
 					// On l'envoit �tout le monde, (si � chang�
 					bb_serverSend((char*)&teamRequest, sizeof(net_clsv_svcl_team_request), NET_CLSV_SVCL_TEAM_REQUEST, 0);
@@ -654,12 +660,13 @@ void Server::recvPacket(char * buffer, int typeID, unsigned long bbnetID)
 		{
 			net_clsv_pong pong;
 			memcpy(&pong, buffer, sizeof(net_clsv_pong));
-			if (game->players[pong.playerID])
+			const int pid = (unsigned char)pong.playerID;
+			if (pid < MAX_PLAYER && game->players[pid])
 			{
-				if (game->players[pong.playerID]->waitForPong)
+				if (game->players[pid]->waitForPong)
 				{
-					game->players[pong.playerID]->waitForPong = false;
-					game->players[pong.playerID]->ping = game->players[pong.playerID]->currentPingFrame;
+					game->players[pid]->waitForPong = false;
+					game->players[pid]->ping = game->players[pid]->currentPingFrame;
 				}
 			}
 			break;

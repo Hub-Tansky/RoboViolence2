@@ -89,6 +89,9 @@ public:
 	bool needToShutDown;
 	bool wrongVersionReason;
 
+	// NET_SVCL_GAMEVERSION arrived before our NET_SVCL_NEWPLAYER slot; answer once the slot exists.
+	bool pendingVersionAccept;
+
 	// Si on montre le menu
 	bool showMenu;
 
@@ -177,6 +180,9 @@ public:
 
 	// On a reçu un message yéé !
 	void recvPacket(char * buffer, int typeID);
+
+	// Sends PLAYER_INFO + GAMEVERSION_ACCEPTED (needs game->thisPlayer)
+	void sendJoinHandshake();
 
 	void MouseEnter(CControl * control);
 };

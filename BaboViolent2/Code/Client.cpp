@@ -42,6 +42,7 @@ Client::Client(Game * pGame)
 {
 	requestedAdmin = false;
 	wrongVersionReason = false;
+	pendingVersionAccept = false;
 	serverFrameID = 0;
 	font = dkfCreateFont("main/fonts/babo.tga");
 	game = pGame;

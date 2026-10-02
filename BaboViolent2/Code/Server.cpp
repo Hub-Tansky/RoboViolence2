@@ -1021,6 +1021,14 @@ void Server::update(float delay)
 			{
 				nbPlayers++;
 
+				// No heartbeat while the client is still loading, or hasn't spawned yet
+				// (team pick / intro): it may not be pumping the network loop.
+				if (game->players[i]->status == PLAYER_STATUS_LOADING)
+					continue;
+				if (game->players[i]->status == PLAYER_STATUS_DEAD &&
+					game->players[i]->timeAlive < EPSILON)
+					continue;
+
 				if (!game->players[i]->waitForPong)
 				{
 					// On est pret �lui envoyer un ping?
@@ -1032,6 +1040,7 @@ void Server::update(float delay)
 
 						// On lui send son pingdlidou
 						net_svcl_ping ping;
+						memset(&ping, 0, sizeof(ping));
 						ping.playerID = char(i); // Ici on s'en occupe pas du ID
 						bb_serverSend((char*)&ping,sizeof(net_svcl_ping),NET_SVCL_PING,game->players[i]->babonetID);
 						continue;
