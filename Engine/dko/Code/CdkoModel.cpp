@@ -78,7 +78,7 @@ int CDkoModel::loadFromFile3DS(FILE *ficIn, char *path)
 //
 int CDkoModel::loadFromFile(FILE *ficIn, char *path)
 {
-	// On load chunk par chunk jusqu'à ce qu'on pogne le chunk End
+	// On load chunk par chunk jusqu'Ã  ce qu'on pogne le chunk End
 	short chunkID = readChunk(ficIn);
 
 	while (chunkID != CHUNK_DKO_END)
@@ -102,7 +102,7 @@ int CDkoModel::loadFromFile(FILE *ficIn, char *path)
 				// On importe le start frame, le end frame et la duration dans un ti array de short
 				fread(timeInfo, 1, sizeof(short)*3, ficIn);
 
-				// Ça va nous servir pour allouer l'espace pour nos meshes
+				// Ã‡a va nous servir pour allouer l'espace pour nos meshes
 				break;
 			}
 		case CHUNK_DKO_PROPERTIES:
@@ -169,10 +169,10 @@ int CDkoModel::loadFromFile(FILE *ficIn, char *path)
 //
 void CDkoModel::loadDummy(FILE *ficIn)
 {
-	// On cré notre dummy
+	// On crÃ© notre dummy
 	_typDummy *newDum = new _typDummy(timeInfo[2]);
 
-	// On load chunk par chunk jusqu'à ce qu'on pogne le chunk End
+	// On load chunk par chunk jusqu'Ã  ce qu'on pogne le chunk End
 	short chunkID = readChunk(ficIn);
 
 	while (chunkID != CHUNK_DKO_END)
@@ -205,7 +205,7 @@ void CDkoModel::loadDummy(FILE *ficIn)
 		chunkID = readChunk(ficIn);
 	}
 
-	// On l'ajoute à notre liste
+	// On l'ajoute Ã  notre liste
 	dummies[dumSize] = newDum;
 	dumSize++;
 }
@@ -213,11 +213,11 @@ void CDkoModel::loadDummy(FILE *ficIn)
 
 
 //
-// Pour loader ses propriétées
+// Pour loader ses propriÃ©tÃ©es
 //
 void CDkoModel::loadProperties(FILE *ficIn)
 {
-	// On load chunk par chunk jusqu'à ce qu'on pogne le chunk End
+	// On load chunk par chunk jusqu'Ã  ce qu'on pogne le chunk End
 	short chunkID = readChunk(ficIn);
 
 	while (chunkID != CHUNK_DKO_END)
@@ -266,13 +266,13 @@ char *readString(FILE *ficIn)
 {
 	char tmp[256];
 	int i = 0;
-	fread(tmp, 1, 1, ficIn); // On li le premier caractère
-	while (*(tmp + i++) != 0)  // Tant qu'on pogne pas le caractère 0, NULL, '\0', toute la même chose
+	fread(tmp, 1, 1, ficIn); // On li le premier caractÃ¨re
+	while (*(tmp + i++) != 0)  // Tant qu'on pogne pas le caractÃ¨re 0, NULL, '\0', toute la mÃªme chose
 	{
-		fread(tmp + i, 1, 1, ficIn);	// On li le prochain caractère
+		fread(tmp + i, 1, 1, ficIn);	// On li le prochain caractÃ¨re
 	}
 	
-	// On cré un string dynamique et on retourne ça
+	// On crÃ© un string dynamique et on retourne Ã§a
 	char *newStr = new char [i];
 	strcpy(newStr, tmp);
 
@@ -282,7 +282,7 @@ char *readString(FILE *ficIn)
 
 
 //
-// On va créer sa facelist
+// On va crÃ©er sa facelist
 //
 void CDkoModel::buildFaceList()
 {
@@ -308,7 +308,7 @@ void CDkoModel::buildVertexArray(float * vertexArray)
 
 
 //
-// On va créer un octree à partir de la facelist
+// On va crÃ©er un octree Ã  partir de la facelist
 //
 void CDkoModel::buildOctree()
 {
@@ -317,7 +317,7 @@ void CDkoModel::buildOctree()
 	for (int i=0;i<nbFace;i++)
 		ptrFaceArray[i] = &(faceArray[i]);
 
-	// On trouve le côté le plus grand
+	// On trouve le cÃ´tÃ© le plus grand
 	float size = (OABB[3]>OABB[4])?OABB[3]:OABB[4];
 	size = (size>OABB[5])?size:OABB[5];
 
@@ -348,14 +348,14 @@ int CDkoModel::addAnimationFromFile(unsigned int modelID, char* filename, char* 
 	if (!fic3DS) 
 	{
 		CDko::updateLastError("Invalide 3ds filename");
-		return 0;	// Si le fichier n'a pas pus être ouvert, on retourne 0
+		return 0;	// Si le fichier n'a pas pus Ãªtre ouvert, on retourne 0
 	}
 
 	// Ici on read le gros chunk, le premier
 	typChunk currentChunk;
 	ReadChunk(fic3DS, &currentChunk, filename);
 	
-	// Bon, est-ce que cest bien un fichier 3ds ça là?
+	// Bon, est-ce que cest bien un fichier 3ds Ã§a lÃ ?
 	if (currentChunk.ID != M3DMAGIC)
 	{
 		CDko::updateLastError("Invalide 3ds file");
@@ -370,8 +370,8 @@ int CDkoModel::addAnimationFromFile(unsigned int modelID, char* filename, char* 
 	// Finalement on ferme le fichier
 	fclose(fic3DS); // On ferme le fichier
 
-	// On retourne le nombre de byte lu pendant le fichier (voir qui ça interresse :|)
-	return currentChunk.mlength; // Voilà tout
+	// On retourne le nombre de byte lu pendant le fichier (voir qui Ã§a interresse :|)
+	return currentChunk.mlength; // VoilÃ  tout
 }
 */
 
@@ -395,7 +395,7 @@ void CDkoModel::readMainBlockAnim(FILE* fic3DS, typChunk &previousChunk, char* f
 			// On load juste squi a rapport avec les animations
 		case KFDATA:
 			{
-			//	dkPrintToConsole("KFDATA"); // Ici on va avoir un autre loader à part pour les animations
+			//	dkPrintToConsole("KFDATA"); // Ici on va avoir un autre loader Ã  part pour les animations
 				readKFDATA(fic3DS, currentChunk, filename);
 				break;
 			}

@@ -752,7 +752,7 @@ void CControl::render()
 	if (!visible) return;
 //	console->add(CString("render control at : %i, %i, %i", this, pos[0], pos[1]));
 
-	//--- Ouff, méchante job de clamping à faire icite
+	//--- Ouff, mÃ©chante job de clamping Ã  faire icite
 	Rect[0] = pos[0];
 	Rect[1] = pos[1];
 	Rect[2] = size[0];

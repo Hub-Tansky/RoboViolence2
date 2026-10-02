@@ -119,12 +119,12 @@ void Extended::updateSkinColor()
 	CColor3f greenDecalT;
 	CColor3f blueDecalT;
 
-	//--- Hey oui, un recré une texture ogl à chaque fois pour chaque babo qui spawn!!!!
-	//--- On est en ogl, faq ça kick ass MOUHOUHOUHAHAHA
+	//--- Hey oui, un recrÃ© une texture ogl Ã  chaque fois pour chaque babo qui spawn!!!!
+	//--- On est en ogl, faq Ã§a kick ass MOUHOUHOUHAHAHA
 	unsigned char imgData[64*32*3];
 	dktGetTextureData(tex_skinOriginal, imgData);
 
-	//--- Celon son team, on set la couleur du babo en conséquence
+	//--- Celon son team, on set la couleur du babo en consÃ©quence
 /*	if (game->gameType != GAME_TYPE_DM)
 	{
 		switch (teamID)
@@ -184,7 +184,7 @@ void Extended::setConfigValue(bool resetAfter)
 	gameVar.cl_greenDecal = greenDecal;
 	gameVar.cl_blueDecal = blueDecal;
 
-	// Au cas où y a des if qui n'auraient pas fonctionné (validation) ;)
+	// Au cas oÃ¹ y a des if qui n'auraient pas fonctionnÃ© (validation) ;)
 	if (resetAfter) resetToConfigValue();
 }
 

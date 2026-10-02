@@ -92,9 +92,9 @@ static unsigned int shift_char_map[21][2] =
 static bool HasFocus = true;
 
 ///////////////////////////////////////////////////////////////////////////////////////
-/// \brief Mise à jour de l'erreur
+/// \brief Mise Ã  jour de l'erreur
 ///
-/// Fonction qui met à jour le message d'erreur (lastErrorString) relatif à la fenêtre.
+/// Fonction qui met Ã  jour le message d'erreur (lastErrorString) relatif Ã  la fenÃªtre.
 ///
 /// \param error : Message d'erreur
 ///
@@ -102,7 +102,7 @@ static bool HasFocus = true;
 ///////////////////////////////////////////////////////////////////////////////////////
 void CDkw::updateLastError(char *error)
 {
-	//Si le message n'est pas null (il y a déja eu une erreur)
+	//Si le message n'est pas null (il y a dÃ©ja eu une erreur)
 	if(lastErrorString)
 	{
 		delete [] lastErrorString;
@@ -117,27 +117,27 @@ void CDkw::updateLastError(char *error)
 
 
 ////////////////////////////////////////////////////////////////////////////////////////
-/// \brief Fonction qui reçoit tous les inputs dirigés à la fenêtre
+/// \brief Fonction qui reÃ§oit tous les inputs dirigÃ©s Ã  la fenÃªtre
 ///
-/// Fonction de Callback utilisée par Windows pour gérer les différents inputs
-///	dirigés à la fenêtre. Un pointeur vers cette fontion est passé en paramètre lors de la
-///	création de la "windows class" (WNDCLASS).
+/// Fonction de Callback utilisÃ©e par Windows pour gÃ©rer les diffÃ©rents inputs
+///	dirigÃ©s Ã  la fenÃªtre. Un pointeur vers cette fontion est passÃ© en paramÃ¨tre lors de la
+///	crÃ©ation de la "windows class" (WNDCLASS).
 ///
-/// \param hWnd : Handle unique de la fenêtre.
-/// \param uMsg : Message que la fenêtre a reçu.
-/// \param wParam : Variable utilisée pour passer des paramètres.
-/// \param lParam : Variable utilisée pour passer des paramètres.
+/// \param hWnd : Handle unique de la fenÃªtre.
+/// \param uMsg : Message que la fenÃªtre a reÃ§u.
+/// \param wParam : Variable utilisÃ©e pour passer des paramÃ¨tres.
+/// \param lParam : Variable utilisÃ©e pour passer des paramÃ¨tres.
 ///
-/// \return LRESULT : Est égal à un long
+/// \return LRESULT : Est Ã©gal Ã  un long
 ///
 /// \note
-/// CALLBACK est égal à _stdcall
+/// CALLBACK est Ã©gal Ã  _stdcall
 ///
 /// \par 
-/// Il faut se rappeler que plusieurs fenêtre pourraient être créées de la même definition 
-/// de "classe window". Donc en créant deux fenêtres de la même classe, chacune va posséder son 
-/// propre handle mais chacune va appeler cette fontion avec des messages. En général, une seule
-/// fenêtre est créée à partir de la classe window.
+/// Il faut se rappeler que plusieurs fenÃªtre pourraient Ãªtre crÃ©Ã©es de la mÃªme definition 
+/// de "classe window". Donc en crÃ©ant deux fenÃªtres de la mÃªme classe, chacune va possÃ©der son 
+/// propre handle mais chacune va appeler cette fontion avec des messages. En gÃ©nÃ©ral, une seule
+/// fenÃªtre est crÃ©Ã©e Ã  partir de la classe window.
 ///
 ///	\see
 /// http://www.toymaker.info/Games/html/wndproc.html# \n
@@ -169,22 +169,22 @@ LRESULT CALLBACK CDkw::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 		return 0;
 		break;
 	case WM_KEYDOWN:
-		// Une touche est pesée
+		// Une touche est pesÃ©e
 		return 0;
 		break;
 	case WM_KEYUP:
-		// Une touche est releasée
+		// Une touche est releasÃ©e
 		return 0;
 		break;
 	case WM_MOUSEMOVE:
-		// On pogne la position de la mouse sur la fenêtre
+		// On pogne la position de la mouse sur la fenÃªtre
 		cursorPos[0] = LOWORD(lParam);
 		cursorPos[1] = HIWORD(lParam);
 		return 0;
 		break;
 	case WM_SIZE:
 
-		// On resize la fenêtre
+		// On resize la fenÃªtre
 		w = LOWORD(lParam);
 		h = HIWORD(lParam);
 
@@ -201,7 +201,7 @@ LRESULT CALLBACK CDkw::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 		return 0;
 		break;
 	case WM_CHAR:
-		// Entrées texte
+		// EntrÃ©es texte
 		if (mainLoopObject) mainLoopObject->textWrite(unsigned int(wParam));
 		return 0;
 		break;
@@ -490,14 +490,14 @@ LRESULT CALLBACK CDkw::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 
 
 //
-// La plus importante. Cré la fenêtre et init les cossin
+// La plus importante. CrÃ© la fenÃªtre et init les cossin
 //
 #ifdef WIN32
 int dkwInit(int width, int height, int mcolorDepth, char* mTitle, CMainLoopInterface *mMainLoopObject, bool fullScreen, int refreshRate)
 {
 	CDkw::mainLoopObject = mMainLoopObject;
 
-	// On set ses propriétées de bases
+	// On set ses propriÃ©tÃ©es de bases
 	CDkw::w = width;
 	CDkw::h = height;
 	CDkw::colorDepth = mcolorDepth;
@@ -507,10 +507,10 @@ int dkwInit(int width, int height, int mcolorDepth, char* mTitle, CMainLoopInter
 		strcpy(CDkw::title, mTitle);
 	}
 
-	// On se cré une instance
+	// On se crÃ© une instance
 	CDkw::hInstance = GetModuleHandle(NULL);
 
-	// On défini la windows class
+	// On dÃ©fini la windows class
 	WNDCLASS wc = {CS_HREDRAW | CS_VREDRAW | CS_OWNDC, (WNDPROC) CDkw::WndProc, 0, 0,
 		CDkw::hInstance, LoadIcon(NULL, IDI_WINLOGO), LoadCursor(NULL, IDC_ARROW),
 		(HBRUSH)GetStockObject(GRAY_BRUSH), NULL, "dkw"};
@@ -570,7 +570,7 @@ int dkwInit(int width, int height, int mcolorDepth, char* mTitle, CMainLoopInter
 		m_WindowRect.bottom = height;
 	}
 
-	// Ajuster le rectangle de la fenetre (fuck it ça! Ça gâche toute)
+	// Ajuster le rectangle de la fenetre (fuck it Ã§a! Ã‡a gÃ¢che toute)
 	if (AdjustWindowRect(&m_WindowRect, dwStyle, FALSE) == 0) 
 	{
 		CDkw::updateLastError("Failled to adjust windows rect");
@@ -579,7 +579,7 @@ int dkwInit(int width, int height, int mcolorDepth, char* mTitle, CMainLoopInter
 		return 0;
 	}
 
-	// Finalement on cré notre fenêtre
+	// Finalement on crÃ© notre fenÃªtre
 	CDkw::hWnd = CreateWindow("dkw", CDkw::title,
 		dwStyle, m_WindowRect.left, m_WindowRect.top, width, height, 
 		NULL, NULL, CDkw::hInstance, NULL);
@@ -603,10 +603,10 @@ int dkwInit(int width, int height, int mcolorDepth, char* mTitle, CMainLoopInter
 						SWP_SHOWWINDOW);
 	}
 
-    // On montre notre fenêtre en premier plan
+    // On montre notre fenÃªtre en premier plan
 	ShowWindow(CDkw::hWnd, SW_SHOW);
 
-	// On se cré finalement un device context
+	// On se crÃ© finalement un device context
 	CDkw::dc = GetDC(CDkw::hWnd);
 
 	
@@ -616,7 +616,7 @@ int dkwInit(int width, int height, int mcolorDepth, char* mTitle, CMainLoopInter
 	//	SetWindowPos(CDkw::hWnd, NULL, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER);
 	//}
 
-	return 1; // Ouff tout c'est bien passé ;)
+	return 1; // Ouff tout c'est bien passÃ© ;)
 }
 
 
@@ -628,7 +628,7 @@ int dkwInit(int width, int height, int mcolorDepth, char* mTitle, CMainLoopInter
 
   CDkw::mainLoopObject = mMainLoopObject;
 
-  // On set ses propriétées de bases
+  // On set ses propriÃ©tÃ©es de bases
   CDkw::w = width;
   CDkw::h = height;
   CDkw::colorDepth = mcolorDepth;
@@ -681,7 +681,7 @@ int dkwInit(int width, int height, int mcolorDepth, char* mTitle, CMainLoopInter
       strcpy(CDkw::title, mTitle);
     }
 
-	// On se cré une instance
+	// On se crÃ© une instance
   m_WindowRect.left = 0;
   m_WindowRect.top = 0;
   m_WindowRect.right = width;
@@ -695,12 +695,12 @@ int dkwInit(int width, int height, int mcolorDepth, char* mTitle, CMainLoopInter
 #endif
 
 //
-// Pour forcer l'application à fermer
+// Pour forcer l'application Ã  fermer
 //
 #ifdef WIN32
 void dkwForceQuit()
 {
-	// On ne pose pas de question, on mets ça à false
+	// On ne pose pas de question, on mets Ã§a Ã  false
 	CDkw::running = false;
 	PostQuitMessage(0);
 	done = true;
@@ -710,7 +710,7 @@ void dkwForceQuit()
 #else
 void dkwForceQuit()
 {
-	// On ne pose pas de question, on mets ça à false
+	// On ne pose pas de question, on mets Ã§a Ã  false
   SDL_Event e;
   CDkw::running = false;
   done = true;
@@ -734,7 +734,7 @@ HDC	dkwGetDC()
 
 
 //
-// On obtien le handle de la fenêtre
+// On obtien le handle de la fenÃªtre
 //
 HWND dkwGetHandle()
 {
@@ -754,7 +754,7 @@ HINSTANCE dkwGetInstance()
 
 
 //
-// Obtenir la dernière erreur
+// Obtenir la derniÃ¨re erreur
 //
 char* dkwGetLastError()
 {
@@ -764,7 +764,7 @@ char* dkwGetLastError()
 
 
 //
-// Pour retourner la position de la sourie sur l'écran
+// Pour retourner la position de la sourie sur l'Ã©cran
 //
 CVector2i dkwGetCursorPos()
 {
@@ -774,7 +774,7 @@ CVector2i dkwGetCursorPos()
 
 
 //
-// On retourne la résolution de la fenêtre
+// On retourne la rÃ©solution de la fenÃªtre
 //
 CVector2i dkwGetResolution()
 {

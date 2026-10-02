@@ -44,7 +44,7 @@ protected:
 	// Caption
 	CString m_caption;
 
-	// Son état
+	// Son Ã©tat
 	control_state m_state;
 
 	// Sa font
@@ -56,18 +56,18 @@ protected:
 	// La grosseur de la font
 	float m_textSize;
 
-	// Son pourcent d'arrivé
+	// Son pourcent d'arrivÃ©
 	float m_leftOffset;
 
 	float anim;
 
-	// la position du text par rapport à sa screenPosition
+	// la position du text par rapport Ã  sa screenPosition
 	control_justify m_justify;
 
 	// Le son pour quand on passe au dessus
 	FSOUND_SAMPLE * m_sfxOver;
 
-	// On ne gère pas les clic sur lui
+	// On ne gÃ¨re pas les clic sur lui
 	bool m_isMouseHandle;
 
 	// La texture
@@ -80,13 +80,13 @@ public:
 	// Constructeur
 	Control(CVector2i screenPosition, CString caption, unsigned int m_font, float textSize, control_justify justify);
 
-	// Sa position sur l'écran
+	// Sa position sur l'Ã©cran
 	CVector2i m_screenPosition;
 
 	// Destructeur
 	virtual ~Control();
 
-	// L'updater le gèrer
+	// L'updater le gÃ¨rer
 	virtual void update(float delay);
 
 	// Pour quand on clic dessus, le child saura quoi faire

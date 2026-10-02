@@ -295,7 +295,7 @@ void Game::renderStats()
 			if (spectatorTeam.size() > 0) spectatorPing /= (int)spectatorTeam.size();
 			if (ffaTeam.size() > 0) ffaPing /= (int)ffaTeam.size();
 
-			// Temporairement juste la liste des joueurs pas trié là pis toute
+			// Temporairement juste la liste des joueurs pas triÃ© lÃ  pis toute
 			dkfBindFont(font);
 			int vPos = 50;
 

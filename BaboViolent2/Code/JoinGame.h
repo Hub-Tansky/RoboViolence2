@@ -134,7 +134,7 @@ public:
 
 	Button * btn_quickRefresh;
 
-	// Ici on a la liste des game trié
+	// Ici on a la liste des game triÃ©
 	std::vector<CGameInfo> m_games;
 
 	Button * btn_gameName;

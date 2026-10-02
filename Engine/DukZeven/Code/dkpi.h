@@ -204,10 +204,10 @@ DLL_API int				dkpUpdate(float delay);
 class CDkp
 {
 public:
-	// La liste de toute les particles ouais poupé
+	// La liste de toute les particles ouais poupÃ©
 	static std::vector<CParticle*> particles;
 
-	// La gravité
+	// La gravitÃ©
 	static CVector3f gravity;
 
 	// Le delay
@@ -227,13 +227,13 @@ public:
 
 	static unsigned int lastTexture;
 
-	// La densité de l'air (en kPa)
+	// La densitÃ© de l'air (en kPa)
 	static float airDensity;
 
 	// Si on doit les sorter ou pas
 	static bool sorting;
 
-	// Pour sorter où on est rendu
+	// Pour sorter oÃ¹ on est rendu
 	static std::vector<CParticle*>::size_type currentSortInteration;
 
 public:

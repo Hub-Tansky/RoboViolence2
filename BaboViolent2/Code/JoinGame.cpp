@@ -92,7 +92,7 @@ JoinGame::~JoinGame()
 //
 void JoinGame::renderUnique()
 {
-	//--- On affiche 20 game à la fois, on va dessiner le tableau first
+	//--- On affiche 20 game Ã  la fois, on va dessiner le tableau first
 	//--- Colones
 	glBegin(GL_QUADS);
 		glColor4f(1,1,1,.25f);
@@ -277,7 +277,7 @@ void JoinGame::renderUnique()
 		printLeftText(200, 25, 25, CString(gameVar.lang_canRefreshIn.s, (int)(refreshDelay+.5f)));
 	}
 
-	//--- Si on n'a pas trouvé de game
+	//--- Si on n'a pas trouvÃ© de game
 	if (nbTotalGame == 0 && !problemConnectingToMaster && m_games.size() == 0)
 	{
 		glColor3f(1,1,1);
@@ -561,7 +561,7 @@ void JoinGame::onClick(Control * control)
 		//--- Thats it, on clear toute sti
 		m_games.clear();
 
-		// On a déjà une connection avec le master, faq mange un char
+		// On a dÃ©jÃ  une connection avec le master, faq mange un char
 		if (masterServerID != -1 || refreshDelay > 0) return;
 		problemConnectingToMaster = false;
 
@@ -761,7 +761,7 @@ void JoinGame::RecvDataFromLan(char* bv2RowBuffer, long frameID)
 		bb_peerDelete(m_games[m_games.size()-1].pingPeerID);
 	}
 
-	// On n'a pas vraiment de max de game icite à atteindre
+	// On n'a pas vraiment de max de game icite Ã  atteindre
 }
 #endif
 

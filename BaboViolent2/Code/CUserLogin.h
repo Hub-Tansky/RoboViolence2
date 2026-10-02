@@ -64,7 +64,7 @@ public:
 	//--- The stats panel
 	CControl * pnl_stats;
 	
-		//--- Le render zone où on va dessiner notre babo yea poupé
+		//--- Le render zone oÃ¹ on va dessiner notre babo yea poupÃ©
 		CControl * pic_babo;
 
 		//--- To choose babo color

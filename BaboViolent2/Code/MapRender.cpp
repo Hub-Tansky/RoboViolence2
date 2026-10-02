@@ -482,7 +482,7 @@ void Map::performCollision(CoordFrame & lastCF, CoordFrame & CF, float radius)
 					CF.position[1] - radius <= (float)(y-1)+1 &&
 					CF.position[1] + radius >= (float)(y-1))
 				{
-					// On le ramËne en Y
+					// On le ram√®ne en Y
 					CF.position[1] = (float)(y-1)+1 + radius + COLLISION_EPSILON;
 					CF.vel[1] = -CF.vel[1] * BOUNCE_FACTOR; // On le fait rebondir ! Bedong!
 				}
@@ -495,7 +495,7 @@ void Map::performCollision(CoordFrame & lastCF, CoordFrame & CF, float radius)
 					CF.position[1] - radius <= (float)(y-1)+1 &&
 					CF.position[1] + radius >= (float)(y-1))
 				{
-					// On le ramËne en Y
+					// On le ram√®ne en Y
 					CF.position[1] = (float)(y-1)+1 + radius + COLLISION_EPSILON;
 					CF.vel[1] = -CF.vel[1] * BOUNCE_FACTOR; // On le fait rebondir ! Bedong!
 				}
@@ -508,7 +508,7 @@ void Map::performCollision(CoordFrame & lastCF, CoordFrame & CF, float radius)
 					CF.position[1] - radius <= (float)(y-1)+1 &&
 					CF.position[1] + radius >= (float)(y-1))
 				{
-					// On le ramËne en Y
+					// On le ram√®ne en Y
 					CF.position[1] = (float)(y-1)+1 + radius + COLLISION_EPSILON;
 					CF.vel[1] = -CF.vel[1] * BOUNCE_FACTOR; // On le fait rebondir ! Bedong!
 				}
@@ -524,7 +524,7 @@ void Map::performCollision(CoordFrame & lastCF, CoordFrame & CF, float radius)
 					CF.position[1] - radius <= (float)(y+1)+1 &&
 					CF.position[1] + radius >= (float)(y+1))
 				{
-					// On le ramËne en Y
+					// On le ram√®ne en Y
 					CF.position[1] = (float)(y+1) - radius - COLLISION_EPSILON;
 					CF.vel[1] = -CF.vel[1] * BOUNCE_FACTOR; // On le fait rebondir ! Bedong!
 				}
@@ -537,7 +537,7 @@ void Map::performCollision(CoordFrame & lastCF, CoordFrame & CF, float radius)
 					CF.position[1] - radius <= (float)(y+1)+1 &&
 					CF.position[1] + radius >= (float)(y+1))
 				{
-					// On le ramËne en Y
+					// On le ram√®ne en Y
 					CF.position[1] = (float)(y+1) - radius - COLLISION_EPSILON;
 					CF.vel[1] = -CF.vel[1] * BOUNCE_FACTOR; // On le fait rebondir ! Bedong!
 				}
@@ -550,14 +550,14 @@ void Map::performCollision(CoordFrame & lastCF, CoordFrame & CF, float radius)
 					CF.position[1] - radius <= (float)(y+1)+1 &&
 					CF.position[1] + radius >= (float)(y+1))
 				{
-					// On le ramËne en Y
+					// On le ram√®ne en Y
 					CF.position[1] = (float)(y+1) - radius - COLLISION_EPSILON;
 					CF.vel[1] = -CF.vel[1] * BOUNCE_FACTOR; // On le fait rebondir ! Bedong!
 				}
 			}
 		}
 
-		// On check en X asteur (sti c sketch comme technique, mais bon, c juste babo l‡!)
+		// On check en X asteur (sti c sketch comme technique, mais bon, c juste babo l√†!)
 		if (CF.vel[0] < 0)
 		{
 			if (!cells[(y)*size[0]+(x-1)].passable)
@@ -568,7 +568,7 @@ void Map::performCollision(CoordFrame & lastCF, CoordFrame & CF, float radius)
 					lastCF.position[1] - radius <= (float)(y)+1 &&
 					lastCF.position[1] + radius >= (float)(y))
 				{
-					// On le ramËne en Y
+					// On le ram√®ne en Y
 					CF.position[0] = (float)(x-1)+1 + radius + COLLISION_EPSILON;
 					CF.vel[0] = -CF.vel[0] * BOUNCE_FACTOR; // On le fait rebondir ! Bedong!
 				}
@@ -581,7 +581,7 @@ void Map::performCollision(CoordFrame & lastCF, CoordFrame & CF, float radius)
 					lastCF.position[1] - radius <= (float)(y-1)+1 &&
 					lastCF.position[1] + radius >= (float)(y-1))
 				{
-					// On le ramËne en Y
+					// On le ram√®ne en Y
 					CF.position[0] = (float)(x-1)+1 + radius + COLLISION_EPSILON;
 					CF.vel[0] = -CF.vel[0] * BOUNCE_FACTOR; // On le fait rebondir ! Bedong!
 				}
@@ -594,7 +594,7 @@ void Map::performCollision(CoordFrame & lastCF, CoordFrame & CF, float radius)
 					lastCF.position[1] - radius <= (float)(y+1)+1 &&
 					lastCF.position[1] + radius >= (float)(y+1))
 				{
-					// On le ramËne en Y
+					// On le ram√®ne en Y
 					CF.position[0] = (float)(x-1)+1 + radius + COLLISION_EPSILON;
 					CF.vel[0] = -CF.vel[0] * BOUNCE_FACTOR; // On le fait rebondir ! Bedong!
 				}
@@ -610,7 +610,7 @@ void Map::performCollision(CoordFrame & lastCF, CoordFrame & CF, float radius)
 					lastCF.position[1] - radius <= (float)(y)+1 &&
 					lastCF.position[1] + radius >= (float)(y))
 				{
-					// On le ramËne en Y
+					// On le ram√®ne en Y
 					CF.position[0] = (float)(x+1) - radius - COLLISION_EPSILON;
 					CF.vel[0] = -CF.vel[0] * BOUNCE_FACTOR; // On le fait rebondir ! Bedong!
 				}
@@ -623,7 +623,7 @@ void Map::performCollision(CoordFrame & lastCF, CoordFrame & CF, float radius)
 					lastCF.position[1] - radius <= (float)(y-1)+1 &&
 					lastCF.position[1] + radius >= (float)(y-1))
 				{
-					// On le ramËne en Y
+					// On le ram√®ne en Y
 					CF.position[0] = (float)(x+1) - radius - COLLISION_EPSILON;
 					CF.vel[0] = -CF.vel[0] * BOUNCE_FACTOR; // On le fait rebondir ! Bedong!
 				}
@@ -636,7 +636,7 @@ void Map::performCollision(CoordFrame & lastCF, CoordFrame & CF, float radius)
 					lastCF.position[1] - radius <= (float)(y+1)+1 &&
 					lastCF.position[1] + radius >= (float)(y+1))
 				{
-					// On le ramËne en Y
+					// On le ram√®ne en Y
 					CF.position[0] = (float)(x+1) - radius - COLLISION_EPSILON;
 					CF.vel[0] = -CF.vel[0] * BOUNCE_FACTOR; // On le fait rebondir ! Bedong!
 				}
@@ -654,7 +654,7 @@ void Map::collisionClip(CoordFrame & CF, float radius)
 	int x = (int)CF.position[0];
 	int y = (int)CF.position[1];
 	
-	// L‡ c simple, on check les 8 cases autour, pis on clip (pour Èviter de se faire pousser dans le mur
+	// L√† c simple, on check les 8 cases autour, pis on clip (pour √©viter de se faire pousser dans le mur
 	if (cells)
 	{
 		if (CF.position[0]+radius+COLLISION_EPSILON > (float)x+1 && !cells[(y)*size[0]+(x+1)].passable)
@@ -707,7 +707,7 @@ void Map::collisionClip(CoordFrame & CF, float radius)
 			possible[3] = true;
 		}
 
-		//--- On essaye de pogner le best choice pareil l‡
+		//--- On essaye de pogner le best choice pareil l√†
 		float dis[4];
 		dis[0] = CF.position[0] - (float)x;
 		dis[1] = 1 - (CF.position[0] - (float)x);
@@ -782,7 +782,7 @@ void Map::renderFlag(int i)
 	glPushMatrix();
 		glTranslatef(flagPos[i][0], flagPos[i][1], flagPos[i][2]);
 
-		//--- Voil‡ on render Áa
+		//--- Voil√† on render √ßa
 //		glLineWidth(5);
 /*		if (i==0)
 			glColor3f(0,0,1);

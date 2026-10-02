@@ -56,10 +56,10 @@ class CStringInterface;
 class CSVType
 {
 public:
-	// Son nom à être affiché
+	// Son nom Ã  Ãªtre affichÃ©
 	CString variableName;
 
-	// Est-ce que cette variable peut être bypassé par le fichier config
+	// Est-ce que cette variable peut Ãªtre bypassÃ© par le fichier config
 	bool configBypass;
 
 public:
@@ -439,7 +439,7 @@ public:
 class CSystemVariable
 {
 public:
-	// La listes des variables enregistré
+	// La listes des variables enregistrÃ©
 	std::vector<CSVType*> variables;
 
 public:
@@ -465,14 +465,14 @@ public:
 	// Pour effacer une variable du stack
 	void unregisterSystemVariable(const CString &screenName);
 
-	// pour loader un fichier config contenant la prédéfinition des variables
+	// pour loader un fichier config contenant la prÃ©dÃ©finition des variables
 	void loadConfig(char * filename);
 	void loadConfigSVOnly(char * filename);
 
-	// Pour saver un fichier config contenant la prédéfinition des variables
+	// Pour saver un fichier config contenant la prÃ©dÃ©finition des variables
 	void saveConfig(char * filename);
 
-	// Pour gèrer les commandes pour modifier les variables
+	// Pour gÃ¨rer les commandes pour modifier les variables
 	CMD_RET command(CString & commandName, CString & params);
 };
 

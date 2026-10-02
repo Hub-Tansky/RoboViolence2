@@ -92,7 +92,7 @@ void Player::update(float delay)
 	if (fireFrameDelay > 0) fireFrameDelay--;
 
 	lastCF = currentCF; // On garde une copie du dernier coordFrame
-	currentCF.frameID++; // Ça ça reste inchangé
+	currentCF.frameID++; // Ã‡a Ã§a reste inchangÃ©
 
 #ifdef _PRO_
 	if (minibot)
@@ -136,14 +136,14 @@ void Player::update(float delay)
 	}
 
 
-	// ca c pour le reload complet du shotty...jme demande ben ou a part ici ca devrait aller......dans shoot c appelé seulement quand ya un mouse HOLD....faq c la meilleur place que j'ai trouver la
+	// ca c pour le reload complet du shotty...jme demande ben ou a part ici ca devrait aller......dans shoot c appelÃ© seulement quand ya un mouse HOLD....faq c la meilleur place que j'ai trouver la
 	if (weapon)
 	{
 		if (weapon->fullReload && weapon->weaponID == WEAPON_SHOTGUN)
 		{
 			if (weapon->shotInc > 0)
 			{
-				// si ca fait un sizieme du temps alloué pour reloader
+				// si ca fait un sizieme du temps allouÃ© pour reloader
 				if ((int)(weapon->currentFireDelay/3*100) % 17 == 0)
 				{
 					weapon->shotInc--;
@@ -160,12 +160,12 @@ void Player::update(float delay)
 	}
 
 #ifndef CONSOLE
-	// On check si on change de nom (on fait ça uniquement si on est à la fin d'un round (tout le temps en fin de compte))
+	// On check si on change de nom (on fait Ã§a uniquement si on est Ã  la fin d'un round (tout le temps en fin de compte))
 	if (isThisPlayer)
 	{
 		if (name != gameVar.cl_playerName)
 		{
-			// On le clamp à 31 caracter
+			// On le clamp Ã  31 caracter
 			if (gameVar.cl_playerName.len() > 31) gameVar.cl_playerName.resize(31);
 			net_clsv_svcl_player_change_name playerChangeName;
 			memcpy(playerChangeName.playerName, gameVar.cl_playerName.s, gameVar.cl_playerName.len()+1);
@@ -198,7 +198,7 @@ void Player::update(float delay)
 			//--- Control it if it's server, else do as a remote entity
 			if (game->isServerGame)
 			{
-				// On déplace avec la velocity
+				// On dÃ©place avec la velocity
 				minibot->currentCF.position += minibot->currentCF.vel * delay;
 
 				// On ralenti sa vel
@@ -214,12 +214,12 @@ void Player::update(float delay)
 				// Un ajustement obligatoire
 				minibot->currentCF.position[2] = .15f;
 
-				// On gère les inputs1
+				// On gÃ¨re les inputs1
 				minibot->Think(delay);
 			}
 			else
 			{
-				// Là on va créer une genre d'interpolation
+				// LÃ  on va crÃ©er une genre d'interpolation
 				minibot->currentCF.interpolate(minibot->cFProgression, minibot->netCF0, minibot->netCF1, delay);
 
 				// Un ajustement obligatoire (sa hauteur)
@@ -240,7 +240,7 @@ void Player::update(float delay)
 
 		if (remoteEntity)
 		{
-			// Là on va créer une genre d'interpolation
+			// LÃ  on va crÃ©er une genre d'interpolation
 			currentCF.interpolate(cFProgression, netCF0, netCF1, delay);
 
 			// Un ajustement obligatoire (sa hauteur)
@@ -249,7 +249,7 @@ void Player::update(float delay)
 #ifndef CONSOLE
 		else
 		{
-			// On déplace avec la velocity
+			// On dÃ©place avec la velocity
 			currentCF.position += currentCF.vel * delay;
 
 			// On ralenti sa vel
@@ -279,7 +279,7 @@ void Player::update(float delay)
 			// Un ajustement obligatoire
 			currentCF.position[2] = .25f;
 
-			// On gère les inputs
+			// On gÃ¨re les inputs
 			if (isThisPlayer && !console->isActive() && !writting && !game->showMenu && !menuManager.root->visible)
 			{
 				controlIt(delay);
@@ -288,7 +288,7 @@ void Player::update(float delay)
 			// On envoit aux autres
 			if (isThisPlayer)
 			{
-				// Bon, on envoit cette position aux autres joueurs, la vitesse d'envoit c'est dépendant de son ping
+				// Bon, on envoit cette position aux autres joueurs, la vitesse d'envoit c'est dÃ©pendant de son ping
 				sendPosFrame++;
 				if (sendPosFrame >= avgPing && sendPosFrame >= gameVar.sv_minSendInterval && status == PLAYER_STATUS_ALIVE)
 				{
@@ -354,7 +354,7 @@ void Player::update(float delay)
 				normalize(right);
 				matrix.RotateArbitrary(-angle*TO_DEGREE, right);
 
-				// On la normalize (parce que la boule à rapetisse :|)
+				// On la normalize (parce que la boule Ã  rapetisse :|)
 				matrix.normalize();
 			}
 		}
@@ -380,7 +380,7 @@ void Player::update(float delay)
 				normalize(right);
 				minibot->matrix.RotateArbitrary(-angle*TO_DEGREE, right);
 
-				// On la normalize (parce que la boule à rapetisse :|)
+				// On la normalize (parce que la boule Ã  rapetisse :|)
 				minibot->matrix.normalize();
 			}
 		}
@@ -394,14 +394,14 @@ void Player::update(float delay)
 		timeToSpawn -= delay;
 		if (timeToSpawn <= 0)
 		{
-			// On ne veut pas afficher des négatif ;)
+			// On ne veut pas afficher des nÃ©gatif ;)
 			timeToSpawn = 0;
 
 #ifndef CONSOLE
 			// Seuleument si c'est notre joueur, sinon on s'en caliss
 			if (isThisPlayer)
 			{
-				// On check si on peut requester le spawn, sauf si on est en s&d (là c le server qui choisi ;))
+				// On check si on peut requester le spawn, sauf si on est en s&d (lÃ  c le server qui choisi ;))
 #ifdef _PRO_
             if ((gameVar.sv_forceRespawn || ((dkiGetState(gameVar.k_shoot) == DKI_DOWN && !scene->client->showMenu) && !scene->client->chatting.haveFocus())) && !spawnRequested)
 #else
@@ -421,7 +421,7 @@ void Player::update(float delay)
 
          #endif
 
-					// Ici on le call juste une fois, isshh sinon ça sera pas trop bon...
+					// Ici on le call juste une fois, isshh sinon Ã§a sera pas trop bon...
 					// On request to spawn
 					spawnRequested = true;
 					net_clsv_spawn_request spawnRequest;
@@ -453,13 +453,13 @@ void Player::update(float delay)
 
 #ifndef CONSOLE
 //
-// Pour le controller (ça c'est client side only, on ne gère pas le mouvement des autres players comme ça)
+// Pour le controller (Ã§a c'est client side only, on ne gÃ¨re pas le mouvement des autres players comme Ã§a)
 //
 void Player::controlIt(float delay)
 {
-	// On gère les inputs
+	// On gÃ¨re les inputs
 
-	// Si on est en mode scope (FPS), on tourne la tête avec la mouse
+	// Si on est en mode scope (FPS), on tourne la tÃªte avec la mouse
 	if (scopeMode)
 	{
 		CVector2i mouseVel = dkiGetMouseVel();
@@ -481,7 +481,7 @@ void Player::controlIt(float delay)
 	}
 
 
-	// Si on est en mode scope, on se déplace dapres l'orientation local
+	// Si on est en mode scope, on se dÃ©place dapres l'orientation local
 	if (scopeMode)
 	{
 		CVector3f front = currentCF.mousePosOnMap - currentCF.position;
@@ -564,12 +564,12 @@ void Player::controlIt(float delay)
 	{
 		if (weapon && grenadeDelay == 0 && meleeDelay == 0) 
 		{
-			firedShowDelay = 2; // Ça c'est le ping sur la map qu'on voit quand L'autre tire
+			firedShowDelay = 2; // Ã‡a c'est le ping sur la map qu'on voit quand L'autre tire
 
 			//--- Est-ce qu'on est sniper et en scope mode?
 			if (weapon->weaponID == WEAPON_SNIPER && game->map->camPos[2] >= 10)
 			{
-				//--- On shoot une deuxième fois pour faire plus de damage en scope mode
+				//--- On shoot une deuxiÃ¨me fois pour faire plus de damage en scope mode
 				weapon->nbShot = 3;
 			}
 
@@ -577,7 +577,7 @@ void Player::controlIt(float delay)
 
 			if (weapon->weaponID == WEAPON_SNIPER)
 			{
-				//--- On shoot une deuxième fois pour faire plus de damage en scope mode
+				//--- On shoot une deuxiÃ¨me fois pour faire plus de damage en scope mode
 				weapon->nbShot = 2;
 			}
 		}
@@ -591,9 +591,9 @@ void Player::controlIt(float delay)
 	{
 		if (meleeWeapon && grenadeDelay == 0) 
 		{
-			firedShowDelay = 2; // Ça c'est le ping sur la map qu'on voit quand L'autre tire
+			firedShowDelay = 2; // Ã‡a c'est le ping sur la map qu'on voit quand L'autre tire
 
-			//--- On shoot ça
+			//--- On shoot Ã§a
 			net_clsv_svcl_player_shoot_melee playerShootMelee;
 			playerShootMelee.playerID = playerID;
 			bb_clientSend(scene->client->uniqueClientID, (char*)&playerShootMelee, sizeof(net_clsv_svcl_player_shoot_melee), NET_CLSV_SVCL_PLAYER_SHOOT_MELEE);
@@ -614,7 +614,7 @@ void Player::controlIt(float delay)
 				lastShootWasNade = true;
 				nbGrenadeLeft--;
 				grenadeDelay = gameVar.weapons[WEAPON_GRENADE]->fireDelay;
-				// On pitch ça
+				// On pitch Ã§a
 				gameVar.weapons[WEAPON_GRENADE]->shoot(this);
 				gameVar.weapons[WEAPON_GRENADE]->currentFireDelay = 0; // Il n'y a pas d'update sur ce gun
 			}
@@ -631,14 +631,14 @@ void Player::controlIt(float delay)
 				lastShootWasNade = false;
 				nbMolotovLeft--;
 				grenadeDelay = gameVar.weapons[WEAPON_COCKTAIL_MOLOTOV]->fireDelay;
-				// On pitch ça
+				// On pitch Ã§a
 				gameVar.weapons[WEAPON_COCKTAIL_MOLOTOV]->shoot(this);
 				gameVar.weapons[WEAPON_COCKTAIL_MOLOTOV]->currentFireDelay = 0; // Il n'y a pas d'update sur ce gun
 			}
 		}
 	}
 
-	// On switch en scope mode (sniper only) (cétait juste un test à chier ça)
+	// On switch en scope mode (sniper only) (cÃ©tait juste un test Ã  chier Ã§a)
 /*	if (dkiGetState(DKI_MOUSE_BUTTON2) == DKI_DOWN)
 	{
 		scopeMode = !scopeMode;

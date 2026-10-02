@@ -48,7 +48,7 @@ public:
 	std::vector<CString> maps;
 	std::vector<Button *> btn_maps;
 
-	// Nos map à inclure
+	// Nos map Ã  inclure
 	std::vector<CString> includedMaps;
 
 public:

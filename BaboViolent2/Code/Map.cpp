@@ -69,7 +69,7 @@ Map::Map(CString mapFilename, Game * _game, unsigned int font, bool editor, int 
 			glViewport(0, 0, res[0], res[1]);
 		dkglSetProjection(60, 1, 50, (float)res[1]*1.333f, (float)res[1]);
 
-		// Truc par default à enabeler
+		// Truc par default Ã  enabeler
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
 		glDisable(GL_TEXTURE_2D);
@@ -189,7 +189,7 @@ Map::Map(CString mapFilename, Game * _game, unsigned int font, bool editor, int 
 
 			cells = new map_cell[size[0]*size[1]];
 
-			// On cré tout suite les contours de la map
+			// On crÃ© tout suite les contours de la map
 			for (j=0;j<size[1];++j)
 			{
 				cells[j*size[0]+0].passable = false;
@@ -442,7 +442,7 @@ Map::Map(CString mapFilename, Game * _game, unsigned int font, bool editor, int 
 	}
 
 
-	//--- on check si on a pas un model 3D de cette map là
+	//--- on check si on a pas un model 3D de cette map lÃ 
 	CString checkFor3D = "main/modelmaps_______/";
 	checkFor3D += mapName + "/" + mapName + ".DKO";
 	FileIO * dkoFile = new FileIO(checkFor3D, "rb");
@@ -569,7 +569,7 @@ Map::Map(CString mapFilename, Game * _game, unsigned int font, bool editor, int 
 	}
 	else
 	{
-		// On cré l'espace pour la texture
+		// On crÃ© l'espace pour la texture
 		texMap = dktCreateEmptyTexture(size[0], size[1], 3, DKT_FILTER_NEAREST);
 		regenTex();
 	}
@@ -1093,7 +1093,7 @@ Map::~Map()
 
 #ifndef CONSOLE
 //
-// Pour générer la texture de la minimap
+// Pour gÃ©nÃ©rer la texture de la minimap
 //
 void Map::regenTex()
 {
@@ -1216,7 +1216,7 @@ void Map::update(float delay, Player * thisPlayer)
 			{
 				if (thisPlayer->weapon->weaponID == WEAPON_SNIPER)
 				{
-					//--- Dépendament de la distance entre la mouse et le player
+					//--- DÃ©pendament de la distance entre la mouse et le player
 					float dis = distance(thisPlayer->currentCF.mousePosOnMap, thisPlayer->currentCF.position) * 2;
 					if (dis > 12) dis = 12;
 					if (dis < 5) dis = 5;
@@ -1467,11 +1467,11 @@ bool Map::rayTest(CVector3f & p1, CVector3f & p2, CVector3f & normal)
 		return result;
 	}
 
-	// On pogne notre cell de départ
+	// On pogne notre cell de dÃ©part
 	int i = (int)p1[0];
 	int j = (int)p1[1];
 
-	// On check que notre tuile n'est pas déjà occupé
+	// On check que notre tuile n'est pas dÃ©jÃ  occupÃ©
 	if (i >= 0 &&
 		i < size[0] &&
 		j >= 0 &&
@@ -1489,7 +1489,7 @@ bool Map::rayTest(CVector3f & p1, CVector3f & p2, CVector3f & normal)
 	}
 
 
-	// On défini dans quel sens on va voyager (4 sens)
+	// On dÃ©fini dans quel sens on va voyager (4 sens)
 	int sens;
 	if (fabsf(p2[0] - p1[0]) > fabsf(p2[1] - p1[1]))
 	{
@@ -1514,11 +1514,11 @@ bool Map::rayTest(CVector3f & p1, CVector3f & p2, CVector3f & normal)
 		}
 	}
 
-	// On while tant qu'on ne l'a pas trouvé
+	// On while tant qu'on ne l'a pas trouvÃ©
 	float percent;
 	while (true)
 	{
-		// On check qu'on n'a pas dépassé
+		// On check qu'on n'a pas dÃ©passÃ©
 		if (i < 0 ||
 			i >= size[0] ||
 			j < 0 ||
@@ -1539,7 +1539,7 @@ bool Map::rayTest(CVector3f & p1, CVector3f & p2, CVector3f & normal)
 			if (rayTileTest(i, j-1, p1, p2, normal)) return true;
 			if (rayTileTest(i, j+1, p1, p2, normal)) return true;
 
-			// On incrémente à la prochaine tuile
+			// On incrÃ©mente Ã  la prochaine tuile
 			i++;
 			percent = ((float)i - p1[0]) / fabsf(p2[0] - p1[0]);
 			j = (int)(p1[1] + (p2[1] - p1[1]) * percent);
@@ -1551,7 +1551,7 @@ bool Map::rayTest(CVector3f & p1, CVector3f & p2, CVector3f & normal)
 			if (rayTileTest(i, j-1, p1, p2, normal)) return true;
 			if (rayTileTest(i, j+1, p1, p2, normal)) return true;
 
-			// On incrémente à la prochaine tuile
+			// On incrÃ©mente Ã  la prochaine tuile
 			i--;
 			percent = (p1[0] - (float)(i+1)) / fabsf(p2[0] - p1[0]);
 			j = (int)(p1[1] + (p2[1] - p1[1]) * percent);
@@ -1563,7 +1563,7 @@ bool Map::rayTest(CVector3f & p1, CVector3f & p2, CVector3f & normal)
 			if (rayTileTest(i-1, j, p1, p2, normal)) return true;
 			if (rayTileTest(i+1, j, p1, p2, normal)) return true;
 
-			// On incrémente à la prochaine tuile
+			// On incrÃ©mente Ã  la prochaine tuile
 			j++;
 			percent = ((float)j - p1[1]) / fabsf(p2[1] - p1[1]);
 			i = (int)(p1[0] + (p2[0] - p1[0]) * percent);
@@ -1575,7 +1575,7 @@ bool Map::rayTest(CVector3f & p1, CVector3f & p2, CVector3f & normal)
 			if (rayTileTest(i-1, j, p1, p2, normal)) return true;
 			if (rayTileTest(i+1, j, p1, p2, normal)) return true;
 
-			// On incrémente à la prochaine tuile
+			// On incrÃ©mente Ã  la prochaine tuile
 			j--;
 			percent = (p1[1] - (float)(j+1)) / fabsf(p2[1] - p1[1]);
 			i = (int)(p1[0] + (p2[0] - p1[0]) * percent);

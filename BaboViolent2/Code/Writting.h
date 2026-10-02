@@ -38,7 +38,7 @@ protected:
 	// Pour dire qu'on a perdu le focus
 	bool m_isActivated;
 
-	// Le nb de caractère max
+	// Le nb de caractÃ¨re max
 	int m_maxCarac;
 
 	// Le son pour quand on tape
@@ -51,7 +51,7 @@ public:
 	// Destructeur
 	virtual ~Writting();
 
-	// Pour écrire dedans
+	// Pour Ã©crire dedans
 	void writeText(unsigned int caracter);
 
 	// Replace text with new string
@@ -81,7 +81,7 @@ public:
 };
 
 
-// Le pointeur global sur le writting qui a présentment le focus
+// Le pointeur global sur le writting qui a prÃ©sentment le focus
 extern Writting * writting;
 
 

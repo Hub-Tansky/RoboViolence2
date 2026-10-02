@@ -133,7 +133,7 @@ public:
 	// Les states de tout nos boutton clavier
 	static int allState[256+8+128];
 
-	// L'état de la sourie
+	// L'Ã©tat de la sourie
 	static DIMOUSESTATE2 mouseStateDI;
 	static _typMousePos mousePos;
 
@@ -144,7 +144,7 @@ public:
 	static DIJOYSTATE2 EtatJoy;
 
 #endif
-	// Pour savoir le dernier key pressé (pour le hold)
+	// Pour savoir le dernier key pressÃ© (pour le hold)
 	static int lastDown;
 	static float downTimer;
 

@@ -48,7 +48,7 @@ public:
 	// gets
 	int getKeyValue() {return m_keyValue;}
 
-	// L'updater le gèrer
+	// L'updater le gÃ¨rer
 	virtual void update(float delay);
 
 	// Pour quand on clic dessus, il faut activer le wait for key hehe (SICK)

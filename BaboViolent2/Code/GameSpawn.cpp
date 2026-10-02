@@ -68,7 +68,7 @@ void Game::spawnBlood(CVector3f & position, float damage)
 			DKP_SRC_ALPHA, //unsigned int srcBlend,
 			DKP_ONE_MINUS_SRC_ALPHA);//unsigned int dstBlend);
 
-		// On cré les marks de sang au sol
+		// On crÃ© les marks de sang au sol
 		CVector3f pos(1,0,0);
 		pos = rotateAboutAxis(pos, rand(0.0f, 360.0f), CVector3f(0,0,1));
 		float distance = rand(0.0f, damage*2.5f);
@@ -122,7 +122,7 @@ void Game::spawnBloodMinibot(CVector3f & position, float damage)
 			DKP_SRC_ALPHA, //unsigned int srcBlend,
 			DKP_ONE);//unsigned int dstBlend);
 
-		// On cré les marks de sang au sol
+		// On crÃ© les marks de sang au sol
 		CVector3f pos(1,0,0);
 		pos = rotateAboutAxis(pos, rand(0.0f, 360.0f), CVector3f(0,0,1));
 		float distance = rand(0.0f, damage*2.5f);
@@ -330,7 +330,7 @@ bool Game::spawnPlayer(int playerID)
 //
 void Game::spawnImpact(CVector3f & p1, CVector3f & p2, CVector3f & normal, Weapon*weapon, float damage, int team)
 {
-	// Bon, ben on spawn des particules là
+	// Bon, ben on spawn des particules lÃ 
 	CVector3f front = normal;
 	CVector3f right, up;
 	createRightUpVectors(right, front, up);
@@ -344,7 +344,7 @@ void Game::spawnImpact(CVector3f & p1, CVector3f & p2, CVector3f & normal, Weapo
 	int type = 0;
 	if (weapon->weaponID == WEAPON_PHOTON_RIFLE) type = 1;
 
-	// On se cré une trail yo yea
+	// On se crÃ© une trail yo yea
 	if (type == 0)
 	{
 		trails.push_back(new Trail(p1, p2, damage, CVector4f((team==PLAYER_TEAM_RED)?.9f:.5f,.5f,(team==PLAYER_TEAM_BLUE)?.9f:.5f,1), damage*4, 0));
@@ -430,7 +430,7 @@ void Game::spawnImpact(CVector3f & p1, CVector3f & p2, CVector3f & normal, Weapo
 bool Game::spawnProjectile(net_clsv_svcl_player_projectile & playerProjectile, bool imServer)
 {
 //	if (playerProjectile.projectileType == PROJECTILE_FLAME) return;
-	// On le push toujours à la fin du vector, si on respect bien ça les clients devraient tous les avoir
+	// On le push toujours Ã  la fin du vector, si on respect bien Ã§a les clients devraient tous les avoir
 	// dans l'ordre
 	if (imServer)
 	{
@@ -477,7 +477,7 @@ bool Game::spawnProjectile(net_clsv_svcl_player_projectile & playerProjectile, b
 		{
 			Projectile * projectile = projectiles[projectiles.size()-1];
 
-			// On demande au server de créer une instance d'une flame
+			// On demande au server de crÃ©er une instance d'une flame
 			net_clsv_svcl_player_projectile playerProjectile;
 			playerProjectile.playerID = projectile->fromID;
 			playerProjectile.nuzzleID = 0;
@@ -532,7 +532,7 @@ bool Game::spawnProjectile(net_clsv_svcl_player_projectile & playerProjectile, b
 
 #ifndef CONSOLE
 //
-// On se cré une explosion dla mort mouhou :P
+// On se crÃ© une explosion dla mort mouhou :P
 //
 void Game::spawnExplosion(CVector3f & position, CVector3f & normal, float size)
 {

@@ -29,7 +29,7 @@ class ControlListener;
 class Button : public Control
 {
 private:
-	// Le menu qui écoute si on pèse sur un bouton
+	// Le menu qui Ã©coute si on pÃ¨se sur un bouton
 	ControlListener * m_listener;
 
 	// Le son pour quand on clic

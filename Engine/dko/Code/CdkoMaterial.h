@@ -55,7 +55,7 @@ public:
 	// La transparence
 	float transparency;
 
-	// Si le mat on voit des deux côté
+	// Si le mat on voit des deux cÃ´tÃ©
 	bool twoSided;
 
 	// Son wireframe

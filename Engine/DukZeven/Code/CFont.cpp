@@ -49,7 +49,7 @@ CFont::~CFont()
 
 
 //
-// On dÈtruir la police et la rÈinit
+// On d√©truir la police et la r√©init
 //
 void CFont::destroy()
 {
@@ -62,7 +62,7 @@ void CFont::destroy()
 
 
 //
-// Pour loader les propriÈtÈes de la police d'un fichier
+// Pour loader les propri√©t√©es de la police d'un fichier
 //
 int CFont::loadFontFile(ifstream &fntFile)
 {
@@ -81,7 +81,7 @@ int CFont::loadFontFile(ifstream &fntFile)
 		if (stricmp(variable, "TEXTURE") == 0)
 		{
 			fntFile >> variable;
-			// On crÈ notre texture
+			// On cr√© notre texture
 			textureID = dktCreateTextureFromFile(variable, DKT_FILTER_BILINEAR);
 		}
 
@@ -110,7 +110,7 @@ int CFont::loadFontFile(ifstream &fntFile)
 					continue;
 				}
 
-				// Sinon on load le charactËre
+				// Sinon on load le charact√®re
 				fntFile >> kerning[current++];
 				fntFile >> variable;
 			}
@@ -126,14 +126,14 @@ int CFont::loadFontFile(ifstream &fntFile)
 
 
 //
-// On crÈ une font, mais uniquement ‡ partir d'un TGA
+// On cr√© une font, mais uniquement √† partir d'un TGA
 //
 int CFont::loadTGAFile(char * tgaFile)
 {
-	// On crÈ notre texture
+	// On cr√© notre texture
 	textureID = dktCreateTextureFromFile(tgaFile, DKT_FILTER_BILINEAR);
 
-	// Bon, ben on crÈ notre font avec cette texture l‡
+	// Bon, ben on cr√© notre font avec cette texture l√†
 	if (textureID)
 	{
 		fntFont = false;
@@ -158,7 +158,7 @@ int CFont::loadTGAFile(char * tgaFile)
 		int curX = 0;
 		int curY = 0;
 		for (int c=33;c<128+32;c++){
-			// Bon, on compte les pixel yÈÈÈ
+			// Bon, on compte les pixel y√©√©√©
 			bool nextCarac = false;
 			while (!nextCarac){
 				for (int j=0;j<charH;j++){
@@ -167,7 +167,7 @@ int CFont::loadTGAFile(char * tgaFile)
 						int to;
 						if (from < 0) from = 0;
 
-						// Maintenant on check pour la fin du caractËre
+						// Maintenant on check pour la fin du caract√®re
 						while (true)
 						{
 							bool allFalse = true;
@@ -188,7 +188,7 @@ int CFont::loadTGAFile(char * tgaFile)
 							curX++;
 						}
 
-						// Bon, maintenant on peut crÈer ce character // 25, 34
+						// Bon, maintenant on peut cr√©er ce character // 25, 34
 						characterProp[c].w = (float)(to - from) / (float)charH;
 						characterProp[c].u1 = (float)from / (float)512;
 						characterProp[c].u2 = (float)to / (float)512;
@@ -222,7 +222,7 @@ int CFont::loadTGAFile(char * tgaFile)
 
 
 //
-// Signifie que l'on vient de crÈer l'objet font
+// Signifie que l'on vient de cr√©er l'objet font
 //
 int CFont::create(CString filename)
 {
@@ -231,10 +231,10 @@ int CFont::create(CString filename)
 		return loadTGAFile(filename.s);
 	}
 
-	// On ouvre le fichier de dÈfinition
+	// On ouvre le fichier de d√©finition
 	ifstream fntFile(filename.s, ios::in);
 
-	// On check si Áa fonctionnÈ
+	// On check si √ßa fonctionn√©
 	if (fntFile.fail())
 	{
 		return 0;
@@ -253,14 +253,14 @@ int CFont::create(CString filename)
 
 //
 // On la construit :
-// On construit la display list ‡ l'aide de notre tableau de kerning
+// On construit la display list √† l'aide de notre tableau de kerning
 //
 void CFont::reloadIt()
 {
-	// On dÈtruit l'encien avant
+	// On d√©truit l'encien avant
 	destroy();
 
-	// On gÈnËre 256 display list pour stocker tout les caractËres
+	// On g√©n√®re 256 display list pour stocker tout les caract√®res
 #ifndef _DX_
 	baseFont = glGenLists(256);
 #endif
@@ -300,11 +300,11 @@ void CFont::reloadIt()
 			k++;
 			finalCaracKerning[i+32] = widthf;
 
-			// Ensuite on crÈe notre display list pour ce caractËre
+			// Ensuite on cr√©e notre display list pour ce caract√®re
 #ifndef _DX_
-			glNewList(baseFont+i+32 /* on commence au charatËre 32, "Space" */, GL_COMPILE);
+			glNewList(baseFont+i+32 /* on commence au charat√®re 32, "Space" */, GL_COMPILE);
 
-				// On dessine un quad de 16x16 avec la lettre affichÈ dedans
+				// On dessine un quad de 16x16 avec la lettre affich√© dedans
 				glBegin(GL_QUADS);
 					glTexCoord2f(txf,1-tyf);
 					glVertex2f(0,0);
@@ -319,16 +319,16 @@ void CFont::reloadIt()
 					glVertex2f(widthf,0);
 				glEnd();
 
-				// On le dÈplace de 10 pour prÈvoir l'espace entre deux lettres
+				// On le d√©place de 10 pour pr√©voir l'espace entre deux lettres
 				glTranslatef(widthf,0,0);
 			glEndList();
 #endif
 
-			// On incrÈmente pour le charactËre suivant
+			// On incr√©mente pour le charact√®re suivant
 			i++;
 		}
 
-		// On crÈ les charatËres spÈciaux (le enter)
+		// On cr√© les charat√®res sp√©ciaux (le enter)
 #ifndef _DX_
 		glNewList(baseFont+1, GL_COMPILE);
 			glColor3f(0,0,1);
@@ -370,11 +370,11 @@ void CFont::reloadIt()
 		int i = 0;
 		while (i<128)
 		{
-			// Ensuite on crÈe notre display list pour ce caractËre
+			// Ensuite on cr√©e notre display list pour ce caract√®re
 #ifndef _DX_
-			glNewList(baseFont+i+32 /* on commence au charatËre 32, "Space" */, GL_COMPILE);
+			glNewList(baseFont+i+32 /* on commence au charat√®re 32, "Space" */, GL_COMPILE);
 
-				// On dessine un quad de 16x16 avec la lettre affichÈ dedans
+				// On dessine un quad de 16x16 avec la lettre affich√© dedans
 				glBegin(GL_QUADS);
 					glTexCoord2f(characterProp[i+32].u1,characterProp[i+32].v1);
 					glVertex2f(0,0);
@@ -389,17 +389,17 @@ void CFont::reloadIt()
 					glVertex2f(characterProp[i+32].w,0);
 				glEnd();
 
-				// On le dÈplace de 10 pour prÈvoir l'espace entre deux lettres
+				// On le d√©place de 10 pour pr√©voir l'espace entre deux lettres
 				glTranslatef(characterProp[i+32].w,0,0);
 			glEndList();
 #endif
 
-			// On incrÈmente pour le charactËre suivant
+			// On incr√©mente pour le charact√®re suivant
 			i++;
 		}
 
 #ifndef _DX_
-		// On crÈ les charatËres spÈciaux (le enter)
+		// On cr√© les charat√®res sp√©ciaux (le enter)
 		glNewList(baseFont+1, GL_COMPILE);
 			glColor3f(.25f,.25f,1);
 		glEndList();
@@ -439,7 +439,7 @@ void CFont::reloadIt()
 
 
 //
-// On imprime le text ‡ l'Ècran en utilisant cette police
+// On imprime le text √† l'√©cran en utilisant cette police
 //
 void CFont::printText(float size, float x, float y, float z, char *text)
 {

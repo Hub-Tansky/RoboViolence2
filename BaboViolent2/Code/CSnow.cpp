@@ -59,7 +59,7 @@ CSnow::~CSnow()
 void CSnow::update(float delay, Map* map)
 {
 	--nextIn;
-	//--- On crée la neige yé
+	//--- On crÃ©e la neige yÃ©
 	if (nextIn <= 0)
 	{
 		nextIn = 3;

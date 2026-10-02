@@ -73,7 +73,7 @@ void Client::sendJoinHandshake()
 }
 
 //
-// On a reçu un message yéé !
+// On a reÃ§u un message yÃ©Ã© !
 //
 void Client::recvPacket(char * buffer, int typeID)
 {
@@ -396,7 +396,7 @@ void Client::recvPacket(char * buffer, int typeID)
 			game->redScore = serverInfo.redScore;
 			game->blueWin = serverInfo.blueWin;
 			game->redWin = serverInfo.redWin;
-			// On cré sa map ici
+			// On crÃ© sa map ici
 			if(isServer)
 				game->createMap();
 			game->gameType = serverInfo.gameType;
@@ -425,7 +425,7 @@ void Client::recvPacket(char * buffer, int typeID)
 			else if (!game->map->isValid)
 				this->needToShutDown = true;
 
-			//--- On start ça ste tune là !
+			//--- On start Ã§a ste tune lÃ  !
 	/*		if (gameVar.s_inGameMusic)
 			{
 				if (rand()%2 == 0)
@@ -568,12 +568,12 @@ void Client::recvPacket(char * buffer, int typeID)
 			net_svcl_projectile_coord_frame projectileCoordFrame;
 			memcpy(&projectileCoordFrame, buffer, sizeof(net_svcl_projectile_coord_frame));
 		//	console->add(CString("Client recved projectile Coord Frame %i", (int)projectileCoordFrame.frameID));
-			// Est-ce que notre player pocède des projectiles au moins? Sinon il n'est peut etre pas créé encore (bug)
+			// Est-ce que notre player pocÃ¨de des projectiles au moins? Sinon il n'est peut etre pas crÃ©Ã© encore (bug)
 		//	if ((int)game->projectiles.size() > projectileCoordFrame.projectileID && projectileCoordFrame.projectileID >= 0)
 		//	{
 		//		if (game->projectiles[projectileCoordFrame.projectileID]->uniqueID != projectileCoordFrame.uniqueID)
 		//		{
-					// On doit searcher pour le bon, ils ont peut etre été décallé
+					// On doit searcher pour le bon, ils ont peut etre Ã©tÃ© dÃ©callÃ©
 					for (int i=0;i<(int)game->projectiles.size();++i)
 					{
 						Projectile * projectile = game->projectiles[i];
@@ -742,10 +742,10 @@ void Client::recvPacket(char * buffer, int typeID)
 					}
 				}
 
-				// Si on touche un joueur, on spawn du SANG :D:D:D si c'est ff à on ou off pis que c un ennemy :(
+				// Si on touche un joueur, on spawn du SANG :D:D:D si c'est ff Ã  on ou off pis que c un ennemy :(
 				if (playerShoot.hitPlayerID >= 0)
 				{
-					// On décrémente sa vie
+					// On dÃ©crÃ©mente sa vie
 				//	game->players[playerShoot.hitPlayerID]->hit(game->players[playerShoot.playerID]->weapon, game->players[playerShoot.playerID]);
 				}
 				
@@ -796,7 +796,7 @@ void Client::recvPacket(char * buffer, int typeID)
 						if (playerShoot.weaponID != -1)
 						{
 							// on va juste emettre du son debords
-							// On entends ça
+							// On entends Ã§a
 							if (playerShoot.weaponID == -2)
 							{
 								// Play flame sound
@@ -824,7 +824,7 @@ void Client::recvPacket(char * buffer, int typeID)
 		}
 	case NET_SVCL_DELETE_PROJECTILE:
 		{
-			// Ça ça ne devrait pas fucker, car on envoit dans l'ordre tout le temps (viva el TCP)
+			// Ã‡a Ã§a ne devrait pas fucker, car on envoit dans l'ordre tout le temps (viva el TCP)
 			net_svcl_delete_projectile deleteProjectile;
 			memcpy(&deleteProjectile, buffer, sizeof(net_svcl_delete_projectile));
 			// On check que le projectile existe au moins, sinon peut etre que le player n'est pas encore actif
@@ -848,7 +848,7 @@ void Client::recvPacket(char * buffer, int typeID)
 		}
 	case NET_SVCL_FLAME_STICK_TO_PLAYER:
 		{
-			// Ça ça ne devrait pas fucker, car on envoit dans l'ordre tout le temps (viva el TCP)
+			// Ã‡a Ã§a ne devrait pas fucker, car on envoit dans l'ordre tout le temps (viva el TCP)
 			net_svcl_flame_stick_to_player flameStickToPlayer;
 			memcpy(&flameStickToPlayer, buffer, sizeof(net_svcl_flame_stick_to_player));
 			// On check que le projectile existe au moins, sinon peut etre que le player n'est pas encore actif
@@ -896,7 +896,7 @@ void Client::recvPacket(char * buffer, int typeID)
 				{
 					if (playerHit.playerID == game->thisPlayer->playerID)
 					{
-						// On recul avec la vel donné
+						// On recul avec la vel donnÃ©
 						CVector3f vel;
 						vel[0] = (float)playerHit.vel[0] / 10.0f;
 						vel[1] = (float)playerHit.vel[1] / 10.0f;
@@ -949,7 +949,7 @@ void Client::recvPacket(char * buffer, int typeID)
 		}
 	case NET_SVCL_CONSOLE:
 		{
-			//--- Pas plus compliqué que ça !
+			//--- Pas plus compliquÃ© que Ã§a !
 			console->add(buffer);
 			break;
 		}
@@ -977,7 +977,7 @@ void Client::recvPacket(char * buffer, int typeID)
 						flagState.newFlagState == -2 &&
 						game->players[flagState.playerID])
 					{
-						// Ce joueur a sauvé le flag !!
+						// Ce joueur a sauvÃ© le flag !!
 						game->players[flagState.playerID]->returns++;
 
 						if (game->thisPlayer)
@@ -1122,10 +1122,10 @@ void Client::recvPacket(char * buffer, int typeID)
 
 			if (roundState.reInit)
 			{
-				// Ouch, on fout toute à 0 (score, etc)
+				// Ouch, on fout toute Ã  0 (score, etc)
 			}
 
-			// On switch sur ça et on emet le son appropriée
+			// On switch sur Ã§a et on emet le son appropriÃ©e
 			switch (game->roundState)
 			{
 			case GAME_PLAYING: break;

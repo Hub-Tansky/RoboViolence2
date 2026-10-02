@@ -55,7 +55,7 @@ CRain::~CRain()
 void CRain::update(float delay, Map* map)
 {
   int i;
-	//--- On crée la pluit yé
+	//--- On crÃ©e la pluit yÃ©
 	for (i=0;i<3;++i)
 	{
 		rains[nextRain].pos = rand(map->camPos + CVector3f(-3,-3,5), map->camPos + CVector3f(3,3,5));

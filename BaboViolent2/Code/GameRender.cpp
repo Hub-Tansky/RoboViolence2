@@ -384,7 +384,7 @@ void Game::render()
 					for (int i=0;i<MAX_FLOOR_MARK;++i) if (floorMarks[i].delay > 0) floorMarks[i].render();
 				}
 
-				// Lui on a pas le choix de l'afficher vu que ça fait parti du gameplay
+				// Lui on a pas le choix de l'afficher vu que Ã§a fait parti du gameplay
 #ifdef _PRO_
 #else
             if (gameType == GAME_TYPE_SND) map->renderBombMark();
@@ -658,7 +658,7 @@ void Game::render()
 				glEnable(GL_TEXTURE_2D);
 				glEnable(GL_BLEND);
 				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-				//--- Render le vote à l'écran
+				//--- Render le vote Ã  l'Ã©cran
 				if (voting.votingInProgress)
 				{
 					if (scene->client->blink <= .25f) printRightText((float)res[0] - 10, 10, 30, CString("\x9VOTING : %i", (int)(voting.remaining)));
@@ -694,7 +694,7 @@ void Game::render()
 
 
 //
-// Pour afficher la minimap (ouff, je mélange pomal les affaires, tk)
+// Pour afficher la minimap (ouff, je mÃ©lange pomal les affaires, tk)
 // On la render ici et non dans l'objet map, 
 // car on a besoin de plein d'info comme la position des joueurs, flag, etc
 //

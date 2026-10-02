@@ -27,7 +27,7 @@ KeyManager keyManager;
 
 
 //
-// Pour obtenir une touche à partir du nom
+// Pour obtenir une touche Ã  partir du nom
 //
 int KeyManager::getKeyByName(CString name)
 {

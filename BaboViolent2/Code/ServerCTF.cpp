@@ -48,7 +48,7 @@ void Server::updateCTF(float delay)
 						flagState.playerID = (char)i;
 						bb_serverSend((char*)&flagState, sizeof(net_svcl_change_flag_state), NET_SVCL_CHANGE_FLAG_STATE, 0);
 
-						// On fait emet un sont dépendament du team :P
+						// On fait emet un sont dÃ©pendament du team :P
 						console->add(CString("\x3> %s took the blue flag ID:%i", game->players[i]->name.s, i));
 						game->players[i]->flagAttempts++;
 						break;
@@ -63,7 +63,7 @@ void Server::updateCTF(float delay)
 					if (dis <= .25f*.25f)
 					{
 						// Ce joueur pogne le flag !!!!!!
-						game->map->flagState[1] = -2; // On a scoooréééé !!!!!!
+						game->map->flagState[1] = -2; // On a scooorÃ©Ã©Ã©Ã© !!!!!!
 
 						// On le dis au autres
 						net_svcl_change_flag_state flagState;
@@ -72,7 +72,7 @@ void Server::updateCTF(float delay)
 						flagState.playerID = (char)i;
 						bb_serverSend((char*)&flagState, sizeof(net_svcl_change_flag_state), NET_SVCL_CHANGE_FLAG_STATE, 0);
 
-						// On fait emet un sont dépendament du team :P
+						// On fait emet un sont dÃ©pendament du team :P
 						CString message("\x03> \x01%s \x08scores for the Blue team! ID:%i", game->players[i]->name.s,i);
 						//console->add(CString("\x3> Blue team scores!"));
 						console->add(message);
@@ -108,7 +108,7 @@ void Server::updateCTF(float delay)
 						flagState.playerID = (char)i;
 						bb_serverSend((char*)&flagState, sizeof(net_svcl_change_flag_state), NET_SVCL_CHANGE_FLAG_STATE, 0);
 
-						// On fait emet un sont dépendament du team :P
+						// On fait emet un sont dÃ©pendament du team :P
 						console->add(CString("\x3> %s took the blue flag ID:%i", game->players[i]->name.s, i));
 						game->players[i]->flagAttempts++;
 						break;
@@ -131,9 +131,9 @@ void Server::updateCTF(float delay)
 						flagState.playerID = (char)i;
 						bb_serverSend((char*)&flagState, sizeof(net_svcl_change_flag_state), NET_SVCL_CHANGE_FLAG_STATE, 0);
 
-						// On fait emet un sont dépendament du team :P
+						// On fait emet un sont dÃ©pendament du team :P
 						console->add(CString("\x3> %s returned the blue flag", game->players[i]->name.s));
-						game->players[i]->returns++; // Il gagne deux points pour avoir sauvé le flag !
+						game->players[i]->returns++; // Il gagne deux points pour avoir sauvÃ© le flag !
 						//game->blueScore += 2;
 						break;
 					}
@@ -166,7 +166,7 @@ void Server::updateCTF(float delay)
 						flagState.playerID = (char)i;
 						bb_serverSend((char*)&flagState, sizeof(net_svcl_change_flag_state), NET_SVCL_CHANGE_FLAG_STATE, 0);
 
-						// On fait emet un sont dépendament du team :P
+						// On fait emet un sont dÃ©pendament du team :P
 						console->add(CString("\x3> %s took the red flag ID:%i", game->players[i]->name.s,i));
 						game->players[i]->flagAttempts++;
 						break;
@@ -181,7 +181,7 @@ void Server::updateCTF(float delay)
 					if (dis <= .25f*.25f)
 					{
 						// Ce joueur pogne le flag !!!!!!
-						game->map->flagState[0] = -2; // On a scoooréééé !!!!!!
+						game->map->flagState[0] = -2; // On a scooorÃ©Ã©Ã©Ã© !!!!!!
 
 						// On le dis au autres
 						net_svcl_change_flag_state flagState;
@@ -190,7 +190,7 @@ void Server::updateCTF(float delay)
 						flagState.playerID = (char)i;
 						bb_serverSend((char*)&flagState, sizeof(net_svcl_change_flag_state), NET_SVCL_CHANGE_FLAG_STATE, 0);
 
-						// On fait emet un sont dépendament du team :P
+						// On fait emet un sont dÃ©pendament du team :P
 						CString message("\x03> \x01%s \x08scores for the Red team! ID:%i", game->players[i]->name.s,i);
 						//console->add(CString("\x3> Red team scores!"));
 						console->add(message);
@@ -226,7 +226,7 @@ void Server::updateCTF(float delay)
 						flagState.playerID = (char)i;
 						bb_serverSend((char*)&flagState, sizeof(net_svcl_change_flag_state), NET_SVCL_CHANGE_FLAG_STATE, 0);
 
-						// On fait emet un sont dépendament du team :P
+						// On fait emet un sont dÃ©pendament du team :P
 						console->add(CString("\x3> %s took the red flag ID:%i", game->players[i]->name.s,i));
 						game->players[i]->flagAttempts++;
 						break;
@@ -249,9 +249,9 @@ void Server::updateCTF(float delay)
 						flagState.playerID = (char)i;
 						bb_serverSend((char*)&flagState, sizeof(net_svcl_change_flag_state), NET_SVCL_CHANGE_FLAG_STATE, 0);
 
-						// On fait emet un sont dépendament du team :P
+						// On fait emet un sont dÃ©pendament du team :P
 						console->add(CString("\x3> %s returned the blue flag", game->players[i]->name.s));
-						game->players[i]->returns++; // Il gagne deux points pour avoir sauvé le flag !
+						game->players[i]->returns++; // Il gagne deux points pour avoir sauvÃ© le flag !
 						//game->redScore += 2;
 						break;
 					}

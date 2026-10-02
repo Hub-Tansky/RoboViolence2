@@ -90,7 +90,7 @@ CreateGame::CreateGame(Menu * pRootMenu)
 
 	if (hFind == INVALID_HANDLE_VALUE)
 	{
-		// Si on ne trouve pas le rÈpertoire dÈsirÈ.
+		// Si on ne trouve pas le r√©pertoire d√©sir√©.
 	}
 	else
 	{
@@ -112,7 +112,7 @@ CreateGame::CreateGame(Menu * pRootMenu)
 		FindClose(hFind);
 		if (dwError != ERROR_NO_MORE_FILES)
 		{
-			// Si il y a une error en dÈtectant qu'il n'y a plus de fichiers.
+			// Si il y a une error en d√©tectant qu'il n'y a plus de fichiers.
 		}
 	}
 
@@ -209,7 +209,7 @@ void CreateGame::setConfigValue()
 //
 void CreateGame::addMap(CString mapName, Button * btn)
 {
-	// On check si elle est dÈj‡ l‡, dans ce cas on l'enlËve
+	// On check si elle est d√©j√† l√†, dans ce cas on l'enl√®ve
 	for (int i=0;i<(int)includedMaps.size();++i)
 	{
 		if (mapName == includedMaps[i])
@@ -249,7 +249,7 @@ void CreateGame::onClick(Control * control)
 		}
 		setConfigValue();
 
-		// On colle la premiËre map
+		// On colle la premi√®re map
 		CString command = "host ";
 		command += includedMaps[0];
 		console->sendCommand(command);
@@ -272,7 +272,7 @@ void CreateGame::onClick(Control * control)
 		}
 		setConfigValue();
 
-		// On colle la premiËre map
+		// On colle la premi√®re map
 		CString command = "dedicate ";
 		command += includedMaps[0];
 		console->sendCommand(command);

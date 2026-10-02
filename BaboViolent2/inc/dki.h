@@ -1,16 +1,16 @@
 /// \brief Module de gestion des controles (clavier, souris, manette de jeu, joystick)
 ///
 /// \file dki.h
-/// Ce module prend en charge la gestion des événements système relevant de l'état de chaque touche du clavier, de la position de la souris, de chaque bouton de la souris et possiblement, la position de chaque axe d'un joystick ou d'une manette de jeu et de chaque boutons d'un joystick ou d'une manette de jeu.
+/// Ce module prend en charge la gestion des Ã©vÃ©nements systÃ¨me relevant de l'Ã©tat de chaque touche du clavier, de la position de la souris, de chaque bouton de la souris et possiblement, la position de chaque axe d'un joystick ou d'une manette de jeu et de chaque boutons d'un joystick ou d'une manette de jeu.
 /// Ceci comprend:
 /// 	- une fonction d'initialisation du module
 /// 	- une fonction de terminaison du module
-/// 	- une fonction de mise à jour du module
-/// 	- des fonctions permettant d'obtenir l'état de chaque touche, boutons, axe ou position d'un clavier, d'un joystick ou d'une souris.
+/// 	- une fonction de mise Ã  jour du module
+/// 	- des fonctions permettant d'obtenir l'Ã©tat de chaque touche, boutons, axe ou position d'un clavier, d'un joystick ou d'une souris.
 ///
-/// \note Ce module nécessite Direct Input pour fonctionner
+/// \note Ce module nÃ©cessite Direct Input pour fonctionner
 /// \author David St-Louis (alias Daivuk)
-/// \author Louis Poirier (à des fins de documentation seulement)
+/// \author Louis Poirier (Ã  des fins de documentation seulement)
 ///
 
 
@@ -27,30 +27,30 @@
 
 
 
-// Les états des touches
-/// \name États des touches et boutons possibles
-/// Dans le cas normal, la séquence d'états pour une touche qui est appuyé pendant un certain temps sera :
-/// ..., DKI_NOTHING, DKI_NOTHING,(l'événement d'enfoncement de la touche se produit ici) DKI_DOWN, DKI_HOLD, DKI_HOLD, ..., DKI_HOLD, DKI_HOLD, (l'événement de relachement de la touche se produit ici)DKI_UP, DKI_NOTHING, DKI_NOTHING,...
+// Les Ã©tats des touches
+/// \name Ã‰tats des touches et boutons possibles
+/// Dans le cas normal, la sÃ©quence d'Ã©tats pour une touche qui est appuyÃ© pendant un certain temps sera :
+/// ..., DKI_NOTHING, DKI_NOTHING,(l'Ã©vÃ©nement d'enfoncement de la touche se produit ici) DKI_DOWN, DKI_HOLD, DKI_HOLD, ..., DKI_HOLD, DKI_HOLD, (l'Ã©vÃ©nement de relachement de la touche se produit ici)DKI_UP, DKI_NOTHING, DKI_NOTHING,...
 //@{
-/// utilisée pour désigner qu'aucune touche n'a encore été pesé (voir dkiGetFirstDown())
+/// utilisÃ©e pour dÃ©signer qu'aucune touche n'a encore Ã©tÃ© pesÃ© (voir dkiGetFirstDown())
 const int DKI_NOKEY = -1;
-/// utilisée pour désigner qu'une touche n'est pas appuyée
+/// utilisÃ©e pour dÃ©signer qu'une touche n'est pas appuyÃ©e
 const int DKI_NOTHING = 0;
-/// utilisée pour désigner qu'une touche vient d'être enfoncée. Cet état est présent seulement une fois pour toute la durée de l'enfoncement d'une touche.
+/// utilisÃ©e pour dÃ©signer qu'une touche vient d'Ãªtre enfoncÃ©e. Cet Ã©tat est prÃ©sent seulement une fois pour toute la durÃ©e de l'enfoncement d'une touche.
 const int DKI_DOWN = 1;
-/// utilisée pour désigner qu'une touche est maintenue enfoncée. Cet état est présent tant que la touche reste enfoncé.
+/// utilisÃ©e pour dÃ©signer qu'une touche est maintenue enfoncÃ©e. Cet Ã©tat est prÃ©sent tant que la touche reste enfoncÃ©.
 const int DKI_HOLD = 2;
-/// utilisée pour désigner qu'une touche vient d'être relachée. Cet état est présent seulement une fois dès que la touche a été relachée.
+/// utilisÃ©e pour dÃ©signer qu'une touche vient d'Ãªtre relachÃ©e. Cet Ã©tat est prÃ©sent seulement une fois dÃ¨s que la touche a Ã©tÃ© relachÃ©e.
 const int DKI_UP = 3;
-/// non utilisé
+/// non utilisÃ©
 const int DKI_CLIC = 3;
-/// non utilisé
+/// non utilisÃ©
 const int DKI_DBL_CLIC = 4;
 //@}
 
 
 // Les boutons de la mouse
-/// \name Constantes désignants les différents boutons d'une souris
+/// \name Constantes dÃ©signants les diffÃ©rents boutons d'une souris
 //@{
 const int DKI_MOUSE_BUTTON1 = 256;
 const int DKI_MOUSE_BUTTON2 = 257;
@@ -64,8 +64,8 @@ const int DKI_MOUSE_BUTTON8 = 263;
 
 
 // Les boutons du joystick
-/// \name Constante désignant les différents boutons d'un joystick
-/// Il y a une limite maximum de 128 buttons détectables. Pour atteindre le n ième bouton, on n'a qu'à faire : DKI_JOY_BUTTON1 + n
+/// \name Constante dÃ©signant les diffÃ©rents boutons d'un joystick
+/// Il y a une limite maximum de 128 buttons dÃ©tectables. Pour atteindre le n iÃ¨me bouton, on n'a qu'Ã  faire : DKI_JOY_BUTTON1 + n
 //@{
 const int DKI_JOY_BUTTON1 = 264; // 128 Buttons. DKI_JOY_BUTTON1 + n
 //@}
@@ -73,59 +73,59 @@ const int DKI_JOY_BUTTON1 = 264; // 128 Buttons. DKI_JOY_BUTTON1 + n
 
 // Les fonction du DKI
 
-/// \brief retourne la constante désignant la première touche ayant été appuyée
+/// \brief retourne la constante dÃ©signant la premiÃ¨re touche ayant Ã©tÃ© appuyÃ©e
 ///
-/// Cette fonction permet de connaitre la touche ou le bouton qui a été appuyé en premier. La fonction effectue la vérification pour un instant seulement (lors de l'appel). Un appel pour chaque cycle d'exécution est donc nécessaire afin de savoir si une touche a été pesé dans un certain intervalle de temps.
+/// Cette fonction permet de connaitre la touche ou le bouton qui a Ã©tÃ© appuyÃ© en premier. La fonction effectue la vÃ©rification pour un instant seulement (lors de l'appel). Un appel pour chaque cycle d'exÃ©cution est donc nÃ©cessaire afin de savoir si une touche a Ã©tÃ© pesÃ© dans un certain intervalle de temps.
 ///
-/// \return l'index représentant la touche ou le bouton qui a été appuyé en premier
+/// \return l'index reprÃ©sentant la touche ou le bouton qui a Ã©tÃ© appuyÃ© en premier
 int				dkiGetFirstDown();
 
 
-/// \brief retourne la vitesse à laquelle la roulette de la souris est déplacée
+/// \brief retourne la vitesse Ã  laquelle la roulette de la souris est dÃ©placÃ©e
 ///
-/// Cette fonction retourne la vitesse à laquelle la roulette de la souris est déplacée en nombre de clic
-/// -2 signifirait que la wheel a été décendu 2 fois. (normalement on s'en tien à -1,0 ou 1)
+/// Cette fonction retourne la vitesse Ã  laquelle la roulette de la souris est dÃ©placÃ©e en nombre de clic
+/// -2 signifirait que la wheel a Ã©tÃ© dÃ©cendu 2 fois. (normalement on s'en tien Ã  -1,0 ou 1)
 /// Exemple d'utilisation : if (dkiGetMouseWheelVel() < 0) zoomOut();
 ///
-/// \return retourne la vitesse à laquelle la roulette de la souris est déplacée
+/// \return retourne la vitesse Ã  laquelle la roulette de la souris est dÃ©placÃ©e
 int				dkiGetMouseWheelVel();
 
 
 
 /// \brief retourne la position actuelle de la souris
 ///
-/// Cette fonction retourne la position actuelle de la souris. Cette position est en pixel et l'origine est le coin supérieur gauche de l'écran.
+/// Cette fonction retourne la position actuelle de la souris. Cette position est en pixel et l'origine est le coin supÃ©rieur gauche de l'Ã©cran.
 ///
 /// \return retourne la position actuelle de la souris en pixel
 CVector2i		dkiGetMouse();
 
 
 
-/// \brief retourne la vitesse à laquelle se déplace la souris
+/// \brief retourne la vitesse Ã  laquelle se dÃ©place la souris
 ///
-/// Cette fonction retourne le déplacement effectué par la souris en pixels depuis le dernier appel a dkiUpdate().
-/// Le déplacement retourné n'est pas dépendant de la grandeur de la fenêtre (il y aura un certain déplacement retourné même si on déplace la souris vers la gauche et que la dernière position était (0,0).
+/// Cette fonction retourne le dÃ©placement effectuÃ© par la souris en pixels depuis le dernier appel a dkiUpdate().
+/// Le dÃ©placement retournÃ© n'est pas dÃ©pendant de la grandeur de la fenÃªtre (il y aura un certain dÃ©placement retournÃ© mÃªme si on dÃ©place la souris vers la gauche et que la derniÃ¨re position Ã©tait (0,0).
 /// Parfait pour les jeux de style FPS
 ///
-/// \return retourne la vitesse à laquelle se déplace la souris
+/// \return retourne la vitesse Ã  laquelle se dÃ©place la souris
 CVector2i		dkiGetMouseVel();
 
 
 
-/// \brief retourne l'état d'une touche ou d'un bouton
+/// \brief retourne l'Ã©tat d'une touche ou d'un bouton
 ///
-/// Cette fonction retourne l'état d'une touche ou d'un bouton.
+/// Cette fonction retourne l'Ã©tat d'une touche ou d'un bouton.
 ///
 /// \param inputID identifiant unique de la touche ou du bouton
-/// \return état de la touche ou du bouton
+/// \return Ã©tat de la touche ou du bouton
 int				dkiGetState(int inputID);
 
 
 
 /// \brief retourne la position de chaque axe d'un joystick ou d'une manette de jeu
 ///
-/// Cette fonction retourne la position de chaque axe d'un joystick ou d'une manette de jeu. La position au repos étant 0 et les extrêmes étant -1 et 1.
-/// Aucune "dead zone" et courbe de progression est défini ici. C'est au client de le faire.
+/// Cette fonction retourne la position de chaque axe d'un joystick ou d'une manette de jeu. La position au repos Ã©tant 0 et les extrÃªmes Ã©tant -1 et 1.
+/// Aucune "dead zone" et courbe de progression est dÃ©fini ici. C'est au client de le faire.
 ///
 /// \return position de chaque axe
 CVector3f		dkiGetJoy();
@@ -133,10 +133,10 @@ CVector3f		dkiGetJoyR();
 
 
 
-/// \brief retourne la vitesse à laquelle se déplace chacun des axes d'un joystick ou d'une manette de jeu
+/// \brief retourne la vitesse Ã  laquelle se dÃ©place chacun des axes d'un joystick ou d'une manette de jeu
 ///
-/// Cette fonction retourne la vitesse à laquelle se déplace chacun des axes d'un joystick ou d'une manette de jeu par rapport au dernier appel à dkiUpdate().
-/// Si la dernière position d'un axe était de -1 et que sa position est à 1 lors de l'appel, la valeur 2 sera retourné pour cet axe.
+/// Cette fonction retourne la vitesse Ã  laquelle se dÃ©place chacun des axes d'un joystick ou d'une manette de jeu par rapport au dernier appel Ã  dkiUpdate().
+/// Si la derniÃ¨re position d'un axe Ã©tait de -1 et que sa position est Ã  1 lors de l'appel, la valeur 2 sera retournÃ© pour cet axe.
 ///
 /// \return vitesse de chaque axe
 CVector3f		dkiGetJoyVel();
@@ -145,31 +145,31 @@ CVector3f		dkiGetJoyVel();
 
 /// \brief initialise le module pour usage
 ///
-/// Cette fonction initialise le module afin que son utilisation puisse débuter. Cette fonction DOIT être appelé avant tout autres appels à des fonctions de ce module.
+/// Cette fonction initialise le module afin que son utilisation puisse dÃ©buter. Cette fonction DOIT Ãªtre appelÃ© avant tout autres appels Ã  des fonctions de ce module.
 ///
 /// \param appInstance pointeur vers l'instance de l'application
 /// \param appHandle pointeur vers le lien logique de l'application
-/// \return 0 s'il y a un échec, 1 si tout s'est bien passé
+/// \return 0 s'il y a un Ã©chec, 1 si tout s'est bien passÃ©
 int				dkiInit(HINSTANCE appInstance, HWND appHandle);
 
 
 
 /// \brief termine l'utilisation du module
 ///
-/// Cette fonction libère le système des ressources allouées qui étaient nécessaires au fonctionnement du module et termine sont utilisation. Cette fonction de doit pas être appelé plusieurs fois de suite : pour chaque appel à cette fonction, un appel à dkiInit() correspondant doit précédemment avoir été fait.
+/// Cette fonction libÃ¨re le systÃ¨me des ressources allouÃ©es qui Ã©taient nÃ©cessaires au fonctionnement du module et termine sont utilisation. Cette fonction de doit pas Ãªtre appelÃ© plusieurs fois de suite : pour chaque appel Ã  cette fonction, un appel Ã  dkiInit() correspondant doit prÃ©cÃ©demment avoir Ã©tÃ© fait.
 ///
 void			dkiShutDown();
 
 
 
-/// \brief mise à jour des états des périphériques d'entrées
+/// \brief mise Ã  jour des Ã©tats des pÃ©riphÃ©riques d'entrÃ©es
 ///
-/// Cette fonction effectue la mise à jour des états des périphériques d'entrées (clavier, souris, joystick). Elle doit être appelée une fois par cycle d'exécution.
-/// On doit spécifier la dimension de la fenêtre dans laquelle le pointeur de la souris ne pourra pas excéder.
+/// Cette fonction effectue la mise Ã  jour des Ã©tats des pÃ©riphÃ©riques d'entrÃ©es (clavier, souris, joystick). Elle doit Ãªtre appelÃ©e une fois par cycle d'exÃ©cution.
+/// On doit spÃ©cifier la dimension de la fenÃªtre dans laquelle le pointeur de la souris ne pourra pas excÃ©der.
 ///
-/// \param elapsef non utilisé
-/// \param width dimension en pixel de la fenêtre
-/// \param height dimension en pixel de la fenêtre
+/// \param elapsef non utilisÃ©
+/// \param width dimension en pixel de la fenÃªtre
+/// \param height dimension en pixel de la fenÃªtre
 void			dkiUpdate(float elapsef, int width, int height);
 
 

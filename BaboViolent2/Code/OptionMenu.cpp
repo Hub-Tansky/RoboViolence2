@@ -254,7 +254,7 @@ void OptionMenu::updateUnique(float delay)
 	if (languageJustChanged)
 	{
 
-		// On load tout suite le language utilisé par le joueur
+		// On load tout suite le language utilisÃ© par le joueur
 		if (!gameVar.loadLanguage(gameVar.languageFile.s))
 		{
 			console->add(CString("\x4 Error > Can not load %s", gameVar.languageFile.s));
@@ -318,7 +318,7 @@ void OptionMenu::setConfigValue(bool resetAfter)
 	gameVar.k_showScore = key_showScore->getKeyValue();
 	gameVar.k_menuAccess = key_menuAccess->getKeyValue();
 
-	// Au cas où y a des if qui n'auraient pas fonctionné (validation) ;)
+	// Au cas oÃ¹ y a des if qui n'auraient pas fonctionnÃ© (validation) ;)
 	if (resetAfter) resetToConfigValue();
 }
 

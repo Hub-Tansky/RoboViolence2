@@ -44,7 +44,7 @@ unsigned int CDkp::lastTexture = 0;
 
 
 //
-// Pour créer une billboard static (mais trié comme les particule) pour faire du gazon à terre surtout
+// Pour crÃ©er une billboard static (mais triÃ© comme les particule) pour faire du gazon Ã  terre surtout
 //
 void			dkpCreateBillboard(	CVector3f & positionFrom,
 									CVector3f & positionTo,
@@ -65,8 +65,8 @@ void			dkpCreateBillboard(	CVector3f & positionFrom,
 	newPart->billboardFadeDelay = 1.0f / fadeSpeed;
 	newPart->angle = 0;
 
-	// On l'ajoute à notre liste
-	// On va tout suite l'ajouter au bon endroit pour pas avoir des tri important à faire tantot
+	// On l'ajoute Ã  notre liste
+	// On va tout suite l'ajouter au bon endroit pour pas avoir des tri important Ã  faire tantot
 	if (CDkp::particles.size() > 1 && CDkp::sorting) // Il faut qu'il y en ai au moins 1
 	{
 		std::vector<CParticle*>::size_type i;
@@ -91,7 +91,7 @@ void			dkpCreateBillboard(	CVector3f & positionFrom,
 
 
 //
-// Pour créer une particle
+// Pour crÃ©er une particle
 //
 void			dkpCreateParticle(	float *position,
 									float *vel,
@@ -112,8 +112,8 @@ void			dkpCreateParticle(	float *position,
 		position, vel, startColor, endColor, startSize, endSize, duration, 
 		density, airResistanceInfluence, rotationSpeed, texture, srcBlend, dstBlend, transitionFunc);
 
-	// On l'ajoute à notre liste
-	// On va tout suite l'ajouter au bon endroit pour pas avoir des tri important à faire tantot
+	// On l'ajoute Ã  notre liste
+	// On va tout suite l'ajouter au bon endroit pour pas avoir des tri important Ã  faire tantot
 	if (CDkp::particles.size() > 1 && CDkp::sorting) // Il faut qu'il y en ai au moins 1
 	{
 		std::vector<CParticle*>::size_type i;
@@ -138,7 +138,7 @@ void			dkpCreateParticle(	float *position,
 
 
 //
-// Pour créer une particle avec plein d'information de random dessus
+// Pour crÃ©er une particle avec plein d'information de random dessus
 //
 void			dkpCreateParticleEx(CVector3f & positionFrom,
 									CVector3f & positionTo,
@@ -170,10 +170,10 @@ void			dkpCreateParticleEx(CVector3f & positionFrom,
 									unsigned int srcBlend,
 									unsigned int dstBlend)
 {
-	// On défini combient on en emet
+	// On dÃ©fini combient on en emet
 	int total = rand((int)particleCountFrom, (int)particleCountTo);
 
-	// On trouve le right et le up vector (la direction étant notre front)
+	// On trouve le right et le up vector (la direction Ã©tant notre front)
 	CVector3f right, up;
 	createRightUpVectors(right, direction, up);
 
@@ -183,7 +183,7 @@ void			dkpCreateParticleEx(CVector3f & positionFrom,
 		vel = rotateAboutAxis(vel, rand(pitchFrom, pitchTo), right);
 		vel = rotateAboutAxis(vel, rand((float)0, (float)360), direction);
 
-		// On cré notre particule
+		// On crÃ© notre particule
 		CParticle * newPart = new CParticle(
 			rand(positionFrom, positionTo).s, 
 			vel.s, 
@@ -208,8 +208,8 @@ void			dkpCreateParticleEx(CVector3f & positionFrom,
 			newPart->textureArray = texture;
 		}
 
-		// On l'ajoute à notre liste
-		// On va tout suite l'ajouter au bon endroit pour pas avoir des tri important à faire tantot
+		// On l'ajoute Ã  notre liste
+		// On va tout suite l'ajouter au bon endroit pour pas avoir des tri important Ã  faire tantot
 		if (CDkp::particles.size() > 1 && CDkp::sorting) // Il faut qu'il y en ai au moins 1
 		{
 			std::vector<CParticle*>::size_type i;
@@ -235,7 +235,7 @@ void			dkpCreateParticleEx(CVector3f & positionFrom,
 
 
 //
-// Pour créer une particle ex à partir d'un preset
+// Pour crÃ©er une particle ex Ã  partir d'un preset
 //
 void			dkpCreateParticleExP(dkp_preset & preset)
 {
@@ -478,7 +478,7 @@ void			dkpSetAirDensity(float airDensity)
 
 
 //
-// Pour setter la direction et la force de la gravité
+// Pour setter la direction et la force de la gravitÃ©
 //
 void			dkpSetGravity(float *vel)
 {
@@ -498,7 +498,7 @@ void			dkpSetSorting(bool sort)
 
 
 //
-// Pour effacer le tout, à la fin du programme
+// Pour effacer le tout, Ã  la fin du programme
 //
 void			dkpShutDown()
 {
@@ -527,7 +527,7 @@ int				dkpUpdate(float delay)
 	// Le nb de particle
 	int particleCount=0;
 
-	// On update notre delait général
+	// On update notre delait gÃ©nÃ©ral
 	CDkp::delay = delay;
 
 	// On les updates normalement avant tout
@@ -550,7 +550,7 @@ int				dkpUpdate(float delay)
 	int curInteration = 0;
 	if (CDkp::currentSortInteration >= CDkp::particles.size()-1) CDkp::currentSortInteration = 0;
 
-	// Maintenant, il faut trier ses particles par rapport à la camera
+	// Maintenant, il faut trier ses particles par rapport Ã  la camera
 	if (CDkp::particles.size() > 1 && CDkp::sorting) // Il faut qu'il y en ai au moins 2
 	{
 		for (std::vector<CParticle*>::size_type i=CDkp::currentSortInteration;i<CDkp::particles.size()-1;i++)

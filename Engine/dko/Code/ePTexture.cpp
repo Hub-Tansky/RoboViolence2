@@ -46,7 +46,7 @@ struct _typChunkDKT
 	}
 };
 
-// Une strucs pour saver plus rapidement les données
+// Une strucs pour saver plus rapidement les donnÃ©es
 struct _typDimension
 {
 	short width;
@@ -60,7 +60,7 @@ struct _typDimension
 	}
 };
 
-// Une strucs pour saver les transformations appliqué sur la texture
+// Une strucs pour saver les transformations appliquÃ© sur la texture
 struct _typTransformation
 {
 	float scaleU;
@@ -76,7 +76,7 @@ struct _typTransformation
 	}
 };
 
-// La définition des chunks
+// La dÃ©finition des chunks
 const unsigned short CHUNK_VERSION = 0x0000;
 	const unsigned short CHUNK_MAP = 0x1000;
 		const unsigned short CHUNK_MAP_NAME = 0x1100;
@@ -99,16 +99,16 @@ void ePTexture::loadIt(char* filename)
 	// On ouvre le fichier
 	FILE* ficIn = fopen(filename, "rb");
 
-	// Si l'ouverture a échoué
+	// Si l'ouverture a Ã©chouÃ©
 	if (!ficIn) return;
 
-	// On check la version (ceci doit être le premier chunk, sinon ce n'est pas un fichier valide
+	// On check la version (ceci doit Ãªtre le premier chunk, sinon ce n'est pas un fichier valide
 	_typChunkDKT chunk;
     fread(&chunk, 1, sizeof(chunk), ficIn);
 
 		if (chunk.chunkID == CHUNK_VERSION)
 		{
-			// La première version
+			// La premiÃ¨re version
 			short version;
 			fread(&version, 1, 2, ficIn);
 			if (version != 0x0001) return;
@@ -121,7 +121,7 @@ void ePTexture::loadIt(char* filename)
 	// On li le chunk
        fread(&chunk, 1, sizeof(chunk), ficIn);
 
-	// Ensuite on passe tout les chunk jusqu'à fin
+	// Ensuite on passe tout les chunk jusqu'Ã  fin
 	while (chunk.chunkID != CHUNK_VERSION_END)
 	{
 		// On load une map
@@ -232,7 +232,7 @@ void ePTexture::loadTexture(_typLayer* ptrLayer, FILE* ficIn)
 //
 void ePTexture::loadString(char* string, FILE* ficIn)
 {
-	// On load le premier caractère
+	// On load le premier caractÃ¨re
 	int i=0;
 	fread(&(string[i++]), 1, 1, ficIn);
 
@@ -245,23 +245,23 @@ void ePTexture::loadString(char* string, FILE* ficIn)
 
 
 //
-// Créer une texture ogl à partir du buffer
+// CrÃ©er une texture ogl Ã  partir du buffer
 //
 //
-// On cré une texture à partir d'un buffer
+// On crÃ© une texture Ã  partir d'un buffer
 //
 unsigned int createTextureFromBuffer(unsigned char *Buffer, int Width, int Height, int BytePerPixel, int Filter, bool inverse)
 {
 #ifndef CONSOLE
 #ifndef _DX_
-	// On cré la texture
+	// On crÃ© la texture
 	unsigned int Texture=0;
 	GLint Level = (BytePerPixel == 3) ? GL_RGB : GL_RGBA;
 
-	// On génère une texture
+	// On gÃ©nÃ¨re une texture
 	glGenTextures(1, &Texture);
 
-	// On pogne la dernière erreur
+	// On pogne la derniÃ¨re erreur
 	if (Texture == 0)
 	{
 	}
@@ -269,7 +269,7 @@ unsigned int createTextureFromBuffer(unsigned char *Buffer, int Width, int Heigh
 	// On bind cette texture au context
 	glBindTexture(GL_TEXTURE_2D, Texture);
 
-	// On met ça en bilinear (pixel et mipmap)
+	// On met Ã§a en bilinear (pixel et mipmap)
 	switch (Filter)
 	{
 	case 0: // Nearest

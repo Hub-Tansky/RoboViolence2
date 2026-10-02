@@ -55,7 +55,7 @@ void Client::render(float & alphaScope)
 		}
 	}
 
-	// C'est côté client qu'on fait ça ;)
+	// C'est cÃ´tÃ© client qu'on fait Ã§a ;)
 	if (isConnected) game->render();
 
 	// LE SNIPER SCOPE
@@ -256,7 +256,7 @@ void Client::render(float & alphaScope)
 
 					glDisable(GL_TEXTURE_2D);
 
-					// On affiche sa vie à droite
+					// On affiche sa vie Ã  droite
 					glBegin(GL_QUADS);
 						glColor3f(1,1,1);
 						glVertex2f(760, 390);
@@ -610,7 +610,7 @@ void Client::render(float & alphaScope)
 					{
 						glColor4f(1,1,1,chatMessages[i].duration);
 					}
-					// On l'écris à peut pret au tier de l'écran à gauche
+					// On l'Ã©cris Ã  peut pret au tier de l'Ã©cran Ã  gauche
 					glEnable(GL_TEXTURE_2D);
 
 #ifdef _PRO_	
@@ -658,7 +658,7 @@ void Client::render(float & alphaScope)
 					{
 						glColor4f(1,1,1,eventMessages[i].duration);
 					}
-					// On l'écris à peut pret au 2 tier de l'écran à gauche
+					// On l'Ã©cris Ã  peut pret au 2 tier de l'Ã©cran Ã  gauche
 
 #ifdef _PRO_	                  
             float eventTextSize = (float)gameVar.r_eventTextSize;

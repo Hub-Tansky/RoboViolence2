@@ -55,7 +55,7 @@ Control::~Control()
 
 
 //
-// L'updater le gèrer
+// L'updater le gÃ¨rer
 //
 void Control::update(float delay)
 {
@@ -215,7 +215,7 @@ void Control::changeCaption(CString caption)
 	float w = dkfGetStringWidth(m_textSize, m_caption.s);
 	float h = dkfGetStringHeight(m_textSize, m_caption.s);
 
-	// On met à jour notre Rect avec ça
+	// On met Ã  jour notre Rect avec Ã§a
 	switch (m_justify)
 	{
 	case JUSTIFY_LEFT:

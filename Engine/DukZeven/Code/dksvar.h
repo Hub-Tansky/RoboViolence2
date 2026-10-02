@@ -22,14 +22,14 @@
 /// Ce module prend en charge la gestion des variables de la console.
 /// Ceci comprend :
 /// 	- des fonction d'enregistrement de variables
-/// 	- une fonction de désenregistrement de variables
-/// 	- une fonction de d'exécution d'un fichier de configuration
-/// 	- une fonction d'exécution de commandes
+/// 	- une fonction de dÃ©senregistrement de variables
+/// 	- une fonction de d'exÃ©cution d'un fichier de configuration
+/// 	- une fonction d'exÃ©cution de commandes
 ///
-/// Ce module est très utile pour débugger : on peut modifier le contenu d'une variables préalablement enregistrée en temps-réel lors de l'exécution du programme (habituellement via une fenêtre console). 
+/// Ce module est trÃ¨s utile pour dÃ©bugger : on peut modifier le contenu d'une variables prÃ©alablement enregistrÃ©e en temps-rÃ©el lors de l'exÃ©cution du programme (habituellement via une fenÃªtre console). 
 ///
 /// \author David St-Louis (alias Daivuk)
-/// \author Louis Poirier (à des fins de documentation seulement)
+/// \author Louis Poirier (Ã  des fins de documentation seulement)
 
 
 
@@ -58,22 +58,22 @@ public:
 // Les fonction du DKSVAR
 
 
-/// \brief exécute une commande
+/// \brief exÃ©cute une commande
 ///
-/// Cette fonction permet d'exécuter une commande passée sous forme d'une chaine de caractères. Présentement, la seul commande valide est 'set' et sa syntaxe est la suivante:
+/// Cette fonction permet d'exÃ©cuter une commande passÃ©e sous forme d'une chaine de caractÃ¨res. PrÃ©sentement, la seul commande valide est 'set' et sa syntaxe est la suivante:
 /// set nomDeLaVariable param1 [param2 param3 ...]
-/// L'exécution de cette commande tente de remplir les champs de la variable enregistrée nomDeLaVariable avec les paramètres param1 param2 ... fournis.
+/// L'exÃ©cution de cette commande tente de remplir les champs de la variable enregistrÃ©e nomDeLaVariable avec les paramÃ¨tres param1 param2 ... fournis.
 ///
-/// \param command chaine de caractères représentant une commande valide
+/// \param command chaine de caractÃ¨res reprÃ©sentant une commande valide
 CMD_RET			dksvarCommand(char * command);
 
 
 
-/// \brief exécution d'un fichier de configuration
+/// \brief exÃ©cution d'un fichier de configuration
 ///
-/// Cette fonction permet d'exécuter toutes les commandes contenues dans un fichier de configuration.
+/// Cette fonction permet d'exÃ©cuter toutes les commandes contenues dans un fichier de configuration.
 ///
-/// \param filename chemin menant au fichier de configuration à exécuter depuis l'endroit où se situe le fichier EXE du programme.
+/// \param filename chemin menant au fichier de configuration Ã  exÃ©cuter depuis l'endroit oÃ¹ se situe le fichier EXE du programme.
 void			dksvarLoadConfig(char * filename);
 void			dksvarLoadConfigSVOnly(char * filename);
 void			dksvarSaveConfig(char * filename);
@@ -83,11 +83,11 @@ void			dksvarSaveConfig(char * filename);
 /// \name VariableRegistering
 ///
 /// \brief enregistre une variable d'un certain type
-/// Ce groupe de fonctions permet d'enregistrer une variable d'un certain type (bool,int,float,CVector2i,CVector2f,CVector3i,CVector3f,CVector4f,CString) en spécifiant si cette variable permet d'être modifiée par l'exécution d'un fichier de configuration.
+/// Ce groupe de fonctions permet d'enregistrer une variable d'un certain type (bool,int,float,CVector2i,CVector2f,CVector3i,CVector3f,CVector4f,CString) en spÃ©cifiant si cette variable permet d'Ãªtre modifiÃ©e par l'exÃ©cution d'un fichier de configuration.
 ///
-/// \param screenName nom de la variable qui sera associé à la variable elle-même
-/// \param defaultValue valeur par défaut de la variable
-/// \param true si cette variable permet d'être modifiée par l'exécution d'un fichier de configuration, false sinon
+/// \param screenName nom de la variable qui sera associÃ© Ã  la variable elle-mÃªme
+/// \param defaultValue valeur par dÃ©faut de la variable
+/// \param true si cette variable permet d'Ãªtre modifiÃ©e par l'exÃ©cution d'un fichier de configuration, false sinon
 //@{
 void			dksvarRegister(const CString &screenName, bool		 *defaultValue,	bool mConfigBypass);
 void			dksvarRegister(const CString &screenName, int		 *defaultValue, int minValue,
@@ -103,11 +103,11 @@ void			dksvarRegister(const CString &screenName, CString	 *defaultValue,	bool mC
 //@}
 
 
-/// \brief désenregistre une variable enregistrée
+/// \brief dÃ©senregistre une variable enregistrÃ©e
 ///
-/// Cette fonction permet de désenregistrer une variable enregistrée. La variable correspondant au nom fournis ne sera plus assujettie à des modifications provenant de l'exécution de commandes.
+/// Cette fonction permet de dÃ©senregistrer une variable enregistrÃ©e. La variable correspondant au nom fournis ne sera plus assujettie Ã  des modifications provenant de l'exÃ©cution de commandes.
 ///
-/// \param screenName nom de la variable associé à la variable elle-même
+/// \param screenName nom de la variable associÃ© Ã  la variable elle-mÃªme
 void			dksvarUnregister(const CString &screenName);
 
 

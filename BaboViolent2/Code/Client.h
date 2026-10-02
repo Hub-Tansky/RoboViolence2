@@ -35,11 +35,11 @@
 #include "CListener.h"
 
 
-// Nos message qu'on affiche à l'écran
+// Nos message qu'on affiche Ã  l'Ã©cran
 struct TimedMessage
 {
 	CString message;
-	float duration; // Sa vie quil lui reste, on laisse les message 10sec ( si sont rendu trop haut, on les force à closer )
+	float duration; // Sa vie quil lui reste, on laisse les message 10sec ( si sont rendu trop haut, on les force Ã  closer )
 	TimedMessage(CString pMessage)
 	{
 		duration = 10;
@@ -75,7 +75,7 @@ public:
 	bool isDownloadingMap;
 
 	float timeSinseLastQMsg;
-	// Les messages chat ou events à printer à l'écran
+	// Les messages chat ou events Ã  printer Ã  l'Ã©cran
 	std::vector<TimedMessage> chatMessages;
 	std::vector<TimedMessage> eventMessages;
 
@@ -95,7 +95,7 @@ public:
 	// Si on montre le menu
 	bool showMenu;
 
-	// Si on est connecté
+	// Si on est connectÃ©
 	bool isConnected;
 
 	CString server_ip;
@@ -123,7 +123,7 @@ public:
 	// Si il cohabite avec un server
 	bool isServer;
 
-	// Quand on écris
+	// Quand on Ã©cris
 	Writting chatting;
 	bool isChattingTeam;
 
@@ -138,7 +138,7 @@ public:
 	// Le hit indicator
 	float hitIndicator;
 
-	// Quand on se fait toucher, l'écran devient rouge
+	// Quand on se fait toucher, l'Ã©cran devient rouge
 	unsigned int tex_screenHit;
 	unsigned int tex_grenadeLeft;
 	unsigned int tex_shotgunLeft;
@@ -147,7 +147,7 @@ public:
 	unsigned int tex_redFlag;
 	unsigned int tex_crossHit;
 
-	// Il a reçu le gamestate
+	// Il a reÃ§u le gamestate
 	bool gotGameState;
 
 	long serverFrameID;
@@ -178,7 +178,7 @@ public:
 	// Pour printer un chat message
 	void printMessage(CString message);
 
-	// On a reçu un message yéé !
+	// On a reÃ§u un message yÃ©Ã© !
 	void recvPacket(char * buffer, int typeID);
 
 	// Sends PLAYER_INFO + GAMEVERSION_ACCEPTED (needs game->thisPlayer)

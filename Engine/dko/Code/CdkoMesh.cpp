@@ -49,7 +49,7 @@ CdkoMesh::~CdkoMesh()
 int CdkoMesh::loadFromFile(FILE *ficIn, char *path)
 {
 	(void)path;
-	// On load chunk par chunk jusqu'‡ ce qu'on pogne le chunk End
+	// On load chunk par chunk jusqu'√† ce qu'on pogne le chunk End
 	short chunkID = readChunk(ficIn);
 
 	while (chunkID != CHUNK_DKO_END)
@@ -105,7 +105,7 @@ int CdkoMesh::loadFromFile(FILE *ficIn, char *path)
 //
 int CdkoMesh::loadMatGroup(FILE *ficIn, _typMatGroup *matGroup)
 {
-	// On load chunk par chunk jusqu'‡ ce qu'on pogne le chunk End
+	// On load chunk par chunk jusqu'√† ce qu'on pogne le chunk End
 	short chunkID = readChunk(ficIn);
 
 	while (chunkID != CHUNK_DKO_END)
@@ -139,9 +139,9 @@ int CdkoMesh::loadMatGroup(FILE *ficIn, _typMatGroup *matGroup)
 
 				// On pogne son parent
 				CDkoModel* owner = (CDkoModel*)parent;
-				owner->nbFace += matGroup->nbVertex/2; // On incrÈmente son nombre de face (triangle)
+				owner->nbFace += matGroup->nbVertex/2; // On incr√©mente son nombre de face (triangle)
 
-				// On passe tout les vertex pour crÈer notre OABB
+				// On passe tout les vertex pour cr√©er notre OABB
 				for (int i=0;i<matGroup->nbVertex;i++)
 				{
 					float tmp[3] = {
@@ -175,7 +175,7 @@ int CdkoMesh::loadMatGroup(FILE *ficIn, _typMatGroup *matGroup)
 					// On en profite pour calculer le rayon
 					float dis = sqrtf(current[0]*current[0] + current[1]*current[1] + current[2]*current[2]);
 
-					// Si il est plus grand que le rayon qu'on a dÈj‡ on le update
+					// Si il est plus grand que le rayon qu'on a d√©j√† on le update
 					if (dis > owner->radius) owner->radius = dis;
 				}
 				break;
@@ -237,7 +237,7 @@ int CdkoMesh::_buildFaceListIt(CFace *faceArray, int index)
 
 	for (int i=0;i<nbMatGroup; i++)
 	{
-		// On crÈ ses face
+		// On cr√© ses face
 		for (int j=0;j<matGroupArray[i].nbVertex / 3;j++)
 		{
 			CFace *face = &(faceArray[index + nbFace + j]);
@@ -273,7 +273,7 @@ int CdkoMesh::_buildFaceListIt(CFace *faceArray, int index)
 			// For fast collisions
 			face->createNormals();
 
-			// Voil‡!
+			// Voil√†!
 		}
 
 		nbFace += matGroupArray[i].nbVertex / 3;
@@ -285,7 +285,7 @@ int CdkoMesh::_buildFaceListIt(CFace *faceArray, int index)
 
 
 //
-// Pour trouver les vertex ‡ un point donnÈ
+// Pour trouver les vertex √† un point donn√©
 //
 int CdkoMesh::_buildVertexArrayIt(float * vertexArray, int index)
 {
@@ -316,7 +316,7 @@ int CdkoMesh::_buildVertexArrayIt(float * vertexArray, int index)
 			matGroupArray[i].ptrVA = matGroupArray[i].meshAtFrame[parentModel->currentFrame].vertexArray;
 		}
 
-		// On crÈ ses face
+		// On cr√© ses face
 		for (int j=0;j<matGroupArray[i].nbVertex;j++)
 		{
 			float * ptrArray = &(vertexArray[index + nbFloat + j * 3]);
@@ -354,7 +354,7 @@ void CdkoMesh::drawIt()
 	// On passe chaque material Group
 	for (int i=0;i<nbMatGroup;i++)
 	{
-		// On interpolate si c'est nÈcÈssaire
+		// On interpolate si c'est n√©c√©ssaire
 		if (parentModel->framef > -1)
 		{
 			// Ha ah!! on interpolate
@@ -518,7 +518,7 @@ void CdkoMesh::drawIt()
 void CdkoMesh::drawBumpFull(int i)
 {
 	(void)i;
-	// On fait lumiËre par lumiËre
+	// On fait lumi√®re par lumi√®re
 /*	bool enabledLight[8];
 	for (int j=0;j<8;j++)
 	{
@@ -526,16 +526,16 @@ void CdkoMesh::drawBumpFull(int i)
 		glDisable(GL_LIGHT0+j);
 	}
 
-	// On dÈbute le array tout suite
+	// On d√©bute le array tout suite
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glVertexPointer(3, GL_FLOAT, 0, matGroupArray[i].vertexArray);
 
-	// Maintenant on enable les lights une par une et on fait les pass nÈcÈssaire
+	// Maintenant on enable les lights une par une et on fait les pass n√©c√©ssaire
 	for (int l=0;l<8;l++)
 	{
 		if (enabledLight[l])
 		{
-			// Le tout premier pass doit Ítre celui du bump (le plus toff quoi)
+			// Le tout premier pass doit √™tre celui du bump (le plus toff quoi)
 			// Ici on va avoir besoin du vertex shader hey oui...
 	//		glDisable(GL_
 		}
