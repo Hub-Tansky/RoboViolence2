@@ -552,7 +552,7 @@ GameVar::GameVar()
 	sv_spawnImmunityTime = 2.0f;
 	dksvarRegister(CString("sv_spawnImmunityTime [float : 0 to 3 (default 2.0)]"), &sv_spawnImmunityTime, 0, 3, LIMIT_MIN | LIMIT_MAX, true);
 	
-	db_accountServer = "http://ladder.rndlabs.ca/bv2link.php";
+	db_accountServer = ""; // TODO(step4): endpoint from local config
 	db_version = 0;
 	FetchDBInfos();
 

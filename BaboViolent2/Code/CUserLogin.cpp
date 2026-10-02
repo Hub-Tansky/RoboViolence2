@@ -86,7 +86,7 @@ CUserLogin::CUserLogin(CControl * in_parent, CControl * in_alignTo)
 
 	label2 = new CControl(instance, CVector2i(20,20), CVector2i(90, 25), "\x9(OPTIONAL) : ", this, "LABEL", label1, CONTROL_SNAP_BOTTOM, 5);
 	btn_createAccount = new CControl(instance, CVector2i(32,32),CVector2i(128,36),CString("") + "Create Account",this,"BUTTON", label2, CONTROL_SNAP_RIGHT, 5);
-	btn_createAccount->toolTips = "If this doesn't launch Internet Explorer, go to http://ladder.rndlabs.ca manually";
+	btn_createAccount->toolTips = "If this doesn't launch Internet Explorer, go to the account site manually"; // TODO(step4): endpoint from local config
 
 	separator = new CControl(instance, CVector2i(10,20), CVector2i(200,25),"Appearance", this, "SEPARATOR", btn_createAccount, CONTROL_SNAP_BOTTOM, 15);*/
 	CControl * separator = new CControl(instance, CVector2i(10,20), CVector2i(200,25),"Appearance", this, "SEPARATOR");
@@ -301,7 +301,7 @@ void CUserLogin::Click(CControl * control)
 	//LPCTSTR url = _T("www.microsoft.com");
 	//CString args;
 	//args.Format(_T("url.dll,FileProtocolHandler www.microsoft.com"), url);
-	ShellExecute(NULL, _T("open"), _T("rundll32.exe"), _T("url.dll,FileProtocolHandler http://ladder.rndlabs.ca"), 0, SW_SHOW);
+	ShellExecute(NULL, _T("open"), _T("rundll32.exe"), _T("") /* TODO(step4): endpoint from local config */, 0, SW_SHOW);
 
 #endif
 		dkwForceQuit();

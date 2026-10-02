@@ -431,11 +431,6 @@ int cMasterServer::UpdateGame(stBV2row *row,unsigned long fromID)
 	CClient *c = GetClientByID(fromID);
 	if(!c) return 0;
 
-	// ban some IPs
-	if( !stricmp( c->IP, "82.0.179.212" ))
-	{
-		return 0;
-	}
 
 	c->isServer = true;
 	c->Timeout = 0;
