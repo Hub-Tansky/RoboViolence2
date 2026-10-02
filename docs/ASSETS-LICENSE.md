@@ -24,6 +24,8 @@ Status: **unresolved**. The GPLv3 in `LICENSE.txt` covers source code only. No g
 
 ## Replacement register
 
+Rows come from [assets/ASSET-INVENTORY.md](assets/ASSET-INVENTORY.md) (one per removed file; hashes in `assets/original-assets.sha256`, enforced by `tools/check-original-assets.py`).
+
 | Asset | Replacement | Author | License | Source URL |
 |---|---|---|---|---|
 | | | | | |
