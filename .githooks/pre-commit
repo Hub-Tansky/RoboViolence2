@@ -1,0 +1,19 @@
+#!/bin/sh
+# RoboViolence2 pre-commit: identity, secrets, original assets, encoding. Never bypass with --no-verify.
+set -e
+root=$(git rev-parse --show-toplevel)
+cd "$root"
+
+expected="337104978+Hub-Tansky@users.noreply.github.com"
+email=$(git config user.email)
+if [ "$email" != "$expected" ]; then
+  echo "pre-commit: user.email is '$email', expected '$expected' (Hub-Tansky)." >&2
+  exit 1
+fi
+
+command -v gitleaks >/dev/null 2>&1 || { echo "pre-commit: gitleaks not installed (run tools/setup-dev.sh)" >&2; exit 1; }
+gitleaks git --pre-commit --staged --redact --config .gitleaks.toml
+
+python3 tools/check-original-assets.py --staged
+[ -f tools/check-encoding.py ] && python3 tools/check-encoding.py --staged
+exit 0

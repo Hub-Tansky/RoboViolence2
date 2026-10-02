@@ -1,0 +1,41 @@
+title = "RoboViolence2 gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+paths = [
+  '''^LICENSE\.txt$''',
+  '''^docs/assets/original-assets\.sha256$''',
+  '''^MasterServer/Source/(COPYING|config\.guess|config\.sub|ltmain\.sh|INSTALL)$''',
+]
+
+[[rules]]
+id = "bv2-cfg-secret"
+description = "Non-empty secret value in a .cfg"
+regex = '''(?im)^\s*(?:set\s+)?(?:sv_password|zsv_adminPass|cl_password|cl_accountPassword|cl_accountUsername|cl_lastUsedIP)\s+"?[^"\s/][^"\r\n]*"?\s*$'''
+path = '''\.cfg$'''
+
+[[rules]]
+id = "public-ipv4"
+description = "Public IPv4 literal"
+regex = '''\b(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|1?\d?\d)\b'''
+keywords = ["."]
+  [rules.allowlist]
+  regexes = [
+    '''\b(?:127\.0\.0\.1|0\.0\.0\.0|255\.\d+\.\d+\.\d+|192\.0\.2\.\d+|198\.51\.100\.\d+|203\.0\.113\.\d+)\b''',
+  ]
+
+[[rules]]
+id = "master-server-insert"
+description = "Master server row in SQL"
+regex = '''(?i)INSERT\s+INTO\s+MasterServers[^;]*VALUES'''
+path = '''\.sql$'''
+
+[[rules]]
+id = "config-host-url"
+description = "http(s) host other than example.com/.org in config or seeds"
+regex = '''(?i)https?://(?:[a-z0-9-]+\.)+[a-z]{2,}'''
+path = '''(^config/.*\.cfg$|^content-seed/.*\.sql$)'''
+  [rules.allowlist]
+  regexes = ['''(?i)https?://(?:[a-z0-9-]+\.)*example\.(?:com|org)''']

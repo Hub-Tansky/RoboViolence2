@@ -21,6 +21,12 @@ RoboViolence 2, an unofficial fork of BaboViolent 2 ([ADR 0004](docs/decisions/0
 - The original assets are removed ([docs/ASSETS-LICENSE.md](docs/ASSETS-LICENSE.md), [docs/assets/ASSET-INVENTORY.md](docs/assets/ASSET-INVENTORY.md)). Never re-add them; `tools/check-original-assets.py` rejects them by hash.
 - With your own copy of the original data, keep it outside the repo and set `BV2_DATA_DIR` (step 4 §4.4; until then symlink `main/` into the run dir). Without it, CI and contributors use generated placeholders (step 2 §2.6).
 
+## Config and secrets
+
+- Tracked config is `config/*.example.cfg` with empty placeholders; real values stay local. Policy: [config/README.md](config/README.md).
+- Databases are generated from `content-seed/*.sql`, never committed.
+- Run `tools/setup-dev.sh` once: it activates `.githooks` (gitleaks, identity, original-asset and encoding checks). Never use `--no-verify`.
+
 ## Compile-time variants
 
 - `CONSOLE`: headless dedicated server (no rendering, client, editor or menus). Guard client-only code with `#ifndef CONSOLE`.
