@@ -24,7 +24,6 @@
 #include "CSystemVariable.h"
 #include <vector>
 
-extern CSystemVariable systemVariable;
 
 
 //

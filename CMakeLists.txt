@@ -62,19 +62,38 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${BV2_RUNTIME_DIR}")
 foreach(cfg DEBUG RELEASE RELWITHDEBINFO MINSIZEREL)
   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_${cfg} "${BV2_RUNTIME_DIR}")
 endforeach()
-file(MAKE_DIRECTORY "${BV2_RUNTIME_DIR}")
-if(NOT EXISTS "${BV2_RUNTIME_DIR}/main")
-  file(CREATE_LINK "${CMAKE_SOURCE_DIR}/content" "${BV2_RUNTIME_DIR}/main" SYMBOLIC RESULT bv2_link_result)
-  if(NOT bv2_link_result STREQUAL "0" AND WIN32)
-    # No symlink privilege: use a directory junction.
-    file(TO_NATIVE_PATH "${BV2_RUNTIME_DIR}/main" bv2_link_native)
-    file(TO_NATIVE_PATH "${CMAKE_SOURCE_DIR}/content" bv2_target_native)
-    execute_process(COMMAND cmd /c mklink /J "${bv2_link_native}" "${bv2_target_native}"
-                    OUTPUT_QUIET RESULT_VARIABLE bv2_link_result)
+# <runtime>/main is the game's data root: content/ entries are linked in, bv2.cfg is copied from the
+# example, and placeholder assets are generated next to them (nothing is ever written into content/).
+set(BV2_DATA_DIR "${BV2_RUNTIME_DIR}/main")
+file(MAKE_DIRECTORY "${BV2_DATA_DIR}")
+function(bv2_link_dir src dst)
+  if(EXISTS "${dst}")
+    return()
   endif()
-  if(NOT bv2_link_result STREQUAL "0")
-    message(WARNING "Could not link ${BV2_RUNTIME_DIR}/main to content/. Link or copy it by hand.")
+  file(CREATE_LINK "${src}" "${dst}" SYMBOLIC RESULT result)
+  if(NOT result STREQUAL "0" AND WIN32)
+    file(TO_NATIVE_PATH "${dst}" dst_native)
+    file(TO_NATIVE_PATH "${src}" src_native)
+    execute_process(COMMAND cmd /c mklink /J "${dst_native}" "${src_native}" OUTPUT_QUIET RESULT_VARIABLE result)
   endif()
+  if(NOT result STREQUAL "0")
+    message(WARNING "Could not link ${dst} to ${src}; copy it by hand.")
+  endif()
+endfunction()
+foreach(entry languages LaunchScript)
+  bv2_link_dir("${CMAKE_SOURCE_DIR}/content/${entry}" "${BV2_DATA_DIR}/${entry}")
+endforeach()
+configure_file("${CMAKE_SOURCE_DIR}/config/bv2.example.cfg" "${BV2_DATA_DIR}/bv2.cfg" COPYONLY)
+
+option(BV2_PLACEHOLDER_CONTENT "Generate placeholder maps, textures, sounds and models (the originals are not in the repo)" ON)
+if(BV2_PLACEHOLDER_CONTENT)
+  find_package(Python3 REQUIRED COMPONENTS Interpreter)
+  add_custom_command(
+    OUTPUT "${BV2_DATA_DIR}/maps/CTF-Placeholder.bvm"
+    COMMAND Python3::Interpreter "${CMAKE_SOURCE_DIR}/tools/gen-placeholder-content.py" "${BV2_DATA_DIR}"
+    DEPENDS "${CMAKE_SOURCE_DIR}/tools/gen-placeholder-content.py" "${CMAKE_SOURCE_DIR}/docs/assets/ASSET-INVENTORY.md"
+    COMMENT "Generating placeholder game data")
+  add_custom_target(bv2_placeholder_content DEPENDS "${BV2_DATA_DIR}/maps/CTF-Placeholder.bvm")
 endif()
 
 add_subdirectory(engine/zeven)

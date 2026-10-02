@@ -17,8 +17,8 @@ endif()
 bv2_target_defaults(zeven_core)
 
 # Client-only modules: window, input, GL, textures, fonts, particles, sound.
-# Step 3 rewrites the platform parts (dkw, dki, dks) behind the same headers.
-add_library(zeven_client STATIC
+# Excluded from "all" until Step 3 rewrites the platform parts (dkw, dki, dks): they need FMOD and DirectInput.
+add_library(zeven_client STATIC EXCLUDE_FROM_ALL
   src/dkw.cpp
   src/dki.cpp
   src/dkgl.cpp

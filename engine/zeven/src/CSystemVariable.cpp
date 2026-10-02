@@ -25,7 +25,11 @@
 
 
 // Notre objet
-CSystemVariable systemVariable;
+CSystemVariable & dksvarRegistry()
+{
+	static CSystemVariable registry;
+	return registry;
+}
 
 
 //

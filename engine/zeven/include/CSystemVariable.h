@@ -476,5 +476,9 @@ public:
 	CMD_RET command(CString & commandName, CString & params);
 };
 
+// The registry is built on first use: the game registers variables from a global constructor
+// (GameVar), which runs before this library's globals once everything is linked statically.
+CSystemVariable & dksvarRegistry();
+#define systemVariable (dksvarRegistry())
 
 #endif
