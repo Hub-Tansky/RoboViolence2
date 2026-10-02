@@ -28,7 +28,7 @@ The game needs a data directory `main/` next to the executable.
 - Without the original data (CI, contributors), generated placeholder content is
   used (step 2 §2.6; not yet available).
 
-Only `languages/en.lang` and `LaunchScript/` remain in `BaboViolent2/Content/main/`.
+Only `languages/en.lang` and `LaunchScript/` remain in `content/`.
 
 ## License
 
@@ -36,13 +36,18 @@ Code: GPLv3 ([LICENSE.txt](LICENSE.txt)). Assets and the name "BaboViolent 2" ar
 
 ## Platforms and build
 
-Targets: Windows 11, macOS and Linux (client and dedicated server), built with
-CMake and vcpkg (Step 2 onwards). Until then:
+Targets: Windows 11, macOS 12+ (arm64) and Linux x64, built with CMake, Ninja and vcpkg.
 
-- Linux dedicated server: run `make` in the repository root (needs sqlite3, libcurl
-  and GLU dev packages; no OpenSSL). The Windows solution and old project files were removed in Step 1.
-- There are no automated tests.
-- Run `tools/setup-dev.sh` (or `tools/setup-dev.ps1`) once to activate the commit hooks.
+```bash
+cmake --preset linux-x64        # or macos-arm64, win-x64-msvc (from a Developer PowerShell)
+cmake --build --preset linux-x64 --target bv2dedicated bv2master
+```
+
+- Needs `VCPKG_ROOT`, CMake 3.25+, Ninja, Python 3. Linux host packages: `tools/setup-dev.sh --linux-packages`.
+- The build creates `build/<preset>/runtime/` with the executables, `main/` (languages, launch scripts, `bv2.cfg` from `config/bv2.example.cfg`, generated placeholder assets) and the databases generated from `content-seed/`. Run the server from there: `./bv2dedicated`, then `execute CTF`.
+- `bv2` (the client) is defined but excluded from `all` until Step 3 replaces FMOD, DirectInput and the Win32/SDL1 window.
+- Verified so far: macOS arm64 (with ASan). Linux and Windows are untested.
+- There are no automated tests. Run `tools/setup-dev.sh` (or `.ps1`) once to activate the commit hooks.
 
 ## Where to read more
 

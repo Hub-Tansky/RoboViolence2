@@ -4,22 +4,23 @@ RoboViolence 2, an unofficial fork of BaboViolent 2 ([ADR 0004](docs/decisions/0
 
 ## Layout
 
-Current (target layout: [docs/refactoring/README.md](docs/refactoring/README.md#target-repository-layout-ai-ready), reached in Step 2):
+- `engine/babonet/`: networking (`bb_*` API); `engine/zeven/`: engine utilities (`dkc`, `dksvar`, `dkt`, `CString`/`CVector`/`CMatrix`, and the client modules `dkw dki dkgl dkf dkp dks`); `engine/dko/`: `.DKO` model loader. Each has `include/` (public), `src/`, `README.md`.
+- `game/src/`: game: client, listen/dedicated server, map editor (one codebase; `CONSOLE` selects the headless server).
+- `masterserver/src/`: standalone master server (SQLite).
+- `content/`: `languages/`, `LaunchScript/` (`main/` at runtime). `config/`, `content-seed/`: example configs and SQL seeds. `tools/`: checks, generators, setup scripts.
 
-- `BaboViolent2/Code/`: game: client, listen/dedicated server, map editor (one codebase; `CONSOLE` selects the headless server)
-- `BaboViolent2/inc/`: project headers shared with the engine (`baboNet.h`, `dk*.h`, `cMSstruct.h`, ...)
-- `Engine/babonet/`: networking library (`bb_*` API)
-- `Engine/DukZeven/`: engine utilities: `dkc` timer, `dksvar` config vars, `dkw` window, `dkgl`, `dki`, `dkt`, `dkf`, `dkp`, `dks` (FMOD)
-- `Engine/dko/`: `.DKO` model loader and ray/sphere intersection
-- `MasterServer/Source/`: standalone master server (SQLite; no build system yet)
-- `config/`, `content-seed/`: example configs and SQL seeds; `tools/`: checks and setup scripts
-
-[ARCHITECTURE.md](ARCHITECTURE.md) lists every tracked file.
+[ARCHITECTURE.md](ARCHITECTURE.md) lists every tracked file; module READMEs describe each module.
 
 ## Build
 
-- Linux dedicated server: `make` in the repo root builds `BaboViolent2/Content/bv2dedicated` (needs sqlite3, libcurl and GLU dev packages). Step 1 removed the vendored SDKs, so it builds only after Steps 2 and 3.
-- Client and master: no build until Step 2 (CMake + vcpkg). The Visual Studio project is kept only as a source-list reference.
+```bash
+cmake --preset <linux-x64|macos-arm64|win-x64-msvc>
+cmake --build --preset <preset> --target bv2dedicated bv2master
+```
+
+- Needs `VCPKG_ROOT`, CMake 3.25+, Ninja, Python 3. `-asan` presets add ASan + UBSan.
+- Output: `build/<preset>/runtime/` (executables, `main/`, `bv2.db`, `master.db`). Run the server from there ([ADR 0005](docs/decisions/0005-runtime-main-data-root.md)).
+- `bv2` (client) is excluded from `all` until Step 3. `zeven_client` likewise.
 - There are no automated tests.
 
 ## Assets
@@ -57,10 +58,10 @@ Current (target layout: [docs/refactoring/README.md](docs/refactoring/README.md#
 
 - All text files are UTF-8 (no BOM) with LF line endings. Keep them that way; the hook and CI reject other encodings (`tools/check-encoding.py`). Some comments contain U+FFFD where upstream lost accented characters; leave them.
 - Fixed 30 Hz step: every `update(float delay)` gets `delay = 1/30`, and "frames" are a time unit (30 = 1 s).
-- Network messages are raw structs in `BaboViolent2/Code/netPacket.h`, `memcpy`'d on the wire. Positions are `short` ×100, velocities `char` ×10. Changing a struct layout requires bumping `GAME_VERSION_SV/CL` in `Server.h`/`Client.h`. Removed message IDs leave gaps; don't renumber.
+- Network messages are raw structs in `game/src/netPacket.h`, `memcpy`'d on the wire. Positions are `short` ×100, velocities `char` ×10. Changing a struct layout requires bumping `GAME_VERSION_SV/CL` in `Server.h`/`Client.h`. Removed message IDs leave gaps; don't renumber.
 - `playerID` (slot 0–31) is not `babonetID` (connection handle). `bb_serverSend` takes the babonetID; destination 0 means broadcast.
 - The server is authoritative for hits, damage, spawns, projectiles and flags. Clients are authoritative for their own movement.
-- Server variables (`sv_*`) are registered in `GameVar.cpp` via `dksvarRegister` and pushed to clients.
+- Server variables (`sv_*`) are registered in `game/src/GameVar.cpp` via `dksvarRegister` and pushed to clients.
 - Decisions are ADRs in `docs/decisions/` (format and index in its README). Read them before reversing a choice; write one for any non-obvious new choice.
 - Known defects (unchecked `playerID` from packets, `sv_serverType = 1` assignment, etc.) are listed in `docs/analysis/KEY_QUESTIONS.md`. Check there before "fixing" odd behaviour, since some of it is load-bearing.
 
