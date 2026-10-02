@@ -27,7 +27,16 @@
 #include "CRain.h"
 #include "CSnow.h"
 #include "CLava.h"
+#ifdef WIN32
 #include <direct.h>
+#else
+#include <dirent.h>
+#include <unistd.h>
+#include <limits.h>
+#include <strings.h>
+#endif
+#include <cstdio>
+#include <cstring>
 #include <algorithm>
 #endif
 
@@ -1582,6 +1591,7 @@ bool Map::rayTest(CVector3f & p1, CVector3f & p2, CVector3f & normal)
 void GetMapList(std::vector< CString > & maps)
 {
 	maps.clear();
+#ifdef WIN32
 	WIN32_FIND_DATA FindFileData;
 	HANDLE hFind = INVALID_HANDLE_VALUE;
 	char DirSpec[MAX_PATH];  // directory specification
@@ -1609,11 +1619,37 @@ void GetMapList(std::vector< CString > & maps)
 		}
 		FindClose(hFind);
 	}
+#else
+	char appPath[PATH_MAX];
+	if (!getcwd(appPath, sizeof(appPath)))
+		return;
+
+	char dirPath[PATH_MAX];
+	snprintf(dirPath, sizeof(dirPath), "%s/main/maps", appPath);
+
+	DIR * dir = opendir(dirPath);
+	if (!dir)
+		return;
+
+	struct dirent * ent;
+	while ((ent = readdir(dir)) != NULL)
+	{
+		const char * name = ent->d_name;
+		const size_t len = strlen(name);
+		if (len <= 4 || strcasecmp(name + len - 4, ".bvm") != 0)
+			continue;
+		CString filename("%s", name);
+		// Drop the extension
+		filename.resize(filename.len() - 4);
+		maps.push_back(filename);
+	}
+	closedir(dir);
+#endif
 }
 
 bool GetMapData(CString name, unsigned int & texture, CVector2i & textureSize, CVector2i & size, CString & author)
 {
-	FileIO file(CString("main\\maps\\%s.bvm", name.s), "rb");
+	FileIO file(CString("main/maps/%s.bvm", name.s), "rb");
 	if(file.isValid())
 	{
 		map_cell * cells = 0;

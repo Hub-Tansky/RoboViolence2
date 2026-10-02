@@ -19,7 +19,9 @@
 #ifndef CONSOLE
 
 #include "CHost.h"
+#ifdef WIN32
 #include <direct.h>
+#endif
 #include "Map.h"
 #include "FileIO.h"
 #include "Scene.h"
@@ -380,30 +382,14 @@ CHost::CHost(CControl * in_parent, CControl * in_alignTo)
 	//--- MAPS
 	separator = new CControl(instance, CVector2i(10,10), CVector2i(150,25),"Map list", this, "SEPARATOR", label1, CONTROL_SNAP_BOTTOM, 15);
 
-	WIN32_FIND_DATA FindFileData;
-	HANDLE hFind = INVALID_HANDLE_VALUE;
-	char DirSpec[MAX_PATH];  // directory specification
-	DWORD dwError;
-	char appPath[_MAX_PATH];
-
-	// Chercher le path du "current working directory".
-	_getcwd(appPath, _MAX_PATH);
-
-	strncpy(DirSpec, appPath, strlen(appPath)+1);
-	strncat(DirSpec, "\\main\\maps\\*.bvm", strlen("\\main\\maps\\*.bvm")+1);
-
-	hFind = FindFirstFile(DirSpec, &FindFileData);
+	std::vector<CString> mapList;
+	GetMapList(mapList);
 
 	label1 = new CControl(instance, CVector2i(10,10), CVector2i(600,40),"Check the maps you want to include on this server.", this, "LABEL", separator, CONTROL_SNAP_BOTTOM,15);
 
-	if (hFind == INVALID_HANDLE_VALUE)
+	if (!mapList.empty())
 	{
-		// Si on ne trouve pas le répertoire désiré.
-	}
-	else
-	{
-		CString filename = CString(FindFileData.cFileName);
-		filename.resize(filename.len() - 4);
+		CString filename = mapList[0];
 
 		int tileX, tileY;
 		int topH;
@@ -430,12 +416,10 @@ CHost::CHost(CControl * in_parent, CControl * in_alignTo)
 
 		//--- We tile it
 
-		while (FindNextFile(hFind, &FindFileData) != 0)
+		for (size_t mi = 1; mi < mapList.size(); ++mi)
 		{
-			if(!(FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
 			{
-				CString filename = CString(FindFileData.cFileName);
-				filename.resize(filename.len() - 4);
+				CString filename = mapList[mi];
 
 
 				//--- Map
@@ -466,13 +450,6 @@ CHost::CHost(CControl * in_parent, CControl * in_alignTo)
 				tileX += mapImg->size[0] + 15;
 				if (topH < mapImg->size[1] + 15) topH = mapImg->size[1] + 15;
 			}
-		}
-		
-		dwError = GetLastError();
-		FindClose(hFind);
-		if (dwError != ERROR_NO_MORE_FILES)
-		{
-			// Si il y a une error en détectant qu'il n'y a plus de fichiers.
 		}
 	}
 

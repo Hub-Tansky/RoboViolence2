@@ -257,7 +257,7 @@ void NewMapDialog::Validate(CControl * control)
 
 void NewMapDialog::OnOk()
 {
-	CString fileName("main\\maps\\%s.bvm", txt_mapName->text.s);
+	CString fileName("main/maps/%s.bvm", txt_mapName->text.s);
 	FileIO f(fileName, "rb");
 	if(!f.isValid())
 	{
@@ -573,7 +573,7 @@ void SaveAsMapDialog::OnOk()
 		subDialog = new MessageDialog(dialogRoot->font, ButtonsOK, "Error!", "You forgot to enter the file name.");
 		return;
 	}
-	FileIO file(CString("main\\maps\\%s.bvm", txt_mapName->text.s), "rb");
+	FileIO file(CString("main/maps/%s.bvm", txt_mapName->text.s), "rb");
 	if(file.isValid() && !overwrite)
 	{
 		state = StateNothing;
