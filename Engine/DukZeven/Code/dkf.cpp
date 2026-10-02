@@ -20,9 +20,6 @@
 
 
 #include "dkfi.h"
-#if defined(_DEBUG) && defined(USE_VLD)
-#include <vld.h>
-#endif
 
 
 //

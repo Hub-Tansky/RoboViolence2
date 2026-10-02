@@ -21,9 +21,6 @@
 
 #include "dkwi.h"
 #include <string.h>
-#if defined(_DEBUG) && defined(USE_VLD)
-#include <vld.h>
-#endif
 #ifndef WIN32
 #include "linux_types.h"
 #ifdef __MACOSX__

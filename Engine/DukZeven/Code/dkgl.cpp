@@ -20,9 +20,6 @@
 
 
 #include "dkgli.h"
-#if defined(_DEBUG) && defined(USE_VLD)
-#include <vld.h>
-#endif
 
 int CDkgl::colorDepth=16;
 

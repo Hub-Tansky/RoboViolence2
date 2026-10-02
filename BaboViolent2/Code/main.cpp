@@ -47,9 +47,6 @@ static void bv2ApplyNetlogFromEnv()
 
 #ifdef WIN32
 	#pragma comment (lib, "libcurl.lib")
-	#if defined(_DEBUG) && defined(USE_VLD) && !defined(CONSOLE)
-		#include <vld.h>
-	#endif
 #endif
 
 

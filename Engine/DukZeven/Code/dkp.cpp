@@ -22,9 +22,6 @@
 
 #include "dkpi.h"
 #include "CMatrix.h"
-#if defined(_DEBUG) && defined(USE_VLD)
-#include <vld.h>
-#endif
 
 // Les trucs statics
 std::vector<CParticle*> CDkp::particles;

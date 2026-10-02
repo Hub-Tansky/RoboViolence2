@@ -20,9 +20,6 @@
 
 
 #include "dkii.h"
-#if defined(_DEBUG) && defined(USE_VLD)
-#include <vld.h>
-#endif
 
 #ifndef WIN32
 #include "dkw.h"

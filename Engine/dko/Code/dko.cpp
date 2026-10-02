@@ -22,9 +22,6 @@
 #ifndef WIN32
 	#include "LinuxHeader.h"
 #endif
-#if defined(_DEBUG) && defined(USE_VLD)
-#include <vld.h>
-#endif
 
 //
 // Les trucs static
