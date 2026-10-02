@@ -292,6 +292,7 @@ public:
 
 	// Si on est en debug !!! tr�s important
 	bool c_debug;
+	bool c_netlog; // [net] join/handshake tracing
 	bool c_huge;
 	bool d_showPath;
 	bool d_showNodes;

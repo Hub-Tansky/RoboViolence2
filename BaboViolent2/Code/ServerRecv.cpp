@@ -51,6 +51,8 @@ void Server::recvPacket(char * buffer, int typeID, unsigned long bbnetID)
             mtrans.chunkNum = 0;
 			mtrans.mapName = request.mapName;
 			mtrans.uniqueClientID = bbnetID;
+			if (gameVar.c_netlog)
+				console->add(CString("server> [net] MAP_REQUEST map=\"%s\" bbnetID=%lu", mtrans.mapName.s, (unsigned long)bbnetID), true);
 
 			// Add to list, server will send chunks on each update
 			mapTransfers.push_back(mtrans);
@@ -311,10 +313,14 @@ void Server::recvPacket(char * buffer, int typeID, unsigned long bbnetID)
 			{
 				if(gameVar.sv_password != "" && CString("%s", gameVersionAccepted.password) != gameVar.sv_password)
 				{
+					if (gameVar.c_netlog)
+						console->add(CString("server> [net] join password mismatch for slot %i, disconnecting", (int)gameVersionAccepted.playerID), true);
 					bb_serverDisconnectClient(game->players[gameVersionAccepted.playerID]->babonetID);
 					break;
 				}
 
+				if (gameVar.c_netlog)
+					console->add(CString("server> [net] handshake OK slot=%i -> SERVER_INFO map=\"%s\"", (int)gameVersionAccepted.playerID, game->mapName.s), true);
 				// Handshake done: restart the ping watchdog so pre-accept time doesn't count.
 				game->players[gameVersionAccepted.playerID]->waitForPong = false;
 				game->players[gameVersionAccepted.playerID]->currentPingFrame = 0;

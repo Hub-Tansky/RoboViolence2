@@ -1661,6 +1661,8 @@ int Game::createNewPlayerSV(int babonetID)
 			net_svcl_gameversion gameVersion;
 			gameVersion.gameVersion = GAME_VERSION_SV;
 			bb_serverSend((char*)&gameVersion, sizeof(net_svcl_gameversion), NET_SVCL_GAMEVERSION, babonetID);
+			if (gameVar.c_netlog)
+				console->add(CString("server> [net] slot %i for babonetID=%i: sent NEWPLAYER (all) + GAMEVERSION %i", i, babonetID, GAME_VERSION_SV), true);
 
 			//--- Est-ce que c'est le seul joueur? ou il y a 2 joueur? On restart le server.
 

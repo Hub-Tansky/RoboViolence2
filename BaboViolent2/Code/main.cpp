@@ -28,7 +28,17 @@
 #include "Scene.h"
 #include "Console.h"
 #include <exception>
+#include <cstdlib>
+#include <cstring>
 #include "CMaster.h"
+
+// After main/bv2.cfg is loaded: BV2_NETLOG=1 forces c_netlog on, BV2_NETLOG=0 off.
+static void bv2ApplyNetlogFromEnv()
+{
+	const char* e = std::getenv("BV2_NETLOG");
+	if (e && e[0] != '\0')
+		gameVar.c_netlog = (std::strcmp(e, "0") != 0);
+}
 #ifndef CONSOLE
 	#include "CStatus.h"
 	#include "CLobby.h"
@@ -488,6 +498,7 @@ int main(int argc, const char* argv[])
 	// PREMI�E CHOSE �FAIRE, on load les config
 	dksvarInit(&stringInterface);
 	dksvarLoadConfig("main/bv2.cfg");
+	bv2ApplyNetlogFromEnv();
 	dksvarSaveConfig("main/bv2.cfg"); // On cre8 le config file aussi
 
 	// On init nos DLL qui vont �re utilis�dans ce jeu
@@ -682,6 +693,7 @@ int WINAPI WinMain(	HINSTANCE	hInstance,				// Instance
 	// PREMI�E CHOSE �FAIRE, on load les config
 	dksvarInit(&stringInterface);
 	dksvarLoadConfig("main/bv2.cfg");
+	bv2ApplyNetlogFromEnv();
 	dksvarSaveConfig("main/bv2.cfg"); // On cre8 le config file aussi
 
 	// On load tout suite le language utilis�par le joueur

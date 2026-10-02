@@ -145,6 +145,8 @@ void Client::recvPacket(char * buffer, int typeID)
 			typeID != NET_SVCL_PING &&
 			typeID != NET_SVCL_MAP_CHUNK)
 		{
+			if (gameVar.c_netlog)
+				console->add(CString("[net] dropped typeId=%i before SERVER_INFO", typeID));
 			return;
 		}
 	}
@@ -305,6 +307,8 @@ void Client::recvPacket(char * buffer, int typeID)
 			}
 			if (pendingVersionAccept && game->thisPlayer)
 			{
+				if (gameVar.c_netlog)
+					console->add("[net] NEWPLAYER after GAMEVERSION: sending deferred handshake");
 				pendingVersionAccept = false;
 				sendJoinHandshake();
 			}
@@ -324,6 +328,8 @@ void Client::recvPacket(char * buffer, int typeID)
 			{
 				// Our slot (NET_SVCL_NEWPLAYER) isn't known yet: answer when it arrives.
 				pendingVersionAccept = true;
+				if (gameVar.c_netlog)
+					console->add("[net] GAMEVERSION before NEWPLAYER: deferring handshake");
 			}
 			else
 			{
@@ -378,6 +384,8 @@ void Client::recvPacket(char * buffer, int typeID)
 		}
 	case NET_SVCL_SERVER_INFO:
 		{
+			if (gameVar.c_netlog)
+				console->add("[net] SERVER_INFO received: joined");
 			isConnected = true;
 			gotGameState = true; // C beau, on est IN !!
 			net_svcl_server_info serverInfo;

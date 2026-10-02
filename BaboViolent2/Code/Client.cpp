@@ -256,6 +256,26 @@ void Client::update(float delay)
 		// On update le client
 		int result = bb_clientUpdate(uniqueClientID, delay, UPDATE_SEND_RECV);
 		console->debugBBNET(true, false);
+		if (gameVar.c_netlog)
+		{
+			// Log each change of the BaboNet connect state (0 = connecting, 1 = error, 2 = closed, 3 = up)
+			static unsigned long s_netlogClient = 0;
+			static int s_netlogResult = -1;
+			if (uniqueClientID != s_netlogClient)
+			{
+				s_netlogClient = uniqueClientID;
+				s_netlogResult = -1;
+			}
+			if (result != s_netlogResult && (result != 0 || !isConnected))
+			{
+				s_netlogResult = result;
+				if (result == 1)
+					console->add(CString("[net] bb_clientUpdate -> 1 ERROR: %s", bb_clientGetLastError(uniqueClientID)));
+				else
+					console->add(CString("[net] bb_clientUpdate -> %i (0 connecting, 2 closed by server, 3 link up) target=%s msg=\"%s\"",
+						result, server_ip.s, bb_clientGetLastMessage(uniqueClientID)));
+			}
+		}
 		if (result == 1)
 		{
 			// Une erreur !!! On arrête tout !!!

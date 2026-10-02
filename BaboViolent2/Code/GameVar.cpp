@@ -776,6 +776,8 @@ GameVar::GameVar()
 
 	c_debug = false; // Default
 	dksvarRegister(CString("c_debug [bool : true | false (default false)]"), &c_debug, true);
+	c_netlog = false; // Default
+	dksvarRegister(CString("c_netlog [bool : true | false (default false)] - [net] join/handshake logs. Env BV2_NETLOG=1 forces it on."), &c_netlog, true);
 
 	c_huge = false;
 	dksvarRegister(CString("c_huge [bool : true | false (default false)]"), &c_huge, true);

@@ -448,6 +448,8 @@ void Server::updateNet(float delay, bool send)
 	{
 		// On a un nouveu client!
 		console->add(CString("\x3> A client has connected. Client ID : %i", clientID), true);
+		if (gameVar.c_netlog)
+			console->add(CString("server> [net] new TCP client babonetID=%i IP=%s (expect GAMEVERSION_ACCEPTED then PLAYER_INFO)", clientID, IPDuGars), true);
 
 		// Check against ban list
 		for(std::size_t i = 0; i < banList.size(); ++i)
@@ -521,6 +523,8 @@ void Server::updateNet(float delay, bool send)
 					}
 					// On le disconnect !!
 					console->add(CString("\x3> Player disconnected : %s ID:%i", game->players[i]->name.s, i), true);
+					if (gameVar.c_netlog)
+						console->add(CString("server> [net] TCP link lost for babonetID=%i, cleared slot %i", -clientID, i), true);
 					// broadcast to potential remote admins
 					if( master ) master->RA_DisconnectedPlayer( textColorLess(game->players[i]->name).s, game->players[i]->playerIP, (long)game->players[i]->playerID );
 					ZEVEN_SAFE_DELETE(game->players[i]);
@@ -1072,6 +1076,9 @@ void Server::update(float delay)
 						if( master ) master->RA_DisconnectedPlayer( textColorLess(game->players[i]->name).s, game->players[i]->playerIP, (long)game->players[i]->playerID);
 						bb_serverDisconnectClient(game->players[i]->babonetID);
 						console->add("\x3> Disconnecting client, no respond since 3sec", true);
+						if (gameVar.c_netlog)
+							console->add(CString("server> [net] kick slot=%i reason=no_PONG currentPingFrame=%i status=%i",
+								i, game->players[i]->currentPingFrame, (int)game->players[i]->status), true);
 						ZEVEN_SAFE_DELETE(game->players[i]);
 						net_svcl_player_disconnect playerDisconnect;
 						playerDisconnect.playerID = (char)i;
