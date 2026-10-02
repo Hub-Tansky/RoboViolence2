@@ -294,8 +294,9 @@ int cServer::SendPacketsToClients()
 		// check if we have a problem with the client
 		if( isReady == BBNET_ERROR )
 		{
+			long disconnectedClient = (long)C->NetID * -1;
 			RemoveClient(C);
-            return 0;
+			return disconnectedClient;
 		}
 
 		if( isReady )
@@ -303,9 +304,10 @@ int cServer::SendPacketsToClients()
 			if(C->Send(BytesSent))
 			{
 				//a problem occured while sending infos to the client, disconnect him
-				printf(" problem sending packets to client ID %li ...disconnected \n",C->NetID);
+				printf(" problem sending packets to client ID %li ...disconnected \n",(long)C->NetID);
+				long disconnectedClient = (long)C->NetID * -1;
 				RemoveClient(C);
-                return 0;
+				return disconnectedClient;
 			}
 		}
 	}
@@ -348,7 +350,7 @@ long cServer::ReceivePacketsFromClients()
 	
 	//TCP part-----------------------------------
 	read_fds = master; // copy it
-	if (select(Listener+1, &read_fds, NULL, NULL, &Timeout) == -1)
+	if (select(GetMaxFD() + 1, &read_fds, NULL, NULL, &Timeout) == -1)
 	{
 		printf(" error selecting while cServer::ReceivePacketsFromClients() \n errno : %i", errno);
 		//sprintf(LastError,"Error : Problem select()ing");
@@ -848,9 +850,8 @@ long cServer::CreateClient(sockaddr_in *ip, int fileDescriptor,unsigned short ud
 	Cli->UDPport	=	UDPenabled ? udpPort : 0;
 
 	//on va ajouter le nouveau file descriptor au master set
-	//FD_SET(fileDescriptor,&master);
-
-	//if(fileDescriptor > fdmax) fdmax = fileDescriptor;
+	FD_SET((unsigned int)fileDescriptor, &master);
+	if(fileDescriptor > fdmax) fdmax = fileDescriptor;
 
 	Cli->LastPacketID = pid;
 	Cli->PendingID = pid + 1;
@@ -943,8 +944,7 @@ int cServer::RemoveClient(cClient *clientToKill)
 		if(C==clientToKill)
 		{
 			//on va enlever le fd du master set
-			//FD_CLR(C->FileDescriptor,&master);
-			//FD_CLR(C->UDPfd,&master);
+			FD_CLR((unsigned int)C->FileDescriptor, &master);
 
 			//on va fermer sa connection
 			CloseSocket(C->FileDescriptor);
@@ -961,6 +961,7 @@ int cServer::RemoveClient(cClient *clientToKill)
 			}
 			
 			delete C;
+			fdmax = GetMaxFD();
 			return 0;
 
 // 			if(clientToKill==Clients)	//si on est la tete de file

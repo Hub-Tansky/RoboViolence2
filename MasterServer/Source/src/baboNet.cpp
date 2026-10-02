@@ -222,7 +222,9 @@ long bb_serverUpdate(float elapsed,int updateMsg,char* newIP)
 		case UPDATE_SEND_RECV: //on update les Send ET les Receive
 		{
 			//envoyer le stock TCP/UDP
-			if(Server->SendPacketsToClients()) return BBNET_ERROR;
+			// Non-zero = -(NetID) of a client dropped while sending; report it like a recv disconnect.
+			long s = Server->SendPacketsToClients();
+			if(s) return s;
 			
 			//recevoir TCP/UDP
 			long r = Server->ReceivePacketsFromClients();
@@ -245,7 +247,8 @@ long bb_serverUpdate(float elapsed,int updateMsg,char* newIP)
 		case UPDATE_SEND: //on update que les send
 		{
 			//on envoie le stock TCP/UDP
-			if(Server->SendPacketsToClients()) return -999999999;
+			long s = Server->SendPacketsToClients();
+			if(s) return s;
 			return 0;
 		}
 		case UPDATE_RECV: //on update que les recv

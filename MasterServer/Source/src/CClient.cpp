@@ -501,10 +501,20 @@ int cClient::SendPacketsToServer()
 }
 void cClient::Disconnect()
 {
-	CloseSocket(FileDescriptor);
-	if(UDPenabled) CloseSocket(UDPfd);
+	if (FileDescriptor > 0)
+	{
+		FD_CLR((unsigned int)FileDescriptor, &master);
+		CloseSocket(FileDescriptor);
+	}
+	if (UDPenabled && UDPfd > 0)
+	{
+		FD_CLR((unsigned int)UDPfd, &master);
+		CloseSocket(UDPfd);
+	}
 	UDPfd			=	0;
 	FileDescriptor	=	0;
+	fdmax			=	0;
+	isConnected		=	false;
 }
 
 int cClient::ReceiveStream(int nbytes,char *buf)

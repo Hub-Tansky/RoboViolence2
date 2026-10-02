@@ -227,7 +227,8 @@ int cClient::UpdateConnection(float elapsed)
 			//printf(">>>>>>>>>>>>>>Error while connecting\n");
 			//sprintf(LastMessage,"Error while connecting...aborting, see bb_clientGetLastError()");
 
-			sprintf(LastError, Connection->LastError);
+			// cConnection already wrote into LastError (same buffer). Never pass the message
+			// as a format string: it can contain conversion specifiers.
 			delete Connection;
 			Connection = 0;
 			return r;
@@ -532,10 +533,20 @@ int cClient::SendPacketsToServer()
 }
 void cClient::Disconnect()
 {
-	CloseSocket(FileDescriptor);
-	if(UDPenabled) CloseSocket(UDPfd);
+	if (FileDescriptor > 0)
+	{
+		FD_CLR((unsigned int)FileDescriptor, &master);
+		CloseSocket(FileDescriptor);
+	}
+	if (UDPenabled && UDPfd > 0)
+	{
+		FD_CLR((unsigned int)UDPfd, &master);
+		CloseSocket(UDPfd);
+	}
 	UDPfd			=	0;
 	FileDescriptor	=	0;
+	fdmax			=	0;
+	isConnected		=	false;
 }
 
 int cClient::ReceiveStream(int nbytes,char *buf)
