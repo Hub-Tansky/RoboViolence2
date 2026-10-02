@@ -570,8 +570,9 @@ int cClient::ReceiveStream(int nbytes,char *buf)
 				key[4] = '\0';
 				if(stricmp("RND1",key)) return 1;	//RndLabs key is corrupted, potential hacker
 
-				memcpy(&pid,lastKey + (sizeof(char) * 4),sizeof(unsigned long));
-                               			
+				memcpy(pid, lastKey + 4, 4); // 4 bytes; sizeof(unsigned long) overflows pid[5] on LP64
+				pid[4] = '\0';
+
 				if(GetPendingID(pid)) return 1;		//potential hacker
 				PendingID++;
 
@@ -743,8 +744,7 @@ bool cClient::GetPendingID(char *pid)
 {
 	char digest[33];
 
-	sprintf( digest , "%ld" , PendingID );
-	//ltoa( PendingID , digest , 10 );
+	snprintf(digest, sizeof(digest), "%lu", (unsigned long)PendingID);
 
 	//create md5 hash from current PendingID
 	CMD5 md5(digest);
@@ -802,7 +802,7 @@ int cClient::Send(unsigned long &nbByte)
 
 		//on parse notre key
 		memcpy(buf + packed,&Key,sizeof(char)*4);
-		packed += sizeof(sizeof(char)*4);
+		packed += 4; // 4-byte RND1 tag; sizeof(size_t) is 8 on LP64
 	
 		//on parse le packetID
 		char pid[5];
@@ -908,8 +908,7 @@ void cClient::GetLastPacketID(char *pid)
 
 	char digest[33];
 
-	sprintf( digest , "%ld" , LastPacketID );
-//	ltoa( LastPacketID , digest , 10 );
+	snprintf(digest, sizeof(digest), "%lu", (unsigned long)LastPacketID);
 
 	//create md5 hash from current PendingID
 	CMD5 md5(digest);

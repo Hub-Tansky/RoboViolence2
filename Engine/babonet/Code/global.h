@@ -40,14 +40,12 @@ typedef unsigned char *POINTER;
 typedef unsigned short int UINT2;
 
 /* UINT4 defines a four byte word */
-#ifdef WIN32
+#if defined(WIN32)
 typedef unsigned long int UINT4;
-#else
-#ifdef LINUX64
+#elif defined(__LP64__) || defined(_LP64) || defined(LINUX64)
 typedef unsigned int UINT4;
 #else
 typedef unsigned long int UINT4;
-#endif
 #endif
 
 /* PROTO_LIST is defined depending on how PROTOTYPES is defined above.

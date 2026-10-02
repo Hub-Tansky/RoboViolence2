@@ -305,16 +305,17 @@ int cConnection::Update(float elapsed)
 
 				if(!ToRecv) //on a recu tout ce quon attendais
 				{
-					memcpy(&connID,RecvBuf,sizeof(connID));
+					// Wire layout is fixed: connID(4) + udp(1) + md5 junk(28) + packetID(4)
+					unsigned int wireConnId = 0;
+					memcpy(&wireConnId, RecvBuf, 4);
+					connID = wireConnId;
 
 					char udp=0;
-					memcpy(&udp,RecvBuf + 4,sizeof(char));
+					memcpy(&udp, RecvBuf + 4, 1);
 
-					char junk[33];
-					memcpy(&junk,RecvBuf + 5,sizeof(char) * 32);
-					//junk[32] = '\0';
-
-					memcpy(Lpid , &(junk[28]) , sizeof(unsigned long) );
+					unsigned int wirePid = 0;
+					memcpy(&wirePid, RecvBuf + 33, 4);
+					*Lpid = wirePid;
 
 					
 // 					if(udp)
