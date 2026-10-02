@@ -18,7 +18,7 @@
 
 #include "CCurl.h"
 #include "Console.h"
-#include "md5.h"
+#include "md5class.h"
 #include <sstream>
 #include <fstream>
 using std::min;
@@ -124,10 +124,8 @@ void CUrlData::add(CString key, std::string value, int flags /* = CUrlData::NONE
 
 	if(flags == MD5)
 	{
-		RSA::MD5 md5((unsigned char*)value.c_str());
-		char * hex_digest = md5.hex_digest();
-		ss << hex_digest;
-		delete[] hex_digest;
+		CMD5 md5(value.c_str());
+		ss << md5.getMD5Digest();
 	}
 	else if(flags == BASE64)
 	{
@@ -158,8 +156,8 @@ void CUrlData::add(CString key, std::string value, int flags /* = CUrlData::NONE
 
 	if(flags == CUrlData::MD5)
 	{
-		RSA::MD5 md5((unsigned char*)value.s);
-		m_data += CString("%s=%s", key.s, md5.hex_digest()).s;
+		CMD5 md5(value.s);
+		m_data += CString("%s=%s", key.s, md5.getMD5Digest()).s;
 	}
 	else
 	{

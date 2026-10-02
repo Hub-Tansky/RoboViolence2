@@ -24,9 +24,21 @@
 #ifndef CONSOLE
 #include "CLobby.h"
 #endif
-#ifdef LINUX64
-#include <openssl/md5.h>
-#endif
+#include "md5class.h"
+
+// Raw 16-byte MD5 digest (babonet's md5class yields hex).
+static void MD5(const unsigned char* data, size_t len, unsigned char* out)
+{
+	std::string text((const char*)data, len);
+	CMD5 md5(text.c_str());
+	const char* hex = md5.getMD5Digest();
+	for (int i = 0; i < 16; ++i)
+	{
+		unsigned int byte = 0;
+		sscanf(hex + i * 2, "%2x", &byte);
+		out[i] = (unsigned char)byte;
+	}
+}
 
 CMaster* master = 0;
 bool surveyReceived = false;

@@ -21,7 +21,7 @@
 #include "netPacket.h"
 #include "Console.h"
 #include "Scene.h"
-#include "md5.h"
+#include "md5class.h"
 #include "CStatus.h"
 
 extern Scene * scene;
@@ -48,10 +48,8 @@ void Client::sendJoinHandshake()
 	gameVar.cl_accountUsername.resize(20);
 	memcpy(playerInfo.username, gameVar.cl_accountUsername.s, gameVar.cl_accountUsername.len() + 1);
 
-	RSA::MD5 pw((unsigned char*)gameVar.cl_accountPassword.s);
-	char* hex_digest = pw.hex_digest();
-	memcpy(playerInfo.password, hex_digest, 32);
-	delete[] hex_digest;
+	CMD5 pw(gameVar.cl_accountPassword.s);
+	memcpy(playerInfo.password, pw.getMD5Digest(), 32);
 
 	bb_clientSend(uniqueClientID, (char*)&playerInfo, sizeof(net_clsv_svcl_player_info), NET_CLSV_SVCL_PLAYER_INFO);
 

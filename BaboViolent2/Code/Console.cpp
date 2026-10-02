@@ -27,7 +27,7 @@
 #include <algorithm>
 #include <string>
 
-	#include "md5.h"
+	#include "md5class.h"
 
 
 // Notre module principal
@@ -734,13 +734,11 @@ void Console::sendCommand(CString commandLine, bool isAdmin, unsigned long bbnet
 			{
 				net_clsv_admin_request adminRequest;
 				memset(&adminRequest, 0, sizeof(net_clsv_admin_request));
-				RSA::MD5 login_((unsigned char*)login.s);
-				char* hex_digest = login_.hex_digest();
-				memcpy(adminRequest.login, hex_digest, 32);
+				CMD5 login_(login.s);
+				memcpy(adminRequest.login, login_.getMD5Digest(), 32);
 
-				RSA::MD5 pwd_((unsigned char*)pwd.s);
-				hex_digest = pwd_.hex_digest();
-				memcpy(adminRequest.password, hex_digest, 32);
+				CMD5 pwd_(pwd.s);
+				memcpy(adminRequest.password, pwd_.getMD5Digest(), 32);
 
 				/*add(CString("\x9> L: %s", adminRequest.login));
 				add(CString("\x9> P: %s", adminRequest.password));*/
