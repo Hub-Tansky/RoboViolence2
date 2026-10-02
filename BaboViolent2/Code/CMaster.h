@@ -134,7 +134,7 @@ private:
 	short s1,s2,s3,s4;
 
 	// holds the master server IP
-	char m_IP[16];
+	char m_IP[64]; // IPv4 or hostname
 
 	// holds the master server Port
 	unsigned short m_Port;

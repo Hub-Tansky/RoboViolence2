@@ -184,14 +184,8 @@ void Scene::update(float delay)
 #ifndef CONSOLE
 	if (mainTab)
 	{
-		if (master->isConnected())
-		{
-			mainTab->browser->btn_refresh->enable = false;
-		}
-		else
-		{
-			mainTab->browser->btn_refresh->enable = true;
-		}
+		// The master session now stays open between refreshes.
+		mainTab->browser->btn_refresh->enable = true;
 	}
 	if (introScreen)
 	{

@@ -85,6 +85,10 @@ void CMaster::UpdateDB()
 //
 void CMaster::connectToMaster(const char* in_IP, short in_port)
 {
+	if (uniqueClientID)
+		disconnectMaster();
+	if (!in_IP || !in_IP[0])
+		return; // no master configured (bv2.db MasterServers empty)
 	uniqueClientID = bb_clientConnect(in_IP, in_port);
 	m_isConnected = false;
 }
@@ -131,10 +135,8 @@ void CMaster::pingReceived(int ping)
 		//--- Remove that row
 		m_games.erase(m_games.begin());
 
-		if( m_games.size() == 0 )
-		{
-			disconnectMaster();
-		}
+		// Keep the master session open for the next refresh; reconnecting on
+		// every listing caused connect/disconnect storms.
 	}
 }
 
@@ -207,6 +209,7 @@ void CMaster::update(float in_delay)
 		{
 			// Une erreur !!! On arr�e tout !!!
 			if (gameVar.c_debug) console->add(CString("\x4> Error connection to master : %s", bb_clientGetLastError(uniqueClientID)));
+			bb_clientDisconnect(uniqueClientID);
 			uniqueClientID = 0;
 			m_isConnected = false;
 			ZEVEN_SAFE_DELETE(m_ping);
@@ -215,6 +218,7 @@ void CMaster::update(float in_delay)
 		{
 			// Le server a foutu le CAMP !
 			//if (gameVar.c_debug) console->add("\x9> Master server disconnected");
+			bb_clientDisconnect(uniqueClientID);
 			uniqueClientID = 0;
 			m_isConnected = false;
 			ZEVEN_SAFE_DELETE(m_ping);
@@ -263,7 +267,13 @@ void CMaster::update(float in_delay)
 		stBV2row * bv2Row = m_games[0];
 
 		m_ping = new CPing();
-		m_ping->ping(CString("%s", bv2Row->ip), bv2Row->port);
+		if (m_ping->ping(CString("%s", bv2Row->ip), bv2Row->port) == -1)
+		{
+			// Can't UDP-ping this host (empty IP, ...): list it anyway.
+			delete m_ping;
+			m_ping = 0;
+			pingReceived(1000);
+		}
 	}
 
 	// peer timeouts
@@ -727,7 +737,6 @@ void CMaster::recvPacket(const char * buffer, int typeID)
 			if (masterInfo.NbGames == 0)
 			{
 				m_nbGameFound = 0;
-				disconnectMaster();
 				console->add(CString("\x3> No games found"));
 			}
 			else if (masterInfo.NbGames == -1)
@@ -863,10 +872,19 @@ void CMaster::sendGameInfo(Server* server)
 {
 	if (server->game)
 	{
-		//clear la message stack first
+		// Replace only the previous BV2_ROW heartbeat; other queued master packets
+		// may still be waiting for the TCP session to come up.
+		for (std::vector<SMasterMessage*>::iterator it = messageStack.begin(); it != messageStack.end(); )
+		{
+			if ((*it)->typeID == BV2_ROW)
+			{
+				delete *it;
+				it = messageStack.erase(it);
+			}
+			else
+				++it;
+		}
 		int i;
-
-		ZEVEN_DELETE_VECTOR(messageStack, i);
 
 		stBV2row bv2Row;
 
@@ -908,9 +926,10 @@ void CMaster::requestGames()
 		if( lobby ) lobby->clearLobby();
 	#endif
 
-	//clear the game stack
-	int i;
-	ZEVEN_DELETE_VECTOR(m_games, i);
+	//clear the game stack (and a ping still pending from the last refresh)
+	ZEVEN_SAFE_DELETE(m_ping);
+	eraseGames();
+	m_nbGameFound = 0;
 
 	stBV2list bv2List;
 	strcpy(bv2List.Version, m_CurrentVersion );
@@ -929,52 +948,59 @@ void CMaster::requestGames()
 //
 void CMaster::GetMasterInfos()
 {
+	// Defaults when bv2.db or its rows are missing: no master, version 2.11.
+	m_IP[0] = '\0';
+	m_Port = 0;
+	snprintf(m_CurrentVersion, sizeof(m_CurrentVersion), "%s", "2.11");
+
 	//connect to database
 	sqlite3 *db = 0;
-	
-	int rc = sqlite3_open("bv2.db",&db);
-	if(rc)
+	if (sqlite3_open("bv2.db",&db) != SQLITE_OK)
 	{
+		if (db) sqlite3_close(db);
 		console->add("Game Database not found, please re-install the game");
 		return ;
 	}
-	else
-	{
-		//printf("Opened database successfully\n");
-	}
 
 	//some infos to load the data
-	char	*zErrMsg;		// holds error msg if any
-	char	**azResult;		// contains the actual returned data
-	int		nRow;			// number of record
-	int		nColumn;		// number of column
+	char	*zErrMsg = 0;	// holds error msg if any
+	char	**azResult = 0;	// contains the actual returned data
+	int		nRow = 0;		// number of record
+	int		nColumn = 0;	// number of column
 	char	SQL[256];		// the query
 
-	// Get infos of master servers and choose the one with the lowest Score
+	// Get infos of master servers and choose the one with the lowest Score.
+	// MASTER_* macros index row i of a 5-column table (Score, ID, IP, Location, Port).
 	sprintf(SQL,"Select * From MasterServers;");
-	sqlite3_get_table(db,SQL,&azResult,&nRow,&nColumn,&zErrMsg);
-
-	
-	int i,best=9999,bestIndex=0;
-	for(i=0;i<nRow;i++)
+	int rc = sqlite3_get_table(db,SQL,&azResult,&nRow,&nColumn,&zErrMsg);
+	if (rc == SQLITE_OK && azResult && nRow >= 1 && nColumn == 5)
 	{
-		if( atoi(azResult[MASTER_SCORE]) < best )
+		int i,best=9999,bestIndex=0;
+		for(i=0;i<nRow;i++)
 		{
-			best = atoi(azResult[MASTER_SCORE]);
-			bestIndex = i;
+			if( azResult[MASTER_SCORE] && atoi(azResult[MASTER_SCORE]) < best )
+			{
+				best = atoi(azResult[MASTER_SCORE]);
+				bestIndex = i;
+			}
 		}
+		i = bestIndex;
+		if (azResult[MASTER_IP])
+			snprintf(m_IP, sizeof(m_IP), "%s", azResult[MASTER_IP]);
+		if (azResult[MASTER_PORT])
+			m_Port = atoi(azResult[MASTER_PORT]) - 1000;
 	}
-	i = bestIndex;
-	sprintf( m_IP , "%s", azResult[MASTER_IP]);
-	m_Port = atoi(azResult[MASTER_PORT]) - 1000;
+	if (zErrMsg) { sqlite3_free(zErrMsg); zErrMsg = 0; }
 	sqlite3_free_table(azResult);
+	azResult = 0;
 
 	// get our current game version
 	sprintf(SQL,"Select Value From LauncherSettings Where Name = 'Version';");
-	sqlite3_get_table(db,SQL,&azResult,&nRow,&nColumn,&zErrMsg);
+	rc = sqlite3_get_table(db,SQL,&azResult,&nRow,&nColumn,&zErrMsg);
+	if (rc == SQLITE_OK && azResult && nRow >= 1 && nColumn >= 1 && azResult[nColumn])
+		snprintf(m_CurrentVersion, sizeof(m_CurrentVersion), "%s", azResult[nColumn]);
+	if (zErrMsg) sqlite3_free(zErrMsg);
 
-	sprintf( m_CurrentVersion , azResult[1] );
-	
 	sqlite3_free_table(azResult);
 	sqlite3_close( db );
 }

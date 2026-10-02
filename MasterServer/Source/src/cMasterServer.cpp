@@ -315,7 +315,7 @@ int cMasterServer::Update(float elapsed)
 {
 	TimeSinceBanCheck += elapsed;
 
-	char	IP[16];
+	char	IP[16] = { 0 };
 	bool	isNew=false;
 	long r = bb_serverUpdate(elapsed,UPDATE_SEND_RECV,IP);
 
@@ -415,11 +415,9 @@ int cMasterServer::GetBV2List(CClient *client)
 
 	if(!client) return 0;
 
-	if(client->nbGames > 0) 
-	{
-		printf("Player %i is already querying master\n",client->BabonetID);
-		return 0;
-	}
+	// Reset any in-progress queue (refresh on the same TCP session).
+	client->nbGames = 0;
+	client->CurrentGame = 0;
 
 	//on va sneder les info du master au player
 	stMasterInfo info;
@@ -427,20 +425,17 @@ int cMasterServer::GetBV2List(CClient *client)
 	
 	bb_serverSend((char*)&info,sizeof(stMasterInfo),MASTER_INFO,client->BabonetID);
 	
-	//y a til des enregistrement retourne ?
+	// Send every BV2_ROW now instead of one per tick (CClient::Update), so a
+	// quick refresh or disconnect can't lose rows.
 	if(NbGames)
 	{
-		client->nbGames = NbGames;
-		client->CurrentGame = 0;
-
 		int i=0;
-		//on va copier les game a notre client
 		for(cBV2game *G=Games;G;G=G->Next)
 		{
-			memcpy(&(client->CurrentGames[i]),&(G->GameInfos),sizeof(stBV2row));
+			bb_serverSend((char*)&(G->GameInfos), sizeof(stBV2row), BV2_ROW, client->BabonetID);
 
 			i++;
-			if(i>=100) return 0;
+			if(i>=100) break;
 		}
 	}
 	
@@ -479,21 +474,42 @@ int cMasterServer::UpdateGame(stBV2row *row,unsigned long fromID)
 	char	SQL[300];
 	sprintf(SQL,"Select Value From Settings Where Name = 'DBVersion';");
 
+	azResult = 0;
+	zErrMsg = 0;
 	int dbResult = sqlite3_get_table(MasterDB,SQL,&azResult,&nRow,&nColumn,&zErrMsg);
-	unsigned short version = (unsigned short)atoi(azResult[1]);
+	unsigned short version = 0;
+	if (dbResult == SQLITE_OK && azResult && nRow >= 1 && nColumn >= 1 && azResult[nColumn])
+		version = (unsigned short)atoi(azResult[nColumn]);
+	if (zErrMsg)
+	{
+		sqlite3_free(zErrMsg);
+		zErrMsg = 0;
+	}
 	sqlite3_free_table(azResult);
+	azResult = 0;
 
 	if( row->DBVersion != version )
 	{
 		sprintf(SQL,"Select Value From Settings Where Name = 'AccountURL';");
 		dbResult = sqlite3_get_table(MasterDB,SQL,&azResult,&nRow,&nColumn,&zErrMsg);
-		
-		// send url!
-		char *buf = new char[512];
-		memcpy(buf,&version,2);
-		sprintf(buf + 2,azResult[1]);
-		bb_serverSend( buf,512,ACCOUNT_URL,fromID);
-		delete [] buf;
+
+		// send url! (DB value is data, never a format string)
+		if (dbResult == SQLITE_OK && azResult && nRow >= 1 && nColumn >= 1 && azResult[nColumn])
+		{
+			char *buf = new char[512];
+			memset(buf, 0, 512);
+			memcpy(buf,&version,2);
+			snprintf(buf + 2, 510, "%s", azResult[nColumn]);
+			bb_serverSend( buf,512,ACCOUNT_URL,fromID);
+			delete [] buf;
+		}
+		if (zErrMsg)
+		{
+			sqlite3_free(zErrMsg);
+			zErrMsg = 0;
+		}
+		sqlite3_free_table(azResult);
+		azResult = 0;
 	}
 
 	
