@@ -22,11 +22,11 @@
 #ifndef PACKET_H
 #define PACKET_H
 
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 	#include <Memory.h>
 	#include "winsock2.h"
 #else
-	#include "LinuxHeader.h"
+	#include "platform.h"
 #endif
 
 #include "stdio.h"

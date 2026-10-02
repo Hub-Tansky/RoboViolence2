@@ -118,7 +118,7 @@ int cServer::PrepareHosting()
     	}
 
 	// lose the pesky "address already in use" error message
-	#ifdef WIN32	
+	#ifdef BV2_PLATFORM_WINDOWS	
 		char yes = '1';
 	#else
 		int yes = 1;
@@ -252,7 +252,7 @@ int cServer::SendPacketsToClients()
 	//		// insert all valid fd's back
 	//		for(cClient *C = Clients;C;C=C->Next)
 	//		{
-	//			#ifdef WIN32
+	//			#ifdef BV2_PLATFORM_WINDOWS
 	//				static int BAD_SOCKET = INVALID_SOCKET;
 	//			#else
 	//				static int BAD_SOCKET = -1;
@@ -540,7 +540,7 @@ INT4 cServer::ReceivePacketsFromClients()
 	//			int nbytes=0;		//garde le nombre de bytes retourner par recv()
 	//			char buf[2048];		//buffer for client data
 	//			sockaddr_in remip;	//remoteip
-	//			#ifdef WIN32
+	//			#ifdef BV2_PLATFORM_WINDOWS
 	//				int len = sizeof(sockaddr);
 	//			#else
 	//				socklen_t len = sizeof(sockaddr);
@@ -695,7 +695,7 @@ INT4 cServer::UpdateConnections(char *newIP)
 
 void cServer::CloseSocket(int socketFD)
 {
-	#ifdef WIN32
+	#ifdef BV2_PLATFORM_WINDOWS
 		closesocket(socketFD);
 	#else
 		close(socketFD);
@@ -838,7 +838,7 @@ INT4 cServer::CreateClient(sockaddr_in *ip, int fileDescriptor,unsigned short ud
 		Cli	=	Clients;
 	}
 
-	#ifdef WIN32
+	#ifdef BV2_PLATFORM_WINDOWS
 		char yes = '1';
 	#else
 		int yes = 1;

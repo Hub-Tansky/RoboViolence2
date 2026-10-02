@@ -6,9 +6,9 @@
 
 
 
-#include "platform_types.h"
+#include "platform.h"
 
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 #ifndef DLL_EXPORTS
 #define DLL_API __declspec(dllexport)
 #else
@@ -47,8 +47,8 @@
 #include "glext.h" // [dsl] I just put it inside our folder
 #else
 #define DLL_API
-#include "LinuxHeader.h"
-#ifdef __MACOSX__
+#include "platform.h"
+#ifdef BV2_PLATFORM_MACOS
 #include <SDL_opengl.h>
 #else
 #include <GL/gl.h>

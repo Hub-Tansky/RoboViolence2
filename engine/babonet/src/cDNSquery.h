@@ -19,11 +19,11 @@
 #ifndef _DNS_QUERY_
 #define _DNS_QUERY_
 
-#include "platform_types.h"
+#include "platform.h"
 
 #include "CThread.h"
 
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 	#include "Winsock2.h"
 #else
 	#include "memory.h"

@@ -75,7 +75,7 @@ void			dkcInit(int framePerSecond)
 {
 	CDkc::framePerSeconde = framePerSecond;
 
-	#ifdef WIN32
+	#ifdef BV2_PLATFORM_WINDOWS
 		// On check si on peut utiliser un timer de haute performance
 		if (!QueryPerformanceFrequency((LARGE_INTEGER *) &(CDkc::frequency)))
 		{
@@ -122,7 +122,7 @@ INT4			dkcUpdateTimer()
 	// On prend le nombre de tick du CPU
 	INT64 lGetTickCount;
 	
-	#ifdef WIN32
+	#ifdef BV2_PLATFORM_WINDOWS
 		if (CDkc::usePerformanceTimer)
 		{
 			QueryPerformanceCounter((LARGE_INTEGER *) &lGetTickCount);
@@ -178,7 +178,7 @@ INT4			dkcUpdateTimer()
 
 void			dkcSleep(INT4 ms)
 {
-	#ifdef WIN32
+	#ifdef BV2_PLATFORM_WINDOWS
 		INT4 timeMem = GetTickCount();
 		INT4 currentTime = timeMem;
 		while (currentTime - timeMem < ms)

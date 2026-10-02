@@ -19,8 +19,8 @@
 #include "dkoInner.h"
 #include "CdkoMesh.h"
 
-#ifndef WIN32
-	#include "LinuxHeader.h"
+#ifndef BV2_PLATFORM_WINDOWS
+	#include "platform.h"
 #endif
 
 //

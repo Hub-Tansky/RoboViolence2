@@ -834,7 +834,7 @@ void Server::recvPacket(char * buffer, int typeID, unsigned long bbnetID)
 						//
 						//game->players[playerCoordFrame.playerID]->miNbCoord++;
 
-						//#ifdef WIN32
+						//#ifdef BV2_PLATFORM_WINDOWS
 						//	game->players[playerCoordFrame.playerID]->mfCumulativeVel += max( fabsf(vDiff.x()) , fabsf(vDiff.y()) );
 						//#else
 						//	game->players[playerCoordFrame.playerID]->mfCumulativeVel += amax( fabsf(vDiff.x()) , fabsf(vDiff.y()) );

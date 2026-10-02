@@ -19,8 +19,8 @@
 #ifndef CONSOLE_H
 #define CONSOLE_H
 
-#ifndef WIN32
-	#include "LinuxHeader.h"
+#ifndef BV2_PLATFORM_WINDOWS
+	#include "platform.h"
 #endif
 
 #include "Zeven.h"

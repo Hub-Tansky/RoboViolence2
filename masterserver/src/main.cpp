@@ -1,5 +1,5 @@
 
-#ifndef WIN32
+#ifndef BV2_PLATFORM_WINDOWS
 	#include "sys/times.h"
 
 	#define stricmp strcasecmp //helper define
@@ -25,7 +25,7 @@ int main()
 	dkcInit(30);
 
 	//linux time struct
-	#ifndef WIN32
+	#ifndef BV2_PLATFORM_WINDOWS
 		timespec ts;
 
 		ts.tv_sec = 0;
@@ -49,7 +49,7 @@ int main()
 			nbFrameElapsed--;
 		}
 		//linux sleep
-		#ifndef WIN32
+		#ifndef BV2_PLATFORM_WINDOWS
 			nanosleep(&ts,0);
 			ts.tv_sec = 0;
 			ts.tv_nsec = 1000000;

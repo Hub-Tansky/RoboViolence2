@@ -19,12 +19,12 @@
 #ifndef CLIENT_H
 #define CLIENT_H
 
-#include "platform_types.h"
+#include "platform.h"
 
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 	#include "winsock2.h"
 #else
-	#include "LinuxHeader.h"
+	#include "platform.h"
 #endif
 
 #include "md5class.h"

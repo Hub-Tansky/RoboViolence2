@@ -24,7 +24,7 @@
 
 
 
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 #ifndef DLL_EXPORTS
 #define DLL_API __declspec(dllexport)
 #else
@@ -34,7 +34,7 @@
 #define DLL_API
 #endif
 
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 #pragma comment( lib, "opengl32.lib" )
 #pragma comment( lib, "glu32.lib" )
 
@@ -44,15 +44,15 @@
 
 #include <vector>
 
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 // Les includes pour opengl
 #include <gl/gl.h> 
 #include <gl/glu.h> 
 //#include <gl/glext.h> 
 #else
-#include "linux_types.h"
-#include "LinuxHeader.h"
-#ifdef __MACOSX__
+#include "platform.h"
+#include "platform.h"
+#ifdef BV2_PLATFORM_MACOS
 #include <SDL_opengl.h>
 #else
 #include <GL/gl.h>

@@ -22,9 +22,9 @@
 
 
 
-#include "platform_types.h"
+#include "platform.h"
 
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 	#ifndef DLL_EXPORTS
 		#define DLL_API(p) __declspec(dllexport) p
 	#else
@@ -35,7 +35,7 @@
 	#define INT64 __int64
 #else
 	#define DLL_API(p) p
-	#include "LinuxHeader.h"
+	#include "platform.h"
 	#define INT64 unsigned long long
 #endif
 

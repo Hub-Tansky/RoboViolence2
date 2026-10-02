@@ -31,8 +31,8 @@
 #define MAX_CARAC 512
 
 //an include file wich ease the includiung of Linux include files
-#ifndef WIN32
-	#include "LinuxHeader.h"
+#ifndef BV2_PLATFORM_WINDOWS
+	#include "platform.h"
 #endif
 
 #include <string.h>

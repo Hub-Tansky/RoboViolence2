@@ -44,7 +44,7 @@ private:
 
 protected:
 
-#ifndef WIN32
+#ifndef BV2_PLATFORM_WINDOWS
 	//pthread_t threadID;
 #endif
 

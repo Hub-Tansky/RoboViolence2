@@ -25,7 +25,7 @@
 #include <time.h>
 #include <fstream>
 #include <algorithm>
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 	#include <direct.h>
 #else
 	#include <dirent.h>
@@ -277,7 +277,7 @@ std::vector<CString> Server::populateMapList(bool all)
 		maps = mapList;
 	else
 	{
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 		WIN32_FIND_DATA FindFileData;
 		HANDLE hFind = INVALID_HANDLE_VALUE;
 		char DirSpec[MAX_PATH]; // directory specification

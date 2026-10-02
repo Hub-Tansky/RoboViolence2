@@ -57,7 +57,7 @@ cPeer2Peer::cPeer2Peer()
 void cPeer2Peer::CloseSocket(int socketFD)
 {
 
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 	closesocket(socketFD);
 #else
 	close(socketFD);
@@ -84,7 +84,7 @@ int cPeer2Peer::PrepareSockets()
         return 1;
     }
 
-	#ifdef WIN32
+	#ifdef BV2_PLATFORM_WINDOWS
 		char yes = '1';
 	#else
 		int yes = 1;
@@ -385,7 +385,7 @@ int cPeer2Peer::ReceiveFromPeers()
 		{
 			int				nbytes	=	0;
 			
-			#ifdef WIN32
+			#ifdef BV2_PLATFORM_WINDOWS
 				int	len	=	sizeof(sockaddr_in);
 			#else
 				socklen_t len	=	sizeof(sockaddr_in);
@@ -428,7 +428,7 @@ int cPeer2Peer::ReceiveFromPeers()
 		{
 			int				nbytes	=	0;
 
-			#ifdef WIN32
+			#ifdef BV2_PLATFORM_WINDOWS
 				int	len =	sizeof(sockaddr_in);
 			#else
 				socklen_t len = sizeof(sockaddr_in);

@@ -24,7 +24,7 @@
 
 
 
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 #ifndef DLL_EXPORTS
 #define DLL_API __declspec(dllexport)
 #else
@@ -36,7 +36,7 @@
 
 
 
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 // Et oui, on utilise directInput :(
 #pragma comment( lib, "dinput8.lib" )
 #pragma comment( lib, "dxguid.lib" )
@@ -48,8 +48,8 @@
 #include <dinput.h>
 #else
 
-#include "LinuxHeader.h"
-#include "linux_types.h"
+#include "platform.h"
+#include "platform.h"
 
 #endif
 
@@ -112,7 +112,7 @@ struct _typMousePos
 class CDki
 {
 public:
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 	// L'objet DirectInput
 	static LPDIRECTINPUT8 diObject;
 
@@ -137,7 +137,7 @@ public:
 	static DIMOUSESTATE2 mouseStateDI;
 	static _typMousePos mousePos;
 
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 	// Pour le joystick
 	static DIDEVCAPS JoyCaps;
 	static DIPROPRANGE diprg;

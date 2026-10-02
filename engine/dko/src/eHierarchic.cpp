@@ -17,7 +17,7 @@
 */
 
 #include "eHierarchic.h"
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 #ifndef CONSOLE
 #ifndef CONSOLE
 	#include <windows.h>
@@ -25,8 +25,8 @@
 #endif
 #endif
 #else
-#include "LinuxHeader.h"
-#ifdef __MACOSX__
+#include "platform.h"
+#ifdef BV2_PLATFORM_MACOS
 #include <SDL_Opengl.h>
 #else
 #include <GL/gl.h>

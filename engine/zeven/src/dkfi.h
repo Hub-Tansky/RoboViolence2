@@ -24,7 +24,7 @@
 
 
 
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 #ifndef DLL_EXPORTS
 #define DLL_API __declspec(dllexport)
 #else

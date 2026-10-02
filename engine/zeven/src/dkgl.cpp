@@ -48,7 +48,7 @@ void dkglEnableVsync(bool vsync)
 
 		if( dkglCheckExtension( "WGL_EXT_swap_control" ) )
 		{
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 			typedef BOOL (APIENTRY *PFNWGLSWAPINTERVALFARPROC)( int );
 			PFNWGLSWAPINTERVALFARPROC wglSwapIntervalEXT = 0;
 
@@ -120,14 +120,14 @@ int				 dkglCreateContext(
 
 	// On cré un rendering context
 	CDkgl::renderingContext = 
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 	  wglCreateContext(CDkgl::deviceContext);
 #else
 	mDC;
 #endif
 
 	// On le met comme courant
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 	wglMakeCurrent(CDkgl::deviceContext, CDkgl::renderingContext); // On le met comme device courant
 
 #else
@@ -348,7 +348,7 @@ void			 dkglSetProjection(float mFieldOfView, float mNear, float mFar, float mWi
 //
 void			 dkglShutDown()
 {
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 	wglMakeCurrent(NULL, NULL);
 	wglDeleteContext(CDkgl::renderingContext);
 #else
@@ -364,7 +364,7 @@ void			 dkglShutDown()
 //
 int initPixelFormat(HDC mDC, int colorDepth)
 {
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 	// on défini le format des pixels
 	PIXELFORMATDESCRIPTOR pfd=
 		{

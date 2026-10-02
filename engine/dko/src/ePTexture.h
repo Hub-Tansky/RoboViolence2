@@ -20,15 +20,15 @@
 #define EPTEXTURE_H
 
 
-#include "platform_types.h"
-#ifdef WIN32
+#include "platform.h"
+#ifdef BV2_PLATFORM_WINDOWS
 #ifndef CONSOLE
 	#include <windows.h>
 	#include <gl/gl.h>
 	#include <gl/glu.h>
 #endif
 #else
-#ifdef __MACOSX__
+#ifdef BV2_PLATFORM_MACOS
 	#include <SDL_opengl.h>
 #else
 	#include <GL/gl.h>
@@ -36,8 +36,8 @@
 #endif
 #endif
 
-#ifndef WIN32
-	#include "LinuxHeader.h"
+#ifndef BV2_PLATFORM_WINDOWS
+	#include "platform.h"
 #endif
 
 #include <stdio.h>

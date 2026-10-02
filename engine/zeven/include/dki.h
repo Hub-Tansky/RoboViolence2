@@ -36,7 +36,7 @@
 #define DKI_H
 
 
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 #pragma comment ( lib , "dki.lib" )
 
 

@@ -24,7 +24,7 @@
 
 
 
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 #ifndef DLL_EXPORTS
 #define DKS_DLL_API __declspec(dllexport)
 #else
@@ -35,7 +35,7 @@
 #endif
 
 
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 #include <windows.h>
 
 

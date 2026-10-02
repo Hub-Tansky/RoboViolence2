@@ -24,7 +24,7 @@
 #include "cIncConnection.h"
 
 
-#ifndef WIN32
+#ifndef BV2_PLATFORM_WINDOWS
 	#include <sys/socket.h>
 	#include <netinet/in.h>
 	#include <arpa/inet.h>

@@ -132,7 +132,7 @@ void CUrlData::add(CString key, std::string value, int flags /* = CUrlData::NONE
 		console->add("\x2>Base64 Encoding Data", true);
 		std::string b64 = base64_encode(value);
 		console->add("\x2>Escaping Data", true);
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 		char* enc = curl_easy_escape(0, b64.c_str(), (int)b64.size());
 #else
 		char* enc = curl_escape(b64.c_str(), (int)b64.size());

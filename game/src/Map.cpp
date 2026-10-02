@@ -27,7 +27,7 @@
 #include "CRain.h"
 #include "CSnow.h"
 #include "CLava.h"
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 #include <direct.h>
 #else
 #include <dirent.h>
@@ -1579,7 +1579,7 @@ bool Map::rayTest(CVector3f & p1, CVector3f & p2, CVector3f & normal)
 void GetMapList(std::vector< CString > & maps)
 {
 	maps.clear();
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 	WIN32_FIND_DATA FindFileData;
 	HANDLE hFind = INVALID_HANDLE_VALUE;
 	char DirSpec[MAX_PATH];  // directory specification

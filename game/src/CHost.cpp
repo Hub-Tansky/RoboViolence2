@@ -19,7 +19,7 @@
 #ifndef CONSOLE
 
 #include "CHost.h"
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 #include <direct.h>
 #endif
 #include "Map.h"

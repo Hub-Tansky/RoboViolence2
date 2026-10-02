@@ -1,11 +1,11 @@
 #ifndef _MASTERSERVER_H
 #define	_MASTERSERVER_H
 
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 	#include "stdlib.h"
 	#include "string.h"
 #else
-	#include "LinuxHeader.h"
+	#include "platform.h"
 #endif
 
 #include "cMSstruct.h"

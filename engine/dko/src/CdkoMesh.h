@@ -25,7 +25,7 @@
 #include <string.h>
 
 
-#include "platform_types.h"
+#include "platform.h"
 
 #include "eHierarchic.h"
 

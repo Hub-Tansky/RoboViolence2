@@ -21,9 +21,9 @@
 
 #include "dkwi.h"
 #include <string.h>
-#ifndef WIN32
-#include "linux_types.h"
-#ifdef __MACOSX__
+#ifndef BV2_PLATFORM_WINDOWS
+#include "platform.h"
+#ifdef BV2_PLATFORM_MACOS
 #include <SDL.h>
 #else
 #include <SDL/SDL.h>
@@ -40,7 +40,7 @@ char *CDkw::lastErrorString = 0;
 int CDkw::w = 640;
 int CDkw::h = 480;
 int CDkw::colorDepth = 16;
-#ifndef WIN32
+#ifndef BV2_PLATFORM_WINDOWS
 unsigned long CDkw::flags = SDL_HWSURFACE | SDL_OPENGL | SDL_DOUBLEBUF | SDL_ASYNCBLIT  | SDL_OPENGLBLIT | SDL_HWACCEL;
 #endif
 
@@ -52,7 +52,7 @@ bool CDkw::running = true;
 CMainLoopInterface *CDkw::mainLoopObject = 0;
 CVector2i CDkw::cursorPos;
 bool done = false;
-#ifndef WIN32
+#ifndef BV2_PLATFORM_WINDOWS
 static unsigned long clear_counter = 0;
 DIMOUSESTATE2 CDkw::mouse_state;
 unsigned char CDkw::keys_state[256+128+8];
@@ -140,7 +140,7 @@ void CDkw::updateLastError(char *error)
 /// http://www.toymaker.info/Games/html/wndproc.html# \n
 /// http://www.newty.de/fpt/index.html
 ////////////////////////////////////////////////////////////////////////////////////////
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 LRESULT CALLBACK CDkw::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch (uMsg)
@@ -489,7 +489,7 @@ LRESULT CALLBACK CDkw::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 //
 // La plus importante. Cré la fenêtre et init les cossin
 //
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 int dkwInit(int width, int height, int mcolorDepth, char* mTitle, CMainLoopInterface *mMainLoopObject, bool fullScreen, int refreshRate)
 {
 	CDkw::mainLoopObject = mMainLoopObject;
@@ -694,7 +694,7 @@ int dkwInit(int width, int height, int mcolorDepth, char* mTitle, CMainLoopInter
 //
 // Pour forcer l'application à fermer
 //
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 void dkwForceQuit()
 {
 	// On ne pose pas de question, on mets ça à false
@@ -781,7 +781,7 @@ CVector2i dkwGetResolution()
 // On clip la mouse au window rect
 void dkwClipMouse( bool abEnabled )
 {
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 	if( !HasFocus )
 		return;
 
@@ -796,7 +796,7 @@ void dkwClipMouse( bool abEnabled )
 //
 // On effectu le loop principal de l'application
 //
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 int dkwMainLoop()
 {
 	while(!done)
@@ -865,7 +865,7 @@ int dkwMainLoop(bool * aExitFlag)
 #endif
 
 
-#ifndef WIN32
+#ifndef BV2_PLATFORM_WINDOWS
 void dkwGetMouseState(DIMOUSESTATE2 * aMouseState)
 {
     (aMouseState && memcpy(aMouseState, & CDkw::mouse_state, sizeof(CDkw::mouse_state)), 0);
@@ -901,7 +901,7 @@ void			dkwShutDown()
 
 	dkwClipMouse( false );
 
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 	DestroyWindow(CDkw::hWnd);
 #else
     
@@ -917,7 +917,7 @@ void			dkwShutDown()
 //
 void			dkwUpdate()
 {
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 	// Le mainloop
 	MSG msg;
 	ZeroMemory (&msg, sizeof(MSG));

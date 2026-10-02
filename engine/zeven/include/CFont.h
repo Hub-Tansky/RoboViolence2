@@ -54,7 +54,7 @@ Voici quelque spécificité :
 using namespace std;
 
 
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 
 #pragma comment( lib, "opengl32.lib" )
 #pragma comment( lib, "dkt.lib" )
@@ -66,7 +66,7 @@ using namespace std;
 #include <gl/glu.h> 
 //#include <gl/glext.h>
 
-#elif __MACOSX__
+#elif BV2_PLATFORM_MACOS
 #include <SDL_opengl.h>
 #else
 #include <GL/gl.h>

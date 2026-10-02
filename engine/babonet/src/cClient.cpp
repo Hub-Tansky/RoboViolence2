@@ -257,7 +257,7 @@ int	cClient::ReceivePacketsFromServer()
 	{
 		//sprintf(LastError,"Error : Problem select()ing while cClient::ReceivePacketsFromServer() WSA : %i",WSAGetLastError());
 		sprintf(LastError,"Error : client, error while selecting, err no. %d", 
-		#ifdef WIN32
+		#ifdef BV2_PLATFORM_WINDOWS
 		WSAGetLastError()
 		#else
 		errno
@@ -282,7 +282,7 @@ int	cClient::ReceivePacketsFromServer()
 			{
 				//on va recevoir des packets
 				sockaddr_in remoteIP;
-				#ifdef WIN32
+				#ifdef BV2_PLATFORM_WINDOWS
 					int len	= sizeof(sockaddr_in);
 				#else
 					socklen_t len	= sizeof(sockaddr_in);
@@ -1152,7 +1152,7 @@ cClient::~cClient()
 
 void cClient::CloseSocket(int socketFD)
 {
-	#ifdef WIN32
+	#ifdef BV2_PLATFORM_WINDOWS
 		closesocket(socketFD);
 	#else
 		close(socketFD);

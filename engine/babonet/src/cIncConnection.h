@@ -22,10 +22,10 @@
 #include "baboNet.h"
 #include "time.h"
 
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 	#include "Winsock2.h"
 #else
-	#include "LinuxHeader.h"
+	#include "platform.h"
 #endif
 
 #include "md5class.h"

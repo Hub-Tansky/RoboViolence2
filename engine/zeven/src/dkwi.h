@@ -24,7 +24,7 @@
 
 
 
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 #ifndef DLL_EXPORTS
 #define DLL_API __declspec(dllexport)
 #else
@@ -36,13 +36,13 @@
 #endif
 
 
-#include "platform_types.h"
+#include "platform.h"
 
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 #include <windows.h>
 #else
 #include <SDL/SDL.h>
-#include "linux_types.h"
+#include "platform.h"
 #endif
 
 #include "CVector.h"
@@ -119,7 +119,7 @@ public:
 
 	// La windows procedure
 	static LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-#ifndef WIN32
+#ifndef BV2_PLATFORM_WINDOWS
 	static unsigned long flags;
 	static DIMOUSESTATE2 mouse_state;
 	static unsigned char keys_state[256+128+8];

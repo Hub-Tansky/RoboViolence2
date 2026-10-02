@@ -37,7 +37,7 @@
 #define DKSVAR_H
 
 
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 //#pragma comment (lib, "dksvar.lib")
 #endif
 

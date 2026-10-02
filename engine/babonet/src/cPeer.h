@@ -19,7 +19,7 @@
 #ifndef _PEER_H
 #define	_PEER_H
 
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 	#include "winsock2.h"
 #else
 	#include "memory.h"

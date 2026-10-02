@@ -50,12 +50,12 @@
 #define DKW_H
 
 
-#include "platform_types.h"
+#include "platform.h"
 
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 #include <windows.h>
 #else
-#include "LinuxHeader.h"
+#include "platform.h"
 #endif
 
 #include "CVector.h"
@@ -177,7 +177,7 @@ CVector2i		dkwGetResolution();
 /// Cette fonction est la boucle principale du programme. Elle ne doit être appelé qu'une fois pour toute la durée de l'exécution du programme. L'exécution de cette fonction ne se terminera que lorsque le message système WM_QUIT aura été reçu.
 ///
 /// \return 0 si l'exécution s'est déroulée normalement, retourne 1 sinon
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 int				dkwMainLoop();
 #else
 int dkwMainLoop(bool *);
@@ -207,7 +207,7 @@ void			dkwUpdate();
 
 void			dkwClipMouse( bool abEnabled );
 
-#ifndef WIN32
+#ifndef BV2_PLATFORM_WINDOWS
 void dkwGetMouseState(DIMOUSESTATE2 * aMouseState);
 void dkwGetKeysState(unsigned char * aState, int aSize);
 #endif

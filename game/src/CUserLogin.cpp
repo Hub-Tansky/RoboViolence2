@@ -288,7 +288,7 @@ void CUserLogin::Click(CControl * control)
 	}
 	if (control == btn_createAccount)
 	{
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 	//	ShellExecute(dkwGetHandle(), "OPEN", "Register.lnk", NULL, NULL, SW_SHOW);
 	//	ShellExecute(0, "OPEN", "http://p3.envision3d.org/~league/", "", NULL/*lcTPath*/, 1);
 	//	ShellExecute(0, "", "http://p3.envision3d.org/~league/", "", "", SW_SHOWNORMAL);

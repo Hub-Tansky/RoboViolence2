@@ -20,7 +20,7 @@
 #define CFACE_H
 
 
-#include "platform_types.h"
+#include "platform.h"
 #include "CVector.h"
 
 

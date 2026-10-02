@@ -70,7 +70,7 @@ int cIncConnection::Update()
 				// handle new connections
 			sockaddr_in remoteaddr;		// new client address
 			
-			#ifdef WIN32
+			#ifdef BV2_PLATFORM_WINDOWS
 				int addrlen = sizeof(sockaddr);
 			#else
 				socklen_t addrlen = sizeof(sockaddr);
@@ -231,7 +231,7 @@ int cIncConnection::Update()
 	else
 	{
 		sockaddr_in remoteaddr;				// new client address
-		#ifdef WIN32
+		#ifdef BV2_PLATFORM_WINDOWS
 			int addrlen = sizeof(sockaddr);
 		#else
 			socklen_t addrlen = sizeof(sockaddr);
@@ -254,7 +254,7 @@ int cIncConnection::Update()
 void cIncConnection::CloseSocket(int socketFD)
 {
 
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 	closesocket(socketFD);
 #else
 	close(socketFD);

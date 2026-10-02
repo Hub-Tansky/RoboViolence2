@@ -254,7 +254,7 @@ int	cClient::ReceivePacketsFromServer()
 			{
 				//on va recevoir des packets
 				sockaddr_in remoteIP;
-				#ifdef WIN32
+				#ifdef BV2_PLATFORM_WINDOWS
 					int len	= sizeof(sockaddr);
 				#else
 					socklen_t len	= sizeof(sockaddr);
@@ -1119,7 +1119,7 @@ cClient::~cClient()
 
 void cClient::CloseSocket(int socketFD)
 {
-	#ifdef WIN32
+	#ifdef BV2_PLATFORM_WINDOWS
 		closesocket(socketFD);
 	#else
 		close(socketFD);

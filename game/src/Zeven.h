@@ -83,7 +83,7 @@
 #define ZEVEN_SUCCESS 1
 #define ZEVEN_FAIL 0
 
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 	#define ZEVEN_DELETE_VECTOR(a, cpt) for (cpt=0;cpt<(int)a.size();delete a[cpt++]); a.clear();
 	#define ZEVEN_VECTOR_CALL(a, cpt, func) for (cpt=0;cpt<(int)a.size();++cpt) a[cpt]->func;
 #else

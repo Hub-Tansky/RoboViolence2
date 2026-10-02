@@ -37,11 +37,11 @@
 #define DKC_H
 
 
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 	#include <windows.h>
 #endif
 
-#include "platform_types.h"
+#include "platform.h"
 
 
 

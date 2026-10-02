@@ -19,12 +19,12 @@
 #include "CThread.h"
 
 // OS dependant
-#ifdef WIN32				//Win32   
+#ifdef BV2_PLATFORM_WINDOWS				//Win32   
 	#define WIN32_LEAN_AND_MEAN
 	#include <windows.h>		
 #else
 	#include <sched.h>		//Linux
-	#include "LinuxHeader.h"
+	#include "platform.h"
 		
 	typedef void* (*PTHREAD_START_ROUTINE)(
 
@@ -43,7 +43,7 @@
 int createThread(unsigned long (*pFuncter)(void*), void * pParam, unsigned long & pThreadID, int pPriority)
 {
 
-	#ifdef WIN32
+	#ifdef BV2_PLATFORM_WINDOWS
 		// We create the thread using win32 API
 		HANDLE hThread = CreateThread(0, 0, (LPTHREAD_START_ROUTINE)pFuncter, pParam, 0, &pThreadID);
 
@@ -147,7 +147,7 @@ void CThread::run(void * pArg)
 	execute(pArg);
 	mIsRunning = false;
 
-#ifndef WIN32
+#ifndef BV2_PLATFORM_WINDOWS
 	pthread_detach(mThreadId);
 	pthread_exit(0);
 #endif

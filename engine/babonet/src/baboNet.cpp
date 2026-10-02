@@ -23,22 +23,22 @@
 // Description : BaboNet network library main code
 ////////////////////////////////////////////////
 
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 	#define WIN32_MEAN_AND_LEAN
 	#pragma comment (lib,"ws2_32.lib")
 	#pragma comment (lib,"iphlpapi.lib")
 	#include "winsock2.h"
 	#include <iphlpapi.h> // this is used for getting mac adress
 #endif
-#ifdef __MACOSX__
+#ifdef BV2_PLATFORM_MACOS
 	#include <net/route.h>
 	#include <netinet/in.h>
 	#include <net/if.h>
 	#include <net/if_dl.h>
 	#include <ifaddrs.h>
 #endif
-#ifndef WIN32
-	#include "LinuxHeader.h"
+#ifndef BV2_PLATFORM_WINDOWS
+	#include "platform.h"
 #endif
 
 #include "baboNet.h"		//les fonctions visible au user
@@ -79,7 +79,7 @@
 	FILE * LogFile=0;
 #endif
 
-#ifdef __MACOSX__		
+#ifdef BV2_PLATFORM_MACOS		
 static struct ifaddrs * ifdevices = 0;
 static char iface[8];
 #endif
@@ -96,7 +96,7 @@ cClient *getClientByID(UINT4 clientID)
 
 void CloseSocket(int socketFD)
 {
-	#ifdef WIN32
+	#ifdef BV2_PLATFORM_WINDOWS
 		closesocket(socketFD);
 	#else
 		close(socketFD);
@@ -117,7 +117,7 @@ int bb_init()
 		sprintf(Version,"4.0");
 
 	//if we are running on windows, we have some initialisation to make
-	#ifdef WIN32
+	#ifdef BV2_PLATFORM_WINDOWS
 		// Tiens les infos sur winsock, dont la version
 			WSADATA		WinSockInfo;
 				
@@ -159,7 +159,7 @@ int bb_init()
 		MainClients	=	0;
 		P2P			=	0;
 		
-#ifdef __MACOSX__
+#ifdef BV2_PLATFORM_MACOS
 		getifaddrs(& ifdevices);
 		struct ifaddrs * a = ifdevices;
 		while(a)
@@ -594,10 +594,10 @@ void bb_shutdown()
 	if(P2P)			delete P2P;
 	P2P			=	0;
 	
-	#ifdef WIN32
+	#ifdef BV2_PLATFORM_WINDOWS
 		WSACleanup();
 	#endif
-	#ifdef __MACOSX__
+	#ifdef BV2_PLATFORM_MACOS
 	if(ifdevices)
 		freeifaddrs(ifdevices);
 	ifdevices = 0;
@@ -646,7 +646,7 @@ int bb_serverShutdown()
 
 char *bb_getMyIP()
 {
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 		struct sockaddr_in ipAdress;
 		char buffer[80];
 		gethostname(buffer,sizeof(buffer));
@@ -654,7 +654,7 @@ char *bb_getMyIP()
 		memcpy(&ipAdress.sin_addr, phe->h_addr_list[0], sizeof(struct in_addr));
 		//printf("%s\n",buffer);
 		return inet_ntoa(ipAdress.sin_addr);
-#elif __MACOSX__
+#elif BV2_PLATFORM_MACOS
     static char ip[32];
     struct sockaddr_in * sin;
     struct ifaddrs * a;
@@ -749,7 +749,7 @@ char *bb_getMyIP()
 
 void bb_getMyMAC(unsigned char * AddrOut)
 {
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 
 			IP_ADAPTER_INFO AdapterInfo[16];       // Allocate information
 													// for up to 16 NICs
@@ -780,7 +780,7 @@ void bb_getMyMAC(unsigned char * AddrOut)
 
 		return;
 
-#elif __MACOSX__
+#elif BV2_PLATFORM_MACOS
     struct sockaddr_dl * sdl;
     struct ifaddrs * a = ifdevices;
 	

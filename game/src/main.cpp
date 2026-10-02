@@ -16,13 +16,7 @@
 	BaboViolent 2 source code. If not, see http://www.gnu.org/licenses/.
 */
 
-#ifdef WIN32
-#define _WIN32_WINNT 0x0400
-#endif
-
-#ifndef WIN32
-	#include "LinuxHeader.h"
-#endif
+#include "platform.h"
 
 #include "Zeven.h"
 #include "Scene.h"
@@ -45,7 +39,7 @@ static void bv2ApplyNetlogFromEnv()
 #endif
 
 
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 	#pragma comment (lib, "libcurl.lib")
 #endif
 
@@ -257,7 +251,7 @@ public:
 		}
 
       #ifdef NDEBUG
-      #ifdef WIN32
+      #ifdef BV2_PLATFORM_WINDOWS
   //    if (IsDebuggerPresent() == TRUE)
   //       {
   //       throw(0);
@@ -315,7 +309,7 @@ public:
 
 	void execute(void* pArg)
 	{
-		#ifndef WIN32 // linux timestruct for nanosleep
+		#ifndef BV2_PLATFORM_WINDOWS // linux timestruct for nanosleep
 			timespec ts;
 
 			ts.tv_sec = 0;
@@ -354,7 +348,7 @@ public:
 
 			while (internalLock)
 			{
-				#ifdef WIN32
+				#ifdef BV2_PLATFORM_WINDOWS
 					Sleep(1);
 				#else
 					if(nanosleep(&ts,0))
@@ -365,7 +359,7 @@ public:
 			//	printf("--- internalLock (execute)\n");
 			}
 
-			#ifdef WIN32
+			#ifdef BV2_PLATFORM_WINDOWS
 				Sleep(1);
 			#else
 			if(nanosleep(&ts,0))
@@ -387,7 +381,7 @@ public:
 			console->sendCommand(input);//CString("Execute CTF"));
 			unlock();
 
-			#ifdef WIN32
+			#ifdef BV2_PLATFORM_WINDOWS
 				Sleep(1);
 			#else
 				if(nanosleep(&ts,0))
@@ -406,7 +400,7 @@ public:
 
 	void lock()
 	{
-		#ifndef WIN32 // linux timestruct for nanosleep
+		#ifndef BV2_PLATFORM_WINDOWS // linux timestruct for nanosleep
 
 			timespec ts;
 
@@ -417,7 +411,7 @@ public:
 		locked = true;
 		while (!internalLock)
 		{
-			#ifdef WIN32
+			#ifdef BV2_PLATFORM_WINDOWS
 				Sleep(1);
 			#else
 				if(nanosleep(&ts,0))
@@ -467,7 +461,7 @@ int main(int argc, const char* argv[])
 
 
 
-	#ifndef WIN32 // linux timestruct for nanosleep
+	#ifndef BV2_PLATFORM_WINDOWS // linux timestruct for nanosleep
 		timespec ts;
 
 		ts.tv_sec = 0;
@@ -487,7 +481,7 @@ int main(int argc, const char* argv[])
 	// On init la network
 	if (bb_init() == 1)
 	{
-		#ifdef WIN32
+		#ifdef BV2_PLATFORM_WINDOWS
 			MessageBox(NULL, "Error initiating baboNet", "Error", 0);
 		#endif
 		return 0;
@@ -498,7 +492,7 @@ int main(int argc, const char* argv[])
 		// Error
 		bb_peerShutdown();
 		bb_shutdown();
-		#ifdef WIN32
+		#ifdef BV2_PLATFORM_WINDOWS
 			MessageBox(NULL, "Wrong version of BaboNet\nReinstalling the game may resolve this prolem", "Error", 0);
 		#endif
 		return 0;
@@ -522,7 +516,7 @@ int main(int argc, const char* argv[])
 
 
 /*	{
-		#ifndef WIN32 // linux timestruct for nanosleep
+		#ifndef BV2_PLATFORM_WINDOWS // linux timestruct for nanosleep
 			timespec ts;
 
 			ts.tv_sec = 0;
@@ -568,7 +562,7 @@ int main(int argc, const char* argv[])
 
 			while (s_internalLock)
 			{
-				#ifdef WIN32
+				#ifdef BV2_PLATFORM_WINDOWS
 					Sleep(1);
 				#else
 					if(nanosleep(&ts,0))
@@ -581,7 +575,7 @@ int main(int argc, const char* argv[])
 			//	printf("--- internalLock (execute)\n");
 			}
 
-			#ifdef WIN32
+			#ifdef BV2_PLATFORM_WINDOWS
 				Sleep(1);
 			#else
 			if(nanosleep(&ts,0))
@@ -617,7 +611,7 @@ int main(int argc, const char* argv[])
 		mainLoopConsole.unlock();
 
 
-		#ifdef WIN32
+		#ifdef BV2_PLATFORM_WINDOWS
 			Sleep(1);
 
 		#else

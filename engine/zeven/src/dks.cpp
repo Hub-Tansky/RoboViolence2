@@ -18,8 +18,8 @@
 
 /* TCE (c) All rights reserved */
 
-#ifndef WIN32
-#include "linux_types.h"
+#ifndef BV2_PLATFORM_WINDOWS
+#include "platform.h"
 #endif
 #include "dksi.h"
 #include <vector>
@@ -107,7 +107,7 @@ bool			dksInit(int mixrate, int maxsoftwarechannels)
     }
 
     result = FMOD_System_SetOutput(s_system, 
-#ifdef __MACOSX__
+#ifdef BV2_PLATFORM_MACOS
 	FMOD_OUTPUTTYPE_AUTODETECT
 #else
 	FMOD_OUTPUTTYPE_ALSA

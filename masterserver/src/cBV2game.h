@@ -4,8 +4,8 @@
 #include "stdio.h"
 #include "cMSstruct.h"
 
-#ifndef WIN32
-	#include "LinuxHeader.h"
+#ifndef BV2_PLATFORM_WINDOWS
+	#include "platform.h"
 #else
 	#include "memory.h"
 #endif

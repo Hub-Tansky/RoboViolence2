@@ -441,7 +441,7 @@ void Client::update(float delay)
 		}
 
 		// Screenshot
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 		if (dkiGetState(gameVar.k_screenShot) == DKI_DOWN && !console->isActive() && !chatting.haveFocus() && isConnected && !(menuManager.root && menuManager.root->visible))
 		{
       SaveScreenGrabAuto();

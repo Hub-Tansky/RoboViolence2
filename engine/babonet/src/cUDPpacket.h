@@ -19,8 +19,8 @@
 #ifndef _UDPPACKET_H
 #define _UDPPACKET_H
 
-#include "platform_types.h"
-#ifdef WIN32
+#include "platform.h"
+#ifdef BV2_PLATFORM_WINDOWS
 	#include <Memory.h>
 #else
 	#include "memory.h"

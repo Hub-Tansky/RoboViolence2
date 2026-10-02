@@ -1,10 +1,10 @@
 #ifndef CLIENT_H
 #define CLIENT_H
 
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 	#include "winsock2.h"
 #else
-	#include "LinuxHeader.h"
+	#include "platform.h"
 #endif
 
 #include "md5class.h"

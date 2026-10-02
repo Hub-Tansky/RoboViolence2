@@ -22,10 +22,10 @@
 #include "cPeer.h"
 #include "stdio.h"
 
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 	#include "ws2tcpip.h"
 #else
-	#include "LinuxHeader.h"
+	#include "platform.h"
 #endif
 #include "baboNet.h"
 #include "cDNSquery.h"

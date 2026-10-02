@@ -1,7 +1,7 @@
 #include "cMasterServer.h"
 
 
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 	#include <windows.h>
 	#include <time.h>
 
@@ -131,7 +131,7 @@ void cMasterServer::SendBanList( unsigned long fromID , char * filter )
 			stCacheBan ban;
 
 			long dateLong = atol( azResult[BV2_BAN_DATE] );
-#ifndef WIN32
+#ifndef BV2_PLATFORM_WINDOWS
 			GetDateString( ban.Date , dateLong );
 #endif
 
@@ -288,7 +288,7 @@ void cMasterServer::CheckBans()
 				continue;
 			}			
 
-#ifndef WIN32
+#ifndef BV2_PLATFORM_WINDOWS
 			int nbDays = GetDayDiff( dateLong , theTime );
 #else
 			int nbDays = 0;

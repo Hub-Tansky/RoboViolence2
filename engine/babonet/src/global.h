@@ -40,9 +40,9 @@ typedef unsigned char *POINTER;
 typedef unsigned short int UINT2;
 
 /* UINT4 defines a four byte word */
-#if defined(WIN32)
+#if defined(BV2_PLATFORM_WINDOWS)
 typedef unsigned long int UINT4;
-#elif defined(__LP64__) || defined(_LP64) || defined(LINUX64)
+#elif defined(__LP64__) || defined(_LP64) || defined(BV2_POSIX)
 typedef unsigned int UINT4;
 #else
 typedef unsigned long int UINT4;

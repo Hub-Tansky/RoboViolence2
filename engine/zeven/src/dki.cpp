@@ -21,13 +21,13 @@
 
 #include "dkii.h"
 
-#ifndef WIN32
+#ifndef BV2_PLATFORM_WINDOWS
 #include "dkw.h"
 //#include <SDL/SDL.h>
 #endif
 
 
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 // Les trucs static de notre class
 LPDIRECTINPUT8 CDki::diObject;
 LPDIRECTINPUTDEVICE8 CDki::diKeyboard;
@@ -46,7 +46,7 @@ DIMOUSESTATE2 CDki::mouseStateDI;
 
 _typMousePos CDki::mousePos;
 
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 DIDEVCAPS CDki::JoyCaps;
 DIPROPRANGE CDki::diprg;
 DIJOYSTATE2 CDki::EtatJoy;
@@ -57,7 +57,7 @@ float CDki::downTimer = 0;
 
 
 
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 //
 // Call back pour énumérer les axes du joystick
 //
@@ -80,7 +80,7 @@ BOOL CALLBACK EnumAxesCallback( const DIDEVICEOBJECTINSTANCE* pdidoi, VOID* pCon
 
 #endif
 
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 //
 // Call back pour énumérer les game pad
 //
@@ -154,7 +154,7 @@ int				dkiGetState(int inputID)
 }
 
 
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 
 //
 // On capte le joystick
@@ -194,7 +194,7 @@ int				dkiInit(HINSTANCE appInstance, HWND appHandle)
 		CDki::allState[i] = DKI_NOTHING;
 	}
 
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 	// On initialise l'objet direct input
 	DirectInput8Create(appInstance, DIRECTINPUT_VERSION, 
 		IID_IDirectInput8, (void**)&(CDki::diObject), NULL);
@@ -239,7 +239,7 @@ int				dkiInit(HINSTANCE appInstance, HWND appHandle)
 //
 void			dkiShutDown()
 {
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 	if (CDki::diJoypad)
 	{
 		CDki::diJoypad->Unacquire();
@@ -267,7 +267,7 @@ void			dkiShutDown()
 //
 // On update le tout
 //
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 void			dkiUpdate(float elapsef, int width, int height)
 {
 	(void)elapsef; // Disable warnings

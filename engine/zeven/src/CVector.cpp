@@ -22,7 +22,7 @@
 #include "CVector.h"
 #include <math.h>
 #include <stdlib.h>
-#include "platform_types.h"
+#include "platform.h"
 
 
 

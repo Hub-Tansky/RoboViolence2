@@ -27,13 +27,13 @@
 #define BB_BBNET_H
 
 //les includes
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 	#include "io.h"
 	#include "stdio.h"
 #else
 	#include "stdio.h"
 #endif
-#include "platform_types.h"
+#include "platform.h"
 
 //les defines
 
@@ -61,7 +61,7 @@
 	#define		NET_PUBLISH_PEERS	0x02	//disabled par defaut, si enabled, le "fake" server va communiquer les infos sur le ip/port de chaque peers quia entrer en communication avec
 
 /*
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 	#ifndef DLL_EXPORTS
 		#define BBNET_DLL_API __declspec(dllexport)
 	#else
@@ -73,7 +73,7 @@
 #endif
 */
 
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 
 	#define amax max	//by-pass an STL bug on linux
 	

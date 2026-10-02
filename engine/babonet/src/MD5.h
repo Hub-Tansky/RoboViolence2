@@ -34,7 +34,7 @@ documentation and/or software.
 
 
 typedef struct 
-#ifndef WIN32
+#ifndef BV2_PLATFORM_WINDOWS
 __attribute__((packed)) 
 #endif
 {

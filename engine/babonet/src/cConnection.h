@@ -19,15 +19,15 @@
 #ifndef _CONNECTION__
 #define	_CONNECTION__
 
-#include "platform_types.h"
+#include "platform.h"
 #include <fcntl.h>
 
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 	#define amax max
 	#include "Winsock2.h"
 	#include "ws2tcpip.h"
 #else
-	#include "LinuxHeader.h"
+	#include "platform.h"
 #endif
 
 #include "cUDPpacket.h"

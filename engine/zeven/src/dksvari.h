@@ -30,7 +30,7 @@
 // #define DLL_API __declspec(dllimport)
 // #endif
 
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 #pragma comment( lib, "opengl32.lib" )
 #pragma comment( lib, "glu32.lib" )
 
@@ -40,14 +40,14 @@
 #include "CVector.h"
 #include "dksvardef.h"
 
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 	#ifndef DLL_EXPORTS
 		#define DLL_API(p) __declspec(dllexport) p
 	#else
 		#define DLL_API(p) __declspec(dllimport) p
 	#endif
 #else
-	#include "LinuxHeader.h"
+	#include "platform.h"
 	#define DLL_API(p) p
 #endif
 

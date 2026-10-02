@@ -106,7 +106,7 @@ int cConnection::PrepareSocket()
     }
 
 	
-	#ifndef WIN32
+	#ifndef BV2_PLATFORM_WINDOWS
 		int yes = 1;
 	#else
 		char yes ='1';
@@ -143,7 +143,7 @@ int cConnection::PrepareSocket()
 
 int cConnection::PrepareUDP()
 {
-	#ifdef WIN32
+	#ifdef BV2_PLATFORM_WINDOWS
 		char yes = '1';
 	#else
 		int yes = 1;
@@ -171,7 +171,7 @@ int cConnection::PrepareUDP()
 int cConnection::StartConnection()
 {
 	// set the socket to non-blocking mode
-	#ifdef WIN32
+	#ifdef BV2_PLATFORM_WINDOWS
 		UINT4 mode = 1;
 		int rc = ioctlsocket( *FileDescriptor, FIONBIO, &mode);
 		if( rc )
@@ -201,14 +201,14 @@ int cConnection::StartConnection()
 	// call connect, which should return with the EINPROGRESS errno on Linux/Mac and a WSAEWOULDBLOCK on Windows
 	connect(*FileDescriptor, (sockaddr *)RemoteIP, sizeof(sockaddr_in));
 	
-	#ifdef WIN32
+	#ifdef BV2_PLATFORM_WINDOWS
 		if( WSAGetLastError() != WSAEWOULDBLOCK )
 	#else
 		if( errno != EINPROGRESS )
 	#endif
 	{
 		// something bad happened, quit the connection process
-		#ifdef WIN32
+		#ifdef BV2_PLATFORM_WINDOWS
 			printf("connect() failed, errno = %i WSA = %i\n",errno,(int)WSAGetLastError());
 		#else
 			printf("connect() failed, errno = %i\n",errno);
@@ -244,7 +244,7 @@ int cConnection::UpdateConnecting(float elapsed)
 	// check if the socket is ready for writing
 	if( FD_ISSET( *FileDescriptor, &writing ) )
 	{
-		#ifdef WIN32
+		#ifdef BV2_PLATFORM_WINDOWS
 			int len = sizeof(sockaddr_in);
 		#else
 			socklen_t len = sizeof(sockaddr_in);
@@ -255,7 +255,7 @@ int cConnection::UpdateConnecting(float elapsed)
 		if( !res )
 		{
 				// Set to blocking mode again
-			#ifdef WIN32
+			#ifdef BV2_PLATFORM_WINDOWS
 				UINT4 mode = 0;
 				int aarc = ioctlsocket( *FileDescriptor, FIONBIO, &mode);
 				if( aarc )
@@ -585,7 +585,7 @@ int cConnection::Update(float elapsed)
 
 void cConnection::CloseSocket(int fd)
 {
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 	closesocket(fd);
 #else
 	close(fd);

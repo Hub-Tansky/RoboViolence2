@@ -53,7 +53,7 @@ CString::CString(char* fmt, ...)
 	// Ici on passe tout les param (c comme un printf) pour les mettre dans le string
 	va_list		ap;
 	va_start(ap, fmt);
-#ifdef WIN32
+#ifdef BV2_PLATFORM_WINDOWS
 	_vsnprintf(mString, sizeof(mString), fmt, ap);
 #else
 	vsnprintf(mString, sizeof(mString), fmt, ap);
