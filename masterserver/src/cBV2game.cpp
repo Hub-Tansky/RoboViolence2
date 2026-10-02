@@ -11,7 +11,7 @@ cBV2game::cBV2game()
 	//ServerID	=	0;
 }
 
-cBV2game::cBV2game(char *ip,stBV2row & gameinfos, unsigned long baboID)
+cBV2game::cBV2game(char *ip,stBV2row & gameinfos, UINT4 baboID)
 {
 	Next		=	0;
 	Previous	=	0;

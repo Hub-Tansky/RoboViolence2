@@ -209,10 +209,10 @@ void Server::recvPacket(char * buffer, int typeID, unsigned long bbnetID)
 					break;
 				}
 				CMD5 login_(gameVar.zsv_adminUser.s);
-				CString login(login_.getMD5Digest());
+				CString login("%s", login_.getMD5Digest());
 
 				CMD5 pwd_(gameVar.zsv_adminPass.s);
-				CString pwd(pwd_.getMD5Digest());
+				CString pwd("%s", pwd_.getMD5Digest());
 
 				/*console->add(CString("\x9> L: %s", login.s));
 				console->add(CString("\x9> P: %s", loginRecv.s));

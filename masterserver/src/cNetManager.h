@@ -17,18 +17,18 @@ private:
 	class RemoteCacheListReq
 	{
 	public:
-		RemoteCacheListReq(unsigned long _fromID, short _reqNum)
+		RemoteCacheListReq(UINT4 _fromID, short _reqNum)
 		{
 			fromID = _fromID;
 			reqNum = _reqNum;
 		}
 
-		unsigned long fromID;
+		UINT4 fromID;
 		short reqNum;
 	};
 
-	typedef std::map<unsigned long, RemoteCacheListReq> RemoteCacheListReqMap;
-	typedef std::pair<unsigned long, RemoteCacheListReq> RemoteCacheListReqPair;
+	typedef std::map<UINT4, RemoteCacheListReq> RemoteCacheListReqMap;
+	typedef std::pair<UINT4, RemoteCacheListReq> RemoteCacheListReqPair;
 
 	RemoteCacheListReqMap cacheRequests;
 
@@ -47,7 +47,7 @@ public:
 	//void	Connect(char* ip,unsigned short port);
 
 	void	RetreiveData();
-	void	ReceiveServerPacket(char *data,int typeID,unsigned long fromID);
+	void	ReceiveServerPacket(char *data,int typeID,UINT4 fromID);
 
 	bool	Update(float elapsed);	//permet de donner du temps a la network
 

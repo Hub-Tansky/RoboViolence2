@@ -90,11 +90,11 @@ int createThread(unsigned long (*pFuncter)(void*), void * pParam, unsigned long 
         		 printf("ERROR; return code from pthread_create() is %d\n", rc);
          		//exit(-1);
       		}
-		pThreadID = threadID;
+		pThreadID = (unsigned long)(uintptr_t)threadID; // pthread_t is a pointer on macOS
 		//pthread_detach(threadID);
 		
 		
-		return threadID;
+		return rc == 0;
 	#endif
 
 	
@@ -148,7 +148,7 @@ void CThread::run(void * pArg)
 	mIsRunning = false;
 
 #ifndef BV2_PLATFORM_WINDOWS
-	pthread_detach(mThreadId);
+	pthread_detach(pthread_self());
 	pthread_exit(0);
 #endif
 }

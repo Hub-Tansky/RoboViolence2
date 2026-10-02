@@ -10,7 +10,7 @@
 
 #include "cMSstruct.h"
 #include "baboNet.h"
-#include "CClient.h"
+#include "MasterClient.h"
 #include "cBV2game.h"
 #include "sqlite3.h"
 
@@ -66,7 +66,7 @@ public:
 	int			NbGames;		//number of games currently being played
 	cBV2game		*Games;			//list of current games in lobby
 
-	CClient			*Clients;		//list of currently connected clients(Players or Servers)
+	MasterClient			*Clients;		//list of currently connected clients(Players or Servers)
 	//stPlayerLink		*Players;		//connected players that are in *Clients
 	//stServerLink		*Servers;		//connected servers that are in *Clients
 
@@ -87,9 +87,9 @@ public:
 	void		AddClient(long baboNetID,char *ip);
 	void		RemoveClient(long baboNetID);
 
-	CClient*	GetClientByID(unsigned long babonetID);
+	MasterClient*	GetClientByID(UINT4 babonetID);
 	cBV2game*	GetGameByIPport(char *ip,unsigned short port);								//va retourner la game qui est sur ce ip/port
-	unsigned long	GetGameBaboIDByIPport(char *ip,unsigned short port);
+	UINT4	GetGameBaboIDByIPport(char *ip,unsigned short port);
 	int		CreateGame(cBV2game* newGame);										//permet de creer une nouvelle game de bv2
 	void		UpdateStats(const stPlayerResult & result);
 
@@ -99,13 +99,13 @@ public:
 	void		CheckBans();												// to see if a ban must stop
 	void		AddBan( char * NickName , char * IP , char * MAC , int Duration );					// to add or update a ban
 	void		Unban( int ID );											// unban someone by ID
-	void		SendBanList( unsigned long fromID , char * filter );							//function to send a ban list to a client	
+	void		SendBanList( UINT4 fromID , char * filter );							//function to send a ban list to a client	
 	int		IsBanned( char * IP , char * MAC );									// return 0 if the guy is not banned, return 1 if he is
 
 	int		RegisterServer(const stServerRegister & reg,char *ip);							//authentification of a server, return 0 on failure, return the ServerID on success
 	int		RegisterPlayer(const stPlayerRegister & reg);								//tries to register a player
-	int		GetBV2List(CClient *client);										//va pogner la liste des games de bv2, et la donner au player qui l'attend
-	int		UpdateGame(stBV2row *row,unsigned long fromID);								//met a jour un enregistrement dla DB
+	int		GetBV2List(MasterClient *client);										//va pogner la liste des games de bv2, et la donner au player qui l'attend
+	int		UpdateGame(stBV2row *row,UINT4 fromID);								//met a jour un enregistrement dla DB
 	void		GetLastBV2ID();												//get the last gameID
 };
 

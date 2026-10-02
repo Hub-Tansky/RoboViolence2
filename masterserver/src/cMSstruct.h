@@ -59,7 +59,7 @@
 	//CACHE_LIST_REMOTE
 	struct stCacheListRemote
 	{
-		unsigned long FromID;
+		UINT4 FromID;
 		short ReqNum;		// used to number consecutive cache list requests
 		char Filter[32];	// 32 char max filter, can be '\0' for none
 		char ServerIP[16];
@@ -90,7 +90,7 @@
 
 	struct stCachePlayer
 	{
-		unsigned long FromID;
+		UINT4 FromID;
 		short ReqNum;		// id of request this data belong to
 		short ID;
 		char NickName[32];
@@ -101,7 +101,7 @@
 	//CACHE_LIST_PLAYER_END
 	struct stCacheListEnd
 	{
-		unsigned long requestFromID;
+		UINT4 requestFromID;
 	};
 
 
@@ -164,10 +164,10 @@
 	struct stPlayerResult
 	{
 		unsigned short	ServerID;		//UniqueID of the current server (only registered servers have this, 0 otherwise)
-		unsigned long	BaboID;			//Unique ID of the bv2 player (received after the player has connected to the server)
+		UINT4	BaboID;			//Unique ID of the bv2 player (received after the player has connected to the server)
         	unsigned short	Deaths;			//Number of deaths in this match
 		unsigned short	Frags;			//Number of Frags
-		unsigned long	Medals;			//The player has win any medals ?
+		UINT4	Medals;			//The player has win any medals ?
 		short		XP;			//Increment or Decrement of current player's XP
 		unsigned short	Molotov;		//number of molotov kills
 		unsigned short	Grenades;		//number of grenade kills

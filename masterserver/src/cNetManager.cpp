@@ -69,7 +69,7 @@ void cNetManager::RetreiveData()
 {
 	char*			buffer=0;
 	int			typeID=0;
-	unsigned long		fromID=0;
+	UINT4		fromID=0;
 	
 	while((buffer=bb_serverReceive(fromID,typeID)))
 	{
@@ -77,7 +77,7 @@ void cNetManager::RetreiveData()
 	}
 }
 
-void cNetManager::ReceiveServerPacket(char *data,int typeID,unsigned long fromID)
+void cNetManager::ReceiveServerPacket(char *data,int typeID,UINT4 fromID)
 {
 
 	//Console->AddText("Receiving packet with TypeID : %i",typeID);
@@ -105,7 +105,7 @@ void cNetManager::ReceiveServerPacket(char *data,int typeID,unsigned long fromID
 				stMasterInfo info;
 				info.NbGames	=	-1;
 	
-				//CClient *client = Server->GetClientByID(fromID);
+				//MasterClient *client = Server->GetClientByID(fromID);
 				//p->nRow = 0;
 				//p->CurrentRow = 0;
 			
@@ -121,7 +121,7 @@ void cNetManager::ReceiveServerPacket(char *data,int typeID,unsigned long fromID
 			stBV2row	row;
 			memcpy(&row,data,sizeof(stBV2row));
 			
-			if(Server->UpdateGame(&row,(unsigned long)fromID))
+			if(Server->UpdateGame(&row,(UINT4)fromID))
 			{
 				printf("Problem with Update from player %i",fromID);
 			}
@@ -268,7 +268,7 @@ void cNetManager::ReceiveServerPacket(char *data,int typeID,unsigned long fromID
 			if (it != cacheRequests.end())
 				cacheRequests.erase(clr.FromID);
 
-			unsigned long baboid = Server->GetGameBaboIDByIPport(clr.ServerIP, atoi(clr.ServerPort));
+			UINT4 baboid = Server->GetGameBaboIDByIPport(clr.ServerIP, atoi(clr.ServerPort));
 			if (baboid != -1)
 			{
 				cacheRequests.insert(RemoteCacheListReqPair(clr.FromID, RemoteCacheListReq(clr.FromID, clr.ReqNum)));

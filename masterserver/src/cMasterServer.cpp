@@ -98,7 +98,7 @@ cMasterServer::cMasterServer()
 	sprintf(Version,"2.09");
 }
 
-void cMasterServer::SendBanList( unsigned long fromID , char * filter )
+void cMasterServer::SendBanList( UINT4 fromID , char * filter )
 {
 	//Quelques infos sur la table qu'on va loader
 	char	*zErrMsg;		// Contient un message d'erreur s'il y a lieu
@@ -338,7 +338,7 @@ int cMasterServer::Update(float elapsed)
 	}
 
 	//on va updater les query des clients
-	for(CClient *C=Clients;C;C=C->Next)
+	for(MasterClient *C=Clients;C;C=C->Next)
 	{
 		if(C->Update( elapsed ))
 		{
@@ -390,7 +390,7 @@ void cMasterServer::AddClient(long baboNetID,char *IP)
 {
 
 	//on va se rendre a la fin des clients presentement connecter
-	CClient *C	=	Clients;
+	MasterClient *C	=	Clients;
 
 	if(C)
 	{
@@ -399,18 +399,18 @@ void cMasterServer::AddClient(long baboNetID,char *IP)
 			C = C->Next;
 		}
 
-		C->Next			=	new CClient((unsigned long)baboNetID,IP);
+		C->Next			=	new MasterClient((UINT4)baboNetID,IP);
 		C->Next->Previous	=	C;
 		//C			=	C->Next;
 	}
 	else
 	{
-		Clients =	new CClient((unsigned long)baboNetID,IP);
+		Clients =	new MasterClient((UINT4)baboNetID,IP);
 		//C	=	Clients;
 	}
 }
 
-int cMasterServer::GetBV2List(CClient *client)
+int cMasterServer::GetBV2List(MasterClient *client)
 {
 
 	if(!client) return 0;
@@ -425,7 +425,7 @@ int cMasterServer::GetBV2List(CClient *client)
 	
 	bb_serverSend((char*)&info,sizeof(stMasterInfo),MASTER_INFO,client->BabonetID);
 	
-	// Send every BV2_ROW now instead of one per tick (CClient::Update), so a
+	// Send every BV2_ROW now instead of one per tick (MasterClient::Update), so a
 	// quick refresh or disconnect can't lose rows.
 	if(NbGames)
 	{
@@ -444,7 +444,7 @@ int cMasterServer::GetBV2List(CClient *client)
 	return 0;
 }
 
-int cMasterServer::UpdateGame(stBV2row *row,unsigned long fromID)
+int cMasterServer::UpdateGame(stBV2row *row,UINT4 fromID)
 {
 	// check for racial slurs in the server name
 	if( (strstr( row->serverName, "Nigger" )) || (strstr( row->serverName, "nigger" )) || (strstr( row->serverName, "Niger" )) || (strstr( row->serverName, "niger" )))
@@ -454,7 +454,7 @@ int cMasterServer::UpdateGame(stBV2row *row,unsigned long fromID)
 
 	//on va creater la game, le id est retourner peu importe si elle existe ou pas
 
-	CClient *c = GetClientByID(fromID);
+	MasterClient *c = GetClientByID(fromID);
 	if(!c) return 0;
 
 
@@ -539,7 +539,7 @@ int cMasterServer::UpdateGame(stBV2row *row,unsigned long fromID)
 // 		sprintf(SQL,"Select Max(BaboID) from Players;");
 // 		sqlite3_get_table(MasterDB,SQL,&azResult,&nRow,&nColumn,&zErrMsg);
 // 
-// 		unsigned long id = 0;
+// 		UINT4 id = 0;
 // 		if(nRow > 0)//we have a max
 // 		{
 // 			id = atoi(azResult[1]) + 1;
@@ -812,7 +812,7 @@ cBV2game* cMasterServer::GetGameByIPport(char *ip,unsigned short port)
 }
 
 
-unsigned long	cMasterServer::GetGameBaboIDByIPport(char *ip,unsigned short port)
+UINT4	cMasterServer::GetGameBaboIDByIPport(char *ip,unsigned short port)
 {
 	for(cBV2game* G = Games; G; G=G->Next)
 	{
@@ -829,7 +829,7 @@ unsigned long	cMasterServer::GetGameBaboIDByIPport(char *ip,unsigned short port)
 
 void cMasterServer::RemoveClient(long babonetID)
 {
-	for(CClient *C=Clients;C;C=C->Next)
+	for(MasterClient *C=Clients;C;C=C->Next)
 	{
 		if(C->BabonetID	==	babonetID)
 		{
@@ -844,9 +844,9 @@ void cMasterServer::RemoveClient(long babonetID)
 	}
 }	
 
-CClient* cMasterServer::GetClientByID(unsigned long babonetID)
+MasterClient* cMasterServer::GetClientByID(UINT4 babonetID)
 {	
-	for(CClient *c=Clients;c;c=c->Next)
+	for(MasterClient *c=Clients;c;c=c->Next)
 	{
 		if(c->BabonetID == babonetID) return c;
 	}
@@ -863,8 +863,8 @@ cMasterServer::~cMasterServer()
 	}
 
 	//on va delter toute les players
-	CClient *toKill=0;
-	for(CClient *C = Clients;C;delete toKill)
+	MasterClient *toKill=0;
+	for(MasterClient *C = Clients;C;delete toKill)
 	{
 		toKill 	= 	C;
 		C 	= 	C->Next;

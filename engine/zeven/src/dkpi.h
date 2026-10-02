@@ -53,7 +53,8 @@
 #include "platform.h"
 #include "platform.h"
 #ifdef BV2_PLATFORM_MACOS
-#include <SDL_opengl.h>
+#include <OpenGL/gl.h>
+#include <OpenGL/glu.h>
 #else
 #include <GL/gl.h>
 #include <GL/glu.h>

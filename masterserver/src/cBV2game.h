@@ -23,13 +23,13 @@ public:
 	//game infos
 	stBV2row	GameInfos;		//keep all game infos here
 
-	unsigned long	BaboID;
+	UINT4	BaboID;
 
 	cBV2game	*Next;
 	cBV2game	*Previous;
 
 	cBV2game();
-	cBV2game(char *ip,stBV2row & gameinfos, unsigned long baboID);
+	cBV2game(char *ip,stBV2row & gameinfos, UINT4 baboID);
 
 
 	int	Update(float elapsed);

@@ -27,7 +27,8 @@
 #else
 #include "platform.h"
 #ifdef BV2_PLATFORM_MACOS
-#include <SDL_Opengl.h>
+#include <OpenGL/gl.h>
+#include <OpenGL/glu.h>
 #else
 #include <GL/gl.h>
 #endif

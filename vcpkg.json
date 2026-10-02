@@ -1,0 +1,9 @@
+{
+  "name": "roboviolence2",
+  "version-string": "0.0.0",
+  "description": "RoboViolence 2, an unofficial fork of BaboViolent 2",
+  "dependencies": [
+    "sqlite3",
+    "curl"
+  ]
+}
