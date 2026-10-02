@@ -41,7 +41,7 @@ RoboViolence 2, an unofficial fork of BaboViolent 2 ([ADR 0004](docs/decisions/0
 
 ## Conventions and gotchas
 
-- Source files use LF line endings. Their encoding is mixed: ASCII, Latin-1/CP1252 (French comments) and UTF-8. Until the scripted UTF-8 conversion in `docs/refactoring/step1-baseline-and-legacy-removal.md` §1.4 lands, don't re-encode files by hand, and use `grep -a` on Latin-1 files.
+- All text files are UTF-8 (no BOM) with LF line endings. Keep them that way; the hook and CI reject other encodings (`tools/check-encoding.py`). Some comments contain U+FFFD where upstream lost accented characters; leave them.
 - Fixed 30 Hz step: every `update(float delay)` gets `delay = 1/30`, and "frames" are a time unit (30 = 1 s).
 - Network messages are raw structs in `BaboViolent2/Code/netPacket.h`, `memcpy`'d on the wire. Positions are `short` ×100, velocities `char` ×10. Changing a struct layout requires bumping `GAME_VERSION_SV/CL` in `Server.h`/`Client.h`.
 - `playerID` (slot 0–31) is not `babonetID` (connection handle). `bb_serverSend` takes the babonetID; destination 0 means broadcast.
