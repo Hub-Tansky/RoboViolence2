@@ -13,7 +13,7 @@ RoboViolence 2, an unofficial fork of BaboViolent 2 ([ADR 0004](docs/decisions/0
 ## Build
 
 - Linux dedicated server: `make` in the repo root → `BaboViolent2/Content/bv2dedicated` (needs sqlite3, libcurl, OpenSSL, GLU dev packages). See `Engine/DukZeven/Code/readme.md`.
-- Windows client: `BaboViolent2/Code/BaboViolent2.sln`; only the `ProDebug` configuration is known to work (`README.txt`).
+- Windows client: `BaboViolent2/Code/BaboViolent2.sln`; only the `ProDebug` configuration is known to work (`README.md`).
 - There are no automated tests.
 
 ## Assets
