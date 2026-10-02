@@ -977,7 +977,6 @@ void Projectile::render()
 	// Les effects de la rocket
 	if (projectileType == PROJECTILE_ROCKET)
 	{
-#ifndef _DX_
 		glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT | GL_LIGHTING_BIT);
 			glDisable(GL_LIGHTING);
 			glDepthMask(GL_FALSE);
@@ -1035,13 +1034,11 @@ void Projectile::render()
 				glEnd();
 			glPopMatrix();
 		glPopAttrib();
-#endif
 	}
 
 	// Les effects du molotov
 	if (projectileType == PROJECTILE_COCKTAIL_MOLOTOV)
 	{
-#ifndef _DX_
 		glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT | GL_LIGHTING_BIT);
 			glDisable(GL_LIGHTING);
 			glDepthMask(GL_FALSE);
@@ -1067,12 +1064,10 @@ void Projectile::render()
 				glEnable(GL_DEPTH_TEST);
 			glPopMatrix();
 		glPopAttrib();
-#endif
 	}
 
 	if (projectileType != PROJECTILE_FLAME)
 	{
-#ifndef _DX_
 		glPushAttrib(GL_ENABLE_BIT);
 			glEnable(GL_LIGHTING);
 			glPushMatrix();
@@ -1119,11 +1114,9 @@ void Projectile::render()
 				}
 			glPopMatrix();
 		glPopAttrib();
-#endif
 	}
 	else
 	{
-#ifndef _DX_
 		glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT | GL_LIGHTING_BIT);
 			glDisable(GL_LIGHTING);
 			glDepthMask(GL_FALSE);
@@ -1149,13 +1142,11 @@ void Projectile::render()
 				glEnable(GL_DEPTH_TEST);
 			glPopMatrix();
 		glPopAttrib();
-#endif
 	}
 }
 
 void Projectile::renderShadow()
 {
-#ifndef _DX_
 	// On render son shadow :)
 	glPushMatrix();
 		glTranslatef(currentCF.position[0]+.1f, currentCF.position[1]-.1f, 0.025f);
@@ -1170,7 +1161,6 @@ void Projectile::renderShadow()
 			glVertex2f(.25f, .25f);
 		glEnd();
 	glPopMatrix();
-#endif
 }
 #endif
 

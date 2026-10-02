@@ -785,12 +785,10 @@ void CControl::render()
 	dkfBindFont(font);
 
 	//--- Render it! Easy stuff
-#ifndef _DX_
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_CULL_FACE);
 	glPushAttrib(GL_SCISSOR_BIT | GL_ENABLE_BIT | GL_CURRENT_BIT);
 	glEnable(GL_SCISSOR_TEST);
-#endif
 
 
 	CVector2i	res = dkwGetResolution();
@@ -803,13 +801,11 @@ void CControl::render()
 		offset = (offset - res[0])/2;	
 	}
 
-#ifndef _DX_
 	glScissor(
 		(GLint)((((float)Rect[0]/800.0f) * (float)res[0]) + offset), 
 		res[1] - (int)(((float)(Rect[1])/600.0f) * (float)res[1]) - (int)(((float)Rect[3]/600.0f) * (float)res[1] + 1),
 		(int)(((float)Rect[2]/800.0f) * (float)res[0]), 
 		(int)(((float)Rect[3]/600.0f) * (float)res[1] + 1));
-#endif
 
 	CVector2i offsetText;
 
@@ -826,10 +822,8 @@ void CControl::render()
 				glColor3fv((backColor*.7f).s);
 				renderMenuQuad(pos[0], pos[1], size[0]-2, size[1]-2);*/
 				offsetText.set(1,1);
-#ifndef _DX_
 				if ((menuManager.hoveringControl == this || menuManager.activeControl == this) && isHoverable) glColor3fv((grayScale * .7f).s);
 				else glColor3fv(grayScale.s);
-#endif
 			}
 			else
 			{
@@ -837,10 +831,8 @@ void CControl::render()
 				renderMenuQuad(pos[0]+2, pos[1]+2, size[0]-2, size[1]-2);
 				glColor3fv((grayScale*1.3f).s);
 				renderMenuQuad(pos[0], pos[1], size[0]-2, size[1]-2);*/
-#ifndef _DX_
 				if ((menuManager.hoveringControl == this) && isHoverable) glColor3fv((grayScale * 1.3f).s);
 				else glColor3fv(grayScale.s);
-#endif
 			}
 			renderMenuQuad(pos[0]+2, pos[1]+2, size[0]-4, size[1]-4);
 		}
@@ -849,10 +841,8 @@ void CControl::render()
 		/*	glColor3fv(borderColor.s);
 			renderMenuQuad(pos[0], pos[1], size[0], size[1]);*/
 
-#ifndef _DX_
 			if ((menuManager.hoveringControl == this || menuManager.activeControl == this) && isHoverable) glColor3fv((grayScale * 1.2f).s);
 			else glColor3fv(grayScale.s);
-#endif
 			renderMenuQuad(pos[0]+2, pos[1]+2, size[0]-4, size[1]-4);
 		}
 		else if (noFrame)
@@ -860,17 +850,13 @@ void CControl::render()
 		}
 		else
 		{
-#ifndef _DX_
 			if ((menuManager.hoveringControl == this || menuManager.activeControl == this) && isHoverable) glColor3fv((grayScale * 1.2f).s);
 			else glColor3fv(grayScale.s);
-#endif
 			renderMenuQuad(pos[0], pos[1], size[0], size[1]);
 		}
 		if (isCheckBox)
 		{
-#ifndef _DX_
 			glColor4f(0, 0, 0, .60f);
-#endif
 			renderMenuQuad(pos[0]+4, pos[1]+4, size[0]-8, size[1]-8);
 		}
 	}
@@ -882,7 +868,6 @@ void CControl::render()
 		float w=(float)size[0];
 		float h=(float)size[1];
 		float ratio = h / w;
-#ifndef _DX_
 
 		glColor4f(1, 1, 1, .15f);
 		
@@ -915,7 +900,6 @@ void CControl::render()
 				glVertex2f(x+w,y);
 			glEnd();
 		glPopAttrib();
-#endif
 	}
 	else if (texture)
 	{
@@ -928,22 +912,17 @@ void CControl::render()
 		{
 			if (perfectFitTexture)
 			{
-#ifndef _DX_
 				glColor4fv(grayScaleImg.s);
-#endif
 				renderTexturedQuad(pos[0], pos[1], size[0], size[1], texture);
 			}
 			else
 			{
-#ifndef _DX_
 				glColor4fv(grayScaleImg.s);
-#endif
 				renderTexturedQuadSmooth(pos[0], pos[1], size[0], size[1], texture);
 			}
 		}
 		else
 		{
-#ifndef _DX_
 			glColor4fv(grayScaleImg.s);
 			glPushAttrib(GL_ENABLE_BIT);
 				glEnable(GL_TEXTURE_2D);
@@ -959,7 +938,6 @@ void CControl::render()
 					glVertex2i(pos[0]+size[0],pos[1]);
 				glEnd();
 			glPopAttrib();
-#endif
 		}
 	}
 
@@ -967,9 +945,7 @@ void CControl::render()
 
 	if (check)
 	{
-#ifndef _DX_
 		glColor3fv(borderColor.s);
-#endif
 	//	glColor4f(1, 1, 1, .60f);
 		renderMenuQuad(pos[0]+6, pos[1]+6, size[0]-12, size[1]-12);
 	}
@@ -978,9 +954,7 @@ void CControl::render()
 	if (slider)
 	{
 		int sliderPos = (int)(((float)(value - valueMin) / (float)(valueMax - valueMin)) * (float)(size[0]-10));
-#ifndef _DX_
 		glColor3fv(borderColor.s);
-#endif
 		renderMenuQuad(pos[0] + sliderPos-5 + 5, pos[1], 10, size[1]);
 		text = CString() + value;
 	}
@@ -989,12 +963,10 @@ void CControl::render()
 	//--- Show the text in it (Clamp)
 	if (!text.isNull() || !isNull() || haveFocus())
 	{
-#ifndef _DX_
 		if (!enable) glColor3f(1,1,1);//.5f, .5f, .5f);
 		else glColor3fv(foreColor.s);
 		glPushAttrib(GL_SCISSOR_BIT | GL_ENABLE_BIT);
 			glEnable(GL_TEXTURE_2D);
-#endif
 			if (!textShadow || !enable) enableShadow = false;
 			CString _text = text;
 			if (haveFocus())
@@ -1095,9 +1067,7 @@ void CControl::render()
 
 			enableShadow = true;
 
-#ifndef _DX_
 		glPopAttrib();
-#endif
 	}
 
 	//--- Childs
@@ -1111,28 +1081,22 @@ void CControl::render()
 	{
 		if (parent->selectedChild == this)
 		{
-#ifndef _DX_
 			glPushAttrib(GL_ENABLE_BIT);
 				glEnable(GL_COLOR_LOGIC_OP);
 				glLogicOp(GL_INVERT);
 				renderMenuQuad(pos[0], pos[1], size[0], size[1]);
 			glPopAttrib();
-#endif
 		}
 		if (parent->hoveringChild == this)
 		{
-#ifndef _DX_
 			glPushAttrib(GL_ENABLE_BIT);
 				glColor4f(1, 1, 0, .3f);
 				renderMenuQuad(pos[0], pos[1], size[0], size[1]);
 			glPopAttrib();
-#endif
 		}
 	}
 
-#ifndef _DX_
 	glPopAttrib();
-#endif
 }
 
 

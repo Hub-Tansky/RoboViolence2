@@ -57,12 +57,9 @@ Map::Map(CString mapFilename, Game * _game, unsigned int font, bool editor, int 
 	//-- On print le loading screen! (new)
 		// On clear les buffers, on init la camera, etc
 #ifndef CONSOLE
-#ifndef _DX_
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-#endif
 		CVector2i res = dkwGetResolution();
 
-#ifndef _DX_
 		if(gameVar.r_widescreen > 1)
 			glViewport( (GLint)((res[0] - res[1]*1.333f)/2.0f) , 0, (GLsizei)(res[1]*1.333f), (GLsizei)res[1]);
 		else
@@ -89,7 +86,6 @@ Map::Map(CString mapFilename, Game * _game, unsigned int font, bool editor, int 
 
 		// On swap les buffers
 		SwapBuffers(dkwGetDC());
-#endif
 #endif
 #ifndef CONSOLE
 	dko_map = 0;
@@ -121,9 +117,7 @@ Map::Map(CString mapFilename, Game * _game, unsigned int font, bool editor, int 
 
 	if (!isServer)
 	{
-#ifndef _DX_
 		qObj = gluNewQuadric();
-#endif
 
 		// Les textures
 		tex_grass = dktCreateTextureFromFile("main/textures/grass.tga", DKT_FILTER_BILINEAR);
@@ -657,7 +651,6 @@ void Map::regenCell(int i, int j)
 {
 	if (i < 0 || j < 0 || i >= size[0] || j >= size[1]) return;
 	int pos = j*size[0]+i;
-#ifndef _DX_
 	if (cells[pos].dl) glDeleteLists(cells[pos].dl, 1);
 	cells[pos].dl = 0;
 	if (!cells[pos].passable)
@@ -931,7 +924,6 @@ void Map::regenCell(int i, int j)
 			glEnd();
 		glEndList();
 	}
-#endif
 }
 
 
@@ -1045,9 +1037,7 @@ Map::~Map()
 #ifndef CONSOLE
 	if (!isServer)
 	{
-#ifndef _DX_
 		gluDeleteQuadric(qObj);
-#endif
 	}
 
 #endif

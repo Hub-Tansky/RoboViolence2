@@ -23,11 +23,9 @@
 #include "platform_types.h"
 #ifdef WIN32
 #ifndef CONSOLE
-#ifndef _DX_
 	#include <windows.h>
 	#include <gl/gl.h>
 	#include <gl/glu.h>
-#endif
 #endif
 #else
 #ifdef __MACOSX__
@@ -73,9 +71,7 @@ public:
 	virtual ~_typLayer()
 	{
 #ifndef CONSOLE
-#ifndef _DX_
 		if (textureID == 0) glDeleteTextures(1, &textureID);
-#endif
 #endif
 	}
 };

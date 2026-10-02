@@ -203,11 +203,7 @@ void ePTexture::loadTexture(_typLayer* ptrLayer, FILE* ficIn)
 		case CHUNK_MAP_TEXTURE_DATA:
 			{
 #ifndef CONSOLE
-	#ifndef _DX_
 					GLubyte* imageData = new GLubyte [ptrLayer->w*ptrLayer->h*ptrLayer->bpp];
-	#else
-					unsigned char* imageData = new unsigned char [ptrLayer->w*ptrLayer->h*ptrLayer->bpp];
-	#endif
 #else
 				unsigned char* imageData = new unsigned char [ptrLayer->w*ptrLayer->h*ptrLayer->bpp];
 #endif
@@ -253,7 +249,6 @@ void ePTexture::loadString(char* string, FILE* ficIn)
 unsigned int createTextureFromBuffer(unsigned char *Buffer, int Width, int Height, int BytePerPixel, int Filter, bool inverse)
 {
 #ifndef CONSOLE
-#ifndef _DX_
 	// On cré la texture
 	unsigned int Texture=0;
 	GLint Level = (BytePerPixel == 3) ? GL_RGB : GL_RGBA;
@@ -322,7 +317,6 @@ unsigned int createTextureFromBuffer(unsigned char *Buffer, int Width, int Heigh
 					  Level, GL_UNSIGNED_BYTE, Buffer);
 
 	return Texture;
-#endif
 	return 0;
 #else
 	(void)Buffer; (void)Width; (void)Height; (void)BytePerPixel; (void)Filter; (void)inverse;

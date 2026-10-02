@@ -72,7 +72,6 @@ CdkoMaterial::~CdkoMaterial()
 void CdkoMaterial::setDiffusePass()
 {
 #ifndef CONSOLE
-#ifndef _DX_
 	glMaterialfv(GL_FRONT,GL_AMBIENT,ambient); // L'ambient
 	glMaterialfv(GL_FRONT,GL_DIFFUSE,diffuse); // La couleur diffuse
 	glMaterialfv(GL_FRONT,GL_SPECULAR,specular); // La couleur et intensité spécular
@@ -115,13 +114,11 @@ void CdkoMaterial::setDiffusePass()
 		glLineWidth(wireSize);
 	}
 #endif
-#endif
 }
 
 void CdkoMaterial::setDetailPass()
 {
 #ifndef CONSOLE
-#ifndef _DX_
 	glPushAttrib(GL_POLYGON_BIT | GL_LINE_BIT | GL_ENABLE_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glDisable(GL_LIGHTING);
@@ -145,13 +142,11 @@ void CdkoMaterial::setDetailPass()
 
 //	glDepthMask(GL_TRUE);
 #endif
-#endif
 }
 
 void CdkoMaterial::setSpecularPass()
 {
 #ifndef CONSOLE
-#ifndef _DX_
 	float zero[] = {0,0,0,1};
 	glMaterialfv(GL_FRONT,GL_AMBIENT,zero); // L'ambient
 	glMaterialfv(GL_FRONT,GL_DIFFUSE,zero); // La couleur diffuse
@@ -195,13 +190,11 @@ void CdkoMaterial::setSpecularPass()
 
 //	glDepthMask(GL_TRUE);
 #endif
-#endif
 }
 
 void CdkoMaterial::setSelfIllPass()
 {
 #ifndef CONSOLE
-#ifndef _DX_
 	glPushAttrib(GL_POLYGON_BIT | GL_LINE_BIT | GL_ENABLE_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glDisable(GL_LIGHTING);
@@ -228,7 +221,6 @@ void CdkoMaterial::setSelfIllPass()
 	}
 
 //	glDepthMask(GL_TRUE);
-#endif
 #endif
 }
 

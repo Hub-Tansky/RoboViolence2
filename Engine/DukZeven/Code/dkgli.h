@@ -37,24 +37,16 @@
 
 
 #ifdef WIN32
-	#ifndef _DX_
 		#pragma comment( lib, "opengl32.lib" )
 		#pragma comment( lib, "glu32.lib" )
-	#else
-		#pragma comment (lib, "d3d9.lib" )
-	#endif
 
 
 	#include <windows.h>
 
 	// Les includes pour opengl
-	#ifndef _DX_
 		#include <gl/gl.h> 
 		#include <gl/glu.h> 
 		#include "glext.h" 
-	#else
-		#include "d3d9.h"
-	#endif
 #else
 	#include "linux_types.h"
 	#ifdef __MACOSX__
@@ -88,11 +80,7 @@ const int DKGL_BLENDING_ALPHA = 2;
 DLL_API void			 dkglEnableVsync(bool enabled = true);
 DLL_API bool			 dkglCheckExtension(char * extension);
 DLL_API int				 dkglCreateContext(
-#ifndef _DX_
 								   HDC mDC, int colorDepth
-#else
-								   HWND wnd, bool fullScreen, int width, int height
-#endif
 	);
 DLL_API void			 dkglDrawCoordSystem();
 DLL_API void			 dkglDrawWireCube();
@@ -105,9 +93,6 @@ DLL_API void			 dkglShutDown();
 DLL_API CVector3f		 dkglUnProject(CVector2i & pos2D, float zRange);
 DLL_API CVector3f		 dkglProject(CVector3f & pos3D);
 
-#ifdef _DX_
-DLL_API IDirect3DDevice9* dkglGetDXDevice();
-#endif
 
 
 

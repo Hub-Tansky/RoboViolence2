@@ -66,7 +66,6 @@ void ControlListener::updateMenu(float delay)
 //
 void ControlListener::renderMenu()
 {
-#ifndef _DX_
 	dkglPushOrtho(800,600);
 		glPushAttrib(GL_ENABLE_BIT);
 			glEnable(GL_BLEND);
@@ -108,7 +107,6 @@ void ControlListener::renderMenu()
 			renderUnique();
 		glPopAttrib();
 	dkglPopOrtho();
-#endif
 }
 
 

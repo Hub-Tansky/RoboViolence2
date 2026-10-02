@@ -145,7 +145,6 @@ int CParticle::update()
 //
 void CParticle::render()
 {
-#ifndef _DX_
 	// On la positionne
 	glPushMatrix();
 
@@ -249,5 +248,4 @@ void CParticle::render()
 			glPopAttrib();
 		}
 	glPopMatrix();
-#endif
 }

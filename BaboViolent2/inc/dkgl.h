@@ -19,24 +19,16 @@
 #define DKGL_H
 
 
-#ifndef _DX_
 	#pragma comment( lib, "opengl32.lib" )
 	#pragma comment( lib, "glu32.lib" )
-#else
-	#pragma comment (lib, "d3d9.lib" )
-#endif
 
 
 #include <windows.h>
 
 // Les includes pour opengl
-#ifndef _DX_
 	#include <gl/gl.h> 
 	#include <gl/glu.h> 
 	#include "glext.h"
-#else
-	#include "d3d9.h"
-#endif
 #include "CVector.h"
 
 
@@ -75,15 +67,8 @@ bool			dkglCheckExtension(char * extension);
 /// \param colorDepth nombre de bit utiliser pour chaque composant de couleur d'un pixel (16 ou 32.....donc 32)
 /// \return true si la création du contexte a réussi, false sinon
 int				 dkglCreateContext(
-#ifndef _DX_
 								   HDC mDC, int colorDepth
-#else
-								   HWND wnd, bool fullScreen, int width, int height
-#endif
 	);
-#ifdef _DX_
-IDirect3DDevice9* dkglGetDXDevice();
-#endif
 
 
 

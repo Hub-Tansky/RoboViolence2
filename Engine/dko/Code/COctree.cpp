@@ -367,7 +367,6 @@ bool COctreeNode::findSphereIntersection(CVector &p1, CVector &p2, float rayon, 
 void COctreeNode::render()
 {
 #ifndef CONSOLE
-#ifndef _DX_
 	glPushAttrib(GL_POLYGON_BIT | GL_CURRENT_BIT | GL_ENABLE_BIT);
 		glDisable(GL_TEXTURE_2D);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -441,7 +440,6 @@ void COctreeNode::render()
 			glEnd();
 		glPopMatrix();
 	glPopAttrib();
-#endif
 #endif
 	
 	// On dessine le cube genreeee

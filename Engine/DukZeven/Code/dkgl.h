@@ -37,25 +37,16 @@
 #define DKGL_H
 
 #ifdef WIN32
-	#ifndef _DX_
 	#pragma comment( lib, "opengl32.lib" )
 	#pragma comment( lib, "glu32.lib" )
-#else
-		#pragma comment (lib, "d3d9.lib" )
-
-	#endif
 
 
 	#include <windows.h>
 
 	// Les includes pour opengl
-	#ifndef _DX_
 	#include <gl/gl.h> 
 	#include <gl/glu.h> 
 	#include "glext.h"
-#else
-		#include "d3d9.h"
-#endif
 #else
 #include "linux_types.h"
 #include "LinuxHeader.h"
@@ -70,24 +61,6 @@
 
 #include "CVector.h"
 
-#ifdef _DX_
-struct VertexPCT
-{
-   float x, y, z;
-   BYTE r, g, b, a;
-   float u, v;
-};
-const DWORD VertexPC_FVF = D3DFVF_XYZ | D3DFVF_DIFFUSE | D3DFVF_TEX0;
-
-struct VertexPNT
-{
-   float x, y, z;
-   float nx, ny, nz;
-   float u, v;
-const DWORD VertexPC_FVF = D3DFVF_XYZ | D3DFVF_NORMAL | D3DFVF_TEX0;
-
-};
-#endif
 
 
 /// \name BlendingPreset
@@ -125,15 +98,8 @@ bool			dkglCheckExtension(char * extension);
 /// \param colorDepth nombre de bit utiliser pour chaque composant de couleur d'un pixel (16 ou 32.....donc 32)
 /// \return true si la création du contexte a réussi, false sinon
 int				 dkglCreateContext(
-#ifndef _DX_
 								   HDC mDC, int colorDepth
-#else
-								   HWND wnd, bool fullScreen, int width, int height
-#endif
 	);
-#ifdef _DX_
-IDirect3DDevice9* dkglGetDXDevice();
-#endif
 
 
 

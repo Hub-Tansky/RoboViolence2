@@ -195,7 +195,6 @@ void Console::render()
 		CVector2i res = dkwGetResolution();
 		if(gameVar.r_widescreen > 1) res[0] = static_cast<int>(res[1]*1.333f);
 
-#ifndef _DX_
 		// on print ?l'?ran les 10 dernier messages encouru
 		dkglPushOrtho((float)res[0], (float)res[1]);
 			glTranslatef(0,m_vPos,0);
@@ -298,7 +297,6 @@ void Console::render()
 				}
 			glPopAttrib();
 		dkglPopOrtho();
-#endif
 	}
 }
 #endif

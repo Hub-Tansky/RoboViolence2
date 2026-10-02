@@ -40,36 +40,6 @@
 	#include "CMatrix.h"
 	#include "CString.h"
 #else
-#ifdef _DX_ // No intention of continuing on DX. we should switch to OGL 2.0 instead
-	//#pragma comment (lib, "dkw.lib")
-	//#pragma comment (lib, "dki.lib")
-	//#pragma comment (lib, "dkgl_dx.lib")
-	//#pragma comment (lib, "dkt_dx.lib")
-	//#pragma comment (lib, "dkf_dx.lib")
-	//#pragma comment (lib, "dko_dx.lib")
-	//#pragma comment (lib, "dkp_dx.lib")
-	//#pragma comment (lib, "dks.lib")
-	//#pragma comment (lib, "dkc.lib")
-	//#pragma comment (lib, "dksvar.lib")
-	//#pragma comment (lib, "baboNet.lib")
-
-	#include "dkc.h"
-	#include "dkw.h"
-	#include "dki.h"
-	#include "dkgl.h"
-	#include "dkt.h"
-	#include "dkf.h"
-	#include "dko.h"
-	#include "dkp.h"
-	#include "dks.h"
-	#include "dksvar.h"
-	#include "baboNet.h"
-	#include "cMSstruct.h"
-
-	#include "CVector.h"
-	#include "CMatrix.h"
-	#include "CString.h"
-#else
 	// [dsl] No more pragma comment, lets include them in the game directly!
 //	#pragma comment (lib, "dkw.lib") // No more pragma comment, lets include them in the engine directly!
 //	#pragma comment (lib, "dki.lib")
@@ -99,7 +69,6 @@
 	#include "CVector.h"
 	#include "CMatrix.h"
 	#include "CString.h"
-#endif
 #endif
 
 

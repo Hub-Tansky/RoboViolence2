@@ -131,9 +131,7 @@ Player::Player(char pPlayerID, Map * pMap, Game * pGame): pingLogInterval(0.05f)
 	waitForPong = false;
 	sendPosFrame=0;
 #ifndef CONSOLE
-#ifndef _DX_
 	qObj = gluNewQuadric();
-#endif
 	isThisPlayer = false;
 #endif
 	timeToSpawn = gameVar.sv_timeToSpawn;
@@ -182,9 +180,7 @@ Player::Player(char pPlayerID, Map * pMap, Game * pGame): pingLogInterval(0.05f)
 Player::~Player()
 {
 #ifndef CONSOLE
-#ifndef _DX_
 	gluDeleteQuadric(qObj);
-#endif
 	ZEVEN_SAFE_DELETE(weapon);
 	dktDeleteTexture(&tex_baboShadow);
 	dktDeleteTexture(&tex_baboHalo);
@@ -402,14 +398,11 @@ void Player::render()
 {
 	if (status == PLAYER_STATUS_ALIVE)
 	{
-#ifndef _DX_
 		glPushAttrib(GL_CURRENT_BIT | GL_ENABLE_BIT | GL_POLYGON_BIT);
-#endif
 		//--- TEMP render path with his bot
 #ifdef _PRO_
 		if (minibot && gameVar.d_showPath)
 		{
-#ifndef _DX_
 			glColor3f(1, 1, 0);
 			glLineWidth(2);
 			glDisable(GL_TEXTURE_2D);
@@ -424,13 +417,11 @@ void Player::render()
 				}
 				glVertex3fv(minibot->currentCF.position.s);
 			glEnd();
-#endif
 		}
 #endif
 			// On render son shadow :)
 			if (gameVar.r_playerShadow)
 			{
-#ifndef _DX_
 				glEnable(GL_TEXTURE_2D);
 				glBindTexture(GL_TEXTURE_2D, tex_baboShadow);
 				glEnable(GL_BLEND);
@@ -451,12 +442,10 @@ void Player::render()
 						glVertex2f(.5f, .5f);
 					glEnd();
 				glPopMatrix();
-#endif
 #ifdef _PRO_
 				//--- Mini bot shadow :D
 				if (minibot)
 				{
-#ifndef _DX_
 					glPushMatrix();
 						glTranslatef(minibot->currentCF.position[0]+.06f, minibot->currentCF.position[1]-.06f, .025f);
 						glBegin(GL_QUADS);
@@ -470,7 +459,6 @@ void Player::render()
 							glVertex2f(.25f, .25f);
 						glEnd();
 					glPopMatrix();
-#endif
 				}
 #endif
 			}
@@ -480,7 +468,6 @@ void Player::render()
 			{
 				//--- Get up & right vectors
 				float modelview[16];
-#ifndef _DX_
 				glGetFloatv(GL_MODELVIEW_MATRIX, modelview);
 				CVector3f up( modelview[1],  modelview[5],  modelview[9]);
 				CVector3f right( modelview[0],  modelview[4],  modelview[8]);
@@ -550,11 +537,9 @@ void Player::render()
 					glPopMatrix();
 				}
 #endif
-#endif
 			}
 
 			// La boule
-#ifndef _DX_
 			glDepthMask(GL_TRUE);
 			glDisable(GL_TEXTURE_2D);
 			glDisable(GL_BLEND);
@@ -654,7 +639,6 @@ void Player::render()
 				}
 			}
 		glPopAttrib();
-#endif
 	}
 }
 
@@ -695,7 +679,6 @@ void Player::renderName()
 		if ((!isThisPlayer && teamID == game->thisPlayer->teamID && game->gameType != GAME_TYPE_DM && game->gameType != GAME_TYPE_SND)  ||
 			teamID == PLAYER_TEAM_SPECTATOR)
 		{
-#ifndef _DX_
 			glColor3f(1,1,1);
 			renderTexturedQuad(onScreenPos[0] - 15, onScreenPos[1] - 8, 30, 7, 0);
 			glColor3f(0,0,0);
@@ -705,7 +688,6 @@ void Player::renderName()
 				glColor3f(1-life,life,0);
 				renderTexturedQuad(onScreenPos[0] - 14, onScreenPos[1] - 7, (int)(life*28.0f), 5, 0);
 			}
-#endif
 		}
 	}
 }

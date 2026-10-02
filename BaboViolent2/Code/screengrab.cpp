@@ -166,7 +166,6 @@ bool SaveScreenGrab(const char* filename) {
 
 	// allocate memory to store image data
 	unsigned char* pdata = new unsigned char[sw*sh*bpp];
-#ifndef _DX_
 	// read from front buffer
 	glReadBuffer(GL_FRONT);
 
@@ -175,7 +174,6 @@ bool SaveScreenGrab(const char* filename) {
 
 	// write data as a tga file
    SaveBitmapToFile(pdata,sw,sh,bitdepth,filename);
-#endif
 
 	// clean up
 	delete [] pdata;

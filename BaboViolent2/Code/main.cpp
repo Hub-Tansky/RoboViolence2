@@ -250,30 +250,14 @@ public:
 			nbFrameElapsed--;
 		}
 
-#ifdef _DX_
-		if (dkglGetDXDevice())
-		{
-			dkglGetDXDevice()->BeginScene();
-#endif
 		// On render le tout
 		scene->render();
-#ifdef _DX_
-		dkglGetDXDevice()->EndScene();
-#endif
 
 		// Swap buffers if valid context is found
-#ifndef _DX_
 		if( dkwGetDC() )
 		{
 			SwapBuffers( dkwGetDC() );
 		}
-#else
-		dkglGetDXDevice()->Present(	NULL,
-									NULL,
-									NULL,
-									NULL);
-		}
-#endif
 
       #ifdef NDEBUG
       #ifdef WIN32
@@ -799,11 +783,7 @@ int WINAPI WinMain(	HINSTANCE	hInstance,				// Instance
 
 	// On cr�notre API openGL
 	if (!dkglCreateContext(
-#ifndef _DX_
 		dkwGetDC(), gameVar.r_bitdepth
-#else
-		dkwGetHandle(), gameVar.r_fullScreen, gameVar.r_resolution[0], gameVar.r_resolution[1]
-#endif
 		)) 
 	{
 		dkiShutDown();

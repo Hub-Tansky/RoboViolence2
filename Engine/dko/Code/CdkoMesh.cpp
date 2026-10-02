@@ -417,7 +417,6 @@ void CdkoMesh::drawIt()
 		}
 
 #ifndef CONSOLE
-#ifndef _DX_
 		glPushAttrib(GL_ENABLE_BIT);
 			if (!(CDko::renderStateBitField & DKO_DYNAMIC_LIGHTING)) glDisable(GL_LIGHTING);
 
@@ -505,7 +504,6 @@ void CdkoMesh::drawIt()
 				glDisableClientState(GL_VERTEX_ARRAY);
 				glDepthMask(GL_TRUE);
 		glPopAttrib();
-#endif
 #endif
 	}
 }

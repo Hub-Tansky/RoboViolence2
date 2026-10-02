@@ -39,9 +39,7 @@ public:
 	CControl * txt_playerName;
 
 	// Pour dessiner notre sphere
-#ifndef _DX_
 	GLUquadricObj* qObj;
-#endif
 
 	// Son shadow
 	unsigned int tex_baboShadow;

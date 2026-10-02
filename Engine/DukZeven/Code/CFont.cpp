@@ -53,9 +53,7 @@ CFont::~CFont()
 //
 void CFont::destroy()
 {
-#ifndef _DX_
 	if (baseFont) glDeleteLists(baseFont, 128);
-#endif
 	baseFont = 0;
 }
 
@@ -138,13 +136,11 @@ int CFont::loadTGAFile(char * tgaFile)
 	{
 		fntFont = false;
 		unsigned char * alphaData = new unsigned char [512 * 512];
-#ifndef _DX_
 		glPushAttrib(GL_ENABLE_BIT);
 			glEnable(GL_TEXTURE_2D);
 			glBindTexture(GL_TEXTURE_2D, textureID);
 			glGetTexImage(GL_TEXTURE_2D, 0, GL_ALPHA, GL_UNSIGNED_BYTE, alphaData);
 		glPopAttrib();
-#endif
 
 		// Chaque caracter fait 64 de haut
 		characterProp[32].u1 = 0;
@@ -261,9 +257,7 @@ void CFont::reloadIt()
 	destroy();
 
 	// On génère 256 display list pour stocker tout les caractères
-#ifndef _DX_
 	baseFont = glGenLists(256);
-#endif
 
 
 	if (fntFont)
@@ -301,7 +295,6 @@ void CFont::reloadIt()
 			finalCaracKerning[i+32] = widthf;
 
 			// Ensuite on crée notre display list pour ce caractère
-#ifndef _DX_
 			glNewList(baseFont+i+32 /* on commence au charatère 32, "Space" */, GL_COMPILE);
 
 				// On dessine un quad de 16x16 avec la lettre affiché dedans
@@ -322,14 +315,12 @@ void CFont::reloadIt()
 				// On le déplace de 10 pour prévoir l'espace entre deux lettres
 				glTranslatef(widthf,0,0);
 			glEndList();
-#endif
 
 			// On incrémente pour le charactère suivant
 			i++;
 		}
 
 		// On cré les charatères spéciaux (le enter)
-#ifndef _DX_
 		glNewList(baseFont+1, GL_COMPILE);
 			glColor3f(0,0,1);
 		glEndList();
@@ -362,7 +353,6 @@ void CFont::reloadIt()
 			glTranslatef(0,1,0);
 			glPushMatrix();
 		glEndList();
-#endif
 	}
 	else
 	{
@@ -371,7 +361,6 @@ void CFont::reloadIt()
 		while (i<128)
 		{
 			// Ensuite on crée notre display list pour ce caractère
-#ifndef _DX_
 			glNewList(baseFont+i+32 /* on commence au charatère 32, "Space" */, GL_COMPILE);
 
 				// On dessine un quad de 16x16 avec la lettre affiché dedans
@@ -392,13 +381,11 @@ void CFont::reloadIt()
 				// On le déplace de 10 pour prévoir l'espace entre deux lettres
 				glTranslatef(characterProp[i+32].w,0,0);
 			glEndList();
-#endif
 
 			// On incrémente pour le charactère suivant
 			i++;
 		}
 
-#ifndef _DX_
 		// On cré les charatères spéciaux (le enter)
 		glNewList(baseFont+1, GL_COMPILE);
 			glColor3f(.25f,.25f,1);
@@ -432,7 +419,6 @@ void CFont::reloadIt()
 			glTranslatef(0,1,0);
 			glPushMatrix();
 		glEndList();
-#endif
 	}
 }
 
@@ -443,7 +429,6 @@ void CFont::reloadIt()
 //
 void CFont::printText(float size, float x, float y, float z, char *text)
 {
-#ifndef _DX_
 	glPushMatrix();
 		glTranslatef(x,y,z);
 		glScalef(size,size,size);
@@ -457,5 +442,4 @@ void CFont::printText(float size, float x, float y, float z, char *text)
 			glPopAttrib();
 		glPopMatrix();
 	glPopMatrix();
-#endif
 }

@@ -377,7 +377,6 @@ void Editor2::render()
 	if (map)
 	{
 		// Position the camera
-#ifndef _DX_
 		glLoadIdentity();
 		CVector3f up(0,1,1);
 		normalize(up);
@@ -510,7 +509,6 @@ void Editor2::render()
 				glPopAttrib();
 			dkglPopOrtho();
 		}
-#endif
 	}
 
 	menuManager.render(editorRoot);
@@ -524,7 +522,6 @@ void Editor2::render()
 void Editor2::renderMiniMap()
 {
 	CVector2i res(800,600);// = dkwGetResolution();
-#ifndef _DX_
 	dkglPushOrtho((float)res[0], (float)res[1]);
 		glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT);
 			glEnable(GL_BLEND);
@@ -564,14 +561,12 @@ void Editor2::renderMiniMap()
 			glPopMatrix();
 		glPopAttrib();
 	dkglPopOrtho();
-#endif
 }
 
 void Editor2::renderSquare(const CControl * control, int distance, const CColor4f & color) const
 {
 	if(control->visible)
 	{
-#ifndef _DX_
 		glColor4fv(color.s);
 		glBegin(GL_LINE_LOOP);
 			glVertex2i(control->pos[0] - distance,                    control->pos[1] - distance);
@@ -579,13 +574,11 @@ void Editor2::renderSquare(const CControl * control, int distance, const CColor4
 			glVertex2i(control->pos[0] + control->size[0] + distance, control->pos[1] + control->size[1] + distance);
 			glVertex2i(control->pos[0] + control->size[0] + distance, control->pos[1] - distance);
 		glEnd();
-#endif
 	}
 }
 
 void Editor2::renderSelection() const
 {
-#ifndef _DX_
 	dkglPushOrtho(800, 600);
 		glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT);
 			glDisable(GL_DEPTH_TEST);
@@ -642,7 +635,6 @@ void Editor2::renderSelection() const
 			}
 		glPopAttrib();
 	dkglPopOrtho();
-#endif
 }
 
 void Editor2::Open(CString mapName)

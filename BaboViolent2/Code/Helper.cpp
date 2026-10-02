@@ -60,14 +60,12 @@ void printCenterText(float x, float y, float size, const CString & text)
 		int shadowDis = (size > 32) ? 2 : 1;
 		float curColor[4];
 
-#ifndef _DX_
 		glGetFloatv(GL_CURRENT_COLOR, curColor);
 		glPushAttrib(GL_CURRENT_BIT);
 			glColor4f(0,0,0, curColor[3]);
 			dkfPrint(size,x-width/2+shadowDis,y+shadowDis,0,textColorLess(text).s);
 		glPopAttrib();
 		glColor4fv(curColor);
-#endif
 	}
 	dkfPrint(size,x-width/2,y,0,text.s);
 }
@@ -82,14 +80,12 @@ void printLeftText(float x, float y, float size, const CString & text)
 		float curColor[4];
 
 
-#ifndef _DX_
 		glGetFloatv(GL_CURRENT_COLOR, curColor);
 		glPushAttrib(GL_CURRENT_BIT);
 			glColor4f(0,0,0, curColor[3]);
 			dkfPrint(size,x/*+shadowDis*/,y+1,0,textColorLess(text).s);
 		glPopAttrib();
 		glColor4fv(curColor);
-#endif
 	}
 	dkfPrint(size,x,y,0,text.s);
 }
@@ -105,14 +101,12 @@ void printRightText(float x, float y, float size, const CString & text)
 		float curColor[4];
 		int shadowDis = (size > 32) ? 2 : 1;
 
-#ifndef _DX_
 		glGetFloatv(GL_CURRENT_COLOR, curColor);
 		glPushAttrib(GL_CURRENT_BIT);
 			glColor4f(0,0,0, curColor[3]);
 			dkfPrint(size,x-width+shadowDis,y+shadowDis,0,textColorLess(text).s);
 		glPopAttrib();
 		glColor4fv(curColor);
-#endif
 	}
 	
 	dkfPrint(size,x-width,y,0,text.s);
@@ -125,7 +119,6 @@ void printRightText(float x, float y, float size, const CString & text)
 //
 void renderTexturedQuad(int x, int y, int w, int h, unsigned int texture)
 {
-#ifndef _DX_
 	glPushAttrib(GL_ENABLE_BIT);
 		glEnable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, texture);
@@ -140,13 +133,11 @@ void renderTexturedQuad(int x, int y, int w, int h, unsigned int texture)
 			glVertex2i(x+w,y);
 		glEnd();
 	glPopAttrib();
-#endif
 }
 
 void renderTexturedQuadSmooth(int x, int y, int w, int h, unsigned int texture)
 {
 	float curColor[4];
-#ifndef _DX_
 	glGetFloatv(GL_CURRENT_COLOR, curColor);
 
 	glPushAttrib(GL_ENABLE_BIT);
@@ -252,12 +243,10 @@ void renderTexturedQuadSmooth(int x, int y, int w, int h, unsigned int texture)
 			glVertex2i(x+w,y+h);
 		glEnd();
 	glPopAttrib();
-#endif
 }
 
 void renderMenuQuad(int x, int y, int w, int h)
 {
-#ifndef _DX_
 	glPushAttrib(GL_CURRENT_BIT);
 
 		//--- Round corner of 5 units
@@ -364,7 +353,6 @@ void renderMenuQuad(int x, int y, int w, int h)
 			glEnd();
 		}
 	glPopAttrib();
-#endif
 }
 
 /*void renderMenuQuad(int x, int y, int w, int h)

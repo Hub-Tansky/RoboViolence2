@@ -43,7 +43,6 @@ int CDkt::checkingUpdate = 0;
 //
 void			 dktBlurTexture(unsigned int textureID, int nbPass)
 {
-#ifndef _DX_
 	// On passe toute nos textures en loop
 	for (int k=0;k<(int)CDkt::textures.size();k++)
 	{
@@ -96,7 +95,6 @@ void			 dktBlurTexture(unsigned int textureID, int nbPass)
 			delete [] imageData;
 		}
 	}
-#endif
 }
 
 
@@ -106,7 +104,6 @@ void			 dktBlurTexture(unsigned int textureID, int nbPass)
 //
 void			 dktChangeFilter(int filter)
 {
-#ifndef _DX_
 	// On passe toute nos textures en loop
 	for (int i=0;i<(int)CDkt::textures.size();i++)
 	{
@@ -152,7 +149,6 @@ void			 dktChangeFilter(int filter)
 			}
 		}
 	}
-#endif
 }
 
 
@@ -162,7 +158,6 @@ void			 dktChangeFilter(int filter)
 //
 void reloadTGA(CTexture * texture)
 {
-#ifndef _DX_
 	// Les variables utilisé pour tenir l'information loadé du Targa
 	unsigned char TGAcompare[12];
 	unsigned char header[6];
@@ -235,7 +230,6 @@ void reloadTGA(CTexture * texture)
 
 	// On delete notre Data qu'on n'a pus besoin
 	delete [] imageData;
-#endif
 }
 
 
@@ -245,7 +239,6 @@ void reloadTGA(CTexture * texture)
 //
 unsigned int createTextureTGA(char * filename, int filter){
 
-#ifndef _DX_
 	// Notre texture ID de ogl
 	unsigned int Texture = 0;
 
@@ -386,9 +379,6 @@ unsigned int createTextureTGA(char * filename, int filter){
 
 	// On retourne l'index de la texture
 	return Texture;
-#else
-	return 0;
-#endif
 }
 
 
@@ -398,7 +388,6 @@ unsigned int createTextureTGA(char * filename, int filter){
 //
 unsigned int	 dktCreateEmptyTexture(int w, int h, int bpp, int filter)
 {
-#ifndef _DX_
 	unsigned int textureID=0;
 	
 	// On se cré notre nouvelle texture
@@ -467,9 +456,6 @@ unsigned int	 dktCreateEmptyTexture(int w, int h, int bpp, int filter)
 	delete [] buffer;
 
 	return textureID;
-#else
-	return 0;
-#endif
 }
 
 
@@ -479,7 +465,6 @@ unsigned int	 dktCreateEmptyTexture(int w, int h, int bpp, int filter)
 //
 void			 dktCreateTextureFromBuffer(unsigned int *textureID, unsigned char *buffer, int w, int h, int bpp, int filter)
 {
-#ifndef _DX_
 	// On delete l'ancienne (elle DOIT exister)
 	dktDeleteTexture(textureID);
 
@@ -541,7 +526,6 @@ void			 dktCreateTextureFromBuffer(unsigned int *textureID, unsigned char *buffe
 	// On construit la texture et ses mipmap
 	gluBuild2DMipmaps(GL_TEXTURE_2D, bpp, w, h,
 					  level, GL_UNSIGNED_BYTE, buffer);
-#endif
 }
 
 
@@ -591,7 +575,6 @@ void CDkt::updateLastError(char *error)
 //
 void			 dktDeleteTexture(unsigned int *textureID)
 {
-#ifndef _DX_
 	for (int i=0;i<(int)CDkt::textures.size();i++)
 	{
 		CTexture *texture = CDkt::textures.at(i);
@@ -608,7 +591,6 @@ void			 dktDeleteTexture(unsigned int *textureID)
 	}
 
 	*textureID = 0;
-#endif
 }
 
 
@@ -628,7 +610,6 @@ char*			 dktGetLastError()
 //
 int				 dktGetTextureBytePerPixel(unsigned int textureID)
 {
-#ifndef _DX_
 	for (int i=0;i<(int)CDkt::textures.size();i++)
 	{
 		CTexture *texture = CDkt::textures.at(i);
@@ -637,7 +618,6 @@ int				 dktGetTextureBytePerPixel(unsigned int textureID)
 			return texture->bpp;
 		}
 	}
-#endif
 	return 0; // La texture n'est pas trouvé
 }
 
@@ -648,7 +628,6 @@ int				 dktGetTextureBytePerPixel(unsigned int textureID)
 //
 void			 dktGetTextureData(unsigned int textureID, unsigned char * data)
 {
-#ifndef _DX_
 	for (int i=0;i<(int)CDkt::textures.size();i++)
 	{
 		CTexture *texture = CDkt::textures.at(i);
@@ -658,7 +637,6 @@ void			 dktGetTextureData(unsigned int textureID, unsigned char * data)
 			glGetTexImage(GL_TEXTURE_2D, 0, (texture->bpp==3)?GL_RGB:GL_RGBA, GL_UNSIGNED_BYTE, data);
 		}
 	}
-#endif
 	data = 0;
 }
 
@@ -669,7 +647,6 @@ void			 dktGetTextureData(unsigned int textureID, unsigned char * data)
 //
 CVector2i		 dktGetTextureSize(unsigned int textureID)
 {
-#ifndef _DX_
 	for (int i=0;i<(int)CDkt::textures.size();i++)
 	{
 		CTexture *texture = CDkt::textures.at(i);
@@ -678,7 +655,6 @@ CVector2i		 dktGetTextureSize(unsigned int textureID)
 			return texture->size;
 		}
 	}
-#endif
 	return CVector2i();
 }
 
@@ -700,10 +676,8 @@ void			 dktInit()
 //
 void			 dktRenderToTexture(unsigned int textureID, int x, int y, int w, int h, unsigned int internalFormat)
 {
-#ifndef _DX_
 	glBindTexture(GL_TEXTURE_2D, textureID);
 	glCopyTexImage2D(GL_TEXTURE_2D, 0, internalFormat, x, y, w, h, 0);
-#endif
 }
 
 

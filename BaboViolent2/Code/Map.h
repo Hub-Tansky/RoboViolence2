@@ -145,9 +145,7 @@ struct map_cell
 	virtual ~map_cell()
 	{
 #ifndef CONSOLE
-#ifndef _DX_
 		if (dl) glDeleteLists(dl, 1);
-#endif
 #endif
 	}
 };
@@ -190,9 +188,7 @@ public:
 	// La destination de la camera
 	CVector3f camDest;
 	// Pour dessiner notre sphere
-#ifndef _DX_
 	GLUquadricObj* qObj;
-#endif
 
 	CVector4f fogColor;
 	float fogDensity;

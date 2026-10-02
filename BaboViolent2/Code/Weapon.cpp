@@ -171,7 +171,6 @@ void NuzzleFlash::render()
 {
 	if (delay > 0)
 	{
-#ifndef _DX_
 		glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT | GL_LIGHTING_BIT);
 			glDisable(GL_FOG);
 			glDisable(GL_LIGHTING);
@@ -228,7 +227,6 @@ void NuzzleFlash::render()
 				glEnd();
 			glPopMatrix();
 		glPopAttrib();
-#endif
 	}
 }
 #endif
@@ -707,17 +705,14 @@ void Weapon::render()
 {
 	if (weaponID == WEAPON_KNIVES)
 	{
-#ifndef _DX_
 		glPushAttrib(GL_ENABLE_BIT);
 			glEnable(GL_ALPHA_TEST);
 			glAlphaFunc(GL_GREATER, 0.3f);
 			dkoRender(dkoModel, modelAnim);
 		glPopAttrib();
-#endif
 	}
 	else if (weaponID == WEAPON_SHIELD)
 	{
-#ifndef _DX_
 		dkoRender(dkoAlternative, modelAnim);
 		glPushAttrib(GL_ENABLE_BIT | GL_DEPTH_BUFFER_BIT);
 			glPushMatrix();
@@ -733,10 +728,8 @@ void Weapon::render()
 				}
 			glPopMatrix();
 		glPopAttrib();
-#endif
 		if (modelAnim < 10)
 		{
-#ifndef _DX_
 			glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT | GL_LIGHTING_BIT);
 				glDisable(GL_FOG);
 				glDisable(GL_LIGHTING);
@@ -762,14 +755,12 @@ void Weapon::render()
 					glEnable(GL_DEPTH_TEST);
 				glPopMatrix();
 			glPopAttrib();
-#endif
 		}
 	}
 	else if (weaponID == WEAPON_NUCLEAR)
 	{
 		if (nukeFrameID % 45 < 23 && m_owner->minibot && this->currentFireDelay > 0)
 		{
-#ifndef _DX_
 			glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT | GL_LIGHTING_BIT);
 				glDisable(GL_FOG);
 				glDisable(GL_LIGHTING);
@@ -795,7 +786,6 @@ void Weapon::render()
 					glEnable(GL_DEPTH_TEST);
 				glPopMatrix();
 			glPopAttrib();
-#endif
 		}
 		dkoRender(dkoModel);
 	}

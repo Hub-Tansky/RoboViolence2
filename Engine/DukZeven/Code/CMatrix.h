@@ -314,9 +314,7 @@ public:
 			s[6], s[7], s[8], 0,
 			0,    0,    0,    1};
 
-#ifndef _DX_
 		glMultMatrixf(Matrix);
-#endif
 	}
 
 	// Les rotations de base autour des axes

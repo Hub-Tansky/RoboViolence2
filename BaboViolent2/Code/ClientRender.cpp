@@ -62,7 +62,6 @@ void Client::render(float & alphaScope)
 	CVector2i cursor = dkwGetCursorPos_main();
 	int xM = (int)(((float)cursor[0]/(float)res[0])*800.0f);
 	int yM = (int)(((float)cursor[1]/(float)res[1])*600.0f);
-#ifndef _DX_
 	dkglPushOrtho(800,600);
 		glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT);
 			glEnable(GL_BLEND);
@@ -98,12 +97,10 @@ void Client::render(float & alphaScope)
 
 		glPopAttrib();
 	dkglPopOrtho();
-#endif
 
 	// Si on doit spawner on marque dans combient de temps
 	if (game->thisPlayer)
 	{
-#ifndef _DX_
 		dkglPushOrtho(800, 600);
 			glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT);
 				glEnable(GL_TEXTURE_2D);
@@ -775,7 +772,6 @@ void Client::render(float & alphaScope)
 				printCenterText(400, 5+64, 32, mapInfo);
 			glPopAttrib();
 		dkglPopOrtho();
-#endif
 	}
 	else
 	{
@@ -793,7 +789,6 @@ void Client::render(float & alphaScope)
 //	CVector2i cursor = dkwGetCursorPos_main();
 //	int xM = (int)(((float)cursor[0]/(float)res[0])*800.0f);
 //	int yM = (int)(((float)cursor[1]/(float)res[1])*600.0f);
-#ifndef _DX_
 	dkglPushOrtho(800,600);
 		glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT);
 			glEnable(GL_BLEND);
@@ -802,12 +797,10 @@ void Client::render(float & alphaScope)
 			renderTexturedQuad(xM-16,yM-16,32,32,tex_crossHit);			
 		glPopAttrib();
 	dkglPopOrtho();
-#endif
 
 	// On se connecte
 	if (!isConnected)
 	{
-#ifndef _DX_
 		dkglPushOrtho(800,600);
 			glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT);
 				glEnable(GL_BLEND);
@@ -818,7 +811,6 @@ void Client::render(float & alphaScope)
 				if (dkiGetState(DIK_F10) == DKI_DOWN) console->sendCommand("disconnect");
 			glPopAttrib();
 		dkglPopOrtho();
-#endif
 	}
 }
 #endif

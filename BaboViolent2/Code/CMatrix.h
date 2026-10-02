@@ -296,7 +296,6 @@ public:
 
 	// Pour openGL
 #ifndef CONSOLE
-#ifndef _DX_
 	void MultOglMatrix()
 	{
 		float Matrix[16] = {
@@ -307,7 +306,6 @@ public:
 
 		glMultMatrixf(Matrix);
 	}
-#endif
 #endif
 
 	// Les rotations de base autour des axes

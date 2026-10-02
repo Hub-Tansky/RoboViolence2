@@ -85,7 +85,6 @@ public:
 	}
 	void render()
 	{
-#ifndef _DX_
 		glPushMatrix();
 			glTranslatef(position[0], position[1], position[2]);
 			glScalef(radius, radius, radius);
@@ -101,7 +100,6 @@ public:
 				glVertex2i(1,1);
 			glEnd();
 		glPopMatrix();
-#endif
 	}
 };
 
@@ -123,7 +121,6 @@ struct Drip
 	}
 	void render()
 	{
-#ifndef _DX_
 		glPushMatrix();
 			glTranslatef(position[0], position[1], position[2]);
 			float _size = (1 - life) * size;
@@ -140,7 +137,6 @@ struct Drip
 				glVertex2i(1,1);
 			glEnd();
 		glPopMatrix();
-#endif
 	}
 };
 
@@ -182,7 +178,6 @@ struct FloorMark
 	{
 		if (startDelay <= 0)
 		{
-#ifndef _DX_
 			glBindTexture(GL_TEXTURE_2D, texture);
 			glPushMatrix();
 				glTranslatef(position[0], position[1], position[2] + .025f);
@@ -203,7 +198,6 @@ struct FloorMark
 					glVertex2i(1,1);
 				glEnd();
 			glPopMatrix();
-#endif
 		}
 	}
 };
@@ -239,7 +233,6 @@ struct Douille
 	void update(float pDelay, Map * map);
 	void render()
 	{
-#ifndef _DX_
 		glPushMatrix();
 			glTranslatef(position[0], position[1], position[2]);
 			glRotatef(delay*90,vel[0], vel[1],0);
@@ -247,7 +240,6 @@ struct Douille
 			if (type == DOUILLE_TYPE_DOUILLE) dkoRender(gameVar.dko_douille);
 			else if (type == DOUILLE_TYPE_GIB) dkoRender(gameVar.dko_gib);
 		glPopMatrix();
-#endif
 	}
 };
 #endif
@@ -370,7 +362,6 @@ struct Trail
 	}
 	void render()
 	{
-#ifndef _DX_
 		glColor4f(.7f, .7f, .7f, (1-delay)*.5f);
 		if (trailType == 1) glColor4f(color[0], color[1], color[2],(1-delay));
 		glBegin(GL_QUADS);
@@ -383,7 +374,6 @@ struct Trail
 			glTexCoord2f(1,dis);
 			glVertex3fv((p2+right*delay*size).s);
 		glEnd();
-#endif
 	}
 	void renderBullet()
 	{
@@ -394,7 +384,6 @@ struct Trail
 			float x = p1[0]+dir[0]*progress;
 			float y = p1[1]+dir[1]*progress;
 
-#ifndef _DX_
 				glColor4f(color[0], color[1], color[2],.1f);
 				glBegin(GL_QUADS);
 					glTexCoord2f(0,1);
@@ -418,7 +407,6 @@ struct Trail
 					glTexCoord2f(1,1);
 					glVertex3fv((p1+dir*progress+dir/dis+right*.05f).s);
 				glEnd();
-#endif
 		}
 	}
 	void update(float pDelay)

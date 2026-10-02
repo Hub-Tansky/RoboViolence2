@@ -26,13 +26,8 @@
 
 int CDkgl::colorDepth=16;
 
-#ifndef _DX_
 	HGLRC CDkgl::renderingContext;
 	HDC CDkgl::deviceContext;
-#else
-	IDirect3D9 *g_D3D=NULL;
-	IDirect3DDevice9 *g_device=NULL;
-#endif
 /*
 IDirect3D9 *g_D3D=NULL;
 
@@ -50,7 +45,6 @@ IDirect3D9 *g_D3D=NULL;
 
 void dkglEnableVsync(bool vsync)
 {
-#ifndef _DX_
 	// if we want vsync, check if video card supports the extension
 	if( vsync )
 	{
@@ -72,12 +66,10 @@ void dkglEnableVsync(bool vsync)
 #endif
 		}
 	}
-#endif
 }
 
 bool CheckExtension( char *m_szSupportedGLExtensions, char* szExtensionName )
 {
-#ifndef _DX_
 	unsigned int uiNextExtension;
 	char*		 szSupExt= m_szSupportedGLExtensions;
 	char*		 cEndExtensions;
@@ -101,7 +93,6 @@ bool CheckExtension( char *m_szSupportedGLExtensions, char* szExtensionName )
 		//move to the nexte extension in the list
 		szSupExt+= ( uiNextExtension+1 );
 	}
-#endif
 	return false;
 }
 
@@ -111,12 +102,8 @@ bool CheckExtension( char *m_szSupportedGLExtensions, char* szExtensionName )
 //
 bool			 dkglCheckExtension(char * extension)
 {
-#ifndef _DX_
 	char * exts = (char*)glGetString(GL_EXTENSIONS);
 	return !(strstr(exts, extension) == 0);
-#else
-	return false;
-#endif
 }
 
 
@@ -125,14 +112,9 @@ bool			 dkglCheckExtension(char * extension)
 // Pour créer le context openGL (rendering context)
 //
 int				 dkglCreateContext(
-#ifndef _DX_
 								   HDC mDC, int colorDepth
-#else
-								   HWND wnd, bool fullScreen, int width, int height
-#endif
 								   )
 {
-#ifndef _DX_
 	CDkgl::colorDepth = colorDepth;
 	CDkgl::deviceContext = mDC;
 
@@ -156,66 +138,9 @@ int				 dkglCreateContext(
 #endif
 	// On check le extensions
 //	CDkgl::extensions = (char*)glGetString(GL_EXTENSIONS);
-#else
-
-   g_D3D = Direct3DCreate9(D3D_SDK_VERSION);
-   if (!g_D3D)
-   {
-	   return 0;
-   }
-
-   D3DFORMAT format = D3DFMT_A8R8G8B8;
-   D3DPRESENT_PARAMETERS pp;
-   HRESULT hr;
-
-	ZeroMemory(&pp, sizeof(D3DPRESENT_PARAMETERS));
-
-	pp.BackBufferCount = 1;
-	pp.MultiSampleType = D3DMULTISAMPLE_NONE;
-	pp.MultiSampleQuality = 0;
-	pp.SwapEffect = D3DSWAPEFFECT_DISCARD;
-	pp.hDeviceWindow = wnd;
-	pp.Flags = 0;
-	pp.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;
-	pp.PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT;
-	pp.BackBufferFormat = format;
-	pp.AutoDepthStencilFormat = D3DFMT_D16;
-	pp.EnableAutoDepthStencil = TRUE;
-
-	if (fullScreen)
-	{
-		pp.Windowed          = FALSE;
-		pp.BackBufferWidth   = width;
-		pp.BackBufferHeight  = height;
-	}
-	else
-	{
-		pp.Windowed          = TRUE;
-	}
-
-	hr = g_D3D->CreateDevice(
-						D3DADAPTER_DEFAULT,
-						D3DDEVTYPE_HAL,
-						wnd,
-						D3DCREATE_HARDWARE_VERTEXPROCESSING,
-						&pp,
-						&g_device);
-	if(FAILED(hr))
-	{
-		return 0;
-	}
-
-
-#endif
 	return 1;
 }
 
-#ifdef _DX_
-IDirect3DDevice9* dkglGetDXDevice()
-{
-	return g_device;
-}
-#endif
 
 
 //
@@ -223,7 +148,6 @@ IDirect3DDevice9* dkglGetDXDevice()
 //
 void			 dkglDrawCoordSystem()
 {
-#ifndef _DX_
 	glPushAttrib(GL_ENABLE_BIT | GL_LINE_BIT | GL_CURRENT_BIT);
 		glLineWidth(2);
 		glDisable(GL_CULL_FACE);
@@ -272,7 +196,6 @@ void			 dkglDrawCoordSystem()
 			glVertex3f(.1f,-.1f,.9f);
 		glEnd();
 	glPopAttrib();
-#endif
 }
 
 
@@ -282,7 +205,6 @@ void			 dkglDrawCoordSystem()
 //
 void			 dkglDrawWireCube()
 {
-#ifndef _DX_
 	glPushAttrib(GL_ENABLE_BIT | GL_LINE_BIT | GL_CURRENT_BIT);
 		glLineWidth(2);
 		glDisable(GL_CULL_FACE);
@@ -312,7 +234,6 @@ void			 dkglDrawWireCube()
 			glVertex3f(1,1,-1);
 		glEnd();
 	glPopAttrib();
-#endif
 }
 
 
@@ -322,7 +243,6 @@ void			 dkglDrawWireCube()
 //
 void			 dkglPopOrtho()
 {
-#ifndef _DX_
 	// On pop nos matrice
 			glMatrixMode(GL_PROJECTION);
 		glPopMatrix();
@@ -331,7 +251,6 @@ void			 dkglPopOrtho()
 
 	// On pop nos attribs
 	glPopAttrib();
-#endif
 }
 
 
@@ -341,7 +260,6 @@ void			 dkglPopOrtho()
 //
 void			 dkglPushOrtho(float mWidth, float mHeight)
 {
-#ifndef _DX_
 	// On push les attribs pour certaines modifications
 	glPushAttrib(GL_ENABLE_BIT | GL_POLYGON_BIT);
 //	glCullFace(GL_BACK);
@@ -357,7 +275,6 @@ void			 dkglPushOrtho(float mWidth, float mHeight)
 		glMatrixMode(GL_MODELVIEW);
 		glPushMatrix();
 			glLoadIdentity();
-#endif
 }
 
 
@@ -367,7 +284,6 @@ void			 dkglPushOrtho(float mWidth, float mHeight)
 //
 void			 dkglSetBlendingFunc(int blending)
 {
-#ifndef _DX_
 	switch (blending)
 	{
 	case DKGL_BLENDING_ADD_SATURATE:
@@ -383,7 +299,6 @@ void			 dkglSetBlendingFunc(int blending)
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		break;
 	}
-#endif
 }
 
 
@@ -393,7 +308,6 @@ void			 dkglSetBlendingFunc(int blending)
 //
 void			 dkglSetPointLight(int ID, float x, float y, float z, float r, float g, float b)
 {
-#ifndef _DX_
 	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0 + ID);
 	float pos[] = {x,y,z,1};
@@ -405,7 +319,6 @@ void			 dkglSetPointLight(int ID, float x, float y, float z, float r, float g, f
 	glLightfv(GL_LIGHT0 + ID, GL_AMBIENT, amb);
 	glLightfv(GL_LIGHT0 + ID, GL_DIFFUSE, diff);
 	glLightfv(GL_LIGHT0 + ID, GL_SPECULAR, spec);
-#endif
 }
 
 
@@ -415,7 +328,6 @@ void			 dkglSetPointLight(int ID, float x, float y, float z, float r, float g, f
 //
 void			 dkglSetProjection(float mFieldOfView, float mNear, float mFar, float mWidth, float mHeight)
 {
-#ifndef _DX_
 	// On met la matrice de projection pour ce créer une vue perspective
 	glMatrixMode(GL_PROJECTION);
 
@@ -430,7 +342,6 @@ void			 dkglSetProjection(float mFieldOfView, float mNear, float mFar, float mWi
 
 	// La model view à identity
 	glLoadIdentity();
-#endif
 }
 
 
@@ -441,18 +352,8 @@ void			 dkglSetProjection(float mFieldOfView, float mNear, float mFar, float mWi
 void			 dkglShutDown()
 {
 #ifdef WIN32
-#ifndef _DX_
 	wglMakeCurrent(NULL, NULL);
 	wglDeleteContext(CDkgl::renderingContext);
-#else
-
-   if (g_D3D)
-   {
-      g_D3D->Release();
-      g_D3D = NULL;
-   }
-
-#endif
 #else
 	//	SDL_Quit();
 #endif
@@ -464,7 +365,6 @@ void			 dkglShutDown()
 //
 // Pour initialiser le format des pixel à l'écran
 //
-#ifndef _DX_
 int initPixelFormat(HDC mDC, int colorDepth)
 {
 #ifdef WIN32
@@ -497,7 +397,6 @@ int initPixelFormat(HDC mDC, int colorDepth)
 	return 1;
 #endif
 }
-#endif
 
 
 
@@ -507,7 +406,6 @@ int initPixelFormat(HDC mDC, int colorDepth)
 CVector3f		 dkglUnProject(CVector2i & pos2D, float zRange)
 {
 	double x,y,z;
-#ifndef _DX_
 	CVector3f pos((float)pos2D[0], (float)pos2D[1], zRange);
 	GLdouble modelMatrix[16];
 	GLdouble projMatrix[16];
@@ -527,7 +425,6 @@ CVector3f		 dkglUnProject(CVector2i & pos2D, float zRange)
 		&x, 
 		&y, 
 		&z);
-#endif
 
 	return CVector3f((float)x,(float)y,(float)z);
 }
@@ -536,7 +433,6 @@ CVector3f		 dkglUnProject(CVector2i & pos2D, float zRange)
 CVector3f		 dkglProject(CVector3f & pos3D)
 {
 	double x,y,z;
-#ifndef _DX_
 	GLdouble modelMatrix[16];
 	GLdouble projMatrix[16];
 	GLint    viewport[4];
@@ -555,6 +451,5 @@ CVector3f		 dkglProject(CVector3f & pos3D)
 		&x, 
 		&y, 
 		&z);
-#endif
 	return CVector3f((float)x,(float)y,(float)z);
 }

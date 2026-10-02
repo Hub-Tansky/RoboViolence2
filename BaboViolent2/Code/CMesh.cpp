@@ -47,9 +47,7 @@ void CMesh::renderSubMesh(size_t index)
 	mat.enable( vb.first() );
 
 	//--- Draw!
-#ifndef _DX_
 	glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(vb.size()) );
-#endif
 
 	//--- Disable material
 	mat.disable();

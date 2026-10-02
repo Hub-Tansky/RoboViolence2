@@ -88,7 +88,6 @@ void CSnow::update(float delay, Map* map)
 //
 void CSnow::render()
 {
-#ifndef _DX_
 	glPushAttrib(GL_ENABLE_BIT);
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -104,7 +103,6 @@ void CSnow::render()
 			}
 		glEnd();
 	glPopAttrib();
-#endif
 }
 
 

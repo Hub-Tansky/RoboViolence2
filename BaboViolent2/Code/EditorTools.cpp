@@ -74,7 +74,6 @@ ToolGround::~ToolGround()
 
 void ToolGround::render(Editor2 * editor)
 {
-#ifndef _DX_
 	glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT);
 		glDisable(GL_DEPTH_TEST);
 		glDisable(GL_TEXTURE_2D);
@@ -89,7 +88,6 @@ void ToolGround::render(Editor2 * editor)
 			glVertex2f(editor->cellCursor[0] + 1 - Selection, editor->cellCursor[1] + 1 - Selection);
 		glEnd();
 	glPopAttrib();
-#endif
 }
 
 void ToolGround::LeftClick(Editor2 * editor, float delay)
@@ -130,7 +128,6 @@ ToolSplat::~ToolSplat()
 
 void ToolSplat::render(Editor2 * editor)
 {
-#ifndef _DX_
 	glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT);
 		glDisable(GL_DEPTH_TEST);
 		glDisable(GL_TEXTURE_2D);
@@ -145,7 +142,6 @@ void ToolSplat::render(Editor2 * editor)
 			glVertex2f(editor->cellCursor[0] + 1 - Selection, editor->cellCursor[1] + 1 - Selection);
 		glEnd();
 	glPopAttrib();
-#endif
 }
 
 void ToolSplat::LeftClick(Editor2 * editor, float delay)
@@ -202,7 +198,6 @@ ToolWall::~ToolWall()
 
 void ToolWall::render(Editor2 * editor)
 {
-#ifndef _DX_
 	glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT);
 		glEnable(GL_DEPTH_TEST);
 		glDisable(GL_TEXTURE_2D);
@@ -233,7 +228,6 @@ void ToolWall::render(Editor2 * editor)
 			glVertex3f(editor->cellCursor[0] + 1 - Selection, editor->cellCursor[1] + 1 - Selection, height + Selection);
 		glEnd();
 	glPopAttrib();
-#endif
 }
 
 void ToolWall::LeftClick(Editor2 * editor, float delay)
@@ -294,7 +288,6 @@ ToolFlag::~ToolFlag()
 
 void ToolFlag::render(Editor2 * editor)
 {
-#ifndef _DX_
 	glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT);
 		dkoPushRenderState();
 			dkoEnable(DKO_FORCE_WIREFRAME);
@@ -306,7 +299,6 @@ void ToolFlag::render(Editor2 * editor)
 			glPopMatrix();
 		dkoPopRenderState();
 	glPopAttrib();
-#endif
 }
 
 void ToolFlag::LeftClick(Editor2 * editor, float delay)
@@ -357,7 +349,6 @@ ToolBomb::~ToolBomb()
 
 void ToolBomb::render(Editor2 * editor)
 {
-#ifndef _DX_
 	glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT);
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_TEXTURE_2D);
@@ -387,7 +378,6 @@ void ToolBomb::render(Editor2 * editor)
 			glEnd();
 		glPopMatrix();
 	glPopAttrib();
-#endif
 }
 
 void ToolBomb::LeftClick(Editor2 * editor, float delay)
@@ -438,7 +428,6 @@ ToolSpawn::~ToolSpawn()
 
 void ToolSpawn::render(Editor2 * editor)
 {
-#ifndef _DX_
 	glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT);
 		glEnable(GL_DEPTH_TEST);
 		glDisable(GL_TEXTURE_2D);
@@ -465,7 +454,6 @@ void ToolSpawn::render(Editor2 * editor)
 			gluQuadricDrawStyle(editor->map->qObj, GLU_FILL);
 		glPopMatrix();
 	glPopAttrib();
-#endif
 }
 
 void ToolSpawn::LeftClick(Editor2 * editor, float delay)
@@ -540,7 +528,6 @@ ToolAddLine::~ToolAddLine()
 
 void ToolAddLine::render(Editor2 * editor)
 {
-#ifndef _DX_
 	glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT);
 		glEnable(GL_DEPTH_TEST);
 		glDisable(GL_TEXTURE_2D);
@@ -566,7 +553,6 @@ void ToolAddLine::render(Editor2 * editor)
 			glVertex3f(end[0], end[1], Selection);
 		glEnd();
 	glPopAttrib();
-#endif
 }
 
 void ToolAddLine::LeftClick(Editor2 * editor, float delay)
@@ -765,7 +751,6 @@ ToolRemoveLine::~ToolRemoveLine()
 
 void ToolRemoveLine::render(Editor2 * editor)
 {
-#ifndef _DX_
 	glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT);
 		glEnable(GL_DEPTH_TEST);
 		glDisable(GL_TEXTURE_2D);
@@ -797,7 +782,6 @@ void ToolRemoveLine::render(Editor2 * editor)
 			glVertex3f(pt4[0], pt4[1], Selection);
 		glEnd();
 	glPopAttrib();
-#endif
 }
 
 void ToolRemoveLine::LeftClick(Editor2 * editor, float delay)

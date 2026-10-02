@@ -80,7 +80,6 @@ void CRain::update(float delay, Map* map)
 //
 void CRain::render()
 {
-#ifndef _DX_
 	glPushAttrib(GL_ENABLE_BIT);
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -95,7 +94,6 @@ void CRain::render()
 			}
 		glEnd();
 	glPopAttrib();
-#endif
 }
 
 

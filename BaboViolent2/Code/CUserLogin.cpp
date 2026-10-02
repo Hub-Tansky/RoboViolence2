@@ -33,9 +33,7 @@ CUserLogin::CUserLogin(CControl * in_parent, CControl * in_alignTo)
 	m_sfxClic = dksCreateSoundFromFile("main/sounds/Button.wav", false);
 	m_sfxOver = dksCreateSoundFromFile("main/sounds/ControlOver.wav", false);
 
-#ifndef _DX_
 	qObj = gluNewQuadric();
-#endif
 	tex_baboShadow = dktCreateTextureFromFile("main/textures/BaboShadow.tga", DKT_FILTER_BILINEAR);
 
 	parent = in_parent;
@@ -150,9 +148,7 @@ CUserLogin::CUserLogin(CControl * in_parent, CControl * in_alignTo)
 
 CUserLogin::~CUserLogin()
 {
-#ifndef _DX_
 	gluDeleteQuadric(qObj);
-#endif
 	dktDeleteTexture(&tex_baboShadow);
 	dksDeleteSound(m_sfxClic);
 	dksDeleteSound(m_sfxOver);
@@ -366,7 +362,6 @@ void CUserLogin::Paint(CControl * control)
 	if (control == pic_babo)
 	{
 		//--- We render the babo in 3D
-#ifndef _DX_
 		glMatrixMode(GL_PROJECTION);
 		glPushMatrix();
 			glMatrixMode(GL_MODELVIEW);
@@ -436,7 +431,6 @@ void CUserLogin::Paint(CControl * control)
 			glMatrixMode(GL_PROJECTION);
 		glPopMatrix();
 		glMatrixMode(GL_MODELVIEW);
-#endif
 	}
 }
 

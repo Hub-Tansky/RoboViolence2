@@ -388,9 +388,7 @@ void			dkpRender()
 	int j;
 
 	// On pogne la model view matrix
-#ifndef _DX_
 	glGetFloatv(GL_MODELVIEW_MATRIX, CDkp::modelView);
-#endif
 
 	// On transpose la matrice
 	for (i=0;i<4;i++)
@@ -420,7 +418,6 @@ void			dkpRender()
 	CDkp::camPos = matView.TransformVectorToParent(CDkp::camPos);
 	CDkp::camPos = -CDkp::camPos;
 
-#ifndef _DX_
 	glPushAttrib(GL_ENABLE_BIT | GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_TEXTURE_BIT | GL_CURRENT_BIT);
 		glEnable(GL_RESCALE_NORMAL);
 		glDisable(GL_CULL_FACE);
@@ -447,7 +444,6 @@ void			dkpRender()
 		glDisableClientState(GL_NORMAL_ARRAY);
 		glDisableClientState(GL_VERTEX_ARRAY);
 	glPopAttrib();
-#endif
 }
 
 
