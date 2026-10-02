@@ -16,7 +16,6 @@
 	BaboViolent 2 source code. If not, see http://www.gnu.org/licenses/.
 */
 
-/* TCE (c) All rights reserved */
 
 
 
@@ -36,8 +35,11 @@
 /// d'arguments. Les arguments sont pass� tour �tour et int�r� �la string...
 ///
 ////////////////////////////////////////////////////////////////////////////////////////
-CString::CString(char* fmt, ...){
+CString::CString(char* fmt, ...)
+{
+    static char mString[MAX_CARAC];
 
+    
 	if (!fmt)
 	{
 		s = new char [1];
@@ -46,19 +48,25 @@ CString::CString(char* fmt, ...){
 	}
 
 	// On cr�un char de 512 pour contenir le string (pas besoin de plus que 512 je crois)
-	char *mString = new char[MAX_CARAC];
+//	char *mString = new char[MAX_CARAC];
 
 	// Ici on passe tout les param (c comme un printf) pour les mettre dans le string
 	va_list		ap;
 	va_start(ap, fmt);
-		vsprintf(mString, fmt, ap);
+#ifdef BV2_PLATFORM_WINDOWS
+	_vsnprintf(mString, sizeof(mString), fmt, ap);
+#else
+	vsnprintf(mString, sizeof(mString), fmt, ap);
+#endif
 	va_end(ap);
 
+    // avoid buffer overrun
+    mString[MAX_CARAC - 1] = 0;
 	// On lui transfert la valeur finale
 	s = new char [strlen(mString)+1];
 	strcpy(s, mString);
 
-	delete [] mString;
+	//delete [] mString;
 }
 
 
@@ -73,12 +81,13 @@ CString::CString(char* fmt, ...){
 ////////////////////////////////////////////////////////////////////////////////////////
 void CString::resize(int newSize)
 {
+	if (newSize >= len()) return;
 	if (newSize > 0)
 	{
 		char tmp[10];
 		sprintf(tmp, "%%.%is", newSize);
 		CString newStr(tmp, s);
-		set(newStr.s);
+		set("%s", newStr.s);
 	}
 	else
 	{
@@ -106,8 +115,8 @@ void CString::resizeInverse(int newSize){
 		int len_ = len();
 		if (len_-newSize > 0)
 		{
-			CString newStr(&(s[len_-newSize]));
-			set(newStr.s);
+			CString newStr("%s", &(s[len_-newSize]));
+			set("%s", newStr.s);
 		}
 	}
 	else
@@ -177,7 +186,7 @@ bool CString::checkExtension(char * extension)
 	}
 
 	// On check le nb de caract�e de notre extension
-	int extensionLen = int(strlen(extension));
+	int extensionLen = (int)strlen(extension);
 
 	if (extensionLen > 0 && len() >= extensionLen)
 	{
@@ -255,7 +264,7 @@ void CString::trim(char caracter)
 			break;
 		}
 	}
-	CString newString(&(s[i]));
+	CString newString("%s", &(s[i]));
 
 	// les dernier caract�e maintenant
 	for (i=newString.len()-1;i>=0;i--)
@@ -270,7 +279,7 @@ void CString::trim(char caracter)
 	sprintf(tmp, "%%.%is", i+1);
 	CString newString2(tmp, newString.s);
 
-	set(newString2.s);
+	set("%s", newString2.s);
 }
 
 
@@ -287,7 +296,7 @@ CString CString::getNextToken(int caracter)
 {
 
 	// On commence pa r trimmer le tout au cas
-	trim(char(caracter));
+	trim(caracter);
 
 	CString result;
 
@@ -304,7 +313,7 @@ CString CString::getNextToken(int caracter)
 	}
 
 	// On trim
-	trim(char(caracter));
+	trim(caracter);
 
 	return result;
 }
@@ -323,7 +332,7 @@ CString CString::getFirstToken(int caracterSeparator)
 {
 
 	// On commence par trimmer le tout au cas
-	trim(char(caracterSeparator));
+	trim(caracterSeparator);
 
 	CString result;
 
@@ -341,7 +350,7 @@ CString CString::getFirstToken(int caracterSeparator)
 	}
 
 	// On trim
-	trim(char(caracterSeparator));
+	trim(caracterSeparator);
 
 	return result;
 }
@@ -498,7 +507,7 @@ bool CString::find(CString string, char* strFound, int & index)
 ////////////////////////////////////////////////////////////////////////////////////////////
 bool CString::find(char* string_)
 {
-	return find(CString(string_)); // On recall l'autre
+	return find(CString("%s", string_)); // On recall l'autre
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -518,7 +527,7 @@ bool CString::find(char* string_)
 ////////////////////////////////////////////////////////////////////////////////////////////
 bool CString::find(char* string_, char* strFound)
 {
-	return find(CString(string_), strFound); // On recall l'autre
+	return find(CString("%s", string_), strFound); // On recall l'autre
 }
 
 
@@ -539,7 +548,7 @@ bool CString::find(char* string_, char* strFound)
 ////////////////////////////////////////////////////////////////////////////////////////////
 bool CString::find(char* string_, int & index)
 {
-	return find(CString(string_), index); // On recall l'autre
+	return find(CString("%s", string_), index); // On recall l'autre
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -560,7 +569,7 @@ bool CString::find(char* string_, int & index)
 ////////////////////////////////////////////////////////////////////////////////////////////
 bool CString::find(char* string_, char* strFound, int & index)
 {
-	return find(CString(string_), strFound, index); // On recall l'autre
+	return find(CString("%s", string_), strFound, index); // On recall l'autre
 }
 
 
@@ -578,7 +587,7 @@ void CString::insert(CString string, int index){
 	char tmp[10];
 	sprintf(tmp, "%%.%is%%s%%s", index);
 	CString newString(tmp, s, string.s, &(s[index]));
-	set(newString.s);
+	set("%s", newString.s);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -590,7 +599,7 @@ void CString::insert(CString string, int index){
 ///	\param	index : Position de l'insertion dans la cha�e de base.
 ////////////////////////////////////////////////////////////////////////////////////////////
 void CString::insert(char *string, int index){
-	insert(CString(string), index);
+	insert(CString("%s", string), index);
 }
 
 
@@ -607,7 +616,7 @@ void CString::remove(int index){
 	char tmp[10];
 	sprintf(tmp, "%%.%is%%s", index);
 	CString newString(tmp, s, &(s[index+1]));
-	set(newString.s);
+	set("%s", newString.s);
 }
 
 
@@ -622,10 +631,10 @@ void CString::fillWithAppPath()
 
 	char *appPath = new char[MAX_CARAC]; //E.P Utile?
 	appPath[0] = '\0';					 //E.P Utile?
-	set(appPath);						 //E.P Utile?
+	set("%s", appPath);						 //E.P Utile?
 
 	CString result = getPath();
-	set(result.s);
+	set("%s", result.s);
 
 	delete [] appPath;					//E.P Utile?
 }
@@ -648,7 +657,7 @@ void CString::loadFromFile(FILE *fic)
 		if (tmp[i] == 0) break;
 	}
 
-	set(tmp);
+	set("%s", tmp);
 }
 
 
@@ -676,3 +685,5 @@ CString operator+(const char * string1, char* string2)
 {
 	return CString("%s%s", string1, string2);
 }*/
+
+

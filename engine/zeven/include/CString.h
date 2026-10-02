@@ -16,7 +16,7 @@
 	BaboViolent 2 source code. If not, see http://www.gnu.org/licenses/.
 */
 
-/* TCE (c) All rights reserved */
+/* RndLabs inc. (c) All rights reserved */
 
 
 
@@ -30,14 +30,15 @@
 //E.P Uhhhmmm... pas sr que j'aime �...
 #define MAX_CARAC 512
 
-//an include file wich ease the includiung of Linux include files
-#ifndef BV2_PLATFORM_WINDOWS
-	#include "platform.h"
-#endif
 
 #include <string.h>
 #include <stdio.h>
 #include <stdarg.h>
+#include <stdlib.h>
+
+#ifndef BV2_PLATFORM_WINDOWS
+	#include "platform.h"
+#endif
 
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -107,7 +108,7 @@ public:
 
 	//	int len(){int len_=0; while(s[len_++]); return len_-1;}  // On peut tr� bien le faire nous m�e
 	/// Grandeur de la string
-	int len() const {return int(strlen(s));} // Probablement que strlen() est plus optimis�en _asm
+	int len() const {return (int)strlen(s);} // Probablement que strlen() est plus optimis�en _asm
 
 	// Pour retirer un caract�e
 	void remove(int index);
@@ -129,9 +130,9 @@ public:
 	void loadFromFile(FILE *fic);
 
 	/// Convertir en float
-	float toFloat(){float tmp;sscanf(s, "%f", &tmp);return tmp;}
+	float toFloat(){/*float tmp;sscanf(s, "%f", &tmp);*/return (float)atof(s)/*tmp*/;}
 	///Convertir en int
-	int toInt(){int tmp;sscanf(s, "%i", &tmp);return tmp;}
+	int toInt(){/*int tmp;sscanf(s, "%i", &tmp);*/return atoi(s)/* tmp*/;}
 
 	/// Mettre la cha�e en minuscule
 	void toLower(){int len_=len(); for(int i=0;i<len_;i++) if(s[i]>='A' && s[i]<='Z') s[i]+=32;}
@@ -145,12 +146,28 @@ public:
 
 
 	/// Acc�er �un caract�e du string
-	char& operator[](const int i){return (i>=0 && i<len()) ? s[i] : ((i<0) ? s[0] : s[len()-1]);}
+	char& operator[](const int i) const {return (i>=0 && i<len()) ? s[i] : ((i<0) ? s[0] : s[len()-1]);}
 
 	///Copier �partir d'un pointeur
-	void operator=(const char* string){delete [] s; s = new char[strlen(string)+1]; strcpy(s, string);}
+	void operator=(const char* string)
+	{
+		if(this->s != string)
+		{
+			delete [] s;
+			s = new char[strlen(string)+1];
+			strcpy(s, string);
+		}
+	}
 	///Copier �partir de l'adresse de l'objet
-	void operator=(const CString &objToCopy){delete [] s; s = new char[strlen(objToCopy.s)+1]; strcpy(s, objToCopy.s);}
+	void operator=(const CString &objToCopy)
+	{
+		if(this != &objToCopy)
+		{
+			delete [] s;
+			s = new char[strlen(objToCopy.s)+1];
+			strcpy(s, objToCopy.s);
+		}
+	}
 	///Copier �partir d'un int
 	void operator=(int value){set("%i", value);}
 	///Copier �partir d'un flaot
@@ -182,9 +199,9 @@ public:
 	///Retourne vrai si les deux string sont diff�entes
 	bool operator!=(const char* string){return !(stricmp(s, string)==0);}
 	///Retourne vrai si la string est plus petite
-	bool operator<(const CString& string){return (stricmp(s, string.s)<0);}
+	bool operator<(const CString& string)const{return (stricmp(s, string.s)<0);}
 	///Retourne vrai si la string est plus grande
-	bool operator>(const CString& string){return (stricmp(s, string.s)>0);}
+	bool operator>(const CString& string)const{return (stricmp(s, string.s)>0);}
 	///Retourne vrai si la string est plus petite ou �ale
 	bool operator<=(const CString& string){return (stricmp(s, string.s)<=0);}
 	///Retourne vrai si la string est plus grande ou �ale
@@ -199,3 +216,5 @@ CString operator+(const char * string1, const char* string2);
 */
 
 #endif
+
+

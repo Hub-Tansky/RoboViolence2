@@ -16,14 +16,11 @@
 	BaboViolent 2 source code. If not, see http://www.gnu.org/licenses/.
 */
 
-/* TCE (c) All rights reserved */
 
 
 #include "CVector.h"
 #include <math.h>
 #include <stdlib.h>
-#include "platform.h"
-
 
 
 
@@ -42,10 +39,10 @@ CVector2i::CVector2i(int x, int y)
 	s[1] = y;
 }
 
-CVector2i::CVector2i(const int* array)
+CVector2i::CVector2i(int* in_v)
 {
-	s[0] = array[0];
-	s[1] = array[1];
+	s[0] = in_v[0];
+	s[1] = in_v[1];
 }
 
 CVector2i::CVector2i(const CVector2i& vector)
@@ -71,10 +68,10 @@ CVector2f::CVector2f(float x, float y)
 	s[1] = y;
 }
 
-CVector2f::CVector2f(const float* array)
+CVector2f::CVector2f(float* in_v)
 {
-	s[0] = array[0];
-	s[1] = array[1];
+	s[0] = in_v[0];
+	s[1] = in_v[1];
 }
 
 CVector2f::CVector2f(const CVector2f& vector)
@@ -102,11 +99,11 @@ CVector3i::CVector3i(int x, int y, int z)
 	s[2] = z;
 }
 
-CVector3i::CVector3i(const int* array)
+CVector3i::CVector3i(int* in_v)
 {
-	s[0] = array[0];
-	s[1] = array[1];
-	s[2] = array[2];
+	s[0] = in_v[0];
+	s[1] = in_v[1];
+	s[2] = in_v[2];
 }
 
 CVector3i::CVector3i(const CVector3i& vector)
@@ -135,11 +132,11 @@ CVector3f::CVector3f(float x, float y, float z)
 	s[2] = z;
 }
 
-CVector3f::CVector3f(const float* array)
+CVector3f::CVector3f(const float* in_v)
 {
-	s[0] = array[0];
-	s[1] = array[1];
-	s[2] = array[2];
+	s[0] = in_v[0];
+	s[1] = in_v[1];
+	s[2] = in_v[2];
 }
 
 CVector3f::CVector3f(const CVector3f& vector)
@@ -170,12 +167,12 @@ CVector4f::CVector4f(float x, float y, float z, float r)
 	s[3] = r;
 }
 
-CVector4f::CVector4f(const float* array)
+CVector4f::CVector4f(const float* in_v)
 {
-	s[0] = array[0];
-	s[1] = array[1];
-	s[2] = array[2];
-	s[3] = array[3];
+	s[0] = in_v[0];
+	s[1] = in_v[1];
+	s[2] = in_v[2];
+	s[3] = in_v[3];
 }
 
 CVector4f::CVector4f(const CVector4f& vector)
@@ -202,13 +199,13 @@ CVector4f::CVector4f(const CVector4f& vector)
 // ---------------------------------------------------------
 float dk_sqrtf(float number)
 {
-	INT4 i;
+	long i;
 	float x2, y;
 	const float threehalfs = 1.5F;
 
 	x2 = number * 0.5F;
 	y  = number;
-	i  = * ( INT4 * ) &y;						// get bits for floating value
+	i  = * ( long * ) &y;						// get bits for floating value
 	i  = 0x5f3759df - ( i >> 1 );               // gives initial guess y0. 0x5f3759df => gives the smalless error approximation of the final value.
 	y  = * ( float * ) &i;						// converts bits back to float
 	y  = y * ( threehalfs - ( x2 * y * y ) );   // 1st iteration
@@ -282,18 +279,20 @@ float dot(const CVector2f &u, const CVector2f &v)
 //
 CVector3f projection(const CVector3f &u, const CVector3f &Onv)
 {
-	return Onv * dot(u, Onv) / Onv.length();
+	float a = dot(u, Onv);
+	CVector3f b = Onv * a;
+	CVector3f c = b / Onv.length();
+	return c;
 }
 
 
 
 //
-// r�lection sur un plan
+// réflection sur un plan
 //
 CVector3f reflect(const CVector3f &u, const CVector3f &normal)
 {
-	CVector3f temp = (projection(u, normal) * 2);
-	return u - temp;
+	return u - projection(u, normal) * 2;
 }
 
 
@@ -403,7 +402,7 @@ CVector2f rotateAboutPivot(const CVector2f & point, float angle, const CVector2f
 
 
 //
-// Pour cr�r un vecteur right et up �partir d'un vecteur front donn�
+// Pour créer un vecteur right et up à partir d'un vecteur front donné
 //
 void createRightUpVectors(CVector3f & right, const CVector3f & _front, CVector3f & up)
 {
@@ -423,8 +422,7 @@ void createRightUpVectors(CVector3f & right, const CVector3f & _front, CVector3f
 	}
 	else
 	{
-		CVector3f temp = CVector3f(0,1,0);
-		up = cross(front, temp);
+		up = cross(front, CVector3f(0,1,0));
 		right = cross(front, up);
 	}
 }
@@ -496,3 +494,4 @@ float rand(float from, float to)
 	float precision = 30000.0f / eccart;
 	return (eccart == 0) ? from : from + (((float)(rand()%((int)((to-from)*precision)))) / precision);
 }
+

@@ -41,8 +41,7 @@ void CMatrix3x3f::Transpose(){
 //
 // Multiplication de matrice
 //
-CMatrix3x3f CMatrix3x3f::operator*(const CMatrix3x3f & matrix) const
-{
+CMatrix3x3f CMatrix3x3f::operator*(CMatrix3x3f & matrix){
 	CMatrix3x3f NewMat;
 
 	for (int i=0;i<3;i++)
@@ -60,8 +59,7 @@ CMatrix3x3f CMatrix3x3f::operator*(const CMatrix3x3f & matrix) const
 
 	return NewMat;
 }
-void CMatrix3x3f::operator*=(const CMatrix3x3f & matrix)
-{
+void CMatrix3x3f::operator*=(CMatrix3x3f & matrix){
 	CMatrix3x3f NewMat;
 
 	for (int i=0;i<3;i++)
@@ -85,8 +83,7 @@ void CMatrix3x3f::operator*=(const CMatrix3x3f & matrix)
 //
 // Multiplication par un vecteur
 //
-CVector3f CMatrix3x3f::operator*(const CVector3f &u) const
-{
+CVector3f CMatrix3x3f::operator*(const CVector3f &u){
 	return CVector3f(
 		s[0]*u.s[0] + s[1]*u.s[1] + s[2]*u.s[2], 
 		s[3]*u.s[0] + s[4]*u.s[1] + s[5]*u.s[2], 
@@ -99,10 +96,9 @@ CVector3f CMatrix3x3f::operator*(const CVector3f &u) const
 //
 // Pour calculer un mineur
 //
-float CMatrix3x3f::Minor(int Row, int Col) const
-{
+float CMatrix3x3f::Minor(int Row, int Col){
 	// On pogne les autres lignes
-	int Row1 = 0, Row2 = 0, Col1 = 0, Col2 = 0;
+	int Row1, Row2, Col1, Col2;
 	float Signe = 1;
 	if (Row == 0) {Row1 = 1;Row2 = 2;}
 	if (Row == 1) {Row1 = 0;Row2 = 2;Signe*=-1;}
@@ -120,8 +116,7 @@ float CMatrix3x3f::Minor(int Row, int Col) const
 //
 // Pour trouver le déterminant de la matrice
 //
-float CMatrix3x3f::Determinant() const
-{
+float CMatrix3x3f::Determinant(){
 	return dot(CVector3f(s[0],s[3],s[6]), cross(CVector3f(s[1],s[4],s[7]), CVector3f(s[2],s[5],s[8])));
 }
 
@@ -130,8 +125,7 @@ float CMatrix3x3f::Determinant() const
 //
 // Pour trouver la matrice inverse
 //
-CMatrix3x3f CMatrix3x3f::Inverse() const
-{
+CMatrix3x3f CMatrix3x3f::Inverse(){
 	CMatrix3x3f Com = *this;
 
 	// On trouve d'abords les mineurs de chaque éléments
@@ -155,7 +149,7 @@ CMatrix3x3f CMatrix3x3f::Inverse() const
 //
 // Effectuer une rotation autour d'un axe déterminé
 //
-void CMatrix3x3f::RotateArbitrary(float Angle, const CVector3f& u)
+void CMatrix3x3f::RotateArbitrary(float Angle, CVector3f& u)
 {
 	CVector3f RightRot = rotateAboutAxis(CVector3f(&(s[0])), Angle, u);
 	CVector3f FrontRot = rotateAboutAxis(CVector3f(&(s[3])), Angle, u);
@@ -178,7 +172,7 @@ void CMatrix3x3f::RotateArbitrary(float Angle, const CVector3f& u)
 //
 // Effectuer une rotation autour d'un axe déterminé
 //
-void CMatrix3x3f::RotateArbitrary(const CVector3f& u)
+void CMatrix3x3f::RotateArbitrary(CVector3f& u)
 {
 	RotateAboutRight(u.s[0]);
 	RotateAboutFront(u.s[1]);
@@ -203,3 +197,4 @@ void CMatrix3x3f::normalize()
 		s[i*3+2] /= size;
 	}
 }
+
