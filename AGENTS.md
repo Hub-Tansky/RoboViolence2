@@ -1,6 +1,6 @@
-# AGENTS.md
+# AGENTS.md: RoboViolence 2
 
-BaboViolent 2: GPLv3 C++ top-down multiplayer shooter (bitHeads, 2012). Detailed architecture notes live in `docs/analysis/` (start with `docs/analysis/README.md`).
+RoboViolence 2, an unofficial fork of BaboViolent 2 ([ADR 0004](docs/decisions/0004-project-name-roboviolence2.md)): GPLv3 C++ top-down multiplayer shooter (bitHeads, 2012). Detailed architecture notes live in `docs/analysis/` (start with `docs/analysis/README.md`).
 
 ## Layout
 

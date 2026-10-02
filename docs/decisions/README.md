@@ -35,3 +35,4 @@ What we do, in one or two sentences.
 | [0001](0001-ninja-generator-on-all-presets.md) | Use the Ninja generator on all presets, MSVC included | Accepted |
 | [0002](0002-compile-out-libcurl.md) | Compile out libcurl in Phase A | Accepted |
 | [0003](0003-keep-opengl-2.1-then-sdl-gpu.md) | Keep OpenGL 2.1 for Phase A; isolate the renderer, then move it to SDL_GPU | Accepted |
+| [0004](0004-project-name-roboviolence2.md) | Name the project RoboViolence 2, an unofficial fork of BaboViolent 2 | Accepted |
