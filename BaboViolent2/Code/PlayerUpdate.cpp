@@ -87,6 +87,7 @@ void Player::update(float delay)
 	}
 
 	frameSinceLast++; // For server hacking prevention
+	if (framesSinceKnockback < 1000) framesSinceKnockback++;
 
 	if (fireFrameDelay > 0) fireFrameDelay--;
 

@@ -827,8 +827,20 @@ void Server::recvPacket(char * buffer, int typeID, unsigned long bbnetID)
 
 							//console->add( CString( "vel : %f  %f  %f" , vel[0] , vel[1] , vel[2] ), true );
 
-							if ( (game->players[playerCoordFrame.playerID]->currentFrame - game->players[playerCoordFrame.playerID]->lastFrame > game->players[playerCoordFrame.playerID]->frameSinceLast + 5) ||
-								  vel.length() > 3.3f )
+							// Frame check: client frames elapsed vs server ticks in the same window.
+							// Allow 5 frames + 10% for packet jitter and the client's catch-up ticks
+							// after a stall; a real speed hack still drifts far beyond that.
+							Player * shp = game->players[playerCoordFrame.playerID];
+							long clientFrames = shp->currentFrame - shp->lastFrame;
+							bool frameHack = clientFrames > shp->frameSinceLast + 5 + shp->frameSinceLast / 10;
+
+							// Speed check: horizontal speed vs the client clamp (3.25) plus the
+							// char*10 quantisation margin. Knockback from a hit legitimately
+							// exceeds the clamp, so skip it for 2 s after the server registers one.
+							float hSpeed = sqrtf(vel[0] * vel[0] + vel[1] * vel[1]);
+							bool speedHack = shp->framesSinceKnockback > 60 && hSpeed > 3.25f + 0.15f;
+
+							if (frameHack || speedHack)
 							{
 								//--- Hey, on a 10 frame de plus que le server.. hacking???
 								game->players[playerCoordFrame.playerID]->speedHackCount++;

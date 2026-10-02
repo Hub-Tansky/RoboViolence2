@@ -1331,6 +1331,7 @@ void Game::shootMinibotSV(CMiniBot * minibot, float imp, CVector3f p1, CVector3f
 	if (hitPlayer)
 	{
 		playerShootSV.hitPlayerID = hitPlayer->playerID;
+		hitPlayer->framesSinceKnockback = 0;
 		playerShootSV.weaponID = WEAPON_MINIBOT_WEAPON;
 
 		// On décrémente sa vie
@@ -1559,6 +1560,7 @@ void Game::shootSV(int playerID, int nuzzleID, float imp, CVector3f p1, CVector3
 		if (hitPlayer)
 		{
 			playerShootSV.hitPlayerID = hitPlayer->playerID;
+			hitPlayer->framesSinceKnockback = 0;
 			playerShootSV.weaponID = player->weapon->weaponID;
 
 			// On décrémente sa vie

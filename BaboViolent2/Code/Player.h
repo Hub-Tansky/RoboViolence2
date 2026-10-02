@@ -215,6 +215,7 @@ public:
 	long lastFrame;
 	long currentFrame;
 	long speedHackCount;
+	long framesSinceKnockback; // server ticks since a shot hit this player (client then adds knockback)
 	float shotsPerSecond;
 	long shotCount;
 	float secondPassed;
