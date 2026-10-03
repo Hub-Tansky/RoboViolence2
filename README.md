@@ -44,7 +44,7 @@ cmake --build --preset linux-x64 --target bv2dedicated bv2master
 ```
 
 - Needs `VCPKG_ROOT`, CMake 3.25+, Ninja, Python 3. Linux host packages: `tools/setup-dev.sh --linux-packages`.
-- The build creates `build/<preset>/runtime/` with the executables, `main/` (languages, launch scripts, `bv2.cfg` from `config/bv2.example.cfg`, generated placeholder assets) and the databases generated from `content-seed/`. Run the server from there: `./bv2dedicated`, then `execute CTF`.
+- The build creates `build/<preset>/runtime/` with the executables, `main/` (languages, launch scripts, `bv2.example.cfg` from `config/bv2.example.cfg`, generated placeholder assets) and the databases generated from `content-seed/`. Run the server from there: `./bv2dedicated`, then `execute CTF`. Saved config, databases and logs go to the per-user pref dir (`BV2_PREF_DIR` overrides).
 - `bv2` (the client) is part of `all`: SDL3 window and input, miniaudio audio, glad GL 2.1. The `client` vcpkg feature supplies them; `-DBV2_BUILD_CLIENT=OFF` builds the servers only.
 - Verified so far: macOS arm64 (with ASan), client started to the main loop. Linux and Windows are untested.
 - There are no automated tests. Run `tools/setup-dev.sh` (or `.ps1`) once to activate the commit hooks.

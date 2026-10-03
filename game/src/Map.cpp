@@ -133,7 +133,7 @@ Map::Map(CString mapFilename, Game * _game, unsigned int font, bool editor, int 
 		dko_flag[1] = dkoLoadFile("main/models/RedFlag.DKO");
 		dko_flagPod[1] = dkoLoadFile("main/models/RedFlagPod.DKO");
 
-	//	dko_flagPole = dkoLoadFile("main/models/flagpole.dko");
+	//	dko_flagPole = dkoLoadFile("main/models/FlagPole.DKO");
 
 		flagAnims[0] = 25;
 		flagAnims[1] = 25;

@@ -114,7 +114,7 @@ Scene::Scene()
 	menuManager.root->enable = true;
 	menuManager.root->visible = false; //--- Not now */
 	dksSetSfxMasterVolume(gameVar.s_masterVolume);
-//	dksPlayMusic("main/sounds/menu.ogg", -1);
+//	dksPlayMusic("main/sounds/Menu.ogg", -1);
 
 	//--- Query from data base if we sent the survey already
 	sqlite3 *DB=bv2::openClientDb();

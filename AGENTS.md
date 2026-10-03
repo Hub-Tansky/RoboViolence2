@@ -26,10 +26,11 @@ cmake --build --preset <preset> --target bv2dedicated bv2master
 ## Assets
 
 - The original assets are removed ([docs/ASSETS-LICENSE.md](docs/ASSETS-LICENSE.md), [docs/assets/ASSET-INVENTORY.md](docs/assets/ASSET-INVENTORY.md)). Never re-add them; `tools/check-original-assets.py` rejects them by hash.
-- With your own copy of the original data, keep it outside the repo and set `BV2_DATA_DIR` (step 4 §4.4; until then symlink `main/` into the run dir). Without it, CI and contributors use generated placeholders (step 2 §2.6).
+- With your own copy of the original data, keep it outside the repo and set `BV2_DATA_DIR`. Without it, CI and contributors use generated placeholders (step 2 §2.6).
 
 ## Config and secrets
 
+- Saved config, `bv2.db`, logs and maps go to the pref dir (`BV2_PREF_DIR` overrides; [ADR 0007](docs/decisions/0007-data-root-pref-dir-config-layers.md)). Env `BV2_MASTER_SERVERS`, `BV2_ACCOUNT_URL`, `BV2_SV_PASSWORD`, `BV2_ADMIN_PASS` and `--config <file>` override config and are never saved.
 - Tracked config is `config/*.example.cfg` with empty placeholders; real values stay local. Policy: [config/README.md](config/README.md).
 - Databases are generated from `content-seed/*.sql`, never committed.
 - Run `tools/setup-dev.sh` (or `.ps1`) once: it activates `.githooks` (identity, gitleaks, original-asset and encoding checks).

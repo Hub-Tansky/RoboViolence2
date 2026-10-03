@@ -31,7 +31,7 @@ IntroScreen::IntroScreen()
 	tex_rndLogo = dktCreateTextureFromFile("main/textures/RnDLabs.tga", DKT_FILTER_LINEAR);
 //	tex_glowLogo = dktCreateTextureFromFile("main/textures/RnDLabsGlow.tga", DKT_FILTER_LINEAR);
 	tex_hgLogo = dktCreateTextureFromFile("main/textures/HeadGames.tga", DKT_FILTER_LINEAR);
-//	sfx_intro = dksCreateSoundFromFile("main/Sounds/IntroScreen.mp3", false);
+//	sfx_intro = dksCreateSoundFromFile("main/sounds/IntroScreen.mp3", false);
 
 //	dksSetSfxMasterVolume(gameVar.s_masterVolume);
 /*	if (gameVar.s_masterVolume > 0)

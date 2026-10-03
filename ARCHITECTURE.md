@@ -53,6 +53,13 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `CMakePresets.json` | Presets: linux-x64, macos-arm64, win-x64-msvc, -asan variants (Ninja) |
 | `LICENSE.txt` | GPLv3 text (code only) |
 | `README.md` | Project overview, fork and asset-removal statement |
+| `docs/decisions/0007-data-root-pref-dir-config-layers.md` | ADR 0007 |
+| `game/src/Paths.cpp` | Data root search, per-user pref dir, layered config loading, map and DB path helpers |
+| `game/src/Paths.h` | Interface of `Paths.cpp` (namespace `bv2`) |
+| `packaging/linux/roboviolence2.desktop` | Linux desktop entry |
+| `packaging/macos/Info.plist.in` | macOS bundle `Info.plist` template |
+| `packaging/windows/bv2.manifest` | Windows manifest: PerMonitorV2 DPI, UTF-8 code page, Windows 10/11 |
+| `tools/check-content-case.py` | Fails when a literal `main/...` path differs from a real file name only by case |
 | `vcpkg.json` | vcpkg manifest (sqlite3, curl; Step 3 completes it) |
 
 ### `.githooks`
@@ -427,7 +434,6 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/ClientRender.cpp` | Client: in-game HUD and view rendering |
 | `game/src/ConfirmPass.cpp` | Password confirmation dialog |
 | `game/src/ConfirmPass.h` | Password confirmation dialog |
-| `game/src/ConnectFailed.cpp` | Dialog: connection failed |
 | `game/src/ConnectFailed.h` | Dialog: connection failed |
 | `game/src/Console.cpp` | In-game console: commands, log, remote console |
 | `game/src/Console.h` | In-game console: commands, log, remote console |
@@ -435,9 +441,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/Control.h` | Menu control base class |
 | `game/src/ControlListener.cpp` | Menu control listener interface |
 | `game/src/ControlListener.h` | Menu control listener interface |
-| `game/src/CreateGame.cpp` | Create-game screen |
 | `game/src/CreateGame.h` | Create-game screen |
-| `game/src/Credits.cpp` | Credits screen |
 | `game/src/Credits.h` | Credits screen |
 | `game/src/Dialog.cpp` | Menu dialog base |
 | `game/src/Dialog.h` | Menu dialog base |
@@ -447,7 +451,6 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/EditorDialogs.h` | Map editor dialogs |
 | `game/src/EditorTools.cpp` | Map editor tools |
 | `game/src/EditorTools.h` | Map editor tools |
-| `game/src/Extended.cpp` | Skin and color chooser screen |
 | `game/src/Extended.h` | Skin and color chooser screen |
 | `game/src/FastDelegate.h` | Third-party fast C++ delegate header |
 | `game/src/FileIO.cpp` | File and memory-buffer reader/writer with fixed-width types |
@@ -463,13 +466,10 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/Helper.cpp` | Misc helpers (colors, text, math) |
 | `game/src/Helper.h` | Misc helpers (colors, text, math) |
 | `game/src/Host.h` | Host-game settings struct |
-| `game/src/IncorrectName.cpp` | Dialog: invalid player name |
 | `game/src/IncorrectName.h` | Dialog: invalid player name |
-| `game/src/IncorrectPassword.cpp` | Dialog: wrong server password |
 | `game/src/IncorrectPassword.h` | Dialog: wrong server password |
 | `game/src/IntroScreen.cpp` | Intro screen |
 | `game/src/IntroScreen.h` | Intro screen |
-| `game/src/JoinGame.cpp` | Join-game screen |
 | `game/src/JoinGame.h` | Join-game screen |
 | `game/src/Key.cpp` | Key binding entry |
 | `game/src/Key.h` | Key binding entry |
@@ -477,31 +477,24 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/KeyManager.h` | Key bindings manager |
 | `game/src/Label.cpp` | Menu label widget |
 | `game/src/Label.h` | Menu label widget |
-| `game/src/MainMenu.cpp` | Main menu screen |
 | `game/src/MainMenu.h` | Main menu screen |
 | `game/src/Map.cpp` | Map data, .bvm loading and saving, collision, rendering resources |
 | `game/src/Map.h` | Map data, .bvm loading and saving, collision, rendering resources |
 | `game/src/MapRender.cpp` | Map rendering (tiles, walls, dirt, optional 3D model map) |
 | `game/src/MemIO.cpp` | In-memory buffer reader/writer |
 | `game/src/MemIO.h` | In-memory buffer reader/writer |
-| `game/src/Menu.cpp` | Menu system core (old menu) |
 | `game/src/Menu.h` | Menu system core (old menu) |
 | `game/src/MenuSetup.cpp` | Menu construction |
 | `game/src/MessageDialog.cpp` | Generic message dialog |
 | `game/src/MessageDialog.h` | Generic message dialog |
 | `game/src/Minibot.cpp` | Minibot drone weapon entity |
-| `game/src/NoGameRunning.cpp` | Dialog: no game running |
 | `game/src/NoGameRunning.h` | Dialog: no game running |
-| `game/src/NoMapSelected.cpp` | Dialog: no map selected |
 | `game/src/NoMapSelected.h` | Dialog: no map selected |
-| `game/src/OptionMenu.cpp` | Options screen |
 | `game/src/OptionMenu.h` | Options screen |
-| `game/src/Password.cpp` | Password prompt dialog |
 | `game/src/Password.h` | Password prompt dialog |
 | `game/src/Player.cpp` | Player entity: movement, weapons, hits, rendering |
 | `game/src/Player.h` | Player entity: movement, weapons, hits, rendering |
 | `game/src/PlayerUpdate.cpp` | Player: per-tick update (physics, firing, timers) |
-| `game/src/Quit.cpp` | Quit confirmation dialog |
 | `game/src/Quit.h` | Quit confirmation dialog |
 | `game/src/RemoteAdminPackets.h` | Wire structs for the remote-admin protocol |
 | `game/src/ReportGen.cpp` | XML server report generation |
@@ -513,7 +506,6 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/Server.cpp` | Authoritative server: connections, joins, tick, map and mode control |
 | `game/src/Server.h` | Authoritative server: connections, joins, tick, map and mode control |
 | `game/src/ServerCTF.cpp` | Server: capture-the-flag rules |
-| `game/src/ServerClose.cpp` | Dialog shown when the server closes the connection |
 | `game/src/ServerClose.h` | Dialog shown when the server closes the connection |
 | `game/src/ServerRecv.cpp` | Server: handlers for every client-to-server packet |
 | `game/src/ServerSnD.cpp` | Server: search-and-destroy rules |
@@ -523,7 +515,6 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/Write.h` | Chat input widget |
 | `game/src/Writting.cpp` | Chat input handling |
 | `game/src/Writting.h` | Chat input handling |
-| `game/src/WrongVersion.cpp` | Dialog: client/server version mismatch |
 | `game/src/WrongVersion.h` | Dialog: client/server version mismatch |
 | `game/src/Zeven.h` | Umbrella include for engine headers and common types |
 | `game/src/bv2.bmp` | Windows resource bitmap (original art; replace in §H) |
