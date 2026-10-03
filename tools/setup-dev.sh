@@ -15,6 +15,7 @@ if [ "$1" = "--linux-packages" ]; then
 fi
 
 git config core.hooksPath .githooks
+git config blame.ignoreRevsFile .git-blame-ignore-revs
 missing=0
 for t in gitleaks cmake ninja python3; do
   command -v "$t" >/dev/null 2>&1 || { echo "missing: $t" >&2; missing=1; }
