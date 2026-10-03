@@ -6,7 +6,7 @@ cd "$(dirname "$0")/.."
 if [ "$1" = "--linux-packages" ]; then
   # Ubuntu 24.04 package names. vcpkg builds most libraries; these are the host packages
   # it and the SDL3/GL build need on Linux.
-  echo "sudo apt install build-essential ninja-build pkg-config autoconf autoconf-archive automake libtool \\"
+  echo "sudo apt install build-essential ninja-build pkg-config autoconf autoconf-archive automake libtool libltdl-dev \\"
   echo "  libgl1-mesa-dev libglu1-mesa-dev \\"
   echo "  libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxi-dev libxss-dev \\"
   echo "  libwayland-dev libxkbcommon-dev wayland-protocols \\"

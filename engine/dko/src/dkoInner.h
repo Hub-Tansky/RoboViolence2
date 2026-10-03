@@ -46,7 +46,6 @@
 #ifndef CONSOLE
 #pragma comment( lib, "opengl32.lib" )
 #pragma comment( lib, "glu32.lib" )
-#pragma comment( lib, "dkt.lib" )
 #endif
 #endif
 
