@@ -26,6 +26,8 @@ jobs:
           echo "VCPKG_ROOT=$VCPKG_INSTALLATION_ROOT" >> "$GITHUB_ENV"
           baseline=$(sed -n 's/.*"builtin-baseline": *"\([0-9a-f]*\)".*/\1/p' vcpkg.json)
           git -C "$VCPKG_INSTALLATION_ROOT" fetch --quiet origin "$baseline" || git -C "$VCPKG_INSTALLATION_ROOT" fetch --quiet --unshallow origin
+          # The builtin registry reads its version database from this checkout: it must be at the baseline.
+          git -C "$VCPKG_INSTALLATION_ROOT" checkout --quiet --force "$baseline"
       - name: Linux packages
         if: runner.os == 'Linux'
         run: |
@@ -81,6 +83,8 @@ jobs:
           echo "VCPKG_ROOT=$VCPKG_INSTALLATION_ROOT" >> "$GITHUB_ENV"
           baseline=$(sed -n 's/.*"builtin-baseline": *"\([0-9a-f]*\)".*/\1/p' vcpkg.json)
           git -C "$VCPKG_INSTALLATION_ROOT" fetch --quiet origin "$baseline" || git -C "$VCPKG_INSTALLATION_ROOT" fetch --quiet --unshallow origin
+          # The builtin registry reads its version database from this checkout: it must be at the baseline.
+          git -C "$VCPKG_INSTALLATION_ROOT" checkout --quiet --force "$baseline"
       - name: Packages
         run: |
           sudo apt-get update

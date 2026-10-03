@@ -21,7 +21,9 @@
 
 #include "platform.h"
 
-#ifndef BV2_PLATFORM_WINDOWS
+#ifdef BV2_PLATFORM_WINDOWS
+	#include <winsock2.h>
+#else
 	#include <errno.h>
 	#include <sys/socket.h>
 #endif

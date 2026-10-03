@@ -46,9 +46,10 @@ function(bv2_target_defaults target)
   if(MSVC)
     target_compile_options(${target} PRIVATE "/FI${BV2_PLATFORM_HEADER}" /utf-8 /W4
       # Legacy code classes not worth fixing: narrowing, shadowing, unreferenced parameters, deprecated CRT.
-      /wd4100 /wd4244 /wd4267 /wd4456 /wd4457 /wd4458 /wd4459 /wd4996 /wd4201 /wd4505)
+      /wd4100 /wd4244 /wd4267 /wd4456 /wd4457 /wd4458 /wd4459 /wd4996 /wd4201 /wd4505 /wd4702 /wd4706)
     target_compile_definitions(${target} PRIVATE
-      _CRT_SECURE_NO_WARNINGS _CRT_NONSTDC_NO_DEPRECATE NOMINMAX)
+      _CRT_SECURE_NO_WARNINGS _CRT_NONSTDC_NO_DEPRECATE NOMINMAX
+      _HAS_STD_BYTE=0) # `using namespace std;` and windows.h both define `byte` otherwise
     if(BV2_SANITIZE)
       target_compile_options(${target} PRIVATE /fsanitize=address)
     endif()

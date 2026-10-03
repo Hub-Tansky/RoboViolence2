@@ -172,7 +172,7 @@ int cConnection::StartConnection()
 {
 	// set the socket to non-blocking mode
 	#ifdef BV2_PLATFORM_WINDOWS
-		UINT4 mode = 1;
+		u_long mode = 1;
 		int rc = ioctlsocket( *FileDescriptor, FIONBIO, &mode);
 		if( rc )
 		{
@@ -256,7 +256,7 @@ int cConnection::UpdateConnecting(float /*elapsed*/)
 		{
 				// Set to blocking mode again
 			#ifdef BV2_PLATFORM_WINDOWS
-				UINT4 mode = 0;
+				u_long mode = 0;
 				int aarc = ioctlsocket( *FileDescriptor, FIONBIO, &mode);
 				if( aarc )
 				{

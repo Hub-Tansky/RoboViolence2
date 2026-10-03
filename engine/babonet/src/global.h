@@ -41,7 +41,7 @@ typedef unsigned short int UINT2;
 
 /* UINT4 defines a four byte word */
 #if defined(BV2_PLATFORM_WINDOWS)
-typedef unsigned long int UINT4;
+typedef unsigned int UINT4; /* long is 32 bits there too, but platform.h declares UINT4 as uint32_t (unsigned int) */
 #elif defined(__LP64__) || defined(_LP64) || defined(BV2_POSIX)
 typedef unsigned int UINT4;
 #else
