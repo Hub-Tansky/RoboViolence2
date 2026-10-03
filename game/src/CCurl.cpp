@@ -19,8 +19,6 @@
 #include "CCurl.h"
 #include "Console.h"
 #include "md5class.h"
-#include <sstream>
-#include <fstream>
 using std::min;
 using std::max;
 
@@ -30,8 +28,6 @@ using std::max;
 // changed to 65536 since it's used for other things that require bigger buffer (cnik)
 const int CCurl::s_maxResponse = 65536;
 
-// For sending xml via postdata
-std::string base64_encode(std::string in);
 
 
 
@@ -109,119 +105,3 @@ size_t CCurl::write_data(void *buffer, size_t size, size_t nmemb, void *userp)
 	else
 		return 0;
 }
-
-
-CUrlData::CUrlData() { m_data = ""; }
-CUrlData::~CUrlData() {}
-
-void CUrlData::add(CString key, std::string value, int flags /* = CUrlData::NONE */)
-{
-	if(m_data.size() > 0)
-		m_data += "&";
-
-	std::stringstream ss;
-	ss << key.s << "=";
-
-	if(flags == MD5)
-	{
-		CMD5 md5(value.c_str());
-		ss << md5.getMD5Digest();
-	}
-	else if(flags == BASE64)
-	{
-		console->add("\x2>Base64 Encoding Data", true);
-		std::string b64 = base64_encode(value);
-		console->add("\x2>Escaping Data", true);
-#ifdef BV2_PLATFORM_WINDOWS
-		char* enc = curl_easy_escape(0, b64.c_str(), (int)b64.size());
-#else
-		char* enc = curl_escape(b64.c_str(), (int)b64.size());
-#endif
-		ss << enc;
-		console->add("\x2>Releasing Temporary Memory", true);
-		curl_free(enc);
-	}
-	else
-	{
-		ss << value;
-	}
-	
-	m_data += ss.str();
-}
-
-/*void CUrlData::add(CString key, CString value, int flags /* = CUrlData::NONE *///)
-/*{
-	if(m_data.size() > 0)
-		m_data += "&";
-
-	if(flags == CUrlData::MD5)
-	{
-		CMD5 md5(value.s);
-		m_data += CString("%s=%s", key.s, md5.getMD5Digest()).s;
-	}
-	else
-	{
-		m_data += CString("%s=%s", key.s, value.s).s;
-	}
-	
-}*/
-
-void CUrlData::add(CString key, int value, int flags /* = CUrlData::NONE */)
-{
-	add(key, CString("%i", value).s, flags);
-}
-
-void CUrlData::add(CString key, float value, int flags /* = CUrlData::NONE */)
-{
-	add(key, CString("%f", value).s, flags);
-}
-
-
-// For base64 encoding
-static const char base64_table[] =
-{ 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
-'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
-'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
-'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
-'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/', '\0'
-};
-
-static const char base64_pad = '=';
-
-std::string base64_encode(std::string in)
-{
-	std::string r;
-	std::size_t pos;
-	typedef unsigned char uchar;
-
-	// keep going until we have less than 24 bits
-	for(pos = 0; in.size() - pos > 2; pos+=3)
-	{
-		r += base64_table[ uchar(in[pos+0]) >> 2];
-		r += base64_table[(( uchar(in[pos+0]) & 0x03) << 4) + ( uchar(in[pos+1]) >> 4)];
-		r += base64_table[(( uchar(in[pos+1]) & 0x0f) << 2) + ( uchar(in[pos+2]) >> 6)];
-		r += base64_table[ uchar(in[pos+2]) & 0x3f];
-	}
-
-	if(in.size() - pos != 0)
-	{
-		r += base64_table[uchar(in[pos+0]) >> 2];
-		
-		if (in.size() - pos > 1)
-		{
-			r += base64_table[(( uchar(in[pos+0]) & 0x03) << 4) + (uchar(in[pos+1]) >> 4)];
-			r += base64_table[(uchar(in[pos+1]) & 0x0f) << 2];
-			r += base64_pad;
-		}
-		else
-		{
-			r += base64_table[(uchar(in[pos+0]) & 0x03) << 4];
-			r += base64_pad;
-			r += base64_pad;
-		}
-
-	}
-
-	return r;
-}
-

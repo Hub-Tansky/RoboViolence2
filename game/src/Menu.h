@@ -51,7 +51,7 @@ public:
 	bool isReady;
 
 	// Le son pour le vent
-	FSOUND_SAMPLE * sfx_wind;
+	DksSound * sfx_wind;
 	int soundPlayChannel;
 
 	// La font

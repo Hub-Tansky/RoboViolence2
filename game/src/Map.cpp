@@ -85,7 +85,7 @@ Map::Map(CString mapFilename, Game * _game, unsigned int font, bool editor, int 
 		dkglPopOrtho();
 
 		// On swap les buffers
-		SwapBuffers(dkwGetDC());
+		dkglSwapBuffers();
 #endif
 #ifndef CONSOLE
 	dko_map = 0;

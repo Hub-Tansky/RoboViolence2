@@ -33,7 +33,7 @@ private:
 	bool m_isWaitingForKey;
 
 	// Le son pour quand on clic
-	FSOUND_SAMPLE * m_sfxClic;
+	DksSound * m_sfxClic;
 
 public:
 	// Constructeur

@@ -33,7 +33,7 @@ private:
 	ControlListener * m_listener;
 
 	// Le son pour quand on clic
-	FSOUND_SAMPLE * m_sfxClic;
+	DksSound * m_sfxClic;
 
 public:
 	// Constructeur

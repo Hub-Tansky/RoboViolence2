@@ -33,7 +33,7 @@ IntroScreen::IntroScreen()
 	tex_hgLogo = dktCreateTextureFromFile("main/textures/HeadGames.tga", DKT_FILTER_LINEAR);
 //	sfx_intro = dksCreateSoundFromFile("main/Sounds/IntroScreen.mp3", false);
 
-//	FSOUND_SetSFXMasterVolume((int)(255.0f*gameVar.s_masterVolume));
+//	dksSetSfxMasterVolume(gameVar.s_masterVolume);
 /*	if (gameVar.s_masterVolume > 0)
 	{
 		dksPlayMusic("main/sounds/IntroScreen.mp3", -1);

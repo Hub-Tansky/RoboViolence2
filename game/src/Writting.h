@@ -42,7 +42,7 @@ protected:
 	int m_maxCarac;
 
 	// Le son pour quand on tape
-	FSOUND_SAMPLE * m_sfxWrite;
+	DksSound * m_sfxWrite;
 
 public:
 	// Constructeur

@@ -16,925 +16,459 @@
 	BaboViolent 2 source code. If not, see http://www.gnu.org/licenses/.
 */
 
-/* TCE (c) All rights reserved */
+#include "dkw.h"
+#include "dikeys.h"
 
+#include <SDL3/SDL.h>
 
-#include "dkwi.h"
+#include <stdio.h>
 #include <string.h>
-#ifndef BV2_PLATFORM_WINDOWS
-#include "platform.h"
-#ifdef BV2_PLATFORM_MACOS
-#include <SDL.h>
-#else
-#include <SDL/SDL.h>
-#endif
-#include <time.h>
-#include <signal.h>
-#endif
+#include <string>
 
-
-//
-// Les trucs static
-//
-char *CDkw::lastErrorString = 0;
-int CDkw::w = 640;
-int CDkw::h = 480;
-int CDkw::colorDepth = 16;
-#ifndef BV2_PLATFORM_WINDOWS
-unsigned long CDkw::flags = SDL_HWSURFACE | SDL_OPENGL | SDL_DOUBLEBUF | SDL_ASYNCBLIT  | SDL_OPENGLBLIT | SDL_HWACCEL;
-#endif
-
-char *CDkw::title = 0;
-HINSTANCE CDkw::hInstance;
-HWND CDkw::hWnd;
-HDC CDkw::dc;
-bool CDkw::running = true;
-CMainLoopInterface *CDkw::mainLoopObject = 0;
-CVector2i CDkw::cursorPos;
-bool done = false;
-#ifndef BV2_PLATFORM_WINDOWS
-static unsigned long clear_counter = 0;
-DIMOUSESTATE2 CDkw::mouse_state;
-unsigned char CDkw::keys_state[256+128+8];
-static unsigned int shift_char_map[21][2] = 
+namespace
 {
-    {SDLK_0, SDLK_RIGHTPAREN},
-    {SDLK_1, SDLK_EXCLAIM},
-    {SDLK_2, 64},
-    {SDLK_3, SDLK_HASH},
-    {SDLK_4, SDLK_DOLLAR},
-    {SDLK_5, 37},
-    {SDLK_6, SDLK_CARET},
-    {SDLK_7, SDLK_AMPERSAND},
-    {SDLK_8, SDLK_ASTERISK},
-    {SDLK_9, SDLK_LEFTPAREN},
-    {SDLK_MINUS, SDLK_UNDERSCORE},
-    {SDLK_EQUALS, SDLK_PLUS},
-    {SDLK_BACKQUOTE, 126},
-    {SDLK_COMMA, SDLK_LESS},
-    {SDLK_PERIOD, SDLK_GREATER},
-    {SDLK_SLASH, SDLK_QUESTION},
-    {SDLK_SEMICOLON, SDLK_COLON},
-    {SDLK_BACKSLASH, 124},
-    {SDLK_LEFTBRACKET, 123},
-    {SDLK_RIGHTBRACKET, 125},
-    {SDLK_QUOTE, SDLK_QUOTEDBL}
-};
-#endif
+	SDL_Window * g_window = 0;
+	std::string g_lastError;
+	std::string g_title;
+	CMainLoopInterface * g_mainLoop = 0;
+	bool g_done = false;
+	bool g_hasFocus = true;
+	bool g_wantCapture = false;
 
+	int g_pixelW = 640;
+	int g_pixelH = 480;
+	float g_pixelScale = 1.0f; // drawable pixels per window coordinate
+	CVector2i g_cursorPos;
 
+	DkwMouseState g_mouse;
+	unsigned char g_keys[256];
 
-
-/// does window has the focus
-static bool HasFocus = true;
-
-///////////////////////////////////////////////////////////////////////////////////////
-/// \brief Mise à jour de l'erreur
-///
-/// Fonction qui met à jour le message d'erreur (lastErrorString) relatif à la fenêtre.
-///
-/// \param error : Message d'erreur
-///
-/// \return Aucune
-///////////////////////////////////////////////////////////////////////////////////////
-void CDkw::updateLastError(char *error)
-{
-	//Si le message n'est pas null (il y a déja eu une erreur)
-	if(lastErrorString)
+	void setError(const char * msg)
 	{
-		delete [] lastErrorString;
+		g_lastError = msg ? msg : "";
 	}
-	if(error)
+
+	int scancodeToDik(SDL_Scancode sc)
 	{
-	  lastErrorString = new char [strlen(error)+1];
-	  strcpy(lastErrorString, error); //E.P memcpy plus efficace...
-	}
-}
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////
-/// \brief Fonction qui reçoit tous les inputs dirigés à la fenêtre
-///
-/// Fonction de Callback utilisée par Windows pour gérer les différents inputs
-///	dirigés à la fenêtre. Un pointeur vers cette fontion est passé en paramètre lors de la
-///	création de la "windows class" (WNDCLASS).
-///
-/// \param hWnd : Handle unique de la fenêtre.
-/// \param uMsg : Message que la fenêtre a reçu.
-/// \param wParam : Variable utilisée pour passer des paramètres.
-/// \param lParam : Variable utilisée pour passer des paramètres.
-///
-/// \return LRESULT : Est égal à un long
-///
-/// \note
-/// CALLBACK est égal à _stdcall
-///
-/// \par 
-/// Il faut se rappeler que plusieurs fenêtre pourraient être créées de la même definition 
-/// de "classe window". Donc en créant deux fenêtres de la même classe, chacune va posséder son 
-/// propre handle mais chacune va appeler cette fontion avec des messages. En général, une seule
-/// fenêtre est créée à partir de la classe window.
-///
-///	\see
-/// http://www.toymaker.info/Games/html/wndproc.html# \n
-/// http://www.newty.de/fpt/index.html
-////////////////////////////////////////////////////////////////////////////////////////
-#ifdef BV2_PLATFORM_WINDOWS
-LRESULT CALLBACK CDkw::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{
-	switch (uMsg)
-	{
-	case WM_SYSCOMMAND:
+		// SDL scancode (USB HID usage) -> DIK key ID
+		switch (sc)
 		{
-			switch (wParam)
+		case SDL_SCANCODE_ESCAPE: return DIK_ESCAPE;
+		case SDL_SCANCODE_1: return DIK_1;
+		case SDL_SCANCODE_2: return DIK_2;
+		case SDL_SCANCODE_3: return DIK_3;
+		case SDL_SCANCODE_4: return DIK_4;
+		case SDL_SCANCODE_5: return DIK_5;
+		case SDL_SCANCODE_6: return DIK_6;
+		case SDL_SCANCODE_7: return DIK_7;
+		case SDL_SCANCODE_8: return DIK_8;
+		case SDL_SCANCODE_9: return DIK_9;
+		case SDL_SCANCODE_0: return DIK_0;
+		case SDL_SCANCODE_MINUS: return DIK_MINUS;
+		case SDL_SCANCODE_EQUALS: return DIK_EQUALS;
+		case SDL_SCANCODE_BACKSPACE: return DIK_BACK;
+		case SDL_SCANCODE_TAB: return DIK_TAB;
+		case SDL_SCANCODE_RETURN: return DIK_RETURN;
+		case SDL_SCANCODE_LCTRL: return DIK_LCONTROL;
+		case SDL_SCANCODE_SEMICOLON: return DIK_SEMICOLON;
+		case SDL_SCANCODE_APOSTROPHE: return DIK_APOSTROPHE;
+		case SDL_SCANCODE_GRAVE: return DIK_GRAVE;
+		case SDL_SCANCODE_LSHIFT: return DIK_LSHIFT;
+		case SDL_SCANCODE_BACKSLASH: return DIK_BACKSLASH;
+		case SDL_SCANCODE_COMMA: return DIK_COMMA;
+		case SDL_SCANCODE_PERIOD: return DIK_PERIOD;
+		case SDL_SCANCODE_SLASH: return DIK_SLASH;
+		case SDL_SCANCODE_RSHIFT: return DIK_RSHIFT;
+		case SDL_SCANCODE_KP_MULTIPLY: return DIK_MULTIPLY;
+		case SDL_SCANCODE_LALT: return DIK_LMENU;
+		case SDL_SCANCODE_SPACE: return DIK_SPACE;
+		case SDL_SCANCODE_CAPSLOCK: return DIK_CAPITAL;
+		case SDL_SCANCODE_NUMLOCKCLEAR: return DIK_NUMLOCK;
+		case SDL_SCANCODE_SCROLLLOCK: return DIK_SCROLL;
+		case SDL_SCANCODE_KP_7: return DIK_NUMPAD7;
+		case SDL_SCANCODE_KP_8: return DIK_NUMPAD8;
+		case SDL_SCANCODE_KP_9: return DIK_NUMPAD9;
+		case SDL_SCANCODE_KP_MINUS: return DIK_SUBTRACT;
+		case SDL_SCANCODE_KP_4: return DIK_NUMPAD4;
+		case SDL_SCANCODE_KP_5: return DIK_NUMPAD5;
+		case SDL_SCANCODE_KP_6: return DIK_NUMPAD6;
+		case SDL_SCANCODE_KP_PLUS: return DIK_ADD;
+		case SDL_SCANCODE_KP_1: return DIK_NUMPAD1;
+		case SDL_SCANCODE_KP_2: return DIK_NUMPAD2;
+		case SDL_SCANCODE_KP_3: return DIK_NUMPAD3;
+		case SDL_SCANCODE_KP_0: return DIK_NUMPAD0;
+		case SDL_SCANCODE_KP_PERIOD: return DIK_DECIMAL;
+		case SDL_SCANCODE_NONUSBACKSLASH: return DIK_OEM_102;
+		case SDL_SCANCODE_F11: return DIK_F11;
+		case SDL_SCANCODE_F12: return DIK_F12;
+		case SDL_SCANCODE_F13: return DIK_F13;
+		case SDL_SCANCODE_F14: return DIK_F14;
+		case SDL_SCANCODE_F15: return DIK_F15;
+		case SDL_SCANCODE_KP_EQUALS: return DIK_NUMPADEQUALS;
+		case SDL_SCANCODE_KP_ENTER: return DIK_NUMPADENTER;
+		case SDL_SCANCODE_RCTRL: return DIK_RCONTROL;
+		case SDL_SCANCODE_KP_DIVIDE: return DIK_DIVIDE;
+		case SDL_SCANCODE_PRINTSCREEN: return DIK_SYSRQ;
+		case SDL_SCANCODE_RALT: return DIK_RMENU;
+		case SDL_SCANCODE_PAUSE: return DIK_PAUSE;
+		case SDL_SCANCODE_HOME: return DIK_HOME;
+		case SDL_SCANCODE_UP: return DIK_UP;
+		case SDL_SCANCODE_PAGEUP: return DIK_PRIOR;
+		case SDL_SCANCODE_LEFT: return DIK_LEFT;
+		case SDL_SCANCODE_RIGHT: return DIK_RIGHT;
+		case SDL_SCANCODE_END: return DIK_END;
+		case SDL_SCANCODE_DOWN: return DIK_DOWN;
+		case SDL_SCANCODE_PAGEDOWN: return DIK_NEXT;
+		case SDL_SCANCODE_INSERT: return DIK_INSERT;
+		case SDL_SCANCODE_DELETE: return DIK_DELETE;
+		case SDL_SCANCODE_LGUI: return DIK_LWIN;
+		case SDL_SCANCODE_RGUI: return DIK_RWIN;
+		case SDL_SCANCODE_APPLICATION: return DIK_APPS;
+		case SDL_SCANCODE_POWER: return DIK_POWER;
+		case SDL_SCANCODE_KP_COMMA: return DIK_NUMPADCOMMA;
+		case SDL_SCANCODE_INTERNATIONAL3: return DIK_YEN;
+		case SDL_SCANCODE_INTERNATIONAL4: return DIK_CONVERT;
+		case SDL_SCANCODE_INTERNATIONAL5: return DIK_NOCONVERT;
+		case SDL_SCANCODE_INTERNATIONAL1: return DIK_ABNT_C1;
+		case SDL_SCANCODE_INTERNATIONAL2: return DIK_KANA;
+		case SDL_SCANCODE_MUTE: return DIK_MUTE;
+		case SDL_SCANCODE_VOLUMEDOWN: return DIK_VOLUMEDOWN;
+		case SDL_SCANCODE_VOLUMEUP: return DIK_VOLUMEUP;
+		case SDL_SCANCODE_STOP: return DIK_STOP;
+		case SDL_SCANCODE_MEDIA_PLAY_PAUSE: return DIK_PLAYPAUSE;
+		case SDL_SCANCODE_MEDIA_STOP: return DIK_MEDIASTOP;
+		case SDL_SCANCODE_MEDIA_NEXT_TRACK: return DIK_NEXTTRACK;
+		case SDL_SCANCODE_MEDIA_PREVIOUS_TRACK: return DIK_PREVTRACK;
+		case SDL_SCANCODE_AC_HOME: return DIK_WEBHOME;
+		case SDL_SCANCODE_AC_SEARCH: return DIK_WEBSEARCH;
+		case SDL_SCANCODE_AC_BOOKMARKS: return DIK_WEBFAVORITES;
+		case SDL_SCANCODE_AC_REFRESH: return DIK_WEBREFRESH;
+		case SDL_SCANCODE_AC_STOP: return DIK_WEBSTOP;
+		case SDL_SCANCODE_AC_FORWARD: return DIK_WEBFORWARD;
+		case SDL_SCANCODE_AC_BACK: return DIK_WEBBACK;
+		case SDL_SCANCODE_SLEEP: return DIK_SLEEP;
+		case SDL_SCANCODE_MEDIA_SELECT: return DIK_MEDIASELECT;
+		case SDL_SCANCODE_Q: return DIK_Q;
+		case SDL_SCANCODE_W: return DIK_W;
+		case SDL_SCANCODE_E: return DIK_E;
+		case SDL_SCANCODE_R: return DIK_R;
+		case SDL_SCANCODE_T: return DIK_T;
+		case SDL_SCANCODE_Y: return DIK_Y;
+		case SDL_SCANCODE_U: return DIK_U;
+		case SDL_SCANCODE_I: return DIK_I;
+		case SDL_SCANCODE_O: return DIK_O;
+		case SDL_SCANCODE_P: return DIK_P;
+		case SDL_SCANCODE_A: return DIK_A;
+		case SDL_SCANCODE_S: return DIK_S;
+		case SDL_SCANCODE_D: return DIK_D;
+		case SDL_SCANCODE_F: return DIK_F;
+		case SDL_SCANCODE_G: return DIK_G;
+		case SDL_SCANCODE_H: return DIK_H;
+		case SDL_SCANCODE_J: return DIK_J;
+		case SDL_SCANCODE_K: return DIK_K;
+		case SDL_SCANCODE_L: return DIK_L;
+		case SDL_SCANCODE_Z: return DIK_Z;
+		case SDL_SCANCODE_X: return DIK_X;
+		case SDL_SCANCODE_C: return DIK_C;
+		case SDL_SCANCODE_V: return DIK_V;
+		case SDL_SCANCODE_B: return DIK_B;
+		case SDL_SCANCODE_N: return DIK_N;
+		case SDL_SCANCODE_M: return DIK_M;
+		case SDL_SCANCODE_F1: return DIK_F1;
+		case SDL_SCANCODE_F2: return DIK_F2;
+		case SDL_SCANCODE_F3: return DIK_F3;
+		case SDL_SCANCODE_F4: return DIK_F4;
+		case SDL_SCANCODE_F5: return DIK_F5;
+		case SDL_SCANCODE_F6: return DIK_F6;
+		case SDL_SCANCODE_F7: return DIK_F7;
+		case SDL_SCANCODE_F8: return DIK_F8;
+		case SDL_SCANCODE_F9: return DIK_F9;
+		case SDL_SCANCODE_F10: return DIK_F10;
+		case SDL_SCANCODE_LEFTBRACKET: return DIK_LBRACKET;
+		case SDL_SCANCODE_RIGHTBRACKET: return DIK_RBRACKET;
+		default: return 0;
+		}
+	}
+
+	void refreshPixelSize()
+	{
+		if (!g_window)
+			return;
+		int w = 0, h = 0;
+		SDL_GetWindowSizeInPixels(g_window, &w, &h);
+		if (w > 0 && h > 0)
+		{
+			g_pixelW = w;
+			g_pixelH = h;
+		}
+		float s = SDL_GetWindowPixelDensity(g_window);
+		g_pixelScale = (s > 0.0f) ? s : 1.0f;
+	}
+
+	void applyMouseCapture()
+	{
+		if (g_window)
+			SDL_SetWindowRelativeMouseMode(g_window, g_wantCapture && g_hasFocus);
+	}
+
+	// UTF-8 codepoint to the Latin-1 byte the bitmap font renders; 0 when it has no glyph.
+	unsigned int toLatin1(unsigned int cp)
+	{
+		return (cp >= 32 && cp <= 255 && cp != 127) ? cp : 0;
+	}
+
+	void textFromUtf8(const char * s)
+	{
+		const unsigned char * p = (const unsigned char *)s;
+		while (p && *p)
+		{
+			unsigned int cp = 0;
+			int extra = 0;
+			if (*p < 0x80) { cp = *p; extra = 0; }
+			else if ((*p & 0xE0) == 0xC0) { cp = *p & 0x1F; extra = 1; }
+			else if ((*p & 0xF0) == 0xE0) { cp = *p & 0x0F; extra = 2; }
+			else if ((*p & 0xF8) == 0xF0) { cp = *p & 0x07; extra = 3; }
+			++p;
+			for (int i = 0; i < extra && (*p & 0xC0) == 0x80; ++i, ++p)
+				cp = (cp << 6) | (*p & 0x3F);
+			unsigned int c = toLatin1(cp);
+			if (c && g_mainLoop)
+				g_mainLoop->textWrite(c);
+		}
+	}
+
+	void handleEvent(const SDL_Event & e)
+	{
+		switch (e.type)
+		{
+		case SDL_EVENT_QUIT:
+		case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
+			g_done = true;
+			break;
+
+		case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
+		case SDL_EVENT_WINDOW_RESIZED:
+		case SDL_EVENT_WINDOW_DISPLAY_SCALE_CHANGED:
+			refreshPixelSize();
+			break;
+
+		case SDL_EVENT_WINDOW_FOCUS_GAINED:
+			g_hasFocus = true;
+			applyMouseCapture();
+			break;
+
+		case SDL_EVENT_WINDOW_FOCUS_LOST:
+			g_hasFocus = false;
+			applyMouseCapture();
+			memset(g_keys, 0, sizeof(g_keys));
+			break;
+
+		case SDL_EVENT_MOUSE_MOTION:
+			g_cursorPos[0] = (int)(e.motion.x * g_pixelScale);
+			g_cursorPos[1] = (int)(e.motion.y * g_pixelScale);
+			g_mouse.lX += (int)(e.motion.xrel * g_pixelScale);
+			g_mouse.lY += (int)(e.motion.yrel * g_pixelScale);
+			break;
+
+		case SDL_EVENT_MOUSE_BUTTON_DOWN:
+		case SDL_EVENT_MOUSE_BUTTON_UP:
+		{
+			unsigned char v = (e.type == SDL_EVENT_MOUSE_BUTTON_DOWN) ? 0x80 : 0;
+			switch (e.button.button)
 			{
-				case SC_SCREENSAVE:
-				case SC_MONITORPOWER:
-				return 0;
+			case SDL_BUTTON_LEFT: g_mouse.rgbButtons[0] = v; break;
+			case SDL_BUTTON_RIGHT: g_mouse.rgbButtons[1] = v; break;
+			case SDL_BUTTON_MIDDLE: g_mouse.rgbButtons[2] = v; break;
+			case SDL_BUTTON_X1: g_mouse.rgbButtons[3] = v; break;
+			case SDL_BUTTON_X2: g_mouse.rgbButtons[4] = v; break;
 			}
 			break;
 		}
-	case WM_CLOSE:
-		// On envoit le message pour quitter
-		PostQuitMessage(0);
-		return 0;
-		break;
-	case WM_PAINT:
-		// On effectue le rendu
-		if (mainLoopObject) mainLoopObject->paint();
-		return 0;
-		break;
-	case WM_KEYDOWN:
-		// Une touche est pesée
-		return 0;
-		break;
-	case WM_KEYUP:
-		// Une touche est releasée
-		return 0;
-		break;
-	case WM_MOUSEMOVE:
-		// On pogne la position de la mouse sur la fenêtre
-		cursorPos[0] = LOWORD(lParam);
-		cursorPos[1] = HIWORD(lParam);
-		return 0;
-		break;
-	case WM_SIZE:
 
-		// On resize la fenêtre
-		w = LOWORD(lParam);
-		h = HIWORD(lParam);
+		case SDL_EVENT_MOUSE_WHEEL:
+			g_mouse.lZ += (int)(e.wheel.y * 120.0f);
+			break;
 
-		// on reajuste les infos sur le width pi height
-		POINT res;
-		res.x = GetSystemMetrics(SM_CXSCREEN);
-		res.y = GetSystemMetrics(SM_CYSCREEN);
-
-		m_WindowRect.left = res.x/2-w/2;
-		m_WindowRect.top = res.y/2-h/2;
-		m_WindowRect.right = res.x/2-w/2 + w;
-		m_WindowRect.bottom = res.y/2-h/2 + h;
-
-		return 0;
-		break;
-	case WM_CHAR:
-		// Entrées texte
-		if (mainLoopObject) mainLoopObject->textWrite(unsigned int(wParam));
-		return 0;
-		break;
-	case WM_MOVE:
-		
-		m_WindowRect.left = (int)(short) LOWORD(lParam);   // horizontal position 
-		m_WindowRect.top = (int)(short) HIWORD(lParam);   // vertical position 
-
-		m_WindowRect.right = m_WindowRect.left + w;
-		m_WindowRect.bottom = m_WindowRect.top + h;
-
-		return 0;
-		break;
-	case WM_ACTIVATE:
-		
-		if( wParam == WA_INACTIVE )
+		case SDL_EVENT_KEY_DOWN:
+		case SDL_EVENT_KEY_UP:
 		{
-			dkwClipMouse( false );
-			HasFocus = false;
-		}
-		else
-		{
-			HasFocus = true;
-		}
-		return 0;
-		break;
-/*	default:
-		return DefWindowProc(hWnd,uMsg,wParam,lParam);
-		break;*/
-	}
-	return DefWindowProc(hWnd,uMsg,wParam,lParam);
-
-
-
-/*	switch (uMsg)
-	{
-		case WM_SYSCOMMAND:
-		{
-			switch (wParam)
+			int dik = scancodeToDik(e.key.scancode);
+			bool down = (e.type == SDL_EVENT_KEY_DOWN);
+			if (dik)
+				g_keys[dik] = down ? 0x80 : 0;
+			// Control characters arrive as text on Windows (WM_CHAR); SDL reports them as keys.
+			if (down && g_mainLoop)
 			{
-				case SC_SCREENSAVE:
-				case SC_MONITORPOWER:
-				return 0;
+				switch (e.key.scancode)
+				{
+				case SDL_SCANCODE_BACKSPACE: g_mainLoop->textWrite(8); break;
+				case SDL_SCANCODE_TAB: g_mainLoop->textWrite(9); break;
+				case SDL_SCANCODE_RETURN:
+				case SDL_SCANCODE_KP_ENTER: g_mainLoop->textWrite(13); break;
+				default: break;
+				}
 			}
 			break;
 		}
 
-		case WM_CLOSE:
-		{
-		PostQuitMessage(0);
-		return 0;
-		}
-		case WM_MOUSEMOVE:
-		{
-		gkConsole.MouseMove(GET_X_LPARAM(lParam),GET_Y_LPARAM(lParam)); //on dit a la cosnoel qu'il y a deplacement de la souris
-		return 0;
-		}
-		case WM_MBUTTONDOWN:
-		{
-		gkConsole.Mouse->SetMouseState(1,true); //on dit a la souris que le piton du milieu est peser
-		return 0;
-		}
-		case WM_MBUTTONUP:
-		{
-		gkConsole.Mouse->SetMouseState(7,false); //certainement qu'on n'est pas entrain de tenir le middle click
-		gkConsole.Mouse->SetMouseState(4,true); //on vien de lever le piton middle de la souris
-		return 0;
-		}
-		case WM_LBUTTONDOWN:
-		{
-		gkConsole.Mouse->SetMouseState(0,true); //on dit a la souris que le piton du milieu est peser
-		return 0;
-		}
-		case WM_LBUTTONUP:
-		{
-		gkConsole.Mouse->SetMouseState(6,false); //certainement qu'on n'est pas entrain de tenir le left click
-		gkConsole.Mouse->SetMouseState(3,true); //on vien de lever le piton gauche de la souris
-
-		return 0;
-		}
-		case WM_RBUTTONDOWN:
-		{
-		gkConsole.Mouse->SetMouseState(2,true); //on est on mouse button down
-		return 0;
-		}
-		case WM_RBUTTONUP:
-		{
-		gkConsole.Mouse->SetMouseState(8,false); //certainement qu'on n'est pas entrain de tenir le left click
-		gkConsole.Mouse->SetMouseState(5,true); //on vien de lever le piton gauche de la souris
-
-		return 0;
-		}
-		case 0x020A: //MouseWheel
-		{
-		gkConsole.MouseWheel((int)wParam > 0 ? true : false);
-		return 0;
-		}
-		case WM_KEYDOWN:
-		{
-		fprintf(gkConsole.fp,"Key Ascii DOWN : %i \n",(int)wParam); // on print le keydown dans le fichier debug.txt
-		gkConsole.changeKeyState(1,(int)wParam);
-		return 0;
-		}
-
-		case WM_KEYUP:
-		{
-		fprintf(gkConsole.fp,"Key Ascii UP : %i \n",(int)wParam); // pour le debogage seulement
-		gkConsole.changeKeyState(0,(int)wParam);
-		return 0;
-		}
-
-		case WM_SIZE:
-		{
-		gkGraphics.ReSize(LOWORD(lParam),HIWORD(lParam));
-		return 0;
-		}
-		}
-		return DefWindowProc(hWnd,uMsg,wParam,lParam);
-		*/
-}
-
-#else
-LRESULT CALLBACK CDkw::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{
-  LRESULT r = 0;
-  unsigned char * buttons;
-  const unsigned int bmasks[3] = {SDL_BUTTON_LMASK, SDL_BUTTON_RMASK, SDL_BUTTON_MMASK};
-  int i;
-  unsigned char bvalue = 0;
-
-
-
-  SDL_Event * e = (SDL_Event *) lParam;
-  if(e)
-	{
-	  switch(e->type)
-		{
-		case SDL_QUIT:
-		  r = 1;
-		  break;
-		case SDL_ACTIVEEVENT:
-		  {
-			SDL_ActiveEvent & ae = e->active;
-			if((ae.gain == 0) && (ae.state & SDL_APPACTIVE))
-			  {
-				dkwClipMouse( false );
-				HasFocus = false;
-			  }
-			else if(ae.gain && (ae.state & SDL_APPACTIVE))
-			  {
-				HasFocus = true;
-			  }
-		  }
-		  break;
-		case SDL_VIDEOEXPOSE:
-            if(mainLoopObject)
-                mainLoopObject->paint();
-
-            if(!clear_counter)
-             {
-                 // a workaround. We do not read the mouse state as in DX so we must clear the buffers at some time.
-                 CDkw::mouse_state.lZ = 0;
-                 clear_counter = 10;
-             }
-             else
-                 clear_counter --;
-            //SDL_PumpEvents();
-		  break;
-		case SDL_VIDEORESIZE:
-		  {
-			SDL_ResizeEvent & re = e->resize;
-			SDL_Surface * s = (SDL_Surface *) hWnd;
-			w = re.w;
-			h = re.h;
-
-			// on reajuste les infos sur le width pi height
-			POINT res;
-			res.x = s->w;
-			res.y = s->h;
-			
-			m_WindowRect.left = res.x/2 - w/2;
-			m_WindowRect.top = res.y/2 - h/2;
-			m_WindowRect.right = res.x/2 - w/2 + w;
-			m_WindowRect.bottom = res.y/2 - h/2 + h;
-		  }
-
-		  break;
-		case SDL_MOUSEMOTION:
-		  {
-			SDL_MouseMotionEvent & m = e->motion;
-			cursorPos[0] = m.x; //x-coord
-			cursorPos[1] = m.y; //y-coord
-
-
-			buttons = CDkw::mouse_state.rgbButtons;
-
- 			CDkw::mouse_state.lX = m.xrel;
-			CDkw::mouse_state.lY = m.yrel;
-			
-			for(i = 0; i < sizeof(bmasks) / sizeof(bmasks[0]); i ++)
-			  buttons[i] = (m.state & bmasks[i]) ? 0x80 : 0;
-
-		  }
-		  break;
-		case SDL_MOUSEBUTTONUP:
-		case SDL_MOUSEBUTTONDOWN:
-		  {  
-			long & zaxis = CDkw::mouse_state.lZ;
-			buttons = CDkw::mouse_state.rgbButtons;
-			SDL_MouseButtonEvent & b = e->button;
-			
-			if(b.state == SDL_PRESSED)
-                bvalue = 0x80;
-			else if(b.state == SDL_RELEASED)
-                bvalue = 0;
-			
-			switch(b.button)
-			  {
-			  case SDL_BUTTON_WHEELUP:
-				zaxis = 1;
-				break;
-			  case SDL_BUTTON_WHEELDOWN:
-				zaxis = -1;
-				break;
-			  case SDL_BUTTON_MIDDLE:
-				buttons = & buttons[2];
-				break;
-			  case SDL_BUTTON_RIGHT:
-				buttons = & buttons[1];
-				break;
-			  default:
-				// left button is here
-				break;
-			  }
-			*buttons = bvalue;
-			// we don't need absolute mouse coordinates at press/release time
-		  }
-
-		  break;
-
-        case SDL_KEYDOWN:
-         {
-            SDL_KeyboardEvent & k = e->key;
-            unsigned int key = k.keysym.sym;
-            CDkw::keys_state[k.keysym.sym] = 0x80;
-
-            if(CDkw::keys_state[SDLK_LSHIFT] || CDkw::keys_state[SDLK_RSHIFT])
-            {
-                if((key >= SDLK_a) && (key <= SDLK_z))
-                    key &= ~0x20; 
-                else
-                {
-                    for(i = 0; i < sizeof(shift_char_map) / sizeof(shift_char_map[0]); i ++)
-                    {
-                        if(shift_char_map[i][0] == key)
-                        {
-                            key = shift_char_map[i][1];
-                            break;
-                        }
-                    }
-                }
-                
-            }
-
-            if(mainLoopObject) 
-                mainLoopObject->textWrite(key);
-            if(CDkw::keys_state[SDLK_c] && CDkw::keys_state[SDLK_LCTRL])
-                raise(SIGINT);
-          }
-            break;
-
-        case SDL_KEYUP:
-		  {
-			SDL_KeyboardEvent & k = e->key;
-            CDkw::keys_state[k.keysym.sym] = 0;
-		  }
-		  break;
+		case SDL_EVENT_TEXT_INPUT:
+			textFromUtf8(e.text.text);
+			break;
 
 		default:
-		  break;
+			break;
 		}
 	}
-  return r;
-}
-#endif
 
-
-//
-// La plus importante. Cré la fenêtre et init les cossin
-//
-#ifdef BV2_PLATFORM_WINDOWS
-int dkwInit(int width, int height, int mcolorDepth, char* mTitle, CMainLoopInterface *mMainLoopObject, bool fullScreen, int refreshRate)
-{
-	CDkw::mainLoopObject = mMainLoopObject;
-
-	// On set ses propriétées de bases
-	CDkw::w = width;
-	CDkw::h = height;
-	CDkw::colorDepth = mcolorDepth;
-	if (mTitle)
+	void pumpEvents()
 	{
-		CDkw::title = new char [strlen(mTitle)+1];
-		strcpy(CDkw::title, mTitle);
+		SDL_Event e;
+		while (SDL_PollEvent(&e))
+			handleEvent(e);
 	}
+}
 
-	// On se cré une instance
-	CDkw::hInstance = GetModuleHandle(NULL);
+int dkwInit(int width, int height, int colorDepth, char* mTitle, CMainLoopInterface *mMainLoopObject, bool fullScreen, int refreshRate)
+{
+	g_mainLoop = mMainLoopObject;
+	g_pixelW = width;
+	g_pixelH = height;
+	g_title = mTitle ? mTitle : "";
+	memset(g_keys, 0, sizeof(g_keys));
+	memset(&g_mouse, 0, sizeof(g_mouse));
 
-	// On défini la windows class
-	WNDCLASS wc = {CS_HREDRAW | CS_VREDRAW | CS_OWNDC, (WNDPROC) CDkw::WndProc, 0, 0,
-		CDkw::hInstance, LoadIcon(NULL, IDI_WINLOGO), LoadCursor(NULL, IDC_ARROW),
-		(HBRUSH)GetStockObject(GRAY_BRUSH), NULL, "dkw"};
-	
-
-	// On enregistre la class
-	if (!RegisterClass(&wc)) 
+	if (!SDL_Init(SDL_INIT_VIDEO))
 	{
-		CDkw::updateLastError("Can not register window class");
+		setError(SDL_GetError());
 		return 0;
 	}
 
-	// On va la centrer
-	POINT res;
-	res.x = GetSystemMetrics(SM_CXSCREEN);
-	res.y = GetSystemMetrics(SM_CYSCREEN);
+	// OpenGL 2.1 compatibility: the renderer is fixed-function (ADR 0003).
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
+	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, colorDepth > 16 ? 8 : 5);
+	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, colorDepth > 16 ? 8 : 6);
+	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, colorDepth > 16 ? 8 : 5);
+	SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, colorDepth > 16 ? 8 : 0);
+	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 
-	// Le style de la fenetre en fonction de windows ou full screen
-//	DWORD dwExStyle = WS_EX_APPWINDOW;
-	DWORD dwStyle = WS_SYSMENU | WS_BORDER | /*WS_MINIMIZEBOX | */WS_MAXIMIZEBOX;
-	m_WindowRect.left = res.x/2-width/2;
-	m_WindowRect.top = res.y/2-height/2;
-	m_WindowRect.right = res.x/2-width/2 + width;
-	m_WindowRect.bottom = res.y/2-height/2 + height;
+	// Windows are sized in screen coordinates; the game works in pixels. Create at the requested size,
+	// then correct it once the display's pixel density is known.
+	SDL_WindowFlags flags = SDL_WINDOW_OPENGL | SDL_WINDOW_HIGH_PIXEL_DENSITY;
+	g_window = SDL_CreateWindow(g_title.c_str(), width, height, flags);
+	if (!g_window)
+	{
+		setError(SDL_GetError());
+		return 0;
+	}
+
 	if (fullScreen)
 	{
-		// On set les cossains pour le fullscreen
-		DEVMODE dmScreenSettings;
-		memset(&dmScreenSettings,0,sizeof(dmScreenSettings));
-		dmScreenSettings.dmSize=sizeof(dmScreenSettings);
-		dmScreenSettings.dmPelsWidth		= width;
-		dmScreenSettings.dmPelsHeight		= height;
-		dmScreenSettings.dmBitsPerPel		= mcolorDepth;
-		if (refreshRate != -1 && fullScreen == true)
-		{
-			dmScreenSettings.dmDisplayFrequency	= refreshRate;
-			dmScreenSettings.dmFields = DM_DISPLAYFREQUENCY;
-		}
-		else
-			dmScreenSettings.dmFields = 0;
-		dmScreenSettings.dmFields |= DM_BITSPERPEL|DM_PELSWIDTH|DM_PELSHEIGHT;
-
-		// On switch en fullscreen
-		if (ChangeDisplaySettings(&dmScreenSettings,CDS_FULLSCREEN)!=DISP_CHANGE_SUCCESSFUL)
-		{
-			CDkw::updateLastError("Failled to switch in fullscreen mode");
-			return 0;
-		}
-
-		// On set le style de fenetre
-		//dwExStyle = WS_EX_APPWINDOW;
-		dwStyle = WS_POPUP;// | WS_OVERLAPPEDWINDOW;
-
-		m_WindowRect.left = 0;
-		m_WindowRect.top = 0;
-		m_WindowRect.right = width;
-		m_WindowRect.bottom = height;
+		SDL_DisplayID display = SDL_GetDisplayForWindow(g_window);
+		SDL_DisplayMode mode;
+		if (SDL_GetClosestFullscreenDisplayMode(display, width, height, refreshRate > 0 ? (float)refreshRate : 0.0f, true, &mode))
+			SDL_SetWindowFullscreenMode(g_window, &mode);
+		SDL_SetWindowFullscreen(g_window, true);
 	}
-
-	// Ajuster le rectangle de la fenetre (fuck it ça! Ça gâche toute)
-	if (AdjustWindowRect(&m_WindowRect, dwStyle, FALSE) == 0) 
+	else
 	{
-		CDkw::updateLastError("Failled to adjust windows rect");
-		ChangeDisplaySettings(NULL,0);
-		ShowCursor(TRUE);
-		return 0;
+		float density = SDL_GetWindowPixelDensity(g_window);
+		if (density > 1.0f)
+			SDL_SetWindowSize(g_window, (int)(width / density + 0.5f), (int)(height / density + 0.5f));
+		SDL_SetWindowPosition(g_window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
 	}
 
-	// Finalement on cré notre fenêtre
-	CDkw::hWnd = CreateWindow("dkw", CDkw::title,
-		dwStyle, m_WindowRect.left, m_WindowRect.top, width, height, 
-		NULL, NULL, CDkw::hInstance, NULL);
-	if (!(CDkw::hWnd))
-	{
-		CDkw::updateLastError("Failled to create window");
-		return 0;
-	}
-
-	//--- Adjust the rect
-	if (!fullScreen)
-	{
-		RECT clientRect;
-		GetClientRect(CDkw::hWnd, &clientRect);
-		SetWindowPos(	CDkw::hWnd,
-						HWND_TOP,
-						m_WindowRect.left,
-						m_WindowRect.top,
-						width + width - (clientRect.right - clientRect.left),
-						height + height - (clientRect.bottom - clientRect.top),
-						SWP_SHOWWINDOW);
-	}
-
-    // On montre notre fenêtre en premier plan
-	ShowWindow(CDkw::hWnd, SW_SHOW);
-
-	// On se cré finalement un device context
-	CDkw::dc = GetDC(CDkw::hWnd);
-
-	
-	//if( fullScreen )
-	//{
-	//	SetWindowLongPtr(CDkw::hWnd, GWL_STYLE, WS_POPUP);
-	//	SetWindowPos(CDkw::hWnd, NULL, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER);
-	//}
-
-	return 1; // Ouff tout c'est bien passé ;)
+	SDL_HideCursor();
+	SDL_StartTextInput(g_window);
+	SDL_SyncWindow(g_window);
+	refreshPixelSize();
+	g_done = false;
+	return 1;
 }
 
-
-#else
-int dkwInit(int width, int height, int mcolorDepth, char* mTitle, CMainLoopInterface *mMainLoopObject, bool fullScreen, int refreshRate)
-{
-  int e;
-
-
-  CDkw::mainLoopObject = mMainLoopObject;
-
-  // On set ses propriétées de bases
-  CDkw::w = width;
-  CDkw::h = height;
-  CDkw::colorDepth = mcolorDepth;
-
-//      if(CDkw::colorDepth > 24)
-//          CDkw::colorDepth = 24;
-
-
-  if(!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_NOPARACHUTE))
-	{
-	  if(fullScreen)
-		CDkw::flags |= SDL_FULLSCREEN;
-
-          SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
-          SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
-          SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
-          SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
-          SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-          SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 0);
-
-          SDL_GL_SetAttribute(SDL_GL_ACCUM_RED_SIZE, 16);
-          SDL_GL_SetAttribute(SDL_GL_ACCUM_GREEN_SIZE, 16);
-          SDL_GL_SetAttribute(SDL_GL_ACCUM_BLUE_SIZE, 16);
-          SDL_GL_SetAttribute(SDL_GL_ACCUM_ALPHA_SIZE, 16);
-//          SDL_GL_SetAttribute(SDL_GL_STEREO, 1);
-          //SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, CDkw::colorDepth);
-          
-	  CDkw::hWnd = (HWND) SDL_SetVideoMode(CDkw::w, CDkw::h, CDkw::colorDepth, CDkw::flags);
-          if(CDkw::hWnd)
-          {
-              SDL_SetClipRect((SDL_Surface *) CDkw::hWnd, 0);
-//               SDL_GL_GetAttribute(SDL_GL_RED_SIZE, & e);
-//               SDL_GL_GetAttribute(SDL_GL_GREEN_SIZE, & e);
-//               SDL_GL_GetAttribute(SDL_GL_BLUE_SIZE, & e);
-//               SDL_GL_GetAttribute(SDL_GL_ALPHA_SIZE, & e);
-//               SDL_GL_GetAttribute(SDL_GL_STENCIL_SIZE, & e);
-//               SDL_GL_GetAttribute(SDL_GL_DEPTH_SIZE, & e);
-
-//               SDL_GL_GetAttribute(SDL_GL_ACCUM_GREEN_SIZE, & e);
-//               SDL_GL_GetAttribute(SDL_GL_ACCUM_BLUE_SIZE, & e);
-//               SDL_GL_GetAttribute(SDL_GL_ACCUM_ALPHA_SIZE, & e);
-//               SDL_GL_GetAttribute(SDL_GL_STEREO, & e);
-          }
-	}
-
-
-  if (mTitle)
-    {
-      CDkw::title = new char [strlen(mTitle)+1];
-      strcpy(CDkw::title, mTitle);
-    }
-
-	// On se cré une instance
-  m_WindowRect.left = 0;
-  m_WindowRect.top = 0;
-  m_WindowRect.right = width;
-  m_WindowRect.bottom = height;
-  
-
-  CDkw::dc = CDkw::hWnd;
-
-  return !!CDkw::hWnd;
-}
-#endif
-
-//
-// Pour forcer l'application à fermer
-//
-#ifdef BV2_PLATFORM_WINDOWS
 void dkwForceQuit()
 {
-	// On ne pose pas de question, on mets ça à false
-	CDkw::running = false;
-	PostQuitMessage(0);
-	done = true;
-	dkwClipMouse( false );
+	g_done = true;
+	dkwClipMouse(false);
 }
 
-#else
-void dkwForceQuit()
+void * dkwGetWindow()
 {
-	// On ne pose pas de question, on mets ça à false
-  SDL_Event e;
-  CDkw::running = false;
-  done = true;
-  dkwClipMouse(false);
-  e.type = SDL_QUIT;
-  e.quit.type = SDL_QUIT;
-  SDL_PushEvent(& e);
-      printf("Quit!\n");
-}
-#endif
-
-
-//
-// On obtien le Device Context de la fenetre
-//
-HDC	dkwGetDC()
-{
-	return done ? 0 : CDkw::dc;
+	return g_window;
 }
 
-
-
-//
-// On obtien le handle de la fenêtre
-//
-HWND dkwGetHandle()
-{
-	return CDkw::hWnd;
-}
-
-
-
-//
-// Pour obtenir l'instance de l'application
-//
-HINSTANCE dkwGetInstance()
-{
-	return CDkw::hInstance;
-}
-
-
-
-//
-// Obtenir la dernière erreur
-//
 char* dkwGetLastError()
 {
-	return CDkw::lastErrorString;
+	return (char*)g_lastError.c_str();
 }
 
-
-
-//
-// Pour retourner la position de la sourie sur l'écran
-//
 CVector2i dkwGetCursorPos()
 {
-	return CDkw::cursorPos;
+	return g_cursorPos;
 }
 
-
-
-//
-// On retourne la résolution de la fenêtre
-//
 CVector2i dkwGetResolution()
 {
-	return CVector2i(CDkw::w, CDkw::h);
+	return CVector2i(g_pixelW, g_pixelH);
 }
 
-// On clip la mouse au window rect
-void dkwClipMouse( bool abEnabled )
+void dkwClipMouse(bool abEnabled)
 {
-#ifdef BV2_PLATFORM_WINDOWS
-	if( !HasFocus )
-		return;
-
-	RECT r;
-	SetRect(&r, m_WindowRect.left+5, m_WindowRect.top+10, m_WindowRect.right-4,m_WindowRect.bottom-5);
-	ClipCursor( abEnabled ? &r : NULL );
-#endif
+	g_wantCapture = abEnabled;
+	applyMouseCapture();
 }
 
+void dkwShowMessage(const char* title, const char* text)
+{
+	if (!SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, title, text, g_window))
+		fprintf(stderr, "%s: %s\n", title, text);
+}
 
-
-//
-// On effectu le loop principal de l'application
-//
-#ifdef BV2_PLATFORM_WINDOWS
 int dkwMainLoop()
 {
-	while(!done)
+	while (!g_done)
 	{
-		//Sleep(1);
-
-		// Le mainloop
-		MSG msg;
-
-		// Le mainloop
-		ZeroMemory (&msg, sizeof(MSG));
-
-		// On peek les messages si c'est le cas
-		if (!PeekMessage(&msg, NULL, NULL, NULL, PM_REMOVE)) return 0;
-		//if (!GetMessage(&msg, NULL, NULL, NULL)) return 0;
-
-		if (msg.message == WM_QUIT) return 0;
-
-		// On transmet les messages
-		TranslateMessage(&msg);
-		DispatchMessage(&msg);
+		pumpEvents();
+		if (g_done)
+			break;
+		if (g_mainLoop)
+			g_mainLoop->paint();
 	}
-
-	// Le main loop
-//	MSG msg;
-//	int result = GetMessage(&msg, CDkw::hWnd, 0, 0/*, PM_REMOVE*/);
-
-	// On effectu les messages (affichage etc)
-//	TranslateMessage(&msg);
-//	DispatchMessage(&msg);
-
 	return 0;
 }
-#else
-int dkwMainLoop(bool * aExitFlag)
-{
-    //unsigned int c = 0;
-  bool done = false;
-  SDL_Event event;
-      //struct timespec ts;
-      while(!(*aExitFlag || done))
-	{
-        //if(!c)
-        //  {
-        //    c = 2;
-            event.expose.type = SDL_VIDEOEXPOSE;
-            event.type = SDL_VIDEOEXPOSE;
-            SDL_PushEvent(& event);
-                //  }
-                //  else
-                //  {
-                // c --;
-              //ts.tv_sec = 0;
-                  //ts.tv_nsec = 5000000;
-                  //nanosleep(& ts, 0);
-                // }
 
-        while(SDL_PollEvent(& event))
-		{
-		  done = (bool) CDkw::WndProc(CDkw::hWnd, 0, 0, (LRESULT) & event);
-		}
-	}
-      printf("exit!\n");
-  return 0;
+void dkwUpdate()
+{
+	pumpEvents();
 }
-#endif
 
-
-#ifndef BV2_PLATFORM_WINDOWS
-void dkwGetMouseState(DIMOUSESTATE2 * aMouseState)
+void dkwGetMouseState(DkwMouseState * aMouseState)
 {
-    (aMouseState && memcpy(aMouseState, & CDkw::mouse_state, sizeof(CDkw::mouse_state)), 0);
+	if (!aMouseState)
+		return;
+	*aMouseState = g_mouse;
+	// Movement and wheel are deltas since the last read; buttons are levels.
+	g_mouse.lX = 0;
+	g_mouse.lY = 0;
+	g_mouse.lZ = 0;
 }
 
 void dkwGetKeysState(unsigned char * aState, int aSize)
 {
-    if(aState && aSize && (aSize <= sizeof(CDkw::keys_state)))
-        memcpy(aState, CDkw::keys_state, aSize);
+	if (aState && aSize > 0 && aSize <= (int)sizeof(g_keys))
+		memcpy(aState, g_keys, aSize);
 }
 
-#endif
-
-
-//
-// Pour shutdowner le tout
-//
-void			dkwShutDown()
+void dkwShutDown()
 {
-	// On delete le buffer des erreurs
-	if (CDkw::lastErrorString)  
+	dkwClipMouse(false);
+	if (g_window)
 	{
-		delete [] CDkw::lastErrorString;
-		CDkw::lastErrorString = 0;
+		SDL_StopTextInput(g_window);
+		SDL_DestroyWindow(g_window);
+		g_window = 0;
 	}
-
-	// On delete le titre de la fenetre
-	if (CDkw::title) 
-	{
-		delete [] CDkw::title;
-		CDkw::title = 0;
-	}
-
-	dkwClipMouse( false );
-
-#ifdef BV2_PLATFORM_WINDOWS
-	DestroyWindow(CDkw::hWnd);
-#else
-    
 	SDL_Quit();
-        printf("SDL shut down\n");
-#endif
 }
-
-
-
-//
-// Pour forcer un update des messages (meton pendant un loading)
-//
-void			dkwUpdate()
-{
-#ifdef BV2_PLATFORM_WINDOWS
-	// Le mainloop
-	MSG msg;
-	ZeroMemory (&msg, sizeof(MSG));
-
-	// On peek les messages si c'est le cas
-	if (PeekMessage(&msg, NULL, NULL, NULL, PM_REMOVE))
-	{
-		// On transmet les messages
-		TranslateMessage(&msg);
-		DispatchMessage(&msg);
-	}
-#else
-
-	SDL_PumpEvents();
-
-#endif
-}
-
-
-

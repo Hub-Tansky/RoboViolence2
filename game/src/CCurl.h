@@ -27,7 +27,9 @@
 #include <string>
 #include "CString.h"
 #include "CThread.h"
-#include <curl/curl.h>
+#ifdef BV2_WITH_HTTP
+	#include <curl/curl.h>
+#endif
 
 
 class CCurl : public CThread
@@ -51,7 +53,9 @@ private:
 	CCurl();
 
 	// Member variables
+#ifdef BV2_WITH_HTTP
 	CURL*		m_handle;
+#endif
 	CString		m_url;
 	std::string	m_data;
 	std::string	m_response;
@@ -68,8 +72,10 @@ private:
 	// Max response size (2048)
 	static const int s_maxResponse;
 
+#ifdef BV2_WITH_HTTP
 	// Writes data to buffer, must be static
 	static size_t write_data(void *buffer, size_t size, size_t nmemb, void *userp);
+#endif
 };
 
 

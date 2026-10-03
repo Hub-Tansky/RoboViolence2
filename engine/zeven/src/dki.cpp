@@ -16,492 +16,181 @@
 	BaboViolent 2 source code. If not, see http://www.gnu.org/licenses/.
 */
 
-/* TCE (c) All rights reserved */
-
-
-#include "dkii.h"
-
-#ifndef BV2_PLATFORM_WINDOWS
+#include "dki.h"
 #include "dkw.h"
-//#include <SDL/SDL.h>
-#endif
 
+#include <SDL3/SDL.h>
 
-#ifdef BV2_PLATFORM_WINDOWS
-// Les trucs static de notre class
-LPDIRECTINPUT8 CDki::diObject;
-LPDIRECTINPUTDEVICE8 CDki::diKeyboard;
-LPDIRECTINPUTDEVICE8 CDki::diMouse;
-LPDIRECTINPUTDEVICE8 CDki::diJoypad;
-#endif
+#include <string.h>
 
-char CDki::keyboardStateDI[256];
-
-
-int CDki::allState[256 + 8 + 128];
-
-
-DIMOUSESTATE2 CDki::mouseStateDI;
-
-
-_typMousePos CDki::mousePos;
-
-#ifdef BV2_PLATFORM_WINDOWS
-DIDEVCAPS CDki::JoyCaps;
-DIPROPRANGE CDki::diprg;
-DIJOYSTATE2 CDki::EtatJoy;
-#endif
-
-int CDki::lastDown = 0;
-float CDki::downTimer = 0;
-
-
-
-#ifdef BV2_PLATFORM_WINDOWS
-//
-// Call back pour énumérer les axes du joystick
-//
-BOOL CALLBACK EnumAxesCallback( const DIDEVICEOBJECTINSTANCE* pdidoi, VOID* pContext )
+namespace
 {
-	(void)pContext; // Disable Warnings
-    HRESULT hr;
-    CDki::diprg.diph.dwSize = sizeof(DIPROPRANGE);
-    CDki::diprg.diph.dwHeaderSize = sizeof(DIPROPHEADER);
-    CDki::diprg.diph.dwHow = DIPH_BYID;
-    CDki::diprg.diph.dwObj = pdidoi->dwType;
-    CDki::diprg.lMin = -1000;
-    CDki::diprg.lMax = +1000;
-    hr = CDki::diJoypad->SetProperty(DIPROP_RANGE, &(CDki::diprg.diph));
-    if (FAILED(hr)) return DIENUM_STOP;
-    return DIENUM_CONTINUE;
-}
+	const int KEYS = 256;
+	const int MOUSE_BUTTONS = 8;
+	const int JOY_BUTTONS = 128;
+	const int ALL = KEYS + MOUSE_BUTTONS + JOY_BUTTONS;
 
+	int g_allState[ALL];
+	unsigned char g_keyboard[KEYS];
+	DkwMouseState g_mouse;
+	int g_mouseX = 0;
+	int g_mouseY = 0;
 
+	SDL_Gamepad * g_pad = 0;
+	int g_padCheck = 0;
+	CVector3f g_joyL;
+	CVector3f g_joyR;
 
-#endif
-
-#ifdef BV2_PLATFORM_WINDOWS
-//
-// Call back pour énumérer les game pad
-//
-BOOL CALLBACK EnumJoysticksCallback(const DIDEVICEINSTANCE* pdidInstance, VOID* pContext)
-{
-	(void)pContext; // Disable Warnings
-	HRESULT hr;
-
-	hr = CDki::diObject->CreateDevice(pdidInstance->guidInstance, &(CDki::diJoypad), NULL);
-	if (FAILED(hr)) return DIENUM_CONTINUE;
-
-	return DIENUM_STOP;
-}
-
-#endif
-
-
-//
-// Pour obtenir la première touche pressé (utile pour setter les touche dans les options)
-//
-int				dkiGetFirstDown()
-{
-	for (int i=0;i<256+8+128;i++)
+	// Same level-to-edge state machine for every input: NOTHING -> DOWN -> HOLD -> UP -> NOTHING.
+	void step(int & state, bool down)
 	{
-		if (CDki::allState[i] == DKI_DOWN)
-		{
-			return i;
-		}
+		if (down)
+			state = (state == DKI_NOTHING || state == DKI_UP) ? DKI_DOWN : DKI_HOLD;
+		else
+			state = (state == DKI_DOWN || state == DKI_HOLD) ? DKI_UP : DKI_NOTHING;
 	}
 
+	float axis(SDL_Gamepad * pad, SDL_GamepadAxis a)
+	{
+		float v = SDL_GetGamepadAxis(pad, a) / 32767.0f;
+		return v < -1.0f ? -1.0f : v;
+	}
+
+	void openPad()
+	{
+		int count = 0;
+		SDL_JoystickID * ids = SDL_GetGamepads(&count);
+		if (ids && count > 0)
+			g_pad = SDL_OpenGamepad(ids[0]);
+		SDL_free(ids);
+	}
+}
+
+// First input that went down since the last update (used by the key binding screen)
+int				dkiGetFirstDown()
+{
+	for (int i = 0; i < ALL; i++)
+		if (g_allState[i] == DKI_DOWN)
+			return i;
 	return DKI_NOKEY;
 }
 
-
-
-//
-// On pogne la wheel mouse
-//
 int				dkiGetMouseWheelVel()
 {
-    return CDki::mouseStateDI.lZ;
+	return g_mouse.lZ;
 }
 
-
-
-//
-// On capte la mouse
-//
 CVector2i		dkiGetMouse()
 {
-	return CVector2i(CDki::mousePos.x, CDki::mousePos.y);
+	return CVector2i(g_mouseX, g_mouseY);
 }
 
 CVector2i		dkiGetMouseVel()
 {
-	return CVector2i(CDki::mouseStateDI.lX, CDki::mouseStateDI.lY);
+	return CVector2i(g_mouse.lX, g_mouse.lY);
 }
 
-
-
-//
-// Pour obtenir l'état d'une touche ou d'un bouton
-//
 int				dkiGetState(int inputID)
 {
-  int r = DKI_NOTHING;
-
-	if(inputID != DKI_NOKEY)
-	  r = CDki::allState[inputID];
-	return r;
+	if (inputID == DKI_NOKEY || inputID < 0 || inputID >= ALL)
+		return DKI_NOTHING;
+	return g_allState[inputID];
 }
 
-
-#ifdef BV2_PLATFORM_WINDOWS
-
-//
-// On capte le joystick
-//
 CVector3f		dkiGetJoy()
 {
-	return CVector3f((float)CDki::EtatJoy.lX/1000.0f, (float)CDki::EtatJoy.lY/1000.0f, (float)CDki::EtatJoy.lZ/1000.0f);
+	return g_joyL;
 }
 
 CVector3f		dkiGetJoyR()
 {
-	return CVector3f((float)CDki::EtatJoy.lRx/1000.0f, (float)CDki::EtatJoy.lRy/1000.0f, (float)CDki::EtatJoy.lRz/1000.0f);
+	return g_joyR;
 }
 
 CVector3f		dkiGetJoyVel()
 {
-	return CVector3f((float)CDki::EtatJoy.lVX/1000.0f, (float)CDki::EtatJoy.lVY/1000.0f, (float)CDki::EtatJoy.lVZ/1000.0f);
+	return CVector3f(0, 0, 0);
 }
 
-#endif
-
-
-
-//
-// Pour initialiser le API
-//
-int				dkiInit(HINSTANCE appInstance, HWND appHandle)
+int				dkiInit()
 {
-	// On fou nos input à 0
-	int i;
-	for (i=0;i<256;i++)
-	{
-		CDki::keyboardStateDI[i] = 0;
-	}
-	for (i=0;i<256+8+128;i++)
-	{
-		CDki::allState[i] = DKI_NOTHING;
-	}
-
-#ifdef BV2_PLATFORM_WINDOWS
-	// On initialise l'objet direct input
-	DirectInput8Create(appInstance, DIRECTINPUT_VERSION, 
-		IID_IDirectInput8, (void**)&(CDki::diObject), NULL);
-	if (!CDki::diObject) return 0;
-
-	// On va initialiser le clavier
-	CDki::diObject->CreateDevice(GUID_SysKeyboard, &(CDki::diKeyboard), NULL);
-	if (!CDki::diKeyboard) return 0;
-	CDki::diKeyboard->SetCooperativeLevel(appHandle, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE) ;
-	CDki::diKeyboard->SetDataFormat(&c_dfDIKeyboard);
-	CDki::diKeyboard->Acquire();
-
-	// Maintenant on va initialiser la mouse
-	CDki::diObject->CreateDevice(GUID_SysMouse, &(CDki::diMouse), NULL);
-	if (!CDki::diMouse) return 0;
-    CDki::diMouse->SetCooperativeLevel(appHandle, DISCL_NONEXCLUSIVE | DISCL_FOREGROUND/*DISCL_BACKGROUND*/);
-    CDki::diMouse->SetDataFormat(&c_dfDIMouse2);
-    CDki::diMouse->Acquire();
-
-	// Maintenant on va initialiser le joystick, s'il y en a un
-	CDki::diObject->EnumDevices(DI8DEVCLASS_GAMECTRL, EnumJoysticksCallback, NULL, DIEDFL_ATTACHEDONLY);
-	if (CDki::diJoypad)
-	{
-		CDki::diJoypad->SetDataFormat(&c_dfDIJoystick2) ;
-		CDki::diJoypad->SetCooperativeLevel(appHandle, DISCL_EXCLUSIVE | DISCL_FOREGROUND);
-		CDki::JoyCaps.dwSize = sizeof(DIDEVCAPS);
-		CDki::diJoypad->GetCapabilities(&(CDki::JoyCaps));
-		CDki::diJoypad->EnumObjects(EnumAxesCallback, (VOID*)appHandle, DIDFT_AXIS);
-		CDki::diJoypad->Acquire();
-	}
-#else
-//        SDL_WM_GrabInput(SDL_GRAB_ON);
-#endif
-
+	memset(g_allState, 0, sizeof(g_allState));
+	memset(g_keyboard, 0, sizeof(g_keyboard));
+	memset(&g_mouse, 0, sizeof(g_mouse));
+	g_mouseX = 0;
+	g_mouseY = 0;
+	SDL_InitSubSystem(SDL_INIT_GAMEPAD); // optional: no gamepad is not an error
+	openPad();
 	return 1;
 }
 
-
-
-//
-// Pour bien fermer le tout
-//
 void			dkiShutDown()
 {
-#ifdef BV2_PLATFORM_WINDOWS
-	if (CDki::diJoypad)
+	if (g_pad)
 	{
-		CDki::diJoypad->Unacquire();
-		CDki::diJoypad->Release();
-		CDki::diJoypad = NULL;
+		SDL_CloseGamepad(g_pad);
+		g_pad = 0;
 	}
-
-	CDki::diMouse->Unacquire();
-	CDki::diMouse->Release();
-	CDki::diMouse = NULL;
-
-	CDki::diKeyboard->Unacquire();
-	CDki::diKeyboard->Release();
-	CDki::diKeyboard = NULL;
-
-	CDki::diObject->Release();
-	CDki::diObject = NULL;
-#else
-//        SDL_WM_GrabInput(SDL_GRAB_OFF);
-#endif
+	SDL_QuitSubSystem(SDL_INIT_GAMEPAD);
 }
 
-
-
-//
-// On update le tout
-//
-#ifdef BV2_PLATFORM_WINDOWS
 void			dkiUpdate(float elapsef, int width, int height)
 {
-	(void)elapsef; // Disable warnings
-	int i;
+	(void)elapsef;
 
-
-	// On capte le clavier
-	HRESULT hr; 
-	hr = CDki::diKeyboard->GetDeviceState(256,(LPVOID)&(CDki::keyboardStateDI));
-
-	// Bon, si on a perdu le focus probablement qu'on a perdu le clavier, on le repogne de même dans un while
-	if (FAILED(hr))
+	dkwGetKeysState(g_keyboard, KEYS);
+	for (int i = 0; i < KEYS; i++)
 	{
-		hr = CDki::diKeyboard->Acquire();
-        while( hr == DIERR_INPUTLOST)
-			hr = CDki::diKeyboard->Acquire();
+		step(g_allState[i], (g_keyboard[i] & 0x80) != 0);
 	}
 
-	// On update notre clavier
-	for (i=0;i<256;i++)
+	dkwGetMouseState(&g_mouse);
+	for (int i = 0; i < MOUSE_BUTTONS; i++)
+		step(g_allState[DKI_MOUSE_BUTTON1 + i], (g_mouse.rgbButtons[i] & 0x80) != 0);
+
+	// Virtual cursor: accumulated movement, clamped to the screen
+	g_mouseX += g_mouse.lX;
+	g_mouseY += g_mouse.lY;
+	if (g_mouseX > width - 1) g_mouseX = width - 1;
+	if (g_mouseX < 0) g_mouseX = 0;
+	if (g_mouseY > height - 1) g_mouseY = height - 1;
+	if (g_mouseY < 0) g_mouseY = 0;
+
+	// Gamepad: hot-plug check about once a second, the first pad wins
+	if (g_pad && !SDL_GamepadConnected(g_pad))
 	{
-		if (INPUTDOWN(CDki::keyboardStateDI[i]))
-		{
-			if (CDki::allState[i] == DKI_NOTHING)
-			{
-				CDki::allState[i] = DKI_DOWN;
-				CDki::lastDown = i;
-				CDki::downTimer = 0;
-			}
-			else
-			{
-				CDki::allState[i] = DKI_HOLD;
-			}
-		}
-		else
-		{
-			if (CDki::allState[i] == DKI_DOWN || CDki::allState[i] == DKI_HOLD)
-			{
-				CDki::allState[i] = DKI_UP;
-			}
-			else
-			{
-				CDki::allState[i] = DKI_NOTHING;
-			}
-		}
+		SDL_CloseGamepad(g_pad);
+		g_pad = 0;
+	}
+	if (!g_pad && ++g_padCheck >= 30)
+	{
+		g_padCheck = 0;
+		openPad();
 	}
 
-	// Au fais jouer notre timer pour le down
-/*	if (CDki::allState[CDki::lastDown] == DKI_HOLD)
-	{
-		CDki::downTimer += elapsef;
-		while (CDki::downTimer > .35f)
-		{
-			CDki::downTimer -= .05f;
-			CDki::allState[CDki::lastDown] = DKI_DOWN;
-		}
-	}*/
+	// DirectInput button order for an XInput pad: A B X Y LB RB Back Start LS RS
+	static const SDL_GamepadButton order[10] = {
+		SDL_GAMEPAD_BUTTON_SOUTH, SDL_GAMEPAD_BUTTON_EAST, SDL_GAMEPAD_BUTTON_WEST, SDL_GAMEPAD_BUTTON_NORTH,
+		SDL_GAMEPAD_BUTTON_LEFT_SHOULDER, SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER,
+		SDL_GAMEPAD_BUTTON_BACK, SDL_GAMEPAD_BUTTON_START,
+		SDL_GAMEPAD_BUTTON_LEFT_STICK, SDL_GAMEPAD_BUTTON_RIGHT_STICK };
+	for (int i = 0; i < JOY_BUTTONS; i++)
+		step(g_allState[DKI_JOY_BUTTON1 + i], g_pad && i < 10 && SDL_GetGamepadButton(g_pad, order[i]));
 
-	// On capte la mouse
-	hr = CDki::diMouse->GetDeviceState(sizeof(DIMOUSESTATE2),(LPVOID)&(CDki::mouseStateDI));
-
-	// Bon, si on a perdu le focus probablement qu'on a perdu la mouse, on la repogne de même dans un while
-	if (FAILED(hr))
+	if (g_pad)
 	{
-		hr = CDki::diMouse->Acquire();
-        while( hr == DIERR_INPUTLOST)
-			hr = CDki::diMouse->Acquire();
+		g_joyL = CVector3f(axis(g_pad, SDL_GAMEPAD_AXIS_LEFTX), axis(g_pad, SDL_GAMEPAD_AXIS_LEFTY), 0);
+		g_joyR = CVector3f(axis(g_pad, SDL_GAMEPAD_AXIS_RIGHTX), axis(g_pad, SDL_GAMEPAD_AXIS_RIGHTY), 0);
 	}
-
-	// On update les boutons de notre mouse
-	for (i=0;i<8;i++)
+	else
 	{
-		if (INPUTDOWN(CDki::mouseStateDI.rgbButtons[i]))
-		{
-			if (CDki::allState[DKI_MOUSE_BUTTON1+i] == DKI_NOTHING)
-			{
-				CDki::allState[DKI_MOUSE_BUTTON1+i] = DKI_DOWN;
-			}
-			else
-			{
-				CDki::allState[DKI_MOUSE_BUTTON1+i] = DKI_HOLD;
-			}
-		}
-		else
-		{
-			if (CDki::allState[DKI_MOUSE_BUTTON1+i] == DKI_DOWN || CDki::allState[DKI_MOUSE_BUTTON1+i] == DKI_HOLD)
-			{
-				CDki::allState[DKI_MOUSE_BUTTON1+i] = DKI_UP;
-			}
-			else
-			{
-				CDki::allState[DKI_MOUSE_BUTTON1+i] = DKI_NOTHING;
-			}
-		}
-	}
-
-	// La position de la sourie
-	CDki::mousePos.x += CDki::mouseStateDI.lX;
-	CDki::mousePos.y += CDki::mouseStateDI.lY;
-
-	if (CDki::mousePos.x > width-1) CDki::mousePos.x = width-1;
-	if (CDki::mousePos.x < 0) CDki::mousePos.x = 0;
-	if (CDki::mousePos.y > height-1) CDki::mousePos.y = height-1;
-	if (CDki::mousePos.y < 0) CDki::mousePos.y = 0;
-
-	// On capte le joystick
-	if (CDki::diJoypad)
-	{
-		hr = CDki::diJoypad->Poll() ;
-		if (FAILED(hr))
-		{
-			hr = CDki::diJoypad->Acquire() ;
-			while(hr == DIERR_INPUTLOST)
-				hr = CDki::diJoypad->Acquire() ;
-		}
-		CDki::diJoypad->GetDeviceState(sizeof(DIJOYSTATE2), &CDki::EtatJoy) ;
-	}
-
-	// On update les boutons du joystick
-	for (i=0;i<128;i++)
-	{
-		if (INPUTDOWN(CDki::EtatJoy.rgbButtons[i]))
-		{
-			if (CDki::allState[DKI_JOY_BUTTON1+i] == DKI_NOTHING)
-			{
-				CDki::allState[DKI_JOY_BUTTON1+i] = DKI_DOWN;
-			}
-			else
-			{
-				CDki::allState[DKI_JOY_BUTTON1+i] = DKI_HOLD;
-			}
-		}
-		else
-		{
-			if (CDki::allState[DKI_JOY_BUTTON1+i] == DKI_DOWN || CDki::allState[DKI_JOY_BUTTON1+i] == DKI_HOLD)
-			{
-				CDki::allState[DKI_JOY_BUTTON1+i] = DKI_UP;
-			}
-			else
-			{
-				CDki::allState[DKI_JOY_BUTTON1+i] = DKI_NOTHING;
-			}
-		}
+		g_joyL = CVector3f(0, 0, 0);
+		g_joyR = CVector3f(0, 0, 0);
 	}
 }
-#else
 
-void dkiUpdate(float elapsef, int width, int height)
-{
-	int i;
-
-	// On capte le clavier
-	dkwGetKeysState((unsigned char *) CDki::keyboardStateDI, sizeof(CDki::keyboardStateDI));
-
-	// On update notre clavier
-	for (i=0;i<256;i++)
-	{
-		if (INPUTDOWN(CDki::keyboardStateDI[i]))
-		{
-			if (CDki::allState[i] == DKI_NOTHING)
-			{
-				CDki::allState[i] = DKI_DOWN;
-				CDki::lastDown = i;
-				CDki::downTimer = 0;
-			}
-			else
-			{
-				CDki::allState[i] = DKI_HOLD;
-			}
-		}
-		else
-		{
-			if (CDki::allState[i] == DKI_DOWN || CDki::allState[i] == DKI_HOLD)
-			{
-				CDki::allState[i] = DKI_UP;
-			}
-			else
-			{
-				CDki::allState[i] = DKI_NOTHING;
-			}
-		}
-	}
-
-	// On capte la mouse
-
-	dkwGetMouseState(& CDki::mouseStateDI);
-
-	// On update les boutons de notre mouse
-	for (i=0;i<8;i++)
-	{
-		if (INPUTDOWN(CDki::mouseStateDI.rgbButtons[i]))
-		{
-			if (CDki::allState[DKI_MOUSE_BUTTON1+i] == DKI_NOTHING)
-			{
-				CDki::allState[DKI_MOUSE_BUTTON1+i] = DKI_DOWN;
-			}
-			else
-			{
-				CDki::allState[DKI_MOUSE_BUTTON1+i] = DKI_HOLD;
-			}
-		}
-		else
-		{
-			if (CDki::allState[DKI_MOUSE_BUTTON1+i] == DKI_DOWN || CDki::allState[DKI_MOUSE_BUTTON1+i] == DKI_HOLD)
-			{
-				CDki::allState[DKI_MOUSE_BUTTON1+i] = DKI_UP;
-			}
-			else
-			{
-				CDki::allState[DKI_MOUSE_BUTTON1+i] = DKI_NOTHING;
-			}
-		}
-	}
-
-	// La position de la sourie
-	CDki::mousePos.x += CDki::mouseStateDI.lX;
-	CDki::mousePos.y += CDki::mouseStateDI.lY;
-
-	if (CDki::mousePos.x > width-1) CDki::mousePos.x = width-1;
-	if (CDki::mousePos.x < 0) CDki::mousePos.x = 0;
-	if (CDki::mousePos.y > height-1) CDki::mousePos.y = height-1;
-	if (CDki::mousePos.y < 0) CDki::mousePos.y = 0;
-
-}
-
-#endif
-
-
-
-//
-// Setter manuellement la position du curseur
-//
 void			dkiSetMouse(CVector2i & mousePos)
 {
-	CDki::mousePos.x = mousePos[0];
-	CDki::mousePos.y = mousePos[1];
+	g_mouseX = mousePos[0];
+	g_mouseY = mousePos[1];
 }

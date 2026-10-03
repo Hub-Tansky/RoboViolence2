@@ -82,7 +82,7 @@ Menu::~Menu()
 	dksDeleteSound(sfx_wind);
 	if (soundPlayChannel >= 0)
 	{
-		FSOUND_StopSound(soundPlayChannel);
+		dksStopSound(soundPlayChannel);
 		soundPlayChannel = -1;
 		dksStopMusic();
 	}

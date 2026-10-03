@@ -153,7 +153,7 @@ struct FloorMark
 	{
 		delay = 0;
 	}
-	void set(CVector3f & pposition, float pangle, float psize, float pdelay, float pstartDelay, unsigned int ptexture, CVector4f pcolor)
+	void set(const CVector3f & pposition, float pangle, float psize, float pdelay, float pstartDelay, unsigned int ptexture, CVector4f pcolor)
 	{
 		position = pposition;
 		angle = pangle;
@@ -346,7 +346,7 @@ struct Trail
 	int trailType;
 	CVector4f color;
 	CVector3f right;
-	Trail(CVector3f & pP1, CVector3f & pP2, float pSize, CVector4f & pColor, float duration, int in_trailType=0)
+	Trail(const CVector3f & pP1, const CVector3f & pP2, float pSize, const CVector4f & pColor, float duration, int in_trailType=0)
 	{
 		trailType = in_trailType;
 		dis = distance(pP1, pP2);
@@ -514,11 +514,11 @@ public:
 	int spectatorPing;
 #ifndef CONSOLE
 	// Les sons pour CTF
-	FSOUND_SAMPLE * sfx_fcapture;
-	FSOUND_SAMPLE * sfx_ecapture;
-	FSOUND_SAMPLE * sfx_return;
-	FSOUND_SAMPLE * sfx_win;
-	FSOUND_SAMPLE * sfx_loose;
+	DksSound * sfx_fcapture;
+	DksSound * sfx_ecapture;
+	DksSound * sfx_return;
+	DksSound * sfx_win;
+	DksSound * sfx_loose;
 #endif
 	// On est en mode fin de round
 	int roundState;
@@ -672,7 +672,7 @@ public:
 	void spawnImpact(CVector3f & p1, CVector3f & p2, CVector3f & normal, Weapon*weapon, float damage, int team);
 	void spawnBlood(CVector3f & position, float damage);
 	void spawnBloodMinibot(CVector3f & position, float damage);
-	void spawnExplosion(CVector3f & position, CVector3f & normal, float size);
+	void spawnExplosion(const CVector3f & position, const CVector3f & normal, float size);
 
 	// Pour afficher la minimap (ouff, je mélange pomal les affaires, tk)
 	void renderMiniMap();

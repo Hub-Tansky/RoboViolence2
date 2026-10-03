@@ -16,112 +16,47 @@
 	BaboViolent 2 source code. If not, see http://www.gnu.org/licenses/.
 */
 
-/// \brief Module de gestion des sons
-///
 /// \file dks.h
-/// Ce module prend en charge la gestion des sons.
-/// Ceci comprend :
-/// 	- une fonction de chargement d'un son
-/// 	- une fonction de destruction d'un son
-/// 	- une fonction de destruction de tout les sons présentement chargées et qui termine l'utilisation du module
-/// 	- une fonction d'initialisation du module
-///
-/// Se référer à la documentation de FMOD pour connaitre les fonctions disponibles pour faire jouer les sons et musiques chargées.
-///
-/// \author David St-Louis (alias Daivuk)
-/// \author Louis Poirier (à des fins de documentation seulement)
-///
-
+/// Sound effects and music on miniaudio (WASAPI, Core Audio, PipeWire/PulseAudio/ALSA).
+/// Effects are decoded WAV files; music streams (WAV, MP3, and OGG when built with stb_vorbis).
+/// Volumes are 0..255 as before. A channel is a handle returned by the play functions; -1 means "no sound".
 
 #ifndef DKS_H
 #define DKS_H
 
-
-#ifdef BV2_PLATFORM_WINDOWS
-#pragma comment( lib, "dks.lib" )
-
-
-// Link
-#pragma comment( lib, "fmodvc.lib" )
-#pragma comment( lib, "fmodlcc.lib" )
-#endif
-
-
-// Les includes pour Fmod
-#include <fmod.h>
 #include "CVector.h"
 
+/// An effect loaded by dksCreateSoundFromFile.
+struct DksSound;
 
-// Les fonction du DKS
-
-
-/// \brief initialise le module et FMOD
-/// 
-/// Cette fonction effectue l'initialisation du module et de FMOD. Ceci est fait en spécifiant un mixrate et un nombre maximal de cannaux audio. Cette onction DOIT être appelée avant tout autres appels à d'autres fonctions de ce module.
-///
-/// \param mixrate mixrate
-/// \param maxsoftwarechannels nombre de cannaux audio
-/// \return true si l'initialisation a réussi, false sinon
 bool			dksInit(int mixrate, int maxsoftwarechannels);
-
-
-
-/// \brief libère toute la mémoire allouée pour les sons et termine l'utilisation du module.
-///
-/// Cette fonction libère toute la mémoire allouée pour les sons et termine l'utilisation du module. Le module pourra être redémarré avec un nouvel appel à dksInit()
-///
 void			dksShutDown();
 
+/// Loads an effect (decoded in memory). Returns 0 if the file is missing or unreadable; every other call accepts 0.
+DksSound *		dksCreateSoundFromFile(char* filename, bool loop=false);
+void			dksDeleteSound(DksSound * sound);
 
+/// Plays a flat (2D) sound. channel -1 picks a free one. Returns the channel handle.
+int				dksPlaySound(DksSound * sound, int channel=-1, int volume=255);
 
-/// \brief chargement d'un son en mémoire
-///
-/// Cette fonction effectue le chargement d'un son ou d'une musique en mémoire. Les formats valides sont les même que FMOD. Avant de créer un nouveau son, le module vérifie si ce fichier a déjà été chargé. Si c'est le cas, aucun son ne sera créé et le pointeur FMOD correspondant à ce fichier sera retourné.
-///
-/// \param filename chemin menant au fichier son ou musique à charger depuis l'endroit où se situe le fichier EXE du programme.
-/// \param loop est-ce que ce son ou cette musique doit jouer en boucle?
-/// \return pointeur FMOD vers le son ou la musique chargée en mémoire
-#ifdef USE_FMODEX
-FMOD_SOUND *	dksCreateSoundFromFile(char* filename, bool loop=false);
-#else
-FSOUND_SAMPLE*	dksCreateSoundFromFile(char* filename, bool loop=false);
-#endif
+/// Plays a sound at a position; it is at full volume within `range` and fades beyond it.
+void			dksPlay3DSound(DksSound * sound, int channel, float range, const CVector3f & position, int volume=255);
 
+/// Same, with a pitch multiplier (1 = recorded speed). Returns the channel handle.
+int				dksPlay3DSoundPitch(DksSound * sound, float range, const CVector3f & position, int volume, float pitch);
 
-
-/// \brief destruction d'un son chargé en mémoire
-///
-/// Cette fonction permet de libérer la mémoire allouée pour un son présentement chargée en mémoire.
-///
-/// \param pointeur FMOD du son à effacer
-
-#ifdef USE_FMODEX
-void dksDeleteSound(FMOD_SOUND * fsound_sample);
-#else
-void			dksDeleteSound(FSOUND_SAMPLE* fsound_sample);
-#endif
-
-
-// Ajou de fonctions
-#ifdef USE_FMODEX
-int	dksPlaySound(FMOD_SOUND * fsound_sample, int channel, int volume=255);
-void dksPlay3DSound(FMOD_SOUND * fsound_sample, int channel, float range, CVector3f & position, int volume=255);
-#else
-int			dksPlaySound(FSOUND_SAMPLE * fsound_sample, int channel, int volume=255);
-void			dksPlay3DSound(FSOUND_SAMPLE * fsound_sample, int channel, float range, CVector3f & position, int volume=255);
-#endif
+/// Stops a channel returned by the play functions (no effect if it already ended or was reused).
+void			dksStopSound(int channel);
 
 void			dksPlayMusic(char* filename, int channel=-1, int volume=255);
 void			dksStopMusic();
 
-#ifdef USE_FMODEX
-void dksSet3DListenerAttributes(const CVector3f * pos, const CVector3f * vel, const CVector3f * forward, const CVector3f * up);
-void dksUpdate();
-void dksSetSfxMasterVolume(float volume);
-void dksStopSound(FMOD_SOUND * s);
-FMOD_SYSTEM * dksGetSystem();
-FMOD_CHANNEL * dksGetChannel(FMOD_SOUND * s);
-#endif
+void			dksSet3DListenerAttributes(const CVector3f * pos, const CVector3f * vel, const CVector3f * forward, const CVector3f * up);
 
+/// Master volume of the effects, 0..1 (music is not affected).
+void			dksSetSfxMasterVolume(float volume);
+
+/// Call once per frame: frees finished voices.
+void			dksUpdate();
 
 #endif

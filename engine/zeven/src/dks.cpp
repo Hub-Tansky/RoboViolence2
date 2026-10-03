@@ -16,663 +16,273 @@
 	BaboViolent 2 source code. If not, see http://www.gnu.org/licenses/.
 */
 
-/* TCE (c) All rights reserved */
+#include "dks.h"
 
-#ifndef BV2_PLATFORM_WINDOWS
-#include "platform.h"
-#endif
-#include "dksi.h"
+#include <stdio.h>
+#include <string.h>
+#include <string>
 #include <vector>
 
-#ifdef USE_FMODEX
-#include <fmod_errors.h>
+// OGG needs stb_vorbis (vcpkg port "stb"); miniaudio decodes it when the implementation is compiled in.
+#ifdef BV2_HAVE_STB_VORBIS
+	#define STB_VORBIS_HEADER_ONLY
+	#include "stb_vorbis.c"
 #endif
 
-class CSound
+#define MINIAUDIO_IMPLEMENTATION
+#include <miniaudio.h>
+
+#ifdef BV2_HAVE_STB_VORBIS
+	#undef STB_VORBIS_HEADER_ONLY
+	#include "stb_vorbis.c"
+#endif
+
+struct DksSound
 {
-public:
-	int loadedXTime;
-	CString filename;
-#ifdef USE_FMODEX
-    FMOD_SOUND * fsound_sample;
-    FMOD_CHANNEL * channel;
-#else
-	FSOUND_SAMPLE *fsound_sample;
-#endif
-
-public:
-	CSound()
-	{
-		loadedXTime = 1;
-		fsound_sample = 0;
-#ifdef USE_FMODEX
-        channel = 0;
-#endif
-	}
-
-	virtual ~CSound()
-	{
-		if (fsound_sample) 
-#ifdef USE_FMODEX
-        {
-            FMOD_Channel_Stop(channel);
-            FMOD_Sound_Release(fsound_sample);
-        }
-        fsound_sample = 0;
-        channel = 0;
-#else
-            FSOUND_Sample_Free(fsound_sample);
-#endif
-	}
+	std::string path;
+	bool loop;
+	bool loaded;
+	ma_sound master; // decoded data; never played, voices are copies that share it
 };
 
-std::vector<CSound *> sounds;
-
-#ifdef USE_FMODEX
-FMOD_SYSTEM * s_system = 0;
-FMOD_SOUND * stream_music = 0;
-FMOD_CHANNEL * music_channel = 0;
-
-#else
-FSOUND_STREAM * stream_music = 0;
-#endif
-
-
-//
-// Initialiser FMod
-//
-bool			dksInit(int mixrate, int maxsoftwarechannels)
-
+namespace
 {
-#ifdef USE_FMODEX
-    float ds, df, rs;
-    bool r = true;
-    const char * message = 0;
-    unsigned int version;
-    FMOD_RESULT  result;
-
-    result = FMOD_System_Create(& s_system);
-    if(result != FMOD_OK)
-    {
-        message = FMOD_ErrorString(result);
-        goto l_abort;
-    }
-
-    result = FMOD_System_GetVersion(s_system, & version);
-    if((result != FMOD_OK) || (version < FMOD_VERSION))
-    {
-        message = FMOD_ErrorString(result);
-		printf("Error!  You are using an old version of FMOD %08x.  This program requires %08x\n", version, FMOD_VERSION);
-        goto l_abort;
-    }
-
-    result = FMOD_System_SetOutput(s_system, 
-#ifdef BV2_PLATFORM_MACOS
-	FMOD_OUTPUTTYPE_AUTODETECT
-#else
-	FMOD_OUTPUTTYPE_ALSA
-#endif
-);
-    if(result != FMOD_OK)
-    {
-        message = FMOD_ErrorString(result);
-        goto l_abort;
-    }
- 
-    result = FMOD_System_Init(s_system, maxsoftwarechannels, FMOD_INIT_NORMAL | FMOD_INIT_3D_RIGHTHANDED, 0);
-    if(result != FMOD_OK)
-    {
-        message = FMOD_ErrorString(result);
-        goto l_abort;
-    }
-
-    result = FMOD_System_Get3DSettings(s_system, & ds, & df, & rs);
-    if(result != FMOD_OK)
-    {
-        message = FMOD_ErrorString(result);
-        goto l_abort;
-    }
-
-    df = 64.0f;
-    result = FMOD_System_Set3DSettings(s_system, ds, df, rs);
-    if(result != FMOD_OK)
-    {
-        message = FMOD_ErrorString(result);
-        goto l_abort;
-    }
-
-l_abort:
-    if((result != FMOD_OK) && message)
-    {
-        printf("FMOD error: %d (%s)\n", result, message);
-        r = false;
-
-        if(s_system)
-        {
-            result = FMOD_System_Close(s_system);
-            if(result != FMOD_OK)
-                printf("FMOD error: %d (%s)\n", result, FMOD_ErrorString(result));
-
-            result = FMOD_System_Release(s_system);
-
-            if(result != FMOD_OK)
-                printf("FMOD error: %d (%s)\n", result, FMOD_ErrorString(result));
-            s_system = 0;
-        }
-    }
-    return r;
-
-#else
-	if (FSOUND_Init(mixrate, maxsoftwarechannels, 0) == TRUE)
+	struct Voice
 	{
-		FSOUND_3D_SetDistanceFactor(64.0f);
-		return true;
-	}
-	else
+		ma_sound sound;
+		DksSound * owner;
+		unsigned int serial;
+		bool used;
+	};
+
+	ma_engine g_engine;
+	ma_sound_group g_sfxGroup;
+	bool g_ready = false;
+	std::vector<Voice *> g_voices;
+	std::vector<DksSound *> g_sounds;
+	unsigned int g_serial = 1;
+
+	ma_sound g_music;
+	bool g_musicPlaying = false;
+
+	int makeHandle(int slot, unsigned int serial)
 	{
-		return false;
+		return (int)((serial & 0x7FFFFFu) << 8) | slot;
 	}
-#endif
+
+	void releaseVoice(Voice * v)
+	{
+		if (v->used)
+		{
+			ma_sound_uninit(&v->sound);
+			v->used = false;
+			v->owner = 0;
+		}
+	}
+
+	// A free slot, or one whose sound ended; -1 when all are busy.
+	int findVoice()
+	{
+		for (size_t i = 0; i < g_voices.size(); ++i)
+		{
+			Voice * v = g_voices[i];
+			if (v->used && ma_sound_at_end(&v->sound))
+				releaseVoice(v);
+			if (!v->used)
+				return (int)i;
+		}
+		return -1;
+	}
+
+	Voice * startVoice(DksSound * sound, int channel, int volume, bool spatial, int & handle)
+	{
+		handle = -1;
+		if (!g_ready || !sound || !sound->loaded)
+			return 0;
+		int slot = (channel >= 0 && channel < (int)g_voices.size()) ? channel : findVoice();
+		if (slot < 0)
+			return 0;
+		Voice * v = g_voices[slot];
+		releaseVoice(v);
+		ma_uint32 flags = MA_SOUND_FLAG_DECODE;
+		if (ma_sound_init_copy(&g_engine, &sound->master, flags, &g_sfxGroup, &v->sound) != MA_SUCCESS)
+			return 0;
+		v->used = true;
+		v->owner = sound;
+		v->serial = g_serial++;
+		ma_sound_set_looping(&v->sound, sound->loop ? MA_TRUE : MA_FALSE);
+		ma_sound_set_volume(&v->sound, volume / 255.0f);
+		ma_sound_set_spatialization_enabled(&v->sound, spatial ? MA_TRUE : MA_FALSE);
+		handle = makeHandle(slot, v->serial);
+		return v;
+	}
 }
 
+bool			dksInit(int mixrate, int maxsoftwarechannels)
+{
+	(void)mixrate; // miniaudio mixes at the device's native rate
+	ma_engine_config config = ma_engine_config_init();
+	if (ma_engine_init(&config, &g_engine) != MA_SUCCESS)
+	{
+		fprintf(stderr, "dks: no audio device, running silent\n");
+		return true; // the game works without sound
+	}
+	ma_sound_group_init(&g_engine, 0, 0, &g_sfxGroup);
+	int count = maxsoftwarechannels < 16 ? 16 : (maxsoftwarechannels > 256 ? 256 : maxsoftwarechannels);
+	for (int i = 0; i < count; ++i)
+	{
+		Voice * v = new Voice();
+		v->used = false;
+		v->owner = 0;
+		v->serial = 0;
+		g_voices.push_back(v);
+	}
+	g_ready = true;
+	return true;
+}
 
-
-//
-// Pour deleter tout les sons puis fermer FMod
-//
 void			dksShutDown()
 {
-
+	if (!g_ready)
+		return;
 	dksStopMusic();
-	// On efface tout nos sons
-	for (int i=0;i<(int)sounds.size();i++)
+	for (size_t i = 0; i < g_voices.size(); ++i)
 	{
-		CSound * sound = sounds.at(i);
-		delete sound;
+		releaseVoice(g_voices[i]);
+		delete g_voices[i];
 	}
-	sounds.clear();
-#ifdef USE_FMODEX
-    FMOD_RESULT r = FMOD_System_Close(s_system);
-    if(r != FMOD_OK)
-    {
-        printf("FMOD error: %d (%s)\n", r, FMOD_ErrorString(r));   
-    }
-    r = FMOD_System_Release(s_system);
-    if(r != FMOD_OK)
-    {
-        printf("FMOD error: %d (%s)\n", r, FMOD_ErrorString(r));   
-    }
-
-#else
-	FSOUND_Close();
-#endif
+	g_voices.clear();
+	ma_sound_group_uninit(&g_sfxGroup);
+	ma_engine_uninit(&g_engine);
+	g_ready = false;
 }
 
-
-
-//
-// Pour cr�er un son
-//
-#ifdef USE_FMODEX
-FMOD_SOUND
-#else
-FSOUND_SAMPLE
-#endif
-	* dksCreateSoundFromFile(char* filename, bool loop)
+DksSound *		dksCreateSoundFromFile(char* filename, bool loop)
 {
-	CSound * newSound = 0;
-	std::vector<CSound *>::size_type i;
-
-
-#ifdef USE_FMODEX
-    if(!s_system)
-        return 0;
-#endif
-
-	// On check si il n'existe pas d�j� en comparant les filename
-	for (i=0;i<sounds.size();i++)
-	{
-		CSound * sound = sounds.at(i);
-		if (sound->filename == filename) 
-		{
-			newSound = sound;
-			newSound->loadedXTime++;
-			return newSound->fsound_sample;
-		}
-	}
-
-	// Si on ne l'a pas trouv� un le cr�
-	if (i == sounds.size())
-	{
-		newSound = new CSound();
-		newSound->filename = filename;
-
-#ifdef USE_FMODEX
-        FMOD_RESULT r = FMOD_System_CreateSound(s_system, filename, FMOD_SOFTWARE | (loop ? FMOD_LOOP_NORMAL : FMOD_LOOP_OFF), 0, & newSound->fsound_sample);
-        if(r != FMOD_OK)
-        {
-            printf("FMOD error: %d (%s), filename: %s\n", r, FMOD_ErrorString(r), filename);
-            delete newSound;
-            return 0;
-        }
-#else
-		newSound->fsound_sample = FSOUND_Sample_Load(FSOUND_FREE, filename, (loop)?FSOUND_LOOP_NORMAL:FSOUND_LOOP_OFF, 0,0);
-#endif
-		sounds.push_back(newSound);
-	}
-
-	if (newSound)
-		return newSound->fsound_sample;
-	else
+	if (!g_ready || !filename)
 		return 0;
+	DksSound * s = new DksSound();
+	s->path = filename;
+	s->loop = loop;
+	s->loaded = false;
+	if (ma_sound_init_from_file(&g_engine, filename, MA_SOUND_FLAG_DECODE | MA_SOUND_FLAG_NO_SPATIALIZATION, 0, 0, &s->master) == MA_SUCCESS)
+		s->loaded = true;
+	else
+		fprintf(stderr, "dks: cannot load %s\n", filename);
+	g_sounds.push_back(s);
+	return s;
 }
 
-
-
-//
-// Pour effacer un son
-//
-void dksDeleteSound(
-#ifdef USE_FMODEX
-    FMOD_SOUND
-#else
-    FSOUND_SAMPLE 
-#endif 
-    * fsound_sample)
+void			dksDeleteSound(DksSound * sound)
 {
-	// On le cherche
-	for (int i=0;i<(int)sounds.size();i++)
+	if (!sound)
+		return;
+	for (size_t i = 0; i < g_voices.size(); ++i)
+		if (g_voices[i]->used && g_voices[i]->owner == sound)
+			releaseVoice(g_voices[i]);
+	for (size_t i = 0; i < g_sounds.size(); ++i)
 	{
-		CSound * sound = sounds.at(i);
-
-		if (sound->fsound_sample == fsound_sample)
+		if (g_sounds[i] == sound)
 		{
-			sound->loadedXTime--;
-
-			// Si on les a toute pogn�, on l'efface
-			if (sound->loadedXTime <= 0)
-			{
-				delete sound;
-				sounds.erase(sounds.begin() + i);
-				return;
-			}
-
-			return; // Fini
+			g_sounds.erase(g_sounds.begin() + i);
+			break;
 		}
 	}
+	if (sound->loaded)
+		ma_sound_uninit(&sound->master);
+	delete sound;
 }
 
-
-
-//
-// Pour faire jouer un son
-//
-int dksPlaySound(
-#ifdef USE_FMODEX
-    FMOD_SOUND
-#else
-    FSOUND_SAMPLE
-#endif
-    * fsound_sample, int mchannel, int volume)
+int				dksPlaySound(DksSound * sound, int channel, int volume)
 {
-#ifdef USE_FMODEX
-    FMOD_RESULT r;
-    int channel = -1;
-    FMOD_MODE mode;
-    const char * message = 0;
-    CSound * s = 0;
-    float vol = (float)volume / 255.0f;
-
-
-    std::vector<CSound *>::iterator i;
-
-    if(!s_system)
-        goto l_abort;
-    for(i = sounds.begin(); i != sounds.end(); i ++)
-    {
-        if(fsound_sample == (*i)->fsound_sample)
-        {
-            s = *i;
-            break;
-        }
-    }
-
-    r = FMOD_Sound_GetMode(fsound_sample, & mode);
-    if(r != FMOD_OK)
-    {
-        message = FMOD_ErrorString(r);
-        goto l_abort;
-    }
-    mode &= ~FMOD_3D;
-    mode |= FMOD_2D;
-    r = FMOD_Sound_SetMode(fsound_sample, mode);
-    if(r != FMOD_OK)
-    {
-        message = FMOD_ErrorString(r);
-        goto l_abort;
-    }   
- 
-    r = FMOD_System_PlaySound(s_system, (FMOD_CHANNELINDEX) mchannel, fsound_sample, 1, & s->channel); 
-    if(r != FMOD_OK)
-    {
-        message = FMOD_ErrorString(r);
-        goto l_abort;
-    }
-
-    r = FMOD_Channel_SetVolume(s->channel, vol);
-    if(r != FMOD_OK)
-    {
-        message = FMOD_ErrorString(r);
-        goto l_abort;
-    }
-    r = FMOD_Channel_SetPaused(s->channel, 0);
-    if(r != FMOD_OK)
-    {
-        message = FMOD_ErrorString(r);
-        goto l_abort;
-    }
-
-    r = FMOD_Channel_GetIndex(s->channel, & channel);
-    if(r != FMOD_OK)
-    {
-        message = FMOD_ErrorString(r);
-        channel = -1;
-        goto l_abort;
-    }
-    
-#else
-	FSOUND_Sample_SetMode(fsound_sample, FSOUND_2D);
-	int channel = FSOUND_PlaySoundEx(mchannel, fsound_sample, 0, TRUE);
-	FSOUND_SetVolume(channel, volume);
-	FSOUND_SetPaused(channel, FALSE);
-#endif
-
-#ifdef USE_FMODEX
-l_abort:
-    if((r != FMOD_OK) && message)
-        printf("FMOD error: %d (%s)\n", r, message);
-#endif
-	return channel;
+	int handle;
+	Voice * v = startVoice(sound, channel, volume, false, handle);
+	if (v)
+		ma_sound_start(&v->sound);
+	return handle;
 }
 
-
-//
-// Pour jouer un son 3D
-//
-void dksPlay3DSound(
-#ifdef USE_FMODEX
-    FMOD_SOUND
-#else
-    FSOUND_SAMPLE
-#endif
-    * fsound_sample, int mchannel, float range, CVector3f & position, int volume)
+int				dksPlay3DSoundPitch(DksSound * sound, float range, const CVector3f & position, int volume, float pitch)
 {
-#ifdef USE_FMODEX
-    FMOD_RESULT r;
-    FMOD_CHANNEL * ch;
-    FMOD_MODE mode;
-    const char * message = 0;
-    std::vector<CSound *>::iterator i;
-    CSound * s = 0;
-    FMOD_VECTOR pos = {position.s[0], position.s[1], position.s[2]};
-
-    float vol = (float)volume / 255.0f;
-
-
-
-    if(!s_system)
-        goto l_abort;
-
-    for(i = sounds.begin(); i != sounds.end(); i ++)
-    {
-        if((*i)->fsound_sample == fsound_sample)
-        {
-            s = *i;
-            break;
-        }
-    }
-
-    r = FMOD_Sound_GetMode(fsound_sample, & mode);
-    if(r != FMOD_OK)
-    {
-        message = FMOD_ErrorString(r);
-        goto l_abort;
-    }
-
-    mode &= ~FMOD_2D;
-    mode |= FMOD_3D;
-    r = FMOD_Sound_SetMode(fsound_sample, mode);
-    if(r != FMOD_OK)
-    {
-        message = FMOD_ErrorString(r);
-        goto l_abort;
-    }   
- 
-    r = FMOD_System_PlaySound(s_system, (FMOD_CHANNELINDEX) mchannel, fsound_sample, 1, & s->channel); 
-    if(r != FMOD_OK)
-    {
-        message = FMOD_ErrorString(r);
-        goto l_abort;
-    }
-
-    r = FMOD_Channel_Set3DMinMaxDistance(s->channel, range, 10000.0f);
-    if(r != FMOD_OK)
-    {
-        message = FMOD_ErrorString(r);
-        goto l_abort;
-    }
-
-    r = FMOD_Channel_Set3DAttributes(s->channel, & pos, 0);
-    if(r != FMOD_OK)
-    {
-        message = FMOD_ErrorString(r);
-        goto l_abort;
-    }
-
-    r = FMOD_Channel_SetVolume(s->channel, vol);
-    if(r != FMOD_OK)
-    {
-        message = FMOD_ErrorString(r);
-        goto l_abort;
-    }
-
-    r = FMOD_Channel_SetPaused(s->channel, 0);
-    if(r != FMOD_OK)
-    {
-        message = FMOD_ErrorString(r);
-        goto l_abort;
-    }
-
-l_abort:
-    if((r != FMOD_OK) && message)
-        printf("FMOD error: %d (%s) for %s\n", r, message, s->filename.s);
-#else
-   int channel = FSOUND_PlaySoundEx(mchannel, fsound_sample, 0, TRUE);
-	FSOUND_3D_SetMinMaxDistance(channel, range, 10000000.0f);
-	FSOUND_3D_SetAttributes(channel, position.s, 0);
-	FSOUND_SetVolume(channel, volume);
-	FSOUND_SetPaused(channel, FALSE);
-#endif
+	int handle;
+	Voice * v = startVoice(sound, -1, volume, true, handle);
+	if (!v)
+		return -1;
+	ma_sound_set_min_distance(&v->sound, range);
+	ma_sound_set_max_distance(&v->sound, 10000000.0f);
+	ma_sound_set_position(&v->sound, position.s[0], position.s[1], position.s[2]);
+	ma_sound_set_pitch(&v->sound, pitch);
+	ma_sound_start(&v->sound);
+	return handle;
 }
 
-
-
-//
-// Jouer de la music
-//
-void			dksPlayMusic(char* filename, int mchannel, int volume)
+void			dksPlay3DSound(DksSound * sound, int channel, float range, const CVector3f & position, int volume)
 {
+	(void)channel;
+	dksPlay3DSoundPitch(sound, range, position, volume, 1.0f);
+}
+
+void			dksStopSound(int channel)
+{
+	if (channel < 0 || !g_ready)
+		return;
+	size_t slot = (size_t)(channel & 0xFF);
+	unsigned int serial = ((unsigned int)channel >> 8) & 0x7FFFFFu;
+	if (slot < g_voices.size() && g_voices[slot]->used && (g_voices[slot]->serial & 0x7FFFFFu) == serial)
+		releaseVoice(g_voices[slot]);
+}
+
+void			dksPlayMusic(char* filename, int channel, int volume)
+{
+	(void)channel;
 	dksStopMusic();
-
-#ifdef USE_FMODEX
-
-    FMOD_RESULT r;
-    const char * message = 0;
-    float vol = (float) volume / 255.0f;
-
-    r = FMOD_System_CreateStream(s_system, filename, FMOD_LOOP_NORMAL, 0, & stream_music);
-    if(r != FMOD_OK)
-    {
-        message = FMOD_ErrorString(r);
-        goto l_abort;
-    }
-
-    r = FMOD_System_PlaySound(s_system, (FMOD_CHANNELINDEX) mchannel, stream_music, 1, & music_channel); 
-    if(r != FMOD_OK)
-    {
-        message = FMOD_ErrorString(r);
-        goto l_abort;
-    }
-
-    r = FMOD_Channel_SetVolume(music_channel, vol);
-    if(r != FMOD_OK)
-    {
-        message = FMOD_ErrorString(r);
-        goto l_abort;
-    }
-    
-    r = FMOD_Channel_SetPaused(music_channel, 0);
-    if(r != FMOD_OK)
-    {
-        message = FMOD_ErrorString(r);
-        goto l_abort;
-    }
-
-l_abort:
-    if((r != FMOD_OK) && message)
-        printf("FMOD error: %d (%s)\n", r, message);    
-
-#else
-	stream_music = FSOUND_Stream_Open(filename,FSOUND_LOOP_NORMAL,0,0);
-	if (stream_music) 
+	if (!g_ready || !filename)
+		return;
+	if (ma_sound_init_from_file(&g_engine, filename, MA_SOUND_FLAG_STREAM | MA_SOUND_FLAG_NO_SPATIALIZATION, 0, 0, &g_music) != MA_SUCCESS)
 	{
-		int channel = FSOUND_Stream_PlayEx(mchannel, stream_music, 0, TRUE);
-		FSOUND_SetVolume(channel, volume);
-		FSOUND_SetPaused(channel, FALSE);
+		fprintf(stderr, "dks: cannot play music %s\n", filename);
+		return;
 	}
-#endif
+	g_musicPlaying = true;
+	ma_sound_set_looping(&g_music, MA_TRUE);
+	ma_sound_set_volume(&g_music, volume / 255.0f);
+	ma_sound_start(&g_music);
 }
 
-
-
-//
-// Arr�ter la music
-// 
 void			dksStopMusic()
 {
-	if (stream_music)
+	if (g_musicPlaying)
 	{
-#ifdef USE_FMODEX
-        if(!s_system) return;
-        FMOD_Channel_Stop(music_channel);
-        FMOD_Sound_Release(stream_music);
-#else
-		FSOUND_Stream_Stop(stream_music);
-		FSOUND_Stream_Close(stream_music);
-#endif
-		stream_music = 0;
+		ma_sound_uninit(&g_music);
+		g_musicPlaying = false;
 	}
 }
 
-#ifdef USE_FMODEX
-void dksSet3DListenerAttributes(const CVector3f * pos, const CVector3f * vel, const CVector3f * forward, const CVector3f * up)
+void			dksSet3DListenerAttributes(const CVector3f * pos, const CVector3f * vel, const CVector3f * forward, const CVector3f * up)
 {
-    FMOD_RESULT r;
-
-    if(!s_system) return;
-    
-    FMOD_VECTOR v[4] = {0};
-    FMOD_VECTOR * pv = v;
-
-    if(pos)
-        memcpy(pv, pos->s, sizeof(*pv));
-    pv ++;
-
-    if(vel)
-        memcpy(pv, vel->s, sizeof(*pv));
-    pv ++;
-    
-    if(forward)
-        memcpy(pv, forward->s, sizeof(*pv));
-    pv ++;
-
-    if(up)
-        memcpy(pv, up->s, sizeof(*pv));
-
-    r = FMOD_System_Set3DListenerAttributes(s_system, 0, pos ? & v[0] : 0, vel ? & v[1] : 0, forward ? & v[2] : 0, up ? & v[3] : 0);
-    if(r != FMOD_OK)
-        printf("FMOD error: %d (%s)\n", r, FMOD_ErrorString(r));
+	if (!g_ready)
+		return;
+	if (pos)
+		ma_engine_listener_set_position(&g_engine, 0, pos->s[0], pos->s[1], pos->s[2]);
+	if (vel)
+		ma_engine_listener_set_velocity(&g_engine, 0, vel->s[0], vel->s[1], vel->s[2]);
+	if (forward)
+		ma_engine_listener_set_direction(&g_engine, 0, forward->s[0], forward->s[1], forward->s[2]);
+	if (up)
+		ma_engine_listener_set_world_up(&g_engine, 0, up->s[0], up->s[1], up->s[2]);
 }
 
-void dksUpdate()
+void			dksSetSfxMasterVolume(float volume)
 {
-    FMOD_RESULT r;
-    if(s_system)
-    {
-        r = FMOD_System_Update(s_system);
-        if(r != FMOD_OK)
-            printf("FMOD error: %d (%s)\n", r, FMOD_ErrorString(r));
-    }
+	if (g_ready)
+		ma_sound_group_set_volume(&g_sfxGroup, volume < 0.0f ? 0.0f : volume);
 }
 
-void dksSetSfxMasterVolume(float volume)
+void			dksUpdate()
 {
-    FMOD_RESULT r;
-    FMOD_CHANNELGROUP * g;
-
-    if(!s_system) return;
-
-    r = FMOD_System_GetMasterChannelGroup(s_system, & g);
-
-    if(r == FMOD_OK)
-        r = FMOD_ChannelGroup_SetVolume(g, volume);
-
-    if(r != FMOD_OK)
-        printf("FMOD error: %d (%s)\n", r, FMOD_ErrorString(r));
-  
+	if (!g_ready)
+		return;
+	for (size_t i = 0; i < g_voices.size(); ++i)
+		if (g_voices[i]->used && ma_sound_at_end(&g_voices[i]->sound))
+			releaseVoice(g_voices[i]);
 }
-
-void dksStopSound(FMOD_SOUND * s)
-{
-    FMOD_RESULT r;
-    std::vector<CSound *>::iterator i;
-    if(!s_system) return;
-    for(i = sounds.begin(); i != sounds.end(); i ++)
-    {
-        if(s == (*i)->fsound_sample)
-        {
-            r = FMOD_Channel_Stop((*i)->channel);
-            if(r != FMOD_OK)
-                printf("FMOD error: %d (%s)\n", r, FMOD_ErrorString(r));
-            break;
-        }
-    }
-}
-
-//hacking
-FMOD_SYSTEM * dksGetSystem()
-{
-    return s_system;
-}
-
-FMOD_CHANNEL * dksGetChannel(FMOD_SOUND * s)
-{
-    FMOD_CHANNEL * c = 0;
-    std::vector<CSound *>::iterator i;
-
-    if(!s_system) goto l_abort;
-
-    for(i = sounds.begin(); i != sounds.end(); i ++)
-    {
-        if(s == (*i)->fsound_sample)
-        {
-            c = (*i)->channel;
-            break;
-        }
-    }
-
-l_abort:
-    return c;
-}
-
-#endif

@@ -36,10 +36,10 @@ private:
 	float m_timeOut;
 
 	// Le son pour quand on clic
-	FSOUND_SAMPLE * m_sfxClic;
+	DksSound * m_sfxClic;
 
 	// Le son pour quand on passe au dessus
-	FSOUND_SAMPLE * m_sfxOver;
+	DksSound * m_sfxOver;
 
 	//--- Controls
 	CControl * pnl_main;

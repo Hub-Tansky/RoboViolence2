@@ -35,7 +35,7 @@ public:
 //	unsigned int tex_glowLogo;
 
 	// Le super son mistic du logo
-	FSOUND_SAMPLE * sfx_intro;
+	DksSound * sfx_intro;
 
 public:
 	// Constructeur

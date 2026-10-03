@@ -41,7 +41,7 @@ CLava::CLava()
 //
 CLava::~CLava()
 {
-	FSOUND_StopSound(channel);
+	dksStopSound(channel);
 	dksDeleteSound(m_sfxRain);
 }
 

@@ -17,22 +17,7 @@
 */
 
 #include "eHierarchic.h"
-#ifdef BV2_PLATFORM_WINDOWS
-#ifndef CONSOLE
-#ifndef CONSOLE
-	#include <windows.h>
-	#include <gl/gl.h>
-#endif
-#endif
-#else
-#include "platform.h"
-#ifdef BV2_PLATFORM_MACOS
-#include <OpenGL/gl.h>
-#include <OpenGL/glu.h>
-#else
-#include <GL/gl.h>
-#endif
-#endif
+#include "glheaders.h"
 
 
 

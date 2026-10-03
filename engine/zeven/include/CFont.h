@@ -54,25 +54,7 @@ Voici quelque spécificité :
 using namespace std;
 
 
-#ifdef BV2_PLATFORM_WINDOWS
-
-#pragma comment( lib, "opengl32.lib" )
-#pragma comment( lib, "dkt.lib" )
-
-
-#include <windows.h>
-// Les includes pour opengl
-#include <gl/gl.h> 
-#include <gl/glu.h> 
-//#include <gl/glext.h>
-
-#elif BV2_PLATFORM_MACOS
-#include <OpenGL/gl.h>
-#include <OpenGL/glu.h>
-#else
-#include <GL/gl.h>
-#include <GL/glu.h>
-#endif
+#include "glheaders.h"
 // pour pouvoir loader une texture
 #include "dkt.h"
 

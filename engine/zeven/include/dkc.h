@@ -37,9 +37,6 @@
 #define DKC_H
 
 
-#ifdef BV2_PLATFORM_WINDOWS
-	#include <windows.h>
-#endif
 
 #include "platform.h"
 

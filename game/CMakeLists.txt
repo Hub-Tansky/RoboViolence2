@@ -10,7 +10,7 @@ set(BV2_GAME_SOURCES
   src/CClans.cpp
   src/CControl.cpp
   src/CCredit.cpp
-  src/CCurl.cpp
+  src/CUrlData.cpp
   src/CEditor.cpp
   src/CFriends.cpp
   src/CHost.cpp
@@ -92,7 +92,7 @@ set(BV2_SERVER_SOURCES
   src/AccountManager.cpp
   src/CAStar.cpp
   src/CAStar_FindPath.cpp
-  src/CCurl.cpp
+  src/CUrlData.cpp
   src/CMaster.cpp
   src/CPathNode.cpp
   src/CPing.cpp
@@ -128,7 +128,11 @@ function(bv2_game_target target)
   target_include_directories(${target} PRIVATE src)
   target_link_libraries(${target} PRIVATE babonet dko zeven_core ${BV2_SQLITE_TARGET} Threads::Threads)
   if(BV2_WITH_HTTP)
+    target_sources(${target} PRIVATE src/CCurl.cpp)
+    target_compile_definitions(${target} PRIVATE BV2_WITH_HTTP)
     target_link_libraries(${target} PRIVATE CURL::libcurl)
+  else()
+    target_sources(${target} PRIVATE src/CCurlStub.cpp)
   endif()
   bv2_target_defaults(${target})
 endfunction()
@@ -137,6 +141,7 @@ if(BV2_BUILD_SERVER)
   add_executable(bv2dedicated ${BV2_SERVER_SOURCES})
   target_compile_definitions(bv2dedicated PRIVATE CONSOLE)
   bv2_game_target(bv2dedicated)
+  target_link_libraries(bv2dedicated PRIVATE zeven_console)
   add_dependencies(bv2dedicated bv2_seed_db)
   if(TARGET bv2_placeholder_content)
     add_dependencies(bv2dedicated bv2_placeholder_content)
@@ -144,10 +149,12 @@ if(BV2_BUILD_SERVER)
 endif()
 
 if(BV2_BUILD_CLIENT)
-  # Excluded from "all" until Step 3 replaces FMOD, DirectInput and the Win32/SDL1 window.
-  add_executable(bv2 EXCLUDE_FROM_ALL ${BV2_GAME_SOURCES} src/ResIco.rc)
+  add_executable(bv2 ${BV2_GAME_SOURCES})
   bv2_game_target(bv2)
   target_link_libraries(bv2 PRIVATE zeven_client)
+  if(WIN32)
+    target_sources(bv2 PRIVATE src/ResIco.rc)
+  endif()
   if(WIN32)
     set_target_properties(bv2 PROPERTIES WIN32_EXECUTABLE ON)
   elseif(APPLE)

@@ -8,13 +8,6 @@
 
 #include "platform.h"
 
-#ifdef BV2_PLATFORM_WINDOWS
-#ifndef DLL_EXPORTS
-#define DLL_API __declspec(dllexport)
-#else
-#define DLL_API __declspec(dllimport)
-#endif
-
 /*
 	Copyright 2012 bitHeads inc.
 
@@ -33,30 +26,8 @@
 	BaboViolent 2 source code. If not, see http://www.gnu.org/licenses/.
 */
 
-#pragma comment( lib, "opengl32.lib" )
-#pragma comment( lib, "glu32.lib" )
-//#pragma comment( lib, "DevIL.lib" )
-
-
-#include <windows.h>
-
-// Les includes pour opengl
-#include <gl/gl.h> 
-#include <gl/glu.h> 
-//#include <gl/glext.h>
-#include "glext.h" // [dsl] I just put it inside our folder
-#else
 #define DLL_API
-#include "platform.h"
-#ifdef BV2_PLATFORM_MACOS
-#include <OpenGL/gl.h>
-#include <OpenGL/glu.h>
-#else
-#include <GL/gl.h>
-#include <GL/glu.h>
-#include <GL/glext.h>
-#endif>
-#endif
+#include "glheaders.h"
 
 
 // pour devil

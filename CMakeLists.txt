@@ -9,15 +9,15 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-option(BV2_BUILD_CLIENT "Build the bv2 client (needs the Step 3 platform layer)" ON)
+option(BV2_BUILD_CLIENT "Build the bv2 client" ON)
 option(BV2_BUILD_SERVER "Build the bv2dedicated server" ON)
 option(BV2_BUILD_MASTER "Build the bv2master master server" ON)
-# ADR 0002: Step 3 adds the CCurl stub and flips this to OFF. Until then CCurl.cpp needs libcurl.
-option(BV2_WITH_HTTP "Link libcurl for account and report requests" ON)
+# ADR 0002: OFF builds game/src/CCurlStub.cpp (every request ends at once with no data); ON links libcurl.
+option(BV2_WITH_HTTP "Link libcurl for account and report requests" OFF)
 option(BV2_SANITIZE "Build with AddressSanitizer and UBSan" OFF)
 
 find_package(Threads REQUIRED)
-# The headless server still links dkt and dko, which call GL/GLU for texture upload (see ARCHITECTURE.md).
+# GL entry points come from glad; GLU (headers and library) is still the system's (see ARCHITECTURE.md).
 find_package(OpenGL REQUIRED COMPONENTS OpenGL OPTIONAL_COMPONENTS GLU)
 find_package(SQLite3 REQUIRED)
 # CMake 4.x renames the imported target; keep one name for both.

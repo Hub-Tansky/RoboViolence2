@@ -16,179 +16,116 @@
 	BaboViolent 2 source code. If not, see http://www.gnu.org/licenses/.
 */
 
-/* RndLabs (c) All rights reserved */
+#include "dkc.h"
 
+#include <chrono>
+#include <thread>
 
-#include "dkci.h"
+namespace
+{
+	typedef std::chrono::steady_clock Clock;
+
+	// The fixed step is 1/framePerSeconde. A long stall (a breakpoint, a window drag, a slow load)
+	// would otherwise make the game run hundreds of catch-up updates in one go; cap it.
+	const int MAX_CATCH_UP_STEPS = 5;
+
+	INT4 g_frame = 0; // The frame we are at
+	bool g_started = false; // lastTick is valid
+	Clock::time_point g_lastTick; // Time at the last dkcUpdateTimer
+	float g_perSecond = 1.0f / 25.0f; // Duration of one frame
+	int g_framePerSecond = 25;
+	float g_currentFrameDelay = 0; // Time accumulated towards the next frame
+	float g_fps = 0;
+	int g_oneSecondFrameCount = 0;
+	float g_oneSecondElapsed = 0;
+}
 
 //
-// Les trucs static
-//
-INT4 CDkc::frame=0; // Le frame qu'on est rendu
-INT64 CDkc::lastFrameCount=0; // Le temps au dernier frame
-float CDkc::elapsedf=0; // Le temps �oul�entre deux frames, pour les animations
-float CDkc::currentFrameDelay=0; // Le temps qu'on a de fait sur ce frame
-bool CDkc::usePerformanceTimer=false;
-INT64 CDkc::frequency=1000;
-float CDkc::perSeconde=40; // Par default 25 frames par seconde
-int CDkc::framePerSeconde=25;
-float CDkc::fps = 0;
-int CDkc::oneSecondFrameCound = 0;
-float CDkc::oneSecondElapsedcpt = 0;
-
-
-
-//
-// The elapsed time in seconde
+// The elapsed time in seconds of one fixed frame
 //
 float			dkcGetElapsedf()
 {
-	return CDkc::perSeconde;
+	return g_perSecond;
 }
-
-
 
 //
 // Obtenir le frame per second
 //
 float			dkcGetFPS()
 {
-	return CDkc::fps;
+	return g_fps;
 }
 
-
-
 //
-// Pour obtenir le nb de frame o on est rendu
+// Pour obtenir le nb de frame ou on est rendu
 //
 INT4			dkcGetFrame()
 {
-	return CDkc::frame;
+	return g_frame;
 }
-
-
 
 //
 // Init the timer (do at your program start)
 //
 void			dkcInit(int framePerSecond)
 {
-	CDkc::framePerSeconde = framePerSecond;
-
-	#ifdef BV2_PLATFORM_WINDOWS
-		// On check si on peut utiliser un timer de haute performance
-		if (!QueryPerformanceFrequency((LARGE_INTEGER *) &(CDkc::frequency)))
-		{
-			CDkc::usePerformanceTimer = false;
-			CDkc::frequency = 1000;
-		}
-		else
-		{
-			CDkc::usePerformanceTimer = true;
-		}
-	#else
-		//		CDkc::frequency = sysconf(_SC_CLK_TCK);
-		CDkc::frequency = 1000000LL;
-	#endif
-
-	// Pour savoir le bon delait pour le nb de frame par seconde
-	CDkc::perSeconde = 1.0f / (float)(CDkc::framePerSeconde);
+	g_framePerSecond = framePerSecond;
+	g_perSecond = 1.0f / (float)g_framePerSecond;
 }
-
-
 
 //
 // To step a couple of frame or to init it to 0
 //
 void			dkcJumpToFrame(int frame)
 {
-	CDkc::frame = frame;
-	CDkc::currentFrameDelay = 0;
-	CDkc::lastFrameCount=0;
-	CDkc::elapsedf=0;
-	CDkc::currentFrameDelay=0;
-	CDkc::fps = 0;
-	CDkc::oneSecondFrameCound = 0;
-	CDkc::oneSecondElapsedcpt = 0;
+	g_frame = frame;
+	g_currentFrameDelay = 0;
+	g_started = false;
+	g_fps = 0;
+	g_oneSecondFrameCount = 0;
+	g_oneSecondElapsed = 0;
 }
 
-
-
 //
-// Will return the current frame count
+// Returns how many fixed frames to animate now
 //
 INT4			dkcUpdateTimer()
 {
-	// On prend le nombre de tick du CPU
-	INT64 lGetTickCount;
-	
-	#ifdef BV2_PLATFORM_WINDOWS
-		if (CDkc::usePerformanceTimer)
-		{
-			QueryPerformanceCounter((LARGE_INTEGER *) &lGetTickCount);
-		}
-		else
-		{
-			lGetTickCount = GetTickCount();
-		}
-	#else
-		//get the current number of microseconds since january 1st 1970
-		
-		tms tBuf;
-		//int ct = times(&tBuf);
+	Clock::time_point now = Clock::now();
+	float elapsed = 0;
+	if (g_started)
+		elapsed = std::chrono::duration<float>(now - g_lastTick).count();
+	g_lastTick = now;
+	g_started = true;
 
-		//printf("ct = %i\n",ct);
-
-		lGetTickCount = times(&tBuf);
-
-            struct timeval tv;
-            gettimeofday(& tv, 0);
-            lGetTickCount = tv.tv_sec * 1000000 + tv.tv_usec;
-
-	#endif
-
-	// On update le timer
-	double elapsedd = (double)((CDkc::lastFrameCount) ? lGetTickCount - CDkc::lastFrameCount : 0) / (double)CDkc::frequency;
-	CDkc::lastFrameCount = lGetTickCount;
-	CDkc::elapsedf = (float)elapsedd;
-	CDkc::currentFrameDelay += CDkc::elapsedf;
-	INT4 nbFrameAdded=0;
-	while (CDkc::currentFrameDelay >= CDkc::perSeconde)
+	g_currentFrameDelay += elapsed;
+	INT4 nbFrameAdded = 0;
+	while (g_currentFrameDelay >= g_perSecond)
 	{
-		CDkc::currentFrameDelay -= CDkc::perSeconde;
-		CDkc::frame++;
+		g_currentFrameDelay -= g_perSecond;
+		g_frame++;
 		nbFrameAdded++;
+	}
+	if (nbFrameAdded > MAX_CATCH_UP_STEPS)
+	{
+		nbFrameAdded = MAX_CATCH_UP_STEPS;
+		g_currentFrameDelay = 0; // drop the backlog instead of replaying it
 	}
 
 	// On update pour le fps
-	CDkc::oneSecondElapsedcpt += CDkc::elapsedf;
-	CDkc::oneSecondFrameCound++;
-	while (CDkc::oneSecondElapsedcpt >= 1)
+	g_oneSecondElapsed += elapsed;
+	g_oneSecondFrameCount++;
+	while (g_oneSecondElapsed >= 1)
 	{
-		CDkc::oneSecondElapsedcpt -= 1;
-		CDkc::fps = (float)CDkc::oneSecondFrameCound;
-		CDkc::oneSecondFrameCound = 0;
+		g_oneSecondElapsed -= 1;
+		g_fps = (float)g_oneSecondFrameCount;
+		g_oneSecondFrameCount = 0;
 	}
 
-	// On retourne le nombre de frame �animer
 	return nbFrameAdded;
 }
 
-
-
 void			dkcSleep(INT4 ms)
 {
-	#ifdef BV2_PLATFORM_WINDOWS
-		INT4 timeMem = GetTickCount();
-		INT4 currentTime = timeMem;
-		while (currentTime - timeMem < ms)
-		{
-			currentTime = GetTickCount();
-		}
-	#else
-		struct timespec t;
-		t.tv_sec = 0;
-		t.tv_nsec = ms * 1000000L;
-		nanosleep(& t, 0);
-	#endif
+	std::this_thread::sleep_for(std::chrono::milliseconds(ms));
 }

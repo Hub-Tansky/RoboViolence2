@@ -46,8 +46,8 @@ public:
 	DialogState state;
 
 	// Sounds
-	FSOUND_SAMPLE * m_sfxClic;
-	FSOUND_SAMPLE * m_sfxOver;
+	DksSound * m_sfxClic;
+	DksSound * m_sfxOver;
 
 	// Dialog root control
 	CControl * dialogRoot;

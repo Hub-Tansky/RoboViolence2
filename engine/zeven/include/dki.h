@@ -26,7 +26,7 @@
 /// 	- une fonction de mise à jour du module
 /// 	- des fonctions permettant d'obtenir l'état de chaque touche, boutons, axe ou position d'un clavier, d'un joystick ou d'une souris.
 ///
-/// \note Ce module nécessite Direct Input pour fonctionner
+/// \note Les événements viennent de dkw (SDL3); la manette passe par l'API gamepad de SDL3
 /// \author David St-Louis (alias Daivuk)
 /// \author Louis Poirier (à des fins de documentation seulement)
 ///
@@ -35,20 +35,7 @@
 #ifndef DKI_H
 #define DKI_H
 
-
-#ifdef BV2_PLATFORM_WINDOWS
-#pragma comment ( lib , "dki.lib" )
-
-
-#include <windows.h>
-#include <dinput.h>
-#else
-#ifdef CALLBACK
-#undef CALLBACK
-#endif
-#define CALLBACK
-#endif
-
+#include "dikeys.h"
 #include "CVector.h"
 
 
@@ -176,7 +163,7 @@ CVector3f		dkiGetJoyVel();
 /// \param appInstance pointeur vers l'instance de l'application
 /// \param appHandle pointeur vers le lien logique de l'application
 /// \return 0 s'il y a un échec, 1 si tout s'est bien passé
-int				dkiInit(HINSTANCE appInstance, HWND appHandle);
+int				dkiInit();
 
 
 

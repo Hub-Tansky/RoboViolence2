@@ -46,7 +46,7 @@ CSnow::CSnow()
 //
 CSnow::~CSnow()
 {
-	FSOUND_StopSound(channel);
+	dksStopSound(channel);
 	dksDeleteSound(m_sfxRain);
 	dktDeleteTexture(&tex_snow);
 }

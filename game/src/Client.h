@@ -48,10 +48,10 @@ class Client :/* public ControlListener, */public CListener
 {
 public:
 	// Le son pour quand on clic
-	FSOUND_SAMPLE * m_sfxClic;
+	DksSound * m_sfxClic;
 
 	// Le son pour quand on passe au dessus
-	FSOUND_SAMPLE * m_sfxOver;
+	DksSound * m_sfxOver;
 
 	// Notre jeu
 	Game * game;
@@ -122,9 +122,9 @@ public:
 	bool isChattingTeam;
 
 	// Le son pour quand un chat message arrive
-	FSOUND_SAMPLE * m_sfxChat;
-	FSOUND_SAMPLE * sfxHit;
-	FSOUND_SAMPLE * sfxShotyReload;
+	DksSound * m_sfxChat;
+	DksSound * sfxHit;
+	DksSound * sfxShotyReload;
 
 	// Le bink pour sa vie (et peut etre le reloading kin)
 	float blink;

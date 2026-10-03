@@ -16,106 +16,17 @@
 	BaboViolent 2 source code. If not, see http://www.gnu.org/licenses/.
 */
 
-/* TCE (c) All rights reserved */
-
-
 #ifndef DKGLI_H
 #define DKGLI_H
 
+#include "dkgl.h"
 
-
-#ifdef BV2_PLATFORM_WINDOWS
-	#ifndef DLL_EXPORTS
-		#define DLL_API __declspec(dllexport)
-	#else
-		#define DLL_API __declspec(dllimport)
-	#endif
-#else
-	#define DLL_API
-#endif
-
-
-
-#ifdef BV2_PLATFORM_WINDOWS
-		#pragma comment( lib, "opengl32.lib" )
-		#pragma comment( lib, "glu32.lib" )
-
-
-	#include <windows.h>
-
-	// Les includes pour opengl
-		#include <gl/gl.h> 
-		#include <gl/glu.h> 
-		#include "glext.h" 
-#else
-	#include "platform.h"
-	#ifdef BV2_PLATFORM_MACOS
-	#include <SDL.h>
-	#else
-	#include <SDL/SDL.h>
-	#endif
-	#include "platform.h"
-	#ifdef BV2_PLATFORM_MACOS
-	#include <OpenGL/gl.h>
-	#include <OpenGL/glu.h>
-	#else
-	#include <GL/gl.h>
-	#include <GL/glu.h>
-	#include <GL/glext.h>
-	#endif
-#endif
-
-#include "CString.h"
-#include "CVector.h"
-
-
-
-const int DKGL_BLENDING_ADD_SATURATE = 0;
-const int DKGL_BLENDING_ADD = 3;
-const int DKGL_BLENDING_MULTIPLY = 1;
-const int DKGL_BLENDING_ALPHA = 2;
-
-
-
-// Les fonction du DKGL
-DLL_API void			 dkglEnableVsync(bool enabled = true);
-DLL_API bool			 dkglCheckExtension(char * extension);
-DLL_API int				 dkglCreateContext(
-								   HDC mDC, int colorDepth
-	);
-DLL_API void			 dkglDrawCoordSystem();
-DLL_API void			 dkglDrawWireCube();
-DLL_API void			 dkglPopOrtho();
-DLL_API void			 dkglPushOrtho(float mWidth, float mHeight);
-DLL_API void			 dkglSetBlendingFunc(int blending);
-DLL_API void			 dkglSetPointLight(int ID, float x, float y, float z, float r, float g, float b);
-DLL_API void			 dkglSetProjection(float mFieldOfView, float mNear, float mFar, float mWidth, float mHeight);
-DLL_API void			 dkglShutDown();
-DLL_API CVector3f		 dkglUnProject(CVector2i & pos2D, float zRange);
-DLL_API CVector3f		 dkglProject(CVector3f & pos3D);
-
-
-
-
-// Pour initialiser le format des pixel
-int initPixelFormat(HDC mDC, int colorDepth);
-
-
-// Pour tenir certaines infos
+// Internal state of the dkgl module
 class CDkgl
 {
 public:
-	// Notre rendering context
-	static HGLRC renderingContext;
-
-	// La profondeur des couleur
 	static int colorDepth;
-
-	// Le device context
-	static HDC deviceContext;
-
-public:
+	static void * context; // SDL_GLContext
 };
-
 
 #endif

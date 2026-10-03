@@ -28,7 +28,7 @@ class CPanel : public CListener
 {
 public:
 	CControl * instance;
-	FSOUND_SAMPLE * m_sfxImpact;
+	DksSound * m_sfxImpact;
 
 public:
 

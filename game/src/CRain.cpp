@@ -43,7 +43,7 @@ CRain::CRain()
 //
 CRain::~CRain()
 {
-	FSOUND_StopSound(channel);
+	dksStopSound(channel);
 	dksDeleteSound(m_sfxRain);
 }
 

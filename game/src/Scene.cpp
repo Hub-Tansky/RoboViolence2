@@ -81,7 +81,7 @@ Scene::Scene()
 		dkglPopOrtho();
 
 		// On swap les buffers
-		SwapBuffers(dkwGetDC());
+		dkglSwapBuffers();
 #endif
 	gameVar.loadModels();
 #ifndef CONSOLE
@@ -112,7 +112,7 @@ Scene::Scene()
 //	menu->isReady = true;
 	menuManager.root->enable = true;
 	menuManager.root->visible = false; //--- Not now */
-	FSOUND_SetSFXMasterVolume((int)(255.0f*gameVar.s_masterVolume));
+	dksSetSfxMasterVolume(gameVar.s_masterVolume);
 //	dksPlayMusic("main/sounds/menu.ogg", -1);
 
 	//--- Query from data base if we sent the survey already
@@ -258,13 +258,11 @@ void Scene::update(float delay)
 			// On set le volume avec �a :D:D trop hot
 			if (client->game)
 			{
-				FSOUND_SetSFXMasterVolume((int)((255.0f - client->game->viewShake*100.0f)*gameVar.s_masterVolume));
-			//	FSOUND_SetFrequency(FSOUND_ALL, gameVar.s_mixRate+(int)(-client->game->viewShake*(float)gameVar.s_mixRate*.25f));
+				dksSetSfxMasterVolume((255.0f - client->game->viewShake*100.0f)/255.0f*gameVar.s_masterVolume);
 			}
 			else
 			{
-				FSOUND_SetSFXMasterVolume((int)(255.0f*gameVar.s_masterVolume));
-			//	FSOUND_SetFrequency(FSOUND_ALL, gameVar.s_mixRate);
+				dksSetSfxMasterVolume(gameVar.s_masterVolume);
 			}
 
 			client->update(delay);
@@ -276,8 +274,7 @@ void Scene::update(float delay)
 		}
 		else
 		{
-			FSOUND_SetSFXMasterVolume((int)(255.0f*gameVar.s_masterVolume));
-		//	FSOUND_SetFrequency(FSOUND_ALL, gameVar.s_mixRate);
+			dksSetSfxMasterVolume(gameVar.s_masterVolume);
 		}
 
 		// On update l'editor
@@ -441,7 +438,7 @@ void Scene::render()
 /*		if (menu->isShowing) menu->render();
 		else if (menu->soundPlayChannel >= 0)
 		{
-			FSOUND_StopSound(menu->soundPlayChannel);
+			dksStopSound(menu->soundPlayChannel);
 			menu->soundPlayChannel = -1;
 		}*/
 

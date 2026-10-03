@@ -31,7 +31,7 @@ class Choice : public Control
 {
 private:
 	// Le son pour quand on clic
-	FSOUND_SAMPLE * m_sfxClic;
+	DksSound * m_sfxClic;
 
 	// Nos choix
 	std::vector<CString> m_choices;

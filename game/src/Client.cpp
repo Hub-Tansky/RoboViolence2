@@ -516,8 +516,11 @@ void Client::update(float delay)
 	{
 		if (game->map)
 		{
-			FSOUND_3D_Listener_SetAttributes(game->map->camPos.s, 0,0,0,1,0,1,0);
-			FSOUND_Update();
+			{
+				CVector3f listenerForward(0, 0, 1), listenerUp(0, 1, 0);
+				dksSet3DListenerAttributes(&game->map->camPos, 0, &listenerForward, &listenerUp);
+			}
+			dksUpdate();
 		}
 	}
 }

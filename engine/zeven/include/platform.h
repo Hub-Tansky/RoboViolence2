@@ -34,6 +34,13 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+	// The game relied on windows.h's min/max macros; NOMINMAX is set, so provide them as functions everywhere.
+	#include <algorithm>
+	using std::min;
+	using std::max;
+#endif
+
 /* 32-bit wire types (the old code used long on 32-bit and int on LP64). */
 typedef int32_t INT4;
 typedef uint32_t UINT4;

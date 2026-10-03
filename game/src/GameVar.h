@@ -320,18 +320,18 @@ public:
 	dkp_preset dkpp_bloodHit;
 
 	// Les sons
-	FSOUND_SAMPLE * sfx_ric[5];
-	FSOUND_SAMPLE * sfx_hit[2];
-	FSOUND_SAMPLE * sfx_baboCreve[3];
-	FSOUND_SAMPLE * sfx_explosion[1];
-	FSOUND_SAMPLE * sfx_grenadeRebond;
-	FSOUND_SAMPLE * sfx_douille[3];
-	FSOUND_SAMPLE * sfx_equip;
-	FSOUND_SAMPLE * sfx_lifePack;
-	FSOUND_SAMPLE * sfx_cocktailMolotov;
-	FSOUND_SAMPLE * sfx_lavaSteam;
-	FSOUND_SAMPLE * sfx_overHeat;
-	FSOUND_SAMPLE * sfx_photonStart;
+	DksSound * sfx_ric[5];
+	DksSound * sfx_hit[2];
+	DksSound * sfx_baboCreve[3];
+	DksSound * sfx_explosion[1];
+	DksSound * sfx_grenadeRebond;
+	DksSound * sfx_douille[3];
+	DksSound * sfx_equip;
+	DksSound * sfx_lifePack;
+	DksSound * sfx_cocktailMolotov;
+	DksSound * sfx_lavaSteam;
+	DksSound * sfx_overHeat;
+	DksSound * sfx_photonStart;
 
 	// LES STRING DIFF�RENT POUR CHAQUE LANGUE
 	CString lang_gameName;

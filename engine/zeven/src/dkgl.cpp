@@ -20,49 +20,17 @@
 
 
 #include "dkgli.h"
+#include "dkw.h"
+
+#include <SDL3/SDL.h>
 
 int CDkgl::colorDepth=16;
-
-	HGLRC CDkgl::renderingContext;
-	HDC CDkgl::deviceContext;
-/*
-IDirect3D9 *g_D3D=NULL;
-
-   g_D3D = Direct3DCreate9( D3D_SDK_VERSION);
-   if(!g_D3D){
-      //Handle error
-   }
-
-   //Then at the end of your application
-   if(g_D3D){
-      g_D3D->Release();
-      g_D3D=NULL;
-   }*/
+void * CDkgl::context = 0;
 
 
 void dkglEnableVsync(bool vsync)
 {
-	// if we want vsync, check if video card supports the extension
-	if( vsync )
-	{
-
-		if( dkglCheckExtension( "WGL_EXT_swap_control" ) )
-		{
-#ifdef BV2_PLATFORM_WINDOWS
-			typedef BOOL (APIENTRY *PFNWGLSWAPINTERVALFARPROC)( int );
-			PFNWGLSWAPINTERVALFARPROC wglSwapIntervalEXT = 0;
-
-			wglSwapIntervalEXT = (PFNWGLSWAPINTERVALFARPROC)wglGetProcAddress( "wglSwapIntervalEXT" );
-			if( wglSwapIntervalEXT )
-			{
-				wglSwapIntervalEXT( 1 );
-			}
-#else
-			//dlopen() ? libGLX.so
-			//glXSwapIntervalSGI(1);
-#endif
-		}
-	}
+	SDL_GL_SetSwapInterval(vsync ? 1 : 0);
 }
 
 bool CheckExtension( char *m_szSupportedGLExtensions, char* szExtensionName )
@@ -108,34 +76,40 @@ bool			 dkglCheckExtension(char * extension)
 //
 // Pour créer le context openGL (rendering context)
 //
-int				 dkglCreateContext(
-								   HDC mDC, int colorDepth
-								   )
+int				 dkglCreateContext(int colorDepth)
 {
 	CDkgl::colorDepth = colorDepth;
-	CDkgl::deviceContext = mDC;
 
-	// On init notre pixel format
-	if (initPixelFormat(CDkgl::deviceContext, CDkgl::colorDepth)==0) return 0;
+	SDL_Window * window = (SDL_Window *)dkwGetWindow();
+	if (!window)
+		return 0;
 
-	// On cré un rendering context
-	CDkgl::renderingContext = 
-#ifdef BV2_PLATFORM_WINDOWS
-	  wglCreateContext(CDkgl::deviceContext);
-#else
-	mDC;
-#endif
+	SDL_GLContext ctx = SDL_GL_CreateContext(window);
+	if (!ctx)
+		return 0;
+	CDkgl::context = ctx;
+	SDL_GL_MakeCurrent(window, ctx);
 
-	// On le met comme courant
-#ifdef BV2_PLATFORM_WINDOWS
-	wglMakeCurrent(CDkgl::deviceContext, CDkgl::renderingContext); // On le met comme device courant
-
-#else
-	//	SDL_Init(SDL_INIT_VIDEO);
-#endif
-	// On check le extensions
-//	CDkgl::extensions = (char*)glGetString(GL_EXTENSIONS);
+	// Entry points for OpenGL 2.1 plus the extensions listed in the glad build
+	if (!gladLoadGL((GLADloadfunc)SDL_GL_GetProcAddress))
+	{
+		SDL_GL_DestroyContext(ctx);
+		CDkgl::context = 0;
+		return 0;
+	}
 	return 1;
+}
+
+
+
+//
+// Pour afficher le back buffer
+//
+void			 dkglSwapBuffers()
+{
+	SDL_Window * window = (SDL_Window *)dkwGetWindow();
+	if (window && CDkgl::context)
+		SDL_GL_SwapWindow(window);
 }
 
 
@@ -348,51 +322,11 @@ void			 dkglSetProjection(float mFieldOfView, float mNear, float mFar, float mWi
 //
 void			 dkglShutDown()
 {
-#ifdef BV2_PLATFORM_WINDOWS
-	wglMakeCurrent(NULL, NULL);
-	wglDeleteContext(CDkgl::renderingContext);
-#else
-	//	SDL_Quit();
-#endif
-
-}
-
-
-
-//
-// Pour initialiser le format des pixel à l'écran
-//
-int initPixelFormat(HDC mDC, int colorDepth)
-{
-#ifdef BV2_PLATFORM_WINDOWS
-	// on défini le format des pixels
-	PIXELFORMATDESCRIPTOR pfd=
-		{
-			sizeof(PIXELFORMATDESCRIPTOR),
-			1,
-			PFD_DRAW_TO_WINDOW |
-			PFD_SUPPORT_OPENGL |
-			PFD_DOUBLEBUFFER,
-			PFD_TYPE_RGBA,
-			(unsigned char)colorDepth,
-			0, 0, 0, 0, 0, 0,
-			0,
-			0,
-			0,
-			0, 0, 0, 0,
-			24, // z-buffer
-			0, // stencil-buffer
-			PFD_MAIN_PLANE,
-			0,
-			0,
-			0, 0, 0
-		};	
-
-	// On set le pixel
-	return SetPixelFormat(mDC, ChoosePixelFormat(mDC, &pfd), &pfd);
-#else
-	return 1;
-#endif
+	if (CDkgl::context)
+	{
+		SDL_GL_DestroyContext((SDL_GLContext)CDkgl::context);
+		CDkgl::context = 0;
+	}
 }
 
 
@@ -427,7 +361,7 @@ CVector3f		 dkglUnProject(CVector2i & pos2D, float zRange)
 }
 
 
-CVector3f		 dkglProject(CVector3f & pos3D)
+CVector3f		 dkglProject(const CVector3f & pos3D)
 {
 	double x,y,z;
 	GLdouble modelMatrix[16];

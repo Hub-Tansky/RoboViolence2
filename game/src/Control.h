@@ -65,7 +65,7 @@ protected:
 	control_justify m_justify;
 
 	// Le son pour quand on passe au dessus
-	FSOUND_SAMPLE * m_sfxOver;
+	DksSound * m_sfxOver;
 
 	// On ne gère pas les clic sur lui
 	bool m_isMouseHandle;

@@ -31,10 +31,10 @@ public:
 	CControl * parent;
 
 	// Le son pour quand on clic
-	FSOUND_SAMPLE * m_sfxClic;
+	DksSound * m_sfxClic;
 
 	// Le son pour quand on passe au dessus
-	FSOUND_SAMPLE * m_sfxOver;
+	DksSound * m_sfxOver;
 
 	//--- Some controls (Login and create acount)
 	CControl * btn_join;

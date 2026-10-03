@@ -51,7 +51,7 @@ class CRain : public CWeather
 {
 public:
 	//--- Weather sound
-	FSOUND_SAMPLE * m_sfxRain;
+	DksSound * m_sfxRain;
 	int channel;
 
 	//--- La rain

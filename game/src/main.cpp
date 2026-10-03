@@ -39,9 +39,6 @@ static void bv2ApplyNetlogFromEnv()
 #endif
 
 
-#ifdef BV2_PLATFORM_WINDOWS
-	#pragma comment (lib, "libcurl.lib")
-#endif
 
 
 // notre scene
@@ -142,58 +139,6 @@ CVector2i dkwGetCursorPos_main()
 
 #ifndef CONSOLE
 
-// lil function to update the launcher on boot up
-void UpdateLauncher()
-{
-
-	//test
-	//CreateDirectory("testing", 0 );
-
-	//CreateDirectory("test", 0 );
-	//CreateDirectory("test/testing", 0 );
-
-
-	// try to open the file, if not present, then we dont need to update the launcher!
-	FILE * file = fopen("_Bv2Launcher.exe" ,"rb");
-
-	//no update needed
-	if(!file)
-	{
-		return;
-	}
-
-	fseek (file , 0 , SEEK_END);
-	long Size = ftell(file);
-	rewind(file);
-
-		//open the current laucher so we can overwrite it!
-	FILE * ufile = fopen("Bv2Launcher.exe","wb");
-
-	// problem opening the file for writing, no update will occur
-	if(!ufile)
-	{
-		fclose(file);
-        return;
-	}
-
-	char *buffer = new char[Size];
-
-	fread( buffer , Size , 1 , file );
-	fwrite( buffer , Size , 1 , ufile );
-
-	//finished with the files
-	fclose( file );
-	fclose( ufile );
-
-	//let's kill the unusefull file
-	remove( "_Bv2Launcher.exe" );
-
-
-
-
-}
-
-
 class MainLoopInterface : public CMainLoopInterface
 {
 public:
@@ -211,7 +156,7 @@ public:
 		// LAG GENERATOR , use it to bind a key and test in lag conditions
 		if (dkiGetState(DIK_BACK) == DKI_DOWN)
 		{
-			Sleep(300);
+			dkcSleep(300);
 		}
 #endif
 
@@ -244,11 +189,8 @@ public:
 		// On render le tout
 		scene->render();
 
-		// Swap buffers if valid context is found
-		if( dkwGetDC() )
-		{
-			SwapBuffers( dkwGetDC() );
-		}
+		// Present the frame
+		dkglSwapBuffers();
 
       #ifdef NDEBUG
       #ifdef BV2_PLATFORM_WINDOWS
@@ -656,139 +598,70 @@ int main(int argc, const char* argv[])
 
 
 //
-// Fonction principal
+// Fonction principal (client): one entry point for Windows, macOS and Linux
 //
-int WINAPI WinMain(	HINSTANCE	hInstance,				// Instance
-			HINSTANCE	hPrevInstance,				// Previous Instance
-			LPSTR		lpCmdLine,				// Command Line Parameters
-			int		nCmdShow)				// Window Show State
+int main(int argc, char* argv[])
 {
-	// PREMI�E CHOSE �FAIRE, on load les config
+	// PREMIERE CHOSE A FAIRE, on load les config
 	dksvarInit(&stringInterface);
 	dksvarLoadConfig("main/bv2.cfg");
 	bv2ApplyNetlogFromEnv();
 	dksvarSaveConfig("main/bv2.cfg"); // On cre8 le config file aussi
 
-	// On load tout suite le language utilis�par le joueur
+	// On load tout suite le language utilise par le joueur
 	if (!gameVar.isLanguageLoaded())
 	{
-		MessageBox(NULL, "Can not load language file\nTry deleting the config file.", "Error", 0);
+		dkwShowMessage("Error", "Can not load language file\nTry deleting the config file.");
 		return 0;
 	}
 
-
 	if (gameVar.r_bitdepth != 16 && gameVar.r_bitdepth != 32) gameVar.r_bitdepth = 32;
 
-	// On init nos DLL qui vont �re utilis�dans ce jeu
 	// On initialise quelque cossin important avant tout
-	dkcInit(30); // 30 frame par seconde (m�e que 15 serait le best)
-	   
+	dkcInit(30); // 30 frame par seconde
 
-	//--- Windowed mode requires special handling
-	if(!gameVar.r_fullScreen)
+	// The window is created at the requested pixel size on every platform (SDL3 has no title-bar offset to compensate)
+	if (!dkwInit(gameVar.r_resolution[0], gameVar.r_resolution[1], gameVar.r_bitdepth, gameVar.lang_gameName.s, &mainLoopInterface, gameVar.r_fullScreen, gameVar.r_refreshRate))
 	{
-		// If we create a window at the specified resolution, the client area
-		// will actually be smaller vertically, and players could potentially
-		// manipulate the title-bar height to increase the viewable area further
-
-		//--- So lets make a window
-		WNDCLASS wclass;
-		wclass.style = CS_OWNDC;
-		wclass.cbClsExtra = 0;
-		wclass.cbWndExtra = 0;
-		wclass.hInstance = GetModuleHandle(0);
-		wclass.hIcon = 0;
-		wclass.hCursor = 0;
-		wclass.lpszClassName = "bv2_res_test";
-		wclass.lpszMenuName = 0;
-		wclass.hbrBackground = 0;
-		wclass.lpfnWndProc = &DefWindowProc;
-		RegisterClass(&wclass);
-
-		//--- We'll create a standard window, but we won't show it
-		HWND hwnd = CreateWindow(wclass.lpszClassName, "", WS_CAPTION, 0, 0, gameVar.r_resolution[0], gameVar.r_resolution[1], 0, 0, GetModuleHandle(0), 0);
-
-		//--- Handle errors
-		if(!hwnd)
-		{
-			//--- Uh oohs
-			DWORD	error = GetLastError();
-			LPVOID	buffer;
-	
-			//--- Get the message
-			FormatMessage(	FORMAT_MESSAGE_ALLOCATE_BUFFER |
-							FORMAT_MESSAGE_FROM_SYSTEM,
-							NULL, error, 0, (LPTSTR) &buffer, 0, NULL);
-
-			//--- Put that message in a box
-			MessageBox(hwnd, (LPSTR)buffer, "Error", 0);
-
-			//--- Release mem and exit
-			LocalFree(buffer);
-			return 0;
-		}
-
-		//--- We just want the client area resolution
-		RECT clientRect;
-		GetClientRect(hwnd, &clientRect);
-
-		//--- Great, now some cleanup
-		DestroyWindow(hwnd);
-		UnregisterClass(wclass.lpszClassName, GetModuleHandle(0));
-
-		//--- Now calculate the window size necessary to match the requested resolution
-		CVector2i adjustedRes;
-		adjustedRes[0] = gameVar.r_resolution[0] + (gameVar.r_resolution[0] - clientRect.right);
-		adjustedRes[1] = gameVar.r_resolution[1] + (gameVar.r_resolution[1] - clientRect.bottom);
-
-		//--- Okay, now we're good to go
-		if (!dkwInit(adjustedRes[0], adjustedRes[1], gameVar.r_bitdepth, gameVar.lang_gameName.s, &mainLoopInterface, gameVar.r_fullScreen, gameVar.r_refreshRate)) 
-		{
-			char * error = dkwGetLastError();
-			MessageBox(NULL, error, "Error", 0);
-			return 0;
-		}
-	}
-	else if (!dkwInit(gameVar.r_resolution[0], gameVar.r_resolution[1], gameVar.r_bitdepth, gameVar.lang_gameName.s, &mainLoopInterface, gameVar.r_fullScreen, gameVar.r_refreshRate)) 
-	{
-		char * error = dkwGetLastError();
-		MessageBox(NULL, error, "Error", 0);
+		dkwShowMessage("Error", dkwGetLastError());
 		return 0;
 	}
 
 	// On init les input
-	if (!dkiInit(dkwGetInstance(), dkwGetHandle()))
+	if (!dkiInit())
 	{
 		dkwShutDown();
-		MessageBox(NULL, "Error creating Input", "Error", 0);
+		dkwShowMessage("Error", "Error creating Input");
 		return 0;
 	}
 
-	// Set single CPU usage
+#ifdef BV2_PLATFORM_WINDOWS
+	// Set single CPU usage while the GL driver starts (some old drivers misbehave on many cores)
 	if(gameVar.cl_affinityMode > 0)
 	{
 		::SetProcessAffinityMask(::GetCurrentProcess(), 0x1);
 	}
+#endif
 
-	// On cr�notre API openGL
-	if (!dkglCreateContext(
-		dkwGetDC(), gameVar.r_bitdepth
-		)) 
+	// On cree notre API openGL
+	if (!dkglCreateContext(gameVar.r_bitdepth))
 	{
 		dkiShutDown();
 		dkwShutDown();
-		MessageBox(NULL, "Error creating openGL context", "Error", 0);
+		dkwShowMessage("Error", "Error creating openGL context");
 		return 0;
 	}
 
+#ifdef BV2_PLATFORM_WINDOWS
 	// Restore system settings
 	if(gameVar.cl_affinityMode == 1)
 	{
-		DWORD procMask;
-		DWORD sysMask;
+		DWORD_PTR procMask;
+		DWORD_PTR sysMask;
 		::GetProcessAffinityMask(::GetCurrentProcess(), &procMask, &sysMask);
 		::SetProcessAffinityMask(::GetCurrentProcess(), sysMask);
 	}
+#endif
 
 	// On init les textures
 	dktInit();
@@ -807,7 +680,7 @@ int WINAPI WinMain(	HINSTANCE	hInstance,				// Instance
 		dkiShutDown();
 		dkglShutDown();
 		dkwShutDown();
-		MessageBox(NULL, "Error creating fmod", "Error", 0);
+		dkwShowMessage("Error", "Error creating the audio engine");
 		return 0;
 	}
 
@@ -820,9 +693,10 @@ int WINAPI WinMain(	HINSTANCE	hInstance,				// Instance
 		dkiShutDown();
 		dkglShutDown();
 		dkwShutDown();
-		MessageBox(NULL, "Error initiating baboNet", "Error", 0);
+		dkwShowMessage("Error", "Error initiating baboNet");
 		return 0;
 	}
+
 	bbNetVersion = bb_getVersion();
 	if (CString("%s", bbNetVersion) != "4.0")
 	{
@@ -835,11 +709,11 @@ int WINAPI WinMain(	HINSTANCE	hInstance,				// Instance
 		dkiShutDown();
 		dkglShutDown();
 		dkwShutDown();
-		MessageBox(NULL, "Wrong version of BaboNet\nReinstalling the game may resolve this prolem", "Error", 0);
+		dkwShowMessage("Error", "Wrong version of BaboNet\nReinstalling the game may resolve this prolem");
 		return 0;
 	}
 
-	// On cr�le lobby
+	// On cree le lobby
 	lobby = new CLobby();
 
 	// On init la console
@@ -849,43 +723,26 @@ int WINAPI WinMain(	HINSTANCE	hInstance,				// Instance
 	// Create the status manager
 	status = new CStatus();
 
-	//--- On cr�le master
+	//--- On cree le master
 	master = new CMaster();
 
-	// On cr�notre scene
+	// On cree notre scene
 	scene = new Scene();
 
-	ShowCursor(FALSE);
-
-
-
-	#ifndef CONSOLE
-		//check if we need to update to launcher
-		UpdateLauncher();
-	#endif
-
-	// check command line options
-	CString str = lpCmdLine;
+	// check command line options: everything after the program name is one console command
+	CString str;
+	for (int i = 1; i < argc; ++i)
+	{
+		if (i > 1) str += " ";
+		str += argv[i];
+	}
 	if( str.len() > 1 )
 	{
 		console->sendCommand( str );
 	}
 
-
 	// La loop principal
-/*	try
-	{*/
-		while (dkwMainLoop());
-/*	}
-	catch(...)
-	{
-		dkwShutDown(); // On close la fenetre au moins!
-		MessageBox(NULL, "Babo Violent 2 has encountered an error and needs to close, sorry for the inconvenience", "Error", 0);
-		return 0;
-	}*/
-
-
-	ShowCursor(TRUE);
+	dkwMainLoop();
 
 	// On efface la scene
 	delete scene;
@@ -918,7 +775,7 @@ int WINAPI WinMain(	HINSTANCE	hInstance,				// Instance
 	// Do last update after window is closed
 	delete status;
 
-	// Tout c'est bien pass� on retourne 0
+	// Tout c'est bien passe on retourne 0
 	return 0;
 }
 

@@ -105,28 +105,7 @@ DLL_API(void)			dkoRender(unsigned int modelID, float frameID); // Avec interpol
 DLL_API(void)			dkoShutDown();
 DLL_API(bool)			dkoSphereIntersection(unsigned int modelID, float *p1, float *p2, float rayon, float *intersect, float *normal, int &n);
 
-#ifdef BV2_PLATFORM_WINDOWS
-#ifndef CONSOLE
-
-#include <windows.h>
-#include <gl/gl.h>
-#include <gl/glu.h>
-//#include <gl/glext.h>
-#include "glext.h" // [dsl] I included it in the folder
-#endif
-
-#else
-#include "platform.h"
-
-#ifdef BV2_PLATFORM_MACOS
-#include <OpenGL/gl.h>
-#include <OpenGL/glu.h>
-#else
-#include <GL/gl.h>
-#include <GL/glu.h>
-#include <GL/glext.h>
-#endif
-#endif
+#include "glheaders.h"
 
 
 // Directives de pr�ompilation

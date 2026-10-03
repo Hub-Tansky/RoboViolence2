@@ -116,7 +116,7 @@ public:
 	CString soundFile;
 
 	// Le son
-	FSOUND_SAMPLE * sfx_sound;
+	DksSound * sfx_sound;
 #endif
 
 	// Si il est juste une instance, on ne delete pas ses ressource

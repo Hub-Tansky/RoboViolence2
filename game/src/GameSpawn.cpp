@@ -528,7 +528,7 @@ bool Game::spawnProjectile(net_clsv_svcl_player_projectile & playerProjectile, b
 //
 // On se cré une explosion dla mort mouhou :P
 //
-void Game::spawnExplosion(CVector3f & position, CVector3f & normal, float size)
+void Game::spawnExplosion(const CVector3f & position, const CVector3f & normal, float size)
 {
 	if (size >= 4.0f)
 	{
@@ -543,19 +543,8 @@ void Game::spawnExplosion(CVector3f & position, CVector3f & normal, float size)
 
 	// Make it sounds and shake !!!
 //	dksPlay3DSound(gameVar.sfx_explosion[0], -1, 10, position,255);
-	int channel = FSOUND_PlaySoundEx(-1, gameVar.sfx_explosion[0], 0, TRUE);
-	FSOUND_3D_SetMinMaxDistance(channel, 10, 10000000.0f);
-	FSOUND_3D_SetAttributes(channel, position.s, 0);
-	if (trueSize >= 4.0f)
-	{
-		FSOUND_SetFrequency(channel, 5000);
-	}
-	else
-	{
-		FSOUND_SetFrequency(channel, 22050);
-	}
-	FSOUND_SetVolume(channel, 255);
-	FSOUND_SetPaused(channel, FALSE);
+	// Big explosions play slower (the old code set 5000 Hz instead of the sample's 22050 Hz)
+	dksPlay3DSoundPitch(gameVar.sfx_explosion[0], 10, position, 255, (trueSize >= 4.0f) ? 5000.0f / 22050.0f : 1.0f);
 
 	float duration = size*.5f;
 

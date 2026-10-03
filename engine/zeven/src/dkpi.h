@@ -44,23 +44,7 @@
 
 #include <vector>
 
-#ifdef BV2_PLATFORM_WINDOWS
-// Les includes pour opengl
-#include <gl/gl.h> 
-#include <gl/glu.h> 
-//#include <gl/glext.h> 
-#else
-#include "platform.h"
-#include "platform.h"
-#ifdef BV2_PLATFORM_MACOS
-#include <OpenGL/gl.h>
-#include <OpenGL/glu.h>
-#else
-#include <GL/gl.h>
-#include <GL/glu.h>
-#endif
-//#include <GL/glext.h>
-#endif
+#include "glheaders.h"
 
 #include "CParticle.h"
 
@@ -156,9 +140,9 @@ DLL_API void			dkpCreateParticle(	float *position,
 											unsigned int srcBlend,
 											unsigned int dstBlend,
 											int transitionFunc);
-DLL_API void			dkpCreateParticleEx(CVector3f & positionFrom,
-											CVector3f & positionTo,
-											CVector3f & direction,
+DLL_API void			dkpCreateParticleEx(const CVector3f & positionFrom,
+											const CVector3f & positionTo,
+											const CVector3f & direction,
 											float speedFrom,
 											float speedTo,
 											float pitchFrom,
@@ -169,10 +153,10 @@ DLL_API void			dkpCreateParticleEx(CVector3f & positionFrom,
 											float endSizeTo,
 											float durationFrom,
 											float durationTo,
-											CColor4f & startColorFrom,
-											CColor4f & startColorTo,
-											CColor4f & endColorFrom,
-											CColor4f & endColorTo,
+											const CColor4f & startColorFrom,
+											const CColor4f & startColorTo,
+											const CColor4f & endColorFrom,
+											const CColor4f & endColorTo,
 											float angleFrom,
 											float angleTo,
 											float angleSpeedFrom,

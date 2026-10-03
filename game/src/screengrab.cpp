@@ -23,66 +23,46 @@
 #include "Game.h"
 #include "Player.h"
 #include "Scene.h"
-#include <GL\gl.h>
+#include "glheaders.h"
 #include <time.h>
 #include <stdio.h>
 
 
 extern Scene* scene;
 
-void SaveBitmapToFile( BYTE* pBitmapBits, LONG lWidth, LONG lHeight,WORD wBitsPerPixel, LPCTSTR lpszFileName )
+// Writes a bottom-up 32 bpp BMP (BITMAPFILEHEADER + BITMAPINFOHEADER, little endian) with plain stdio.
+static void put16(FILE * f, unsigned int v) { fputc(v & 255, f); fputc((v >> 8) & 255, f); }
+static void put32(FILE * f, unsigned int v) { put16(f, v & 0xFFFF); put16(f, v >> 16); }
+
+void SaveBitmapToFile( const unsigned char* pBitmapBits, int lWidth, int lHeight, int wBitsPerPixel, const char* lpszFileName )
 {
-    BITMAPINFOHEADER bmpInfoHeader = {0};
-    // Set the size
-    bmpInfoHeader.biSize = sizeof(BITMAPINFOHEADER);
-    // Bit count
-    bmpInfoHeader.biBitCount = wBitsPerPixel;
-    // Use all colors
-    bmpInfoHeader.biClrImportant = 0;
-    // Use as many colors according to bits per pixel
-    bmpInfoHeader.biClrUsed = 0;
-    // Store as un Compressed
-    bmpInfoHeader.biCompression = BI_RGB;
-    // Set the height in pixels
-    bmpInfoHeader.biHeight = lHeight;
-    // Width of the Image in pixels
-    bmpInfoHeader.biWidth = lWidth;
-    // Default number of planes
-    bmpInfoHeader.biPlanes = 1;
-    // Calculate the image size in bytes
-    bmpInfoHeader.biSizeImage = lWidth* lHeight * (wBitsPerPixel/8);
+	const unsigned int headers = 14 + 40;
+	const unsigned int imageSize = (unsigned int)(lWidth * lHeight * (wBitsPerPixel / 8));
 
-    BITMAPFILEHEADER bfh = {0};
-    // This value should be values of BM letters i.e 0×4D42
-    // 0×4D = M 0×42 = B storing in reverse order to match with endian
-    bfh.bfType=0x4D42;
-    /* or
-    bfh.bfType = ‘B’+(’M’ << 8);
-    // <<8 used to shift ‘M’ to end
-    */
-    // Offset to the RGBQUAD
-    bfh.bfOffBits = sizeof(BITMAPINFOHEADER) + sizeof(BITMAPFILEHEADER);
-    // Total size of image including size of headers
-    bfh.bfSize = bfh.bfOffBits + bmpInfoHeader.biSizeImage;
-    // Create the file in disk to write
-    HANDLE hFile = CreateFile( lpszFileName,GENERIC_WRITE, 0,NULL,
+	FILE * f = fopen(lpszFileName, "wb");
+	if (!f)
+		return;
 
-                               CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL,NULL);
+	// BITMAPFILEHEADER
+	put16(f, 0x4D42); // "BM"
+	put32(f, headers + imageSize);
+	put32(f, 0);
+	put32(f, headers); // offset to the pixels
+	// BITMAPINFOHEADER
+	put32(f, 40);
+	put32(f, (unsigned int)lWidth);
+	put32(f, (unsigned int)lHeight);
+	put16(f, 1); // planes
+	put16(f, (unsigned int)wBitsPerPixel);
+	put32(f, 0); // BI_RGB
+	put32(f, imageSize);
+	put32(f, 0);
+	put32(f, 0);
+	put32(f, 0);
+	put32(f, 0);
 
-    if( !hFile ) // return if error opening file
-    {
-        return;
-    }
-
-    DWORD dwWritten = 0;
-    // Write the File header
-    WriteFile( hFile, &bfh, sizeof(bfh), &dwWritten , NULL );
-    // Write the bitmap info header
-    WriteFile( hFile, &bmpInfoHeader, sizeof(bmpInfoHeader), &dwWritten, NULL );
-    // Write the RGB Data
-    WriteFile( hFile, pBitmapBits, bmpInfoHeader.biSizeImage, &dwWritten, NULL );
-    // Close the file handle
-    CloseHandle( hFile );
+	fwrite(pBitmapBits, 1, imageSize, f);
+	fclose(f);
 }
 
 bool SaveScreenGrabAuto() 
@@ -90,7 +70,7 @@ bool SaveScreenGrabAuto()
    char path[512];
    time_t time;
    ::time(&time);
-   sprintf(path, "SS_%d.bmp", time);
+   sprintf(path, "SS_%lld.bmp", (long long)time);
    return SaveScreenGrab(path);
 }
 
@@ -99,9 +79,9 @@ bool SaveStatsAuto()
    char path[512];
    time_t time;
    ::time(&time);
-   sprintf(path, "SS_%d.bmp", time);
+   sprintf(path, "SS_%lld.bmp", (long long)time);
    SaveScreenGrab(path);
-   sprintf(path, "SS_%d.txt", time);
+   sprintf(path, "SS_%lld.txt", (long long)time);
 
   FILE * pFile;
   pFile = fopen (path,"w");

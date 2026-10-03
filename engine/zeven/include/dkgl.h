@@ -36,29 +36,7 @@
 #ifndef DKGL_H
 #define DKGL_H
 
-#ifdef BV2_PLATFORM_WINDOWS
-	#pragma comment( lib, "opengl32.lib" )
-	#pragma comment( lib, "glu32.lib" )
-
-
-	#include <windows.h>
-
-	// Les includes pour opengl
-	#include <gl/gl.h> 
-	#include <gl/glu.h> 
-	#include "glext.h"
-#else
-#include "platform.h"
-#include "platform.h"
-#ifdef BV2_PLATFORM_MACOS
-#include <OpenGL/gl.h>
-#include <OpenGL/glu.h>
-#else
-#include <GL/gl.h>
-#include <GL/glu.h>
-#include <GL/glext.h>
-#endif 
-#endif
+#include "glheaders.h"
 
 #include "CVector.h"
 
@@ -98,9 +76,12 @@ bool			dkglCheckExtension(char * extension);
 /// \param mDC Device Context de la fenêtre Windows
 /// \param colorDepth nombre de bit utiliser pour chaque composant de couleur d'un pixel (16 ou 32.....donc 32)
 /// \return true si la création du contexte a réussi, false sinon
-int				 dkglCreateContext(
-								   HDC mDC, int colorDepth
-	);
+/// Creates the OpenGL 2.1 compatibility context for the dkw window, makes it current and loads the entry points.
+/// Returns 1 on success.
+int				 dkglCreateContext(int colorDepth);
+
+/// Presents the back buffer.
+void			 dkglSwapBuffers();
 
 
 
@@ -200,7 +181,7 @@ void			dkglShutDown();
 /// \return le nouveau vecteur représentant correspondant à la position de la souris en 3D à une certaine profondeur.
 CVector3f		dkglUnProject(CVector2i & pos2D, float zRange);
 
-CVector3f		dkglProject(CVector3f & pos3D);
+CVector3f		dkglProject(const CVector3f & pos3D);
 
 
 #endif

@@ -21,21 +21,7 @@
 
 
 #include "platform.h"
-#ifdef BV2_PLATFORM_WINDOWS
-#ifndef CONSOLE
-	#include <windows.h>
-	#include <gl/gl.h>
-	#include <gl/glu.h>
-#endif
-#else
-#ifdef BV2_PLATFORM_MACOS
-	#include <OpenGL/gl.h>
-	#include <OpenGL/glu.h>
-#else
-	#include <GL/gl.h>
-	#include <GL/glu.h>
-#endif
-#endif
+#include "glheaders.h"
 
 #ifndef BV2_PLATFORM_WINDOWS
 	#include "platform.h"
