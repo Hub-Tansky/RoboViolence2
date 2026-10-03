@@ -234,12 +234,9 @@ int cPeer::SendPackets(int fd,float elapsed,fd_set master, UINT4 & nbBytes)
 			toKill = 0;
 		}
 
-		int Acks=0;
-
 		//on attach ici les ack des packets recu
 		if(nbAcks)
 		{
-			Acks = nbAcks;
 			//DebugAcks();
 
 			//on va se fair eun ti packet a ajouter au buffer

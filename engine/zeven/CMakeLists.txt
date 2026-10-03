@@ -26,6 +26,7 @@ add_library(zeven_core STATIC
 target_include_directories(zeven_core PUBLIC include PRIVATE src)
 target_link_libraries(zeven_core PUBLIC Threads::Threads glad)
 bv2_target_defaults(zeven_core)
+bv2_target_strict(zeven_core)
 
 # Headless server: there is no GL context, so dkt gets no-op stand-ins.
 add_library(zeven_console STATIC src/dkt_console.cpp)

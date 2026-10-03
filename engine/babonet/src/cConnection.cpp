@@ -223,7 +223,7 @@ int cConnection::StartConnection()
 	return 0;
 }
 
-int cConnection::UpdateConnecting(float elapsed)
+int cConnection::UpdateConnecting(float /*elapsed*/)
 {
 	// set the timeout for select()
 	timeval	timeout;

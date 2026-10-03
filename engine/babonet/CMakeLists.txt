@@ -20,3 +20,7 @@ if(WIN32)
   target_link_libraries(babonet PUBLIC ws2_32 iphlpapi)
 endif()
 bv2_target_defaults(babonet)
+bv2_target_strict(babonet)
+
+# md5c.c is the RSA reference code with K&R definitions; leave it as is.
+set_source_files_properties(src/md5c.c PROPERTIES COMPILE_OPTIONS "-Wno-deprecated-non-prototype;-Wno-unknown-warning-option")

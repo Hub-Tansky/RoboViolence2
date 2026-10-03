@@ -13,3 +13,4 @@ add_library(dko STATIC
 target_include_directories(dko PUBLIC include PRIVATE src)
 target_link_libraries(dko PUBLIC zeven_core bv2_glu)
 bv2_target_defaults(dko)
+bv2_target_strict(dko)

@@ -43,14 +43,19 @@ set(BV2_PLATFORM_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/engine/zeven/include/platfo
 # Flags shared by every target: platform.h force-included, Windows 10/11 API level, sanitizers.
 function(bv2_target_defaults target)
   if(MSVC)
-    target_compile_options(${target} PRIVATE "/FI${BV2_PLATFORM_HEADER}" /utf-8 /W3)
+    target_compile_options(${target} PRIVATE "/FI${BV2_PLATFORM_HEADER}" /utf-8 /W4
+      # Legacy code classes not worth fixing: narrowing, shadowing, unreferenced parameters, deprecated CRT.
+      /wd4100 /wd4244 /wd4267 /wd4456 /wd4457 /wd4458 /wd4459 /wd4996 /wd4201 /wd4505)
     target_compile_definitions(${target} PRIVATE
       _CRT_SECURE_NO_WARNINGS _CRT_NONSTDC_NO_DEPRECATE NOMINMAX)
     if(BV2_SANITIZE)
       target_compile_options(${target} PRIVATE /fsanitize=address)
     endif()
   else()
-    target_compile_options(${target} PRIVATE -include "${BV2_PLATFORM_HEADER}" -Wall)
+    target_compile_options(${target} PRIVATE -include "${BV2_PLATFORM_HEADER}" -Wall -Wextra
+      # Legacy API: string literals passed as char*, sprintf. Not worth rewriting (step 5.3).
+      -Wno-deprecated-declarations -Wno-write-strings -Wno-writable-strings
+      -Wno-unknown-warning-option)
     if(BV2_SANITIZE)
       target_compile_options(${target} PRIVATE -fsanitize=address,undefined -fno-omit-frame-pointer)
       target_link_options(${target} PRIVATE -fsanitize=address,undefined)
@@ -61,6 +66,15 @@ function(bv2_target_defaults target)
   endif()
   if(WIN32)
     target_compile_definitions(${target} PRIVATE _WIN32_WINNT=0x0A00 WINVER=0x0A00)
+  endif()
+endfunction()
+
+# Warnings are errors on targets that are clean. Add a target here once it builds without warnings.
+function(bv2_target_strict target)
+  if(MSVC)
+    target_compile_options(${target} PRIVATE /WX)
+  else()
+    target_compile_options(${target} PRIVATE -Werror)
   endif()
 endfunction()
 

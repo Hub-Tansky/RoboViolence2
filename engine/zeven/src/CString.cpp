@@ -407,6 +407,7 @@ bool CString::find(CString string)
 ////////////////////////////////////////////////////////////////////////////////////////////
 bool CString::find(CString string, char* strFound)
 {
+	(void)strFound; // by value: the caller never sees the assignment below (legacy API)
 
 	int len_1 = len();
 	int len_2 = string.len();
@@ -474,6 +475,7 @@ bool CString::find(CString string, int & index)
 ////////////////////////////////////////////////////////////////////////////////////////////
 bool CString::find(CString string, char* strFound, int & index)
 {
+	(void)strFound; // by value: the caller never sees the assignment below (legacy API)
 
 	int len_1 = len();
 	int len_2 = string.len();

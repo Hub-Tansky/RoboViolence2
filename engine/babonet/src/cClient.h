@@ -79,7 +79,7 @@ private:
 	char			Key[5];				// holds the key
 	cPacket			*PacketToKill;		// garde le packet a enlever du queue des ReceivedPackets
 
-	bool			isServer;			// garde si oui ou non on est en mode serveur
+	[[maybe_unused]] bool	isServer;			// garde si oui ou non on est en mode serveur
 
 
 	bool			GetPendingID(char *pid);				// returns true if hash are different

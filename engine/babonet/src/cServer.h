@@ -42,7 +42,7 @@ private:
 	fd_set			write_fds;			// temp file descriptor list for select()
 
 	int			fdmax;				// garde lindex le plus haut des fd
-	int			newfd;				// garde lindex du dernier file descriptor connecter
+	[[maybe_unused]] int	newfd;				// garde lindex du dernier file descriptor connecter
 	timeval			Timeout;			// garde le nombre de temps a attendre apres les fd_Set
 
 

@@ -592,7 +592,7 @@ void cPeer2Peer::ReceiveDatagram(cUDPpacket *packet,sockaddr_in fromIP)
 				
 				//pogne le IP
 				char ip[16];
-				sprintf(ip,inet_ntoa(fromIP.sin_addr));
+				sprintf(ip,"%s",inet_ntoa(fromIP.sin_addr));
 				
 				//pogne le port
 				unsigned short port = ntohs(fromIP.sin_port);

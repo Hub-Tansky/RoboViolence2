@@ -58,6 +58,8 @@ class CStringInterface;
 class CSVType
 {
 public:
+	virtual ~CSVType() {}
+
 	// Son nom à être affiché
 	CString variableName;
 
