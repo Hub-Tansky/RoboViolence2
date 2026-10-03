@@ -505,9 +505,12 @@ void			dkpShutDown()
 	// On efface la display list
 //	glDeleteLists(CDkp::dpSprite, 1);
 
-	if (	CDkp::vertexArray) delete [] 	CDkp::vertexArray; 	CDkp::vertexArray = 0;
-	if (	CDkp::normalArray) delete [] 	CDkp::normalArray; 	CDkp::normalArray = 0;
-	if (	CDkp::texCoordArray) delete [] 	CDkp::texCoordArray; 	CDkp::texCoordArray = 0;
+	if (CDkp::vertexArray) { delete [] CDkp::vertexArray; }
+	CDkp::vertexArray = 0;
+	if (CDkp::normalArray) { delete [] CDkp::normalArray; }
+	CDkp::normalArray = 0;
+	if (CDkp::texCoordArray) { delete [] CDkp::texCoordArray; }
+	CDkp::texCoordArray = 0;
 }
 
 

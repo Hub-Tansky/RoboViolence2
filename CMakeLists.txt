@@ -88,7 +88,8 @@ function(bv2_target_legacy_strict target)
   else()
     target_compile_options(${target} PRIVATE -Wno-unused-parameter -Wno-unused-variable -Wno-unused-but-set-variable
       -Wno-unused-private-field -Wno-unused-local-typedef -Wno-sign-compare -Wno-reorder -Wno-reorder-ctor
-      -Wno-comment -Wno-dangling-else -Wno-unknown-warning-option)
+      -Wno-comment -Wno-dangling-else -Wno-type-limits -Wno-implicit-fallthrough
+      -Wno-misleading-indentation -Wno-unused-local-typedefs -Wno-format-overflow -Wno-class-memaccess -Wno-unknown-warning-option)
   endif()
   bv2_target_strict(${target})
 endfunction()

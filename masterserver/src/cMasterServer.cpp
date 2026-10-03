@@ -223,7 +223,7 @@ void cMasterServer::AddBan( char * NickName , char * IP , char * MAC , int Durat
 	if( nRow )
 	{
 		// just update current row
-		sprintf(SQL,"Update BanList Set Date = %li , Nick = '%s',IP = '%s',MAC = '%s',Duration = %i Where ID = %i;", theTime , NickName , IP, MAC, Duration , atoi(azResult[BV2_BAN_ID]) );
+		sprintf(SQL,"Update BanList Set Date = %li , Nick = '%s',IP = '%s',MAC = '%s',Duration = %i Where ID = %i;", (long)theTime , NickName , IP, MAC, Duration , atoi(azResult[BV2_BAN_ID]) );
 		sqlite3_exec(MasterDB,SQL,0,0,0);
 
 		printf("Updated ban with ID %i\n",atoi(azResult[BV2_BAN_ID]));
@@ -232,7 +232,7 @@ void cMasterServer::AddBan( char * NickName , char * IP , char * MAC , int Durat
 	else
 	{
 		// add new ban
-		sprintf(SQL,"Insert into BanList ( Date , Duration , IP , MAC , Nick ) values( %li , %i , '%s', '%s','%s');", theTime , Duration , IP, MAC, NickName );
+		sprintf(SQL,"Insert into BanList ( Date , Duration , IP , MAC , Nick ) values( %li , %i , '%s', '%s','%s');", (long)theTime , Duration , IP, MAC, NickName );
 		sqlite3_exec(MasterDB,SQL,0,0,0);
 
 		printf("Added ban : IP=%s  MAC=%s  NickName=%s\n",IP,MAC,NickName);
@@ -824,7 +824,7 @@ UINT4	cMasterServer::GetGameBaboIDByIPport(char *ip,unsigned short port)
 			}
 		}
 	}
-	return -1;
+	return (UINT4)-1;
 }
 
 void cMasterServer::RemoveClient(long babonetID)
