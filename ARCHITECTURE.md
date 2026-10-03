@@ -49,7 +49,6 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `.gitleaks.toml` | gitleaks rules: default plus config secrets, public IPs, master-server rows, hosts |
 | `AGENTS.md` | Canonical agent and contributor instructions |
 | `ARCHITECTURE.md` | This file: summary and file inventory |
-| `CLAUDE.md` | Imports AGENTS.md for Claude Code |
 | `CMakeLists.txt` | Root CMake project: options, runtime layout, placeholder content, subdirectories |
 | `CMakePresets.json` | Presets: linux-x64, macos-arm64, win-x64-msvc, -asan variants (Ninja) |
 | `LICENSE.txt` | GPLv3 text (code only) |

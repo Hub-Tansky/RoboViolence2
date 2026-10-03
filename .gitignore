@@ -126,3 +126,7 @@ MasterServer/Source/src/linuxmaster
 /docs/legal/
 /docs/assets/
 /docs/ASSETS-LICENSE.md
+
+# Local agent entry point (imports AGENTS.md); not committed
+/CLAUDE.md
+/.CLAUDE.md
