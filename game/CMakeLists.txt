@@ -158,6 +158,10 @@ if(BV2_BUILD_CLIENT)
   endif()
   if(WIN32)
     set_target_properties(bv2 PROPERTIES WIN32_EXECUTABLE ON)
+    # GUI subsystem (no console window) but the portable main() stays the entry point.
+    if(MSVC)
+      target_link_options(bv2 PRIVATE /ENTRY:mainCRTStartup)
+    endif()
   elseif(APPLE)
     set_target_properties(bv2 PROPERTIES MACOSX_BUNDLE ON
       MACOSX_BUNDLE_INFO_PLIST "${CMAKE_SOURCE_DIR}/packaging/macos/Info.plist.in")

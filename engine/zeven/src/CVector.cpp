@@ -21,6 +21,8 @@
 #include "CVector.h"
 #include <math.h>
 #include <stdlib.h>
+#include <string.h>
+#include <stdint.h>
 
 
 
@@ -199,15 +201,15 @@ CVector4f::CVector4f(const CVector4f& vector)
 // ---------------------------------------------------------
 float dk_sqrtf(float number)
 {
-	long i;
+	int32_t i; // 32 bits: `long` is 64 bits on LP64 and read past the float
 	float x2, y;
 	const float threehalfs = 1.5F;
 
 	x2 = number * 0.5F;
 	y  = number;
-	i  = * ( long * ) &y;						// get bits for floating value
+	memcpy(&i, &y, sizeof(i));						// get bits for floating value
 	i  = 0x5f3759df - ( i >> 1 );               // gives initial guess y0. 0x5f3759df => gives the smalless error approximation of the final value.
-	y  = * ( float * ) &i;						// converts bits back to float
+	memcpy(&y, &i, sizeof(y));						// converts bits back to float
 	y  = y * ( threehalfs - ( x2 * y * y ) );   // 1st iteration
 //	y  = y * ( threehalfs - ( x2 * y * y ) );   // 2nd iteration, this can be removed. Put back if more precision is needed.
 

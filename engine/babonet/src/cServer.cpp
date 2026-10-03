@@ -48,8 +48,8 @@ cServer::cServer()
 cServer::cServer(bool udpenabled,int maxclients,unsigned short port)
 {
 
-	sprintf(LastMessage,"");
-	sprintf(LastError,"");
+	sprintf(LastMessage,"%s","");
+	sprintf(LastError,"%s","");
 
 	Clients		=	0;
 	maxClients	=	maxclients;

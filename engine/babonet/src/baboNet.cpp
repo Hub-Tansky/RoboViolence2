@@ -42,6 +42,9 @@
 	#include "platform.h"
 #endif
 
+#ifndef BV2_PLATFORM_WINDOWS
+	#include <signal.h>
+#endif
 #include "baboNet.h"		//les fonctions visible au user
 #include "cServer.h"
 #include "cClient.h"		//nos objets clients
@@ -262,8 +265,8 @@ UINT4 bb_serverGetBytesReceived()
 
 INT4 bb_serverUpdate(float elapsed,int updateMsg,char* newIP)
 {
-	sprintf(Server->LastMessage,"");
-	sprintf(Server->LastError,"");
+	sprintf(Server->LastMessage,"%s","");
+	sprintf(Server->LastError,"%s","");
 
 
 
@@ -419,8 +422,8 @@ int bb_clientUpdate(UINT4 clientID,float elapsed,int updateMsg)
 		return 1;
 	}
 
-	sprintf(c->LastMessage,"");
-	sprintf(c->LastError,"");
+	sprintf(c->LastMessage,"%s","");
+	sprintf(c->LastError,"%s","");
 
 
 
@@ -686,7 +689,6 @@ char *bb_getMyIP()
     return ip;
     
 #else
-		unsigned char      *u;
 		int                sockfd, size  = 1;
 		struct ifreq       *ifr;
 		struct ifconf      ifc;
@@ -725,10 +727,7 @@ char *bb_getMyIP()
 		for (;(char *) ifr < (char *) ifc.ifc_req + ifc.ifc_len; ++ifr)
 		{
 		
-			if (ifr->ifr_addr.sa_data == (ifr+1)->ifr_addr.sa_data)
-			{
-				continue;  /* duplicate, skip it */
-			}
+			// (The original compared two array addresses here, which is never true; the duplicate check is dropped.)
 		
 			if (ioctl(sockfd, SIOCGIFFLAGS, ifr))
 			{
@@ -755,6 +754,7 @@ char *bb_getMyIP()
 
 void bb_getMyMAC(unsigned char * AddrOut)
 {
+	(void)AddrOut;
 #ifdef BV2_PLATFORM_WINDOWS
 
 			IP_ADAPTER_INFO AdapterInfo[16];       // Allocate information

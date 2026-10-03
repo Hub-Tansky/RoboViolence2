@@ -39,8 +39,8 @@ cIncConnection::cIncConnection(UINT4 id,unsigned char *netBitField,bool udpenabl
 
 	LastError		=	lastError;
 
-	sprintf(LastMessage,"");
-	sprintf(LastError,"");
+	sprintf(LastMessage,"%s","");
+	sprintf(LastError,"%s","");
 
 	isConnected		=	false;
 

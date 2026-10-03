@@ -33,10 +33,7 @@ documentation and/or software.
 #include "global.h"
 
 
-typedef struct 
-#ifndef BV2_PLATFORM_WINDOWS
-__attribute__((packed)) 
-#endif
+typedef struct
 {
 	UINT4 state[4];                                   /* state (ABCD) */
 	UINT4 count[2];        /* number of bits, modulo 2^64 (lsb first) */

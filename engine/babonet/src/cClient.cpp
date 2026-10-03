@@ -30,8 +30,8 @@ cClient::cClient()
 	Connection			=	0;
 	UDPenabled			=	false;
 
-	sprintf(LastMessage,"");
-	sprintf(LastError,"");
+	sprintf(LastMessage,"%s","");
+	sprintf(LastError,"%s","");
 
 	isConnected			=	false;
 	
@@ -90,8 +90,8 @@ cClient::cClient(sockaddr_in *ip, int fileDescriptor,UINT4 netID)
 	isConnected			=	false;
 	Connection			=	0;
 
-	sprintf(LastMessage,"");
-	sprintf(LastError,"");
+	sprintf(LastMessage,"%s","");
+	sprintf(LastError,"%s","");
 
 	NetID				=	netID;
 
@@ -140,8 +140,8 @@ cClient::cClient(const char *HostIP, unsigned short port,UINT4 netID)
 	BytesSent			=	0;
 	BytesReceived		=	0;
 
-	sprintf(LastMessage,"");
-	sprintf(LastError,"");
+	sprintf(LastMessage,"%s","");
+	sprintf(LastError,"%s","");
 
 	isConnected			=	false;
 	Connection			=	0;

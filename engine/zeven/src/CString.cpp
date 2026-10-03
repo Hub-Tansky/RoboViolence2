@@ -84,7 +84,7 @@ void CString::resize(int newSize)
 	if (newSize >= len()) return;
 	if (newSize > 0)
 	{
-		char tmp[10];
+		char tmp[16];
 		sprintf(tmp, "%%.%is", newSize);
 		CString newStr(tmp, s);
 		set("%s", newStr.s);
@@ -211,7 +211,7 @@ CString CString::getPath()
 	{
 		if (s[i] == '\\' || s[i] == '/')
 		{
-			char tmp[10];
+			char tmp[16];
 			sprintf(tmp, "%%.%is", i+1);
 			return CString(tmp, s);
 		}
@@ -233,7 +233,7 @@ CString CString::getFilename()
 	{
 		if (s[i] == '\\' || s[i] == '/')
 		{
-			char tmp[10];
+			char tmp[16];
 			sprintf(tmp, "%%.%is", len()-(i+1));
 			return CString(tmp, &(s[i+1]));
 		}
@@ -275,7 +275,7 @@ void CString::trim(char caracter)
 		}
 	}
 
-	char tmp[10];
+	char tmp[16];
 	sprintf(tmp, "%%.%is", i+1);
 	CString newString2(tmp, newString.s);
 
@@ -341,7 +341,7 @@ CString CString::getFirstToken(int caracterSeparator)
 	int len_ = len();
 	for (int i=0;i<=len_;i++){
 		if (s[i] == caracterSeparator || s[i] == '\0'){
-			char tmp[10];
+			char tmp[16];
 			sprintf(tmp, "%%.%is", i);
 			result = CString(tmp, s);
 			resizeInverse(len_-i);
@@ -586,7 +586,7 @@ bool CString::find(char* string_, char* strFound, int & index)
 ////////////////////////////////////////////////////////////////////////////////////////////
 void CString::insert(CString string, int index){
 
-	char tmp[10];
+	char tmp[16];
 	sprintf(tmp, "%%.%is%%s%%s", index);
 	CString newString(tmp, s, string.s, &(s[index]));
 	set("%s", newString.s);
@@ -615,7 +615,7 @@ void CString::insert(char *string, int index){
 ////////////////////////////////////////////////////////////////////////////////////////////
 void CString::remove(int index){
 
-	char tmp[10];
+	char tmp[16];
 	sprintf(tmp, "%%.%is%%s", index);
 	CString newString(tmp, s, &(s[index+1]));
 	set("%s", newString.s);

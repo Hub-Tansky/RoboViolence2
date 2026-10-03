@@ -38,8 +38,8 @@ cPeer2Peer::cPeer2Peer()
 	FD_ZERO(&fdread);
 	FD_ZERO(&fdwrite);
 
-	sprintf(LastMessage,"");
-	sprintf(LastError,"");
+	sprintf(LastMessage,"%s","");
+	sprintf(LastError,"%s","");
 
 	//FD_SET(UDPfd,&master);
 	//FD_SET(BCfd,&master);
