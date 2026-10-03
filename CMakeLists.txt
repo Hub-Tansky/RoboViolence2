@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.25)
 # Options come first: they select the vcpkg manifest features, which are read when project() runs the toolchain.
 option(BV2_BUILD_CLIENT "Build the bv2 client" ON)
 option(BV2_BUILD_SERVER "Build the bv2dedicated server" ON)
+option(BV2_BUILD_TESTS "Build the tests (ctest)" ON)
 option(BV2_BUILD_MASTER "Build the bv2master master server" ON)
 # ADR 0002: OFF builds game/src/CCurlStub.cpp (every request ends at once with no data); ON links libcurl.
 option(BV2_WITH_HTTP "Link libcurl for account and report requests" OFF)
@@ -127,6 +128,10 @@ if(BV2_BUILD_CLIENT OR BV2_BUILD_SERVER)
 endif()
 if(BV2_BUILD_MASTER)
   add_subdirectory(masterserver)
+endif()
+if(BV2_BUILD_TESTS)
+  enable_testing()
+  add_subdirectory(tests)
 endif()
 
 # Install layout (FHS; the game looks for <prefix>/share/bv2/main next to <prefix>/bin). On macOS the bundle
