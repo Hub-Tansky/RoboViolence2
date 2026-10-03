@@ -1,0 +1,42 @@
+#ifndef _BV2_GAME_
+#define _BV2_GAME_
+
+#include "stdio.h"
+#include "cMSstruct.h"
+
+#ifndef BV2_PLATFORM_WINDOWS
+	#include "platform.h"
+#else
+	#include "memory.h"
+#endif
+
+#define GAME_TIMEOUT	60		//timeout apres 1 minute
+
+class cBV2game
+{
+public:
+
+	//int		ID;				//garde le id unique dla game
+	float		LastCheck;		//combien de temps qu'on a recu un update
+	//unsigned short	ServerID;		//garde le ID du server s'il est babostats enabled
+
+	//game infos
+	stBV2row	GameInfos;		//keep all game infos here
+
+	UINT4	BaboID;
+
+	cBV2game	*Next;
+	cBV2game	*Previous;
+
+	cBV2game();
+	cBV2game(char *ip,stBV2row & gameinfos, UINT4 baboID);
+
+
+	int	Update(float elapsed);
+
+
+};
+
+
+
+#endif

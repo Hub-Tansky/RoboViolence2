@@ -111,7 +111,7 @@ Declare include directories per target (`target_include_directories(... PUBLIC i
 - Step 4 teaches the code to find these locations.
 - **Data for running:** the original assets aren't in the repo (Step 0).
   - Local manual runs: point the runtime `main/` at your own original data (`BV2_DATA_DIR`, step 0 §0.5).
-  - CI and agents: `tools/gen-placeholder-content.py` (stdlib only) writes a minimal data set made for this project into the build dir: one small `.bvm` map per game mode (format: [../analysis/02_DATA_STRUCTURES.md](../analysis/02_DATA_STRUCTURES.md)), solid-colour TGAs and short silent WAVs under every file name listed as `required` in `docs/assets/ASSET-INVENTORY.md`. It's never committed as data; only the generator is.
+  - CI and agents: `tools/gen-placeholder-content.py` (stdlib only) writes a minimal data set made for this project into the build dir: one small `.bvm` map per game mode (format: [../analysis/02_DATA_STRUCTURES.md](../analysis/02_DATA_STRUCTURES.md)), solid-colour TGAs and short silent WAVs under every file name listed as `required` in the asset inventory (kept outside this repository). It's never committed as data; only the generator is.
 
 ### 2.7 Module READMEs
 

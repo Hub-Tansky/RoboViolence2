@@ -1,0 +1,209 @@
+# Files the game loads at startup, with the format the placeholder must have.
+# folder<TAB>name<TAB>format (read by gen-placeholder-content.py)
+main/models	Antena.DKO	DKO v2, 2 mesh, 2 material, textures: Shieldtga.tga
+main/models	Bazooka.DKO	DKO v2, 2 mesh, 1 material
+main/models	BlueFlag.DKO	DKO v2, 2 mesh, 2 material
+main/models	BlueFlagPod.DKO	DKO v2, 2 mesh, 2 material
+main/models	ChainGun.DKO	DKO v2, 1 mesh, 1 material
+main/models	CocktailMolotov.DKO	DKO v2, 1 mesh, 1 material
+main/models	Douille.DKO	DKO v2, 1 mesh, 1 material
+main/models	DualMachineGun.DKO	DKO v2, 1 mesh, 1 material
+main/models	FlameThrower.DKO	DKO v2, 3 mesh, 3 material
+main/models	Gib.DKO	DKO v2, 2 mesh, 2 material
+main/models	Grenade.DKO	DKO v2, 2 mesh, 2 material
+main/models	Hand.DKO	DKO v2, 0 mesh, 272 material
+main/models	Knife.tga	TGA 64×64×32
+main/models	Knifes.DKO	DKO v2, 8 mesh, 1 material, textures: Knife.tga
+main/models	LifePack.DKO	DKO v2, 2 mesh, 2 material
+main/models	Nuclear.DKO	DKO v2, 3 mesh, 3 material
+main/models	PhotonRifle.DKO	DKO v2, 5 mesh, 2 material
+main/models	RedFlag.DKO	DKO v2, 2 mesh, 2 material
+main/models	RedFlagPod.DKO	DKO v2, 2 mesh, 2 material
+main/models	Rocket.DKO	DKO v2, 2 mesh, 2 material
+main/models	SMG.DKO	DKO v2, 1 mesh, 1 material
+main/models	Shield.DKO	DKO v2, 1 mesh, 1 material, textures: Shieldtga.tga
+main/models	ShieldMagnet.DKO	DKO v2, 1 mesh, 1 material
+main/models	Shieldtga.tga	TGA 128×128×32
+main/models	ShotGun.DKO	DKO v2, 1 mesh, 1 material
+main/models	Sniper.DKO	DKO v2, 1 mesh, 1 material
+main/textures	ArrowD.tga	TGA 16×16×32
+main/textures	ArrowL.tga	TGA 16×16×32
+main/textures	ArrowR.tga	TGA 16×16×32
+main/textures	ArrowU.tga	TGA 16×16×32
+main/textures	BaboHalo.tga	TGA 128×128×32
+main/textures	BaboShadow.tga	TGA 32×32×32
+main/textures	BerretGuy.tga	TGA 256×256×32
+main/textures	BlueFlag.tga	TGA 64×64×32
+main/textures	BombMark.tga	TGA 64×64×32
+main/textures	CartridgeIcon.tga	TGA 64×64×32
+main/textures	Cloud.tga	TGA 256×256×32
+main/textures	Cross01.tga	TGA 32×32×32
+main/textures	CrossHit.tga	TGA 32×32×32
+main/textures	ExplosionMark.tga	TGA 64×64×32
+main/textures	GrenadeIcon.tga	TGA 64×64×32
+main/textures	HeadGames.tga	TGA 512×512×24
+main/textures	Icones.tga	TGA 32×32×24
+main/textures	Menu.tga	TGA 64×64×32
+main/textures	Menu1Back.tga	TGA 256×256×24
+main/textures	Menu2Back.tga	TGA 256×256×24
+main/textures	Menu3Back.tga	TGA 256×256×24
+main/textures	Menu4Back.tga	TGA 256×256×24
+main/textures	Menu5Back.tga	TGA 256×256×24
+main/textures	MenuCursor.tga	TGA 32×32×32
+main/textures	MiniMapAllied.tga	TGA 16×16×32
+main/textures	MiniMapEnemy.tga	TGA 16×16×32
+main/textures	RedFlag.tga	TGA 64×64×32
+main/textures	RnDLabs.tga	TGA 512×512×24
+main/textures	Smoke1.tga	TGA 128×128×32
+main/textures	Smoke2.tga	TGA 128×128×32
+main/textures	blood01.tga	TGA 64×64×32
+main/textures	blood02.tga	TGA 64×64×32
+main/textures	blood03.tga	TGA 64×64×32
+main/textures	blood04.tga	TGA 64×64×32
+main/textures	blood05.tga	TGA 64×64×32
+main/textures	blood06.tga	TGA 64×64×32
+main/textures	blood07.tga	TGA 64×64×32
+main/textures	blood08.tga	TGA 64×64×32
+main/textures	blood09.tga	TGA 64×64×32
+main/textures	blood10.tga	TGA 64×64×32
+main/textures	dirt1.tga	TGA 128×128×24
+main/textures	dirt2.tga	TGA 128×128×24
+main/textures	drip.tga	TGA 16×16×32
+main/textures	glowTrail.tga	TGA 32×32×32
+main/textures	grass.tga	TGA 128×128×24
+main/textures	medals/Medal01.tga	TGA 64×64×32
+main/textures	medals/Medal02.tga	TGA 64×64×32
+main/textures	medals/Medal03.tga	TGA 64×64×32
+main/textures	medals/Medal04.tga	TGA 64×64×32
+main/textures	medals/Medal05.tga	TGA 64×64×32
+main/textures	medals/Medal06.tga	TGA 64×64×32
+main/textures	medals/Medal07.tga	TGA 64×64×32
+main/textures	medals/Medal08.tga	TGA 64×64×32
+main/textures	medals/Medal09.tga	TGA 64×64×32
+main/textures	medals/Medal10.tga	TGA 64×64×32
+main/textures	medals/Medal11.tga	TGA 64×64×32
+main/textures	molotovIcon.tga	TGA 64×64×32
+main/textures	nuzzleFlash.tga	TGA 32×32×24
+main/textures	screenHit.tga	TGA 128×128×32
+main/textures	shotGlow.tga	TGA 32×32×32
+main/textures	snowflake.tga	TGA 16×16×32
+main/textures	themes/animal/tex_floor.tga	TGA 128×128×32
+main/textures	themes/animal/tex_floor_dirt.tga	TGA 128×128×32
+main/textures	themes/animal/tex_wall_center.tga	TGA 128×128×32
+main/textures	themes/city/tex_floor.tga	TGA 128×128×24
+main/textures	themes/city/tex_floor_dirt.tga	TGA 128×128×24
+main/textures	themes/city/tex_wall_center.tga	TGA 128×128×24
+main/textures	themes/core/tex_floor.tga	TGA 128×128×32
+main/textures	themes/core/tex_floor_dirt.tga	TGA 128×128×24
+main/textures	themes/core/tex_wall_center.tga	TGA 128×128×32
+main/textures	themes/frozen/tex_floor.tga	TGA 128×128×24
+main/textures	themes/frozen/tex_floor_dirt.tga	TGA 128×128×24
+main/textures	themes/frozen/tex_wall_center.tga	TGA 128×128×24
+main/textures	themes/grain/tex_floor.tga	TGA 128×128×24
+main/textures	themes/grain/tex_floor_dirt.tga	TGA 128×128×24
+main/textures	themes/grain/tex_wall_center.tga	TGA 128×128×24
+main/textures	themes/grass/tex_floor.tga	TGA 128×128×24
+main/textures	themes/grass/tex_floor_dirt.tga	TGA 128×128×24
+main/textures	themes/grass/tex_wall_center.tga	TGA 128×128×24
+main/textures	themes/lava/tex_floor.tga	TGA 128×128×32
+main/textures	themes/lava/tex_floor_dirt.tga	TGA 128×128×32
+main/textures	themes/lava/tex_wall_center.tga	TGA 128×128×32
+main/textures	themes/medieval/tex_floor.tga	TGA 128×128×24
+main/textures	themes/medieval/tex_floor_dirt.tga	TGA 128×128×24
+main/textures	themes/medieval/tex_wall_center.tga	TGA 128×128×24
+main/textures	themes/metal/tex_floor.tga	TGA 128×128×32
+main/textures	themes/metal/tex_floor_dirt.tga	TGA 128×128×32
+main/textures	themes/metal/tex_wall_center.tga	TGA 128×128×32
+main/textures	themes/modern/tex_floor.tga	TGA 128×128×24
+main/textures	themes/modern/tex_floor_dirt.tga	TGA 128×128×24
+main/textures	themes/modern/tex_wall_center.tga	TGA 128×128×24
+main/textures	themes/orange/tex_floor.tga	TGA 128×128×32
+main/textures	themes/orange/tex_floor_dirt.tga	TGA 128×128×32
+main/textures	themes/orange/tex_wall_center.tga	TGA 128×128×32
+main/textures	themes/rainy/tex_floor.tga	TGA 128×128×24
+main/textures	themes/rainy/tex_floor_dirt.tga	TGA 128×128×24
+main/textures	themes/rainy/tex_wall_center.tga	TGA 128×128×24
+main/textures	themes/real/tex_floor.tga	TGA 128×128×24
+main/textures	themes/real/tex_floor_dirt.tga	TGA 128×128×24
+main/textures	themes/real/tex_wall_center.tga	TGA 128×128×24
+main/textures	themes/road/tex_floor.tga	TGA 128×128×24
+main/textures	themes/road/tex_floor_dirt.tga	TGA 128×128×24
+main/textures	themes/road/tex_wall_center.tga	TGA 128×128×24
+main/textures	themes/rock/tex_floor.tga	TGA 128×128×32
+main/textures	themes/rock/tex_floor_dirt.tga	TGA 128×128×24
+main/textures	themes/rock/tex_wall_center.tga	TGA 128×128×32
+main/textures	themes/sand/tex_floor.tga	TGA 128×128×24
+main/textures	themes/sand/tex_floor_dirt.tga	TGA 128×128×24
+main/textures	themes/sand/tex_wall_center.tga	TGA 128×128×24
+main/textures	themes/savana/tex_floor.tga	TGA 128×128×24
+main/textures	themes/savana/tex_floor_dirt.tga	TGA 128×128×24
+main/textures	themes/savana/tex_wall_center.tga	TGA 128×128×24
+main/textures	themes/snow/tex_floor.tga	TGA 128×128×24
+main/textures	themes/snow/tex_floor_dirt.tga	TGA 128×128×24
+main/textures	themes/snow/tex_wall_center.tga	TGA 128×128×24
+main/textures	themes/soft/tex_floor.tga	TGA 128×128×32
+main/textures	themes/soft/tex_floor_dirt.tga	TGA 128×128×32
+main/textures	themes/soft/tex_wall_center.tga	TGA 128×128×32
+main/textures	themes/street/tex_floor.tga	TGA 128×128×32
+main/textures	themes/street/tex_floor_dirt.tga	TGA 128×128×32
+main/textures	themes/street/tex_wall_center.tga	TGA 128×128×32
+main/textures	themes/tropical/tex_floor.tga	TGA 128×128×24
+main/textures	themes/tropical/tex_floor_dirt.tga	TGA 128×128×24
+main/textures	themes/tropical/tex_wall_center.tga	TGA 128×128×24
+main/textures	themes/winter/tex_floor.tga	TGA 128×128×24
+main/textures	themes/winter/tex_floor_dirt.tga	TGA 128×128×24
+main/textures	themes/winter/tex_wall_center.tga	TGA 128×128×24
+main/textures	themes/wooden/tex_floor.tga	TGA 128×128×24
+main/textures	themes/wooden/tex_floor_dirt.tga	TGA 128×128×24
+main/textures	themes/wooden/tex_wall_center.tga	TGA 128×128×24
+main/fonts	babo.tga	TGA 512×512×32
+main/sounds	BaboCreve1.wav	WAV 1ch 22050 Hz 16-bit 1.77 s
+main/sounds	BaboCreve2.wav	WAV 1ch 22050 Hz 16-bit 1.50 s
+main/sounds	BaboCreve3.wav	WAV 1ch 22050 Hz 16-bit 1.23 s
+main/sounds	Bazooka.wav	WAV 1ch 22050 Hz 16-bit 0.92 s
+main/sounds	Button.wav	WAV 1ch 22050 Hz 8-bit 0.30 s
+main/sounds	ChainGun.wav	WAV 1ch 22050 Hz 8-bit 0.16 s
+main/sounds	Chat.wav	WAV 1ch 22050 Hz 16-bit 0.25 s
+main/sounds	ControlOver.wav	WAV 1ch 22050 Hz 8-bit 0.49 s
+main/sounds	DualMachineGun.wav	WAV 1ch 22050 Hz 16-bit 0.93 s
+main/sounds	Explosion1.wav	WAV 1ch 22050 Hz 16-bit 4.23 s
+main/sounds	FlameThrower.wav	WAV 1ch 22050 Hz 8-bit 0.96 s
+main/sounds	Grenade.wav	WAV 1ch 22050 Hz 8-bit 0.37 s
+main/sounds	GrenadeRebond.wav	WAV 1ch 11025 Hz 16-bit 0.10 s
+main/sounds	LifePack.wav	WAV 1ch 11025 Hz 16-bit 0.62 s
+main/sounds	Menu.ogg	OGG 2ch 44100 Hz 32.0 s
+main/sounds	Music.ogg	OGG 2ch 44100 Hz 305.3 s
+main/sounds	PhotonRifle.wav	WAV 1ch 22050 Hz 16-bit 2.01 s
+main/sounds	PhotonStart.wav	WAV 1ch 11025 Hz 16-bit 1.47 s
+main/sounds	SMG.wav	WAV 1ch 22050 Hz 16-bit 0.82 s
+main/sounds	Shotgun.wav	WAV 1ch 22050 Hz 16-bit 0.97 s
+main/sounds	Siren.WAV	WAV 1ch 11025 Hz 8-bit 0.89 s
+main/sounds	Sniper.wav	WAV 1ch 22050 Hz 16-bit 2.01 s
+main/sounds	Write.wav	WAV 1ch 22050 Hz 16-bit 0.15 s
+main/sounds	cheerBlueTeam.wav	WAV 1ch 44100 Hz 16-bit 6.28 s
+main/sounds	cheerRedTeam.wav	WAV 1ch 44100 Hz 16-bit 4.53 s
+main/sounds	cocktailmolotov.wav	WAV 1ch 44100 Hz 16-bit 1.97 s
+main/sounds	douille1.wav	WAV 1ch 22050 Hz 16-bit 0.90 s
+main/sounds	douille2.wav	WAV 1ch 22050 Hz 16-bit 0.91 s
+main/sounds	douille3.wav	WAV 1ch 22050 Hz 16-bit 1.02 s
+main/sounds	equip.wav	WAV 1ch 22050 Hz 16-bit 0.35 s
+main/sounds	etook.wav	WAV 1ch 44100 Hz 16-bit 5.88 s
+main/sounds	ftook.wav	WAV 1ch 11025 Hz 16-bit 1.34 s
+main/sounds	hit.wav	WAV 1ch 22050 Hz 16-bit 0.14 s
+main/sounds	hit1.wav	WAV 1ch 22050 Hz 8-bit 0.33 s
+main/sounds	hit2.wav	WAV 1ch 22050 Hz 8-bit 0.22 s
+main/sounds	impact.wav	WAV 1ch 22050 Hz 16-bit 0.36 s
+main/sounds	knifes.wav	WAV 1ch 22050 Hz 8-bit 1.15 s
+main/sounds	lava.wav	WAV 1ch 11025 Hz 8-bit 5.64 s
+main/sounds	lavasteam.wav	WAV 1ch 11025 Hz 8-bit 0.86 s
+main/sounds	overHeat.wav	WAV 1ch 22050 Hz 16-bit 3.90 s
+main/sounds	rain2.wav	WAV 1ch 11025 Hz 8-bit 5.56 s
+main/sounds	return.wav	WAV 1ch 44100 Hz 16-bit 0.99 s
+main/sounds	ric1.wav	WAV 1ch 22050 Hz 8-bit 1.33 s
+main/sounds	ric2.wav	WAV 1ch 22050 Hz 8-bit 0.40 s
+main/sounds	ric3.wav	WAV 1ch 22050 Hz 8-bit 0.73 s
+main/sounds	ric4.wav	WAV 1ch 22050 Hz 8-bit 1.38 s
+main/sounds	ric5.wav	WAV 1ch 22050 Hz 8-bit 1.01 s
+main/sounds	shield.wav	WAV 1ch 22050 Hz 8-bit 2.10 s
+main/sounds	shotgunReload.wav	WAV 1ch 8000 Hz 16-bit 0.17 s
+main/sounds	wind.wav	WAV 1ch 8013 Hz 8-bit 4.04 s

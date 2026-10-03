@@ -112,11 +112,21 @@ bv2.cfg
 # ---- Prebuilt 2012 binaries without extension ----
 MasterServer/Source/src/linuxmaster
 
-# ---- Original BaboViolent 2 assets (no license; see docs/ASSETS-LICENSE.md) ----
+# ---- Original BaboViolent 2 assets (no license) ----
 /original-assets/
-/BaboViolent2/Content/main/maps/
-/BaboViolent2/Content/main/models/
-/BaboViolent2/Content/main/skins/
-/BaboViolent2/Content/main/textures/
-/BaboViolent2/Content/main/fonts/
-/BaboViolent2/Content/main/sounds/
+/content/maps/
+/content/models/
+/content/skins/
+/content/textures/
+/content/fonts/
+/content/sounds/
+
+# Restricted notes (licence, legal, asset inventory) live outside the repo; never commit them.
+/docs_restricted/
+/docs/legal/
+/docs/assets/
+/docs/ASSETS-LICENSE.md
+
+# Local agent entry point (imports AGENTS.md); not committed
+/CLAUDE.md
+/.CLAUDE.md

@@ -1,33 +1,39 @@
 # Architecture
 
-RoboViolence 2: unofficial fork of BaboViolent 2, a top-down multiplayer shooter (C++, GPLv3). State after Step 1: sources cleaned, no build system yet.
+RoboViolence 2: unofficial fork of BaboViolent 2, a top-down multiplayer shooter (C++, GPLv3). State after Step 3: SDL3 + miniaudio + glad platform layer.
 
 ## Summary
 
 | Topic | Fact |
 |---|---|
-| Deliverables | Client, dedicated server (`CONSOLE` build), master server. Only the root `Makefile` (Linux server) exists; it can't build until Steps 2 and 3. |
-| Platforms | Targets: Linux, macOS, Windows 11. Phase A plan: [docs/refactoring/README.md](docs/refactoring/README.md). |
-| Modules | `BaboViolent2/Code` game; `Engine/babonet` networking (`bb_*`); `Engine/DukZeven` engine utilities (`dkc dkf dkgl dki dkp dks dksvar dkt dkw`); `Engine/dko` model loader; `MasterServer/Source` master server. |
+| Deliverables | `bv2` (client), `bv2dedicated` (headless server, `CONSOLE`) and `bv2master`. Built and run on macOS arm64 (ASan too); the client starts to its main loop (not visually checked). Linux and Windows are untested. |
+| Build | CMake 3.25+, Ninja presets (`CMakePresets.json`), vcpkg manifest. Output in `build/<preset>/runtime/` ([ADR 0005](docs/decisions/0005-runtime-main-data-root.md)). |
+| Platforms | Targets: Linux x64, macOS 12+ arm64, Windows 11. `engine/zeven/include/platform.h` defines `BV2_PLATFORM_*`, `BV2_POSIX`; CMake force-includes it. |
+| Modules | `game` (client, server, editor); `engine/babonet` networking (`bb_*`, `CThread` on `std::thread`); `engine/zeven` utilities (`zeven_core`: `dkc dksvar` + `CString/CVector/CMatrix`; `zeven_console`: no-op `dkt` for the server; `zeven_client`: `dkw dki dkgl dkt dkf dkp dks`); `engine/dko` model loader; `masterserver`. |
+| Dependencies | vcpkg (`vcpkg.json`, pinned baseline): sqlite3; feature `client`: sdl3, miniaudio, stb; feature `http`: curl (off, ADR 0002). Generated, committed: glad GL 2.1 (`engine/zeven/third_party/glad`). System: GLU. No libcurl or OpenSSL is linked by default. |
+| Platform layer | SDL3 window and input (`dkw`, `dki`), miniaudio (`dks`), glad ([ADR 0006](docs/decisions/0006-sdl3-miniaudio-glad-platform-layer.md)). One client `main()` for all OSes. |
 | Tick | Fixed 30 Hz: every `update(float delay)` gets `1/30`; "frames" are a time unit (30 = 1 s). |
-| Network | TCP, raw structs `memcpy`'d from `BaboViolent2/Code/netPacket.h`. The server is authoritative for hits, damage, spawns, projectiles and flags; clients for their own movement. `playerID` (slot) differs from `babonetID` (connection). Protocol version `GAME_VERSION_SV/CL` = 21100 (Pro). |
-| Variants | `CONSOLE` = headless server. Direct3D, non-Pro and VLD code were removed. |
+| Network | TCP, raw structs `memcpy`'d from `game/src/netPacket.h`. The server is authoritative for hits, damage, spawns, projectiles and flags; clients for their own movement. `playerID` (slot) differs from `babonetID` (connection). Protocol `GAME_VERSION_SV/CL` = 21100. |
+| Variants | `CONSOLE` = headless server (explicit file list in `game/CMakeLists.txt`). Direct3D, non-Pro and VLD code were removed in Step 1. |
 | Config and secrets | Tracked: `config/*.example.cfg` with empty secrets, `content-seed/*.sql` for generated DBs. Real values stay local; gitleaks, hooks and CI enforce it ([config/README.md](config/README.md)). |
-| Assets | The original assets are removed and blocked by hash ([docs/ASSETS-LICENSE.md](docs/ASSETS-LICENSE.md)). Only `languages/en.lang` and `LaunchScript/` remain in `BaboViolent2/Content/main/`. |
+| Assets | The original assets are removed and blocked by hash (`tools/check-original-assets.py`). Only `content/languages/en.lang` and `content/LaunchScript/` remain; the build generates placeholders (`tools/gen-placeholder-content.py`). |
 | Encoding | UTF-8 without BOM, LF; `tools/check-encoding.py`. Some comments hold U+FFFD where upstream lost accents. |
 | Known defects | [docs/analysis/KEY_QUESTIONS.md](docs/analysis/KEY_QUESTIONS.md). |
-| Decisions | [docs/decisions/README.md](docs/decisions/README.md): 0001 Ninja, 0002 libcurl compiled out, 0003 OpenGL 2.1 kept, 0004 project name. |
+| Decisions | [docs/decisions/README.md](docs/decisions/README.md): 0001 Ninja, 0002 libcurl compiled out, 0003 OpenGL 2.1 kept, 0004 project name, 0005 `main/` data root, 0006 platform layer. |
 
-### Open items from Step 1
+### Open items
 
-- Master server: forked babonet/dkc copies were deleted; it uses `Engine/` and is unverified until Step 2 builds it. Its `CClient`/`CServer` differ from `Engine/babonet` `cClient`/`cServer` only by case; rename before building both on macOS or Windows. Its `cMSstruct.h` is an older subset of `BaboViolent2/inc/cMSstruct.h`.
-- `BaboViolent2/Code/bv2.bmp` and `icon1.ico` are original artwork used by the Windows resource; replace in §H.
-- Vendored `glext.h` copies remain (`BaboViolent2/Code`, `Engine/DukZeven/{Code,inc}`, `Engine/dko/Code/gl`); Step 3 replaces them.
-- The Windows project (`BaboViolent2.vcxproj`) still carries old defines (`_PRO_`, `_DX_`, `_MD5CODESEG_`); Step 2 replaces it.
+- **Master server:** `MasterClient` is reconstructed (the original class is missing from the source release); its timeout is an assumption. See [masterserver/README.md](masterserver/README.md).
+- **GLU:** still the system library (headers and link) for `dko`, `zeven_client` and the game, so the headless server needs GLU dev packages; `dkt` is stubbed there. The renderer itself is unchanged fixed-function GL 2.1 (ADR 0003).
+- **OGG music** needs `stb_vorbis.c` (vcpkg `stb`); the macOS check ran without it, so `Menu.ogg`/`Music.ogg` did not play, and the placeholders have no music anyway.
+- **HiDPI:** `dkwGetResolution()` is the pixel size; the UI math assumes nothing else. Untested on a Retina display.
+- **Dead code:** 16 old-menu `.cpp` files in `game/src` are not built (see [game/README.md](game/README.md)). `game/src/bv2.bmp` and `icon1.ico` are original artwork; replace in §H.
+- UBSan reports pre-existing defects (null `Server` calls, out-of-range `bool` loads, NaN casts in `CUserLogin.cpp`); Step 4.
+
 
 ## File inventory
 
-One row per tracked file. `tools/check-architecture.sh` fails when this list and `git ls-files` differ. Assets: per-file catalogue is [docs/assets/ASSET-INVENTORY.md](docs/assets/ASSET-INVENTORY.md); replacement asset folders get one row per directory.
+One row per tracked file. `tools/check-architecture.sh` fails when this list and `git ls-files` differ. Assets: per-file catalogue is the asset inventory (kept outside this repository); replacement asset folders get one row per directory.
 
 
 ### `.`
@@ -35,16 +41,30 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | path | purpose |
 |---|---|
 | `.editorconfig` | Editor settings: UTF-8, LF |
+| `.clang-format` | Formatting style (tabs, Allman); apply with `git clang-format` only |
+| `.clang-tidy` | Static analysis checks (bugprone, clang-analyzer, cert-err34-c); non-blocking |
 | `.git-blame-ignore-revs` | Commits ignored by git blame (encoding conversion) |
 | `.gitattributes` | Line-ending and binary attributes |
 | `.gitignore` | Ignore rules (OS, editors, builds, secrets, original assets) |
 | `.gitleaks.toml` | gitleaks rules: default plus config secrets, public IPs, master-server rows, hosts |
 | `AGENTS.md` | Canonical agent and contributor instructions |
 | `ARCHITECTURE.md` | This file: summary and file inventory |
-| `CLAUDE.md` | Imports AGENTS.md for Claude Code |
+| `CMakeLists.txt` | Root CMake project: options, runtime layout, placeholder content, subdirectories |
+| `CMakePresets.json` | Presets: linux-x64, macos-arm64, win-x64-msvc, -asan variants (Ninja) |
 | `LICENSE.txt` | GPLv3 text (code only) |
-| `Makefile` | Root Makefile: Linux dedicated server (g++ plus Engine sub-makes) |
 | `README.md` | Project overview, fork and asset-removal statement |
+| `docs/decisions/0007-data-root-pref-dir-config-layers.md` | ADR 0007 |
+| `game/src/Paths.cpp` | Data root search, per-user pref dir, layered config loading, map and DB path helpers |
+| `game/src/Paths.h` | Interface of `Paths.cpp` (namespace `bv2`) |
+| `packaging/linux/roboviolence2.desktop` | Linux desktop entry |
+| `packaging/macos/Info.plist.in` | macOS bundle `Info.plist` template |
+| `packaging/windows/bv2.manifest` | Windows manifest: PerMonitorV2 DPI, UTF-8 code page, Windows 10/11 |
+| `tests/CMakeLists.txt` | ctest targets: netPacket, config, dedicated-server smoke |
+| `tests/smoke_server.py` | Starts `bv2dedicated` headless, runs the CTF script, quits |
+| `tests/test_config.cpp` | dksvar config layering, transient values not saved, secrets masked |
+| `tests/test_netpacket.cpp` | Byte-level layout of the packed wire structs |
+| `tools/check-content-case.py` | Fails when a literal `main/...` path differs from a real file name only by case |
+| `vcpkg.json` | vcpkg manifest (sqlite3, curl; Step 3 completes it) |
 
 ### `.githooks`
 
@@ -58,454 +78,8 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | path | purpose |
 |---|---|
 | `.github/workflows/secret-scan.yml` | CI: gitleaks over commits after the fork point and original-asset check |
-
-### `BaboViolent2/Code`
-
-| path | purpose |
-|---|---|
-| `BaboViolent2/Code/AccountManager.cpp` | Account create/login/clan/friend requests over the master connection |
-| `BaboViolent2/Code/AccountManager.h` | Account create/login/clan/friend requests over the master connection |
-| `BaboViolent2/Code/BaboViolent2.vcxproj` | Visual Studio project; source list reference until Step 2 replaces it |
-| `BaboViolent2/Code/BaboViolent2.vcxproj.filters` | Visual Studio filters for the project |
-| `BaboViolent2/Code/Button.cpp` | Menu button widget |
-| `BaboViolent2/Code/Button.h` | Menu button widget |
-| `BaboViolent2/Code/CAStar.cpp` | A* path finding grid |
-| `BaboViolent2/Code/CAStar.h` | A* path finding grid |
-| `BaboViolent2/Code/CAStar_FindPath.cpp` | A* search routine |
-| `BaboViolent2/Code/CAccount.cpp` | Account UI tab |
-| `BaboViolent2/Code/CAccount.h` | Account UI tab |
-| `BaboViolent2/Code/CBrowser.cpp` | Server browser UI |
-| `BaboViolent2/Code/CBrowser.h` | Server browser UI |
-| `BaboViolent2/Code/CClans.cpp` | Clans UI tab |
-| `BaboViolent2/Code/CClans.h` | Clans UI tab |
-| `BaboViolent2/Code/CControl.cpp` | Generic UI control (button, label, list, text box) of the newer menu |
-| `BaboViolent2/Code/CControl.h` | Generic UI control (button, label, list, text box) of the newer menu |
-| `BaboViolent2/Code/CCredit.cpp` | Credits tab |
-| `BaboViolent2/Code/CCredit.h` | Credits tab |
-| `BaboViolent2/Code/CCurl.cpp` | HTTP requests through libcurl (compiled out in Phase A) |
-| `BaboViolent2/Code/CCurl.h` | HTTP requests through libcurl (compiled out in Phase A) |
-| `BaboViolent2/Code/CEditor.cpp` | Map editor UI (newer) |
-| `BaboViolent2/Code/CEditor.h` | Map editor UI (newer) |
-| `BaboViolent2/Code/CFriends.cpp` | Friends list UI and requests |
-| `BaboViolent2/Code/CFriends.h` | Friends list UI and requests |
-| `BaboViolent2/Code/CHost.cpp` | Host-game UI |
-| `BaboViolent2/Code/CHost.h` | Host-game UI |
-| `BaboViolent2/Code/CLava.cpp` | Lava rendering and effect |
-| `BaboViolent2/Code/CLava.h` | Lava rendering and effect |
-| `BaboViolent2/Code/CListener.cpp` | Listener interface for CControl events |
-| `BaboViolent2/Code/CListener.h` | Listener interface for CControl events |
-| `BaboViolent2/Code/CLobby.cpp` | Lobby and menu tab host |
-| `BaboViolent2/Code/CLobby.h` | Lobby and menu tab host |
-| `BaboViolent2/Code/CMainTab.cpp` | Main menu tab |
-| `BaboViolent2/Code/CMainTab.h` | Main menu tab |
-| `BaboViolent2/Code/CMaster.cpp` | Master-server client: server list, remote admin, account manager packets |
-| `BaboViolent2/Code/CMaster.h` | Master-server client: server list, remote admin, account manager packets |
-| `BaboViolent2/Code/CMaterial.cpp` | Material/texture state wrapper |
-| `BaboViolent2/Code/CMaterial.h` | Material/texture state wrapper |
-| `BaboViolent2/Code/CMatrix.cpp` | Engine copy of the shared math/string type |
-| `BaboViolent2/Code/CMatrix.h` | Engine copy of the shared math/string type |
-| `BaboViolent2/Code/CMenuManager.cpp` | Manager for the newer menu controls |
-| `BaboViolent2/Code/CMenuManager.h` | Manager for the newer menu controls |
-| `BaboViolent2/Code/CMesh.cpp` | Mesh container |
-| `BaboViolent2/Code/CMesh.h` | Mesh container |
-| `BaboViolent2/Code/CMeshBuilder.cpp` | Mesh builder |
-| `BaboViolent2/Code/CMeshBuilder.h` | Mesh builder |
-| `BaboViolent2/Code/CNews.cpp` | News feed UI |
-| `BaboViolent2/Code/CNews.h` | News feed UI |
-| `BaboViolent2/Code/COption.cpp` | Options UI |
-| `BaboViolent2/Code/COption.h` | Options UI |
-| `BaboViolent2/Code/CPanel.h` | UI panel container |
-| `BaboViolent2/Code/CPathNode.cpp` | Path node for A* |
-| `BaboViolent2/Code/CPathNode.h` | Path node for A* |
-| `BaboViolent2/Code/CPing.cpp` | Server ping measurement |
-| `BaboViolent2/Code/CPing.h` | Server ping measurement |
-| `BaboViolent2/Code/CPlayers.cpp` | Players list UI |
-| `BaboViolent2/Code/CPlayers.h` | Players list UI |
-| `BaboViolent2/Code/CProfile.cpp` | Profile UI tab |
-| `BaboViolent2/Code/CProfile.h` | Profile UI tab |
-| `BaboViolent2/Code/CRain.cpp` | Rain weather effect |
-| `BaboViolent2/Code/CRain.h` | Rain weather effect |
-| `BaboViolent2/Code/CRegisterClan.cpp` | Clan registration UI |
-| `BaboViolent2/Code/CRegisterClan.h` | Clan registration UI |
-| `BaboViolent2/Code/CSnow.cpp` | Snow weather effect |
-| `BaboViolent2/Code/CSnow.h` | Snow weather effect |
-| `BaboViolent2/Code/CStats.cpp` | Player statistics UI |
-| `BaboViolent2/Code/CStats.h` | Player statistics UI |
-| `BaboViolent2/Code/CStatus.cpp` | Online status reporting |
-| `BaboViolent2/Code/CStatus.h` | Online status reporting |
-| `BaboViolent2/Code/CString.cpp` | Engine copy of the shared math/string type |
-| `BaboViolent2/Code/CString.h` | Engine copy of the shared math/string type |
-| `BaboViolent2/Code/CSurvey.cpp` | Survey dialog |
-| `BaboViolent2/Code/CSurvey.h` | Survey dialog |
-| `BaboViolent2/Code/CThread.cpp` | Thread wrapper |
-| `BaboViolent2/Code/CThread.h` | Thread wrapper |
-| `BaboViolent2/Code/CUserLogin.cpp` | Account login UI |
-| `BaboViolent2/Code/CUserLogin.h` | Account login UI |
-| `BaboViolent2/Code/CVector.cpp` | Engine copy of the shared math/string type |
-| `BaboViolent2/Code/CVector.h` | Engine copy of the shared math/string type |
-| `BaboViolent2/Code/CVertexBuffer.cpp` | Vertex buffer wrapper |
-| `BaboViolent2/Code/CVertexBuffer.h` | Vertex buffer wrapper |
-| `BaboViolent2/Code/CWeather.cpp` | Weather selection and rendering |
-| `BaboViolent2/Code/CWeather.h` | Weather selection and rendering |
-| `BaboViolent2/Code/Changes Log.txt` | Upstream change log |
-| `BaboViolent2/Code/Choice.cpp` | Menu choice (drop-down/spinner) widget |
-| `BaboViolent2/Code/Choice.h` | Menu choice (drop-down/spinner) widget |
-| `BaboViolent2/Code/Client.cpp` | Client: connection, join handshake, send/receive state |
-| `BaboViolent2/Code/Client.h` | Client: connection, join handshake, send/receive state |
-| `BaboViolent2/Code/ClientRecv.cpp` | Client: handlers for every server-to-client packet |
-| `BaboViolent2/Code/ClientRender.cpp` | Client: in-game HUD and view rendering |
-| `BaboViolent2/Code/ConfirmPass.cpp` | Password confirmation dialog |
-| `BaboViolent2/Code/ConfirmPass.h` | Password confirmation dialog |
-| `BaboViolent2/Code/ConnectFailed.cpp` | Dialog: connection failed |
-| `BaboViolent2/Code/ConnectFailed.h` | Dialog: connection failed |
-| `BaboViolent2/Code/Console.cpp` | In-game console: commands, log, remote console |
-| `BaboViolent2/Code/Console.h` | In-game console: commands, log, remote console |
-| `BaboViolent2/Code/Control.cpp` | Menu control base class |
-| `BaboViolent2/Code/Control.h` | Menu control base class |
-| `BaboViolent2/Code/ControlListener.cpp` | Menu control listener interface |
-| `BaboViolent2/Code/ControlListener.h` | Menu control listener interface |
-| `BaboViolent2/Code/CreateGame.cpp` | Create-game screen |
-| `BaboViolent2/Code/CreateGame.h` | Create-game screen |
-| `BaboViolent2/Code/Credits.cpp` | Credits screen |
-| `BaboViolent2/Code/Credits.h` | Credits screen |
-| `BaboViolent2/Code/Dialog.cpp` | Menu dialog base |
-| `BaboViolent2/Code/Dialog.h` | Menu dialog base |
-| `BaboViolent2/Code/Editor.cpp` | Map editor core |
-| `BaboViolent2/Code/Editor.h` | Map editor core |
-| `BaboViolent2/Code/EditorDialogs.cpp` | Map editor dialogs |
-| `BaboViolent2/Code/EditorDialogs.h` | Map editor dialogs |
-| `BaboViolent2/Code/EditorTools.cpp` | Map editor tools |
-| `BaboViolent2/Code/EditorTools.h` | Map editor tools |
-| `BaboViolent2/Code/Extended.cpp` | Skin and color chooser screen |
-| `BaboViolent2/Code/Extended.h` | Skin and color chooser screen |
-| `BaboViolent2/Code/FastDelegate.h` | Third-party fast C++ delegate header |
-| `BaboViolent2/Code/FileIO.cpp` | File and memory-buffer reader/writer with fixed-width types |
-| `BaboViolent2/Code/FileIO.h` | File and memory-buffer reader/writer with fixed-width types |
-| `BaboViolent2/Code/Game.cpp` | Game state: players, projectiles, items, flags, round and mode logic (shared by client and server) |
-| `BaboViolent2/Code/Game.h` | Game state: players, projectiles, items, flags, round and mode logic (shared by client and server) |
-| `BaboViolent2/Code/GameProjectile.cpp` | Game: projectile and explosion simulation |
-| `BaboViolent2/Code/GameRender.cpp` | Game: world rendering |
-| `BaboViolent2/Code/GameShowStats.cpp` | Game: scoreboard and end-of-round stats drawing |
-| `BaboViolent2/Code/GameSpawn.cpp` | Game: spawn point selection and respawn |
-| `BaboViolent2/Code/GameVar.cpp` | All client and server variables (cl_*, sv_*, r_*, s_*), registered through dksvar, plus loaded textures and sounds |
-| `BaboViolent2/Code/GameVar.h` | All client and server variables (cl_*, sv_*, r_*, s_*), registered through dksvar, plus loaded textures and sounds |
-| `BaboViolent2/Code/Helper.cpp` | Misc helpers (colors, text, math) |
-| `BaboViolent2/Code/Helper.h` | Misc helpers (colors, text, math) |
-| `BaboViolent2/Code/Host.h` | Host-game settings struct |
-| `BaboViolent2/Code/IncorrectName.cpp` | Dialog: invalid player name |
-| `BaboViolent2/Code/IncorrectName.h` | Dialog: invalid player name |
-| `BaboViolent2/Code/IncorrectPassword.cpp` | Dialog: wrong server password |
-| `BaboViolent2/Code/IncorrectPassword.h` | Dialog: wrong server password |
-| `BaboViolent2/Code/IntroScreen.cpp` | Intro screen |
-| `BaboViolent2/Code/IntroScreen.h` | Intro screen |
-| `BaboViolent2/Code/JoinGame.cpp` | Join-game screen |
-| `BaboViolent2/Code/JoinGame.h` | Join-game screen |
-| `BaboViolent2/Code/Key.cpp` | Key binding entry |
-| `BaboViolent2/Code/Key.h` | Key binding entry |
-| `BaboViolent2/Code/KeyManager.cpp` | Key bindings manager |
-| `BaboViolent2/Code/KeyManager.h` | Key bindings manager |
-| `BaboViolent2/Code/Label.cpp` | Menu label widget |
-| `BaboViolent2/Code/Label.h` | Menu label widget |
-| `BaboViolent2/Code/MainMenu.cpp` | Main menu screen |
-| `BaboViolent2/Code/MainMenu.h` | Main menu screen |
-| `BaboViolent2/Code/Map.cpp` | Map data, .bvm loading and saving, collision, rendering resources |
-| `BaboViolent2/Code/Map.h` | Map data, .bvm loading and saving, collision, rendering resources |
-| `BaboViolent2/Code/MapRender.cpp` | Map rendering (tiles, walls, dirt, optional 3D model map) |
-| `BaboViolent2/Code/MemIO.cpp` | In-memory buffer reader/writer |
-| `BaboViolent2/Code/MemIO.h` | In-memory buffer reader/writer |
-| `BaboViolent2/Code/Menu.cpp` | Menu system core (old menu) |
-| `BaboViolent2/Code/Menu.h` | Menu system core (old menu) |
-| `BaboViolent2/Code/MenuSetup.cpp` | Menu construction |
-| `BaboViolent2/Code/MessageDialog.cpp` | Generic message dialog |
-| `BaboViolent2/Code/MessageDialog.h` | Generic message dialog |
-| `BaboViolent2/Code/Minibot.cpp` | Minibot drone weapon entity |
-| `BaboViolent2/Code/NoGameRunning.cpp` | Dialog: no game running |
-| `BaboViolent2/Code/NoGameRunning.h` | Dialog: no game running |
-| `BaboViolent2/Code/NoMapSelected.cpp` | Dialog: no map selected |
-| `BaboViolent2/Code/NoMapSelected.h` | Dialog: no map selected |
-| `BaboViolent2/Code/OptionMenu.cpp` | Options screen |
-| `BaboViolent2/Code/OptionMenu.h` | Options screen |
-| `BaboViolent2/Code/Password.cpp` | Password prompt dialog |
-| `BaboViolent2/Code/Password.h` | Password prompt dialog |
-| `BaboViolent2/Code/Player.cpp` | Player entity: movement, weapons, hits, rendering |
-| `BaboViolent2/Code/Player.h` | Player entity: movement, weapons, hits, rendering |
-| `BaboViolent2/Code/PlayerUpdate.cpp` | Player: per-tick update (physics, firing, timers) |
-| `BaboViolent2/Code/Quit.cpp` | Quit confirmation dialog |
-| `BaboViolent2/Code/Quit.h` | Quit confirmation dialog |
-| `BaboViolent2/Code/RemoteAdminPackets.h` | Wire structs for the remote-admin protocol |
-| `BaboViolent2/Code/ReportGen.cpp` | XML server report generation |
-| `BaboViolent2/Code/ReportGen.h` | XML server report generation |
-| `BaboViolent2/Code/ResIco.rc` | Windows resource script (icon) |
-| `BaboViolent2/Code/Scene.cpp` | Top-level scene: main loop, menus, game and editor switching, rendering setup |
-| `BaboViolent2/Code/Scene.h` | Top-level scene: main loop, menus, game and editor switching, rendering setup |
-| `BaboViolent2/Code/SceneNet.cpp` | Scene: starts and stops client and server, hosting and joining |
-| `BaboViolent2/Code/Server.cpp` | Authoritative server: connections, joins, tick, map and mode control |
-| `BaboViolent2/Code/Server.h` | Authoritative server: connections, joins, tick, map and mode control |
-| `BaboViolent2/Code/ServerCTF.cpp` | Server: capture-the-flag rules |
-| `BaboViolent2/Code/ServerClose.cpp` | Dialog shown when the server closes the connection |
-| `BaboViolent2/Code/ServerClose.h` | Dialog shown when the server closes the connection |
-| `BaboViolent2/Code/ServerRecv.cpp` | Server: handlers for every client-to-server packet |
-| `BaboViolent2/Code/ServerSnD.cpp` | Server: search-and-destroy rules |
-| `BaboViolent2/Code/Weapon.cpp` | Weapon definitions and stats |
-| `BaboViolent2/Code/Weapon.h` | Weapon definitions and stats |
-| `BaboViolent2/Code/Write.cpp` | Chat input widget |
-| `BaboViolent2/Code/Write.h` | Chat input widget |
-| `BaboViolent2/Code/Writting.cpp` | Chat input handling |
-| `BaboViolent2/Code/Writting.h` | Chat input handling |
-| `BaboViolent2/Code/WrongVersion.cpp` | Dialog: client/server version mismatch |
-| `BaboViolent2/Code/WrongVersion.h` | Dialog: client/server version mismatch |
-| `BaboViolent2/Code/Zeven.h` | Umbrella include for engine headers and common types |
-| `BaboViolent2/Code/bv2.bmp` | Windows resource bitmap (original art; replace in §H) |
-| `BaboViolent2/Code/glext.h` | Vendored OpenGL extension header |
-| `BaboViolent2/Code/icon1.ico` | Windows application icon (original art; replace in §H) |
-| `BaboViolent2/Code/main.cpp` | Program entry: window, engine init, main loop |
-| `BaboViolent2/Code/netPacket.h` | Wire structs and message IDs (raw memcpy'd structs) |
-| `BaboViolent2/Code/resource3.h` | Resource IDs for ResIco.rc |
-| `BaboViolent2/Code/screengrab.cpp` | Screenshot capture |
-| `BaboViolent2/Code/screengrab.h` | Screenshot capture |
-| `BaboViolent2/Code/tinyxml.cpp` | TinyXML (third-party XML parser) |
-| `BaboViolent2/Code/tinyxml.h` | TinyXML (third-party XML parser) |
-| `BaboViolent2/Code/tinyxmlerror.cpp` | TinyXML (third-party XML parser) |
-| `BaboViolent2/Code/tinyxmlparser.cpp` | TinyXML (third-party XML parser) |
-
-### `BaboViolent2/Content`
-
-| path | purpose |
-|---|---|
-| `BaboViolent2/Content/README.txt` | Where game data goes (originals removed) |
-
-### `BaboViolent2/Content/main/LaunchScript`
-
-| path | purpose |
-|---|---|
-| `BaboViolent2/Content/main/LaunchScript/CTF.cfg` | Example dedicated-server launch script (CTF) |
-
-### `BaboViolent2/Content/main/languages`
-
-| path | purpose |
-|---|---|
-| `BaboViolent2/Content/main/languages/en.lang` | English strings (default and only language) |
-
-### `BaboViolent2/inc`
-
-| path | purpose |
-|---|---|
-| `BaboViolent2/inc/LinuxHeader.h` | Linux/POSIX compatibility header |
-| `BaboViolent2/inc/baboNet.h` | Copy of the babonet public header |
-| `BaboViolent2/inc/cMSstruct.h` | Master-server protocol structs and message IDs |
-| `BaboViolent2/inc/dkc.h` | dkc: high-resolution timer and platform helpers |
-| `BaboViolent2/inc/dkf.h` | dkf: bitmap font rendering |
-| `BaboViolent2/inc/dkgl.h` | dkgl: OpenGL context and state |
-| `BaboViolent2/inc/dki.h` | dki: keyboard, mouse and input polling |
-| `BaboViolent2/inc/dko.h` | dko: public API of the .DKO model loader |
-| `BaboViolent2/inc/dkp.h` | dkp: particle system |
-| `BaboViolent2/inc/dks.h` | dks: sound and music (FMOD) |
-| `BaboViolent2/inc/dksvar.h` | dksvar: configuration variable registry |
-| `BaboViolent2/inc/dksvardef.h` | dksvar: variable definition macros |
-| `BaboViolent2/inc/dkt.h` | dkt: texture loading (TGA) and binding |
-| `BaboViolent2/inc/dkw.h` | dkw: window creation and events |
-| `BaboViolent2/inc/platform_types.h` | Fixed-width type aliases |
-
-### `Engine/DukZeven/Code`
-
-| path | purpose |
-|---|---|
-| `Engine/DukZeven/Code/CDkoObject.cpp` | DKO model instance wrapper |
-| `Engine/DukZeven/Code/CDkoObject.h` | DKO model instance wrapper |
-| `Engine/DukZeven/Code/CFont.cpp` | Bitmap font class |
-| `Engine/DukZeven/Code/CFont.h` | Bitmap font class |
-| `Engine/DukZeven/Code/CMatrix.cpp` | Engine copy of the shared math/string type |
-| `Engine/DukZeven/Code/CMatrix.h` | Engine copy of the shared math/string type |
-| `Engine/DukZeven/Code/CParticle.cpp` | Particle class |
-| `Engine/DukZeven/Code/CParticle.h` | Particle class |
-| `Engine/DukZeven/Code/CString.cpp` | Engine copy of the shared math/string type |
-| `Engine/DukZeven/Code/CString.h` | Engine copy of the shared math/string type |
-| `Engine/DukZeven/Code/CSystemVariable.cpp` | Typed configuration variable classes |
-| `Engine/DukZeven/Code/CSystemVariable.h` | Typed configuration variable classes |
-| `Engine/DukZeven/Code/CVector.cpp` | Engine copy of the shared math/string type |
-| `Engine/DukZeven/Code/CVector.h` | Engine copy of the shared math/string type |
-| `Engine/DukZeven/Code/Makefile` | Makefile for the DukZeven modules |
-| `Engine/DukZeven/Code/dkc.cpp` | dkc: high-resolution timer and platform helpers |
-| `Engine/DukZeven/Code/dkc.h` | dkc: high-resolution timer and platform helpers |
-| `Engine/DukZeven/Code/dkci.h` | Internal header of the matching dk module |
-| `Engine/DukZeven/Code/dkf.cpp` | dkf: bitmap font rendering |
-| `Engine/DukZeven/Code/dkf.h` | dkf: bitmap font rendering |
-| `Engine/DukZeven/Code/dkfi.h` | Internal header of the matching dk module |
-| `Engine/DukZeven/Code/dkgl.cpp` | dkgl: OpenGL context and state |
-| `Engine/DukZeven/Code/dkgl.h` | dkgl: OpenGL context and state |
-| `Engine/DukZeven/Code/dkgli.h` | Internal header of the matching dk module |
-| `Engine/DukZeven/Code/dki.cpp` | dki: keyboard, mouse and input polling |
-| `Engine/DukZeven/Code/dki.h` | dki: keyboard, mouse and input polling |
-| `Engine/DukZeven/Code/dkii.h` | Internal header of the matching dk module |
-| `Engine/DukZeven/Code/dko.h` | dko: public API of the .DKO model loader |
-| `Engine/DukZeven/Code/dkp.cpp` | dkp: particle system |
-| `Engine/DukZeven/Code/dkp.h` | dkp: particle system |
-| `Engine/DukZeven/Code/dkpi.h` | Internal header of the matching dk module |
-| `Engine/DukZeven/Code/dks.cpp` | dks: sound and music (FMOD) |
-| `Engine/DukZeven/Code/dks.h` | dks: sound and music (FMOD) |
-| `Engine/DukZeven/Code/dksi.h` | Internal header of the matching dk module |
-| `Engine/DukZeven/Code/dksvar.cpp` | dksvar: configuration variable registry |
-| `Engine/DukZeven/Code/dksvar.h` | dksvar: configuration variable registry |
-| `Engine/DukZeven/Code/dksvardef.h` | dksvar: variable definition macros |
-| `Engine/DukZeven/Code/dksvari.h` | Internal header of the matching dk module |
-| `Engine/DukZeven/Code/dkt.cpp` | dkt: texture loading (TGA) and binding |
-| `Engine/DukZeven/Code/dkt.h` | dkt: texture loading (TGA) and binding |
-| `Engine/DukZeven/Code/dkti.h` | Internal header of the matching dk module |
-| `Engine/DukZeven/Code/dkw.cpp` | dkw: window creation and events |
-| `Engine/DukZeven/Code/dkw.h` | dkw: window creation and events |
-| `Engine/DukZeven/Code/dkwi.h` | Internal header of the matching dk module |
-| `Engine/DukZeven/Code/glext.h` | Vendored OpenGL extension header |
-
-### `Engine/DukZeven/inc`
-
-| path | purpose |
-|---|---|
-| `Engine/DukZeven/inc/dkc.h` | dkc: high-resolution timer and platform helpers |
-| `Engine/DukZeven/inc/dkf.h` | dkf: bitmap font rendering |
-| `Engine/DukZeven/inc/dkgl.h` | dkgl: OpenGL context and state |
-| `Engine/DukZeven/inc/dki.h` | dki: keyboard, mouse and input polling |
-| `Engine/DukZeven/inc/dko.h` | dko: public API of the .DKO model loader |
-| `Engine/DukZeven/inc/dkp.h` | dkp: particle system |
-| `Engine/DukZeven/inc/dks.h` | dks: sound and music (FMOD) |
-| `Engine/DukZeven/inc/dksi.h` | Internal header of the matching dk module |
-| `Engine/DukZeven/inc/dksvar.h` | dksvar: configuration variable registry |
-| `Engine/DukZeven/inc/dksvardef.h` | dksvar: variable definition macros |
-| `Engine/DukZeven/inc/dkt.h` | dkt: texture loading (TGA) and binding |
-| `Engine/DukZeven/inc/dkw.h` | dkw: window creation and events |
-| `Engine/DukZeven/inc/glext.h` | Vendored OpenGL extension header |
-| `Engine/DukZeven/inc/linux_types.h` | Fixed-width type aliases for Linux |
-
-### `Engine/babonet/Code`
-
-| path | purpose |
-|---|---|
-| `Engine/babonet/Code/MD5.h` | RFC 1321 MD5 header |
-| `Engine/babonet/Code/Makefile` | Makefile for babonet |
-| `Engine/babonet/Code/baboNet.cpp` | babonet public API (bb_* functions) |
-| `Engine/babonet/Code/baboNet.h` | babonet public API (bb_* functions) |
-| `Engine/babonet/Code/cClient.cpp` | babonet client connection (TCP and UDP) |
-| `Engine/babonet/Code/cClient.h` | babonet client connection (TCP and UDP) |
-| `Engine/babonet/Code/cConnection.cpp` | babonet outgoing connection state machine |
-| `Engine/babonet/Code/cConnection.h` | babonet outgoing connection state machine |
-| `Engine/babonet/Code/cDNSquery.cpp` | babonet asynchronous DNS lookup |
-| `Engine/babonet/Code/cDNSquery.h` | babonet asynchronous DNS lookup |
-| `Engine/babonet/Code/cIncConnection.cpp` | babonet incoming connection handshake |
-| `Engine/babonet/Code/cIncConnection.h` | babonet incoming connection handshake |
-| `Engine/babonet/Code/cPacket.cpp` | babonet TCP packet |
-| `Engine/babonet/Code/cPacket.h` | babonet TCP packet |
-| `Engine/babonet/Code/cPeer.cpp` | babonet UDP peer with reliability acks |
-| `Engine/babonet/Code/cPeer.h` | babonet UDP peer with reliability acks |
-| `Engine/babonet/Code/cPeer2Peer.cpp` | babonet UDP peer-to-peer manager |
-| `Engine/babonet/Code/cPeer2Peer.h` | babonet UDP peer-to-peer manager |
-| `Engine/babonet/Code/cServer.cpp` | babonet server: listener and client set |
-| `Engine/babonet/Code/cServer.h` | babonet server: listener and client set |
-| `Engine/babonet/Code/cUDPpacket.cpp` | babonet UDP packet |
-| `Engine/babonet/Code/cUDPpacket.h` | babonet UDP packet |
-| `Engine/babonet/Code/cUDPserver.cpp` | babonet UDP server |
-| `Engine/babonet/Code/cUDPserver.h` | babonet UDP server |
-| `Engine/babonet/Code/global.h` | babonet shared types and constants |
-| `Engine/babonet/Code/main.cpp` | Standalone CMD5 example program (not part of any build) |
-| `Engine/babonet/Code/md5c.c` | RFC 1321 MD5 implementation |
-| `Engine/babonet/Code/md5class.cpp` | CMD5: MD5 hex-digest wrapper |
-| `Engine/babonet/Code/md5class.h` | CMD5: MD5 hex-digest wrapper |
-
-### `Engine/babonet/inc`
-
-| path | purpose |
-|---|---|
-| `Engine/babonet/inc/baboNet.h` | babonet public API (bb_* functions) |
-
-### `Engine/dko/Code`
-
-| path | purpose |
-|---|---|
-| `Engine/dko/Code/CFace.cpp` | dko: geometry and collision octree |
-| `Engine/dko/Code/CFace.h` | dko: geometry and collision octree |
-| `Engine/dko/Code/CHUNKINF.H` | Autodesk 3DS chunk definitions (3DS import) |
-| `Engine/dko/Code/COctree.cpp` | dko: geometry and collision octree |
-| `Engine/dko/Code/COctree.h` | dko: geometry and collision octree |
-| `Engine/dko/Code/CVector.cpp` | Engine copy of the shared math/string type |
-| `Engine/dko/Code/CVector.h` | Engine copy of the shared math/string type |
-| `Engine/dko/Code/CdkoAnimation.cpp` | dko: model data structures |
-| `Engine/dko/Code/CdkoAnimation.h` | dko: model data structures |
-| `Engine/dko/Code/CdkoMaterial.cpp` | dko: model data structures |
-| `Engine/dko/Code/CdkoMaterial.h` | dko: model data structures |
-| `Engine/dko/Code/CdkoMesh.cpp` | dko: model data structures |
-| `Engine/dko/Code/CdkoMesh.h` | dko: model data structures |
-| `Engine/dko/Code/CdkoModel.cpp` | dko: model data structures |
-| `Engine/dko/Code/CdkoModel.h` | dko: model data structures |
-| `Engine/dko/Code/DKO Chunk Info.txt` | DKO file chunk layout |
-| `Engine/dko/Code/Makefile` | Makefile for dko |
-| `Engine/dko/Code/Readme.txt` | Notes on the DKO exporter and format |
-| `Engine/dko/Code/dko.cpp` | dko: public API of the .DKO model loader |
-| `Engine/dko/Code/dko.h` | dko: public API of the .DKO model loader |
-| `Engine/dko/Code/dkoInner.h` | dko: internal declarations |
-| `Engine/dko/Code/eHierarchic.cpp` | dko: hierarchy and texture helpers |
-| `Engine/dko/Code/eHierarchic.h` | dko: hierarchy and texture helpers |
-| `Engine/dko/Code/ePTexture.cpp` | dko: hierarchy and texture helpers |
-| `Engine/dko/Code/ePTexture.h` | dko: hierarchy and texture helpers |
-| `Engine/dko/Code/platform_types.h` | Fixed-width type aliases |
-
-### `Engine/dko/Code/gl`
-
-| path | purpose |
-|---|---|
-| `Engine/dko/Code/gl/glext.h` | Vendored OpenGL extension header |
-
-### `Engine/dko/inc`
-
-| path | purpose |
-|---|---|
-| `Engine/dko/inc/dko.h` | dko: public API of the .DKO model loader |
-| `Engine/dko/inc/dkt.h` | dkt: texture loading (TGA) and binding |
-
-### `MasterServer`
-
-| path | purpose |
-|---|---|
-| `MasterServer/Readme.md` | Master server notes |
-
-### `MasterServer/Source`
-
-| path | purpose |
-|---|---|
-| `MasterServer/Source/AUTHORS` | Autotools boilerplate |
-| `MasterServer/Source/COPYING` | License text shipped with the master server |
-| `MasterServer/Source/ChangeLog` | Autotools boilerplate |
-| `MasterServer/Source/Doxyfile` | Doxygen config |
-| `MasterServer/Source/INSTALL` | Autotools boilerplate |
-| `MasterServer/Source/Makefile.am` | Automake source list (replaced in Step 2) |
-| `MasterServer/Source/NEWS` | Autotools boilerplate |
-| `MasterServer/Source/TODO` | Autotools boilerplate |
-| `MasterServer/Source/config.guess` | Autotools helper |
-| `MasterServer/Source/config.h.in` | Autotools config header template |
-| `MasterServer/Source/config.sub` | Autotools helper |
-| `MasterServer/Source/configure.in` | Autoconf script (replaced in Step 2) |
-| `MasterServer/Source/depcomp` | Autotools helper |
-| `MasterServer/Source/install-sh` | Autotools helper |
-| `MasterServer/Source/ltmain.sh` | Libtool helper |
-| `MasterServer/Source/missing` | Autotools helper |
-| `MasterServer/Source/mkinstalldirs` | Autotools helper |
-
-### `MasterServer/Source/src`
-
-| path | purpose |
-|---|---|
-| `MasterServer/Source/src/CClient.cpp` | Master: connected-client record (babonet client variant) |
-| `MasterServer/Source/src/CClient.h` | Master: connected-client record (babonet client variant) |
-| `MasterServer/Source/src/CServer.cpp` | Master: registered game-server record |
-| `MasterServer/Source/src/Makefile.am` | Automake source list for linuxmaster (replaced in Step 2) |
-| `MasterServer/Source/src/cBV2game.cpp` | Master: game list entry |
-| `MasterServer/Source/src/cBV2game.h` | Master: game list entry |
-| `MasterServer/Source/src/cMSstruct.h` | Master protocol structs (older subset of BaboViolent2/inc/cMSstruct.h) |
-| `MasterServer/Source/src/cMasterServer.cpp` | Master: server registry, bans, DB access |
-| `MasterServer/Source/src/cMasterServer.h` | Master: server registry, bans, DB access |
-| `MasterServer/Source/src/cNetManager.cpp` | Master: network loop and packet handling |
-| `MasterServer/Source/src/cNetManager.h` | Master: network loop and packet handling |
-| `MasterServer/Source/src/cPlayer.cpp` | Master: player record |
-| `MasterServer/Source/src/cPlayer.h` | Master: player record |
-| `MasterServer/Source/src/cServer.h` | Master: registered game-server record |
-| `MasterServer/Source/src/main.cpp` | Master server entry point |
+| `.github/workflows/build.yml` | CI: build and ctest on Windows, macOS, Linux; ASan smoke job with client under xvfb; artifacts |
+| `.github/workflows/hygiene.yml` | CI: ARCHITECTURE.md inventory, repository hygiene, content case |
 
 ### `config`
 
@@ -513,6 +87,12 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 |---|---|
 | `config/README.md` | Config and secrets policy |
 | `config/bv2.example.cfg` | Default client/server config with empty secrets |
+
+### `content`
+
+| path | purpose |
+|---|---|
+| `content/README.txt` | Where game data goes (originals removed) |
 
 ### `content-seed`
 
@@ -522,11 +102,22 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `content-seed/master.sql` | Master server SQLite schema (recovered from code) |
 | `content-seed/web.sql` | Master server web game-list schema |
 
+### `content/LaunchScript`
+
+| path | purpose |
+|---|---|
+| `content/LaunchScript/CTF.cfg` | Example dedicated-server launch script (CTF; map is a placeholder) |
+
+### `content/languages`
+
+| path | purpose |
+|---|---|
+| `content/languages/en.lang` | English strings (default and only language) |
+
 ### `docs`
 
 | path | purpose |
 |---|---|
-| `docs/ASSETS-LICENSE.md` | Asset and name licensing status, replacement register |
 
 ### `docs/analysis`
 
@@ -543,13 +134,6 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/analysis/KEY_QUESTIONS.md` | Code analysis: KEY QUESTIONS |
 | `docs/analysis/README.md` | Index of the code analysis |
 
-### `docs/assets`
-
-| path | purpose |
-|---|---|
-| `docs/assets/ASSET-INVENTORY.md` | Catalogue of every removed original asset |
-| `docs/assets/original-assets.sha256` | SHA-256 of every removed original file |
-
 ### `docs/decisions`
 
 | path | purpose |
@@ -558,13 +142,9 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/decisions/0002-compile-out-libcurl.md` | ADR 0002 |
 | `docs/decisions/0003-keep-opengl-2.1-then-sdl-gpu.md` | ADR 0003 |
 | `docs/decisions/0004-project-name-roboviolence2.md` | ADR 0004 |
+| `docs/decisions/0005-runtime-main-data-root.md` | ADR 0005 |
+| `docs/decisions/0006-sdl3-miniaudio-glad-platform-layer.md` | ADR 0006 |
 | `docs/decisions/README.md` | ADR format and index |
-
-### `docs/legal`
-
-| path | purpose |
-|---|---|
-| `docs/legal/permission-request.md` | Draft permission request to the rights holders |
 
 ### `docs/refactoring`
 
@@ -580,16 +160,405 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/refactoring/step4-64bit-and-cross-platform.md` | Scope file for step4 |
 | `docs/refactoring/step5-code-hygiene-and-ci.md` | Scope file for step5 |
 
+### `engine/babonet`
+
+| path | purpose |
+|---|---|
+| `engine/babonet/CMakeLists.txt` | Target babonet |
+| `engine/babonet/README.md` | Module README: babonet |
+
+### `engine/babonet/include`
+
+| path | purpose |
+|---|---|
+| `engine/babonet/include/CThread.h` | Thread wrapper |
+| `engine/babonet/include/baboNet.h` | babonet public API (bb_* functions) |
+| `engine/babonet/include/cMSstruct.h` | Master-server protocol structs and message IDs |
+| `engine/babonet/include/md5class.h` | CMD5: MD5 hex-digest wrapper |
+
+### `engine/babonet/src`
+
+| path | purpose |
+|---|---|
+| `engine/babonet/src/CThread.cpp` | Thread wrapper |
+| `engine/babonet/src/MD5.h` | RFC 1321 MD5 header |
+| `engine/babonet/src/baboNet.cpp` | babonet public API (bb_* functions) |
+| `engine/babonet/src/cClient.cpp` | babonet client connection (TCP and UDP) |
+| `engine/babonet/src/cClient.h` | babonet client connection (TCP and UDP) |
+| `engine/babonet/src/cConnection.cpp` | babonet outgoing connection state machine |
+| `engine/babonet/src/cConnection.h` | babonet outgoing connection state machine |
+| `engine/babonet/src/cDNSquery.cpp` | babonet asynchronous DNS lookup |
+| `engine/babonet/src/cDNSquery.h` | babonet asynchronous DNS lookup |
+| `engine/babonet/src/cIncConnection.cpp` | babonet incoming connection handshake |
+| `engine/babonet/src/cIncConnection.h` | babonet incoming connection handshake |
+| `engine/babonet/src/cPacket.cpp` | babonet TCP packet |
+| `engine/babonet/src/cPacket.h` | babonet TCP packet |
+| `engine/babonet/src/cPeer.cpp` | babonet UDP peer with reliability acks |
+| `engine/babonet/src/cPeer.h` | babonet UDP peer with reliability acks |
+| `engine/babonet/src/cPeer2Peer.cpp` | babonet UDP peer-to-peer manager |
+| `engine/babonet/src/cPeer2Peer.h` | babonet UDP peer-to-peer manager |
+| `engine/babonet/src/cServer.cpp` | babonet server: listener and client set |
+| `engine/babonet/src/cServer.h` | babonet server: listener and client set |
+| `engine/babonet/src/cUDPpacket.cpp` | babonet UDP packet |
+| `engine/babonet/src/cUDPpacket.h` | babonet UDP packet |
+| `engine/babonet/src/cUDPserver.cpp` | babonet UDP server |
+| `engine/babonet/src/cUDPserver.h` | babonet UDP server |
+| `engine/babonet/src/global.h` | babonet shared types and constants |
+| `engine/babonet/src/main.cpp` | Program entry: window, engine init, main loop |
+| `engine/babonet/src/md5c.c` | RFC 1321 MD5 implementation |
+| `engine/babonet/src/md5class.cpp` | CMD5: MD5 hex-digest wrapper |
+| `engine/babonet/src/socket_compat.h` | send() with EINTR retry; SIGPIPE is ignored in bb_init |
+
+### `engine/dko`
+
+| path | purpose |
+|---|---|
+| `engine/dko/CMakeLists.txt` | Target dko |
+| `engine/dko/README.md` | Module README: dko |
+
+### `engine/dko/include`
+
+| path | purpose |
+|---|---|
+| `engine/dko/include/dko.h` | dko: public API of the .DKO model loader |
+
+### `engine/dko/src`
+
+| path | purpose |
+|---|---|
+| `engine/dko/src/CFace.cpp` | dko: geometry and collision octree |
+| `engine/dko/src/CFace.h` | dko: geometry and collision octree |
+| `engine/dko/src/CHUNKINF.H` | Autodesk 3DS chunk definitions (3DS import) |
+| `engine/dko/src/COctree.cpp` | dko: geometry and collision octree |
+| `engine/dko/src/COctree.h` | dko: geometry and collision octree |
+| `engine/dko/src/CdkoAnimation.cpp` | dko: model data structures |
+| `engine/dko/src/CdkoAnimation.h` | dko: model data structures |
+| `engine/dko/src/CdkoMaterial.cpp` | dko: model data structures |
+| `engine/dko/src/CdkoMaterial.h` | dko: model data structures |
+| `engine/dko/src/CdkoMesh.cpp` | dko: model data structures |
+| `engine/dko/src/CdkoMesh.h` | dko: model data structures |
+| `engine/dko/src/CdkoModel.cpp` | dko: model data structures |
+| `engine/dko/src/CdkoModel.h` | dko: model data structures |
+| `engine/dko/src/Readme.txt` | Notes on the DKO exporter and format |
+| `engine/dko/src/dko-chunk-info.txt` | DKO file chunk layout |
+| `engine/dko/src/dko.cpp` | dko: public API of the .DKO model loader |
+| `engine/dko/src/dkoInner.h` | dko: internal declarations |
+| `engine/dko/src/eHierarchic.cpp` | dko: hierarchy and texture helpers |
+| `engine/dko/src/eHierarchic.h` | dko: hierarchy and texture helpers |
+| `engine/dko/src/ePTexture.cpp` | dko: hierarchy and texture helpers |
+| `engine/dko/src/ePTexture.h` | dko: hierarchy and texture helpers |
+
+### `engine/zeven`
+
+| path | purpose |
+|---|---|
+| `engine/zeven/CMakeLists.txt` | Targets zeven_core and zeven_client |
+| `engine/zeven/README.md` | Module README: zeven |
+
+### `engine/zeven/include`
+
+| path | purpose |
+|---|---|
+| `engine/zeven/include/CDkoObject.h` | DKO model instance wrapper |
+| `engine/zeven/include/CFont.h` | Bitmap font class |
+| `engine/zeven/include/CMatrix.h` | Engine copy of the shared math/string type |
+| `engine/zeven/include/CParticle.h` | Particle class |
+| `engine/zeven/include/CString.h` | Engine copy of the shared math/string type |
+| `engine/zeven/include/CSystemVariable.h` | Typed configuration variable classes |
+| `engine/zeven/include/CVector.h` | Engine copy of the shared math/string type |
+| `engine/zeven/include/dikeys.h` | DIK_* key IDs (DirectInput scancodes) used by dki, key binds and the game |
+| `engine/zeven/include/dkc.h` | dkc: high-resolution timer and platform helpers |
+| `engine/zeven/include/dkf.h` | dkf: bitmap font rendering |
+| `engine/zeven/include/dkgl.h` | dkgl: OpenGL context and state |
+| `engine/zeven/include/dki.h` | dki: keyboard, mouse and input polling |
+| `engine/zeven/include/dkp.h` | dkp: particle system |
+| `engine/zeven/include/dks.h` | dks: sound and music (FMOD) |
+| `engine/zeven/include/dksvar.h` | dksvar: configuration variable registry |
+| `engine/zeven/include/dksvardef.h` | dksvar: variable definition macros |
+| `engine/zeven/include/dkt.h` | dkt: texture loading (TGA) and binding |
+| `engine/zeven/include/dkw.h` | dkw: window creation and events |
+| `engine/zeven/include/glheaders.h` | The only OpenGL include: glad, then GLU |
+| `engine/zeven/include/platform.h` | Platform macros (BV2_PLATFORM_*, BV2_POSIX), INT4/UINT4, POSIX includes and Win32 type shims; force-included |
+
+### `engine/zeven/src`
+
+| path | purpose |
+|---|---|
+| `engine/zeven/src/CDkoObject.cpp` | DKO model instance wrapper |
+| `engine/zeven/src/CFont.cpp` | Bitmap font class |
+| `engine/zeven/src/CMatrix.cpp` | Engine copy of the shared math/string type |
+| `engine/zeven/src/CParticle.cpp` | Particle class |
+| `engine/zeven/src/CString.cpp` | Engine copy of the shared math/string type |
+| `engine/zeven/src/CSystemVariable.cpp` | Typed configuration variable classes |
+| `engine/zeven/src/CVector.cpp` | Engine copy of the shared math/string type |
+| `engine/zeven/src/dkc.cpp` | dkc: high-resolution timer and platform helpers |
+| `engine/zeven/src/dkf.cpp` | dkf: bitmap font rendering |
+| `engine/zeven/src/dkfi.h` | Internal header of the matching dk module |
+| `engine/zeven/src/dkgl.cpp` | dkgl: OpenGL context and state |
+| `engine/zeven/src/dkgli.h` | Internal header of the matching dk module |
+| `engine/zeven/src/dki.cpp` | dki: keyboard, mouse and input polling |
+| `engine/zeven/src/dkp.cpp` | dkp: particle system |
+| `engine/zeven/src/dkpi.h` | Internal header of the matching dk module |
+| `engine/zeven/src/dks.cpp` | dks: sound and music (FMOD) |
+| `engine/zeven/src/dksvar.cpp` | dksvar: configuration variable registry |
+| `engine/zeven/src/dksvari.h` | Internal header of the matching dk module |
+| `engine/zeven/src/dkt.cpp` | dkt: texture loading (TGA) and binding |
+| `engine/zeven/src/dkt_console.cpp` | No-op dkt for the headless server |
+| `engine/zeven/src/dkti.h` | Internal header of the matching dk module |
+| `engine/zeven/src/dkw.cpp` | dkw: window creation and events |
+
+### `engine/zeven/third_party/glad`
+
+| path | purpose |
+|---|---|
+| `engine/zeven/third_party/glad/README.md` | How the glad loader was generated |
+
+### `engine/zeven/third_party/glad/include/KHR`
+
+| path | purpose |
+|---|---|
+| `engine/zeven/third_party/glad/include/KHR/khrplatform.h` | Khronos platform header (glad dependency) |
+
+### `engine/zeven/third_party/glad/include/glad`
+
+| path | purpose |
+|---|---|
+| `engine/zeven/third_party/glad/include/glad/gl.h` | Generated glad header |
+
+### `engine/zeven/third_party/glad/src`
+
+| path | purpose |
+|---|---|
+| `engine/zeven/third_party/glad/src/gl.c` | Generated glad loader (GL 2.1 compatibility, GL_EXT_bgra) |
+
+### `game`
+
+| path | purpose |
+|---|---|
+| `game/CMakeLists.txt` | Targets bv2dedicated (explicit CONSOLE file list) and bv2 (client) |
+| `game/README.md` | Module README: game |
+
+### `game/src`
+
+| path | purpose |
+|---|---|
+| `game/src/AccountManager.cpp` | Account create/login/clan/friend requests over the master connection |
+| `game/src/AccountManager.h` | Account create/login/clan/friend requests over the master connection |
+| `game/src/Button.cpp` | Menu button widget |
+| `game/src/Button.h` | Menu button widget |
+| `game/src/CAStar.cpp` | A* path finding grid |
+| `game/src/CAStar.h` | A* path finding grid |
+| `game/src/CAStar_FindPath.cpp` | A* search routine |
+| `game/src/CAccount.cpp` | Account UI tab |
+| `game/src/CAccount.h` | Account UI tab |
+| `game/src/CBrowser.cpp` | Server browser UI |
+| `game/src/CBrowser.h` | Server browser UI |
+| `game/src/CClans.cpp` | Clans UI tab |
+| `game/src/CClans.h` | Clans UI tab |
+| `game/src/CControl.cpp` | Generic UI control (button, label, list, text box) of the newer menu |
+| `game/src/CControl.h` | Generic UI control (button, label, list, text box) of the newer menu |
+| `game/src/CCredit.cpp` | Credits tab |
+| `game/src/CCredit.h` | Credits tab |
+| `game/src/CCurl.cpp` | HTTP requests through libcurl (compiled out in Phase A) |
+| `game/src/CCurl.h` | HTTP requests through libcurl (compiled out in Phase A) |
+| `game/src/CCurlStub.cpp` | CCurl stand-in when BV2_WITH_HTTP is OFF |
+| `game/src/CEditor.cpp` | Map editor UI (newer) |
+| `game/src/CEditor.h` | Map editor UI (newer) |
+| `game/src/CFriends.cpp` | Friends list UI and requests |
+| `game/src/CFriends.h` | Friends list UI and requests |
+| `game/src/CHost.cpp` | Host-game UI |
+| `game/src/CHost.h` | Host-game UI |
+| `game/src/CLava.cpp` | Lava rendering and effect |
+| `game/src/CLava.h` | Lava rendering and effect |
+| `game/src/CListener.cpp` | Listener interface for CControl events |
+| `game/src/CListener.h` | Listener interface for CControl events |
+| `game/src/CLobby.cpp` | Lobby and menu tab host |
+| `game/src/CLobby.h` | Lobby and menu tab host |
+| `game/src/CMainTab.cpp` | Main menu tab |
+| `game/src/CMainTab.h` | Main menu tab |
+| `game/src/CMaster.cpp` | Master-server client: server list, remote admin, account manager packets |
+| `game/src/CMaster.h` | Master-server client: server list, remote admin, account manager packets |
+| `game/src/CMaterial.cpp` | Material/texture state wrapper |
+| `game/src/CMaterial.h` | Material/texture state wrapper |
+| `game/src/CMenuManager.cpp` | Manager for the newer menu controls |
+| `game/src/CMenuManager.h` | Manager for the newer menu controls |
+| `game/src/CMesh.cpp` | Mesh container |
+| `game/src/CMesh.h` | Mesh container |
+| `game/src/CMeshBuilder.cpp` | Mesh builder |
+| `game/src/CMeshBuilder.h` | Mesh builder |
+| `game/src/CNews.cpp` | News feed UI |
+| `game/src/CNews.h` | News feed UI |
+| `game/src/COption.cpp` | Options UI |
+| `game/src/COption.h` | Options UI |
+| `game/src/CPanel.h` | UI panel container |
+| `game/src/CPathNode.cpp` | Path node for A* |
+| `game/src/CPathNode.h` | Path node for A* |
+| `game/src/CPing.cpp` | Server ping measurement |
+| `game/src/CPing.h` | Server ping measurement |
+| `game/src/CPlayers.cpp` | Players list UI |
+| `game/src/CPlayers.h` | Players list UI |
+| `game/src/CProfile.cpp` | Profile UI tab |
+| `game/src/CProfile.h` | Profile UI tab |
+| `game/src/CRain.cpp` | Rain weather effect |
+| `game/src/CRain.h` | Rain weather effect |
+| `game/src/CRegisterClan.cpp` | Clan registration UI |
+| `game/src/CRegisterClan.h` | Clan registration UI |
+| `game/src/CSnow.cpp` | Snow weather effect |
+| `game/src/CSnow.h` | Snow weather effect |
+| `game/src/CStats.cpp` | Player statistics UI |
+| `game/src/CStats.h` | Player statistics UI |
+| `game/src/CStatus.cpp` | Online status reporting |
+| `game/src/CStatus.h` | Online status reporting |
+| `game/src/CSurvey.cpp` | Survey dialog |
+| `game/src/CSurvey.h` | Survey dialog |
+| `game/src/CUrlData.cpp` | URL-encoded request bodies (MD5/base64 fields), shared by both CCurl builds |
+| `game/src/CUserLogin.cpp` | Account login UI |
+| `game/src/CUserLogin.h` | Account login UI |
+| `game/src/CVertexBuffer.cpp` | Vertex buffer wrapper |
+| `game/src/CVertexBuffer.h` | Vertex buffer wrapper |
+| `game/src/CWeather.cpp` | Weather selection and rendering |
+| `game/src/CWeather.h` | Weather selection and rendering |
+| `game/src/Choice.cpp` | Menu choice (drop-down/spinner) widget |
+| `game/src/Choice.h` | Menu choice (drop-down/spinner) widget |
+| `game/src/Client.cpp` | Client: connection, join handshake, send/receive state |
+| `game/src/Client.h` | Client: connection, join handshake, send/receive state |
+| `game/src/ClientRecv.cpp` | Client: handlers for every server-to-client packet |
+| `game/src/ClientRender.cpp` | Client: in-game HUD and view rendering |
+| `game/src/ConfirmPass.cpp` | Password confirmation dialog |
+| `game/src/ConfirmPass.h` | Password confirmation dialog |
+| `game/src/ConnectFailed.h` | Dialog: connection failed |
+| `game/src/Console.cpp` | In-game console: commands, log, remote console |
+| `game/src/Console.h` | In-game console: commands, log, remote console |
+| `game/src/Control.cpp` | Menu control base class |
+| `game/src/Control.h` | Menu control base class |
+| `game/src/ControlListener.cpp` | Menu control listener interface |
+| `game/src/ControlListener.h` | Menu control listener interface |
+| `game/src/CreateGame.h` | Create-game screen |
+| `game/src/Credits.h` | Credits screen |
+| `game/src/Dialog.cpp` | Menu dialog base |
+| `game/src/Dialog.h` | Menu dialog base |
+| `game/src/Editor.cpp` | Map editor core |
+| `game/src/Editor.h` | Map editor core |
+| `game/src/EditorDialogs.cpp` | Map editor dialogs |
+| `game/src/EditorDialogs.h` | Map editor dialogs |
+| `game/src/EditorTools.cpp` | Map editor tools |
+| `game/src/EditorTools.h` | Map editor tools |
+| `game/src/Extended.h` | Skin and color chooser screen |
+| `game/src/FastDelegate.h` | Third-party fast C++ delegate header |
+| `game/src/FileIO.cpp` | File and memory-buffer reader/writer with fixed-width types |
+| `game/src/FileIO.h` | File and memory-buffer reader/writer with fixed-width types |
+| `game/src/Game.cpp` | Game state: players, projectiles, items, flags, round and mode logic (shared by client and server) |
+| `game/src/Game.h` | Game state: players, projectiles, items, flags, round and mode logic (shared by client and server) |
+| `game/src/GameProjectile.cpp` | Game: projectile and explosion simulation |
+| `game/src/GameRender.cpp` | Game: world rendering |
+| `game/src/GameShowStats.cpp` | Game: scoreboard and end-of-round stats drawing |
+| `game/src/GameSpawn.cpp` | Game: spawn point selection and respawn |
+| `game/src/GameVar.cpp` | All client and server variables (cl_*, sv_*, r_*, s_*), registered through dksvar, plus loaded textures and sounds |
+| `game/src/GameVar.h` | All client and server variables (cl_*, sv_*, r_*, s_*), registered through dksvar, plus loaded textures and sounds |
+| `game/src/Helper.cpp` | Misc helpers (colors, text, math) |
+| `game/src/Helper.h` | Misc helpers (colors, text, math) |
+| `game/src/Host.h` | Host-game settings struct |
+| `game/src/IncorrectName.h` | Dialog: invalid player name |
+| `game/src/IncorrectPassword.h` | Dialog: wrong server password |
+| `game/src/IntroScreen.cpp` | Intro screen |
+| `game/src/IntroScreen.h` | Intro screen |
+| `game/src/JoinGame.h` | Join-game screen |
+| `game/src/Key.cpp` | Key binding entry |
+| `game/src/Key.h` | Key binding entry |
+| `game/src/KeyManager.cpp` | Key bindings manager |
+| `game/src/KeyManager.h` | Key bindings manager |
+| `game/src/Label.cpp` | Menu label widget |
+| `game/src/Label.h` | Menu label widget |
+| `game/src/MainMenu.h` | Main menu screen |
+| `game/src/Map.cpp` | Map data, .bvm loading and saving, collision, rendering resources |
+| `game/src/Map.h` | Map data, .bvm loading and saving, collision, rendering resources |
+| `game/src/MapRender.cpp` | Map rendering (tiles, walls, dirt, optional 3D model map) |
+| `game/src/MemIO.cpp` | In-memory buffer reader/writer |
+| `game/src/MemIO.h` | In-memory buffer reader/writer |
+| `game/src/Menu.h` | Menu system core (old menu) |
+| `game/src/MenuSetup.cpp` | Menu construction |
+| `game/src/MessageDialog.cpp` | Generic message dialog |
+| `game/src/MessageDialog.h` | Generic message dialog |
+| `game/src/Minibot.cpp` | Minibot drone weapon entity |
+| `game/src/NoGameRunning.h` | Dialog: no game running |
+| `game/src/NoMapSelected.h` | Dialog: no map selected |
+| `game/src/OptionMenu.h` | Options screen |
+| `game/src/Password.h` | Password prompt dialog |
+| `game/src/Player.cpp` | Player entity: movement, weapons, hits, rendering |
+| `game/src/Player.h` | Player entity: movement, weapons, hits, rendering |
+| `game/src/PlayerUpdate.cpp` | Player: per-tick update (physics, firing, timers) |
+| `game/src/Quit.h` | Quit confirmation dialog |
+| `game/src/RemoteAdminPackets.h` | Wire structs for the remote-admin protocol |
+| `game/src/ReportGen.cpp` | XML server report generation |
+| `game/src/ReportGen.h` | XML server report generation |
+| `game/src/ResIco.rc` | Windows resource script (icon) |
+| `game/src/Scene.cpp` | Top-level scene: main loop, menus, game and editor switching, rendering setup |
+| `game/src/Scene.h` | Top-level scene: main loop, menus, game and editor switching, rendering setup |
+| `game/src/SceneNet.cpp` | Scene: starts and stops client and server, hosting and joining |
+| `game/src/Server.cpp` | Authoritative server: connections, joins, tick, map and mode control |
+| `game/src/Server.h` | Authoritative server: connections, joins, tick, map and mode control |
+| `game/src/ServerCTF.cpp` | Server: capture-the-flag rules |
+| `game/src/ServerClose.h` | Dialog shown when the server closes the connection |
+| `game/src/ServerRecv.cpp` | Server: handlers for every client-to-server packet |
+| `game/src/ServerSnD.cpp` | Server: search-and-destroy rules |
+| `game/src/Weapon.cpp` | Weapon definitions and stats |
+| `game/src/Weapon.h` | Weapon definitions and stats |
+| `game/src/Write.cpp` | Chat input widget |
+| `game/src/Write.h` | Chat input widget |
+| `game/src/Writting.cpp` | Chat input handling |
+| `game/src/Writting.h` | Chat input handling |
+| `game/src/WrongVersion.h` | Dialog: client/server version mismatch |
+| `game/src/Zeven.h` | Umbrella include for engine headers and common types |
+| `game/src/bv2.bmp` | Windows resource bitmap (original art; replace in §H) |
+| `game/src/changes-log.txt` | Upstream change log |
+| `game/src/icon1.ico` | Windows application icon (original art; replace in §H) |
+| `game/src/main.cpp` | Program entry: window, engine init, main loop |
+| `game/src/netPacket.h` | Wire structs and message IDs (raw memcpy'd structs) |
+| `game/src/resource3.h` | Resource IDs for ResIco.rc |
+| `game/src/screengrab.cpp` | Screenshot capture |
+| `game/src/screengrab.h` | Screenshot capture |
+| `game/src/tinyxml.cpp` | TinyXML (third-party XML parser) |
+| `game/src/tinyxml.h` | TinyXML (third-party XML parser) |
+| `game/src/tinyxmlerror.cpp` | TinyXML (third-party XML parser) |
+| `game/src/tinyxmlparser.cpp` | TinyXML (third-party XML parser) |
+
+### `masterserver`
+
+| path | purpose |
+|---|---|
+| `masterserver/CMakeLists.txt` | Target bv2master |
+| `masterserver/README.md` | Module README: master server |
+
+### `masterserver/src`
+
+| path | purpose |
+|---|---|
+| `masterserver/src/MasterClient.cpp` | Master: connected-client record (reconstructed) |
+| `masterserver/src/MasterClient.h` | Master: connected-client record (reconstructed; see masterserver/README.md) |
+| `masterserver/src/cBV2game.cpp` | Master: game list entry |
+| `masterserver/src/cBV2game.h` | Master: game list entry |
+| `masterserver/src/cMSstruct.h` | Master protocol structs (older subset of engine/babonet/include/cMSstruct.h) |
+| `masterserver/src/cMasterServer.cpp` | Master: server registry, bans, DB access |
+| `masterserver/src/cMasterServer.h` | Master: server registry, bans, DB access |
+| `masterserver/src/cNetManager.cpp` | Master: network loop and packet handling |
+| `masterserver/src/cNetManager.h` | Master: network loop and packet handling |
+| `masterserver/src/main.cpp` | Program entry: window, engine init, main loop |
+
 ### `tools`
 
 | path | purpose |
 |---|---|
+| `tools/CMakeLists.txt` | Database seeding (bv2_seed_db_tool, bv2.db, master.db, web.db) |
 | `tools/FORK_BASE` | First commit after upstream; secret scans start here |
-| `tools/asset-inventory.py` | Generates the asset inventory and hash list (needs the originals) |
 | `tools/check-architecture.ps1` | Fails if ARCHITECTURE.md and the tracked files disagree (Windows) |
 | `tools/check-architecture.sh` | Fails if ARCHITECTURE.md and the tracked files disagree (Unix) |
 | `tools/check-encoding.py` | Fails on non-UTF-8, BOM or CR in tracked text files |
 | `tools/check-original-assets.py` | Fails if a tracked file matches an original-asset hash |
+| `tools/original-assets.sha256` | SHA-256 of every removed original file |
 | `tools/convert-encoding.py` | One-off UTF-8/LF converter used in step 1.4 |
+| `tools/placeholder-manifest.tsv` | Files the game loads at startup and their formats, for the placeholder generator |
+| `tools/gen-placeholder-content.py` | Writes placeholder maps, textures, sounds and models for dev and CI |
+| `tools/check-hygiene.py` | Fails on spaces in paths, tracked ignored files, files over 5 MB, bad encoding |
+| `tools/seed_db.cpp` | Creates a SQLite DB from SQL files (build helper) |
 | `tools/setup-dev.ps1` | Activates hooks, checks tools (Windows) |
 | `tools/setup-dev.sh` | Activates hooks, checks tools (Unix) |

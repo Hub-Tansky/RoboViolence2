@@ -1,0 +1,115 @@
+name: build
+on:
+  push:
+  pull_request:
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+env:
+  VCPKG_BINARY_SOURCES: clear;files,${{ github.workspace }}/.vcpkg-bin,readwrite
+jobs:
+  build:
+    name: build (${{ matrix.preset }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: windows-latest, preset: win-x64-msvc }
+          - { os: macos-14, preset: macos-arm64 }
+          - { os: ubuntu-24.04, preset: linux-x64 }
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use the runner's vcpkg, with the pinned baseline fetched
+        shell: bash
+        run: |
+          echo "VCPKG_ROOT=$VCPKG_INSTALLATION_ROOT" >> "$GITHUB_ENV"
+          baseline=$(sed -n 's/.*"builtin-baseline": *"\([0-9a-f]*\)".*/\1/p' vcpkg.json)
+          git -C "$VCPKG_INSTALLATION_ROOT" fetch --quiet origin "$baseline" || git -C "$VCPKG_INSTALLATION_ROOT" fetch --quiet --unshallow origin
+          # The builtin registry reads its version database from this checkout: it must be at the baseline.
+          git -C "$VCPKG_INSTALLATION_ROOT" checkout --quiet --force "$baseline"
+      - name: Linux packages
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          eval "$(tools/setup-dev.sh --linux-packages | sed 's/^sudo apt install/sudo apt-get install -y/')"
+      - name: macOS tools
+        if: runner.os == 'macOS'
+        run: brew install ninja autoconf autoconf-archive automake libtool
+      - name: MSVC environment
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+      - uses: actions/cache@v4
+        with:
+          path: .vcpkg-bin
+          key: vcpkg-${{ matrix.preset }}-${{ hashFiles('vcpkg.json') }}
+          restore-keys: vcpkg-${{ matrix.preset }}-
+      - name: Configure
+        run: cmake --preset ${{ matrix.preset }}
+      - name: Build (keep going, so one run lists every failure)
+        run: cmake --build --preset ${{ matrix.preset }} -- -k 0
+      - name: Test
+        run: ctest --test-dir build/${{ matrix.preset }} --output-on-failure
+      - name: Package (Windows)
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          mkdir out && cp build/${{ matrix.preset }}/runtime/bv2dedicated.exe out/
+      - name: Package (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          mkdir out
+          cp build/${{ matrix.preset }}/runtime/bv2dedicated out/
+          ditto -c -k --keepParent build/${{ matrix.preset }}/runtime/bv2.app out/bv2-macos-arm64.zip
+      - name: Package (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          mkdir out
+          cp build/${{ matrix.preset }}/runtime/bv2dedicated out/
+          tar -C build/${{ matrix.preset }}/runtime -hczf out/bv2-linux-x64.tar.gz bv2 bv2dedicated main
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bv2-${{ matrix.preset }}
+          path: out/
+  smoke:
+    name: smoke (linux-x64-asan)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use the runner's vcpkg, with the pinned baseline fetched
+        run: |
+          echo "VCPKG_ROOT=$VCPKG_INSTALLATION_ROOT" >> "$GITHUB_ENV"
+          baseline=$(sed -n 's/.*"builtin-baseline": *"\([0-9a-f]*\)".*/\1/p' vcpkg.json)
+          git -C "$VCPKG_INSTALLATION_ROOT" fetch --quiet origin "$baseline" || git -C "$VCPKG_INSTALLATION_ROOT" fetch --quiet --unshallow origin
+          # The builtin registry reads its version database from this checkout: it must be at the baseline.
+          git -C "$VCPKG_INSTALLATION_ROOT" checkout --quiet --force "$baseline"
+      - name: Packages
+        run: |
+          sudo apt-get update
+          eval "$(tools/setup-dev.sh --linux-packages | sed 's/^sudo apt install/sudo apt-get install -y/')"
+          sudo apt-get install -y xvfb libgl1-mesa-dri
+      - uses: actions/cache@v4
+        with:
+          path: .vcpkg-bin
+          key: vcpkg-linux-x64-asan-${{ hashFiles('vcpkg.json') }}
+          restore-keys: vcpkg-linux-x64-asan-
+      - run: cmake --preset linux-x64-asan
+      - run: cmake --build --preset linux-x64-asan
+      - name: Server smoke (loads the CTF launch script, quits) and unit tests
+        env:
+          ASAN_OPTIONS: detect_leaks=0
+        run: ctest --test-dir build/linux-x64-asan --output-on-failure
+      - name: Client reaches the main menu and survives 10 s
+        working-directory: build/linux-x64-asan/runtime
+        env:
+          ASAN_OPTIONS: detect_leaks=0
+          SDL_AUDIODRIVER: dummy
+          BV2_PREF_DIR: ${{ runner.temp }}/bv2-pref
+        run: |
+          set +e
+          xvfb-run -a -s "-screen 0 1280x720x24" timeout 10 ./bv2
+          rc=$?
+          # 124 = still running when the timeout fired: it did not crash.
+          [ "$rc" = 124 ] || { echo "client exited early with $rc"; exit 1; }

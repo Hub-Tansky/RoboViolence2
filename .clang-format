@@ -1,0 +1,22 @@
+# Matches the existing style: tabs, Allman braces, no column limit.
+# Never mass-format: use `git clang-format` so only touched lines change.
+BasedOnStyle: LLVM
+Language: Cpp
+UseTab: Always
+IndentWidth: 4
+TabWidth: 4
+ColumnLimit: 0
+BreakBeforeBraces: Allman
+AccessModifierOffset: -4
+IndentCaseLabels: true
+NamespaceIndentation: All
+PointerAlignment: Left
+SpaceAfterCStyleCast: false
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+SortIncludes: Never
+ReflowComments: false
+AlignTrailingComments: false
+FixNamespaceComments: false
+IndentPPDirectives: AfterHash

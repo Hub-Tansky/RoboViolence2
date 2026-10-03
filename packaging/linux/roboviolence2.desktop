@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=RoboViolence 2
+Comment=Top-down multiplayer shooter (unofficial fork of BaboViolent 2)
+Exec=bv2
+Icon=roboviolence2
+Categories=Game;ActionGame;
+StartupWMClass=org.roboviolence.bv2
+Terminal=false

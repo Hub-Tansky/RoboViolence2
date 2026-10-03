@@ -4,9 +4,12 @@ title = "RoboViolence2 gitleaks config"
 useDefault = true
 
 [allowlist]
+regexes = [
+  '''compatibility=2\.1''', # glad generator command line, not a key
+]
 paths = [
   '''^LICENSE\.txt$''',
-  '''^docs/assets/original-assets\.sha256$''',
+  '''^tools/original-assets\.sha256$''',
   '''^MasterServer/Source/(COPYING|config\.guess|config\.sub|ltmain\.sh|INSTALL)$''',
 ]
 

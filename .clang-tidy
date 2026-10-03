@@ -1,0 +1,9 @@
+# Non-blocking in CI at first (step 5.3). Run: clang-tidy -p build/<preset> <file>
+Checks: >
+  -*,
+  bugprone-*,
+  -bugprone-easily-swappable-parameters,
+  clang-analyzer-*,
+  cert-err34-c
+WarningsAsErrors: ''
+HeaderFilterRegex: '(engine|game|masterserver)/'

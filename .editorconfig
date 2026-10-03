@@ -10,3 +10,8 @@ end_of_line = crlf
 
 [Makefile]
 indent_style = tab
+
+[*.{c,cpp,h,hpp}]
+indent_style = tab
+indent_size = 4
+tab_width = 4
