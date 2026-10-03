@@ -98,7 +98,7 @@ CVector3f CMatrix3x3f::operator*(const CVector3f &u){
 //
 float CMatrix3x3f::Minor(int Row, int Col){
 	// On pogne les autres lignes
-	int Row1, Row2, Col1, Col2;
+	int Row1 = 0, Row2 = 0, Col1 = 0, Col2 = 0;
 	float Signe = 1;
 	if (Row == 0) {Row1 = 1;Row2 = 2;}
 	if (Row == 1) {Row1 = 0;Row2 = 2;Signe*=-1;}
