@@ -831,6 +831,10 @@ void Console::sendCommand(CString commandLine, bool isAdmin, unsigned long bbnet
 				}
 
 				// Il faut envoyer le changement de variable sur le r?eau
+#ifdef CONSOLE
+				// A launch script sets sv_* variables before `dedicate` creates the server.
+				if (scene && scene->server)
+#endif
 				scene->server->sendSVChange(commandLine);
 
 				if (command == "set sv_port")
