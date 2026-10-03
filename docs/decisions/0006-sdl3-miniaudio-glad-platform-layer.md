@@ -6,7 +6,7 @@
 
 ## Context
 - The platform modules were a Win32/WGL window, DirectInput, FMOD 3 and an SDL 1.2 path that never had a client `main` (`game/src/main.cpp` had only `WinMain` for the client).
-- The game calls `dkw*`, `dki*`, `dks*`, `dkgl*` from about 90 sites; key binds in `bv2.cfg` are DirectInput scancodes (`k_moveUp 17`).
+- The game calls `dkw*`, `dki*`, `dks*`, `dkgl*` from about 90 sites; key binds in `bv2.cfg` are legacy PC scancodes (`k_moveUp 17`).
 
 ## Decision
 Rewrite the modules behind their headers: `dkw`/`dki` on SDL3 (SDL scancodes map to the same `DIK_*` IDs, `dikeys.h`), `dks` on miniaudio, GL entry points from a generated glad (GL 2.1 compatibility) committed under `engine/zeven/third_party/glad`. The window API no longer exposes `HWND`/`HDC`; `dkglSwapBuffers()` replaces `SwapBuffers`, `dkwShowMessage()` replaces `MessageBox`.
