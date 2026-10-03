@@ -42,6 +42,8 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | path | purpose |
 |---|---|
 | `.editorconfig` | Editor settings: UTF-8, LF |
+| `.clang-format` | Formatting style (tabs, Allman); apply with `git clang-format` only |
+| `.clang-tidy` | Static analysis checks (bugprone, clang-analyzer, cert-err34-c); non-blocking |
 | `.git-blame-ignore-revs` | Commits ignored by git blame (encoding conversion) |
 | `.gitattributes` | Line-ending and binary attributes |
 | `.gitignore` | Ignore rules (OS, editors, builds, secrets, original assets) |
@@ -59,6 +61,10 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `packaging/linux/roboviolence2.desktop` | Linux desktop entry |
 | `packaging/macos/Info.plist.in` | macOS bundle `Info.plist` template |
 | `packaging/windows/bv2.manifest` | Windows manifest: PerMonitorV2 DPI, UTF-8 code page, Windows 10/11 |
+| `tests/CMakeLists.txt` | ctest targets: netPacket, config, dedicated-server smoke |
+| `tests/smoke_server.py` | Starts `bv2dedicated` headless, runs the CTF script, quits |
+| `tests/test_config.cpp` | dksvar config layering, transient values not saved, secrets masked |
+| `tests/test_netpacket.cpp` | Byte-level layout of the packed wire structs |
 | `tools/check-content-case.py` | Fails when a literal `main/...` path differs from a real file name only by case |
 | `vcpkg.json` | vcpkg manifest (sqlite3, curl; Step 3 completes it) |
 
@@ -74,6 +80,8 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | path | purpose |
 |---|---|
 | `.github/workflows/secret-scan.yml` | CI: gitleaks over commits after the fork point and original-asset check |
+| `.github/workflows/build.yml` | CI: build and ctest on Windows, macOS, Linux; ASan smoke job with client under xvfb; artifacts |
+| `.github/workflows/hygiene.yml` | CI: ARCHITECTURE.md inventory, repository hygiene, content case |
 
 ### `config`
 
@@ -565,6 +573,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tools/check-original-assets.py` | Fails if a tracked file matches an original-asset hash |
 | `tools/convert-encoding.py` | One-off UTF-8/LF converter used in step 1.4 |
 | `tools/gen-placeholder-content.py` | Writes placeholder maps, textures, sounds and models for dev and CI |
+| `tools/check-hygiene.py` | Fails on spaces in paths, tracked ignored files, files over 5 MB, bad encoding |
 | `tools/seed_db.cpp` | Creates a SQLite DB from SQL files (build helper) |
 | `tools/setup-dev.ps1` | Activates hooks, checks tools (Windows) |
 | `tools/setup-dev.sh` | Activates hooks, checks tools (Unix) |
