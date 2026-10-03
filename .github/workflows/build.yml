@@ -113,3 +113,35 @@ jobs:
           rc=$?
           # 124 = still running when the timeout fired: it did not crash.
           [ "$rc" = 124 ] || { echo "client exited early with $rc"; exit 1; }
+  tidy:
+    name: clang-tidy (not required)
+    runs-on: ubuntu-24.04
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use the runner's vcpkg, with the pinned baseline fetched
+        run: |
+          echo "VCPKG_ROOT=$VCPKG_INSTALLATION_ROOT" >> "$GITHUB_ENV"
+          baseline=$(sed -n 's/.*"builtin-baseline": *"\([0-9a-f]*\)".*/\1/p' vcpkg.json)
+          git -C "$VCPKG_INSTALLATION_ROOT" fetch --quiet origin "$baseline" || git -C "$VCPKG_INSTALLATION_ROOT" fetch --quiet --unshallow origin
+          git -C "$VCPKG_INSTALLATION_ROOT" checkout --quiet --force "$baseline"
+      - name: Packages
+        run: |
+          sudo apt-get update
+          eval "$(tools/setup-dev.sh --linux-packages | sed 's/^sudo apt install/sudo apt-get install -y/')"
+          sudo apt-get install -y clang-tidy
+      - uses: actions/cache@v4
+        with:
+          path: .vcpkg-bin
+          key: vcpkg-linux-x64-tidy-${{ hashFiles('vcpkg.json') }}
+          restore-keys: vcpkg-linux-x64-tidy-
+      - run: cmake --preset linux-x64
+      - name: clang-tidy over the engine libraries and the game (.clang-tidy)
+        run: |
+          files=$(git ls-files 'engine/*/src/*.cpp' 'game/src/*.cpp' 'masterserver/src/*.cpp' | grep -v 'third_party')
+          clang-tidy -p build/linux-x64 --quiet $files 2>&1 | tee tidy.log | tail -50
+          echo "findings: $(grep -c 'warning:' tidy.log)"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: clang-tidy-log
+          path: tidy.log

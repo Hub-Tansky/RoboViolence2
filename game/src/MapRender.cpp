@@ -418,7 +418,7 @@ void Map::performCollision(CoordFrame & lastCF, CoordFrame & CF, float radius)
 		CVector3f lastP2 = p2;
 		CVector3f normal;
 		bool result;
-		while (result = dkoSphereIntersection(dko_mapLM, p1.s, p2.s, radius * 10, intersect.s, normal.s, n))
+		while ((result = dkoSphereIntersection(dko_mapLM, p1.s, p2.s, radius * 10, intersect.s, normal.s, n)))
 		{
 			p2 = intersect + normal * .01f;
 			CVector3f reste = lastP2 - p2;

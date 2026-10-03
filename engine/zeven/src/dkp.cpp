@@ -505,9 +505,12 @@ void			dkpShutDown()
 	// On efface la display list
 //	glDeleteLists(CDkp::dpSprite, 1);
 
-	if (	CDkp::vertexArray) delete [] 	CDkp::vertexArray; 	CDkp::vertexArray = 0;
-	if (	CDkp::normalArray) delete [] 	CDkp::normalArray; 	CDkp::normalArray = 0;
-	if (	CDkp::texCoordArray) delete [] 	CDkp::texCoordArray; 	CDkp::texCoordArray = 0;
+	if (CDkp::vertexArray) { delete [] CDkp::vertexArray; }
+	CDkp::vertexArray = 0;
+	if (CDkp::normalArray) { delete [] CDkp::normalArray; }
+	CDkp::normalArray = 0;
+	if (CDkp::texCoordArray) { delete [] CDkp::texCoordArray; }
+	CDkp::texCoordArray = 0;
 }
 
 
@@ -564,11 +567,11 @@ int				dkpUpdate(float delay)
 				// Alors il faut switcher les deux
 				CDkp::particles.erase(CDkp::particles.begin()+i+1);
 				CDkp::particles.insert(CDkp::particles.begin()+i, p2);
-				if (lastIndex == -1) lastIndex = i;
+				if (lastIndex == std::vector<CParticle*>::size_type(-1)) lastIndex = i;
 				if (i>0) i-=2;
 				continue;
 			}
-			else if (lastIndex != -1)
+			else if (lastIndex != std::vector<CParticle*>::size_type(-1))
 			{
 				i = lastIndex - 1;
 				lastIndex = std::vector<CParticle*>::size_type(-1);

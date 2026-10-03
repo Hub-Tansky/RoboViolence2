@@ -917,7 +917,7 @@ void Server::update(float delay)
 		char * buffer;
 		int messageID;
 		UINT4 babonetID;
-		while (buffer = bb_serverReceive(babonetID, messageID))
+		while ((buffer = bb_serverReceive(babonetID, messageID)))
 		{
 			// On g�e les messages re�the 
 			recvPacket(buffer, messageID, babonetID);

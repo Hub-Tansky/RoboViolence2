@@ -16,6 +16,7 @@
 	BaboViolent 2 source code. If not, see http://www.gnu.org/licenses/.
 */
 
+#include <cfloat>
 #include "Player.h"
 #include "GameVar.h"
 #include "Console.h"
@@ -1111,7 +1112,7 @@ void Player::hitSV(Weapon * fromWeapon, Player * from, float damage)
 			break;
 		case 2://(a-d/(x-b)c)
 			if (distance == 0)
-				distance = 0.0000000000000000000000000000000000000000000000000000000001f;
+				distance = FLT_MIN; // the old literal (1e-58) underflowed to 0
 			cdamage = cdamage*(gameVar.sv_photonVerticalShift+gameVar.sv_photonDamageCoefficient/((distance-gameVar.sv_photonHorizontalShift)*gameVar.sv_photonDistMult));
 			break;
 		case 3:

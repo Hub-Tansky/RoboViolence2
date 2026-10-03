@@ -330,7 +330,23 @@ void Console::update(float delay)
 			if (token == "-")
 				token = command.getFirstToken(' ');
 			if (std::find(m_excludeFromLog.begin(), m_excludeFromLog.end(), token) == m_excludeFromLog.end())
-				console->add(CString(": ") + *m_currentText);
+			{
+				// Never echo (or log, or broadcast to remote admins) a secret: `set <*pass*> value`, `admin user pass`.
+				CString echo = *m_currentText;
+				CString probe = *m_currentText;
+				CString first = probe.getFirstToken(' ');
+				if (first == "-")
+					first = probe.getFirstToken(' ');
+				if (first == "admin")
+					echo = CString("admin ***");
+				else if (first == "set")
+				{
+					CString varName = probe.getFirstToken(' ');
+					if (dksvarIsSecret(varName.s))
+						echo = CString("set %s ***", varName.s);
+				}
+				console->add(CString(": ") + echo);
+			}
 
 			// On va g?er la commande dans la console m?e ici
 			sendCommand(*m_currentText);
@@ -1134,7 +1150,7 @@ void Console::sendCommand(CString commandLine, bool isAdmin, unsigned long bbnet
 		if(scene->server)
 			if(scene->server->game)
 			{
-				int playerID;
+				int playerID = -1;
 				for (int i = 0; i < MAX_PLAYER; ++i)
 				{
 					if(scene->server->game->players[i] && (textColorLess(tokenize) == textColorLess(scene->server->game->players[i]->name)))

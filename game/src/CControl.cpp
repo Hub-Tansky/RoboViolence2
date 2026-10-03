@@ -359,7 +359,7 @@ CControl::CControl(CControl * in_parent,
 CControl::~CControl()
 {
 	m_radios.clear();
-	if (customData) delete customData;
+	if (customData) ::operator delete(customData); // untyped payload: release the memory only (was `delete void*`)
 	loseFocus();
 	int i=0;
 
@@ -654,10 +654,10 @@ void CControl::update(float delay)
 	}
 
 	//--- We are writting
-	if (haveFocus() && 
+	if ((haveFocus() && 
 		
 		((dkiGetState(DKI_JOY_BUTTON1) == DKI_DOWN && gameVar.cl_enableXBox360Controller) ||
-		(dkiGetState(DKI_MOUSE_BUTTON1) == DKI_DOWN && !gameVar.cl_enableXBox360Controller))
+		(dkiGetState(DKI_MOUSE_BUTTON1) == DKI_DOWN && !gameVar.cl_enableXBox360Controller)))
 		
 		|| isActivated())
 	{
@@ -815,7 +815,7 @@ void CControl::render()
 	{
 		if (frame3D)
 		{
-			if (mouseOver && menuManager.activeControl == this && isHoverable && enable || haveFocus())
+			if ((mouseOver && menuManager.activeControl == this && isHoverable && enable) || haveFocus())
 			{
 			/*	glColor3fv((backColor*1.3f).s);
 				renderMenuQuad(pos[0]+2, pos[1]+2, size[0]-2, size[1]-2);

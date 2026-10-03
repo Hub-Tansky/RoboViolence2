@@ -19,6 +19,13 @@
 #ifndef CONSOLE
 #include "CLobby.h"
 #include "Zeven.h"
+#include "CMaster.h" // SBrowsableGame
+
+// The lobby stores SBrowsableGame objects as void*.
+static void freeGame(void * game)
+{
+	delete (SBrowsableGame *)game;
+}
 
 
 CLobby* lobby = 0;
@@ -41,7 +48,11 @@ CLobby::CLobby()
 CLobby::~CLobby()
 {
 	clearLobby();
-	ZEVEN_SAFE_DELETE(lastSent);
+	if (lastSent)
+	{
+		freeGame(lastSent);
+		lastSent = 0;
+	}
 }
 
 
@@ -62,7 +73,11 @@ void CLobby::pushGame(void* in_game)
 //
 void* CLobby::getNext()
 {
-	ZEVEN_SAFE_DELETE(lastSent);
+	if (lastSent)
+	{
+		freeGame(lastSent);
+		lastSent = 0;
+	}
 
 	if (m_games.size() > 0)
 	{
@@ -83,9 +98,14 @@ void* CLobby::getNext()
 //
 void CLobby::clearLobby()
 {
-	int i;
-	ZEVEN_DELETE_VECTOR(m_games, i);
-	ZEVEN_SAFE_DELETE(lastSent);
+	for (size_t i = 0; i < m_games.size(); ++i)
+		freeGame(m_games[i]);
+	m_games.clear();
+	if (lastSent)
+	{
+		freeGame(lastSent);
+		lastSent = 0;
+	}
 }
 
 #endif

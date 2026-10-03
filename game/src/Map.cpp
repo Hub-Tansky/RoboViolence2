@@ -537,7 +537,7 @@ Map::Map(CString mapFilename, Game * _game, unsigned int font, bool editor, int 
 		//--- Load dummies
 		int i=0;
 		char* dummyName = 0;
-		while (dummyName = dkoGetDummyName(i, dko_map))
+		while ((dummyName = dkoGetDummyName(i, dko_map)))
 		{
 			CVector3f dumPos;
 			int dumType = -1;

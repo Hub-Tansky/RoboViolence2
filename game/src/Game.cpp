@@ -552,7 +552,7 @@ void Game::update(float delay)
 
 	// Si on tiens tab, on montre les stats
 #ifndef CONSOLE
-	if (!console->isActive() && dkiGetState(gameVar.k_showScore) || roundState != GAME_PLAYING)
+	if ((!console->isActive() && dkiGetState(gameVar.k_showScore)) || roundState != GAME_PLAYING)
 	{
 		showStats = true;
 	}

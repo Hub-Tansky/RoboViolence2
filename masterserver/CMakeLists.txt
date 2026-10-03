@@ -10,4 +10,5 @@ add_executable(bv2master
 target_include_directories(bv2master PRIVATE src ${CMAKE_SOURCE_DIR}/engine/babonet/src)
 target_link_libraries(bv2master PRIVATE babonet zeven_core ${BV2_SQLITE_TARGET} Threads::Threads)
 bv2_target_defaults(bv2master)
+bv2_target_legacy_strict(bv2master)
 add_dependencies(bv2master bv2_seed_master_db)

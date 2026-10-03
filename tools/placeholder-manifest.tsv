@@ -207,3 +207,6 @@ main/sounds	ric5.wav	WAV 1ch 22050 Hz 8-bit 1.01 s
 main/sounds	shield.wav	WAV 1ch 22050 Hz 8-bit 2.10 s
 main/sounds	shotgunReload.wav	WAV 1ch 8000 Hz 16-bit 0.17 s
 main/sounds	wind.wav	WAV 1ch 8013 Hz 8-bit 4.04 s
+main/textures	sky.tga	TGA 256×256×24
+main/textures	sniperScope.tga	TGA 256×256×32
+main/textures	RnDLabsGlow.tga	TGA 128×128×32
