@@ -19,16 +19,18 @@ RoboViolence 2: unofficial fork of BaboViolent 2, a top-down multiplayer shooter
 | Assets | The original assets are removed and blocked by hash (`tools/check-original-assets.py`). Only `content/languages/en.lang` and `content/LaunchScript/` remain; the build generates placeholders (`tools/gen-placeholder-content.py`). |
 | Encoding | UTF-8 without BOM, LF; `tools/check-encoding.py`. Some comments hold U+FFFD where upstream lost accents. |
 | Known defects | [docs/analysis/KEY_QUESTIONS.md](docs/analysis/KEY_QUESTIONS.md). |
-| Decisions | [docs/decisions/README.md](docs/decisions/README.md): 0001 Ninja, 0002 libcurl compiled out, 0003 OpenGL 2.1 kept, 0004 project name, 0005 `main/` data root, 0006 platform layer. |
+| Decisions | [docs/decisions/README.md](docs/decisions/README.md): 0001 Ninja, 0002 libcurl compiled out, 0003 OpenGL 2.1 kept, 0004 project name, 0005 `main/` data root, 0006 platform layer, 0007 data root, pref dir and config layers. |
 
 ### Open items
 
 - **Master server:** `MasterClient` is reconstructed (the original class is missing from the source release); its timeout is an assumption. See [masterserver/README.md](masterserver/README.md).
 - **GLU:** still the system library (headers and link) for `dko`, `zeven_client` and the game, so the headless server needs GLU dev packages; `dkt` is stubbed there. The renderer itself is unchanged fixed-function GL 2.1 (ADR 0003).
-- **OGG music** needs `stb_vorbis.c` (vcpkg `stb`); the macOS check ran without it, so `Menu.ogg`/`Music.ogg` did not play, and the placeholders have no music anyway.
+- **OGG music** needs `stb_vorbis.c` (vcpkg `stb`, found in CI builds); the placeholders have no music, and playback was never heard.
 - **HiDPI:** `dkwGetResolution()` is the pixel size; the UI math assumes nothing else. Untested on a Retina display.
 - **Dead code:** 16 old-menu `.cpp` files in `game/src` are not built (see [game/README.md](game/README.md)). `game/src/bv2.bmp` and `icon1.ico` are original artwork; replace in §H.
-- UBSan reports pre-existing defects (null `Server` calls, out-of-range `bool` loads, NaN casts in `CUserLogin.cpp`); Step 4.
+- UBSan reports pre-existing defects (out-of-range `bool` loads, NaN casts in `CUserLogin.cpp`).
+- **Warnings:** every target except `glad` builds with `-Werror` / `/WX`. Cosmetic classes (unused names, signed compares, initialiser order) are off for `game` and `masterserver` (`bv2_target_legacy_strict`); about 4800 string-literal-to-`char*` warnings are suppressed.
+- **clang-tidy** runs in CI as a non-required job.
 
 
 ## File inventory
@@ -59,9 +61,10 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `packaging/linux/roboviolence2.desktop` | Linux desktop entry |
 | `packaging/macos/Info.plist.in` | macOS bundle `Info.plist` template |
 | `packaging/windows/bv2.manifest` | Windows manifest: PerMonitorV2 DPI, UTF-8 code page, Windows 10/11 |
-| `tests/CMakeLists.txt` | ctest targets: netPacket, config, dedicated-server smoke |
+| `tests/CMakeLists.txt` | ctest targets: netPacket, config, fileio, dedicated-server smoke |
 | `tests/smoke_server.py` | Starts `bv2dedicated` headless, runs the CTF script, quits |
 | `tests/test_config.cpp` | dksvar config layering, transient values not saved, secrets masked |
+| `tests/test_fileio.cpp` | `FileIO` byte widths for `.bvm` data and the widths the `.DKO` loader relies on |
 | `tests/test_netpacket.cpp` | Byte-level layout of the packed wire structs |
 | `tools/check-content-case.py` | Fails when a literal `main/...` path differs from a real file name only by case |
 | `vcpkg.json` | vcpkg manifest (sqlite3, curl; Step 3 completes it) |
