@@ -605,7 +605,7 @@ void Projectile::update(float delay, Map* map)
 				currentCF.vel[2] -= 9.8f * delay; // (suposont q'un babo fait 50cm de diamètre)
 			}
 
-			if (map && projectileType == PROJECTILE_GRENADE || projectileType == PROJECTILE_LIFE_PACK || projectileType == PROJECTILE_DROPED_WEAPON || projectileType == PROJECTILE_DROPED_GRENADE)
+			if ((map && projectileType == PROJECTILE_GRENADE) || projectileType == PROJECTILE_LIFE_PACK || projectileType == PROJECTILE_DROPED_WEAPON || projectileType == PROJECTILE_DROPED_GRENADE)
 			{
 				CVector3f p1 = lastCF.position;
 				CVector3f p2 = currentCF.position;
@@ -711,7 +711,7 @@ void Projectile::update(float delay, Map* map)
 		float zookaRadius = 3.0;
 		if (gameVar.sv_zookaRemoteDet && gameVar.sv_serverType == 1)
 			zookaRadius = gameVar.sv_zookaRadius;
-		if (gameVar.sv_serverType = 1)
+		if ((gameVar.sv_serverType = 1)) // sic: an assignment (known defect, docs/analysis/KEY_QUESTIONS.md)
 		{
 			gameVar.weapons[WEAPON_BAZOOKA]->damage = gameVar.sv_zookaDamage;
 		}
@@ -856,9 +856,9 @@ void Projectile::update(float delay, Map* map)
 					playerProjectile.weaponID = 0;//WEAPON_COCKTAIL_MOLOTOV;
 					playerProjectile.projectileType = PROJECTILE_FLAME;
 					CVector3f vel = currentCF.vel*.5f + rand(CVector3f(-1,-1,1),CVector3f(1,1,2));
-					playerProjectile.vel[0] = 0;(char)(vel[0] * 10);
-					playerProjectile.vel[1] = 0;(char)(vel[1] * 10);
-					playerProjectile.vel[2] = 0;(char)(vel[2] * 10);
+					playerProjectile.vel[0] = 0;
+					playerProjectile.vel[1] = 0;
+					playerProjectile.vel[2] = 0;
 					scene->server->game->spawnProjectile(playerProjectile,true);
 				//}
 				return;

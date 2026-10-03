@@ -564,11 +564,11 @@ int				dkpUpdate(float delay)
 				// Alors il faut switcher les deux
 				CDkp::particles.erase(CDkp::particles.begin()+i+1);
 				CDkp::particles.insert(CDkp::particles.begin()+i, p2);
-				if (lastIndex == -1) lastIndex = i;
+				if (lastIndex == std::vector<CParticle*>::size_type(-1)) lastIndex = i;
 				if (i>0) i-=2;
 				continue;
 			}
-			else if (lastIndex != -1)
+			else if (lastIndex != std::vector<CParticle*>::size_type(-1))
 			{
 				i = lastIndex - 1;
 				lastIndex = std::vector<CParticle*>::size_type(-1);

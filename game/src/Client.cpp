@@ -419,7 +419,7 @@ void Client::update(float delay)
 		// On recv les messages
 		char * buffer;
 		int messageID;
-		while (buffer = bb_clientReceive(uniqueClientID, &messageID))
+		while ((buffer = bb_clientReceive(uniqueClientID, &messageID)))
 		{
 			// On gère les messages reçu
 			recvPacket(buffer, messageID);

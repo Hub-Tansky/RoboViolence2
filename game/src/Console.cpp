@@ -1134,7 +1134,7 @@ void Console::sendCommand(CString commandLine, bool isAdmin, unsigned long bbnet
 		if(scene->server)
 			if(scene->server->game)
 			{
-				int playerID;
+				int playerID = -1;
 				for (int i = 0; i < MAX_PLAYER; ++i)
 				{
 					if(scene->server->game->players[i] && (textColorLess(tokenize) == textColorLess(scene->server->game->players[i]->name)))

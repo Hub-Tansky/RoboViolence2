@@ -85,6 +85,7 @@ void			 dktBlurTexture(unsigned int textureID, int nbPass)
 			if (texture->bpp == 1) level = GL_LUMINANCE;
 			if (texture->bpp == 3) level = GL_RGB;
 			if (texture->bpp == 4) level = GL_RGBA;
+			(void)level; // gluBuild2DMipmaps below always gets GL_RGB (kept as is)
 			gluBuild2DMipmaps(GL_TEXTURE_2D, texture->bpp, texture->size[0], texture->size[1],
 							  GL_RGB, GL_UNSIGNED_BYTE, imageData);
 

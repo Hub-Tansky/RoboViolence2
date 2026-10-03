@@ -119,7 +119,7 @@ void CFriends::updatePerso(float delay)
 				TiXmlHandle docHandle(&doc);
 				TiXmlElement* item = docHandle.FirstChild("friends").FirstChild().ToElement();
 
-				for(item; item; item = item->NextSiblingElement() )
+				for(; item; item = item->NextSiblingElement() )
 				{
 					const char* name = item->Attribute("name");
 					const char* sname = item->Attribute("server_name");

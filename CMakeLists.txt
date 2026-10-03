@@ -80,6 +80,19 @@ function(bv2_target_strict target)
   endif()
 endfunction()
 
+# Game and master code from 2012: cosmetic warning classes stay off (unused names, signed compares, initialiser order),
+# everything else is an error. Real defects in these classes are fixed when found.
+function(bv2_target_legacy_strict target)
+  if(MSVC)
+    target_compile_options(${target} PRIVATE /wd4189 /wd4101 /wd4127 /wd4389 /wd4018 /wd4701 /wd4703 /wd4310 /wd4146)
+  else()
+    target_compile_options(${target} PRIVATE -Wno-unused-parameter -Wno-unused-variable -Wno-unused-but-set-variable
+      -Wno-unused-private-field -Wno-unused-local-typedef -Wno-sign-compare -Wno-reorder -Wno-reorder-ctor
+      -Wno-comment -Wno-dangling-else -Wno-unknown-warning-option)
+  endif()
+  bv2_target_strict(${target})
+endfunction()
+
 # Runtime layout: <build>/runtime/{bin, main -> content, bv2.db, master.db}
 set(BV2_RUNTIME_DIR "${CMAKE_BINARY_DIR}/runtime")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${BV2_RUNTIME_DIR}")

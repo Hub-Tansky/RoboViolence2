@@ -976,7 +976,7 @@ void GameVar::sendOne(char * varName, UINT4 babonetID)
 	dksvarGetFormatedVar(varName, &varCom);
 	varCom.insert("set ", 0);
 
-	if(varName == "sv_nukeReload")
+	if(strcmp(varName, "sv_nukeReload") == 0)
 	{
 		weapons[WEAPON_NUCLEAR]->fireDelay = sv_nukeReload;
 	}

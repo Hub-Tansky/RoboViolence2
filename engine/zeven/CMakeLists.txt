@@ -32,6 +32,7 @@ bv2_target_strict(zeven_core)
 add_library(zeven_console STATIC src/dkt_console.cpp)
 target_link_libraries(zeven_console PUBLIC zeven_core)
 bv2_target_defaults(zeven_console)
+bv2_target_strict(zeven_console)
 
 if(BV2_BUILD_CLIENT)
   # Client modules: window, input, GL state, textures, fonts, particles, sound. SDL3, miniaudio and stb come from vcpkg.
@@ -63,4 +64,5 @@ if(BV2_BUILD_CLIENT)
     message(STATUS "stb_vorbis.c not found: OGG music will not play")
   endif()
   bv2_target_defaults(zeven_client)
+  bv2_target_strict(zeven_client)
 endif()

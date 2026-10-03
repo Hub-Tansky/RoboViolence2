@@ -137,6 +137,7 @@ function(bv2_game_target target)
     target_sources(${target} PRIVATE src/CCurlStub.cpp)
   endif()
   bv2_target_defaults(${target})
+  bv2_target_legacy_strict(${target})
 endfunction()
 
 if(BV2_BUILD_SERVER)

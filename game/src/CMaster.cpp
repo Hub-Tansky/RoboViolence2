@@ -267,7 +267,7 @@ void CMaster::update(float in_delay)
 		// On recv les messages
 		char * buffer;
 		int messageID;
-		while (buffer = bb_clientReceive(uniqueClientID, &messageID))
+		while ((buffer = bb_clientReceive(uniqueClientID, &messageID)))
 		{
 			// On g�e les messages re�
 			recvPacket(buffer, messageID);
@@ -311,7 +311,7 @@ void CMaster::ReceivePeersPacket()
 	INT4 peerID;
 	int typeID;
 
-	while( buf = bb_peerReceive( &peerID, &typeID ))
+	while(( buf = bb_peerReceive( &peerID, &typeID )))
 	{		
 		switch( typeID )
 		{
