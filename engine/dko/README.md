@@ -11,4 +11,4 @@ Loader and renderer for the `.DKO` model format (chunked binary, exported from 3
 
 - Models are indexed in a fixed array of 1024; `dkoLoadFile` returns an ID, 0 on failure (`dkoGetLastError`).
 - An empty-but-valid model (version, time info, end chunk) loads, so placeholder assets work (`tools/gen-placeholder-content.py`).
-- The original `.DKO` files are removed; see [../../docs/assets/ASSET-INVENTORY.md](../../docs/assets/ASSET-INVENTORY.md).
+- The original `.DKO` files are removed; the build generates placeholders (`tools/gen-placeholder-content.py`).

@@ -147,7 +147,7 @@ Do this right after §1.3, **before any other code edit**, so every later diff a
   1. **Summary** (≤ 1 page): deliverables, supported platforms, module map, tick model (30 Hz), network model (TCP, raw structs, who is authoritative), config and secrets policy, known-defect pointer (`docs/analysis/KEY_QUESTIONS.md`), build entry points.
   2. **File inventory**: every tracked file grouped by directory, as a table `| path | purpose (one line) |`.
      - Source, config, doc and script files are listed individually.
-     - Replacement asset folders (once §H adds them) are listed per directory with file count, formats and purpose. The per-file catalogue is `docs/assets/ASSET-INVENTORY.md` (step 0 §0.3).
+     - Replacement asset folders (once §H adds them) are listed per directory with file count, formats and purpose. The per-file catalogue is the asset inventory (kept outside this repository) (step 0 §0.3).
 - `tools/check-architecture.sh` (plus `.ps1`): compares `git ls-files` with the paths in `ARCHITECTURE.md` and fails on unlisted or stale entries. CI enforces it from Step 5.
 - Generate the inventory **at the end of this step**, after §1.6–1.14, so it describes the cleaned tree.
 

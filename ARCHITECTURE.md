@@ -16,7 +16,7 @@ RoboViolence 2: unofficial fork of BaboViolent 2, a top-down multiplayer shooter
 | Network | TCP, raw structs `memcpy`'d from `game/src/netPacket.h`. The server is authoritative for hits, damage, spawns, projectiles and flags; clients for their own movement. `playerID` (slot) differs from `babonetID` (connection). Protocol `GAME_VERSION_SV/CL` = 21100. |
 | Variants | `CONSOLE` = headless server (explicit file list in `game/CMakeLists.txt`). Direct3D, non-Pro and VLD code were removed in Step 1. |
 | Config and secrets | Tracked: `config/*.example.cfg` with empty secrets, `content-seed/*.sql` for generated DBs. Real values stay local; gitleaks, hooks and CI enforce it ([config/README.md](config/README.md)). |
-| Assets | The original assets are removed and blocked by hash ([docs/ASSETS-LICENSE.md](docs/ASSETS-LICENSE.md)). Only `content/languages/en.lang` and `content/LaunchScript/` remain; the build generates placeholders (`tools/gen-placeholder-content.py`). |
+| Assets | The original assets are removed and blocked by hash (`tools/check-original-assets.py`). Only `content/languages/en.lang` and `content/LaunchScript/` remain; the build generates placeholders (`tools/gen-placeholder-content.py`). |
 | Encoding | UTF-8 without BOM, LF; `tools/check-encoding.py`. Some comments hold U+FFFD where upstream lost accents. |
 | Known defects | [docs/analysis/KEY_QUESTIONS.md](docs/analysis/KEY_QUESTIONS.md). |
 | Decisions | [docs/decisions/README.md](docs/decisions/README.md): 0001 Ninja, 0002 libcurl compiled out, 0003 OpenGL 2.1 kept, 0004 project name, 0005 `main/` data root, 0006 platform layer. |
@@ -29,12 +29,11 @@ RoboViolence 2: unofficial fork of BaboViolent 2, a top-down multiplayer shooter
 - **HiDPI:** `dkwGetResolution()` is the pixel size; the UI math assumes nothing else. Untested on a Retina display.
 - **Dead code:** 16 old-menu `.cpp` files in `game/src` are not built (see [game/README.md](game/README.md)). `game/src/bv2.bmp` and `icon1.ico` are original artwork; replace in §H.
 - UBSan reports pre-existing defects (null `Server` calls, out-of-range `bool` loads, NaN casts in `CUserLogin.cpp`); Step 4.
-- `docs/assets/ASSET-INVENTORY.md` "Used by" cites the pre-Step-2 paths.
 
 
 ## File inventory
 
-One row per tracked file. `tools/check-architecture.sh` fails when this list and `git ls-files` differ. Assets: per-file catalogue is [docs/assets/ASSET-INVENTORY.md](docs/assets/ASSET-INVENTORY.md); replacement asset folders get one row per directory.
+One row per tracked file. `tools/check-architecture.sh` fails when this list and `git ls-files` differ. Assets: per-file catalogue is the asset inventory (kept outside this repository); replacement asset folders get one row per directory.
 
 
 ### `.`
@@ -120,7 +119,6 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 
 | path | purpose |
 |---|---|
-| `docs/ASSETS-LICENSE.md` | Asset and name licensing status, replacement register |
 
 ### `docs/analysis`
 
@@ -137,13 +135,6 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/analysis/KEY_QUESTIONS.md` | Code analysis: KEY QUESTIONS |
 | `docs/analysis/README.md` | Index of the code analysis |
 
-### `docs/assets`
-
-| path | purpose |
-|---|---|
-| `docs/assets/ASSET-INVENTORY.md` | Catalogue of every removed original asset |
-| `docs/assets/original-assets.sha256` | SHA-256 of every removed original file |
-
 ### `docs/decisions`
 
 | path | purpose |
@@ -155,12 +146,6 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/decisions/0005-runtime-main-data-root.md` | ADR 0005 |
 | `docs/decisions/0006-sdl3-miniaudio-glad-platform-layer.md` | ADR 0006 |
 | `docs/decisions/README.md` | ADR format and index |
-
-### `docs/legal`
-
-| path | purpose |
-|---|---|
-| `docs/legal/permission-request.md` | Draft permission request to the rights holders |
 
 ### `docs/refactoring`
 
@@ -566,12 +551,13 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 |---|---|
 | `tools/CMakeLists.txt` | Database seeding (bv2_seed_db_tool, bv2.db, master.db, web.db) |
 | `tools/FORK_BASE` | First commit after upstream; secret scans start here |
-| `tools/asset-inventory.py` | Generates the asset inventory and hash list (needs the originals) |
 | `tools/check-architecture.ps1` | Fails if ARCHITECTURE.md and the tracked files disagree (Windows) |
 | `tools/check-architecture.sh` | Fails if ARCHITECTURE.md and the tracked files disagree (Unix) |
 | `tools/check-encoding.py` | Fails on non-UTF-8, BOM or CR in tracked text files |
 | `tools/check-original-assets.py` | Fails if a tracked file matches an original-asset hash |
+| `tools/original-assets.sha256` | SHA-256 of every removed original file |
 | `tools/convert-encoding.py` | One-off UTF-8/LF converter used in step 1.4 |
+| `tools/placeholder-manifest.tsv` | Files the game loads at startup and their formats, for the placeholder generator |
 | `tools/gen-placeholder-content.py` | Writes placeholder maps, textures, sounds and models for dev and CI |
 | `tools/check-hygiene.py` | Fails on spaces in paths, tracked ignored files, files over 5 MB, bad encoding |
 | `tools/seed_db.cpp` | Creates a SQLite DB from SQL files (build helper) |

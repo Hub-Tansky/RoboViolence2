@@ -9,7 +9,7 @@ regexes = [
 ]
 paths = [
   '''^LICENSE\.txt$''',
-  '''^docs/assets/original-assets\.sha256$''',
+  '''^tools/original-assets\.sha256$''',
   '''^MasterServer/Source/(COPYING|config\.guess|config\.sub|ltmain\.sh|INSTALL)$''',
 ]
 

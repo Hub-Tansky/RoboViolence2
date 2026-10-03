@@ -171,13 +171,13 @@ GL 3.3 core is not an option: on macOS it still runs on Apple's deprecated OpenG
 
 ## H. Replacement assets and rebranding
 
-Source of truth: `docs/assets/ASSET-INVENTORY.md` (step 0 §0.3), with one row per removed file and its purpose, constraints and `Recreate` class.
+Source of truth: the asset inventory (kept outside this repository) (step 0 §0.3), with one row per removed file and its purpose, constraints and `Recreate` class.
 
 1. **Minimum playable set:** every `required` row. Textures, skins, fonts, models (`.DKO` via an exporter for a free tool, see 4), effects and one map per game mode. Use CC0/CC-BY or original work only.
-2. **Record every replacement** in the inventory's `Replaced by` column and in the `ASSETS-LICENSE.md` replacement register: author, licence, source URL. The hash blocklist (`tools/check-original-assets.py`) stays on permanently.
+2. **Record every replacement** in the inventory's `Replaced by` column and in the replacement register (kept outside this repository): author, licence, source URL. The hash blocklist (`tools/check-original-assets.py`) stays on permanently.
 3. **Maps:** recreate the `content` rows with the in-game editor. New maps get new names, not copies of the originals.
 4. **Toolchain:** `.DKO` models came from 3ds Max via `dkoExporter.dle` (removed). Write a Blender exporter, or convert from glTF in `tools/`, and record the choice as an ADR.
 5. **Audio:** new effects, and new music to replace the third-party tracks.
 6. **Translations:** new language files written from `en.lang` by project contributors, under the project licence.
 7. **Rebrand:** window title, menus, credits, binary names (`bv2*`), config/pref-path names, master-server game ID. Keep a "based on BaboViolent 2 by bitHeads / RndLabs" credit. This breaks config paths, so migrate the old pref dir once.
-8. **Grants:** if the original authors grant rights ([../legal/permission-request.md](../legal/permission-request.md)), record them in `ASSETS-LICENSE.md`. Re-adding any granted original needs an ADR and removing its hash from the blocklist.
+8. **Grants:** if the original authors grant rights (the permission request (kept outside this repository)), record them in the licence notes. Re-adding any granted original needs an ADR and removing its hash from the blocklist.

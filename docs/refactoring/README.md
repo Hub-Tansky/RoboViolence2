@@ -1,6 +1,6 @@
 # Refactoring handoff: Phase A (build, dependencies, legacy cleanup)
 
-Project: **RoboViolence 2**, an unofficial fork of [Daivuk/BaboViolent2](https://github.com/Daivuk/BaboViolent2), without the original assets ([../ASSETS-LICENSE.md](../ASSETS-LICENSE.md)).
+Project: **RoboViolence 2**, an unofficial fork of [Daivuk/BaboViolent2](https://github.com/Daivuk/BaboViolent2), without the original assets (the asset licence notes (kept outside this repository)).
 
 This repository is developed **only by AI agents**. Every step of the refactor has one scope file here. An agent picks up exactly one step, stays inside that step's scope, and finishes by passing its acceptance checks and updating `ARCHITECTURE.md`.
 
@@ -17,7 +17,7 @@ Gameplay, security, bots and anti-cheat are out of scope here; see [future-phase
 | Topic | Decision |
 |---|---|
 | Fork and name | GitHub fork renamed `RoboViolence2`, local dir `RoboViolence2-master`. Code identifiers (`bv2`) stay until [future-phases.md](future-phases.md) §H ([step0](step0-fork-rename-and-asset-removal.md)) |
-| Original assets | Not committed or redistributed. Removed from `main` in [step0](step0-fork-rename-and-asset-removal.md) §0.4; every removed file is catalogued in `docs/assets/ASSET-INVENTORY.md` for recreation; a hash blocklist stops them coming back. Local runs use your own copy via `BV2_DATA_DIR`; CI uses generated placeholders |
+| Original assets | Not committed or redistributed. Removed from `main` in [step0](step0-fork-rename-and-asset-removal.md) §0.4; every removed file is catalogued in the asset inventory (kept outside this repository) for recreation; a hash blocklist stops them coming back. Local runs use your own copy via `BV2_DATA_DIR`; CI uses generated placeholders |
 | Platforms | **Linux, macOS, Windows**. All three are equivalent first-class targets: none is secondary, and each one blocks a release. Linux x64 (Ubuntu 24.04 LTS as the reference distro; X11 and Wayland); macOS 12+ (arm64); Windows 11 and later (x64). arm64 Linux/Windows and x86_64 macOS are optional extras |
 | Protocol | Free to break compatibility with 2.11 clients. Bump `GAME_VERSION_SV/CL` once |
 | Build system | CMake + `CMakePresets.json`, Ninja generator on every preset ([ADR 0001](../decisions/0001-ninja-generator-on-all-presets.md)) |
@@ -89,9 +89,6 @@ docs/
   analysis/            # code analysis (was "docs/code analysis")
   refactoring/         # this plan: one scope file per step
   decisions/           # ADRs
-  assets/              # ASSET-INVENTORY.md + original-assets.sha256 (step 0)
-  legal/               # permission request, received grants
-  ASSETS-LICENSE.md    # asset licence status and replacement register
 engine/
   babonet/  zeven/  dko/   # each: include/, src/, README.md, CMakeLists.txt
 game/                  # was BaboViolent2/Code: src/, README.md, CMakeLists.txt

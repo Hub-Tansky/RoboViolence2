@@ -64,7 +64,7 @@ Its only backend (the account/ladder server) is gone; see [ADR 0002](../decision
 - Map concepts: `ma_engine` for the global engine; `ma_sound` per sample with `MA_SOUND_FLAG_DECODE` for effects; streaming for music.
 - Use `ma_sound_set_position` if `dks` exposes positional playback; otherwise pan and volume.
 - Backends are chosen automatically: WASAPI on Windows, Core Audio on macOS, PipeWire, PulseAudio or ALSA on Linux. Verify on a PipeWire desktop (Ubuntu 24.04 default).
-- Required formats are in the sounds section of `docs/assets/ASSET-INVENTORY.md` (WAV effects, OGG music). **OGG needs `stb_vorbis`**.
+- Required formats are in the sounds section of the asset inventory (kept outside this repository) (WAV effects, OGG music). **OGG needs `stb_vorbis`**.
 
 ### 3.5 Window + GL context: `dkw` → SDL3
 

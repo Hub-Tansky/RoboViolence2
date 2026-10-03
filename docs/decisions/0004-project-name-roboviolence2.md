@@ -5,8 +5,8 @@
 - Affects: [step0 §0.2](../refactoring/step0-fork-rename-and-asset-removal.md)
 
 ## Context
-- The GPLv3 covers code only. The name "BaboViolent 2" and its logos are claimed by RndLabs Inc. (`License.txt` §2c) with no grant ([../ASSETS-LICENSE.md](../ASSETS-LICENSE.md)).
-- The fork must ship under a distinct name until a grant arrives ([../legal/permission-request.md](../legal/permission-request.md)).
+- The GPLv3 covers code only. The name "BaboViolent 2" and its logos are claimed by RndLabs Inc. (`License.txt` §2c) with no grant (the asset licence notes (kept outside this repository)).
+- The fork must ship under a distinct name until a grant arrives (the permission request (kept outside this repository)).
 - Binaries, window titles, in-game strings and code identifiers (`bv2`, `babo`) still carry the old name.
 
 ## Decision

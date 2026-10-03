@@ -27,7 +27,7 @@ cmake --build --preset <preset> --target bv2dedicated bv2master
 
 ## Assets
 
-- The original assets are removed ([docs/ASSETS-LICENSE.md](docs/ASSETS-LICENSE.md), [docs/assets/ASSET-INVENTORY.md](docs/assets/ASSET-INVENTORY.md)). Never re-add them; `tools/check-original-assets.py` rejects them by hash.
+- The original assets are removed. Never re-add them; `tools/check-original-assets.py` rejects them by hash.
 - With your own copy of the original data, keep it outside the repo and set `BV2_DATA_DIR`. Without it, CI and contributors use generated placeholders (step 2 §2.6).
 
 ## Config and secrets

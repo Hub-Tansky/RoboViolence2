@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """Write placeholder game data for development and CI: no original assets.
 
-Reads the `required` rows of docs/assets/ASSET-INVENTORY.md and writes, under <out>/:
+Reads tools/placeholder-manifest.tsv (the files the game loads at startup) and writes, under <out>/:
   - a solid-colour TGA (same size and depth) for every required texture and font,
   - a short silent WAV (same format) for every required sound,
   - an empty but valid .DKO model for every required model,
   - four tiny maps (DM, TDM, CTF, SND) in .bvm v20202.
 Music (.ogg) is not generated: only the client plays it, and no encoder is available here.
-Usage: gen-placeholder-content.py <out-dir> [--inventory FILE]
+Usage: gen-placeholder-content.py <out-dir> [--manifest FILE]
 Python 3, stdlib only.
 """
 import os
@@ -17,7 +17,7 @@ import sys
 import zlib
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DEFAULT_INVENTORY = os.path.join(ROOT, "docs", "assets", "ASSET-INVENTORY.md")
+DEFAULT_MANIFEST = os.path.join(ROOT, "tools", "placeholder-manifest.tsv")
 
 
 def colour(name):
@@ -75,16 +75,12 @@ def bvm(name, size=16):
     return out
 
 
-def required_rows(inventory):
-    folder = None
-    for line in open(inventory, encoding="utf-8"):
-        m = re.match(r"## `(?:BaboViolent2/Content/)?(main/[^`]*)`", line)
-        if m:
-            folder = m.group(1)
+def required_rows(manifest):
+    for line in open(manifest, encoding="utf-8"):
+        if line.startswith("#") or not line.strip():
             continue
-        cells = [c.strip() for c in line.strip().strip("|").split("|")]
-        if folder and len(cells) == 6 and cells[0].startswith("`") and cells[4] == "required":
-            yield folder, cells[0].strip("`"), cells[1]
+        folder, name, fmt = line.rstrip("\n").split("\t")
+        yield folder, name, fmt
 
 
 def write(path, data):
@@ -99,12 +95,12 @@ def main():
         print(__doc__)
         return 2
     out = args[0]
-    inv = DEFAULT_INVENTORY
-    if "--inventory" in sys.argv:
-        inv = sys.argv[sys.argv.index("--inventory") + 1]
+    manifest = DEFAULT_MANIFEST
+    if "--manifest" in sys.argv:
+        manifest = sys.argv[sys.argv.index("--manifest") + 1]
     # content/ holds only languages and scripts; main/ in the runtime dir is the game's data root
     counts, skipped = {}, []
-    for folder, rel, typ in required_rows(inv):
+    for folder, rel, typ in required_rows(manifest):
         # folder is "main/<kind>"; the runtime main/ dir is `out` itself
         dest = os.path.join(out, folder.split("/", 1)[1], rel)
         ext = os.path.splitext(rel)[1].lower()

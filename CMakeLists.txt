@@ -115,7 +115,7 @@ if(BV2_PLACEHOLDER_CONTENT)
   add_custom_command(
     OUTPUT "${BV2_DATA_DIR}/maps/CTF-Placeholder.bvm"
     COMMAND Python3::Interpreter "${CMAKE_SOURCE_DIR}/tools/gen-placeholder-content.py" "${BV2_DATA_DIR}"
-    DEPENDS "${CMAKE_SOURCE_DIR}/tools/gen-placeholder-content.py" "${CMAKE_SOURCE_DIR}/docs/assets/ASSET-INVENTORY.md"
+    DEPENDS "${CMAKE_SOURCE_DIR}/tools/gen-placeholder-content.py" "${CMAKE_SOURCE_DIR}/tools/placeholder-manifest.tsv"
     COMMENT "Generating placeholder game data")
   add_custom_target(bv2_placeholder_content DEPENDS "${BV2_DATA_DIR}/maps/CTF-Placeholder.bvm")
 endif()

@@ -6,19 +6,19 @@
 
 | Field | Value |
 |---|---|
-| Goal | The project lives in a GitHub fork of `Daivuk/BaboViolent2`, named `RoboViolence2`. Its `main` branch contains none of the original assets listed in [../ASSETS-LICENSE.md](../ASSETS-LICENSE.md); every removed file is catalogued for recreation; `README.txt` states the fork and the removal |
+| Goal | The project lives in a GitHub fork of `Daivuk/BaboViolent2`, named `RoboViolence2`. Its `main` branch contains none of the original assets listed in the asset licence notes (kept outside this repository); every removed file is catalogued for recreation; `README.txt` states the fork and the removal |
 | In scope | Tasks 0.0–0.7 below |
 | Out of scope | Renaming code identifiers, binaries (`bv2*`), window titles or in-game strings ([future-phases.md](future-phases.md) §H); creating replacement assets (§H); all Step 1+ work |
-| Allowed paths | Repository root dir name; `~/.gitconfig` include, `~/.gitconfig-hubtansky`, `~/.config/git/hubtansky-hooks/` (0.0); deletions of the paths in 0.4; `README.txt`; `docs/assets/**`; `docs/ASSETS-LICENSE.md`; `docs/decisions/0004-*`; `tools/asset-inventory.py`; `tools/check-original-assets.py`; `.gitignore`; `AGENTS.md`; `docs/refactoring/**` |
-| Inputs | [../ASSETS-LICENSE.md](../ASSETS-LICENSE.md), [../legal/permission-request.md](../legal/permission-request.md), `AGENTS.md` |
-| Deliverables | Renamed fork and local clone; `docs/assets/ASSET-INVENTORY.md`; `docs/assets/original-assets.sha256`; asset-removal commit; new `README.txt`; ADR 0004 |
+| Allowed paths | Repository root dir name; `~/.gitconfig` include, `~/.gitconfig-hubtansky`, `~/.config/git/hubtansky-hooks/` (0.0); deletions of the paths in 0.4; `README.txt`; `docs/decisions/0004-*`; `tools/check-original-assets.py`; `tools/original-assets.sha256`; `.gitignore`; `AGENTS.md`; `docs/refactoring/**` |
+| Inputs | the asset licence notes (kept outside this repository), the permission request (kept outside this repository), `AGENTS.md` |
+| Deliverables | Renamed fork and local clone; the asset inventory (kept outside this repository); `tools/original-assets.sha256`; asset-removal commit; new `README.txt`; ADR 0004 |
 | Definition of done | "Acceptance checks" below all pass |
 
 **No merge requests before Step 0 is complete.** Step 0 commits go straight to `main` of the fork, in order. The first PR is Step 1.
 
 ## Context
 
-- The GPLv3 covers code only. The assets and the name have no grant ([../ASSETS-LICENSE.md](../ASSETS-LICENSE.md)), so the fork ships under a new name and without them.
+- The GPLv3 covers code only. The assets and the name have no grant (the asset licence notes (kept outside this repository)), so the fork ships under a new name and without them.
 - Asset files in the tree (2026-10-02):
 
   | Folder | Files |
@@ -105,7 +105,7 @@ Prints the noreply address, then `Hi Hub-Tansky!`.
 
 ### 0.3 Inventory every asset before removing it
 
-`tools/asset-inventory.py` (Python 3, stdlib only) writes `docs/assets/ASSET-INVENTORY.md` and `docs/assets/original-assets.sha256`. It must cover **each file** that 0.4 removes, one row per file:
+A one-off script (Python 3, stdlib only, kept outside this repository) writes the asset inventory and `tools/original-assets.sha256`. It must cover **each file** that 0.4 removes, one row per file:
 
 | Column | Source |
 |---|---|
@@ -120,11 +120,11 @@ Prints the noreply address, then `Hi Hub-Tansky!`.
 - Add a summary table at the top: counts per folder and per `Recreate` class.
 - `original-assets.sha256` holds the SHA-256 of every removed file. Hashes contain no copyrighted content.
 - `tools/check-original-assets.py` fails if any tracked file matches a hash in that list. Step 1 wires it into the pre-commit hook and CI, so originals can't come back, even renamed.
-- Link the inventory from `../ASSETS-LICENSE.md` ("Replacement register" gets its rows from it).
+- Link the inventory from the asset licence notes (kept outside this repository) ("Replacement register" gets its rows from it).
 
 ### 0.4 Remove the original assets from `main`
 
-Delete everything listed in [../ASSETS-LICENSE.md](../ASSETS-LICENSE.md) "Scope", in one commit `step0.4: remove original assets (see docs/assets/ASSET-INVENTORY.md)`:
+Delete everything listed in the asset licence notes (kept outside this repository) "Scope", in one commit `step0.4: remove original assets`:
 
 - `BaboViolent2/Content/main/{maps,models,skins,textures,fonts,sounds}/`
 - `BaboViolent2/Assets/`, `BaboViolent2/Design/`
@@ -164,7 +164,7 @@ Step 2 moves the remaining content to `content/`, where replacement assets are t
 Replace the content entirely. It must say:
 
 - RoboViolence 2 is a fork of <https://github.com/Daivuk/BaboViolent2> (BaboViolent 2 by bitHeads / RndLabs, GPLv3 code release).
-- The original game assets (maps, models, textures, skins, fonts, sounds, music, source art) and the RndLabs EULA are **removed**. They aren't covered by the GPL and aren't redistributed. Pointers: `docs/ASSETS-LICENSE.md`, `docs/assets/ASSET-INVENTORY.md`.
+- The original game assets (maps, models, textures, skins, fonts, sounds, music, source art) and the RndLabs EULA are **removed**. They aren't covered by the GPL and aren't redistributed. Licence notes and the inventory are kept outside this repository.
 - How to run with your own copy of the original data (0.5).
 - Code license: GPLv3 (`LICENSE.txt`). Not affiliated with or endorsed by the original authors.
 - Pointers to `AGENTS.md`, `ARCHITECTURE.md` (after Step 1) and `docs/refactoring/`.
@@ -178,8 +178,7 @@ Step 1 §1.14 later turns it into `README.md`.
 
 ## Critical files
 
-- `docs/ASSETS-LICENSE.md`, `docs/assets/ASSET-INVENTORY.md`, `docs/assets/original-assets.sha256`
-- `tools/asset-inventory.py`, `tools/check-original-assets.py`
+- `tools/original-assets.sha256`, `tools/check-original-assets.py`
 - `README.txt`, `AGENTS.md`, `.gitignore`, `docs/decisions/0004-project-name-roboviolence2.md`
 
 ## Acceptance checks
@@ -209,6 +208,6 @@ python3 tools/check-original-assets.py
 ```
 Passes.
 
-- `ASSET-INVENTORY.md` has exactly one row per path in `original-assets.sha256` (the script checks the counts). No row of class `required` has `Purpose` = `TODO`.
+- The inventory (kept outside this repository) has exactly one row per path in `original-assets.sha256`.
 - `README.txt` names the fork URL and states that the original assets were removed.
 - `git log --oneline` on `main` shows the ported commits, then `step0.*` commits. No PR was opened.

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Check literal "main/..." paths in the sources against the real file names.
 
-Real names come from content/ (tracked) and docs/assets/original-assets.sha256
+Real names come from content/ (tracked) and tools/original-assets.sha256
 (the removed originals). Linux is case-sensitive, so a path that matches a real
 file only when case is ignored is an error. Paths that match nothing are only
 listed (dynamic names, user files, files from this fork).
@@ -21,7 +21,7 @@ def real_names():
     for f in (ROOT / "content").rglob("*"):
         if f.is_file() and not f.name.endswith(".log"):
             names.add("main/" + f.relative_to(ROOT / "content").as_posix())
-    for line in (ROOT / "docs/assets/original-assets.sha256").read_text().splitlines():
+    for line in (ROOT / "tools/original-assets.sha256").read_text().splitlines():
         path = line.split("  ", 1)[-1]
         if path.startswith(ORIGINAL_PREFIX + "main/"):
             names.add(path[len(ORIGINAL_PREFIX):])
