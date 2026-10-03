@@ -975,7 +975,7 @@ void cClient::GetLastPacketID(char *pid)
 	memcpy( &(newID[3]) , digest + 7 , sizeof (char) );
 	newID[4] = '\0';
 
-	sprintf(pid , newID);
+	sprintf(pid , "%s", newID);
 
 }
 

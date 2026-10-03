@@ -122,7 +122,7 @@ int CdkoMesh::loadMatGroup(FILE *ficIn, _typMatGroup *matGroup)
 		case CHUNK_DKO_NB_VERTEX:
 			{
 				fread(&(matGroup->nbVertex), 1, sizeof(matGroup->nbVertex), ficIn);
-                printf("nbVertex: %ld\n", matGroup->nbVertex);
+                printf("nbVertex: %ld\n", (long)matGroup->nbVertex);
 				break;
 			}
 		case CHUNK_DKO_VERTEX_ARRAY:

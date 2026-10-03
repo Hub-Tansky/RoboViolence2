@@ -1156,7 +1156,7 @@ int bb_peerGetIPport(UINT4 babonetID,char *IP,unsigned short *Port)
 	{
 		if(P->ID == babonetID)
 		{
-			sprintf(IP,inet_ntoa(P->IpAdress.sin_addr));
+			sprintf(IP,"%s",inet_ntoa(P->IpAdress.sin_addr));
 			*Port	=	ntohs(P->IpAdress.sin_port);
 
 			return 0;

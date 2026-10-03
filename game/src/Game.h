@@ -282,7 +282,7 @@ struct Projectile
 	float duration;
 
 	// Hey, de qui ça vient ça?
-	char fromID;
+	int8_t fromID;
 	bool movementLock;
 
 	// Pour savoir quand shooter le data au client
@@ -686,7 +686,7 @@ public:
 	bool spawnProjectile(net_clsv_svcl_player_projectile & playerProjectile, bool imServer);
 
 	// Pour toucher les joueurs dans un rayon
-	void radiusHit(CVector3f & position, float radius, char fromID, char weaponID, bool sameDmg=false);
+	void radiusHit(CVector3f & position, float radius, int8_t fromID, int8_t weaponID, bool sameDmg=false);
 
 	// Pour savoir s'il y a un joueur dans le radius, last parameter used to ignore a specific player ( -1 = not ignoring anyone )
 	Player * playerInRadius(CVector3f position, float radius, int ignore = -1 );

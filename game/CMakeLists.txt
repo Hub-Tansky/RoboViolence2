@@ -65,6 +65,7 @@ set(BV2_GAME_SOURCES
   src/Map.cpp
   src/MapRender.cpp
   src/MemIO.cpp
+  src/Paths.cpp
   src/MenuSetup.cpp
   src/MessageDialog.cpp
   src/Minibot.cpp
@@ -107,6 +108,7 @@ set(BV2_SERVER_SOURCES
   src/Map.cpp
   src/MapRender.cpp
   src/MemIO.cpp
+  src/Paths.cpp
   src/Minibot.cpp
   src/Player.cpp
   src/PlayerUpdate.cpp
@@ -142,7 +144,6 @@ if(BV2_BUILD_SERVER)
   target_compile_definitions(bv2dedicated PRIVATE CONSOLE)
   bv2_game_target(bv2dedicated)
   target_link_libraries(bv2dedicated PRIVATE zeven_console)
-  add_dependencies(bv2dedicated bv2_seed_db)
   if(TARGET bv2_placeholder_content)
     add_dependencies(bv2dedicated bv2_placeholder_content)
   endif()
@@ -153,14 +154,20 @@ if(BV2_BUILD_CLIENT)
   bv2_game_target(bv2)
   target_link_libraries(bv2 PRIVATE zeven_client)
   if(WIN32)
-    target_sources(bv2 PRIVATE src/ResIco.rc)
+    target_sources(bv2 PRIVATE src/ResIco.rc "${CMAKE_SOURCE_DIR}/packaging/windows/bv2.manifest")
   endif()
   if(WIN32)
     set_target_properties(bv2 PROPERTIES WIN32_EXECUTABLE ON)
   elseif(APPLE)
-    set_target_properties(bv2 PROPERTIES MACOSX_BUNDLE ON)
+    set_target_properties(bv2 PROPERTIES MACOSX_BUNDLE ON
+      MACOSX_BUNDLE_INFO_PLIST "${CMAKE_SOURCE_DIR}/packaging/macos/Info.plist.in")
+    # Development layout: the bundle finds main/ in Contents/Resources (the first place the game looks)
+    add_custom_command(TARGET bv2 POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_BUNDLE_CONTENT_DIR:bv2>/Resources"
+      COMMAND ${CMAKE_COMMAND} -E create_symlink "${BV2_DATA_DIR}" "$<TARGET_BUNDLE_CONTENT_DIR:bv2>/Resources/main"
+      COMMAND codesign --force --sign - "$<TARGET_BUNDLE_DIR:bv2>" || true
+      VERBATIM)
   endif()
-  add_dependencies(bv2 bv2_seed_db)
   if(TARGET bv2_placeholder_content)
     add_dependencies(bv2 bv2_placeholder_content)
   endif()

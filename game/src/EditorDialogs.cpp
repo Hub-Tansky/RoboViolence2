@@ -17,6 +17,7 @@
 */
 
 #ifndef CONSOLE
+#include "Paths.h"
 #include "EditorDialogs.h"
 #include "CMenuManager.h"
 #include "MessageDialog.h"
@@ -257,7 +258,7 @@ void NewMapDialog::Validate(CControl * control)
 
 void NewMapDialog::OnOk()
 {
-	CString fileName("main/maps/%s.bvm", txt_mapName->text.s);
+	CString fileName("%s", bv2::mapFileForRead(txt_mapName->text.s).c_str());
 	FileIO f(fileName, "rb");
 	if(!f.isValid())
 	{
@@ -573,7 +574,7 @@ void SaveAsMapDialog::OnOk()
 		subDialog = new MessageDialog(dialogRoot->font, ButtonsOK, "Error!", "You forgot to enter the file name.");
 		return;
 	}
-	FileIO file(CString("main/maps/%s.bvm", txt_mapName->text.s), "rb");
+	FileIO file(CString("%s", bv2::mapFileForRead(txt_mapName->text.s).c_str()), "rb");
 	if(file.isValid() && !overwrite)
 	{
 		state = StateNothing;

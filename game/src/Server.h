@@ -29,7 +29,7 @@
 #endif
 #include <vector>
 
-#define GAME_VERSION_SV 21100
+#define GAME_VERSION_SV 22000 // bumped once for Phase A: fixed-width packed wire structs (step 4.2)
 
 #define GAME_UPDATE_DELAY 20
 

@@ -72,7 +72,12 @@ bool CSVString::setValue(const CString & paramsT){
 //
 // On load un fichier config
 //
-void CSystemVariable::loadConfig(char * filename)
+bool CSystemVariable::isTransient(const CString & name) const
+{
+	return transientNames.count(std::string(name.s)) != 0;
+}
+
+void CSystemVariable::loadConfig(char * filename, bool transient)
 {
 	ifstream ficIn(filename, ios::in);
 
@@ -100,6 +105,8 @@ void CSystemVariable::loadConfig(char * filename)
 			if (varNameTmp.getFirstToken(' ') == variable)
 			{
 				svType->loadConfig(ficIn);
+				if (transient)
+					transientNames.insert(std::string(variable));
 				break;
 			}
 		}
@@ -184,6 +191,8 @@ void CSystemVariable::saveConfig(char * filename)
 		CSVType *svType = variables.at(i);
 
 		CString varNameTmp = svType->variableName;
+		if (isTransient(varNameTmp.getFirstToken(' ')))
+			continue; // came from the environment or a local file: not ours to persist
 		ficOut <<varNameTmp.getFirstToken(' ').s << " ";
 		svType->saveConfig(ficOut);
 		ficOut << endl;

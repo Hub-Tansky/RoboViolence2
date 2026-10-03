@@ -251,7 +251,7 @@ void cMasterServer::Unban( int ID )
 	sqlite3_exec(MasterDB,SQL,0,0,0);
 
 
-	printf("Ban with ID %i has been removed\n");
+	printf("Ban with ID %i has been removed\n", ID);
 }
 
 void cMasterServer::CheckBans()
@@ -298,7 +298,7 @@ void cMasterServer::CheckBans()
 			if( nbDays >= Duration )
 			{
 				char SQL[512];
-				sprintf(SQL,"Delete From BanList Where ID = %i;",azResult[BV2_BAN_ID]);
+				sprintf(SQL,"Delete From BanList Where ID = %i;",atoi(azResult[BV2_BAN_ID]));
 				sqlite3_exec(MasterDB,SQL,0,0,0);
 			}
 

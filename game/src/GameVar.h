@@ -169,6 +169,8 @@ public:
 	CString zsv_adminPass;
 
 	CString db_accountServer;
+	CString cl_masterServers; // host:port list (BV2_MASTER_SERVERS); empty = no master
+	CString cl_accountURL;    // account/ladder endpoint (BV2_ACCOUNT_URL); empty = accounts off
 	int db_version;
 
 	CString cl_accountUsername;
@@ -563,6 +565,9 @@ public:
 };
 
 extern GameVar gameVar;
+
+// Reads version and account URL from the user database (after the config layers are loaded)
+void FetchDBInfos();
 
 
 #endif

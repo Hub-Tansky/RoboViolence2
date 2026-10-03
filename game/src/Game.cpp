@@ -16,6 +16,7 @@
 	BaboViolent 2 source code. If not, see http://www.gnu.org/licenses/.
 */
 
+#include "Paths.h"
 #include "Game.h"
 #include "netPacket.h"
 #include "Console.h"
@@ -1565,7 +1566,7 @@ void Game::shootSV(int playerID, int nuzzleID, float imp, CVector3f p1, CVector3
 //
 // Pour toucher les joueurs dans un rayon
 //
-void Game::radiusHit(CVector3f & pos, float radius, char fromID, char weaponID, bool sameDmg)
+void Game::radiusHit(CVector3f & pos, float radius, int8_t fromID, int8_t weaponID, bool sameDmg)
 {
 	CVector3f position;
 	position[0] = pos[0];

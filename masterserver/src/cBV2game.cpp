@@ -25,7 +25,7 @@ cBV2game::cBV2game(char *ip,stBV2row & gameinfos, UINT4 baboID)
 	
 	if(GameInfos.Priority == 0)
 	{
-		sprintf(GameInfos.ip,ip);
+		sprintf(GameInfos.ip,"%s",ip);
 	}
 }
 

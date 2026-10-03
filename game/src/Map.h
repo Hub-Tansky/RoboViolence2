@@ -261,7 +261,7 @@ public:
 	CVector3f flagLastPos[2];
 	CVector3f flagLastAccel[2];
 	CVector3f flagBendOffset[2];
-	char flagState[2]; // -1 = par terre, -2 = on pod, 0+ on player
+	int8_t flagState[2]; // -1 = par terre, -2 = on pod, 0+ on player
 
 	// Les objectifs
 	CVector3f objective[2];

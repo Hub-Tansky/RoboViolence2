@@ -16,6 +16,7 @@
 	BaboViolent 2 source code. If not, see http://www.gnu.org/licenses/.
 */
 
+#include "Paths.h"
 #include "Server.h"
 #include "Console.h"
 #include "netPacket.h"
@@ -62,7 +63,7 @@ Server::Server(Game * pGame): maxTimeOverMaxPing(5.0f)//, maxIdleTime(180.0f)
 	}
 
 	// Load banlist
-	std::ifstream file("main/banlist", std::ios::binary);
+	std::ifstream file(bv2::userFile("banlist"), std::ios::binary);
 	char name[32], ip[16];
 
 	while(file.is_open() && !file.eof())
@@ -200,7 +201,7 @@ void Server::changeMap(CString & mapName)
 				mapName = queryNextMap();
 			}
 			//--- Check first is that map exist.
-			CString filename("main/maps/%s.bvm", mapName.s);
+			CString filename("%s", bv2::mapFileForRead(mapName.s).c_str());
 			FILE* fic = fopen(filename.s, "rb");
 			if (!fic)
 			{
@@ -226,7 +227,7 @@ void Server::changeMap(CString & mapName)
 void Server::addmap(CString & mapName)
 {
 	//--- Check first is that map exist.
-	CString filename("main/maps/%s.bvm", mapName.s);
+	CString filename("%s", bv2::mapFileForRead(mapName.s).c_str());
 	FILE* fic = fopen(filename.s, "rb");
 	if (!fic)
 	{
@@ -277,70 +278,9 @@ std::vector<CString> Server::populateMapList(bool all)
 		maps = mapList;
 	else
 	{
-#ifdef BV2_PLATFORM_WINDOWS
-		WIN32_FIND_DATA FindFileData;
-		HANDLE hFind = INVALID_HANDLE_VALUE;
-		char DirSpec[MAX_PATH]; // directory specification
-		DWORD dwError;
-		char appPath[_MAX_PATH];
-
-		// Chercher le path du "current working directory".
-		_getcwd(appPath, _MAX_PATH);
-
-		strncpy(DirSpec, appPath, strlen(appPath)+1);
-		strncat(DirSpec, "\\main\\maps\\*.bvm", strlen("\\main\\maps\\*.bvm")+1);
-
-		hFind = FindFirstFile(DirSpec, &FindFileData);
-
-		if (hFind == INVALID_HANDLE_VALUE)
-		{
-			// Si on ne trouve pas le rA©pertoire dA©sirA©.
-		}
-		else
-		{
-			CString filename = CString(FindFileData.cFileName);
-			filename.resize(filename.len() - 4);
-			maps.push_back(filename);
-
-			while (FindNextFile(hFind, &FindFileData) != 0)
-			{
-				if(!(FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
-				{
-					CString filename = CString(FindFileData.cFileName);
-					filename.resize(filename.len() - 4);
-					maps.push_back(filename);
-				}
-			}
-
-			dwError = GetLastError();
-			FindClose(hFind);
-			if (dwError != ERROR_NO_MORE_FILES)
-			{
-				// Si il y a une error en dA©tectant qu'il n'y a plus de fichiers.
-			}
-		}
-#else
-		dirent* file;
-		DIR* hFile;
-        char dirspec[256];
-        getcwd(dirspec, sizeof(dirspec));
-        strcat(dirspec, "/main/maps");
-		hFile = opendir(dirspec);
-		if(hFile)
-		{
-			while(file = readdir(hFile))
-			{
-				char *extension = strrchr(file->d_name, '.');
-				if(extension)
-				{
-					if(!strcasecmp(extension, ".bvm"))
-						maps.push_back(file->d_name);
-				}
-			}
-			closedir(hFile);
-		}
-
-#endif
+		std::vector<std::string> names = bv2::listMapNames();
+		for (size_t i = 0; i < names.size(); ++i)
+			maps.push_back(CString("%s", names[i].c_str()));
 	}
 	return maps;
 }
@@ -1329,7 +1269,7 @@ void Server::update(float delay)
 
 		// Open map
         if (mapTransfers[i].mapName != "") {
-            CString filename("main/maps/%s.bvm", mapTransfers[i].mapName.s);
+            CString filename("%s", bv2::mapFileForRead(mapTransfers[i].mapName.s).c_str());
             FILE* fic = fopen(filename.s, "rb");
 
             if (fic)

@@ -287,24 +287,29 @@ void FileIO::put(unsigned int data)
 	fwrite(&tmp, 1, sizeof(unsigned short), m_file);
 }
 
+// long is 32 bits on Windows and 64 on Linux and macOS; the files hold 32-bit values
 void FileIO::put(long data)
 {
-	fwrite(&data, sizeof(data), 1, m_file);
+	int32_t tmp = (int32_t)data;
+	fwrite(&tmp, sizeof(tmp), 1, m_file);
 }
 
 void FileIO::put(long * data, int size)
 {
-	fwrite(data, 1, sizeof(long) * size, m_file);
+	for (int i = 0; i < size; ++i)
+		put(data[i]);
 }
 
 void FileIO::put(unsigned long data)
 {
-	fwrite(&data, 1, sizeof(unsigned long), m_file);
+	uint32_t tmp = (uint32_t)data;
+	fwrite(&tmp, sizeof(tmp), 1, m_file);
 }
 
 void FileIO::put(unsigned long * data, int size)
 {
-	fwrite(data, 1, sizeof(unsigned long) * size, m_file);
+	for (int i = 0; i < size; ++i)
+		put(data[i]);
 }
 
 void FileIO::put(float data)

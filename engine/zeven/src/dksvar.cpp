@@ -23,6 +23,10 @@
 #include "CString.h"
 #include "CSystemVariable.h"
 #include <vector>
+#include <string>
+#include <ctype.h>
+
+bool			dksvarIsSecret(const char * name);
 
 
 
@@ -51,7 +55,7 @@ void			dksvarGetFormatedVar(char * varName, CString * formatedString)
 		if (strnicmp(var->variableName.s, varName, strlen(varName)) == 0)
 		{
 			// On pogne son nom format�avec la valeur apres
-			CString formatedName = CString(varName) + " " + var->getValue();
+			CString formatedName = CString(varName) + " " + (dksvarIsSecret(var->variableName.s) ? CString("***") : var->getValue());
 			systemVariable.stringInterface->updateString(formatedString, formatedName.s);
 			return;
 		}
@@ -122,6 +126,31 @@ void			dksvarInit(CStringInterface * stringInterface)
 void			dksvarLoadConfig(char * filename)
 {
 	systemVariable.loadConfig(filename);
+}
+
+void			dksvarLoadConfigTransient(char * filename)
+{
+	systemVariable.loadConfig(filename, true);
+}
+
+bool			dksvarSetTransient(const char * name, const char * value)
+{
+	CString command("set %s \"%s\"", name, value);
+	CString commandName = command.getFirstToken(' ');
+	if (systemVariable.command(commandName, command) != CR_OK)
+		return false;
+	systemVariable.transientNames.insert(std::string(name));
+	return true;
+}
+
+bool			dksvarIsSecret(const char * name)
+{
+	if (!name)
+		return false;
+	std::string n(name);
+	for (size_t i = 0; i < n.size(); ++i)
+		n[i] = (char)tolower((unsigned char)n[i]);
+	return n.find("pass") != std::string::npos;
 }
 
 void			dksvarLoadConfigSVOnly(char * filename)

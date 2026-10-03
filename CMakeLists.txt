@@ -43,14 +43,14 @@ set(BV2_PLATFORM_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/engine/zeven/include/platfo
 # Flags shared by every target: platform.h force-included, Windows 10/11 API level, sanitizers.
 function(bv2_target_defaults target)
   if(MSVC)
-    target_compile_options(${target} PRIVATE "/FI${BV2_PLATFORM_HEADER}" /utf-8)
+    target_compile_options(${target} PRIVATE "/FI${BV2_PLATFORM_HEADER}" /utf-8 /W3)
     target_compile_definitions(${target} PRIVATE
       _CRT_SECURE_NO_WARNINGS _CRT_NONSTDC_NO_DEPRECATE NOMINMAX)
     if(BV2_SANITIZE)
       target_compile_options(${target} PRIVATE /fsanitize=address)
     endif()
   else()
-    target_compile_options(${target} PRIVATE -include "${BV2_PLATFORM_HEADER}")
+    target_compile_options(${target} PRIVATE -include "${BV2_PLATFORM_HEADER}" -Wall)
     if(BV2_SANITIZE)
       target_compile_options(${target} PRIVATE -fsanitize=address,undefined -fno-omit-frame-pointer)
       target_link_options(${target} PRIVATE -fsanitize=address,undefined)
@@ -70,8 +70,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${BV2_RUNTIME_DIR}")
 foreach(cfg DEBUG RELEASE RELWITHDEBINFO MINSIZEREL)
   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_${cfg} "${BV2_RUNTIME_DIR}")
 endforeach()
-# <runtime>/main is the game's data root: content/ entries are linked in, bv2.cfg is copied from the
-# example, and placeholder assets are generated next to them (nothing is ever written into content/).
+# <runtime>/main is the game's data root: content/ entries are linked in, bv2.example.cfg is copied from config/, and placeholder assets are generated next to them (nothing is ever written into content/).
 set(BV2_DATA_DIR "${BV2_RUNTIME_DIR}/main")
 file(MAKE_DIRECTORY "${BV2_DATA_DIR}")
 function(bv2_link_dir src dst)
@@ -91,7 +90,8 @@ endfunction()
 foreach(entry languages LaunchScript)
   bv2_link_dir("${CMAKE_SOURCE_DIR}/content/${entry}" "${BV2_DATA_DIR}/${entry}")
 endforeach()
-configure_file("${CMAKE_SOURCE_DIR}/config/bv2.example.cfg" "${BV2_DATA_DIR}/bv2.cfg" COPYONLY)
+# Defaults only: the game keeps the user's settings in its pref directory (ADR 0007).
+configure_file("${CMAKE_SOURCE_DIR}/config/bv2.example.cfg" "${BV2_DATA_DIR}/bv2.example.cfg" COPYONLY)
 
 option(BV2_PLACEHOLDER_CONTENT "Generate placeholder maps, textures, sounds and models (the originals are not in the repo)" ON)
 if(BV2_PLACEHOLDER_CONTENT)
@@ -113,4 +113,18 @@ if(BV2_BUILD_CLIENT OR BV2_BUILD_SERVER)
 endif()
 if(BV2_BUILD_MASTER)
   add_subdirectory(masterserver)
+endif()
+
+# Install layout (FHS; the game looks for <prefix>/share/bv2/main next to <prefix>/bin). On macOS the bundle
+# holds the content in Contents/Resources instead (packaging is a later phase).
+include(GNUInstallDirs)
+foreach(tgt bv2 bv2dedicated bv2master)
+  if(TARGET ${tgt})
+    install(TARGETS ${tgt} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} BUNDLE DESTINATION .)
+  endif()
+endforeach()
+install(DIRECTORY content/ DESTINATION ${CMAKE_INSTALL_DATADIR}/bv2/main)
+install(FILES config/bv2.example.cfg DESTINATION ${CMAKE_INSTALL_DATADIR}/bv2/main)
+if(UNIX AND NOT APPLE)
+  install(FILES packaging/linux/roboviolence2.desktop DESTINATION ${CMAKE_INSTALL_DATADIR}/applications)
 endif()

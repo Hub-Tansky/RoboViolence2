@@ -35,23 +35,27 @@ ePTexture::ePTexture()
 //
 
 // La struct pour les chunks
+// On-disk layout: u16 id, 2 padding bytes, i32 length (what the 32-bit original wrote)
 struct _typChunkDKT
 {
-	unsigned short chunkID;
-	INT4 lenght;
+	uint16_t chunkID;
+	uint16_t padding;
+	int32_t lenght;
 	_typChunkDKT()
 	{
 		chunkID = 0;
+		padding = 0;
 		lenght = 0;
 	}
 };
+static_assert(sizeof(_typChunkDKT) == 8, "dkt chunk header is 8 bytes on disk");
 
 // Une strucs pour saver plus rapidement les données
 struct _typDimension
 {
-	short width;
-	short height;
-	short bpp;
+	int16_t width;
+	int16_t height;
+	int16_t bpp;
 	_typDimension()
 	{
 		width=0;

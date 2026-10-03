@@ -18,6 +18,8 @@
 
 #ifndef CONSOLE
 #include "screengrab.h"
+#include "Paths.h"
+#include <string>
 #include "Zeven.h"
 #include "GameVar.h"
 #include "Game.h"
@@ -70,7 +72,7 @@ bool SaveScreenGrabAuto()
    char path[512];
    time_t time;
    ::time(&time);
-   sprintf(path, "SS_%lld.bmp", (long long)time);
+   snprintf(path, sizeof(path), "%s", bv2::userFile("screenshots/SS_" + std::to_string((long long)time) + ".bmp").c_str());
    return SaveScreenGrab(path);
 }
 
@@ -79,9 +81,9 @@ bool SaveStatsAuto()
    char path[512];
    time_t time;
    ::time(&time);
-   sprintf(path, "SS_%lld.bmp", (long long)time);
+   snprintf(path, sizeof(path), "%s", bv2::userFile("screenshots/SS_" + std::to_string((long long)time) + ".bmp").c_str());
    SaveScreenGrab(path);
-   sprintf(path, "SS_%lld.txt", (long long)time);
+   snprintf(path, sizeof(path), "%s", bv2::userFile("screenshots/SS_" + std::to_string((long long)time) + ".txt").c_str());
 
   FILE * pFile;
   pFile = fopen (path,"w");

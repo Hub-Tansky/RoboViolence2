@@ -34,6 +34,11 @@
 
 #include <stdint.h>
 
+/* The wire and file formats are little endian and read by memcpy. */
+#if defined(__BYTE_ORDER__) && defined(__ORDER_LITTLE_ENDIAN__) && (__BYTE_ORDER__ != __ORDER_LITTLE_ENDIAN__)
+	#error "big-endian targets are not supported"
+#endif
+
 #ifdef __cplusplus
 	// The game relied on windows.h's min/max macros; NOMINMAX is set, so provide them as functions everywhere.
 	#include <algorithm>

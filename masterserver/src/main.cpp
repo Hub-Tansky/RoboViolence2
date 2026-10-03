@@ -1,6 +1,8 @@
 
 #ifndef BV2_PLATFORM_WINDOWS
-	#include "sys/times.h"
+	#include <chrono>
+#include <thread>
+#include "sys/times.h"
 
 	#define stricmp strcasecmp //helper define
 #else
@@ -48,15 +50,7 @@ int main()
 
 			nbFrameElapsed--;
 		}
-		//linux sleep
-		#ifndef BV2_PLATFORM_WINDOWS
-			nanosleep(&ts,0);
-			ts.tv_sec = 0;
-			ts.tv_nsec = 1000000;
-		//windows sleep
-		#else
-			Sleep(1);
-		#endif
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 		
 	}
   

@@ -285,18 +285,8 @@ void CUserLogin::Click(CControl * control)
 	}
 	if (control == btn_createAccount)
 	{
-#ifdef BV2_PLATFORM_WINDOWS
-	//	ShellExecute(dkwGetHandle(), "OPEN", "Register.lnk", NULL, NULL, SW_SHOW);
-	//	ShellExecute(0, "OPEN", "http://p3.envision3d.org/~league/", "", NULL/*lcTPath*/, 1);
-	//	ShellExecute(0, "", "http://p3.envision3d.org/~league/", "", "", SW_SHOWNORMAL);
-	//	execl("http://p3.envision3d.org/~league/", 0);
-	//	CreateProcess();
-	//LPCTSTR url = _T("www.microsoft.com");
-	//CString args;
-	//args.Format(_T("url.dll,FileProtocolHandler www.microsoft.com"), url);
-	ShellExecute(NULL, _T("open"), _T("rundll32.exe"), _T("") /* TODO(step4): endpoint from local config */, 0, SW_SHOW);
-
-#endif
+	// The original registration website is gone; there is nothing to open until an account service is configured.
+	console->add("\x4> Account registration is not available");
 		dkwForceQuit();
 	}
 }

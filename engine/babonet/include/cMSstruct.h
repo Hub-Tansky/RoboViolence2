@@ -1,6 +1,9 @@
 #ifndef _MASTER_STRUCT_H
 #define	_MASTER_STRUCT_H
 
+// Wire format: fixed-width fields, no padding, little endian (asserted below). Changing a layout needs a GAME_VERSION bump.
+#pragma pack(push, 1)
+
 
 
 //type ID des message
@@ -69,11 +72,11 @@
 	//CACHE_BAN		1010
 	struct stCacheBan
 	{
-		short	ID;
+		int16_t	ID;
 		char	Nick[32];
 		char	IP[16];
 		char	MAC[20];
-		char	Duration;
+		int8_t	Duration;
 		char	Date[9];
 		char	Pass[8];
 	};
@@ -87,8 +90,8 @@
 	//CACHE_LIST_REMOTE
 	typedef struct
 	{
-		unsigned long FromID;
-		short ReqNum;		// used to number consecutive cache list requests
+		uint32_t FromID;
+		int16_t ReqNum;		// used to number consecutive cache list requests
 		char Filter[32];	// 32 char max filter, can be '\0' for none
 		char ServerIP[16];
 		char ServerPort[6];
@@ -97,14 +100,14 @@
 	//CACHE_UNBAN		1012
 	struct stCacheUnban
 	{
-		short	ID;
+		int16_t	ID;
 		char	Pass[10];
 	};
 
 	//CACHE_BANNED		1013
 	struct stCacheBanned
 	{
-		short	ID;			// player ID, only used for the server
+		int16_t	ID;			// player ID, only used for the server
 		char	IP[16];
 		char	MAC[20];
 	};
@@ -112,15 +115,15 @@
 	//CACHE_ANSWER		1014
 	struct stCacheAnswer
 	{
-		short	ID;
-		char	Answer;	// 0 = no , 1 = yes
+		int16_t	ID;
+		int8_t	Answer;	// 0 = no , 1 = yes
 	};
 
 	typedef struct
 	{
-		unsigned long FromID;
-		short ReqNum;		// id of request this data belong to
-		short ID;
+		uint32_t FromID;
+		int16_t ReqNum;		// id of request this data belong to
+		int16_t ID;
 		char NickName[32];
 		char IP[16];
 		char macAddr[20];
@@ -129,16 +132,16 @@
 	//CACHE_LIST_PLAYER_END
 	struct stCacheListEnd
 	{
-		unsigned long requestFromID;
+		uint32_t requestFromID;
 	};
 
 	//CLIENT_HASH
 	typedef struct
 	{
-		short s1;
-		short s2;
-		short s3;
-		short s4;
+		int16_t s1;
+		int16_t s2;
+		int16_t s3;
+		int16_t s4;
 	} stHashSeed;
 
 	//CREATE_ACCOUNT, UPDATE_ACCOUNT
@@ -153,14 +156,14 @@
 	//DELETE_ACCOUNT
 	typedef struct
 	{
-		int UserID;	// user requesting this operation
+		int32_t UserID;	// user requesting this operation
 		char HashedPassMD5[17];
 	} stDeleteAccount;
 
 	//CHANGE_PASSWORD
 	typedef struct
 	{
-		int UserID;	// user requesting this operation
+		int32_t UserID;	// user requesting this operation
 		char HashedOldPassMD5[17];
 		char HashedNewPassMD5[17];
 	} stChangePassword;
@@ -181,11 +184,11 @@
 	//USER_STATUS_UPDATE
 	typedef struct
 	{
-		int UserID;	// user requesting this operation
+		int32_t UserID;	// user requesting this operation
 		char HashedPassMD5[17];
 		char ServerName[65]; // 63 + '\0'
 		char IP[16];
-		unsigned short Port;
+		uint16_t Port;
 		//char LastSeenDate[12]; // format HH:MM:SS, end with "\0"
 		//char LastSeenTime[12]; // format YYYY-MM-DD, end with "\0"
 	} stUserStatusUpdate;
@@ -193,7 +196,7 @@
 	//REGISTER_CLAN
 	typedef struct
 	{
-		int UserID;	// user requesting this operation
+		int32_t UserID;	// user requesting this operation
 		char HashedPassMD5[17];
 		char Name[49];
 		char Tag[9];
@@ -205,48 +208,48 @@
 	//user can remove only the clan he is admin of
 	typedef struct
 	{
-		int UserID;	// user requesting this operation
+		int32_t UserID;	// user requesting this operation
 		char HashedPassMD5[17]; // pass of user requesting this op
 	} stRemoveClan;
 
 	//CHANGE_CLAN_PERMISSIONS
 	typedef struct
 	{
-		int UserID;	// user requesting this operation, have to be admin of clan
+		int32_t UserID;	// user requesting this operation, have to be admin of clan
 		char HashedPassMD5[17];
-		int DestUserID; // user whose permissions we are about to change
-		char Permissions; // 1 - make admin, 2 - remove admin
+		int32_t DestUserID; // user whose permissions we are about to change
+		int8_t Permissions; // 1 - make admin, 2 - remove admin
 	} stChangeClanPermissions;
 
 	//JOIN_CLAN_REQUEST
 	typedef struct
 	{
-		int UserID;	// user requesting this operation, have to be admin of clan
+		int32_t UserID;	// user requesting this operation, have to be admin of clan
 		char HashedPassMD5[17];
-		int DestUserID; // user that gonna be added to clan members
+		int32_t DestUserID; // user that gonna be added to clan members
 	} stJoinClanRequest;
 
 	//JOIN_CLAN_ACCEPT
 	typedef struct
 	{
-		int UserID;	// user that was invited to clan
+		int32_t UserID;	// user that was invited to clan
 		char HashedPassMD5[17];
-		int UserIDFrom; // stJoinClanRequest.UserID
+		int32_t UserIDFrom; // stJoinClanRequest.UserID
 	} stJoinClanAccept;
 
 	//LEAVE_CLAN
 	typedef struct
 	{
-		int UserID;	// user requesting this operation, member of a clan ofc
+		int32_t UserID;	// user requesting this operation, member of a clan ofc
 		char HashedPassMD5[17];
 	} stLeaveClan;
 
 	//REQUEST_FRIEND, ACCEPT_FRIEND, REMOVE_FRIEND, MOVE_FRIEND
 	typedef struct
 	{
-		int UserID;	// user requesting this operation
+		int32_t UserID;	// user requesting this operation
 		char HashedPassMD5[17];
-		int DestUserID; // requested friend or friend that gonna be added/removed
+		int32_t DestUserID; // requested friend or friend that gonna be added/removed
 		char GroupName[50];
 	} stFriendOp;
 
@@ -258,9 +261,9 @@
 	//ACCOUNT_MGR_RESULT
 	typedef struct
 	{
-		int MessageID;
-		int Param;
-		char Result; // 0 - ok, 1 - failed
+		int32_t MessageID;
+		int32_t Param;
+		int8_t Result; // 0 - ok, 1 - failed
 		char Info[100];
 	} stAccountMgrResult;
 
@@ -283,7 +286,7 @@
 	//struct typeID 1002
 	struct stMasterInfo
 	{
-		short		NbGames;
+		int16_t		NbGames;
 	};
 
 
@@ -298,16 +301,16 @@
 		char			serverName[64]; // 63 + '\0'			//TEXT
 		char			password[16]; // 15 + '\0'			//TEXT
 		char			ip[16];						//TEXT		lors d'un update vers le master, IP peut etre vide, le master va catcher le IP anyway en pognant le packet
-		unsigned short		port;						//NUMERIC	
-		char			nbPlayer;					//NUMERIC
-		char			maxPlayer;					//NUMERIC
-		unsigned short		flags;						//NUMERIC
-		char			gameType;					//NUMERIC
-		unsigned short		ServerID;					//if server is REGISTERED, put ID here, else, leave to 0
+		uint16_t		port;						//NUMERIC	
+		int8_t			nbPlayer;					//NUMERIC
+		int8_t			maxPlayer;					//NUMERIC
+		uint16_t		flags;						//NUMERIC
+		int8_t			gameType;					//NUMERIC
+		uint16_t		ServerID;					//if server is REGISTERED, put ID here, else, leave to 0
 		char			Version[5];					//version of server
-		char			Priority;					//master server usage only, leave at 0
-		unsigned short		DBVersion;
-		unsigned short		Padding;
+		int8_t			Priority;					//master server usage only, leave at 0
+		uint16_t		DBVersion;
+		uint16_t		Padding;
 	};
 
 	
@@ -320,23 +323,23 @@
 	//Struct typeID 1003
 	struct stPlayerResult
 	{
-		unsigned short	ServerID;		//UniqueID of the current server (only registered servers have this, 0 otherwise)
-		unsigned long	BaboID;			//Unique ID of the bv2 player (received after the player has connected to the server)
-        	unsigned short	Deaths;			//Number of deaths in this match
-		unsigned short	Frags;			//Number of Frags
-		unsigned long	Medals;			//The player has win any medals ?
-		short		XP;			//Increment or Decrement of current player's XP
-		unsigned short	Molotov;		//number of molotov kills
-		unsigned short	Grenades;		//number of grenade kills
-		unsigned short	Bazooka;		//number of bazooka kills
-		unsigned short	SMG;			//number of SMG kills
-		unsigned short	Shotgun;		//number of shotgun kills
-		unsigned short	Sniper;			//number of sniper kills
-		unsigned short	DMG;			//number of DualMachinegun kills
-		unsigned short	Chaingun;		//number of chaingun kills
-		unsigned short	Photon;			//number of photon rifle kills
-		unsigned short	Nuke;			//number of Nuke kills
-		unsigned short	Knife;			//number of Knife kills
+		uint16_t	ServerID;		//UniqueID of the current server (only registered servers have this, 0 otherwise)
+		uint32_t	BaboID;			//Unique ID of the bv2 player (received after the player has connected to the server)
+        	uint16_t	Deaths;			//Number of deaths in this match
+		uint16_t	Frags;			//Number of Frags
+		uint32_t	Medals;			//The player has win any medals ?
+		int16_t		XP;			//Increment or Decrement of current player's XP
+		uint16_t	Molotov;		//number of molotov kills
+		uint16_t	Grenades;		//number of grenade kills
+		uint16_t	Bazooka;		//number of bazooka kills
+		uint16_t	SMG;			//number of SMG kills
+		uint16_t	Shotgun;		//number of shotgun kills
+		uint16_t	Sniper;			//number of sniper kills
+		uint16_t	DMG;			//number of DualMachinegun kills
+		uint16_t	Chaingun;		//number of chaingun kills
+		uint16_t	Photon;			//number of photon rifle kills
+		uint16_t	Nuke;			//number of Nuke kills
+		uint16_t	Knife;			//number of Knife kills
 	};
 
 
@@ -349,7 +352,7 @@
 	//Struct typeID 1004
 	struct stPlayerRegister
 	{
-		char	Action;		//Action, 0 = User wants to create new account. 1 = User wants to authentify(account already created)
+		int8_t	Action;		//Action, 0 = User wants to create new account. 1 = User wants to authentify(account already created)
 		char	Username[16];	//username entered (what will be shown on website)
 		char	Password[16];	//password the user entered
 		//char	cdkey[33];	//not yet
@@ -398,8 +401,8 @@
 	*/
 	struct stRegisterResult
 	{
-		char	Result;
-		long	ID;			
+		int8_t	Result;
+		int32_t	ID;			
 	};
 
 
@@ -410,38 +413,74 @@
 	//struct typeID 1001
 	struct stKillServ
 	{
-		unsigned short Port;
+		uint16_t Port;
 	};
 
 
 	//--- All information for the survey
 	struct SSurvey
 	{
-		char gender;
-		char age;
-		char continent;
+		int8_t gender;
+		int8_t age;
+		int8_t continent;
 		char country[80];
-		char gameGenre;
+		int8_t gameGenre;
 		char specifiedGenre[80];
-		char hourPlayerGames;
+		int8_t hourPlayerGames;
 		char magazine[80];
-		char console;
+		int8_t console;
 
-		char hourPlayingBV2;
-		char kindOfServer;
+		int8_t hourPlayingBV2;
+		int8_t kindOfServer;
 		char howYouLearnAboutBabo[80];
-		char whoDoYouPlayWith; //--- bitMask
-		char whatDoYouLike; //--- bitMask
+		int8_t whoDoYouPlayWith; //--- bitMask
+		int8_t whatDoYouLike; //--- bitMask
 		char whatDoYouLikeOther[80];
 
-		char whatYouWouldLikeForBV3; //--- bitMask
+		int8_t whatYouWouldLikeForBV3; //--- bitMask
 		char whatYouWouldLikeForBV3Other[80];
-		char adsAndFree;
-		char payNoAds;
+		int8_t adsAndFree;
+		int8_t payNoAds;
 
 		char email[80];
 	};
 
 
+
+static_assert(sizeof(stCacheBan) == 88, "stCacheBan wire size");
+static_assert(sizeof(stCacheList) == 32, "stCacheList wire size");
+static_assert(sizeof(stCacheUnban) == 12, "stCacheUnban wire size");
+static_assert(sizeof(stCacheBanned) == 38, "stCacheBanned wire size");
+static_assert(sizeof(stCacheAnswer) == 3, "stCacheAnswer wire size");
+static_assert(sizeof(stCacheListEnd) == 4, "stCacheListEnd wire size");
+static_assert(sizeof(stBV2list) == 5, "stBV2list wire size");
+static_assert(sizeof(stMasterInfo) == 2, "stMasterInfo wire size");
+static_assert(sizeof(stBV2row) == 132, "stBV2row wire size");
+static_assert(sizeof(stPlayerResult) == 38, "stPlayerResult wire size");
+static_assert(sizeof(stPlayerRegister) == 33, "stPlayerRegister wire size");
+static_assert(sizeof(stServerRegister) == 32, "stServerRegister wire size");
+static_assert(sizeof(stRegisterResult) == 5, "stRegisterResult wire size");
+static_assert(sizeof(stKillServ) == 2, "stKillServ wire size");
+static_assert(sizeof(SSurvey) == 573, "SSurvey wire size");
+static_assert(sizeof(stCacheListRemote) == 60, "stCacheListRemote wire size");
+static_assert(sizeof(stCachePlayer) == 76, "stCachePlayer wire size");
+static_assert(sizeof(stHashSeed) == 8, "stHashSeed wire size");
+static_assert(sizeof(stAccount) == 132, "stAccount wire size");
+static_assert(sizeof(stDeleteAccount) == 21, "stDeleteAccount wire size");
+static_assert(sizeof(stChangePassword) == 38, "stChangePassword wire size");
+static_assert(sizeof(stRecoverPassword) == 33, "stRecoverPassword wire size");
+static_assert(sizeof(stLoginLogout) == 50, "stLoginLogout wire size");
+static_assert(sizeof(stUserStatusUpdate) == 104, "stUserStatusUpdate wire size");
+static_assert(sizeof(stRegisterClan) == 177, "stRegisterClan wire size");
+static_assert(sizeof(stRemoveClan) == 21, "stRemoveClan wire size");
+static_assert(sizeof(stChangeClanPermissions) == 26, "stChangeClanPermissions wire size");
+static_assert(sizeof(stJoinClanRequest) == 25, "stJoinClanRequest wire size");
+static_assert(sizeof(stJoinClanAccept) == 25, "stJoinClanAccept wire size");
+static_assert(sizeof(stLeaveClan) == 21, "stLeaveClan wire size");
+static_assert(sizeof(stFriendOp) == 75, "stFriendOp wire size");
+static_assert(sizeof(stStatsUpdate) == 1, "stStatsUpdate wire size");
+static_assert(sizeof(stAccountMgrResult) == 109, "stAccountMgrResult wire size");
+
+#pragma pack(pop)
 
 #endif

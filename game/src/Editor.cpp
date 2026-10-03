@@ -17,6 +17,7 @@
 */
 
 #ifndef CONSOLE
+#include "Paths.h"
 #include "Editor.h"
 #include "Console.h"
 #include "CMenuManager.h"
@@ -657,7 +658,7 @@ void Editor2::Save(CString mapName)
     int i, j;
 	map->mapName = mapName;
 	// On save la map dans ce cas!
-	FileIO file(CString("main/maps/%s.bvm", mapName.s), "wb");
+	FileIO file(CString("%s", bv2::mapFileForWrite(mapName.s).c_str()), "wb");
 	if (!file.isValid())
 	{
 		console->add("\x4> Error saving map");

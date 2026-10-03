@@ -43,6 +43,8 @@
 
 
 #include <vector>
+#include <set>
+#include <string>
 #include "CVector.h"
 #include "CString.h"
 #include <fstream>
@@ -465,8 +467,14 @@ public:
 	// Pour effacer une variable du stack
 	void unregisterSystemVariable(const CString &screenName);
 
+	// Variables set from the environment, --config or config/local are "transient": saveConfig leaves them out,
+	// so secrets given that way never reach the user's saved bv2.cfg.
+	std::set<std::string> transientNames;
+	bool isTransient(const CString & name) const;
+
 	// pour loader un fichier config contenant la prédéfinition des variables
-	void loadConfig(char * filename);
+	// transient: mark every variable the file sets as not to be saved
+	void loadConfig(char * filename, bool transient = false);
 	void loadConfigSVOnly(char * filename);
 
 	// Pour saver un fichier config contenant la prédéfinition des variables

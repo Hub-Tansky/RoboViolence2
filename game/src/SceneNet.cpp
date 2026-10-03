@@ -16,6 +16,7 @@
 	BaboViolent 2 source code. If not, see http://www.gnu.org/licenses/.
 */
 
+#include "Paths.h"
 #include "Scene.h"
 #include "Console.h"
 #ifndef CONSOLE
@@ -155,7 +156,7 @@ void Scene::edit(CString command)
 void Scene::disconnect()
 {
 #ifndef CONSOLE
-	if (client && !server) dksvarLoadConfigSVOnly("main/bv2.cfg");
+	if (client && !server) dksvarLoadConfigSVOnly((char*)bv2::configFile().c_str());
 
 	status->set(CStatus::ONLINE);
 
@@ -277,7 +278,7 @@ void Scene::ban(int ID)
 		bb_serverDisconnectClient(server->game->players[ID]->babonetID);
 		server->banList.push_back(std::pair<CString,CString>(server->game->players[ID]->name,server->game->players[ID]->playerIP) );
 		
-		std::ofstream file("main/banlist", std::ios::app | std::ios::binary);
+		std::ofstream file(bv2::userFile("banlist"), std::ios::app | std::ios::binary);
 		CString name = server->game->players[ID]->name;
 		name.resize(32);
 		file.write(name.s, sizeof(char)*32);
@@ -298,7 +299,7 @@ void Scene::banIP(CString playerIP)
 		CString playerName("MANUAL-IP-BAN");
 		server->banList.push_back(std::pair<CString,CString>(playerName,playerIP) );
 
-		std::ofstream file("main/banlist", std::ios::app | std::ios::binary);
+		std::ofstream file(bv2::userFile("banlist"), std::ios::app | std::ios::binary);
 		playerName.resize(32);
 		playerIP.resize(16);
 		file.write(playerName.s, sizeof(char)*32);
@@ -315,7 +316,7 @@ void Scene::unban(int banID)
 		server->banList.erase(server->banList.begin() + banID);
 
 		// Then rewrite file
-		std::ofstream file("main/banlist", std::ios::trunc | std::ios::binary);
+		std::ofstream file(bv2::userFile("banlist"), std::ios::trunc | std::ios::binary);
 		CString name;
 
 		for(std::size_t i = 0; i < server->banList.size(); ++i)

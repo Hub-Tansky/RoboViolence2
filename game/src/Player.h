@@ -254,10 +254,10 @@ public:
 	UINT4 babonetID;
 
 	// Le ID dans le jeu
-	char playerID;
+	int8_t playerID;
 
 	// Son team
-	char teamID;
+	int8_t teamID;
 
 	// Notre status (mort, spectateur)
 	char status;

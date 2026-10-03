@@ -25,6 +25,8 @@
 #include <cstdlib>
 #include <cstring>
 #include "CMaster.h"
+#include "Paths.h"
+#include <string>
 
 // After main/bv2.cfg is loaded: BV2_NETLOG=1 forces c_netlog on, BV2_NETLOG=0 off.
 static void bv2ApplyNetlogFromEnv()
@@ -314,18 +316,13 @@ int main(int argc, const char* argv[])
 
 
 
-	#ifndef BV2_PLATFORM_WINDOWS // linux timestruct for nanosleep
-		timespec ts;
-
-		ts.tv_sec = 0;
-		ts.tv_nsec = 1000000; // 1 ms
-	#endif
-
 	// PREMI�E CHOSE �FAIRE, on load les config
+	bv2::pathsInit(argv[0]);
 	dksvarInit(&stringInterface);
-	dksvarLoadConfig("main/bv2.cfg");
+	std::string configPath = bv2::loadConfigLayers(argc, (const char* const*)argv);
 	bv2ApplyNetlogFromEnv();
-	dksvarSaveConfig("main/bv2.cfg"); // On cre8 le config file aussi
+	FetchDBInfos();
+	dksvarSaveConfig((char*)configPath.c_str()); // On cre8 le config file aussi
 
 	// On init nos DLL qui vont �re utilis�dans ce jeu
 	// On initialise quelque cossin important avant tout
@@ -334,9 +331,7 @@ int main(int argc, const char* argv[])
 	// On init la network
 	if (bb_init() == 1)
 	{
-		#ifdef BV2_PLATFORM_WINDOWS
-			MessageBox(NULL, "Error initiating baboNet", "Error", 0);
-		#endif
+		fprintf(stderr, "Error initiating baboNet\n");
 		return 0;
 	}
 	bbNetVersion = bb_getVersion();
@@ -345,9 +340,7 @@ int main(int argc, const char* argv[])
 		// Error
 		bb_peerShutdown();
 		bb_shutdown();
-		#ifdef BV2_PLATFORM_WINDOWS
-			MessageBox(NULL, "Wrong version of BaboNet\nReinstalling the game may resolve this prolem", "Error", 0);
-		#endif
+		fprintf(stderr, "Wrong version of BaboNet\n");
 		return 0;
 	}
 
@@ -368,87 +361,22 @@ int main(int argc, const char* argv[])
 	mainLoopConsole.start();
 
 
-/*	{
-		#ifndef BV2_PLATFORM_WINDOWS // linux timestruct for nanosleep
-			timespec ts;
 
-			ts.tv_sec = 0;
-			ts.tv_nsec = 1000000;
-		#endif
-	
-
-		float tim = 0;
-
-		while (!quit)
-		{
-			// On va updater notre timer
-			int nbFrameElapsed = dkcUpdateTimer();
-
-			// On va chercher notre delay
-			float delay = dkcGetElapsedf();
-
-			//printf("nbFrameElapsed : %i\n",nbFrameElapsed);
-
-			// On passe le nombre de frame �animer
-			while (nbFrameElapsed)
-			{
-				// Update la console
-				console->update(delay);
-
-				// On appel nos fonction pour animer ici
-				scene->update(delay);
-
-				// On d�r�ente pour le prochain frame
-				nbFrameElapsed--;
-
-				//tim += delay;
-				//printf("elapsed : %f\n",tim);
-
-				//printf("FPS: %f\n", dkcGetFPS());
-			}
-
-			//--- On check si on n'est pas lock�avant de continuer
-			if (s_locked)
-			{
-				s_internalLock = true;
-			}
-
-			while (s_internalLock)
-			{
-				#ifdef BV2_PLATFORM_WINDOWS
-					Sleep(1);
-				#else
-					if(nanosleep(&ts,0))
-					{
-						printf("problem nanosleep internal lock\n");
-					}
-					ts.tv_sec = 0;
-					ts.tv_nsec = 1000000;
-				#endif
-			//	printf("--- internalLock (execute)\n");
-			}
-
-			#ifdef BV2_PLATFORM_WINDOWS
-				Sleep(1);
-			#else
-			if(nanosleep(&ts,0))
-			{
-				printf("problem nanosleep main loop\n");
-			}
-			ts.tv_sec = 0;
-			ts.tv_nsec = 1000000;
-			#endif
-		}
-	}*/
 
 	//--- Get the arguments and send that to console
 //	int argc, const char* argv[]
 
-	if (argc > 1)
+	for (int i = 1; i < argc; ++i)
 	{
+		if (std::strcmp(argv[i], "--config") == 0)
+		{
+			++i; // its file was applied with the other config layers
+			continue;
+		}
 		CString executeCmd = "execute ";
-		executeCmd += (char*)(argv[1]);
+		executeCmd += (char*)(argv[i]);
 		console->sendCommand(executeCmd);
+		break;
 	}
 
 
@@ -464,17 +392,7 @@ int main(int argc, const char* argv[])
 		mainLoopConsole.unlock();
 
 
-		#ifdef BV2_PLATFORM_WINDOWS
-			Sleep(1);
-
-		#else
-			if(nanosleep(&ts,0))
-			{
-				printf("problem nanosleep console loop\n");
-			}
-			ts.tv_sec = 0;
-			ts.tv_nsec = 1000000;
-		#endif
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
 		//cin.ignore( 10000 , '\n');
 		//input[0] = 0;
@@ -498,7 +416,7 @@ int main(int argc, const char* argv[])
 	master = 0;
 	scene = 0;
 
-	dksvarSaveConfig("main/bv2.cfg");
+	dksvarSaveConfig((char*)bv2::configFile().c_str());
 
 	// On shutdown le tout (L'ordre est assez important ici)
 	bb_peerShutdown();
@@ -518,10 +436,12 @@ int main(int argc, const char* argv[])
 int main(int argc, char* argv[])
 {
 	// PREMIERE CHOSE A FAIRE, on load les config
+	bv2::pathsInit(argv[0]);
 	dksvarInit(&stringInterface);
-	dksvarLoadConfig("main/bv2.cfg");
+	std::string configPath = bv2::loadConfigLayers(argc, (const char* const*)argv);
 	bv2ApplyNetlogFromEnv();
-	dksvarSaveConfig("main/bv2.cfg"); // On cre8 le config file aussi
+	FetchDBInfos();
+	dksvarSaveConfig((char*)configPath.c_str()); // On cre8 le config file aussi
 
 	// On load tout suite le language utilise par le joueur
 	if (!gameVar.isLanguageLoaded())
@@ -648,7 +568,12 @@ int main(int argc, char* argv[])
 	CString str;
 	for (int i = 1; i < argc; ++i)
 	{
-		if (i > 1) str += " ";
+		if (std::strcmp(argv[i], "--config") == 0)
+		{
+			++i; // handled by the config layers
+			continue;
+		}
+		if (str.len() > 0) str += " ";
 		str += argv[i];
 	}
 	if( str.len() > 1 )
@@ -673,7 +598,7 @@ int main(int argc, char* argv[])
 	delete lobby;
 	lobby = 0;
 
-	dksvarSaveConfig("main/bv2.cfg");
+	dksvarSaveConfig((char*)bv2::configFile().c_str());
 
 	// On shutdown le tout (L'ordre est assez important ici)
 	bb_peerShutdown();

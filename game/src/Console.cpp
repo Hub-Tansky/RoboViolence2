@@ -16,6 +16,7 @@
 	BaboViolent 2 source code. If not, see http://www.gnu.org/licenses/.
 */
 
+#include "Paths.h"
 #include "Console.h"
 #include "FileIO.h"
 #include "CMaster.h"
@@ -48,7 +49,7 @@ void dkwForceQuit();
 //
 Console::Console(): m_maxCmdHistorySize(20), m_maxMsgHistorySize(300), m_historyMod(3)
 {
-	m_outputFilename = "main/console.log";
+	m_outputFilename = CString("%s", bv2::userFile("console.log").c_str());
 	FileIO *fileIO = new FileIO(m_outputFilename, "wb");
 	ZEVEN_SAFE_DELETE(fileIO);
 	m_excludeFromLog.push_back("admin");

@@ -16,6 +16,7 @@
 	BaboViolent 2 source code. If not, see http://www.gnu.org/licenses/.
 */
 
+#include "Paths.h"
 #include "Map.h"
 #include "Helper.h"
 #include "FileIO.h"
@@ -149,7 +150,7 @@ Map::Map(CString mapFilename, Game * _game, unsigned int font, bool editor, int 
 	flagState[1] = -2;
 
 	// On essaye d'abords de lire la map
-	CString fullName = CString("main/maps/") + mapName + ".bvm";
+	CString fullName("%s", bv2::mapFileForRead(mapName.s).c_str());
 
 #ifndef CONSOLE
 	// Hosts will load from file since they are also the server
@@ -1579,65 +1580,14 @@ bool Map::rayTest(CVector3f & p1, CVector3f & p2, CVector3f & normal)
 void GetMapList(std::vector< CString > & maps)
 {
 	maps.clear();
-#ifdef BV2_PLATFORM_WINDOWS
-	WIN32_FIND_DATA FindFileData;
-	HANDLE hFind = INVALID_HANDLE_VALUE;
-	char DirSpec[MAX_PATH];  // directory specification
-	char appPath[MAX_PATH];
-
-	// Chercher le path du "current working directory".
-	_getcwd(appPath, MAX_PATH);
-
-	strncpy(DirSpec, appPath, strlen(appPath) + 1);
-	strncat(DirSpec, "\\main\\maps\\*.bvm", strlen("\\main\\maps\\*.bvm") + 1);
-
-	hFind = FindFirstFile(DirSpec, &FindFileData);
-	if(hFind != INVALID_HANDLE_VALUE)
-	{
-		CString filename ("%s", FindFileData.cFileName);
-		// Drop the extension
-		filename.resize(filename.len() - 4);
-		maps.push_back(filename);
-		while(FindNextFile(hFind, &FindFileData) != 0)
-		{
-			CString filename ("%s", FindFileData.cFileName);
-			// Drop the extension
-			filename.resize(filename.len() - 4);
-			maps.push_back(filename);
-		}
-		FindClose(hFind);
-	}
-#else
-	char appPath[PATH_MAX];
-	if (!getcwd(appPath, sizeof(appPath)))
-		return;
-
-	char dirPath[PATH_MAX];
-	snprintf(dirPath, sizeof(dirPath), "%s/main/maps", appPath);
-
-	DIR * dir = opendir(dirPath);
-	if (!dir)
-		return;
-
-	struct dirent * ent;
-	while ((ent = readdir(dir)) != NULL)
-	{
-		const char * name = ent->d_name;
-		const size_t len = strlen(name);
-		if (len <= 4 || strcasecmp(name + len - 4, ".bvm") != 0)
-			continue;
-		CString filename("%s", name);
-		// Drop the extension
-		filename.resize(filename.len() - 4);
-		maps.push_back(filename);
-	}
-	closedir(dir);
-#endif
+	std::vector<std::string> names = bv2::listMapNames();
+	for (size_t i = 0; i < names.size(); ++i)
+		maps.push_back(CString("%s", names[i].c_str()));
 }
 
 bool GetMapData(CString name, unsigned int & texture, CVector2i & textureSize, CVector2i & size, CString & author)
 {
-	FileIO file(CString("main/maps/%s.bvm", name.s), "rb");
+	FileIO file(CString("%s", bv2::mapFileForRead(name.s).c_str()), "rb");
 	if(file.isValid())
 	{
 		map_cell * cells = 0;

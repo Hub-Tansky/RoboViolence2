@@ -16,6 +16,7 @@
 	BaboViolent 2 source code. If not, see http://www.gnu.org/licenses/.
 */
 
+#include "Paths.h"
 #include "Scene.h"
 #include "Console.h"
 #include "GameVar.h"
@@ -116,8 +117,7 @@ Scene::Scene()
 //	dksPlayMusic("main/sounds/menu.ogg", -1);
 
 	//--- Query from data base if we sent the survey already
-	sqlite3 *DB=0;
-	sqlite3_open("bv2.db",&DB);
+	sqlite3 *DB=bv2::openClientDb();
 
 	//some infos to load the data
 	char	*zErrMsg;		// holds error msg if any
@@ -127,12 +127,16 @@ Scene::Scene()
 	char	SQL[256];		// the query
 
 	// Get infos of master servers and choose the one with the lowest Score
-	sprintf(SQL,"Select Value From LauncherSettings where Name = 'DidSurvey';");
-	sqlite3_get_table(DB,SQL,&azResult,&nRow,&nColumn,&zErrMsg);
-
-	int didSurvey = atoi(azResult[1]);
-	sqlite3_free_table(azResult);
-	sqlite3_close( DB );
+	int didSurvey = 1; // no database: do not ask
+	if (DB)
+	{
+		sprintf(SQL,"Select Value From LauncherSettings where Name = 'DidSurvey';");
+		sqlite3_get_table(DB,SQL,&azResult,&nRow,&nColumn,&zErrMsg);
+		if (nRow >= 1 && azResult[1])
+			didSurvey = atoi(azResult[1]);
+		sqlite3_free_table(azResult);
+		sqlite3_close( DB );
+	}
 	
 	surveySent = (didSurvey == 0 ? false : true);
 

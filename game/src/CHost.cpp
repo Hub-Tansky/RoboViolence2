@@ -18,6 +18,7 @@
 
 #ifndef CONSOLE
 
+#include "Paths.h"
 #include "CHost.h"
 #ifdef BV2_PLATFORM_WINDOWS
 #include <direct.h>
@@ -43,7 +44,7 @@ unsigned int loadMapPreview(CString mapFilename)
 	map_cell * cells = 0;
 
 	// On essaye d'abords de lire la map
-	FileIO file(CString("main/maps/%s.bvm", mapFilename.s), "rb");
+	FileIO file(CString("%s", bv2::mapFileForRead(mapFilename.s).c_str()), "rb");
 	if (!file.isValid())
 	{
 		return 0;

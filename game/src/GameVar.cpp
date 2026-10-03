@@ -16,6 +16,7 @@
 	BaboViolent 2 source code. If not, see http://www.gnu.org/licenses/.
 */
 
+#include "Paths.h"
 #include "GameVar.h"
 #include "netPacket.h"
 #include "RemoteAdminPackets.h"
@@ -30,8 +31,9 @@ GameVar gameVar;
 // function to fetch db infos, version and web url
 void FetchDBInfos()
 {
-	sqlite3* db=0;
-	sqlite3_open("./bv2.db",&db);
+	sqlite3* db=bv2::openClientDb();
+	if (!db)
+		return;
 
 	//some infos to load the data
 	char	*zErrMsg;		// holds error msg if any
@@ -43,13 +45,17 @@ void FetchDBInfos()
 	sprintf(SQL,"Select Value From LauncherSettings Where Name = 'DBVersion';");
 	sqlite3_get_table(db,SQL,&azResult,&nRow,&nColumn,&zErrMsg);
 
-	gameVar.db_version = atoi(azResult[1]);
+	if (nRow >= 1 && azResult[1])
+		gameVar.db_version = atoi(azResult[1]);
 	sqlite3_free_table(azResult);
 
 	sprintf(SQL,"Select Value From LauncherSettings Where Name = 'AccountURL';");
 	sqlite3_get_table(db,SQL,&azResult,&nRow,&nColumn,&zErrMsg);
 
-	gameVar.db_accountServer = CString( azResult[1] );
+	if (nRow >= 1 && azResult[1])
+		gameVar.db_accountServer = CString( azResult[1] );
+	if (gameVar.cl_accountURL.len() > 0)
+		gameVar.db_accountServer = gameVar.cl_accountURL; // the config wins over what the master told us earlier
 
 	sqlite3_free_table(azResult);
 	sqlite3_close(db);
@@ -538,9 +544,14 @@ GameVar::GameVar()
 	sv_spawnImmunityTime = 2.0f;
 	dksvarRegister(CString("sv_spawnImmunityTime [float : 0 to 3 (default 2.0)]"), &sv_spawnImmunityTime, 0, 3, LIMIT_MIN | LIMIT_MAX, true);
 	
-	db_accountServer = ""; // TODO(step4): endpoint from local config
+	db_accountServer = ""; // from cl_accountURL or the master (see loadDBInfos)
 	db_version = 0;
-	FetchDBInfos();
+
+	// Endpoints: nothing is built in. Empty means the feature is off (no master list, no account login).
+	cl_masterServers = "";
+	dksvarRegister(CString("cl_masterServers [string : \"host:port,host:port\" (default \"\")]"), &cl_masterServers, true);
+	cl_accountURL = "";
+	dksvarRegister(CString("cl_accountURL [string : \"\" (default \"\")]"), &cl_accountURL, true);
 
 //	dksvarRegister(CString("cl_accountServer [string : \"URL\"]", cl_accountServer.s), &cl_accountServer, true);
 

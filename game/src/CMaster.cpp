@@ -16,6 +16,7 @@
 	BaboViolent 2 source code. If not, see http://www.gnu.org/licenses/.
 */
 
+#include "Paths.h"
 #include "CMaster.h"
 #include "Console.h"
 #include "RemoteAdminPackets.h"
@@ -78,8 +79,8 @@ CMaster::~CMaster()
 
 void CMaster::UpdateDB()
 {
-	sqlite3 *DB=0;
-	sqlite3_open("bv2.db",&DB);
+	sqlite3 *DB=bv2::openClientDb();
+	if (!DB) return;
 	char	SQL[300];
 	
 	sprintf(SQL,"Update LauncherSettings Set Value = '%i' Where Name = 'DBVersion';", gameVar.db_version);
@@ -100,7 +101,7 @@ void CMaster::connectToMaster(const char* in_IP, short in_port)
 	if (uniqueClientID)
 		disconnectMaster();
 	if (!in_IP || !in_IP[0])
-		return; // no master configured (bv2.db MasterServers empty)
+		return; // no master configured (cl_masterServers / BV2_MASTER_SERVERS)
 	uniqueClientID = bb_clientConnect(in_IP, in_port);
 	m_isConnected = false;
 }
@@ -364,7 +365,7 @@ void CMaster::ReceivePeersPacket()
 					sprintf( srvName , "{ LAN } %s", gameVar.sv_gameName.s );
 					strncpy(gameInfos.GameInfo.serverName, srvName, 63);
 					strncpy(gameInfos.GameInfo.password, gameVar.sv_password.s, 15);
-					sprintf( gameInfos.GameInfo.ip , bb_getMyIP() );
+					sprintf( gameInfos.GameInfo.ip , "%s", bb_getMyIP() );
 					gameInfos.GameInfo.port = (unsigned short)gameVar.sv_port;
 					int nbPlayer = 0;
 					for (int i=0;i<MAX_PLAYER;++i)
@@ -583,8 +584,7 @@ void CMaster::ReceivePeersPacket()
 					if( m_peers[i].peerId == peerID )
 					{
 						m_peers[i].m_sizeRemaining = header.fileSize;
-						CString str = "main/maps/";
-						str += header.fileName;
+						CString str("%s", bv2::mapFileForWrite(header.fileName).c_str());
 						m_peers[i].m_currentFile = fopen( str.s, "wb" );
 						CString message = "Receiving map from remote admin : ";
 						message += str;
@@ -845,15 +845,15 @@ void CMaster::recvPacket(const char * buffer, int typeID)
 			surveyReceived = true;
 
 			//--- Write in db the 'surveySent' flag
-			sqlite3 *DB=0;
-			sqlite3_open("bv2.db",&DB);
+			sqlite3 *DB=bv2::openClientDb();
 			char	SQL[300];
+			if (DB)
+			{
 			
 			sprintf(SQL,"Update LauncherSettings Set Value = '1' Where Name = 'DidSurvey';");
 			sqlite3_exec(DB,SQL,0,0,0);
-			
-			
 			sqlite3_close(DB);
+			}
 			break;
 		}
 	case CLIENT_HASH:
@@ -965,46 +965,26 @@ void CMaster::GetMasterInfos()
 	m_Port = 0;
 	snprintf(m_CurrentVersion, sizeof(m_CurrentVersion), "%s", "2.11");
 
-	//connect to database
-	sqlite3 *db = 0;
-	if (sqlite3_open("bv2.db",&db) != SQLITE_OK)
+	// Master servers come from the config (cl_masterServers / BV2_MASTER_SERVERS); none means no master list
+	std::vector<bv2::HostPort> masters = bv2::parseHostPorts(gameVar.cl_masterServers.s);
+	if (!masters.empty())
 	{
-		if (db) sqlite3_close(db);
-		console->add("Game Database not found, please re-install the game");
-		return ;
+		snprintf(m_IP, sizeof(m_IP), "%s", masters[0].host.c_str());
+		m_Port = (short)masters[0].port;
 	}
 
-	//some infos to load the data
-	char	*zErrMsg = 0;	// holds error msg if any
-	char	**azResult = 0;	// contains the actual returned data
-	int		nRow = 0;		// number of record
-	int		nColumn = 0;	// number of column
-	char	SQL[256];		// the query
-
-	// Get infos of master servers and choose the one with the lowest Score.
-	// MASTER_* macros index row i of a 5-column table (Score, ID, IP, Location, Port).
-	sprintf(SQL,"Select * From MasterServers;");
-	int rc = sqlite3_get_table(db,SQL,&azResult,&nRow,&nColumn,&zErrMsg);
-	if (rc == SQLITE_OK && azResult && nRow >= 1 && nColumn == 5)
+	sqlite3 *db = bv2::openClientDb();
+	if (!db)
 	{
-		int i,best=9999,bestIndex=0;
-		for(i=0;i<nRow;i++)
-		{
-			if( azResult[MASTER_SCORE] && atoi(azResult[MASTER_SCORE]) < best )
-			{
-				best = atoi(azResult[MASTER_SCORE]);
-				bestIndex = i;
-			}
-		}
-		i = bestIndex;
-		if (azResult[MASTER_IP])
-			snprintf(m_IP, sizeof(m_IP), "%s", azResult[MASTER_IP]);
-		if (azResult[MASTER_PORT])
-			m_Port = atoi(azResult[MASTER_PORT]) - 1000;
+		console->add("Could not open the user database");
+		return;
 	}
-	if (zErrMsg) { sqlite3_free(zErrMsg); zErrMsg = 0; }
-	sqlite3_free_table(azResult);
-	azResult = 0;
+	char	*zErrMsg = 0;
+	char	**azResult = 0;
+	int		nRow = 0;
+	int		nColumn = 0;
+	char	SQL[256];
+	int		rc;
 
 	// get our current game version
 	sprintf(SQL,"Select Value From LauncherSettings Where Name = 'Version';");

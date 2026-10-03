@@ -76,6 +76,12 @@ CMD_RET			dksvarCommand(char * command);
 /// \param filename chemin menant au fichier de configuration à exécuter depuis l'endroit où se situe le fichier EXE du programme.
 void			dksvarLoadConfig(char * filename);
 void			dksvarLoadConfigSVOnly(char * filename);
+/// Like dksvarLoadConfig, but the variables the file sets are never written back by dksvarSaveConfig (local and server secrets).
+void			dksvarLoadConfigTransient(char * filename);
+/// Sets one variable to a value, transient (see above). Returns false if the variable does not exist.
+bool			dksvarSetTransient(const char * name, const char * value);
+/// True for variables holding secrets (name contains "pass"); callers must not echo their values.
+bool			dksvarIsSecret(const char * name);
 void			dksvarSaveConfig(char * filename);
 
 

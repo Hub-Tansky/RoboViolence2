@@ -337,6 +337,7 @@ int dkwInit(int width, int height, int colorDepth, char* mTitle, CMainLoopInterf
 	memset(g_keys, 0, sizeof(g_keys));
 	memset(&g_mouse, 0, sizeof(g_mouse));
 
+	SDL_SetHint(SDL_HINT_APP_ID, "org.roboviolence.bv2"); // Wayland app id, matches the .desktop file
 	if (!SDL_Init(SDL_INIT_VIDEO))
 	{
 		setError(SDL_GetError());

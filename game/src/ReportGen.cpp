@@ -17,6 +17,7 @@
 */
 
 
+#include "Paths.h"
 #include "Server.h"
 #include "ReportGen.h"
 #include "Scene.h"
@@ -43,7 +44,7 @@ std::string ReportGen::genReport()
 	if(filename.empty())
 		filename = "report";
 
-	doc.SaveFile("main/"+filename+".xml");
+	doc.SaveFile(bv2::userFile("reports/" + filename + ".xml"));
 
 	TiXmlPrinter printer;
 	printer.SetIndent("\t");
