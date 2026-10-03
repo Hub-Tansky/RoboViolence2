@@ -27,7 +27,8 @@
 	#define WIN32_MEAN_AND_LEAN
 	#pragma comment (lib,"ws2_32.lib")
 	#pragma comment (lib,"iphlpapi.lib")
-	#include "winsock2.h"
+	#include <signal.h>
+#include "winsock2.h"
 	#include <iphlpapi.h> // this is used for getting mac adress
 #endif
 #ifdef BV2_PLATFORM_MACOS
@@ -116,9 +117,14 @@ int bb_init()
 	// Version courrante de la bbnet
 		sprintf(Version,"4.0");
 
+	#ifndef BV2_PLATFORM_WINDOWS
+		// A peer that vanished must not kill the process: send() then fails with EPIPE
+		signal(SIGPIPE, SIG_IGN);
+	#endif
+
 	//if we are running on windows, we have some initialisation to make
 	#ifdef BV2_PLATFORM_WINDOWS
-		// Tiens les infos sur winsock, dont la version
+		// Tiens les infos sur winsock, dont la version (WSAStartup is counted, bb_shutdown calls WSACleanup once per bb_init)
 			WSADATA		WinSockInfo;
 				
 			int error = WSAStartup (0x0202, &WinSockInfo);  

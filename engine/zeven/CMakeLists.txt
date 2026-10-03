@@ -7,6 +7,13 @@ target_include_directories(glad PUBLIC third_party/glad/include)
 target_link_libraries(glad PUBLIC ${CMAKE_DL_LIBS})
 bv2_target_defaults(glad)
 
+# GLU stays on the system library for now (gluPerspective, gluBuild2DMipmaps, quadrics); GL itself comes from glad.
+add_library(bv2_glu INTERFACE)
+target_link_libraries(bv2_glu INTERFACE OpenGL::GL)
+if(TARGET OpenGL::GLU)
+  target_link_libraries(bv2_glu INTERFACE OpenGL::GLU)
+endif()
+
 # Shared by every executable.
 add_library(zeven_core STATIC
   src/dkc.cpp
@@ -17,11 +24,7 @@ add_library(zeven_core STATIC
   src/CMatrix.cpp
 )
 target_include_directories(zeven_core PUBLIC include PRIVATE src)
-# GLU stays on the system library for now (gluPerspective, gluBuild2DMipmaps, quadrics); GL itself comes from glad.
-target_link_libraries(zeven_core PUBLIC Threads::Threads glad OpenGL::GL)
-if(TARGET OpenGL::GLU)
-  target_link_libraries(zeven_core PUBLIC OpenGL::GLU)
-endif()
+target_link_libraries(zeven_core PUBLIC Threads::Threads glad)
 bv2_target_defaults(zeven_core)
 
 # Headless server: there is no GL context, so dkt gets no-op stand-ins.
@@ -51,7 +54,7 @@ if(BV2_BUILD_CLIENT)
     src/dks.cpp
   )
   target_include_directories(zeven_client PUBLIC include PRIVATE src "${BV2_MINIAUDIO_INCLUDE_DIR}")
-  target_link_libraries(zeven_client PUBLIC zeven_core SDL3::SDL3 ${CMAKE_DL_LIBS})
+  target_link_libraries(zeven_client PUBLIC zeven_core bv2_glu SDL3::SDL3 ${CMAKE_DL_LIBS})
   if(BV2_STB_VORBIS_DIR)
     target_include_directories(zeven_client PRIVATE "${BV2_STB_VORBIS_DIR}")
     target_compile_definitions(zeven_client PRIVATE BV2_HAVE_STB_VORBIS)

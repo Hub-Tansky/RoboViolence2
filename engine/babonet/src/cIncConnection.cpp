@@ -16,6 +16,7 @@
 	BaboViolent 2 source code. If not, see http://www.gnu.org/licenses/.
 */
 
+#include "socket_compat.h"
 #include "cIncConnection.h"
 
 
@@ -151,7 +152,7 @@ int cIncConnection::Update()
 
 						while(sent < 37)
 						{
-							nbytes = send(NewFD,buf + sent,37-sent,0);
+							nbytes = bbSend(NewFD,buf + sent,37-sent);
 							if(nbytes <= 0)
 							{
 								//probleme a envoyer le id
@@ -203,7 +204,7 @@ int cIncConnection::Update()
 
 						while(sent < 4)
 						{
-							nbytes = send(NewFD,((char*)&ID) + sent,sizeof(ID)-sent,0);
+							nbytes = bbSend(NewFD,((char*)&ID) + sent,sizeof(ID)-sent);
 							if(nbytes <= 0)
 							{
 								//probleme a envoyer le id

@@ -168,7 +168,7 @@ void			dkiUpdate(float elapsef, int width, int height)
 		openPad();
 	}
 
-	// DirectInput button order for an XInput pad: A B X Y LB RB Back Start LS RS
+	// Button order the key binds were written for (XInput pad): A B X Y LB RB Back Start LS RS
 	static const SDL_GamepadButton order[10] = {
 		SDL_GAMEPAD_BUTTON_SOUTH, SDL_GAMEPAD_BUTTON_EAST, SDL_GAMEPAD_BUTTON_WEST, SDL_GAMEPAD_BUTTON_NORTH,
 		SDL_GAMEPAD_BUTTON_LEFT_SHOULDER, SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER,

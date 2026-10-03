@@ -1,15 +1,17 @@
 # Architecture
 
-RoboViolence 2: unofficial fork of BaboViolent 2, a top-down multiplayer shooter (C++, GPLv3). State after Step 2: target layout, one CMake build.
+RoboViolence 2: unofficial fork of BaboViolent 2, a top-down multiplayer shooter (C++, GPLv3). State after Step 3: SDL3 + miniaudio + glad platform layer.
 
 ## Summary
 
 | Topic | Fact |
 |---|---|
-| Deliverables | `bv2dedicated` (headless server, `CONSOLE`) and `bv2master` build and run on macOS arm64; `bv2` (client) is defined but excluded from `all` until Step 3. Linux and Windows are untested. |
+| Deliverables | `bv2` (client), `bv2dedicated` (headless server, `CONSOLE`) and `bv2master`. Built and run on macOS arm64 (ASan too); the client starts to its main loop (not visually checked). Linux and Windows are untested. |
 | Build | CMake 3.25+, Ninja presets (`CMakePresets.json`), vcpkg manifest. Output in `build/<preset>/runtime/` ([ADR 0005](docs/decisions/0005-runtime-main-data-root.md)). |
 | Platforms | Targets: Linux x64, macOS 12+ arm64, Windows 11. `engine/zeven/include/platform.h` defines `BV2_PLATFORM_*`, `BV2_POSIX`; CMake force-includes it. |
-| Modules | `game` (client, server, editor); `engine/babonet` networking (`bb_*`); `engine/zeven` utilities (`zeven_core`: `dkc dksvar dkt` + `CString/CVector/CMatrix`; `zeven_client`: `dkw dki dkgl dkf dkp dks`); `engine/dko` model loader; `masterserver`. |
+| Modules | `game` (client, server, editor); `engine/babonet` networking (`bb_*`, `CThread` on `std::thread`); `engine/zeven` utilities (`zeven_core`: `dkc dksvar` + `CString/CVector/CMatrix`; `zeven_console`: no-op `dkt` for the server; `zeven_client`: `dkw dki dkgl dkt dkf dkp dks`); `engine/dko` model loader; `masterserver`. |
+| Dependencies | vcpkg (`vcpkg.json`, pinned baseline): sqlite3; feature `client`: sdl3, miniaudio, stb; feature `http`: curl (off, ADR 0002). Generated, committed: glad GL 2.1 (`engine/zeven/third_party/glad`). System: GLU. No libcurl or OpenSSL is linked by default. |
+| Platform layer | SDL3 window and input (`dkw`, `dki`), miniaudio (`dks`), glad ([ADR 0006](docs/decisions/0006-sdl3-miniaudio-glad-platform-layer.md)). One client `main()` for all OSes. |
 | Tick | Fixed 30 Hz: every `update(float delay)` gets `1/30`; "frames" are a time unit (30 = 1 s). |
 | Network | TCP, raw structs `memcpy`'d from `game/src/netPacket.h`. The server is authoritative for hits, damage, spawns, projectiles and flags; clients for their own movement. `playerID` (slot) differs from `babonetID` (connection). Protocol `GAME_VERSION_SV/CL` = 21100. |
 | Variants | `CONSOLE` = headless server (explicit file list in `game/CMakeLists.txt`). Direct3D, non-Pro and VLD code were removed in Step 1. |
@@ -17,17 +19,18 @@ RoboViolence 2: unofficial fork of BaboViolent 2, a top-down multiplayer shooter
 | Assets | The original assets are removed and blocked by hash ([docs/ASSETS-LICENSE.md](docs/ASSETS-LICENSE.md)). Only `content/languages/en.lang` and `content/LaunchScript/` remain; the build generates placeholders (`tools/gen-placeholder-content.py`). |
 | Encoding | UTF-8 without BOM, LF; `tools/check-encoding.py`. Some comments hold U+FFFD where upstream lost accents. |
 | Known defects | [docs/analysis/KEY_QUESTIONS.md](docs/analysis/KEY_QUESTIONS.md). |
-| Decisions | [docs/decisions/README.md](docs/decisions/README.md): 0001 Ninja, 0002 libcurl compiled out, 0003 OpenGL 2.1 kept, 0004 project name, 0005 `main/` data root. |
+| Decisions | [docs/decisions/README.md](docs/decisions/README.md): 0001 Ninja, 0002 libcurl compiled out, 0003 OpenGL 2.1 kept, 0004 project name, 0005 `main/` data root, 0006 platform layer. |
 
 ### Open items
 
-- **Master server:** `MasterClient` is reconstructed (the original class is missing from the source release); its timeout is an assumption. It builds on babonet internals (`src/cPacket.h`, `src/cConnection.h`). See [masterserver/README.md](masterserver/README.md).
-- **Server links GL/GLU:** `dkt` and `dko` call GL for texture upload, so `zeven_core` links OpenGL. Removing that needs a `CONSOLE` stub for `dkt`; not done.
-- **BV2_WITH_HTTP is ON** until Step 3 adds the `CCurl` stub ([ADR 0002](docs/decisions/0002-compile-out-libcurl.md)).
+- **Master server:** `MasterClient` is reconstructed (the original class is missing from the source release); its timeout is an assumption. See [masterserver/README.md](masterserver/README.md).
+- **GLU:** still the system library (headers and link) for `dko`, `zeven_client` and the game, so the headless server needs GLU dev packages; `dkt` is stubbed there. The renderer itself is unchanged fixed-function GL 2.1 (ADR 0003).
+- **OGG music** needs `stb_vorbis.c` (vcpkg `stb`); the macOS check ran without it, so `Menu.ogg`/`Music.ogg` did not play, and the placeholders have no music anyway.
+- **HiDPI:** `dkwGetResolution()` is the pixel size; the UI math assumes nothing else. Untested on a Retina display.
 - **Dead code:** 16 old-menu `.cpp` files in `game/src` are not built (see [game/README.md](game/README.md)). `game/src/bv2.bmp` and `icon1.ico` are original artwork; replace in §H.
-- Vendored `glext.h` copies remain in `game/src` and `engine/zeven/include`; Step 3 replaces them.
-- UBSan reports member calls on a null `Server` (`Console.cpp:833`, `Server.cpp:1476`); Step 4.
-- `docs/assets/ASSET-INVENTORY.md` "Used by" cites the pre-Step-2 paths (`BaboViolent2/Code`).
+- UBSan reports pre-existing defects (null `Server` calls, out-of-range `bool` loads, NaN casts in `CUserLogin.cpp`); Step 4.
+- `docs/assets/ASSET-INVENTORY.md` "Used by" cites the pre-Step-2 paths.
+
 
 ## File inventory
 
@@ -135,6 +138,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/decisions/0003-keep-opengl-2.1-then-sdl-gpu.md` | ADR 0003 |
 | `docs/decisions/0004-project-name-roboviolence2.md` | ADR 0004 |
 | `docs/decisions/0005-runtime-main-data-root.md` | ADR 0005 |
+| `docs/decisions/0006-sdl3-miniaudio-glad-platform-layer.md` | ADR 0006 |
 | `docs/decisions/README.md` | ADR format and index |
 
 ### `docs/legal`
@@ -204,6 +208,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `engine/babonet/src/main.cpp` | Program entry: window, engine init, main loop |
 | `engine/babonet/src/md5c.c` | RFC 1321 MD5 implementation |
 | `engine/babonet/src/md5class.cpp` | CMD5: MD5 hex-digest wrapper |
+| `engine/babonet/src/socket_compat.h` | send() with EINTR retry; SIGPIPE is ignored in bb_init |
 
 ### `engine/dko`
 
@@ -262,6 +267,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `engine/zeven/include/CString.h` | Engine copy of the shared math/string type |
 | `engine/zeven/include/CSystemVariable.h` | Typed configuration variable classes |
 | `engine/zeven/include/CVector.h` | Engine copy of the shared math/string type |
+| `engine/zeven/include/dikeys.h` | DIK_* key IDs (DirectInput scancodes) used by dki, key binds and the game |
 | `engine/zeven/include/dkc.h` | dkc: high-resolution timer and platform helpers |
 | `engine/zeven/include/dkf.h` | dkf: bitmap font rendering |
 | `engine/zeven/include/dkgl.h` | dkgl: OpenGL context and state |
@@ -272,7 +278,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `engine/zeven/include/dksvardef.h` | dksvar: variable definition macros |
 | `engine/zeven/include/dkt.h` | dkt: texture loading (TGA) and binding |
 | `engine/zeven/include/dkw.h` | dkw: window creation and events |
-| `engine/zeven/include/glext.h` | Vendored OpenGL extension header |
+| `engine/zeven/include/glheaders.h` | The only OpenGL include: glad, then GLU |
 | `engine/zeven/include/platform.h` | Platform macros (BV2_PLATFORM_*, BV2_POSIX), INT4/UINT4, POSIX includes and Win32 type shims; force-included |
 
 ### `engine/zeven/src`
@@ -287,23 +293,44 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `engine/zeven/src/CSystemVariable.cpp` | Typed configuration variable classes |
 | `engine/zeven/src/CVector.cpp` | Engine copy of the shared math/string type |
 | `engine/zeven/src/dkc.cpp` | dkc: high-resolution timer and platform helpers |
-| `engine/zeven/src/dkci.h` | Internal header of the matching dk module |
 | `engine/zeven/src/dkf.cpp` | dkf: bitmap font rendering |
 | `engine/zeven/src/dkfi.h` | Internal header of the matching dk module |
 | `engine/zeven/src/dkgl.cpp` | dkgl: OpenGL context and state |
 | `engine/zeven/src/dkgli.h` | Internal header of the matching dk module |
 | `engine/zeven/src/dki.cpp` | dki: keyboard, mouse and input polling |
-| `engine/zeven/src/dkii.h` | Internal header of the matching dk module |
 | `engine/zeven/src/dkp.cpp` | dkp: particle system |
 | `engine/zeven/src/dkpi.h` | Internal header of the matching dk module |
 | `engine/zeven/src/dks.cpp` | dks: sound and music (FMOD) |
-| `engine/zeven/src/dksi.h` | Internal header of the matching dk module |
 | `engine/zeven/src/dksvar.cpp` | dksvar: configuration variable registry |
 | `engine/zeven/src/dksvari.h` | Internal header of the matching dk module |
 | `engine/zeven/src/dkt.cpp` | dkt: texture loading (TGA) and binding |
+| `engine/zeven/src/dkt_console.cpp` | No-op dkt for the headless server |
 | `engine/zeven/src/dkti.h` | Internal header of the matching dk module |
 | `engine/zeven/src/dkw.cpp` | dkw: window creation and events |
-| `engine/zeven/src/dkwi.h` | Internal header of the matching dk module |
+
+### `engine/zeven/third_party/glad`
+
+| path | purpose |
+|---|---|
+| `engine/zeven/third_party/glad/README.md` | How the glad loader was generated |
+
+### `engine/zeven/third_party/glad/include/KHR`
+
+| path | purpose |
+|---|---|
+| `engine/zeven/third_party/glad/include/KHR/khrplatform.h` | Khronos platform header (glad dependency) |
+
+### `engine/zeven/third_party/glad/include/glad`
+
+| path | purpose |
+|---|---|
+| `engine/zeven/third_party/glad/include/glad/gl.h` | Generated glad header |
+
+### `engine/zeven/third_party/glad/src`
+
+| path | purpose |
+|---|---|
+| `engine/zeven/third_party/glad/src/gl.c` | Generated glad loader (GL 2.1 compatibility, GL_EXT_bgra) |
 
 ### `game`
 
@@ -335,6 +362,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/CCredit.h` | Credits tab |
 | `game/src/CCurl.cpp` | HTTP requests through libcurl (compiled out in Phase A) |
 | `game/src/CCurl.h` | HTTP requests through libcurl (compiled out in Phase A) |
+| `game/src/CCurlStub.cpp` | CCurl stand-in when BV2_WITH_HTTP is OFF |
 | `game/src/CEditor.cpp` | Map editor UI (newer) |
 | `game/src/CEditor.h` | Map editor UI (newer) |
 | `game/src/CFriends.cpp` | Friends list UI and requests |
@@ -384,6 +412,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/CStatus.h` | Online status reporting |
 | `game/src/CSurvey.cpp` | Survey dialog |
 | `game/src/CSurvey.h` | Survey dialog |
+| `game/src/CUrlData.cpp` | URL-encoded request bodies (MD5/base64 fields), shared by both CCurl builds |
 | `game/src/CUserLogin.cpp` | Account login UI |
 | `game/src/CUserLogin.h` | Account login UI |
 | `game/src/CVertexBuffer.cpp` | Vertex buffer wrapper |
@@ -499,7 +528,6 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/Zeven.h` | Umbrella include for engine headers and common types |
 | `game/src/bv2.bmp` | Windows resource bitmap (original art; replace in §H) |
 | `game/src/changes-log.txt` | Upstream change log |
-| `game/src/glext.h` | Vendored OpenGL extension header |
 | `game/src/icon1.ico` | Windows application icon (original art; replace in §H) |
 | `game/src/main.cpp` | Program entry: window, engine init, main loop |
 | `game/src/netPacket.h` | Wire structs and message IDs (raw memcpy'd structs) |

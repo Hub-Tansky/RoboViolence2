@@ -16,42 +16,31 @@
 	BaboViolent 2 source code. If not, see http://www.gnu.org/licenses/.
 */
 
-
 #ifndef CTHREAD_H
 #define CTHREAD_H
 
+#include <atomic>
+#include <thread>
 
-#include <iostream>
-
+// Kept for source compatibility: std::thread has no portable priorities, so the value is ignored.
 #define CTHREAD_PRIORITY_VERY_LOW 0
 #define CTHREAD_PRIORITY_LOW 1
 #define CTHREAD_PRIORITY_NORMAL 2
 #define CTHREAD_PRIORITY_HIGH 3
 #define CTHREAD_PRIORITY_VERY_HIGH 4
 
-int createThread(unsigned long (*pFuncter)(void*), void * pParam, unsigned long & pThreadID, int pPriority);
-
-
-
+// A thread that runs execute(). Derive, implement execute(), call start(). isRunning() turns false once
+// execute() has returned; the destructor waits for the thread, so deleting a finished object is safe.
 class CThread
 {
 private:
 	// holding the user Data
 	void * mArg;
 
-	// The thread is running
-	volatile bool mIsRunning;
+	std::atomic<bool> mIsRunning;
+	std::thread mThread;
 
 protected:
-
-#ifndef BV2_PLATFORM_WINDOWS
-	//pthread_t threadID;
-#endif
-
-	// To hold the thread ID
-	unsigned long mThreadId;
-
-	static unsigned long entryPoint(void*);
 	void * arg() const {return mArg;}
 	void arg(void * pArg){mArg = pArg;}
 	void run(void * arg);
@@ -61,18 +50,18 @@ protected:
 	virtual void execute(void* pArg) = 0; // Execute your thread
 
 public:
-
 	// Constructor
 	CThread();
+	virtual ~CThread();
 
-	// To start the thread process
+	CThread(const CThread &) = delete;
+	CThread & operator=(const CThread &) = delete;
+
+	// To start the thread process. Returns false if it is already running.
 	bool start(void * pArg = 0, int pThreadPriority = CTHREAD_PRIORITY_NORMAL);
 
 	// To know if the thread is running
-	bool isRunning() {return mIsRunning;}
+	bool isRunning() const {return mIsRunning;}
 };
 
-
 #endif
-
-

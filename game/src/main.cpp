@@ -52,7 +52,8 @@ bool fullscreen = false;
 char * bbNetVersion;
 
 #ifdef CONSOLE
-bool quit = false;
+#include <atomic>
+std::atomic<bool> quit(false);
 void dkwForceQuit()
 {
 	quit = true;
@@ -233,146 +234,56 @@ public:
 #ifdef CONSOLE
 
 #include "CThread.h"
-	bool s_locked = false;
-	bool s_internalLock = false;
+#include <mutex>
+#include <thread>
+#include <chrono>
 
+// Runs the game loop on its own thread; the console thread takes `gameMutex` (lock/unlock) around anything that touches the game.
 class CMainLoopConsole : public CThread
 {
 public:
-	bool locked;
-	bool internalLock;
+	std::mutex gameMutex;
 
 public:
-	CMainLoopConsole()
-	{
-		locked = false;
-		internalLock = false;
-	}
-
 	void execute(void* pArg)
 	{
-		#ifndef BV2_PLATFORM_WINDOWS // linux timestruct for nanosleep
-			timespec ts;
-
-			ts.tv_sec = 0;
-			ts.tv_nsec = 1000000;
-		#endif
-	
-
 		while (!quit)
 		{
-			// On va updater notre timer
-			int nbFrameElapsed = dkcUpdateTimer();
-
-			// On va chercher notre delay
-			float delay = dkcGetElapsedf();
-
-			// On passe le nombre de frame �animer
-			while (nbFrameElapsed)
 			{
-				// Update la console
-				console->update(delay);
+				std::lock_guard<std::mutex> guard(gameMutex);
 
-				// On appel nos fonction pour animer ici
-				scene->update(delay);
+				// On va updater notre timer
+				int nbFrameElapsed = dkcUpdateTimer();
 
-				// On d�r�ente pour le prochain frame
-				nbFrameElapsed--;
+				// On va chercher notre delay
+				float delay = dkcGetElapsedf();
 
-				//printf("FPS: %f\n", dkcGetFPS());
-			}
-
-			//--- On check si on n'est pas lock�avant de continuer
-			if (locked)
-			{
-				internalLock = true;
-			}
-
-			while (internalLock)
-			{
-				#ifdef BV2_PLATFORM_WINDOWS
-					Sleep(1);
-				#else
-					if(nanosleep(&ts,0))
-					{
-						printf("problem nanosleep internal lock\n");
-					}
-				#endif
-			//	printf("--- internalLock (execute)\n");
-			}
-
-			#ifdef BV2_PLATFORM_WINDOWS
-				Sleep(1);
-			#else
-			if(nanosleep(&ts,0))
-			{
-				printf("problem nanosleep main loop\n");
-			}
-			#endif
-		}
-
-		//printf(" game main loop has quit \n");
-
-	/*	char input[256];
-		while (!quit)
-		{
-			std::cin.getline(input,256);
-
-
-			lock();
-			console->sendCommand(input);//CString("Execute CTF"));
-			unlock();
-
-			#ifdef BV2_PLATFORM_WINDOWS
-				Sleep(1);
-			#else
-				if(nanosleep(&ts,0))
+				// On passe le nombre de frame a animer
+				while (nbFrameElapsed)
 				{
-					printf("problem nanosleep console loop\n");
-				}
-				ts.tv_sec = 0;
-				ts.tv_nsec = 1000000;
-			#endif
+					// Update la console
+					console->update(delay);
 
-			//cin.ignore( 10000 , '\n');
-			//input[0] = 0;
-			//fflush(stdin);
-		};*/
+					// On appel nos fonction pour animer ici
+					scene->update(delay);
+
+					// On decremente pour le prochain frame
+					nbFrameElapsed--;
+				}
+			}
+
+			std::this_thread::sleep_for(std::chrono::milliseconds(1));
+		}
 	}
 
 	void lock()
 	{
-		#ifndef BV2_PLATFORM_WINDOWS // linux timestruct for nanosleep
-
-			timespec ts;
-
-			ts.tv_sec = 0;
-			ts.tv_nsec = 1000000;
-		#endif
-
-		locked = true;
-		while (!internalLock)
-		{
-			#ifdef BV2_PLATFORM_WINDOWS
-				Sleep(1);
-			#else
-				if(nanosleep(&ts,0))
-				{
-					printf("problem nanosleep lock\n");
-				}
-				ts.tv_sec = 0;
-				ts.tv_nsec = 1000000;
-				
-				
-			#endif
-		//	printf("--- internalLock (lock)\n");
-		}
+		gameMutex.lock();
 	}
 
 	void unlock()
 	{
-		locked = false;
-		internalLock = false;
+		gameMutex.unlock();
 	}
 };
 
@@ -574,6 +485,10 @@ int main(int argc, const char* argv[])
 
 
 //	while (dkwMainLoop());
+
+	// Let the game loop finish its current iteration (it sees `quit` and stops) before the scene goes away
+	mainLoopConsole.lock();
+	mainLoopConsole.unlock();
 
 	// On efface la scene et ses amis
 	delete scene;

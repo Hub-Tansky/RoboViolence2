@@ -1,5 +1,18 @@
 cmake_minimum_required(VERSION 3.25)
 
+# Options come first: they select the vcpkg manifest features, which are read when project() runs the toolchain.
+option(BV2_BUILD_CLIENT "Build the bv2 client" ON)
+option(BV2_BUILD_SERVER "Build the bv2dedicated server" ON)
+option(BV2_BUILD_MASTER "Build the bv2master master server" ON)
+# ADR 0002: OFF builds game/src/CCurlStub.cpp (every request ends at once with no data); ON links libcurl.
+option(BV2_WITH_HTTP "Link libcurl for account and report requests" OFF)
+if(NOT BV2_BUILD_CLIENT)
+  set(VCPKG_MANIFEST_NO_DEFAULT_FEATURES ON)
+endif()
+if(BV2_WITH_HTTP)
+  list(APPEND VCPKG_MANIFEST_FEATURES http)
+endif()
+
 project(BaboViolent2 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -9,11 +22,6 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-option(BV2_BUILD_CLIENT "Build the bv2 client" ON)
-option(BV2_BUILD_SERVER "Build the bv2dedicated server" ON)
-option(BV2_BUILD_MASTER "Build the bv2master master server" ON)
-# ADR 0002: OFF builds game/src/CCurlStub.cpp (every request ends at once with no data); ON links libcurl.
-option(BV2_WITH_HTTP "Link libcurl for account and report requests" OFF)
 option(BV2_SANITIZE "Build with AddressSanitizer and UBSan" OFF)
 
 find_package(Threads REQUIRED)

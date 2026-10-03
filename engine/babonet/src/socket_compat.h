@@ -16,49 +16,30 @@
 	BaboViolent 2 source code. If not, see http://www.gnu.org/licenses/.
 */
 
-#include "CThread.h"
+#ifndef BB_SOCKET_COMPAT_H
+#define BB_SOCKET_COMPAT_H
 
-CThread::CThread()
-	: mArg(0), mIsRunning(false)
+#include "platform.h"
+
+#ifndef BV2_PLATFORM_WINDOWS
+	#include <errno.h>
+	#include <sys/socket.h>
+#endif
+
+// send() that retries when a signal interrupts it (POSIX). SIGPIPE is ignored once in bb_init(), so a peer that
+// disconnected makes send() fail with EPIPE instead of killing the process.
+inline int bbSend(int fd, const char * buf, int len)
 {
-}
-
-CThread::~CThread()
-{
-	if (mThread.joinable())
-		mThread.join();
-}
-
-bool CThread::start(void * pArg, int pThreadPriority)
-{
-	(void)pThreadPriority;
-	if (mIsRunning)
-		return false;
-	if (mThread.joinable())
-		mThread.join(); // a previous run has finished
-
-	arg(pArg); // store user data
-	mIsRunning = true;
-	try
+#ifdef BV2_PLATFORM_WINDOWS
+	return send(fd, buf, len, 0);
+#else
+	int r;
+	do
 	{
-		mThread = std::thread([this]() { run(this->arg()); });
-	}
-	catch (...)
-	{
-		mIsRunning = false;
-		return false;
-	}
-	return true;
+		r = (int)send(fd, buf, (size_t)len, 0);
+	} while (r < 0 && errno == EINTR);
+	return r;
+#endif
 }
 
-void CThread::run(void * pArg)
-{
-	setup();
-	execute(pArg);
-	mIsRunning = false;
-}
-
-void CThread::setup()
-{
-	// Do any setup here
-}
+#endif

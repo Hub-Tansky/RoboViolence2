@@ -1,15 +1,18 @@
 # zeven (DukZeven)
 
-Engine utilities behind small C APIs with a `dk` prefix. Targets: `zeven_core` (all executables) and `zeven_client` (client only, excluded from `all` until Step 3).
+Engine utilities behind small C APIs with a `dk` prefix.
 
 | Module | Role | Target |
 |---|---|---|
-| `dkc` | high-resolution timer | core |
-| `dksvar`, `CSystemVariable` | config variable registry (`sv_*`, `cl_*`), `set` command | core |
-| `dkt` | TGA texture loading and binding (uses GL/GLU, also in the server) | core |
-| `CString`, `CVector`, `CMatrix` | string and math types shared by the whole project | core |
-| `dkw`, `dki`, `dkgl`, `dkf`/`CFont`, `dkp`/`CParticle`, `dks` | window, input, GL state, fonts, particles, sound | client |
+| `dkc` | fixed-step timer (`std::chrono`, catch-up capped at 5 steps) | `zeven_core` |
+| `dksvar`, `CSystemVariable` | config variable registry (`sv_*`, `cl_*`), `set` command | `zeven_core` |
+| `CString`, `CVector`, `CMatrix` | string and math types shared by the whole project | `zeven_core` |
+| `dkt_console.cpp` | no-op `dkt` for the headless server | `zeven_console` |
+| `dkw` | SDL3 window, GL 2.1 compatibility context host, event pump | `zeven_client` |
+| `dki` | keyboard (`DIK_*` IDs, `dikeys.h`), mouse and gamepad state | `zeven_client` |
+| `dkgl`, `dkt`, `dkf`/`CFont`, `dkp`/`CParticle` | GL state, textures, fonts, particles | `zeven_client` |
+| `dks` | miniaudio effects and music | `zeven_client` |
 
-- **Headers:** `include/` (public), `src/*i.h` (module internals). `include/platform.h` is force-included everywhere by CMake and defines `BV2_PLATFORM_*`, `BV2_POSIX`, `INT4`/`UINT4`.
-- **Depends on:** pthreads, OpenGL (and GLU where present). The client modules need FMOD, DirectInput or SDL 1.2 until Step 3.
-- **Gotchas:** `systemVariable` is built on first use (`dksvarRegistry()`); the game registers variables from a global constructor. Vendored `glext.h` stays until Step 3. See [../../docs/analysis/01_SYSTEM_OVERVIEW.md](../../docs/analysis/01_SYSTEM_OVERVIEW.md).
+- **Headers:** `include/` (public), `src/*i.h` (module internals). `platform.h` is force-included by CMake. `glheaders.h` is the only place that includes OpenGL (glad from `third_party/glad`, then GLU).
+- **Depends on:** pthreads, glad; the client adds SDL3, miniaudio and (for OGG) stb_vorbis. GLU is the system library for now.
+- **Gotchas:** `systemVariable` is built on first use (`dksvarRegistry()`) because the game registers variables from a global constructor. `dkwGetResolution()` is the drawable size in pixels (HiDPI-aware): use it for `glViewport`. Key binds in `bv2.cfg` are DirectInput scancodes; `dkw` translates SDL scancodes. See [../../docs/analysis/01_SYSTEM_OVERVIEW.md](../../docs/analysis/01_SYSTEM_OVERVIEW.md) and [ADR 0006](../../docs/decisions/0006-sdl3-miniaudio-glad-platform-layer.md).

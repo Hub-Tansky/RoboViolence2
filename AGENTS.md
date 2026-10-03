@@ -4,7 +4,7 @@ RoboViolence 2, an unofficial fork of BaboViolent 2 ([ADR 0004](docs/decisions/0
 
 ## Layout
 
-- `engine/babonet/`: networking (`bb_*` API); `engine/zeven/`: engine utilities (`dkc`, `dksvar`, `dkt`, `CString`/`CVector`/`CMatrix`, and the client modules `dkw dki dkgl dkf dkp dks`); `engine/dko/`: `.DKO` model loader. Each has `include/` (public), `src/`, `README.md`.
+- `engine/babonet/`: networking (`bb_*` API); `engine/zeven/`: engine utilities (`dkc`, `dksvar`, `CString`/`CVector`/`CMatrix`; client modules `dkw dki dkgl dkt dkf dkp dks` on SDL3, miniaudio and glad); `engine/dko/`: `.DKO` model loader. Each has `include/` (public), `src/`, `README.md`.
 - `game/src/`: game: client, listen/dedicated server, map editor (one codebase; `CONSOLE` selects the headless server).
 - `masterserver/src/`: standalone master server (SQLite).
 - `content/`: `languages/`, `LaunchScript/` (`main/` at runtime). `config/`, `content-seed/`: example configs and SQL seeds. `tools/`: checks, generators, setup scripts.
@@ -20,7 +20,7 @@ cmake --build --preset <preset> --target bv2dedicated bv2master
 
 - Needs `VCPKG_ROOT`, CMake 3.25+, Ninja, Python 3. `-asan` presets add ASan + UBSan.
 - Output: `build/<preset>/runtime/` (executables, `main/`, `bv2.db`, `master.db`). Run the server from there ([ADR 0005](docs/decisions/0005-runtime-main-data-root.md)).
-- `bv2` (client) is excluded from `all` until Step 3. `zeven_client` likewise.
+- `bv2` (client) needs the vcpkg `client` feature (SDL3, miniaudio, stb); `-DBV2_BUILD_CLIENT=OFF` builds the servers only. `-DBV2_WITH_HTTP=ON` adds libcurl (off by default, ADR 0002).
 - There are no automated tests.
 
 ## Assets

@@ -2,8 +2,27 @@
   "name": "roboviolence2",
   "version-string": "0.0.0",
   "description": "RoboViolence 2, an unofficial fork of BaboViolent 2",
+  "builtin-baseline": "c748cb44f2a435fcf015c35225c9d5545fe0021c",
   "dependencies": [
-    "sqlite3",
-    "curl"
-  ]
+    "sqlite3"
+  ],
+  "default-features": [
+    "client"
+  ],
+  "features": {
+    "client": {
+      "description": "bv2 client: SDL3 window and input, miniaudio audio, stb_vorbis for OGG music",
+      "dependencies": [
+        "sdl3",
+        "miniaudio",
+        "stb"
+      ]
+    },
+    "http": {
+      "description": "libcurl for account and report requests (BV2_WITH_HTTP, off by default, ADR 0002)",
+      "dependencies": [
+        "curl"
+      ]
+    }
+  }
 }

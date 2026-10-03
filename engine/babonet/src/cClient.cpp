@@ -16,6 +16,7 @@
 	BaboViolent 2 source code. If not, see http://www.gnu.org/licenses/.
 */
 
+#include "socket_compat.h"
 #include "cClient.h"
 
 
@@ -894,7 +895,7 @@ int cClient::Send(UINT4 &nbByte)
 			while(sent < packed)
 			{
 				int iSent=0;
-				iSent = send(FileDescriptor,buf + sent,packed - sent,0);
+				iSent = bbSend(FileDescriptor,buf + sent,packed - sent);
 
 				if(iSent <= 0)
 				{
@@ -932,7 +933,7 @@ int cClient::Send(UINT4 &nbByte)
 		while(sent < packed)
 		{
 			int iSent=0;
-			iSent = send(FileDescriptor,buf + sent,packed - sent,0);
+			iSent = bbSend(FileDescriptor,buf + sent,packed - sent);
 
 			if(iSent <= 0)
 			{

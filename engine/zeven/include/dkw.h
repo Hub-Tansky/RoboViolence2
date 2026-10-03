@@ -69,7 +69,7 @@ void			dkwClipMouse( bool abEnabled = true );
 /// Shows a modal error box (replaces MessageBox).
 void			dkwShowMessage(const char* title, const char* text);
 
-/// Accumulated mouse movement since the last call, wheel in 120 per notch (the DirectInput convention), buttons 0x80 when down.
+/// Accumulated mouse movement since the last call, wheel in 120 per notch (the convention the game was written for), buttons 0x80 when down.
 struct DkwMouseState
 {
 	int lX;

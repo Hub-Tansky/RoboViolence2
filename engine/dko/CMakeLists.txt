@@ -11,5 +11,5 @@ add_library(dko STATIC
   src/ePTexture.cpp
 )
 target_include_directories(dko PUBLIC include PRIVATE src)
-target_link_libraries(dko PUBLIC zeven_core)
+target_link_libraries(dko PUBLIC zeven_core bv2_glu)
 bv2_target_defaults(dko)

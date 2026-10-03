@@ -1187,8 +1187,8 @@ void GameVar::deleteModels()
 	dksDeleteSound(sfx_ric[2]);
 	dksDeleteSound(sfx_ric[3]);
 	dksDeleteSound(sfx_ric[4]);
-	dksDeleteSound(sfx_hit[3]);
-	dksDeleteSound(sfx_hit[4]);
+	dksDeleteSound(sfx_hit[0]);
+	dksDeleteSound(sfx_hit[1]);
 	dksDeleteSound(sfx_baboCreve[0]);
 	dksDeleteSound(sfx_baboCreve[1]);
 	dksDeleteSound(sfx_baboCreve[2]);

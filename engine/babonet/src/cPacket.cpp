@@ -16,6 +16,7 @@
 	BaboViolent 2 source code. If not, see http://www.gnu.org/licenses/.
 */
 
+#include "socket_compat.h"
 #include "cPacket.h"
 
 
@@ -121,7 +122,7 @@ int cPacket::Send(int socketFD)
 			return 2;
 		}
 
-		sent = send(socketFD,(const char*)(Packet.data + (total-Remaining)),Remaining,0);
+		sent = bbSend(socketFD,(const char*)(Packet.data + (total-Remaining)),Remaining);
 
 		if(sent < 0)
 		{

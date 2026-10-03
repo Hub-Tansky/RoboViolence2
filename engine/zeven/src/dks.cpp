@@ -177,17 +177,17 @@ void			dksDeleteSound(DksSound * sound)
 {
 	if (!sound)
 		return;
+	// Only pointers this module handed out (and not yet deleted) are accepted
+	size_t found = g_sounds.size();
+	for (size_t i = 0; i < g_sounds.size(); ++i)
+		if (g_sounds[i] == sound)
+			found = i;
+	if (found == g_sounds.size())
+		return;
 	for (size_t i = 0; i < g_voices.size(); ++i)
 		if (g_voices[i]->used && g_voices[i]->owner == sound)
 			releaseVoice(g_voices[i]);
-	for (size_t i = 0; i < g_sounds.size(); ++i)
-	{
-		if (g_sounds[i] == sound)
-		{
-			g_sounds.erase(g_sounds.begin() + i);
-			break;
-		}
-	}
+	g_sounds.erase(g_sounds.begin() + found);
 	if (sound->loaded)
 		ma_sound_uninit(&sound->master);
 	delete sound;
