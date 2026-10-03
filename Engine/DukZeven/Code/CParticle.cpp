@@ -58,7 +58,7 @@ CParticle::CParticle(
 	rotationSpeed = mrotationSpeed;
 	srcBlend = msrcBlend;
 	dstBlend = mdstBlend;
-//	transitionFunc = mtransitionFunc;  // Pas utilisé
+//	transitionFunc = mtransitionFunc;  // Pas utilisÃ©
 	(void)mtransitionFunc;// No need to show the warning about unreferenced parameter
 	airResistanceInfluence = mairResistanceInfluence;
 	billboard = false;
@@ -71,7 +71,7 @@ CParticle::CParticle(
 	textureArray = 0;
 	nbFrame = 1;
 
-	// Ici on la calcul tout suite pour pouvoir la placer tout suite à bonne place dans le array
+	// Ici on la calcul tout suite pour pouvoir la placer tout suite Ã  bonne place dans le array
 	if (CDkp::sorting) camDis = dot((CDkp::camPos - position),(CDkp::camPos - position));
 }
 
@@ -123,10 +123,10 @@ int CParticle::update()
 		// Sa rotation
 		angle += rotationSpeed * CDkp::delay;
 
-		// On affecte la gravité
+		// On affecte la gravitÃ©
 		vel += CDkp::gravity * density * CDkp::delay;
 
-		// On l'affecte à la densité de l'air
+		// On l'affecte Ã  la densitÃ© de l'air
 
 		// On anim finalement sa position
 		position += vel * CDkp::delay;
@@ -145,7 +145,6 @@ int CParticle::update()
 //
 void CParticle::render()
 {
-#ifndef _DX_
 	// On la positionne
 	glPushMatrix();
 
@@ -249,5 +248,4 @@ void CParticle::render()
 			glPopAttrib();
 		}
 	glPopMatrix();
-#endif
 }

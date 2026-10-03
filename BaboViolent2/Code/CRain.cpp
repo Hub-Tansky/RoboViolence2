@@ -55,7 +55,7 @@ CRain::~CRain()
 void CRain::update(float delay, Map* map)
 {
   int i;
-	//--- On crée la pluit yé
+	//--- On crÃ©e la pluit yÃ©
 	for (i=0;i<3;++i)
 	{
 		rains[nextRain].pos = rand(map->camPos + CVector3f(-3,-3,5), map->camPos + CVector3f(3,3,5));
@@ -80,7 +80,6 @@ void CRain::update(float delay, Map* map)
 //
 void CRain::render()
 {
-#ifndef _DX_
 	glPushAttrib(GL_ENABLE_BIT);
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -95,7 +94,6 @@ void CRain::render()
 			}
 		glEnd();
 	glPopAttrib();
-#endif
 }
 
 

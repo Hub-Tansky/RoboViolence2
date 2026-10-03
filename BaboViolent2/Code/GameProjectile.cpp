@@ -56,7 +56,7 @@ Projectile::Projectile(CVector3f & position, CVector3f & vel, char pFromID, int 
 
 	whenToShoot = 0;
 
-	remoteEntity = pRemoteEntity; // «a c'est server only
+	remoteEntity = pRemoteEntity; // √áa c'est server only
 	needToBeDeleted = false;
 	reallyNeedToBeDeleted = false;
 	movementLock = false;
@@ -74,7 +74,7 @@ Projectile::Projectile(CVector3f & position, CVector3f & vel, char pFromID, int 
 			rotateVel = 360;
 #endif
 			duration = 10; // 10 sec
-			// On calcul l'angle que la rocket devrait avoir (dÈpendanment de sa vel, qui est l'Orientation)
+			// On calcul l'angle que la rocket devrait avoir (d√©pendanment de sa vel, qui est l'Orientation)
 			CVector3f dirVect = vel;
 			dirVect[2] = 0; // L'orientation est juste en Z
 			normalize(dirVect);
@@ -82,7 +82,7 @@ Projectile::Projectile(CVector3f & position, CVector3f & vel, char pFromID, int 
 			float dotWithX = dot(CVector3f(1,0,0),dirVect);
 			currentCF.angle = acosf(dotWithY)*TO_DEGREE;
 			if (dotWithX > 0) currentCF.angle = -currentCF.angle;
-			// La rocket dÈmarre plus vite
+			// La rocket d√©marre plus vite
 			currentCF.vel *= 2.5f;
 #ifndef CONSOLE
 			if (remoteEntity)
@@ -162,7 +162,7 @@ Projectile::Projectile(CVector3f & position, CVector3f & vel, char pFromID, int 
 			rotateVel = 360;
 #endif
 			duration = 2;
-			// La grenade dÈmarre plus vite
+			// La grenade d√©marre plus vite
 			currentCF.vel *= 5;
 			currentCF.vel[2] += 5; // Pas trop apique, on veut pogner les murs
 			break;
@@ -234,20 +234,20 @@ Projectile::Projectile(CVector3f & position, CVector3f & vel, char pFromID, int 
 void Projectile::update(float delay, Map* map)
 {
 #ifndef CONSOLE
-	rotation += delay * rotateVel; // 1 tour ‡ la seconde :D
+	rotation += delay * rotateVel; // 1 tour √† la seconde :D
 	while (rotation >= 360) rotation -= 360;
 	while (rotation < 0) rotation += 360;
 #endif
 
 	lastCF = currentCF; // On garde une copie du dernier coordFrame
-	currentCF.frameID++; // «a Áa reste inchangÈ
+	currentCF.frameID++; // √áa √ßa reste inchang√©
 
 	timeSinceThrown += delay;
 
 #ifndef CONSOLE
 	if (remoteEntity)
 	{
-		// L‡ on va crÈer une genre d'interpolation (cubic spline (bezier), pour Ítre plus prÈcis)
+		// L√† on va cr√©er une genre d'interpolation (cubic spline (bezier), pour √™tre plus pr√©cis)
 	//	currentCF.interpolate(cFProgression, netCF0, netCF1, delay); //--- Client side maintenant
 
 		if (projectileType == PROJECTILE_ROCKET)
@@ -308,11 +308,7 @@ void Projectile::update(float delay, Map* map)
 		if (projectileType == PROJECTILE_GRENADE)
 		{
 			//--- Depending of the team, the color change
-#ifdef _PRO_
 			if ((scene->client->game->gameType == GAME_TYPE_DM) || (scene->client->game->gameType == GAME_TYPE_SND))
-#else
-         if (scene->client->game->gameType == GAME_TYPE_DM)
-#endif
 			{
 				// On spawn des particules dans son cul (une par frame)
 				dkpCreateParticle(	currentCF.position.s,//float *position,
@@ -464,32 +460,32 @@ void Projectile::update(float delay, Map* map)
 				currentCF.vel *= speed;
 			}
 
-			// On dÈplace avec la velocity
+			// On d√©place avec la velocity
 			currentCF.position += currentCF.vel * delay;
 
-			// On incrÈmente la vel, la rocket ‡ fuse en sale! (accÈlÈration exponentiel!)
+			// On incr√©mente la vel, la rocket √† fuse en sale! (acc√©l√©ration exponentiel!)
 			currentCF.vel += currentCF.vel * delay * 3;
 		}
 
 		if (projectileType == PROJECTILE_COCKTAIL_MOLOTOV)
 		{
-			// On dÈplace avec la velocity
+			// On d√©place avec la velocity
 			currentCF.position += currentCF.vel * delay;
 
-			// On affecte la gravitÈe!
+			// On affecte la gravit√©e!
 			currentCF.vel[2] -= 9.8f * delay;
 		}
 
 		if (projectileType == PROJECTILE_FLAME && !movementLock)
 		{
-			// On dÈplace avec la velocity
+			// On d√©place avec la velocity
 			currentCF.position += currentCF.vel * delay;
 
-			// On affecte la gravitÈe!
+			// On affecte la gravit√©e!
 			currentCF.vel[2] -= 9.8f * delay;
 		}
 
-		//--- Le feu est pognÈ sur un player
+		//--- Le feu est pogn√© sur un player
 		if (projectileType == PROJECTILE_FLAME)
 		{
 
@@ -518,7 +514,7 @@ void Projectile::update(float delay, Map* map)
 						flameStickToPlayer.projectileID = projectileID;
 						bb_serverSend((char*)&flameStickToPlayer, sizeof(net_svcl_flame_stick_to_player), NET_SVCL_FLAME_STICK_TO_PLAYER, 0);
 						movementLock = false;
-						stickFor = 1.0f; // 1 sec sans retoucher ‡ un autre joueur (quand meme l‡)
+						stickFor = 1.0f; // 1 sec sans retoucher √† un autre joueur (quand meme l√†)
 					//	net_svcl_flame_stick_to_player flameStickToPlayer;
 						flameStickToPlayer.playerID = -1;
 						flameStickToPlayer.projectileID = projectileID;
@@ -593,7 +589,7 @@ void Projectile::update(float delay, Map* map)
 				// On lock les mouvements du feu
 				movementLock = true;
 
-				// On se crÈ un spot par terre, pis on lock les mouvement du feu l‡
+				// On se cr√© un spot par terre, pis on lock les mouvement du feu l√†
 				currentCF.position = p2 + normal*.1f;
 			}
 		}
@@ -602,11 +598,11 @@ void Projectile::update(float delay, Map* map)
 		{
 			if (projectileType == PROJECTILE_GRENADE || projectileType == PROJECTILE_LIFE_PACK || projectileType == PROJECTILE_DROPED_WEAPON || projectileType == PROJECTILE_DROPED_GRENADE)
 			{
-				// On dÈplace avec la velocity
+				// On d√©place avec la velocity
 				currentCF.position += currentCF.vel * delay;
 
-				// On affecte la gravitÈe!
-				currentCF.vel[2] -= 9.8f * delay; // (suposont q'un babo fait 50cm de diamËtre)
+				// On affecte la gravit√©e!
+				currentCF.vel[2] -= 9.8f * delay; // (suposont q'un babo fait 50cm de diam√®tre)
 			}
 
 			if (map && projectileType == PROJECTILE_GRENADE || projectileType == PROJECTILE_LIFE_PACK || projectileType == PROJECTILE_DROPED_WEAPON || projectileType == PROJECTILE_DROPED_GRENADE)
@@ -616,7 +612,7 @@ void Projectile::update(float delay, Map* map)
 				CVector3f normal;
 				if (map->rayTest(p1, p2, normal))
 				{
-					// On dit ‡ tout le monde de jouer le son (pour l'instant juste server side)
+					// On dit √† tout le monde de jouer le son (pour l'instant juste server side)
 				//	net_svcl_play_sound playSound;
 				//	playSound.position[0] = (unsigned char)p2[0];
 				//	playSound.position[1] = (unsigned char)p2[1];
@@ -643,7 +639,7 @@ void Projectile::update(float delay, Map* map)
 			currentCF.vel.set(0,0,0);
 		}
 
-		// C le server et lui seul qui dÈcide quand il est temps de mettre fin ‡ ses jours
+		// C le server et lui seul qui d√©cide quand il est temps de mettre fin √† ses jours
 		if (!remoteEntity)
 		{
 			duration -= delay;
@@ -657,7 +653,7 @@ void Projectile::update(float delay, Map* map)
 
                     needToBeDeleted = true;
 					
-					// On se crÈ DA explosion :P
+					// On se cr√© DA explosion :P
 					net_svcl_explosion explosion;
 					explosion.position[0] = currentCF.position[0];
 					explosion.position[1] = currentCF.position[1];
@@ -734,7 +730,7 @@ void Projectile::update(float delay, Map* map)
 				scene->server->game->players[fromID]->detonateRocket = false;
 				// On frappe un mec !!! KKAAAABBOOOUUMM PLEIN DE SANG MOUHOUHAHAHAHHA
 				needToBeDeleted = true;
-				// On se crÈ DA explosion :P
+				// On se cr√© DA explosion :P
 				net_svcl_explosion explosion;
 				explosion.position[0] = playerInRadius->currentCF.position[0];
 				explosion.position[1] = playerInRadius->currentCF.position[1];
@@ -760,7 +756,7 @@ void Projectile::update(float delay, Map* map)
 					p2 += normal * .1f;
 					// On frappe un mur !!! KKAAAABBOOOUUMM
 					needToBeDeleted = true;
-					// On se crÈ DA explosion :P
+					// On se cr√© DA explosion :P
 					net_svcl_explosion explosion;
 					explosion.position[0] = p2[0];
 					explosion.position[1] = p2[1];
@@ -824,7 +820,7 @@ void Projectile::update(float delay, Map* map)
 				// On frappe un mec !!! Flak MOLOTOV PARTY!
 				needToBeDeleted = true;
 
-				// On se crÈ DA FLAME explosion :P
+				// On se cr√© DA FLAME explosion :P
 				net_svcl_play_sound playSound;
 				playSound.position[0] = (unsigned char)currentCF.position[0];
 				playSound.position[1] = (unsigned char)currentCF.position[1];
@@ -878,7 +874,7 @@ void Projectile::update(float delay, Map* map)
 
 					// On frappe un mur ou un plancher, Molotov Party time
 					needToBeDeleted = true;
-					// On se crÈ DA FLAME explosion :P
+					// On se cr√© DA FLAME explosion :P
 					net_svcl_play_sound playSound;
 					playSound.position[0] = (unsigned char)p2[0];
 					playSound.position[1] = (unsigned char)p2[1];
@@ -930,7 +926,7 @@ void Projectile::update(float delay, Map* map)
 			Player * playerInRadius = (scene->server)?scene->server->game->playerInRadius(CVector3f(currentCF.position[0], currentCF.position[1], .25f), .25f):0;
 			if (playerInRadius)
 			{
-				// On lui donne de la vie yÈÈÈ
+				// On lui donne de la vie y√©√©√©
 				playerInRadius->life += .5f;
 				if (playerInRadius->life > 1) playerInRadius->life = 1;
 				needToBeDeleted = true;
@@ -977,7 +973,6 @@ void Projectile::render()
 	// Les effects de la rocket
 	if (projectileType == PROJECTILE_ROCKET)
 	{
-#ifndef _DX_
 		glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT | GL_LIGHTING_BIT);
 			glDisable(GL_LIGHTING);
 			glDepthMask(GL_FALSE);
@@ -1035,13 +1030,11 @@ void Projectile::render()
 				glEnd();
 			glPopMatrix();
 		glPopAttrib();
-#endif
 	}
 
 	// Les effects du molotov
 	if (projectileType == PROJECTILE_COCKTAIL_MOLOTOV)
 	{
-#ifndef _DX_
 		glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT | GL_LIGHTING_BIT);
 			glDisable(GL_LIGHTING);
 			glDepthMask(GL_FALSE);
@@ -1067,12 +1060,10 @@ void Projectile::render()
 				glEnable(GL_DEPTH_TEST);
 			glPopMatrix();
 		glPopAttrib();
-#endif
 	}
 
 	if (projectileType != PROJECTILE_FLAME)
 	{
-#ifndef _DX_
 		glPushAttrib(GL_ENABLE_BIT);
 			glEnable(GL_LIGHTING);
 			glPushMatrix();
@@ -1081,31 +1072,31 @@ void Projectile::render()
 				{
 					glRotatef(currentCF.angle, 0, 0, 1);
 					glScalef(.0025f,.0025f,.0025f);
-					dkoRender(gameVar.dko_rocket); // Voil‡!
+					dkoRender(gameVar.dko_rocket); // Voil√†!
 				}
 				if (projectileType == PROJECTILE_GRENADE) 
 				{
 					glRotatef(rotation, currentCF.vel[0], currentCF.vel[1], 0);
 					glScalef(.0025f,.0025f,.0025f);
-					dkoRender(gameVar.dko_grenade); // Voil‡!
+					dkoRender(gameVar.dko_grenade); // Voil√†!
 				}
 				if (projectileType == PROJECTILE_COCKTAIL_MOLOTOV) 
 				{
 					glRotatef(rotation, currentCF.vel[0], currentCF.vel[1], 0);
 					glScalef(.0025f,.0025f,.0025f);
-					dkoRender(gameVar.dko_cocktailMolotov); // Voil‡!
+					dkoRender(gameVar.dko_cocktailMolotov); // Voil√†!
 				}
 				if (projectileType == PROJECTILE_DROPED_GRENADE) 
 				{
 				//	glTranslatef(0,0,.30f);
 					glScalef(.0025f,.0025f,.0025f);
-					dkoRender(gameVar.dko_grenade); // Voil‡!
+					dkoRender(gameVar.dko_grenade); // Voil√†!
 				}
 				if (projectileType == PROJECTILE_LIFE_PACK) 
 				{
 					glTranslatef(0,0,-.20f);
 					glScalef(.0025f,.0025f,.0025f);
-					dkoRender(gameVar.dko_lifePack); // Voil‡!
+					dkoRender(gameVar.dko_lifePack); // Voil√†!
 				}
 				if (projectileType == PROJECTILE_DROPED_WEAPON) 
 				{
@@ -1114,16 +1105,14 @@ void Projectile::render()
 					glScalef(.005f,.005f,.005f);
 					if (fromID >= 0) 
 					{
-						if (gameVar.weapons[fromID]) dkoRender(gameVar.weapons[fromID]->dkoModel); // Voil‡!
+						if (gameVar.weapons[fromID]) dkoRender(gameVar.weapons[fromID]->dkoModel); // Voil√†!
 					}
 				}
 			glPopMatrix();
 		glPopAttrib();
-#endif
 	}
 	else
 	{
-#ifndef _DX_
 		glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT | GL_LIGHTING_BIT);
 			glDisable(GL_LIGHTING);
 			glDepthMask(GL_FALSE);
@@ -1149,13 +1138,11 @@ void Projectile::render()
 				glEnable(GL_DEPTH_TEST);
 			glPopMatrix();
 		glPopAttrib();
-#endif
 	}
 }
 
 void Projectile::renderShadow()
 {
-#ifndef _DX_
 	// On render son shadow :)
 	glPushMatrix();
 		glTranslatef(currentCF.position[0]+.1f, currentCF.position[1]-.1f, 0.025f);
@@ -1170,7 +1157,6 @@ void Projectile::renderShadow()
 			glVertex2f(.25f, .25f);
 		glEnd();
 	glPopMatrix();
-#endif
 }
 #endif
 
@@ -1185,9 +1171,9 @@ void Projectile::setCoordFrame(net_svcl_projectile_coord_frame & projectileCoord
 	// Notre dernier keyframe change pour celui qu'on est rendu
 	netCF0 = currentCF;
 	netCF0.frameID = netCF1.frameID; // On pogne le frameID de l'ancien packet par contre
-	cFProgression = 0; // On commence au dÈbut de la courbe ;)
+	cFProgression = 0; // On commence au d√©but de la courbe ;)
 
-	// On donne la nouvelle velocity ‡ notre entity
+	// On donne la nouvelle velocity √† notre entity
 	currentCF.vel[0] = (float)projectileCoordFrame.vel[0] / 10.0f;
 	currentCF.vel[1] = (float)projectileCoordFrame.vel[1] / 10.0f;
 	currentCF.vel[2] = (float)projectileCoordFrame.vel[2] / 10.0f;
@@ -1195,7 +1181,7 @@ void Projectile::setCoordFrame(net_svcl_projectile_coord_frame & projectileCoord
 	// Son frame ID
 	netCF1.frameID = projectileCoordFrame.frameID;
 
-	// Va faloir interpoler ici et prÈdire (job's done!)
+	// Va faloir interpoler ici et pr√©dire (job's done!)
 	netCF1.position[0] = (float)projectileCoordFrame.position[0] / 100.0f;
 	netCF1.position[1] = (float)projectileCoordFrame.position[1] / 100.0f;
 	netCF1.position[2] = (float)projectileCoordFrame.position[2] / 100.0f;
@@ -1205,7 +1191,7 @@ void Projectile::setCoordFrame(net_svcl_projectile_coord_frame & projectileCoord
 	netCF1.vel[1] = (float)projectileCoordFrame.vel[1] / 10.0f;
 	netCF1.vel[2] = (float)projectileCoordFrame.vel[2] / 10.0f;
 
-	// Si notre frameID Ètait ‡ 0, on le copie direct
+	// Si notre frameID √©tait √† 0, on le copie direct
 	if (netCF0.frameID == 0) 
 	{
 		netCF0 = netCF1;

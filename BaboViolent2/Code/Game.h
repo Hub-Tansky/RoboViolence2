@@ -85,7 +85,6 @@ public:
 	}
 	void render()
 	{
-#ifndef _DX_
 		glPushMatrix();
 			glTranslatef(position[0], position[1], position[2]);
 			glScalef(radius, radius, radius);
@@ -101,7 +100,6 @@ public:
 				glVertex2i(1,1);
 			glEnd();
 		glPopMatrix();
-#endif
 	}
 };
 
@@ -123,7 +121,6 @@ struct Drip
 	}
 	void render()
 	{
-#ifndef _DX_
 		glPushMatrix();
 			glTranslatef(position[0], position[1], position[2]);
 			float _size = (1 - life) * size;
@@ -140,7 +137,6 @@ struct Drip
 				glVertex2i(1,1);
 			glEnd();
 		glPopMatrix();
-#endif
 	}
 };
 
@@ -182,7 +178,6 @@ struct FloorMark
 	{
 		if (startDelay <= 0)
 		{
-#ifndef _DX_
 			glBindTexture(GL_TEXTURE_2D, texture);
 			glPushMatrix();
 				glTranslatef(position[0], position[1], position[2] + .025f);
@@ -203,7 +198,6 @@ struct FloorMark
 					glVertex2i(1,1);
 				glEnd();
 			glPopMatrix();
-#endif
 		}
 	}
 };
@@ -211,7 +205,7 @@ struct FloorMark
 #define DOUILLE_TYPE_DOUILLE 0
 #define DOUILLE_TYPE_GIB 1
 
-// Nos douilles, ça on gère pas ça sur le net
+// Nos douilles, Ã§a on gÃ¨re pas Ã§a sur le net
 struct Douille
 {
 	CVector3f position;
@@ -225,7 +219,7 @@ struct Douille
 		vel = pDirection * 1.5f;
 		if (type == DOUILLE_TYPE_DOUILLE)
 		{
-			delay = 2; // Ça dure 2sec ça, en masse
+			delay = 2; // Ã‡a dure 2sec Ã§a, en masse
 			vel = rotateAboutAxis(vel, rand(-30.0f, 30.0f), right);
 			vel = rotateAboutAxis(vel, rand(0.0f, 360.0f), pDirection);
 		}
@@ -239,7 +233,6 @@ struct Douille
 	void update(float pDelay, Map * map);
 	void render()
 	{
-#ifndef _DX_
 		glPushMatrix();
 			glTranslatef(position[0], position[1], position[2]);
 			glRotatef(delay*90,vel[0], vel[1],0);
@@ -247,7 +240,6 @@ struct Douille
 			if (type == DOUILLE_TYPE_DOUILLE) dkoRender(gameVar.dko_douille);
 			else if (type == DOUILLE_TYPE_GIB) dkoRender(gameVar.dko_gib);
 		glPopMatrix();
-#endif
 	}
 };
 #endif
@@ -263,13 +255,13 @@ struct Projectile
 	// Son (ses) coordframes
 	CoordFrame currentCF; // Celui qu'on affiche
 	CoordFrame lastCF; // Le key frame de sauvegarde du frame courant
-	CoordFrame netCF0; // L'avant dernier keyframe reçu du net
-	CoordFrame netCF1; // Le dernier keyframe reçu du net
+	CoordFrame netCF0; // L'avant dernier keyframe reÃ§u du net
+	CoordFrame netCF1; // Le dernier keyframe reÃ§u du net
 
 	// Sa progression sur la courbe
 	long cFProgression;
 
-	// Si c'est un entity controllé par le server
+	// Si c'est un entity controllÃ© par le server
 	bool remoteEntity;
 
 	// On en a fini avec, on l'efface
@@ -279,7 +271,7 @@ struct Projectile
 	bool reallyNeedToBeDeleted;
 
 #ifndef CONSOLE
-	// La rocket tourne sur elle même
+	// La rocket tourne sur elle mÃªme
 	float rotation;
 	float rotateVel;
 
@@ -289,7 +281,7 @@ struct Projectile
 	// Il a une duration limite
 	float duration;
 
-	// Hey, de qui ça vient ça?
+	// Hey, de qui Ã§a vient Ã§a?
 	char fromID;
 	bool movementLock;
 
@@ -328,7 +320,7 @@ struct Projectile
 };
 
 
-// Pour tenir nos explosion, ça c'est client OnLy
+// Pour tenir nos explosion, Ã§a c'est client OnLy
 /*
 struct Explosion
 {
@@ -370,7 +362,6 @@ struct Trail
 	}
 	void render()
 	{
-#ifndef _DX_
 		glColor4f(.7f, .7f, .7f, (1-delay)*.5f);
 		if (trailType == 1) glColor4f(color[0], color[1], color[2],(1-delay));
 		glBegin(GL_QUADS);
@@ -383,7 +374,6 @@ struct Trail
 			glTexCoord2f(1,dis);
 			glVertex3fv((p2+right*delay*size).s);
 		glEnd();
-#endif
 	}
 	void renderBullet()
 	{
@@ -394,7 +384,6 @@ struct Trail
 			float x = p1[0]+dir[0]*progress;
 			float y = p1[1]+dir[1]*progress;
 
-#ifndef _DX_
 				glColor4f(color[0], color[1], color[2],.1f);
 				glBegin(GL_QUADS);
 					glTexCoord2f(0,1);
@@ -418,7 +407,6 @@ struct Trail
 					glTexCoord2f(1,1);
 					glVertex3fv((p1+dir*progress+dir/dis+right*.05f).s);
 				glEnd();
-#endif
 		}
 	}
 	void update(float pDelay)
@@ -467,10 +455,10 @@ public:
 	// Le seed
 	long mapSeed;
 #ifndef CONSOLE
-	// Notre liste de trail à afficher
+	// Notre liste de trail Ã  afficher
 	std::vector<Trail*> trails;
 #endif
-	// notre liste de projectile (très important de toujours les garder dans l'ordre
+	// notre liste de projectile (trÃ¨s important de toujours les garder dans l'ordre
 	std::vector<Projectile*> projectiles;
 
 #ifndef CONSOLE
@@ -483,7 +471,7 @@ public:
 	// Son shadow
 	unsigned int tex_baboShadow;
 
-	// Nos marques sur le plancher (ça c chouette)
+	// Nos marques sur le plancher (Ã§a c chouette)
 	FloorMark floorMarks[MAX_FLOOR_MARK];
 	long nextWriteFloorMark;
 	Drip drips[MAX_FLOOR_MARK];
@@ -641,7 +629,7 @@ public:
    // Create map
 	void createMap();
 
-	// pour donner un team à un player
+	// pour donner un team Ã  un player
 	int assignPlayerTeam(int playerID, char teamRequested, Client * client = 0);
 
 	// let the player join selected team
@@ -669,26 +657,24 @@ public:
 	bool spawnPlayer(int playerID);
 
 	// Pour ajouter un nouveau joueur
-	int createNewPlayerSV(int babonetID); // Ça c'est côté server
+	int createNewPlayerSV(int babonetID); // Ã‡a c'est cÃ´tÃ© server
 #ifndef CONSOLE
-	void createNewPlayerCL(int playerID, long babonetID); // Ça c'est côté client
+	void createNewPlayerCL(int playerID, long babonetID); // Ã‡a c'est cÃ´tÃ© client
 
 	// Pour quand un client shot
 	void shoot(const CVector3f & position, const CVector3f & direction, float imp, float damage, Player * from, int projectileType);
 #endif
 
-	// Quand un client shot, mais que le server le vérifie puis le shoot aux autres joueurs
+	// Quand un client shot, mais que le server le vÃ©rifie puis le shoot aux autres joueurs
 	void shootSV(net_clsv_player_shoot & playerShoot);
 #ifndef CONSOLE
 	// Pour spawner des particules sur le murs l'hors d'un impact
 	void spawnImpact(CVector3f & p1, CVector3f & p2, CVector3f & normal, Weapon*weapon, float damage, int team);
 	void spawnBlood(CVector3f & position, float damage);
-#ifdef _PRO_
 	void spawnBloodMinibot(CVector3f & position, float damage);
-#endif
 	void spawnExplosion(CVector3f & position, CVector3f & normal, float size);
 
-	// Pour afficher la minimap (ouff, je mélange pomal les affaires, tk)
+	// Pour afficher la minimap (ouff, je mÃ©lange pomal les affaires, tk)
 	void renderMiniMap();
 
 	// Pour pogner le prochain markFloor

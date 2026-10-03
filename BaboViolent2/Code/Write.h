@@ -47,7 +47,7 @@ public:
 	// Destructeur
 	virtual ~Write();
 
-	// L'updater le gèrer
+	// L'updater le gÃ¨rer
 	virtual void update(float delay);
 
 	// Pour quand on clic dessus, le child saura quoi faire

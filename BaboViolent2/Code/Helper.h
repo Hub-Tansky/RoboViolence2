@@ -36,7 +36,6 @@ void renderTexturedQuadSmooth(int x, int y, int w, int h, unsigned int texture);
 void renderMenuQuad(int x, int y, int w, int h);
 /*inline void renderMenuQuad(int x, int y, int w, int h)
 {
-#ifndef _DX_
 	glPushAttrib(GL_CURRENT_BIT);
 
 		//--- Round corner of 5 units
@@ -103,7 +102,6 @@ void renderMenuQuad(int x, int y, int w, int h);
 			glEnd();
 	//	}
 	glPopAttrib();
-#endif
 }*/
 
 #endif

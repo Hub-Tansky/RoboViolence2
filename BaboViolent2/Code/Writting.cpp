@@ -21,7 +21,7 @@
 #include "Helper.h"
 
 
-// Le pointeur sur le writting qui a présentemnt le focus
+// Le pointeur sur le writting qui a prÃ©sentemnt le focus
 Writting * writting;
 
 
@@ -52,14 +52,14 @@ Writting::~Writting()
 
 
 //
-// Pour écrire dedans
+// Pour Ã©crire dedans
 //
 void Writting::writeText(unsigned int caracter)
 {
-	// Bon y a des fucks là avec les caractères qui ont des accents
+	// Bon y a des fucks lÃ  avec les caractÃ¨res qui ont des accents
 	if (caracter > 127)
 	{
-		for (int i=0;i<1;++i) // Juste pour faire fonctionner le break là
+		for (int i=0;i<1;++i) // Juste pour faire fonctionner le break lÃ 
 		{
 			if (caracter == 199) {caracter = 128;break;}
 			if (caracter == 252) {caracter = 129;break;}
@@ -143,7 +143,7 @@ void Writting::writeText(unsigned int caracter)
 		}
 	}
 
-	// On écris notre caractère
+	// On Ã©cris notre caractÃ¨re
 	if (caracter >= 32 && caracter <= 159)
 	{
 		insert(CString("%c", caracter), m_cursorPos);
@@ -179,7 +179,7 @@ void Writting::updateWritting(float delay)
 	m_cursorAnim += delay;
 	while (m_cursorAnim >= 1) m_cursorAnim -= 1;
 
-	// Si on déplace avec les flèches
+	// Si on dÃ©place avec les flÃ¨ches
 	if (dkiGetState(DIK_LEFT) == DKI_DOWN)
 	{
 		dksPlaySound(m_sfxWrite, -1, 200);
@@ -250,7 +250,7 @@ void Writting::loseFocus()
 //
 void Writting::print(float size, float x, float y, float z)
 {
-	// On écris le text normalement
+	// On Ã©cris le text normalement
 	printLeftText(x,y,size,CString("%s", s));
 //	dkfPrint(size, x, y, z, s);
 

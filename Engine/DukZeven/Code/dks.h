@@ -23,13 +23,13 @@
 /// Ceci comprend :
 /// 	- une fonction de chargement d'un son
 /// 	- une fonction de destruction d'un son
-/// 	- une fonction de destruction de tout les sons présentement chargées et qui termine l'utilisation du module
+/// 	- une fonction de destruction de tout les sons prÃ©sentement chargÃ©es et qui termine l'utilisation du module
 /// 	- une fonction d'initialisation du module
 ///
-/// Se référer à la documentation de FMOD pour connaitre les fonctions disponibles pour faire jouer les sons et musiques chargées.
+/// Se rÃ©fÃ©rer Ã  la documentation de FMOD pour connaitre les fonctions disponibles pour faire jouer les sons et musiques chargÃ©es.
 ///
 /// \author David St-Louis (alias Daivuk)
-/// \author Louis Poirier (à des fins de documentation seulement)
+/// \author Louis Poirier (Ã  des fins de documentation seulement)
 ///
 
 
@@ -57,30 +57,30 @@
 
 /// \brief initialise le module et FMOD
 /// 
-/// Cette fonction effectue l'initialisation du module et de FMOD. Ceci est fait en spécifiant un mixrate et un nombre maximal de cannaux audio. Cette onction DOIT être appelée avant tout autres appels à d'autres fonctions de ce module.
+/// Cette fonction effectue l'initialisation du module et de FMOD. Ceci est fait en spÃ©cifiant un mixrate et un nombre maximal de cannaux audio. Cette onction DOIT Ãªtre appelÃ©e avant tout autres appels Ã  d'autres fonctions de ce module.
 ///
 /// \param mixrate mixrate
 /// \param maxsoftwarechannels nombre de cannaux audio
-/// \return true si l'initialisation a réussi, false sinon
+/// \return true si l'initialisation a rÃ©ussi, false sinon
 bool			dksInit(int mixrate, int maxsoftwarechannels);
 
 
 
-/// \brief libère toute la mémoire allouée pour les sons et termine l'utilisation du module.
+/// \brief libÃ¨re toute la mÃ©moire allouÃ©e pour les sons et termine l'utilisation du module.
 ///
-/// Cette fonction libère toute la mémoire allouée pour les sons et termine l'utilisation du module. Le module pourra être redémarré avec un nouvel appel à dksInit()
+/// Cette fonction libÃ¨re toute la mÃ©moire allouÃ©e pour les sons et termine l'utilisation du module. Le module pourra Ãªtre redÃ©marrÃ© avec un nouvel appel Ã  dksInit()
 ///
 void			dksShutDown();
 
 
 
-/// \brief chargement d'un son en mémoire
+/// \brief chargement d'un son en mÃ©moire
 ///
-/// Cette fonction effectue le chargement d'un son ou d'une musique en mémoire. Les formats valides sont les même que FMOD. Avant de créer un nouveau son, le module vérifie si ce fichier a déjà été chargé. Si c'est le cas, aucun son ne sera créé et le pointeur FMOD correspondant à ce fichier sera retourné.
+/// Cette fonction effectue le chargement d'un son ou d'une musique en mÃ©moire. Les formats valides sont les mÃªme que FMOD. Avant de crÃ©er un nouveau son, le module vÃ©rifie si ce fichier a dÃ©jÃ  Ã©tÃ© chargÃ©. Si c'est le cas, aucun son ne sera crÃ©Ã© et le pointeur FMOD correspondant Ã  ce fichier sera retournÃ©.
 ///
-/// \param filename chemin menant au fichier son ou musique à charger depuis l'endroit où se situe le fichier EXE du programme.
+/// \param filename chemin menant au fichier son ou musique Ã  charger depuis l'endroit oÃ¹ se situe le fichier EXE du programme.
 /// \param loop est-ce que ce son ou cette musique doit jouer en boucle?
-/// \return pointeur FMOD vers le son ou la musique chargée en mémoire
+/// \return pointeur FMOD vers le son ou la musique chargÃ©e en mÃ©moire
 #ifdef USE_FMODEX
 FMOD_SOUND *	dksCreateSoundFromFile(char* filename, bool loop=false);
 #else
@@ -89,11 +89,11 @@ FSOUND_SAMPLE*	dksCreateSoundFromFile(char* filename, bool loop=false);
 
 
 
-/// \brief destruction d'un son chargé en mémoire
+/// \brief destruction d'un son chargÃ© en mÃ©moire
 ///
-/// Cette fonction permet de libérer la mémoire allouée pour un son présentement chargée en mémoire.
+/// Cette fonction permet de libÃ©rer la mÃ©moire allouÃ©e pour un son prÃ©sentement chargÃ©e en mÃ©moire.
 ///
-/// \param pointeur FMOD du son à effacer
+/// \param pointeur FMOD du son Ã  effacer
 
 #ifdef USE_FMODEX
 void dksDeleteSound(FMOD_SOUND * fsound_sample);

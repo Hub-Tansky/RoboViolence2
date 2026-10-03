@@ -23,7 +23,6 @@
 
 void renderStatsSlice(const CVector4f & sliceColor, char * text1, char* c1, char* c2, char* c3, char* c4, char* c5, char * pingText, int & vPos)
 {
-#ifndef _DX_
 	glDisable(GL_TEXTURE_2D);
 	glColor4fv(sliceColor.s);
 	glBegin(GL_QUADS);
@@ -71,7 +70,6 @@ void renderStatsSlice(const CVector4f & sliceColor, char * text1, char* c1, char
 	glEnable(GL_TEXTURE_2D);
 
 	glColor3f(1,1,1);
-#endif
 	printLeftText(154, (float)vPos-2, 28, CString(text1));
 	printRightText(500, (float)vPos-2, 28, CString(c1));
 	printRightText(550, (float)vPos-2, 28, CString(c2));
@@ -209,7 +207,6 @@ void Game::renderSpectator(std::vector<Player*> & spectatorTeam, int & vPos)
 void Game::renderStats()
 {
 	CVector2i res(800,600);// = dkwGetResolution();
-#ifndef _DX_
 	dkglPushOrtho((float)res[0], (float)res[1]);
 		glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT);
 			glEnable(GL_BLEND);
@@ -233,7 +230,6 @@ void Game::renderStats()
 				glVertex2f(800,300);
 			glEnd();
 			glEnable(GL_TEXTURE_2D);
-#endif
 
 			// On construit la blue team vector et la red team vector puis on tri
 			std::vector<Player*> blueTeam;
@@ -295,7 +291,7 @@ void Game::renderStats()
 			if (spectatorTeam.size() > 0) spectatorPing /= (int)spectatorTeam.size();
 			if (ffaTeam.size() > 0) ffaPing /= (int)ffaTeam.size();
 
-			// Temporairement juste la liste des joueurs pas triÈ l‡ pis toute
+			// Temporairement juste la liste des joueurs pas tri√© l√† pis toute
 			dkfBindFont(font);
 			int vPos = 50;
 
@@ -347,10 +343,8 @@ void Game::renderStats()
 			redTeam.clear();
 			spectatorTeam.clear();
 			ffaTeam.clear();
-#ifndef _DX_
 		glPopAttrib();
 	dkglPopOrtho();
-#endif
 }
 #endif
 

@@ -44,13 +44,9 @@
 
 #ifdef WIN32
 #ifndef CONSOLE
-#ifndef _DX_
 #pragma comment( lib, "opengl32.lib" )
 #pragma comment( lib, "glu32.lib" )
 #pragma comment( lib, "dkt.lib" )
-#else
-#pragma comment (lib, "dkt_dx.lib" )
-#endif
 #endif
 #endif
 
@@ -113,12 +109,10 @@ DLL_API(bool)			dkoSphereIntersection(unsigned int modelID, float *p1, float *p2
 #ifndef CONSOLE
 
 #include <windows.h>
-#ifndef _DX_
 #include <gl/gl.h>
 #include <gl/glu.h>
 //#include <gl/glext.h>
 #include "gl/glext.h" // [dsl] I included it in the folder
-#endif
 #endif
 
 #else

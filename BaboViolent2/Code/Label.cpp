@@ -38,7 +38,6 @@ Label::Label(CVector2i screenPosition, CString caption, unsigned int m_font, flo
 //
 void Label::render()
 {
-#ifndef _DX_
 	glPushAttrib(GL_CURRENT_BIT);
 
 		dkfBindFont(m_font);
@@ -61,7 +60,6 @@ void Label::render()
 			break;
 		}
 	glPopAttrib();
-#endif
 }
 #endif
 

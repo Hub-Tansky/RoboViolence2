@@ -20,9 +20,6 @@
 
 
 #include "dkfi.h"
-#if defined(_DEBUG) && defined(USE_VLD)
-#include <vld.h>
-#endif
 
 
 //
@@ -44,11 +41,11 @@ void			dkfBindFont(unsigned int ID)
 
 
 //
-// Pour créer une police de charactère
+// Pour crÃ©er une police de charactÃ¨re
 //
 unsigned int	dkfCreateFont(char *filename)
 {
-	// Bon avant là, on check si il l'a pas loadé 2 fois
+	// Bon avant lÃ , on check si il l'a pas loadÃ© 2 fois
 	for (int i=0;i<(int)fonts.size();i++)
 	{
 		CFont *font = fonts.at(i);
@@ -59,7 +56,7 @@ unsigned int	dkfCreateFont(char *filename)
 		}
 	}
 
-	// Sinon on cré la font
+	// Sinon on crÃ© la font
 	CFont *font = new CFont();
 	font->fontID = ++currentIDCount;
 	if (!font->create(filename))
@@ -135,7 +132,7 @@ CPoint2f		dkfGetCaracterPos(float size, char *text, int caracter)
 
 
 //
-// Obtenir le caractère où on est au dessus avec la sourie
+// Obtenir le caractÃ¨re oÃ¹ on est au dessus avec la sourie
 //
 int				dkfGetOverStringCaracter(float size, char *text, CPoint2f & onStringPos)
 {
@@ -181,7 +178,7 @@ float			dkfGetStringHeight(float size, char *text)
 	{
 		if (text[i] == '\n') nbChariot++;
 	}
-	return (float)nbChariot*size; // Pour le height c'est aussi simple que ça
+	return (float)nbChariot*size; // Pour le height c'est aussi simple que Ã§a
 }
 
 float			dkfGetStringWidth(float size, char *text)
@@ -215,7 +212,7 @@ float			dkfGetStringWidth(float size, char *text)
 
 
 //
-// Pour afficher du text à l'écran avec cette font
+// Pour afficher du text Ã  l'Ã©cran avec cette font
 //
 void			dkfPrint(float size, float x, float y, float z, char *text)
 {

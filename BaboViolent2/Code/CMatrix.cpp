@@ -21,7 +21,7 @@
 
 
 //
-// La matrice transposé
+// La matrice transposÃ©
 //
 void CMatrix3x3f::Transpose(){
 	for (int i=0;i<3;i++)
@@ -114,7 +114,7 @@ float CMatrix3x3f::Minor(int Row, int Col){
 
 
 //
-// Pour trouver le déterminant de la matrice
+// Pour trouver le dÃ©terminant de la matrice
 //
 float CMatrix3x3f::Determinant(){
 	return dot(CVector3f(s[0],s[3],s[6]), cross(CVector3f(s[1],s[4],s[7]), CVector3f(s[2],s[5],s[8])));
@@ -128,7 +128,7 @@ float CMatrix3x3f::Determinant(){
 CMatrix3x3f CMatrix3x3f::Inverse(){
 	CMatrix3x3f Com = *this;
 
-	// On trouve d'abords les mineurs de chaque éléments
+	// On trouve d'abords les mineurs de chaque Ã©lÃ©ments
 	for (int i=0;i<3;i++)
 	{
 		for (int j=0;j<3;j++)
@@ -137,17 +137,17 @@ CMatrix3x3f CMatrix3x3f::Inverse(){
 		}
 	}
 
-	// On effectu la transposé de cette matrice
+	// On effectu la transposÃ© de cette matrice
 	Com.Transpose();
 
-	// On la divise par le determinant et voilà
+	// On la divise par le determinant et voilÃ 
 	return Com / Determinant();
 }
 
 
 
 //
-// Effectuer une rotation autour d'un axe déterminé
+// Effectuer une rotation autour d'un axe dÃ©terminÃ©
 //
 void CMatrix3x3f::RotateArbitrary(float Angle, CVector3f& u)
 {
@@ -170,7 +170,7 @@ void CMatrix3x3f::RotateArbitrary(float Angle, CVector3f& u)
 
 
 //
-// Effectuer une rotation autour d'un axe déterminé
+// Effectuer une rotation autour d'un axe dÃ©terminÃ©
 //
 void CMatrix3x3f::RotateArbitrary(CVector3f& u)
 {

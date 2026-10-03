@@ -50,10 +50,10 @@ public:
 	// On ajoute un enfant
 	void addChild(eHierarchic* child);
 
-	// On enlève un enfant
+	// On enlÃ¨ve un enfant
 	void removeChild(eHierarchic* child);
 
-	// On détach du parent
+	// On dÃ©tach du parent
 	void detach();
 
 	// Pour le dessiner

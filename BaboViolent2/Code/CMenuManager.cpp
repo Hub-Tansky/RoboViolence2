@@ -140,13 +140,10 @@ extern bool enableShadow;
 
 void CMenuManager::render(CControl * toRender)
 {
-#ifndef _DX_
 	glClear(GL_DEPTH_BUFFER_BIT);
-#endif
 	CVector2i res = dkwGetResolution();
 	if(gameVar.r_widescreen > 1) res[0] = static_cast<int>(res[1]*1.333f);
 
-#ifndef _DX_
 	dkglPushOrtho(800, 600);
 		glPushAttrib(GL_ENABLE_BIT);
 			glDisable(GL_DEPTH_TEST);
@@ -156,7 +153,6 @@ void CMenuManager::render(CControl * toRender)
 			else if (root) root->render();
 		glPopAttrib();
 	dkglPopOrtho();
-#endif
 
 	//--- Head games logo bottom right // Temporarly disabled until 2.07
 	/*dkglPushOrtho(800, 600);
@@ -187,13 +183,10 @@ void CMenuManager::renderDialogs()
 {
 	if (dialogs.empty() == false)
 	{
-#ifndef _DX_
 		glClear(GL_DEPTH_BUFFER_BIT);
-#endif
 		CVector2i res = dkwGetResolution();
 		if(gameVar.r_widescreen > 1) res[0] = static_cast<int>(res[1]*1.333f);
 
-#ifndef _DX_
 		dkglPushOrtho(800, 600);
 			glPushAttrib(GL_ENABLE_BIT);
 				glDisable(GL_DEPTH_TEST);
@@ -205,7 +198,6 @@ void CMenuManager::renderDialogs()
 				dialogs.back()->render();
 			glPopAttrib();
 		dkglPopOrtho();
-#endif
 
 		renderTooltip(hoveringControl, res);
 	}
@@ -213,7 +205,6 @@ void CMenuManager::renderDialogs()
 
 void CMenuManager::renderTooltip(CControl * control, const CVector2i& res)
 {
-#ifndef _DX_
 	//--- We render the tooltips text if the mouse if over that control
 	dkglPushOrtho((float)res[0], (float)res[1]);
 		glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT);
@@ -248,7 +239,6 @@ void CMenuManager::renderTooltip(CControl * control, const CVector2i& res)
 			}
 		glPopAttrib();
 	dkglPopOrtho();
-#endif
 }
 
 void CMenuManager::showDialog(IDialog* dialog)

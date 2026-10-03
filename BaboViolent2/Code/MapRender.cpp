@@ -278,17 +278,14 @@ void Map::buildWallSide(CMeshBuilder& builder,float* vert1, float* vert2, float*
 
 void Map::renderGround()
 {
-#ifndef _DX_
 	glPushAttrib(GL_ENABLE_BIT);
 	glDepthMask(GL_FALSE);
-#endif
 	//--- Render the map
 	groundMesh->render();
 
 	// render the grid for the editor
 	if(isEditor)
 	{
-#ifndef _DX_
 		glDisable(GL_BLEND);
 		glDisable(GL_DEPTH_TEST);
 		glDisable(GL_TEXTURE_2D);
@@ -307,7 +304,6 @@ void Map::renderGround()
 				glEnd();
 			}
 		}
-#endif
 		float currentRedDist = 0;
 		float farthestRedSpawn = 0;
 		float currentBlueDist = 0;
@@ -339,7 +335,6 @@ void Map::renderGround()
 		}
 		for(int i = 0; i < (int)blue_spawns.size(); i++)
 		{
-#ifndef _DX_
 			glColor3f(1.0,0.0,0.0);
 			glLineWidth(2);
 			glBegin(GL_LINE_LOOP);
@@ -348,11 +343,9 @@ void Map::renderGround()
 				glVertex2f(blue_spawns[i][0],blue_spawns[i][1]);
 			}
 			glEnd();
-#endif
 		}
 		for(int i = 0; i < (int)red_spawns.size(); i++)
 		{
-#ifndef _DX_
 			glColor3f(0.0,0.0,1.0);
 			glLineWidth(2);
 			glBegin(GL_LINE_LOOP);
@@ -361,20 +354,15 @@ void Map::renderGround()
 				glVertex2f(red_spawns[i][0],red_spawns[i][1]);
 			}
 			glEnd();
-#endif
 		}
 	}
 
-#ifndef _DX_
 	glDepthMask(GL_TRUE);
 	glPopAttrib();
-#endif
 
-#ifdef _PRO_
 	//--- Render path finding
 	if (aStar && gameVar.d_showNodes)
 	{
-#ifndef _DX_
 		glPushAttrib(GL_ENABLE_BIT);
 		glDisable(GL_LIGHTING);
 		glLineWidth(1);
@@ -389,9 +377,7 @@ void Map::renderGround()
 			glEnd();
 		}
 		glPopAttrib();
-#endif
 	}
-#endif
 }
 
 void Map::renderShadow()
@@ -405,7 +391,6 @@ void Map::renderWalls()
 {
 	wallMesh->render();
 
-#ifndef _DX_
 	// Tout est fini, on peut maintenant renderer le plancher dans le zbuffer
 	glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 		glBegin(GL_QUADS);
@@ -415,7 +400,6 @@ void Map::renderWalls()
 			glVertex2i(size[0]+1,size[1]+1);
 		glEnd();
 	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-#endif
 }
 
 #endif
@@ -482,7 +466,7 @@ void Map::performCollision(CoordFrame & lastCF, CoordFrame & CF, float radius)
 					CF.position[1] - radius <= (float)(y-1)+1 &&
 					CF.position[1] + radius >= (float)(y-1))
 				{
-					// On le ramËne en Y
+					// On le ram√®ne en Y
 					CF.position[1] = (float)(y-1)+1 + radius + COLLISION_EPSILON;
 					CF.vel[1] = -CF.vel[1] * BOUNCE_FACTOR; // On le fait rebondir ! Bedong!
 				}
@@ -495,7 +479,7 @@ void Map::performCollision(CoordFrame & lastCF, CoordFrame & CF, float radius)
 					CF.position[1] - radius <= (float)(y-1)+1 &&
 					CF.position[1] + radius >= (float)(y-1))
 				{
-					// On le ramËne en Y
+					// On le ram√®ne en Y
 					CF.position[1] = (float)(y-1)+1 + radius + COLLISION_EPSILON;
 					CF.vel[1] = -CF.vel[1] * BOUNCE_FACTOR; // On le fait rebondir ! Bedong!
 				}
@@ -508,7 +492,7 @@ void Map::performCollision(CoordFrame & lastCF, CoordFrame & CF, float radius)
 					CF.position[1] - radius <= (float)(y-1)+1 &&
 					CF.position[1] + radius >= (float)(y-1))
 				{
-					// On le ramËne en Y
+					// On le ram√®ne en Y
 					CF.position[1] = (float)(y-1)+1 + radius + COLLISION_EPSILON;
 					CF.vel[1] = -CF.vel[1] * BOUNCE_FACTOR; // On le fait rebondir ! Bedong!
 				}
@@ -524,7 +508,7 @@ void Map::performCollision(CoordFrame & lastCF, CoordFrame & CF, float radius)
 					CF.position[1] - radius <= (float)(y+1)+1 &&
 					CF.position[1] + radius >= (float)(y+1))
 				{
-					// On le ramËne en Y
+					// On le ram√®ne en Y
 					CF.position[1] = (float)(y+1) - radius - COLLISION_EPSILON;
 					CF.vel[1] = -CF.vel[1] * BOUNCE_FACTOR; // On le fait rebondir ! Bedong!
 				}
@@ -537,7 +521,7 @@ void Map::performCollision(CoordFrame & lastCF, CoordFrame & CF, float radius)
 					CF.position[1] - radius <= (float)(y+1)+1 &&
 					CF.position[1] + radius >= (float)(y+1))
 				{
-					// On le ramËne en Y
+					// On le ram√®ne en Y
 					CF.position[1] = (float)(y+1) - radius - COLLISION_EPSILON;
 					CF.vel[1] = -CF.vel[1] * BOUNCE_FACTOR; // On le fait rebondir ! Bedong!
 				}
@@ -550,14 +534,14 @@ void Map::performCollision(CoordFrame & lastCF, CoordFrame & CF, float radius)
 					CF.position[1] - radius <= (float)(y+1)+1 &&
 					CF.position[1] + radius >= (float)(y+1))
 				{
-					// On le ramËne en Y
+					// On le ram√®ne en Y
 					CF.position[1] = (float)(y+1) - radius - COLLISION_EPSILON;
 					CF.vel[1] = -CF.vel[1] * BOUNCE_FACTOR; // On le fait rebondir ! Bedong!
 				}
 			}
 		}
 
-		// On check en X asteur (sti c sketch comme technique, mais bon, c juste babo l‡!)
+		// On check en X asteur (sti c sketch comme technique, mais bon, c juste babo l√†!)
 		if (CF.vel[0] < 0)
 		{
 			if (!cells[(y)*size[0]+(x-1)].passable)
@@ -568,7 +552,7 @@ void Map::performCollision(CoordFrame & lastCF, CoordFrame & CF, float radius)
 					lastCF.position[1] - radius <= (float)(y)+1 &&
 					lastCF.position[1] + radius >= (float)(y))
 				{
-					// On le ramËne en Y
+					// On le ram√®ne en Y
 					CF.position[0] = (float)(x-1)+1 + radius + COLLISION_EPSILON;
 					CF.vel[0] = -CF.vel[0] * BOUNCE_FACTOR; // On le fait rebondir ! Bedong!
 				}
@@ -581,7 +565,7 @@ void Map::performCollision(CoordFrame & lastCF, CoordFrame & CF, float radius)
 					lastCF.position[1] - radius <= (float)(y-1)+1 &&
 					lastCF.position[1] + radius >= (float)(y-1))
 				{
-					// On le ramËne en Y
+					// On le ram√®ne en Y
 					CF.position[0] = (float)(x-1)+1 + radius + COLLISION_EPSILON;
 					CF.vel[0] = -CF.vel[0] * BOUNCE_FACTOR; // On le fait rebondir ! Bedong!
 				}
@@ -594,7 +578,7 @@ void Map::performCollision(CoordFrame & lastCF, CoordFrame & CF, float radius)
 					lastCF.position[1] - radius <= (float)(y+1)+1 &&
 					lastCF.position[1] + radius >= (float)(y+1))
 				{
-					// On le ramËne en Y
+					// On le ram√®ne en Y
 					CF.position[0] = (float)(x-1)+1 + radius + COLLISION_EPSILON;
 					CF.vel[0] = -CF.vel[0] * BOUNCE_FACTOR; // On le fait rebondir ! Bedong!
 				}
@@ -610,7 +594,7 @@ void Map::performCollision(CoordFrame & lastCF, CoordFrame & CF, float radius)
 					lastCF.position[1] - radius <= (float)(y)+1 &&
 					lastCF.position[1] + radius >= (float)(y))
 				{
-					// On le ramËne en Y
+					// On le ram√®ne en Y
 					CF.position[0] = (float)(x+1) - radius - COLLISION_EPSILON;
 					CF.vel[0] = -CF.vel[0] * BOUNCE_FACTOR; // On le fait rebondir ! Bedong!
 				}
@@ -623,7 +607,7 @@ void Map::performCollision(CoordFrame & lastCF, CoordFrame & CF, float radius)
 					lastCF.position[1] - radius <= (float)(y-1)+1 &&
 					lastCF.position[1] + radius >= (float)(y-1))
 				{
-					// On le ramËne en Y
+					// On le ram√®ne en Y
 					CF.position[0] = (float)(x+1) - radius - COLLISION_EPSILON;
 					CF.vel[0] = -CF.vel[0] * BOUNCE_FACTOR; // On le fait rebondir ! Bedong!
 				}
@@ -636,7 +620,7 @@ void Map::performCollision(CoordFrame & lastCF, CoordFrame & CF, float radius)
 					lastCF.position[1] - radius <= (float)(y+1)+1 &&
 					lastCF.position[1] + radius >= (float)(y+1))
 				{
-					// On le ramËne en Y
+					// On le ram√®ne en Y
 					CF.position[0] = (float)(x+1) - radius - COLLISION_EPSILON;
 					CF.vel[0] = -CF.vel[0] * BOUNCE_FACTOR; // On le fait rebondir ! Bedong!
 				}
@@ -654,7 +638,7 @@ void Map::collisionClip(CoordFrame & CF, float radius)
 	int x = (int)CF.position[0];
 	int y = (int)CF.position[1];
 	
-	// L‡ c simple, on check les 8 cases autour, pis on clip (pour Èviter de se faire pousser dans le mur
+	// L√† c simple, on check les 8 cases autour, pis on clip (pour √©viter de se faire pousser dans le mur
 	if (cells)
 	{
 		if (CF.position[0]+radius+COLLISION_EPSILON > (float)x+1 && !cells[(y)*size[0]+(x+1)].passable)
@@ -707,7 +691,7 @@ void Map::collisionClip(CoordFrame & CF, float radius)
 			possible[3] = true;
 		}
 
-		//--- On essaye de pogner le best choice pareil l‡
+		//--- On essaye de pogner le best choice pareil l√†
 		float dis[4];
 		dis[0] = CF.position[0] - (float)x;
 		dis[1] = 1 - (CF.position[0] - (float)x);
@@ -742,7 +726,6 @@ void Map::collisionClip(CoordFrame & CF, float radius)
 
 void Map::renderBombMark()
 {
-#ifndef _DX_
 	glBindTexture(GL_TEXTURE_2D, tex_bombMark);
 	glPushMatrix();
 		glTranslatef(objective[0][0], objective[0][1], objective[0][2]);
@@ -772,17 +755,15 @@ void Map::renderBombMark()
 			glVertex2f(.5f,.5f);
 		glEnd();
 	glPopMatrix();
-#endif
 }
 
 
 void Map::renderFlag(int i)
 {
-#ifndef _DX_
 	glPushMatrix();
 		glTranslatef(flagPos[i][0], flagPos[i][1], flagPos[i][2]);
 
-		//--- Voil‡ on render Áa
+		//--- Voil√† on render √ßa
 //		glLineWidth(5);
 /*		if (i==0)
 			glColor3f(0,0,1);
@@ -798,7 +779,6 @@ void Map::renderFlag(int i)
 		glScalef(.005f,.005f,.005f);
 		dkoRender(dko_flag[i], flagAnim);
 	glPopMatrix();
-#endif
 }
 
 
@@ -808,7 +788,6 @@ void Map::renderMisc()
 	if (game && (game->gameType != GAME_TYPE_CTF))
 		return;
 
-#ifndef _DX_
 	glPushMatrix();
 		glTranslatef(flagPodPos[0][0], flagPodPos[0][1], flagPodPos[0][2]);
 		glScalef(.005f,.005f,.005f);
@@ -852,7 +831,6 @@ void Map::renderMisc()
 		}
 	}
 
-#endif
 
 	if (((game) && (game->gameType == GAME_TYPE_CTF)) || isEditor)
 	{

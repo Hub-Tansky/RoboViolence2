@@ -24,9 +24,7 @@
 #include <vector>
 #include "GameVar.h"
 #include "Player.h"
-#ifdef _PRO_
 #include "CAStar.h"
-#endif
 
 #ifndef CONSOLE
 #include "CMeshBuilder.h"
@@ -145,9 +143,7 @@ struct map_cell
 	virtual ~map_cell()
 	{
 #ifndef CONSOLE
-#ifndef _DX_
 		if (dl) glDeleteLists(dl, 1);
-#endif
 #endif
 	}
 };
@@ -174,25 +170,21 @@ class Map
 public:
 	// Sa grosseur
 	CVector2i size;
-#ifdef _PRO_
 
 	CAStar * aStar;
-#endif
 	// Ses cells
 	map_cell * cells;
 #ifndef CONSOLE
 	// La position de la camera
 	CVector3f camPos;
 
-	// Où elle regarde
+	// OÃ¹ elle regarde
 	CVector3f camLookAt;
 
 	// La destination de la camera
 	CVector3f camDest;
 	// Pour dessiner notre sphere
-#ifndef _DX_
 	GLUquadricObj* qObj;
-#endif
 
 	CVector4f fogColor;
 	float fogDensity;
@@ -227,7 +219,7 @@ public:
 	// [PM] Author name
 	CString author_name;
 
-	//--- Son thème
+	//--- Son thÃ¨me
 	int theme;
 	int weather;
 	CWeather * m_weather;
@@ -333,7 +325,7 @@ public:
 	// Pour faire un ray tracing
 	bool rayTest(CVector3f & p1, CVector3f & p2, CVector3f & normal);
 
-	// Pour générer la texture de la minimap
+	// Pour gÃ©nÃ©rer la texture de la minimap
 #ifndef CONSOLE
 	void regenTex();
 #endif
@@ -411,7 +403,7 @@ public:
 		}
 	}
 
-	// Pour tester une tuile (inline celle là)
+	// Pour tester une tuile (inline celle lÃ )
 	inline bool rayTileTest(int x, int y, CVector3f & p1, CVector3f & p2, CVector3f & normal)
 	{
 		if (x>=0 && x<size[0] && y>=0 && y<size[1])
@@ -463,7 +455,7 @@ public:
 				}
 			}
 
-			// Le côté x1 en premier
+			// Le cÃ´tÃ© x1 en premier
 			if (p1[0] <= x1 && p2[0] > x1)
 			{
 				percent = fabsf(x1 - p1[0]) / fabsf(p2[0] - p1[0]);
@@ -476,7 +468,7 @@ public:
 				}
 			}
 
-			// Le côté oposé
+			// Le cÃ´tÃ© oposÃ©
 			if (p1[0] >= x2 && p2[0] < x2)
 			{
 				percent = fabsf(p1[0] - x2) / fabsf(p2[0] - p1[0]);
@@ -489,7 +481,7 @@ public:
 				}
 			}
 
-			// Le côté y1
+			// Le cÃ´tÃ© y1
 			if (p1[1] <= y1 && p2[1] > y1)
 			{
 				percent = fabsf(y1 - p1[1]) / fabsf(p2[1] - p1[1]);
@@ -502,7 +494,7 @@ public:
 				}
 			}
 
-			// Le côté oposé
+			// Le cÃ´tÃ© oposÃ©
 			if (p1[1] >= y2 && p2[1] < y2)
 			{
 				percent = fabsf(p1[1] - y2) / fabsf(p2[1] - p1[1]);

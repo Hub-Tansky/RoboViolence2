@@ -15,7 +15,6 @@
 #define DLL_API __declspec(dllimport)
 #endif
 
-#ifndef _DX_
 /*
 	Copyright 2012 bitHeads inc.
 
@@ -36,19 +35,16 @@
 
 #pragma comment( lib, "opengl32.lib" )
 #pragma comment( lib, "glu32.lib" )
-#endif
 //#pragma comment( lib, "DevIL.lib" )
 
 
 #include <windows.h>
 
 // Les includes pour opengl
-#ifndef _DX_
 #include <gl/gl.h> 
 #include <gl/glu.h> 
 //#include <gl/glext.h>
 #include "gl/glext.h" // [dsl] I just put it inside our folder
-#endif
 #else
 #define DLL_API
 #include "LinuxHeader.h"
@@ -110,10 +106,10 @@ public:
 	// La date de modification du fichier
 	INT4 modifDate;
 
-	// Sa résolution
+	// Sa rÃ©solution
 	CVector2i size;
 
-	// Le nombre de fois quelle a été loadé
+	// Le nombre de fois quelle a Ã©tÃ© loadÃ©
 	int nbInstance;
 
 	// Le nombre de Byte per pixel de la texture
@@ -130,9 +126,7 @@ public:
 	
 	virtual ~CTexture()
 	{
-#ifndef _DX_
 		glDeleteTextures(1, &oglID);
-#endif
 	}
 };
 
@@ -142,10 +136,10 @@ public:
 class CDkt
 {
 public:
-	// Pour tenir la dernière erreur
+	// Pour tenir la derniÃ¨re erreur
 	static char *lastErrorString;
 
-	// Le vector de nos textures initialisé
+	// Le vector de nos textures initialisÃ©
 	static std::vector<CTexture*> textures;
 
 	// La texture qu'on check pour le auto updating

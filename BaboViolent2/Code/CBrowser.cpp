@@ -132,15 +132,11 @@ void CBrowser::updatePerso(float delay)
 				gameType = "Capture the Flag";
 				break;
 			case 3:
-#ifdef _PRO_
             gameType = "Champion";
-#else
-				gameType = "Counter Baborist";
-#endif
 				break;
 			}
 			CControl* gameRow = new CControl(lst_browseList, CVector2i(10, 10 + nbGames*30), CVector2i(676,30), "", this, "LABEL");
-			gameRow->customData = holdRow; // Voilà pour ça
+			gameRow->customData = holdRow; // VoilÃ  pour Ã§a
 	
 			CControl* Name = new CControl(gameRow, CVector2i(0, 5), CVector2i(350,20), holdRow->bv2Row->serverName, this, "LABEL");
 			CControl* Type = new CControl(gameRow, CVector2i(350, 5), CVector2i(150,20), gameType, this, "LABEL");
@@ -273,7 +269,7 @@ void CBrowser::DbClick(CControl * control)
 		//	menuManager.focusControl = 0;
 		//	menuManager.hoveringControl = 0;
 
-			//--- Bah, on launch ste game là !!!
+			//--- Bah, on launch ste game lÃ  !!!
 			command = "connect ";
 			command += ((SBrowsableGame*)(control->customData))->bv2Row->ip;
 			command += " ";

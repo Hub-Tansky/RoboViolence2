@@ -26,7 +26,7 @@
 class IntroScreen
 {
 public:
-	// Le delay qui reste à l'afficher
+	// Le delay qui reste Ã  l'afficher
 	float showDelay;
 
 	// Notre logo

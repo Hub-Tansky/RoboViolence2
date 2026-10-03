@@ -40,11 +40,9 @@ public:
 	}
 	void render()
 	{
-#ifndef _DX_
 		glColor4f(.25f, .7f, .3f,((pos[2] > 2)?2:pos[2]) / 2.0f * .3f);
 		glVertex3fv(pos.s);
 		glVertex3f(pos[0],pos[1],pos[2]-.5f);
-#endif
 	}
 };
 

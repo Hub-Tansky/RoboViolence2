@@ -259,7 +259,7 @@ void CFriends::DbClick(CControl * control)
 			//	menuManager.focusControl = 0;
 			//	menuManager.hoveringControl = 0;
 
-			//--- Bah, on launch ste game là !!!
+			//--- Bah, on launch ste game lÃ  !!!
 			CString* server = ((CString*)(control->customData));
 			if(server->len() > 1)
 			{

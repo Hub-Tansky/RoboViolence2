@@ -23,13 +23,13 @@
 
 Class : CFont
 Auteur : David St-Louis
-Compatibilité : <all>
+CompatibilitÃ© : <all>
 
 < Description >
 
-Construction d'un font, et permet d'imprimer à l'écran dans cette
+Construction d'un font, et permet d'imprimer Ã  l'Ã©cran dans cette
 police.
-Voici quelque spécificité :
+Voici quelque spÃ©cificitÃ© :
 \n = retour de chariot (automatique)
 ^0 = texte noir (user)
 ^1 = texte bleu (user)
@@ -56,21 +56,14 @@ using namespace std;
 
 #ifdef WIN32
 
-#ifndef _DX_
 #pragma comment( lib, "opengl32.lib" )
 #pragma comment( lib, "dkt.lib" )
-#else
-#pragma comment( lib, "dkt_dx.lib" )
-
-#endif
 
 
 #include <windows.h>
 // Les includes pour opengl
-#ifndef _DX_
 #include <gl/gl.h> 
 #include <gl/glu.h> 
-#endif
 //#include <gl/glext.h>
 
 #elif __MACOSX__
@@ -104,7 +97,7 @@ public:
 	// Le fichier Font .fnt
 	CString filename;
 
-	// La texture utilisé (ogl)
+	// La texture utilisÃ© (ogl)
 	unsigned int textureID;
 
 	// La grosseur de chaque lettre
@@ -114,13 +107,13 @@ public:
 	// La hauteur des lettres
 	int height;
 
-	// La liste de display list contenant les caractère individuel
+	// La liste de display list contenant les caractÃ¨re individuel
 	unsigned int baseFont;
 
 	// Son ID du dkf
 	unsigned int fontID;
 
-	// Les propriétées de chaque lettre
+	// Les propriÃ©tÃ©es de chaque lettre
 	typ_characterProp characterProp[256];
 
 	// Si cette font est tga ou fnt
@@ -138,18 +131,18 @@ public:
 
 public:
 
-	// Pour la détruire
+	// Pour la dÃ©truire
 	void destroy();
 
-	// Pour loader les propriétées de la police d'un fichier
+	// Pour loader les propriÃ©tÃ©es de la police d'un fichier
 	int loadFontFile(ifstream &fntFile);
 	int loadTGAFile(char * tgaFile);
 
-	// Pour créer la police
-	int create(CString filename); // attention, ceci ne cré PAS les display list
-	void reloadIt(); // Ceci va la créer (parce que ça nous prend le bon context avec le bon renderer)
+	// Pour crÃ©er la police
+	int create(CString filename); // attention, ceci ne crÃ© PAS les display list
+	void reloadIt(); // Ceci va la crÃ©er (parce que Ã§a nous prend le bon context avec le bon renderer)
 
-	// Pour imprimer du texte à l'aide de cette police
+	// Pour imprimer du texte Ã  l'aide de cette police
 	void printText(float size, float x, float y, float z, char *text);
 };
 

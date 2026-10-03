@@ -83,13 +83,13 @@ public:
 	/// Dernier message d'erreur
 	static char *lastErrorString;
 
-	/// Le titre de la fenêtre
+	/// Le titre de la fenÃªtre
 	static char *title;
 
-	/// Largeur de la fenêtre
+	/// Largeur de la fenÃªtre
 	static int w;
 
-	///Hauteur de la fenêtre
+	///Hauteur de la fenÃªtre
 	static int h;
 
 	/// La profondeur des couleurs
@@ -104,7 +104,7 @@ public:
 	/// Le handle de la fenetre
 	static HWND hWnd;
 
-	/// Booleen servant à savoir si l'application roule
+	/// Booleen servant Ã  savoir si l'application roule
 	static bool running;
 
 	/// Le callback pour le main loop

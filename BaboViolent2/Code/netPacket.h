@@ -79,13 +79,11 @@ struct net_clsv_pickup_request
 
 // On demande au server d'�tre admin!
 #define NET_CLSV_ADMIN_REQUEST 6
-#ifdef _PRO_
 struct net_clsv_admin_request
 {
 	char login[33];		//md5
 	char password[33];	//md5
 };
-#endif
 
 // Vote
 #define NET_CLSV_VOTE 7
@@ -414,21 +412,6 @@ struct net_svcl_player_update_stats
 	float timePlayedCurGame;
 };
 
-#define NET_SVCL_BAD_CHECKSUM_ENTITY 134
-struct net_svcl_bad_checksum_entity
-{
-	int id;
-	char name[32];
-	char playerIP[16];
-};
-
-#define NET_SVCL_BAD_CHECKSUM_INFO 135
-struct net_svcl_bad_checksum_info
-{
-	int number;
-};
-
-
 // Le client recois son ID, il envoit ses info (player name, etc), 
 // et le server le renvois aux autres
 #define NET_CLSV_SVCL_PLAYER_INFO 201
@@ -469,13 +452,10 @@ struct net_clsv_svcl_player_coord_frame
 	char vel[3]; // Sa velocity
 	short mousePos[3]; // La position o� il vise
 	int32_t babonetID;
-#ifdef _PRO_
 	int camPosZ;
-#endif
 	// Son orientation sera calcul� client side, vu que c pas full important c une boule
 };
 
-#ifdef _PRO_
 //--- mini bot creation
 #define NET_SVCL_CREATE_MINIBOT 1001
 struct net_svcl_create_minibot
@@ -496,7 +476,6 @@ struct net_svcl_minibot_coord_frame
 	short mousePos[3]; // La position o� il vise
 	int32_t babonetID; // ?? don't need that
 };
-#endif
 
 
 // On change le nom du joueur pendant le round (devra attendre la fin, ou au prochain round)
@@ -592,23 +571,6 @@ struct net_svcl_broadcast_game_info
 	stBV2row	GameInfo;	
 };
 
-
-
-// things specific to the pro client
-#ifdef _PRO_
-
-	#define NET_SVCL_HASH_SEED 404
-	struct net_svcl_hash_seed
-	{
-		short s1;
-		short s2;
-		short s3;
-		short s4;
-	};
-
-	#define NET_SVCL_HASH_SEED_REPLY 405
-
-#endif
 
 
 #endif

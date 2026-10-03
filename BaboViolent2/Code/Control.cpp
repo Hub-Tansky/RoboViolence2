@@ -55,7 +55,7 @@ Control::~Control()
 
 
 //
-// L'updater le gèrer
+// L'updater le gÃ¨rer
 //
 void Control::update(float delay)
 {
@@ -127,7 +127,6 @@ void Control::update(float delay)
 //
 void Control::render()
 {
-#ifndef _DX_
 	glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT);
 		// Le contour
 		glEnable(GL_TEXTURE_2D);
@@ -198,7 +197,6 @@ void Control::render()
 			break;
 		}
 	glPopAttrib();
-#endif
 }
 
 
@@ -215,7 +213,7 @@ void Control::changeCaption(CString caption)
 	float w = dkfGetStringWidth(m_textSize, m_caption.s);
 	float h = dkfGetStringHeight(m_textSize, m_caption.s);
 
-	// On met à jour notre Rect avec ça
+	// On met Ã  jour notre Rect avec Ã§a
 	switch (m_justify)
 	{
 	case JUSTIFY_LEFT:

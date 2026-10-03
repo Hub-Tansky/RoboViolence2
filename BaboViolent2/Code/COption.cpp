@@ -145,7 +145,6 @@ COption::COption(CControl * in_parent, CControl * in_alignTo)
 			item = new CControl(lst_bitDepth, CVector2i(10,10), CVector2i(150,20),"32 bits", this, "LABEL", item, CONTROL_SNAP_BOTTOM);
 		if (gameVar.r_bitdepth == 16) lst_bitDepth->selectChild(0);
 		if (gameVar.r_bitdepth == 32) lst_bitDepth->selectChild(1);
-#ifdef _PRO_
 		//--- Display refresh rate
 		label1 = new CControl(instance, CVector2i(20,10), CVector2i(200,170),"Display refresh rate:", this, "LABEL", label1, CONTROL_SNAP_BOTTOM);
 		label1->textAlign = CONTROL_TEXTALIGN_MIDDLERIGHT;
@@ -176,7 +175,6 @@ COption::COption(CControl * in_parent, CControl * in_alignTo)
 			item = new CControl(lst_teamIndicatorType, CVector2i(10,10), CVector2i(250,20),"Identify your team by halo", this, "LABEL", item, CONTROL_SNAP_BOTTOM);
 			item->toolTips = "Team is indicated by a glowing halo around the babo, custom colors for skins are not overwritten.";
 			lst_teamIndicatorType->selectChild(gameVar.cl_teamIndicatorType);
-#endif
 		//--- Weather Effects
 		label1 = new CControl(instance, CVector2i(20,10), CVector2i(200,25),"Weather effects:", this, "LABEL", label1, CONTROL_SNAP_BOTTOM);
 		label1->textAlign = CONTROL_TEXTALIGN_MIDDLERIGHT;
@@ -262,7 +260,6 @@ COption::COption(CControl * in_parent, CControl * in_alignTo)
 
 
    //--- GUI OPTIONS
-#ifdef _PRO_
 	separator = new CControl(instance, CVector2i(10,20), CVector2i(200,25),"User Interface options", this, "SEPARATOR",label1, CONTROL_SNAP_BOTTOM, 15);
 
    //--- Chat Text Size
@@ -289,7 +286,6 @@ COption::COption(CControl * in_parent, CControl * in_alignTo)
 	label1->toolTips = "Show Game Event Text.";
 	chk_showEventText = new CControl(instance, CVector2i(10,10), CVector2i(25,25),"", this, "CHECK", label1, CONTROL_SNAP_RIGHT);
    chk_showEventText->check = gameVar.r_showEventText;
-#endif
 	//--- SOUND OPTIONS
 	separator = new CControl(instance, CVector2i(10,20), CVector2i(200,25),"Sounds and music options", this, "SEPARATOR",label1, CONTROL_SNAP_BOTTOM, 15);
 
@@ -435,7 +431,6 @@ COption::COption(CControl * in_parent, CControl * in_alignTo)
 			keyManager.getKeyName(gameVar.k_menuAccess), this, "KEY", label1, CONTROL_SNAP_RIGHT);
 		key_menuAccess->selectedIndex = gameVar.k_menuAccess;
 
-#ifdef _PRO_	
 		//--- Key
 		label1 = new CControl(instance, CVector2i(20,10), CVector2i(200,25),"Screen shot:", this, "LABEL", label1, CONTROL_SNAP_BOTTOM);
 		label1->textAlign = CONTROL_TEXTALIGN_MIDDLERIGHT;
@@ -451,7 +446,6 @@ COption::COption(CControl * in_parent, CControl * in_alignTo)
 		key_stats = new CControl(instance, CVector2i(10,10), CVector2i(100,25),
 			keyManager.getKeyName(gameVar.k_stats), this, "KEY", label1, CONTROL_SNAP_RIGHT);
 		key_stats->selectedIndex = gameVar.k_stats;
-#endif
 
 	//--- QUICK MESSAGES OPTIONS
 	separator = new CControl(instance, CVector2i(10,20), CVector2i(200,25),"Quick messages' options", this, "SEPARATOR", label1, CONTROL_SNAP_BOTTOM, 15);
@@ -715,7 +709,6 @@ void COption::Click(CControl * control)
 		case 1: gameVar.r_bitdepth = 32; break;
 		default: gameVar.r_bitdepth = 32; break;
 		}
-#ifdef _PRO_
 		switch (lst_refreshRate->selectedIndex)
 		{
 		case 0: gameVar.r_refreshRate = -1; break;
@@ -728,7 +721,6 @@ void COption::Click(CControl * control)
 		}
 
 		gameVar.cl_teamIndicatorType = lst_teamIndicatorType->selectedIndex;
-#endif
 		gameVar.r_shadowQuality = (chk_wallShadow->check)?2:0;
 		gameVar.r_playerShadow = chk_playerShadow->check;
 		gameVar.r_projectileShadow = chk_projectileShadow->check;
@@ -750,12 +742,10 @@ void COption::Click(CControl * control)
 				scene->client->game->map->reloadWeather();
 		}
 
-#ifdef _PRO_
       // GUI Options
       gameVar.r_chatTextSize = slc_chatTextSize->value;
       gameVar.r_eventTextSize = slc_eventTextSize->value;
       gameVar.r_showEventText = chk_showEventText->check;
-#endif
 
 		// Sound options
 		switch (lst_mixRate->selectedIndex)
@@ -782,10 +772,8 @@ void COption::Click(CControl * control)
 		gameVar.k_showScore = key_showScore->selectedIndex;
 		gameVar.k_menuAccess = key_menuAccess->selectedIndex;
 
-#ifdef _PRO_	
       gameVar.k_screenShot = key_screenShot->selectedIndex;
       gameVar.k_stats = key_stats->selectedIndex;
-#endif
 
 		gameVar.cl_qMsg01.set("%c%s", (chk_qMsg01->check ? 'a' : 't'), txt_qMsg01->text.s);
 		gameVar.cl_qMsg02.set("%c%s", (chk_qMsg02->check ? 'a' : 't'), txt_qMsg02->text.s);
@@ -876,7 +864,6 @@ void COption::Validate(CControl * control)
 				scene->client->game->map->reloadWeather();
 		}
 
-#ifdef _PRO_
 		switch (lst_refreshRate->selectedIndex)
 		{
 		case 0: gameVar.r_refreshRate = -1; break;
@@ -891,7 +878,6 @@ void COption::Validate(CControl * control)
       gameVar.r_chatTextSize = slc_chatTextSize->value;
       gameVar.r_eventTextSize = slc_eventTextSize->value;
       gameVar.r_showEventText = chk_showEventText->check;
-#endif
 
 		// Sound options
 		switch (lst_mixRate->selectedIndex)
@@ -919,10 +905,8 @@ void COption::Validate(CControl * control)
 		gameVar.k_showScore = key_showScore->selectedIndex;
 		gameVar.k_menuAccess = key_menuAccess->selectedIndex;
 
-#ifdef _PRO_
       gameVar.k_screenShot = key_screenShot->selectedIndex;
       gameVar.k_stats = key_stats->selectedIndex;
-#endif
 
 		gameVar.cl_qMsg01.set("%c%s", (chk_qMsg01->check ? 'a' : 't'), txt_qMsg01->text.s);
 		gameVar.cl_qMsg02.set("%c%s", (chk_qMsg02->check ? 'a' : 't'), txt_qMsg02->text.s);

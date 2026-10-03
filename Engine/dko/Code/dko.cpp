@@ -22,9 +22,6 @@
 #ifndef WIN32
 	#include "LinuxHeader.h"
 #endif
-#if defined(_DEBUG) && defined(USE_VLD)
-#include <vld.h>
-#endif
 
 //
 // Les trucs static
@@ -762,7 +759,6 @@ bool			dkoRayIntersection(unsigned int modelID, float *mp1, float *mp2, float *i
 void			dkoRender(unsigned int modelID)
 {
 #ifndef CONSOLE
-#ifndef _DX_
 	glPushAttrib(GL_ENABLE_BIT | GL_POLYGON_BIT);
 		glEnable(GL_RESCALE_NORMAL);
 		if (CDko::modelArray[modelID]) 
@@ -887,7 +883,6 @@ void			dkoRender(unsigned int modelID)
 			}
 		}
 	glPopAttrib();
-#endif
 #else
 	(void)modelID;
 #endif
@@ -901,7 +896,6 @@ void			dkoRender(unsigned int modelID)
 void			dkoRender(unsigned int modelID, unsigned short frameID)
 {
 #ifndef CONSOLE
-#ifndef _DX_
 	glPushAttrib(GL_ENABLE_BIT | GL_POLYGON_BIT);
 		glEnable(GL_RESCALE_NORMAL);
 		if (CDko::modelArray[modelID]) 
@@ -1026,7 +1020,6 @@ void			dkoRender(unsigned int modelID, unsigned short frameID)
 			}
 		}
 	glPopAttrib();
-#endif
 #else
 	(void)modelID; (void)frameID;
 #endif
@@ -1040,7 +1033,6 @@ void			dkoRender(unsigned int modelID, unsigned short frameID)
 void			dkoRender(unsigned int modelID, float frameID)
 {
 #ifndef CONSOLE
-#ifndef _DX_
 	glPushAttrib(GL_ENABLE_BIT | GL_POLYGON_BIT);
 		glEnable(GL_RESCALE_NORMAL);
 		if (CDko::modelArray[modelID]) 
@@ -1169,7 +1161,6 @@ void			dkoRender(unsigned int modelID, float frameID)
 			}
 		}
 	glPopAttrib();
-#endif
 #else
 	(void)modelID; (void)frameID;
 #endif

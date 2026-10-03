@@ -54,7 +54,6 @@ Scene::Scene()
 
 	//-- On print le loading screen! (new)
 		// On clear les buffers, on init la camera, etc
-#ifndef _DX_
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		CVector2i res = dkwGetResolution();
 
@@ -83,7 +82,6 @@ Scene::Scene()
 
 		// On swap les buffers
 		SwapBuffers(dkwGetDC());
-#endif
 #endif
 	gameVar.loadModels();
 #ifndef CONSOLE
@@ -317,20 +315,9 @@ void Scene::update(float delay)
 //
 void Scene::render()
 {
-#ifndef _DX_
 	// On clear les buffers, on init la camera, etc
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-#else
-	dkglGetDXDevice()->Clear(
-					0,  //Number of rectangles to clear, we're clearing everything so set it to 0
-                    NULL, //Pointer to the rectangles to clear, NULL to clear whole display
-                    D3DCLEAR_TARGET,   //What to clear.
-                    0x00000000, //Colour to clear to (AARRGGBB)
-                    1.0f,  //Value to clear ZBuffer to
-                    0 );   //Stencil clear value, we don't have one, this value doesn't matter
-#endif
 	CVector2i res = dkwGetResolution();
-#ifndef _DX_
 
 	if(gameVar.r_widescreen > 1)
 		glViewport( (GLint)((res[0] - res[1]*1.333f)/2.0f), 0, (GLsizei)(res[1]*1.333f), (GLsizei)res[1]);
@@ -343,7 +330,6 @@ void Scene::render()
 	glEnable(GL_CULL_FACE);
 	glDisable(GL_TEXTURE_2D);
 	glColor3f(1,1,1);
-#endif
 
 	if (introScreen)
 	{
@@ -363,7 +349,6 @@ void Scene::render()
 		CVector2i cursor = dkwGetCursorPos_main();
 		int xM = (int)(((float)cursor[0]/(float)res[0])*800.0f);
 		int yM = (int)(((float)cursor[1]/(float)res[1])*600.0f);
-#ifndef _DX_
 		dkglPushOrtho(800,600);
 			glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT);
 				glEnable(GL_BLEND);
@@ -373,11 +358,9 @@ void Scene::render()
 				renderTexturedQuad(xM,yM,32,32,tex_menuCursor);
 			glPopAttrib();
 		dkglPopOrtho();
-#endif
 
 		// On afficher le fps
 		if(gameVar.r_widescreen > 1) res[0] = static_cast<int>(res[1]*1.333f);
-#ifndef _DX_
 		dkglPushOrtho((float)res[0], (float)res[1]);
 			glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT);
 				glEnable(GL_TEXTURE_2D);
@@ -433,7 +416,6 @@ void Scene::render()
 				}
 			glPopAttrib();
 		dkglPopOrtho();
-#endif
 	}
 	else
 	{
@@ -464,7 +446,6 @@ void Scene::render()
 		}*/
 
 		// On afficher le fps
-#ifndef _DX_
 		dkglPushOrtho((float)res[0], (float)res[1]);
 			glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT);
 				glEnable(GL_TEXTURE_2D);
@@ -522,7 +503,6 @@ void Scene::render()
 				}
 			glPopAttrib();
 		dkglPopOrtho();
-#endif
 
 		// Render la console sur toute
 		console->render();
@@ -531,7 +511,6 @@ void Scene::render()
 		CVector2i cursor = dkwGetCursorPos_main();
 		int xM = (int)(((float)cursor[0]/(float)res[0])*800.0f);
 		int yM = (int)(((float)cursor[1]/(float)res[1])*600.0f);
-#ifndef _DX_
 		dkglPushOrtho(800,600);
 			glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT);
 				glEnable(GL_BLEND);
@@ -563,7 +542,6 @@ void Scene::render()
 				}
 			glPopAttrib();
 		dkglPopOrtho();
-#endif
 	}
 }
 #endif

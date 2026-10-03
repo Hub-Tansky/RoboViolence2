@@ -1,3 +1,2 @@
-Download the original game from 
-www.rndlabs.ca
-and copy the content folder in here
+Game data goes in main/. Only languages/en.lang and LaunchScript/ are tracked.
+The original assets are not part of this repository; see README.md and docs/ASSETS-LICENSE.md.

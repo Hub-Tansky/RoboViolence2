@@ -511,11 +511,6 @@
     <ClCompile Include="CAStar_FindPath.cpp" />
     <ClCompile Include="CPathNode.cpp" />
     <ClCompile Include="CCurl.cpp" />
-    <ClCompile Include="md5.cpp" />
-    <ClCompile Include="md5_2.c">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="screengrab.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ConsoleProDebug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ConsoleRelease|Win32'">true</ExcludedFromBuild>
@@ -550,7 +545,6 @@
     <ClInclude Include="..\..\Engine\dko\Code\dkoInner.h" />
     <ClInclude Include="..\..\Engine\dko\Code\eHierarchic.h" />
     <ClInclude Include="..\..\Engine\dko\Code\ePTexture.h" />
-    <ClInclude Include="..\..\Engine\dko\inc\platform_types.h" />
     <ClInclude Include="..\..\Engine\DukZeven\Code\CFont.h" />
     <ClInclude Include="..\..\Engine\DukZeven\Code\CParticle.h" />
     <ClInclude Include="..\..\Engine\DukZeven\Code\CSystemVariable.h" />
@@ -646,10 +640,7 @@
     <ClInclude Include="CAStar.h" />
     <ClInclude Include="CPathNode.h" />
     <ClInclude Include="CCurl.h" />
-    <ClInclude Include="ChecksumQuery.h" />
     <ClInclude Include="FastDelegate.h" />
-    <ClInclude Include="md5.h" />
-    <ClInclude Include="md5_2.h" />
     <ClInclude Include="..\inc\platform_types.h" />
     <CustomBuildStep Include="screengrab.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ConsoleProDebug|Win32'">true</ExcludedFromBuild>

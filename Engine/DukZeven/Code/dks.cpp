@@ -23,9 +23,6 @@
 #endif
 #include "dksi.h"
 #include <vector>
-#if defined(_DEBUG) && defined(USE_VLD)
-#include <vld.h>
-#endif
 
 #ifdef USE_FMODEX
 #include <fmod_errors.h>

@@ -74,7 +74,7 @@ void CSystemVariable::loadConfig(char * filename)
 
 	if (ficIn.fail())
 	{
-		// On imprime message à la console? (pkoi pas, on est dedans :P)
+		// On imprime message Ã  la console? (pkoi pas, on est dedans :P)
 		return;
 	}
 
@@ -88,7 +88,7 @@ void CSystemVariable::loadConfig(char * filename)
 			continue;
 		}
 
-		// On check à quel variable ça correspond
+		// On check Ã  quel variable Ã§a correspond
 		for (int i=0;i<(int)variables.size();i++)
 		{
 			CSVType *svType = variables.at(i);
@@ -112,7 +112,7 @@ void CSystemVariable::loadConfigSVOnly(char * filename)
 
 	if (ficIn.fail())
 	{
-		// On imprime message à la console? (pkoi pas, on est dedans :P)
+		// On imprime message Ã  la console? (pkoi pas, on est dedans :P)
 		return;
 	}
 
@@ -126,7 +126,7 @@ void CSystemVariable::loadConfigSVOnly(char * filename)
 			continue;
 		}
 
-		// On check à quel variable ça correspond
+		// On check Ã  quel variable Ã§a correspond
 		for (int i=0;i<(int)variables.size();i++)
 		{
 			CSVType *svType = variables.at(i);
@@ -155,7 +155,7 @@ void CSystemVariable::loadConfigSVOnly(char * filename)
 
 
 //
-// Pour saver un fichier config contenant la prédéfinition des variables
+// Pour saver un fichier config contenant la prÃ©dÃ©finition des variables
 //
 void CSystemVariable::saveConfig(char * filename)
 {
@@ -167,7 +167,7 @@ void CSystemVariable::saveConfig(char * filename)
 
 	if (ficOut.fail())
 	{
-		// On imprime message à la console? (pkoi pas, on est dedans :P)
+		// On imprime message Ã  la console? (pkoi pas, on est dedans :P)
 		return;
 	}
 
@@ -193,7 +193,7 @@ void CSystemVariable::saveConfig(char * filename)
 			continue;
 		}
 
-		// On check à quel variable ça correspond
+		// On check Ã  quel variable Ã§a correspond
 		for (int i=0;i<variables.size();i++)
 		{
 			CSVType *svType = variables.at(i);
@@ -233,7 +233,7 @@ void CSystemVariable::unregisterSystemVariable(const CString &screenName)
 
 
 //
-// Pour gèrer les commandes pour modifier les variables
+// Pour gÃ¨rer les commandes pour modifier les variables
 //
 CMD_RET CSystemVariable::command(CString & commandName, CString & params)
 {
@@ -241,7 +241,7 @@ CMD_RET CSystemVariable::command(CString & commandName, CString & params)
 	{
 		// On prend le nom de la variable
 		CString varName = params.getFirstToken(' ');
-		varName.trim('\"'); // Au cas où, y en a des épais tse
+		varName.trim('\"'); // Au cas oÃ¹, y en a des Ã©pais tse
 
 		// On loop les variables pour savoir si elle existe et on lui transfer ses params
 		for (int i=0;i<(int)variables.size();i++)
@@ -263,7 +263,7 @@ CMD_RET CSystemVariable::command(CString & commandName, CString & params)
 		return CR_NOSUCHVAR;
 	}
 
-	// Aucune commande n'a été trouvé ici
+	// Aucune commande n'a Ã©tÃ© trouvÃ© ici
 	return CR_NOTSUPPORTED;
 }
 

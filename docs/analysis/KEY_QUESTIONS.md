@@ -31,6 +31,7 @@ It makes the Bézier end tangents equal to the sender's velocity: with `N` frame
 
 ### Q6. Why is there a `_PRO_` protocol at all?
 Pro moves shot spread to the server (client sends direction, server rolls the random spread), adds a client binary checksum challenge, minibots and Pro-only tuning. Pro and non-Pro versions (21100 vs 21000) refuse each other.
+**Update (step 1.6/1.7):** the non-Pro ruleset and the client binary checksum challenge (with its `BadChecksum` SQL insert, Q-S3) were removed; Pro is the only ruleset.
 [VERIFY: BaboViolent2/Code/Game.cpp:1118-1126] [VERIFY: BaboViolent2/Code/ClientRecv.cpp:38-80] [VERIFY: BaboViolent2/Code/Server.h:30-36]
 
 ### Q7. Why two `Game` objects when hosting?

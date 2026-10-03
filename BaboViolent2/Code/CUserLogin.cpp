@@ -33,9 +33,7 @@ CUserLogin::CUserLogin(CControl * in_parent, CControl * in_alignTo)
 	m_sfxClic = dksCreateSoundFromFile("main/sounds/Button.wav", false);
 	m_sfxOver = dksCreateSoundFromFile("main/sounds/ControlOver.wav", false);
 
-#ifndef _DX_
 	qObj = gluNewQuadric();
-#endif
 	tex_baboShadow = dktCreateTextureFromFile("main/textures/BaboShadow.tga", DKT_FILTER_BILINEAR);
 
 	parent = in_parent;
@@ -150,9 +148,7 @@ CUserLogin::CUserLogin(CControl * in_parent, CControl * in_alignTo)
 
 CUserLogin::~CUserLogin()
 {
-#ifndef _DX_
 	gluDeleteQuadric(qObj);
-#endif
 	dktDeleteTexture(&tex_baboShadow);
 	dksDeleteSound(m_sfxClic);
 	dksDeleteSound(m_sfxOver);
@@ -196,7 +192,7 @@ void CUserLogin::updateSkin()
 	if (gameVar.weapons[gameVar.scl_weaponOfChoice]) lbl_weaponOfChoice->text = gameVar.weapons[gameVar.scl_weaponOfChoice]->weaponName;
 */
 	//--- Ici c'est nowhere on update les couleurs lol
-	//--- Si ça changé on update ça au autres joueur!
+	//--- Si Ã§a changÃ© on update Ã§a au autres joueur!
 	redDecalT = gameVar.cl_redDecal;
 	greenDecalT = gameVar.cl_greenDecal;
 	blueDecalT = gameVar.cl_blueDecal;
@@ -217,17 +213,17 @@ void CUserLogin::updateSkin()
 	skinStr.resizeInverse(skinStr.len() - 4);
 	sld_skin->value = skinStr.toInt();
 
-	//--- On reload le skin si ça changé
+	//--- On reload le skin si Ã§a changÃ©
 	dktDeleteTexture(&tex_skinOriginal);
 	tex_skinOriginal = dktCreateTextureFromFile(CString("main/skins/%s.tga", gameVar.cl_skin.s).s, DKT_FILTER_BILINEAR);
 //	dktBlurTexture(tex_skinOriginal, 1);
 
-	//--- Hey oui, un recré une texture ogl à chaque fois pour chaque babo qui spawn!!!!
-	//--- On est en ogl, faq ça kick ass MOUHOUHOUHAHAHA
+	//--- Hey oui, un recrÃ© une texture ogl Ã  chaque fois pour chaque babo qui spawn!!!!
+	//--- On est en ogl, faq Ã§a kick ass MOUHOUHOUHAHAHA
 	unsigned char imgData[64*32*3];
 	dktGetTextureData(tex_skinOriginal, imgData);
 
-	//--- Celon son team, on set la couleur du babo en conséquence
+	//--- Celon son team, on set la couleur du babo en consÃ©quence
 	for (j=0;j<32;++j)
 	{
 		for (i=0;i<64;++i)
@@ -366,7 +362,6 @@ void CUserLogin::Paint(CControl * control)
 	if (control == pic_babo)
 	{
 		//--- We render the babo in 3D
-#ifndef _DX_
 		glMatrixMode(GL_PROJECTION);
 		glPushMatrix();
 			glMatrixMode(GL_MODELVIEW);
@@ -393,7 +388,7 @@ void CUserLogin::Paint(CControl * control)
 
 					dkglSetProjection(70, 1, 1000, (float)control->size[0], (float)control->size[1]);
 
-					// Truc par default à enabeler
+					// Truc par default Ã  enabeler
 					glEnable(GL_DEPTH_TEST);
 					glEnable(GL_CULL_FACE);
 					glDisable(GL_TEXTURE_2D);
@@ -436,7 +431,6 @@ void CUserLogin::Paint(CControl * control)
 			glMatrixMode(GL_PROJECTION);
 		glPopMatrix();
 		glMatrixMode(GL_MODELVIEW);
-#endif
 	}
 }
 

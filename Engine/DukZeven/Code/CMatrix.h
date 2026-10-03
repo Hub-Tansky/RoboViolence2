@@ -91,7 +91,7 @@ public:
 		s[8]=Array9Float[8];
 	}
 
-	// revenir à la matrice identity
+	// revenir Ã  la matrice identity
 	void LoadIdentity(){
 		s[0]=1; s[1]=0; s[2]=0;
 		s[3]=0; s[4]=1; s[5]=0;
@@ -251,7 +251,7 @@ public:
 			s[8]==matrix.s[8]);
 	}
 
-	// La matrice transposé
+	// La matrice transposÃ©
 	void Transpose();
 
 	// Multiplication de matrice
@@ -264,13 +264,13 @@ public:
 	// Pour calculer un mineur
 	float Minor(int Row, int Col) const;
 
-	// Pour trouver le déterminant de la matrice
+	// Pour trouver le dÃ©terminant de la matrice
 	float Determinant() const;
 
 	// Pour trouver la matrice inverse
 	CMatrix3x3f Inverse() const;
 
-	// Pour acèder aux éléments
+	// Pour acÃ¨der aux Ã©lÃ©ments
 	float& operator[](const int i) {return s[i];}
 	float operator[](const int i) const {return s[i];}
 
@@ -284,10 +284,10 @@ public:
 	void setFront(const CVector3f & vector) {s[3] = vector[0];s[4] = vector[1];s[5] = vector[2];}
 	void setUp(const CVector3f & vector) {s[6] = vector[0];s[7] = vector[1];s[8] = vector[2];}
 
-	// Effectuer une rotation autour d'un axe déterminé
+	// Effectuer une rotation autour d'un axe dÃ©terminÃ©
 	void RotateArbitrary(float Angle, const CVector3f& u);
 
-	// Effectuer une rotation autour d'un axe déterminé
+	// Effectuer une rotation autour d'un axe dÃ©terminÃ©
 	void RotateArbitrary(const CVector3f& u);
 
 	// Transformation d'un vecteur
@@ -314,9 +314,7 @@ public:
 			s[6], s[7], s[8], 0,
 			0,    0,    0,    1};
 
-#ifndef _DX_
 		glMultMatrixf(Matrix);
-#endif
 	}
 
 	// Les rotations de base autour des axes

@@ -39,9 +39,7 @@ public:
 	CControl * txt_playerName;
 
 	// Pour dessiner notre sphere
-#ifndef _DX_
 	GLUquadricObj* qObj;
-#endif
 
 	// Son shadow
 	unsigned int tex_baboShadow;
@@ -64,7 +62,7 @@ public:
 	//--- The stats panel
 	CControl * pnl_stats;
 	
-		//--- Le render zone où on va dessiner notre babo yea poupé
+		//--- Le render zone oÃ¹ on va dessiner notre babo yea poupÃ©
 		CControl * pic_babo;
 
 		//--- To choose babo color

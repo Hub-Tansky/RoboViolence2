@@ -1,4 +1,4 @@
-Le fichier "dkoExporter.dle" Áa va dans \3DStudio7\plugins
+Le fichier "dkoExporter.dle" √ßa va dans \3DStudio7\plugins
 Re-ouvre 3d studio, ensuite tu as l'option export dans le menu.
-Le export selected a pas l'air de fonctionner, Áa exporte toujours tout squi a dans la scene.
-Jvas checker Áa un moment donner l‡.
+Le export selected a pas l'air de fonctionner, √ßa exporte toujours tout squi a dans la scene.
+Jvas checker √ßa un moment donner l√†.

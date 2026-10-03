@@ -88,16 +88,6 @@ Server::Server(Game * pGame): maxTimeOverMaxPing(5.0f)//, maxIdleTime(180.0f)
 //
 Server::~Server()
 {
-#ifdef _PRO_
-
-	for( unsigned int i=0; i<m_checksumQueries.size(); i++ )
-	{
-		delete m_checksumQueries[i];
-	}
-	m_checksumQueries.clear();
-
-#endif
-
 
 	if (master) master->RunningServer = 0;
 
@@ -701,29 +691,6 @@ void Server::update(float delay)
 			}
 		}
 
-#ifdef _PRO_
-		// update current checksum queries
-		for( unsigned int nn = 0; nn < m_checksumQueries.size(); nn++ )
-		{
-			if( !m_checksumQueries[nn]->Update(delay))
-			{
-				// we need to get rid of the client associated with that query, because we didnt receive the checksum in the right amount of time
-				// kick
-				if( game->players[m_checksumQueries[nn]->GetID()] )
-				{
-					if( master ) master->RA_DisconnectedPlayer( textColorLess(game->players[m_checksumQueries[nn]->GetID()]->name).s, game->players[m_checksumQueries[nn]->GetID()]->playerIP, (long)game->players[m_checksumQueries[nn]->GetID()]->playerID );
-					bb_serverDisconnectClient(game->players[m_checksumQueries[nn]->GetID()]->babonetID);
-					ZEVEN_SAFE_DELETE(game->players[m_checksumQueries[nn]->GetID()]);
-					net_svcl_player_disconnect playerDisconnect;
-					playerDisconnect.playerID = (char)m_checksumQueries[nn]->GetID();
-					bb_serverSend((char*)&playerDisconnect,sizeof(net_svcl_player_disconnect),NET_SVCL_PLAYER_DISCONNECT,0);
-				}
-				delete m_checksumQueries[nn];
-				m_checksumQueries.erase( m_checksumQueries.begin() + nn );
-				nn--;
-			}
-		}
-
 		DelayedKicksMap::iterator it = delayedKicks.begin(), itTmp;
 		for (; it != delayedKicks.end(); )
 		{
@@ -748,7 +715,6 @@ void Server::update(float delay)
 			else
 				it++;
 		}
-#endif
 		
 		// On update le server
 		updateNet(delay, false);
@@ -1169,13 +1135,10 @@ void Server::update(float delay)
 									playerCoordFrame.vel[0] = (char)(game->players[j]->currentCF.vel[0] * 10);
 									playerCoordFrame.vel[1] = (char)(game->players[j]->currentCF.vel[1] * 10);
 									playerCoordFrame.vel[2] = (char)(game->players[j]->currentCF.vel[2] * 10);
-#ifdef _PRO_
 									playerCoordFrame.camPosZ = 0;
-#endif
 									bb_serverSend((char*)&playerCoordFrame, sizeof(net_clsv_svcl_player_coord_frame), NET_CLSV_SVCL_PLAYER_COORD_FRAME, game->players[i]->babonetID, NET_UDP);
 								}
 
-#ifdef _PRO_
 								if (game->players[j]->status == PLAYER_STATUS_ALIVE)
 								{
 									//--- Mini bot?
@@ -1197,7 +1160,6 @@ void Server::update(float delay)
 										bb_serverSend((char*)&minibotCoordFrame, sizeof(net_svcl_minibot_coord_frame), NET_SVCL_MINIBOT_COORD_FRAME, game->players[i]->babonetID, NET_UDP);
 									}
 								}
-#endif
 
 								// On shoot aussi le ping de ce joueur
 								net_svcl_player_ping playerPing;
@@ -1309,7 +1271,6 @@ void Server::update(float delay)
 				}
 				else if (game->map && game->gameType == GAME_TYPE_SND)
 				{
-#ifdef _PRO_
                // Every minute, new spawn-slots and respawn everyone
                if (game->roundTimeLeft == 0)
                {
@@ -1342,9 +1303,6 @@ void Server::update(float delay)
                         }                        
                   }
                }               
-#else
-               updateSnD(delay);
-#endif
 				}
 			}
 		}
@@ -1598,116 +1556,6 @@ void Server::sayall(CString message)
 	}
 }
 
-#ifdef _PRO_
-
-std::vector<invalidChecksumEntity> Server::getInvalidChecksums(unsigned long bbnetID, int number, int offsetFromEnd)
-{
-	sqlite3 *DB=0;
-	sqlite3_open("./bv2.db",&DB);
-
-	std::vector<invalidChecksumEntity> list;
-	//some infos to load the data
-	char	*zErrMsg;		// holds error msg if any
-	char	**azResult;		// contains the actual returned data
-	int	nRow;			// number of record
-	int	nColumn;		// number of column
-	char	SQL[256];		// the query
-	int maxRows = 50;
-
-	if (number > maxRows)
-		number = maxRows;
-	//sprintf(SQL, CString("Select IP, Name From BadChecksum limit %i", maxRows).s);
-	sprintf(SQL, CString("Select IP, Name From BadChecksum limit %i offset (select count(*) from BadChecksum) - %i",
-		number, offsetFromEnd).s);
-	sqlite3_get_table(DB,SQL,&azResult,&nRow,&nColumn,&zErrMsg);
-	{
-		for (int i = 0; i < nRow; i++)
-		{
-			invalidChecksumEntity tmp;
-			char* ip = azResult[(i + 1) * nColumn];
-			char* name = azResult[(i + 1) * nColumn + 1];
-			int minLen = static_cast<int>( (strlen(name) < 31) ? strlen(name) : 31 );
-			tmp.id = i + 1;
-			strncpy(tmp.name, name, minLen);
-			strncpy(tmp.playerIP, ip, 16);
-			list.push_back(tmp);
-		}
-		sqlite3_free_table(azResult);
-	}
-	sqlite3_close( DB );
-	return list;
-}
-
-/*void Server::sendInvalidChecksums(unsigned long bbnetID, int number, int offsetFromEnd)
-{
-	sqlite3 *DB=0;
-	sqlite3_open("./bv2.db",&DB);
-
-	//some infos to load the data
-	char	*zErrMsg;		// holds error msg if any
-	char	**azResult;		// contains the actual returned data
-	int	nRow;			// number of record
-	int	nColumn;		// number of column
-	char	SQL[256];		// the query
-	int maxRows = 50;
-
-	if (number > maxRows)
-		number = maxRows;
-	//sprintf(SQL, CString("Select IP, Name From BadChecksum limit %i", maxRows).s);
-	sprintf(SQL, CString("Select IP, Name From BadChecksum limit %i offset (select count(*) from BadChecksum) - %i",
-		number, offsetFromEnd).s);
-	sqlite3_get_table(DB,SQL,&azResult,&nRow,&nColumn,&zErrMsg);
-	{
-		for (int i = 0; i < nRow; i++)
-		{
-			net_svcl_bad_checksum_entity bce;
-			memset(&bce, 0, sizeof(net_svcl_bad_checksum_entity));
-			char* ip = azResult[(i + 1) * nColumn];
-			char* name = azResult[(i + 1) * nColumn + 1];
-			int minLen = (strlen(name) < 31) ? strlen(name) : 31;
-			strncpy(bce.name, name, minLen);
-			strncpy(bce.playerIP, ip, 16);
-			bce.id = i + 1;
-			bb_serverSend((char*)&bce, sizeof(net_svcl_bad_checksum_entity), NET_SVCL_BAD_CHECKSUM_ENTITY, bbnetID);
-		}
-		sqlite3_free_table(azResult);
-	}
-	sqlite3_close( DB );
-}*/
-
-void Server::deleteInvalidChecksums()
-{
-	sqlite3 *DB=0;
-	sqlite3_open("./bv2.db",&DB);
-	
-	sqlite3_exec(DB,"delete from BadChecksum",0,0,0);
-	
-	sqlite3_close(DB);
-}
-
-int Server::getNumberOfInvalidChecksums()
-{
-	sqlite3 *DB=0;
-	sqlite3_open("./bv2.db",&DB);
-
-	//some infos to load the data
-	char	*zErrMsg;		// holds error msg if any
-	char	**azResult;		// contains the actual returned data
-	int	nRow;			// number of record
-	int	nColumn;		// number of column
-	char	SQL[256];		// the query
-	int num = 0;
-
-	sprintf(SQL, "select count(*) as Number from BadChecksum");
-	sqlite3_get_table(DB,SQL,&azResult,&nRow,&nColumn,&zErrMsg);
-	if (nRow == 1)
-		num = atoi(azResult[1]);
-	sqlite3_free_table(azResult);
-	sqlite3_close( DB );
-	return num;
-}
-
-#endif
 
 void Server::cacheStats(const Player* player)
 {

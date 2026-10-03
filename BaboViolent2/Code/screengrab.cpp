@@ -17,7 +17,6 @@
 */
 
 #ifndef CONSOLE
-#ifdef _PRO_
 #include "screengrab.h"
 #include "Zeven.h"
 #include "GameVar.h"
@@ -54,12 +53,12 @@ void SaveBitmapToFile( BYTE* pBitmapBits, LONG lWidth, LONG lHeight,WORD wBitsPe
     bmpInfoHeader.biSizeImage = lWidth* lHeight * (wBitsPerPixel/8);
 
     BITMAPFILEHEADER bfh = {0};
-    // This value should be values of BM letters i.e 0×4D42
-    // 0×4D = M 0×42 = B storing in reverse order to match with endian
+    // This value should be values of BM letters i.e 0Ã—4D42
+    // 0Ã—4D = M 0Ã—42 = B storing in reverse order to match with endian
     bfh.bfType=0x4D42;
     /* or
-    bfh.bfType = ‘B’+(’M’ << 8);
-    // <<8 used to shift ‘M’ to end
+    bfh.bfType = â€˜Bâ€™+(â€™Mâ€™ << 8);
+    // <<8 used to shift â€˜Mâ€™ to end
     */
     // Offset to the RGBQUAD
     bfh.bfOffBits = sizeof(BITMAPINFOHEADER) + sizeof(BITMAPFILEHEADER);
@@ -166,7 +165,6 @@ bool SaveScreenGrab(const char* filename) {
 
 	// allocate memory to store image data
 	unsigned char* pdata = new unsigned char[sw*sh*bpp];
-#ifndef _DX_
 	// read from front buffer
 	glReadBuffer(GL_FRONT);
 
@@ -175,7 +173,6 @@ bool SaveScreenGrab(const char* filename) {
 
 	// write data as a tga file
    SaveBitmapToFile(pdata,sw,sh,bitdepth,filename);
-#endif
 
 	// clean up
 	delete [] pdata;
@@ -184,5 +181,4 @@ bool SaveScreenGrab(const char* filename) {
 	return true;
 }
 
-#endif
 #endif

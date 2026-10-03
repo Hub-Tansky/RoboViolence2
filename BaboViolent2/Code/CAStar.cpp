@@ -16,7 +16,6 @@
 	BaboViolent 2 source code. If not, see http://www.gnu.org/licenses/.
 */
 
-#ifdef _PRO_
 
 #include "CAStar.h"
 #include <memory.h>
@@ -336,4 +335,3 @@ void CAStar::CreateNodes(int in_x, int in_y, int in_size)
 		}
 	}
 }
-#endif

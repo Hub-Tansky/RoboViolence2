@@ -39,7 +39,7 @@ CPing::~CPing()
 {
 	if (uniquePeerID != -1)
 	{
-		//--- On delete ça instant
+		//--- On delete Ã§a instant
 		bb_peerDelete(uniquePeerID, true);
 	}
 }

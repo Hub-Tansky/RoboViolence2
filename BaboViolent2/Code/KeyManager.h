@@ -27,7 +27,7 @@ class KeyManager
 {
 private:
 public:
-	// Pour obtenir une touche à partir du nom
+	// Pour obtenir une touche Ã  partir du nom
 	int getKeyByName(CString name);
 
 	// Pour obtenir le nom d'une touche

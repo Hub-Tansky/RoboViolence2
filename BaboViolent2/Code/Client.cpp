@@ -25,9 +25,7 @@
 #include "Scene.h"
 #include "CStatus.h"
 
-#ifdef _PRO_
 #include "Screengrab.h"
-#endif
 
 extern Scene * scene;
 
@@ -54,9 +52,7 @@ Client::Client(Game * pGame)
 	isConnected = false;
 	gotGameState = false;
 
-#ifdef _PRO_
    proServer = false;
-#endif
 
 	m_sfxChat = dksCreateSoundFromFile("main/sounds/Chat.wav", false);
 	sfxHit = dksCreateSoundFromFile("main/sounds/hit.wav", false);
@@ -86,7 +82,7 @@ Client::Client(Game * pGame)
 	clientRoot->textShadow = true;
 	clientRoot->noFill = true;
 
-	// On crÈ nos menu bitch
+	// On cr√© nos menu bitch
 	btn_autoAssign = new CControl(clientRoot, CVector2i(25, 130), CVector2i(200,30), "Auto assign team", this, "BUTTON");
 	btn_blueTeam = new CControl(clientRoot, CVector2i(25, 130), CVector2i(200,30), "\x1Join blue team", this, "BUTTON", btn_autoAssign, CONTROL_SNAP_BOTTOM);
 	btn_redTeam = new CControl(clientRoot, CVector2i(25, 130), CVector2i(200,30), "\x4Join red team", this, "BUTTON", btn_blueTeam, CONTROL_SNAP_BOTTOM);
@@ -106,9 +102,7 @@ Client::Client(Game * pGame)
 	btn_meleeguns[0] = new CControl(clientRoot, CVector2i(475, 130 + 0 * 40), CVector2i(200,30), gameVar.weapons[WEAPON_KNIVES]->weaponName, this, "BUTTON");
 	btn_meleeguns[1] = new CControl(clientRoot, CVector2i(475, 130 + 1 * 40), CVector2i(200,30), gameVar.weapons[WEAPON_NUCLEAR]->weaponName, this, "BUTTON");
 	btn_meleeguns[2] = new CControl(clientRoot, CVector2i(475, 130 + 2 * 40), CVector2i(200,30), gameVar.weapons[WEAPON_SHIELD]->weaponName, this, "BUTTON");
-	#ifdef _PRO_
 		btn_meleeguns[3] = new CControl(clientRoot, CVector2i(475, 130 + 3 * 40), CVector2i(200,30), gameVar.weapons[WEAPON_MINIBOT]->weaponName, this, "BUTTON");
-	#endif
 	currentGun = btn_guns[gameVar.cl_primaryWeapon/*0*/];
 	currentMelee = btn_meleeguns[gameVar.cl_secondaryWeapon/*0*/];
 
@@ -278,7 +272,7 @@ void Client::update(float delay)
 		}
 		if (result == 1)
 		{
-			// Une erreur !!! On arrÍte tout !!!
+			// Une erreur !!! On arr√™te tout !!!
 			console->add(CString("\x3> Error : %s", bb_clientGetLastError(uniqueClientID)));
 			needToShutDown = true;
 			status->set(CStatus::ONLINE);
@@ -297,7 +291,7 @@ void Client::update(float delay)
 	//		isConnected = true;
 		}
 
-		// Si on pËse sur T, on tombe en mode chatting
+		// Si on p√®se sur T, on tombe en mode chatting
 		/*if(game->roundState != GAME_PLAYING)
 		{
 			console->unlock();
@@ -409,7 +403,7 @@ void Client::update(float delay)
 				timeSinseLastQMsg = 0.0f;
 			}
 
-			// Si on est entrein de chatter et qu'on pËse sur Enter on send le chat
+			// Si on est entrein de chatter et qu'on p√®se sur Enter on send le chat
 			if (chatting.isActivated())
 			{
 				if (isChattingTeam)
@@ -427,7 +421,7 @@ void Client::update(float delay)
 		int messageID;
 		while (buffer = bb_clientReceive(uniqueClientID, &messageID))
 		{
-			// On gËre les messages reÁu
+			// On g√®re les messages re√ßu
 			recvPacket(buffer, messageID);
 		}
 
@@ -447,7 +441,6 @@ void Client::update(float delay)
 		}
 
 		// Screenshot
-#ifdef _PRO_
 #ifdef WIN32
 		if (dkiGetState(gameVar.k_screenShot) == DKI_DOWN && !console->isActive() && !chatting.haveFocus() && isConnected && !(menuManager.root && menuManager.root->visible))
 		{
@@ -460,9 +453,8 @@ void Client::update(float delay)
 		}
 
 #endif
-#endif
 
-		// On gËre le menu (important, toujours tester si la console est l‡ ou pas)
+		// On g√®re le menu (important, toujours tester si la console est l√† ou pas)
 		if (showMenu && !console->isActive() && isConnected)
 		{
 			menuManager.update(delay, clientRoot);
@@ -470,7 +462,7 @@ void Client::update(float delay)
 		}
 	}
 
-	// On update le jeu («a c'est autant client que server side)
+	// On update le jeu (√áa c'est autant client que server side)
 	if (game) game->update(delay);
 
 	// On update les chat messages
@@ -500,12 +492,12 @@ void Client::update(float delay)
 		}
 	}
 
-	// On update le client une derniËre fois
+	// On update le client une derni√®re fois
 	int result = bb_clientUpdate(uniqueClientID, delay, UPDATE_SEND_RECV);
 	console->debugBBNET(true, false);
 	if (result == 1)
 	{
-		// Une erreur !!! On arrÍte tout !!!
+		// Une erreur !!! On arr√™te tout !!!
 		console->add(CString("\x3> Error : %s", bb_clientGetLastError(uniqueClientID)));
 		needToShutDown = true;
 	}
@@ -563,7 +555,7 @@ void Client::Click(CControl * control)
 		if (game->thisPlayer)
 		{
 			// On le dit au server qu'on change de state!
-			// En fait, on le demannnnde au server, lui va dÈcider si t'as le droit ou pas
+			// En fait, on le demannnnde au server, lui va d√©cider si t'as le droit ou pas
 			net_clsv_svcl_team_request teamRequest;
 			teamRequest.playerID = game->thisPlayer->playerID;
 			teamRequest.teamRequested = PLAYER_TEAM_AUTO_ASSIGN;
@@ -578,7 +570,7 @@ void Client::Click(CControl * control)
 		if (game->thisPlayer)
 		{
 			// On le dit au server qu'on change de state!
-			// En fait, on le demannnnde au server, lui va dÈcider si t'as le droit ou pas
+			// En fait, on le demannnnde au server, lui va d√©cider si t'as le droit ou pas
 			net_clsv_svcl_team_request teamRequest;
 			teamRequest.playerID = game->thisPlayer->playerID;
 			teamRequest.teamRequested = PLAYER_TEAM_BLUE;
@@ -593,7 +585,7 @@ void Client::Click(CControl * control)
 		if (game->thisPlayer)
 		{
 			// On le dit au server qu'on change de state!
-			// En fait, on le demannnnde au server, lui va dÈcider si t'as le droit ou pas
+			// En fait, on le demannnnde au server, lui va d√©cider si t'as le droit ou pas
 			net_clsv_svcl_team_request teamRequest;
 			teamRequest.playerID = game->thisPlayer->playerID;
 			teamRequest.teamRequested = PLAYER_TEAM_RED;
@@ -608,7 +600,7 @@ void Client::Click(CControl * control)
 		if (game->thisPlayer)
 		{
 			// On le dit au server qu'on change de state!
-			// En fait, on le demannnnde au server, lui va dÈcider si t'as le droit ou pas
+			// En fait, on le demannnnde au server, lui va d√©cider si t'as le droit ou pas
 			net_clsv_svcl_team_request teamRequest;
 			teamRequest.playerID = game->thisPlayer->playerID;
 			teamRequest.teamRequested = PLAYER_TEAM_SPECTATOR;
@@ -737,7 +729,6 @@ void Client::Click(CControl * control)
 		}
 		return;
 	}
-	#ifdef _PRO_
 		if (control == btn_meleeguns[3])
 		{
 			if (game->thisPlayer)
@@ -751,13 +742,12 @@ void Client::Click(CControl * control)
 			}
 			return;
 		}
-	#endif
 }
 
 
 
 //
-// Pour gËrer les events de son menu
+// Pour g√®rer les events de son menu
 //
 /*
 void Client::onClick(Control * control)
@@ -782,7 +772,7 @@ void Client::onClick(Control * control)
 		if (game->thisPlayer)
 		{
 			// On le dit au server qu'on change de state!
-			// En fait, on le demannnnde au server, lui va dÈcider si t'as le droit ou pas
+			// En fait, on le demannnnde au server, lui va d√©cider si t'as le droit ou pas
 			net_clsv_svcl_team_request teamRequest;
 			teamRequest.playerID = game->thisPlayer->playerID;
 			teamRequest.teamRequested = PLAYER_TEAM_AUTO_ASSIGN;
@@ -796,7 +786,7 @@ void Client::onClick(Control * control)
 		if (game->thisPlayer)
 		{
 			// On le dit au server qu'on change de state!
-			// En fait, on le demannnnde au server, lui va dÈcider si t'as le droit ou pas
+			// En fait, on le demannnnde au server, lui va d√©cider si t'as le droit ou pas
 			net_clsv_svcl_team_request teamRequest;
 			teamRequest.playerID = game->thisPlayer->playerID;
 			teamRequest.teamRequested = PLAYER_TEAM_BLUE;
@@ -810,7 +800,7 @@ void Client::onClick(Control * control)
 		if (game->thisPlayer)
 		{
 			// On le dit au server qu'on change de state!
-			// En fait, on le demannnnde au server, lui va dÈcider si t'as le droit ou pas
+			// En fait, on le demannnnde au server, lui va d√©cider si t'as le droit ou pas
 			net_clsv_svcl_team_request teamRequest;
 			teamRequest.playerID = game->thisPlayer->playerID;
 			teamRequest.teamRequested = PLAYER_TEAM_RED;
@@ -824,7 +814,7 @@ void Client::onClick(Control * control)
 		if (game->thisPlayer)
 		{
 			// On le dit au server qu'on change de state!
-			// En fait, on le demannnnde au server, lui va dÈcider si t'as le droit ou pas
+			// En fait, on le demannnnde au server, lui va d√©cider si t'as le droit ou pas
 			net_clsv_svcl_team_request teamRequest;
 			teamRequest.playerID = game->thisPlayer->playerID;
 			teamRequest.teamRequested = PLAYER_TEAM_SPECTATOR;
@@ -869,7 +859,7 @@ int Client::join(CString IPAddress, int port, CString password)
 
 
 //
-// Pour printer un chat message sur l'Ècran
+// Pour printer un chat message sur l'√©cran
 //
 void Client::printMessage(CString message)
 {
@@ -887,27 +877,27 @@ void Client::sayall(CString message)
 	{
 		if (game->thisPlayer)
 		{
-			// On send Áa sur la network oui messieur
+			// On send √ßa sur la network oui messieur
 			net_clsv_svcl_chat chat_message;
 
 		//	chat_message.fromID = game->thisPlayer->playerID;
 			chat_message.teamID = PLAYER_TEAM_SPECTATOR - 1; // All player!
 
-			// On insert la couleur dÈpendament du team 
+			// On insert la couleur d√©pendament du team 
 			// (une fois apres le nom du joueur, parce que ce dernier a surement 
-			// mis plein de caractËres de couleurs)
+			// mis plein de caract√®res de couleurs)
 			message.insert(" : \x8", 0);
 
 			// On insert le nom du joueur
 			message.insert(game->thisPlayer->name.s, 0);
 
-			// On insert son Ètat (mort)
+			// On insert son √©tat (mort)
 			if (game->thisPlayer->status == PLAYER_STATUS_DEAD && game->thisPlayer->teamID != PLAYER_TEAM_SPECTATOR)
 			{
 				message.insert(CString("(%s)", gameVar.lang_dead.s).s, 0);
 			}
 
-			// On insert la couleur dÈpendament du team
+			// On insert la couleur d√©pendament du team
 			switch (game->thisPlayer->teamID)
 			{
 			case PLAYER_TEAM_SPECTATOR:
@@ -924,10 +914,10 @@ void Client::sayall(CString message)
 			// Si le message est trop grand, on le resize
 			if (message.len() > 49+80) message.resize(49+80);
 
-			// Voil‡, on copie le finale
+			// Voil√†, on copie le finale
 			memcpy(chat_message.message, message.s, sizeof(char) * (message.len() + 1));
 
-			// Voil‡, on send Áa sur le network!
+			// Voil√†, on send √ßa sur le network!
 			bb_clientSend(uniqueClientID, (char*)&chat_message, sizeof(net_clsv_svcl_chat), NET_CLSV_SVCL_CHAT);
 		}
 	}
@@ -940,15 +930,15 @@ void Client::sayteam(CString message)
 	{
 		if (game->thisPlayer)
 		{
-			// On send Áa sur la network oui messieur
+			// On send √ßa sur la network oui messieur
 			net_clsv_svcl_chat chat_message;
 
 		//	chat_message.fromID = game->thisPlayer->playerID;
 			chat_message.teamID = game->thisPlayer->teamID;
 
-			// On insert la couleur dÈpendament du team 
+			// On insert la couleur d√©pendament du team 
 			// (une fois apres le nom du joueur, parce que ce dernier a surement 
-			// mis plein de caractËres de couleurs)
+			// mis plein de caract√®res de couleurs)
 			message.insert(" : \x8", 0);
 
 			// On insert le nom du joueur
@@ -973,14 +963,14 @@ void Client::sayteam(CString message)
 
 			if (game->thisPlayer->teamID != PLAYER_TEAM_SPECTATOR) 
 			{
-				// On insert son Ètat (mort)
+				// On insert son √©tat (mort)
 				if (game->thisPlayer->status == PLAYER_STATUS_DEAD)
 				{
 					message.insert(CString("(%s)", gameVar.lang_dead.s).s, 0);
 				}
 			}
 
-			// On insert la couleur dÈpendament du team
+			// On insert la couleur d√©pendament du team
 			switch (game->thisPlayer->teamID)
 			{
 			case PLAYER_TEAM_SPECTATOR:
@@ -997,10 +987,10 @@ void Client::sayteam(CString message)
 			// Si le message est trop grand, on le resize
 			if (message.len() > 49+80) message.resize(49+80);
 
-			// Voil‡, on copie le finale
+			// Voil√†, on copie le finale
 			memcpy(chat_message.message, message.s, sizeof(char) * (message.len() + 1));
 
-			// Voil‡, on send Áa sur le network!
+			// Voil√†, on send √ßa sur le network!
 			bb_clientSend(uniqueClientID, (char*)&chat_message, sizeof(net_clsv_svcl_chat), NET_CLSV_SVCL_CHAT);
 		}
 	}

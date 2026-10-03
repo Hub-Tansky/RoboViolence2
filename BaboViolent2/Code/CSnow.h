@@ -41,7 +41,6 @@ public:
 	}
 	void render()
 	{
-#ifndef _DX_
 		glColor4f(1, 1, 1,((pos[2] > 2)?2:pos[2]) / 2.0f);
 		glTexCoord2f(0,1);
 		glVertex3f(pos[0]-.05f,pos[1]+.05f,pos[2]);
@@ -51,7 +50,6 @@ public:
 		glVertex3f(pos[0]+.05f,pos[1]-.05f,pos[2]);
 		glTexCoord2f(1,1);
 		glVertex3f(pos[0]+.05f,pos[1]+.05f,pos[2]);
-#endif
 	}
 };
 

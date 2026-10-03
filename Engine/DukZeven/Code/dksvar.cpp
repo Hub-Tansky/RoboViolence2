@@ -23,9 +23,6 @@
 #include "CString.h"
 #include "CSystemVariable.h"
 #include <vector>
-#if defined(_DEBUG) && defined(USE_VLD)
-#include <vld.h>
-#endif
 
 extern CSystemVariable systemVariable;
 

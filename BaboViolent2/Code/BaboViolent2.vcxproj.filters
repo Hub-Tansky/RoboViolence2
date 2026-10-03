@@ -329,12 +329,6 @@
     <ClCompile Include="CCurl.cpp">
       <Filter>External</Filter>
     </ClCompile>
-    <ClCompile Include="md5.cpp">
-      <Filter>External</Filter>
-    </ClCompile>
-    <ClCompile Include="md5_2.c">
-      <Filter>External</Filter>
-    </ClCompile>
     <ClCompile Include="screengrab.cpp">
       <Filter>External</Filter>
     </ClCompile>
@@ -667,16 +661,7 @@
     <ClInclude Include="CCurl.h">
       <Filter>External</Filter>
     </ClInclude>
-    <ClInclude Include="ChecksumQuery.h">
-      <Filter>External</Filter>
-    </ClInclude>
     <ClInclude Include="FastDelegate.h">
-      <Filter>External</Filter>
-    </ClInclude>
-    <ClInclude Include="md5.h">
-      <Filter>External</Filter>
-    </ClInclude>
-    <ClInclude Include="md5_2.h">
       <Filter>External</Filter>
     </ClInclude>
     <ClInclude Include="..\inc\platform_types.h">
@@ -720,9 +705,6 @@
     </ClInclude>
     <ClInclude Include="..\..\Engine\babonet\Code\md5class.h">
       <Filter>Engine\Babonet</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Engine\dko\inc\platform_types.h">
-      <Filter>Engine\dko</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Engine\dko\Code\CdkoMesh.h">
       <Filter>Engine\dko</Filter>

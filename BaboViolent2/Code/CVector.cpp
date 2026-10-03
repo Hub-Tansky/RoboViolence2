@@ -288,7 +288,7 @@ CVector3f projection(const CVector3f &u, const CVector3f &Onv)
 
 
 //
-// réflection sur un plan
+// rÃ©flection sur un plan
 //
 CVector3f reflect(const CVector3f &u, const CVector3f &normal)
 {
@@ -402,7 +402,7 @@ CVector2f rotateAboutPivot(const CVector2f & point, float angle, const CVector2f
 
 
 //
-// Pour créer un vecteur right et up à partir d'un vecteur front donné
+// Pour crÃ©er un vecteur right et up Ã  partir d'un vecteur front donnÃ©
 //
 void createRightUpVectors(CVector3f & right, const CVector3f & _front, CVector3f & up)
 {

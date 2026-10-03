@@ -17,7 +17,6 @@
 */
 
 
-#ifdef _PRO_
 
 #include "Player.h"
 #include "Game.h"
@@ -242,4 +241,3 @@ void CMiniBot::Think(float delay)
 	}*/
 }
 
-#endif

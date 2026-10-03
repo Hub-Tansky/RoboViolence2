@@ -27,9 +27,7 @@
 #include <algorithm>
 #include <string>
 
-#ifdef _PRO_
-	#include "md5.h"
-#endif
+	#include "md5class.h"
 
 
 // Notre module principal
@@ -195,7 +193,6 @@ void Console::render()
 		CVector2i res = dkwGetResolution();
 		if(gameVar.r_widescreen > 1) res[0] = static_cast<int>(res[1]*1.333f);
 
-#ifndef _DX_
 		// on print ?l'?ran les 10 dernier messages encouru
 		dkglPushOrtho((float)res[0], (float)res[1]);
 			glTranslatef(0,m_vPos,0);
@@ -298,7 +295,6 @@ void Console::render()
 				}
 			glPopAttrib();
 		dkglPopOrtho();
-#endif
 	}
 }
 #endif
@@ -730,7 +726,6 @@ void Console::sendCommand(CString commandLine, bool isAdmin, unsigned long bbnet
 			return;
 		}
 #ifndef CONSOLE
-#ifdef _PRO_
 		if (scene->client)
 		{
 			CString login = tokenize.getFirstToken(' ');
@@ -739,13 +734,11 @@ void Console::sendCommand(CString commandLine, bool isAdmin, unsigned long bbnet
 			{
 				net_clsv_admin_request adminRequest;
 				memset(&adminRequest, 0, sizeof(net_clsv_admin_request));
-				RSA::MD5 login_((unsigned char*)login.s);
-				char* hex_digest = login_.hex_digest();
-				memcpy(adminRequest.login, hex_digest, 32);
+				CMD5 login_(login.s);
+				memcpy(adminRequest.login, login_.getMD5Digest(), 32);
 
-				RSA::MD5 pwd_((unsigned char*)pwd.s);
-				hex_digest = pwd_.hex_digest();
-				memcpy(adminRequest.password, hex_digest, 32);
+				CMD5 pwd_(pwd.s);
+				memcpy(adminRequest.password, pwd_.getMD5Digest(), 32);
 
 				/*add(CString("\x9> L: %s", adminRequest.login));
 				add(CString("\x9> P: %s", adminRequest.password));*/
@@ -758,16 +751,6 @@ void Console::sendCommand(CString commandLine, bool isAdmin, unsigned long bbnet
 				add(CString("\x9> Invalid arguments"));
 			}
 		}
-#else
-		if (scene->client)
-		{
-			if (tokenize.isNull())
-			{
-				scene->client->isAdmin = false;
-			}
-			bb_clientSend(scene->client->uniqueClientID, tokenize.s, tokenize.len() + 1, NET_CLSV_ADMIN_REQUEST);
-		}
-#endif //_PRO_
 #endif
 		return;
 	}
@@ -2297,64 +2280,6 @@ void Console::sendCommand(CString commandLine, bool isAdmin, unsigned long bbnet
 		//return;
 		// "Unkown command" ;)
 	}
-
-#ifdef _PRO_
-	// getinvalidchecksums [offsetFromEnd=50 [number=50]]
-	// request number(max 50) of entries from BadChecksums starting from number of entries-offsetFromEnd
-	if (command == "getinvalidchecksums")
-	{
-		if (scene && scene->server)
-		{
-			int num = -1, offsetFromEnd = 50;
-			CString offsetFromEndStr = tokenize.getFirstToken(' ');
-			if (offsetFromEndStr != "")
-				offsetFromEnd = offsetFromEndStr.toInt();
-			CString numStr = tokenize.getFirstToken(' ');
-			if (numStr != "")
-				num = numStr.toInt();
-			//scene->server->sendInvalidChecksums(bbnetID, num, offsetFromEnd);
-			std::vector<invalidChecksumEntity> list = scene->server->getInvalidChecksums(bbnetID, num, offsetFromEnd);
-			for (int i = 0; i < (int)list.size(); i++)
-			{
-#ifdef CONSOLE
-				net_svcl_bad_checksum_entity bce;
-				memset(&bce, 0, sizeof(net_svcl_bad_checksum_entity));
-				strcpy(bce.name, list[i].name);
-				strcpy(bce.playerIP, list[i].playerIP);
-				bce.id = list[i].id;
-				bb_serverSend((char*)&bce, sizeof(net_svcl_bad_checksum_entity), NET_SVCL_BAD_CHECKSUM_ENTITY, bbnetID);
-#else
-				console->add(CString("%i) %s, IP: %s", list[i].id, list[i].name, list[i].playerIP));
-#endif //CONSOLE
-			}
-		}
-		return;
-	}
-
-	if (command == "deleteinvalidchecksums")
-	{
-		if (scene && scene->server)
-			scene->server->deleteInvalidChecksums();
-		return;
-	}
-
-	if (command == "invalidchecksumsinfo")
-	{
-
-		if (scene && scene->server)
-		{
-#ifdef CONSOLE
-			net_svcl_bad_checksum_info bci;
-			bci.number = scene->server->getNumberOfInvalidChecksums();
-			bb_serverSend((char*)&bci, sizeof(net_svcl_bad_checksum_info), NET_SVCL_BAD_CHECKSUM_INFO, bbnetID);
-#else
-			console->add(CString(">> %i", scene->server->getNumberOfInvalidChecksums()));
-#endif //CONSOLE
-		}
-		return;
-	}
-
-#endif //_PRO_
 
 #ifdef _DEBUG
 #ifndef CONSOLE

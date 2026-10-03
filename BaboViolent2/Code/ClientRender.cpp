@@ -55,14 +55,13 @@ void Client::render(float & alphaScope)
 		}
 	}
 
-	// C'est côté client qu'on fait ça ;)
+	// C'est cÃ´tÃ© client qu'on fait Ã§a ;)
 	if (isConnected) game->render();
 
 	// LE SNIPER SCOPE
 	CVector2i cursor = dkwGetCursorPos_main();
 	int xM = (int)(((float)cursor[0]/(float)res[0])*800.0f);
 	int yM = (int)(((float)cursor[1]/(float)res[1])*600.0f);
-#ifndef _DX_
 	dkglPushOrtho(800,600);
 		glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT);
 			glEnable(GL_BLEND);
@@ -98,12 +97,10 @@ void Client::render(float & alphaScope)
 
 		glPopAttrib();
 	dkglPopOrtho();
-#endif
 
 	// Si on doit spawner on marque dans combient de temps
 	if (game->thisPlayer)
 	{
-#ifndef _DX_
 		dkglPushOrtho(800, 600);
 			glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT);
 				glEnable(GL_TEXTURE_2D);
@@ -256,7 +253,7 @@ void Client::render(float & alphaScope)
 
 					glDisable(GL_TEXTURE_2D);
 
-					// On affiche sa vie à droite
+					// On affiche sa vie Ã  droite
 					glBegin(GL_QUADS);
 						glColor3f(1,1,1);
 						glVertex2f(760, 390);
@@ -533,40 +530,15 @@ void Client::render(float & alphaScope)
 					break;
 				case GAME_TYPE_SND:
 
-#ifdef _PRO_
                printLeftText(5,5,64,CString("%01i:%02i", (int)((game->gameTimeLeft+1)/60), (int)(game->gameTimeLeft+1)%60));
                printLeftText(5,5+64,64,CString("%01i:%02i", (int)((game->roundTimeLeft+1)/60), (int)(game->roundTimeLeft+1)%60));
 
-#else
-					// Round Time left
-					printLeftText(5,5,64,CString("%01i:%02i", (int)((game->roundTimeLeft+1)/60), (int)(game->roundTimeLeft+1)%60));
-					// win left
-
-					if (game->blueWin >= game->redWin)
-					{
-						renderTexturedQuad(5,5+64,64,64,tex_blueFlag);
-						printLeftText(5+64+5,5+64,64,CString("%i/%i", game->blueWin, gameVar.sv_winLimit));
-						renderTexturedQuad(5,5+64+64,64,64,tex_redFlag);
-						printLeftText(5+64+5,5+64+64,64,CString("%i/%i", game->redWin, gameVar.sv_winLimit));
-					}
-					else
-					{
-						renderTexturedQuad(5,5+64,64,64,tex_redFlag);
-						printLeftText(5+64+5,5+64,64,CString("%i/%i", game->redWin, gameVar.sv_winLimit));
-						renderTexturedQuad(5,5+64+64,64,64,tex_blueFlag);
-						printLeftText(5+64+5,5+64+64,64,CString("%i/%i", game->blueWin, gameVar.sv_winLimit));
-					}
-
-
-#endif
 
 					break;
 				}
          
-#ifdef _PRO_	      
 
             float textSize = (float)gameVar.r_chatTextSize;
-#endif
 
             float xPos = ((float)res[0] / 800.0f) * 128 + 40;
 				float yPos = res[1] - (((float)res[1] / 600.0f) * 128 + 40)-60;
@@ -585,7 +557,6 @@ void Client::render(float & alphaScope)
 					glBegin(GL_QUADS);
 
          
-#ifdef _PRO_	      
                float chatWidth = dkfGetStringWidth(textSize, chatMessages[i].message.s);
 
 					glVertex2f(8,yPos - (float)((chatMessages.size() - i - 1) * textSize)+1);
@@ -593,13 +564,6 @@ void Client::render(float & alphaScope)
 					glColor4f(0,0,0,0);
 					glVertex2f(8+chatWidth,yPos - (float)((chatMessages.size() - i - 1) * textSize)+textSize-1);
 					glVertex2f(8+chatWidth,yPos - (float)((chatMessages.size() - i - 1) * textSize)+1);
-#else
-					glVertex2f(8,yPos - (float)(chatMessages.size() - i - 1) * 28+1);
-					glVertex2f(8,yPos - (float)(chatMessages.size() - i - 1) * 28+27);
-					glColor4f(0,0,0,0);
-					glVertex2f(500,yPos - (float)(chatMessages.size() - i - 1) * 28+27);
-					glVertex2f(500,yPos - (float)(chatMessages.size() - i - 1) * 28+1);
-#endif
 
 					glEnd();
 					if (chatMessages[i].duration > 1)
@@ -610,14 +574,10 @@ void Client::render(float & alphaScope)
 					{
 						glColor4f(1,1,1,chatMessages[i].duration);
 					}
-					// On l'écris à peut pret au tier de l'écran à gauche
+					// On l'Ã©cris Ã  peut pret au tier de l'Ã©cran Ã  gauche
 					glEnable(GL_TEXTURE_2D);
 
-#ifdef _PRO_	
 					printLeftText(10,yPos - (float)(chatMessages.size() - i - 1) * textSize, textSize, chatMessages[i].message);
-#else
-               printLeftText(10,yPos - (float)(chatMessages.size() - i - 1) * 28, 28, chatMessages[i].message);
-#endif
 				}
 
 				// Si on est apres chatter
@@ -658,18 +618,14 @@ void Client::render(float & alphaScope)
 					{
 						glColor4f(1,1,1,eventMessages[i].duration);
 					}
-					// On l'écris à peut pret au 2 tier de l'écran à gauche
+					// On l'Ã©cris Ã  peut pret au 2 tier de l'Ã©cran Ã  gauche
 
-#ifdef _PRO_	                  
             float eventTextSize = (float)gameVar.r_eventTextSize;
 
             if (gameVar.r_showEventText)
             {
                printLeftText(xPos,(float)res[1] - (float)(eventMessages.size() - i - 1) * eventTextSize-20-eventTextSize, eventTextSize, eventMessages[i].message);
             }
-#else
-            printLeftText(xPos,(float)res[1] - (float)(eventMessages.size() - i - 1) * 28-20-28, 28, eventMessages[i].message);
-#endif
 
 					
 				}
@@ -760,13 +716,8 @@ void Client::render(float & alphaScope)
 					printCenterText(400, 5+88, 32, gameVar.lang_captureTheFlagD);
 					break;
 				case GAME_TYPE_SND:
-#ifdef _PRO_
 					printCenterText(400, 5, 64, gameVar.lang_championC);
 					printCenterText(400, 5+88, 32, gameVar.lang_championD);
-#else
-					printCenterText(400, 5, 64, gameVar.lang_counterBaboristC);
-					printCenterText(400, 5+88, 32, gameVar.lang_counterBaboristD);
-#endif
 					break;
 				}
 				CString mapInfo (game->map->mapName);
@@ -775,7 +726,6 @@ void Client::render(float & alphaScope)
 				printCenterText(400, 5+64, 32, mapInfo);
 			glPopAttrib();
 		dkglPopOrtho();
-#endif
 	}
 	else
 	{
@@ -793,7 +743,6 @@ void Client::render(float & alphaScope)
 //	CVector2i cursor = dkwGetCursorPos_main();
 //	int xM = (int)(((float)cursor[0]/(float)res[0])*800.0f);
 //	int yM = (int)(((float)cursor[1]/(float)res[1])*600.0f);
-#ifndef _DX_
 	dkglPushOrtho(800,600);
 		glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT);
 			glEnable(GL_BLEND);
@@ -802,12 +751,10 @@ void Client::render(float & alphaScope)
 			renderTexturedQuad(xM-16,yM-16,32,32,tex_crossHit);			
 		glPopAttrib();
 	dkglPopOrtho();
-#endif
 
 	// On se connecte
 	if (!isConnected)
 	{
-#ifndef _DX_
 		dkglPushOrtho(800,600);
 			glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT);
 				glEnable(GL_BLEND);
@@ -818,7 +765,6 @@ void Client::render(float & alphaScope)
 				if (dkiGetState(DIK_F10) == DKI_DOWN) console->sendCommand("disconnect");
 			glPopAttrib();
 		dkglPopOrtho();
-#endif
 	}
 }
 #endif

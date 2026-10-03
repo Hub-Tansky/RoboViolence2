@@ -17,7 +17,6 @@
 */
 
 
-#ifdef _PRO_
 #include "CAStar.h"
 #include <math.h>
 
@@ -159,4 +158,3 @@ CPathNode *CAStar::FindPath(CPathNode* in_start, CPathNode* in_end)
 
 	return bestSoFar;
 }
-#endif

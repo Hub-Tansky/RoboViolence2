@@ -32,7 +32,6 @@ CMaterial::~CMaterial()
 void CMaterial::enable(SVertex* first) const
 {
 	//--- Push enable bit, this causes OpenGL to track and revert glEnable states
-#ifndef _DX_
 	glPushAttrib(GL_ENABLE_BIT);
 
 	//--- Always need verticies
@@ -85,12 +84,10 @@ void CMaterial::enable(SVertex* first) const
 		glEnableClientState(GL_COLOR_ARRAY);
 		glColorPointer(4, GL_FLOAT, sizeof(SVertex), &(first->r) );
 	}
-#endif
 }
 
 void CMaterial::disable() const
 {
-#ifndef _DX_
 	glDisableClientState(GL_VERTEX_ARRAY);
 
 	if(m_tex != no_texture)
@@ -104,7 +101,6 @@ void CMaterial::disable() const
 
 	//--- Return OpenGL to normal
 	glPopAttrib();
-#endif
 }
 
 bool CMaterial::operator==(const CMaterial &rhs) const

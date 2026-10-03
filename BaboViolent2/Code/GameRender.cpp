@@ -45,26 +45,20 @@ void Game::render()
 	{
 		if (map->fogDensity > 0 && gameVar.r_weatherEffects)
 		{
-#ifndef _DX_
 			glEnable(GL_FOG);
 			glFogi(GL_FOG_MODE, GL_LINEAR);
 			glFogfv(GL_FOG_COLOR, map->fogColor.s);
 			glFogf(GL_FOG_DENSITY, map->fogDensity);
 			glFogf(GL_FOG_START, map->camPos[2] - map->fogStart);
 			glFogf(GL_FOG_END, map->camPos[2] - map->fogEnd);
-#endif
 		}
 		else
 		{
-#ifndef _DX_
 			glDisable(GL_FOG);
-#endif
 		}
 
 		// Positionne la camera
-#ifndef _DX_
 		glLoadIdentity();
-#endif
 		CVector3f up(0,1,1);
 		normalize(up);
 		for (i=0;i<1;++i)
@@ -77,7 +71,6 @@ void Game::render()
 					{
 						CVector2i res = dkwGetResolution();
 						dkglSetProjection(80, .1f, 50, (float)res[1]*1.333f, (float)res[1]);
-#ifndef _DX_
 						gluLookAt(
 							thisPlayer->currentCF.position[0], 
 							thisPlayer->currentCF.position[1], 
@@ -85,7 +78,6 @@ void Game::render()
 							thisPlayer->currentCF.mousePosOnMap[0], 
 							thisPlayer->currentCF.mousePosOnMap[1], .4f, 
 							0, 0, 1);
-#endif
 						break;
 					}
 				}
@@ -100,12 +92,10 @@ void Game::render()
 				dkoGetDummyPosition("dum_target", map->dko_cam, camTarget.s, (short)map->introAnim);
 				camPos *= .1f;
 				camTarget *= .1f;
-#ifndef _DX_
 					gluLookAt(
 						camPos[0], camPos[1], camPos[2], 
 						camTarget[0], camTarget[1], camTarget[2], 
 						0, 0, 1);
-#endif
 			}
 			else
 			{
@@ -113,31 +103,25 @@ void Game::render()
 				{
 					if (thisPlayer)
 					{
-#ifndef _DX_
 						gluLookAt(
 							map->camPos[0]/* + thisPlayer->shootShakeDis[0] * .25f*/, map->camPos[1]/* + thisPlayer->shootShakeDis[1] * .25f*/, map->camPos[2]/* + thisPlayer->shootShakeDis[2] * .25f*/, 
 							map->camPos[0]/* + thisPlayer->shootShakeDis[0] * .25f*/, map->camPos[1]/* + thisPlayer->shootShakeDis[1] * .25f*/, 0/* + thisPlayer->shootShakeDis[2] * .25f*/, 
 							up[0], up[1], up[2]);
-#endif
 					}
 					else
 					{
-#ifndef _DX_
 						gluLookAt(
 							map->camPos[0], map->camPos[1], map->camPos[2], 
 							map->camPos[0], map->camPos[1], 0, 
 							up[0], up[1], up[2]);
-#endif
 					}
 				}
 				else
 				{
-#ifndef _DX_
 					gluLookAt(
 						map->camPos[0], map->camPos[1]-4.0f, map->camPos[2], 
 						map->camPos[0], map->camPos[1]-1.0f, 0, 
 						up[0], up[1], up[2]);
-#endif
 				}
 			}
 		}
@@ -147,11 +131,9 @@ void Game::render()
 	#endif
 		if (gameVar.r_reflection && (map->weather == WEATHER_RAIN || map->theme == THEME_SNOW))
 		{
-#ifndef _DX_
 			glPushMatrix();
 				glScalef(1,1,-1);
 				glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT | GL_LIGHTING_BIT);
-#endif
 
 					// Le soleil
 				//	glEnable(GL_LIGHTING);
@@ -160,7 +142,6 @@ void Game::render()
 					//--- Full 3D map wow
 					if (map->dko_map)
 					{
-#ifndef _DX_
 						glPushAttrib(GL_DEPTH_BUFFER_BIT | GL_CURRENT_BIT | GL_ENABLE_BIT);
 							glCullFace(GL_FRONT);
 							glDisable(GL_LIGHTING);
@@ -198,11 +179,9 @@ void Game::render()
 								glPopMatrix();
 						//	glCullFace(GL_BACK);
 						glPopAttrib();
-#endif
 					}
 					else
 					{
-#ifndef _DX_
 						//--- Sky
 						glColor3fv(map->fogColor.s);
 						dkglPushOrtho(10,10);
@@ -212,7 +191,6 @@ void Game::render()
 						glCullFace(GL_FRONT);
 						glEnable(GL_LIGHTING);
 						dkglSetPointLight(1, -1000, 1000, 2000, 1, 1, 1);
-#endif
 
 						// On render les trucs genre flag pod, flag, canon
 						map->renderMisc();
@@ -233,7 +211,6 @@ void Game::render()
 						map->renderWalls();
 					}
 
-#ifndef _DX_
 				glPopAttrib();
 
 				// Les trails
@@ -284,14 +261,11 @@ void Game::render()
 			glPopMatrix();
 
 			glClear(GL_DEPTH_BUFFER_BIT);
-#endif
 		}
 
 	//	glEnable(GL_LIGHTING);
 
-#ifndef _DX_
 		glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT | GL_LIGHTING_BIT);
-#endif
 			// On trouve la position de la souri
 			if (thisPlayer && !console->isActive())
 			{
@@ -315,10 +289,8 @@ void Game::render()
 			}
 
 			// Le soleil
-#ifndef _DX_
 			glEnable(GL_LIGHTING);
 			dkglSetPointLight(1, -1000, 1000, 2000, 1, 1, 1);
-#endif
 
 			//--- Do we have water drip?
 			#ifdef RENDER_LAYER_TOGGLE
@@ -326,7 +298,6 @@ void Game::render()
 			#endif
 			if (gameVar.r_showGroundMark)
 			{
-#ifndef _DX_
 				glPushAttrib(GL_ENABLE_BIT | GL_DEPTH_BUFFER_BIT | GL_CURRENT_BIT);
 					glDepthMask(GL_FALSE);
 					glDisable(GL_LIGHTING);
@@ -336,7 +307,6 @@ void Game::render()
 					glBindTexture(GL_TEXTURE_2D, gameVar.tex_drip);
 						for (int i=0;i<MAX_FLOOR_MARK;++i) if (drips[i].life > 0) drips[i].render();
 				glPopAttrib();
-#endif
 			}
 
 			// Render la map
@@ -345,7 +315,6 @@ void Game::render()
 			//--- Full 3D map wow
 			if (map->dko_map)
 			{
-#ifndef _DX_
 				glPushAttrib(GL_DEPTH_BUFFER_BIT | GL_CURRENT_BIT | GL_ENABLE_BIT);
 				glDisable(GL_LIGHTING);
 			//	glCullFace(GL_FRONT);
@@ -363,10 +332,8 @@ void Game::render()
 					glPopMatrix();
 			//	glCullFace(GL_BACK);
 				glPopAttrib();
-#endif
 			}
 
-#ifndef _DX_
 			// On render les floor mark et projectile shadows
 			glPushAttrib(GL_ENABLE_BIT | GL_DEPTH_BUFFER_BIT | GL_CURRENT_BIT);
 				glDepthMask(GL_FALSE);
@@ -374,7 +341,6 @@ void Game::render()
 				glEnable(GL_TEXTURE_2D);
 				glEnable(GL_BLEND);
 				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-#endif
 				// Les marke de bomb ou de sang
 				#ifdef RENDER_LAYER_TOGGLE
 					if (renderToggle >= 5)
@@ -384,12 +350,7 @@ void Game::render()
 					for (int i=0;i<MAX_FLOOR_MARK;++i) if (floorMarks[i].delay > 0) floorMarks[i].render();
 				}
 
-				// Lui on a pas le choix de l'afficher vu que ça fait parti du gameplay
-#ifdef _PRO_
-#else
-            if (gameType == GAME_TYPE_SND) map->renderBombMark();
-#endif
-#ifndef _DX_
+				// Lui on a pas le choix de l'afficher vu que Ã§a fait parti du gameplay
 
 				// On render les shadows des projectiles
 				if (gameVar.r_projectileShadow)
@@ -411,7 +372,6 @@ void Game::render()
 					ZEVEN_VECTOR_CALL(clientProjectiles, i, renderShadow());
 				}
 			glPopAttrib();
-#endif
 
 			// On render les trucs genre flag pod, flag, canon
 			#ifdef RENDER_LAYER_TOGGLE
@@ -457,7 +417,6 @@ void Game::render()
 				#endif
 				map->renderWalls();
 			}
-#ifndef _DX_
 		glPopAttrib();
 
 		// Les trails
@@ -498,7 +457,6 @@ void Game::render()
 				}
 			glDepthMask(GL_TRUE);
 		glPopAttrib();
-#endif
 
 		// Sniper aiming point
 	/*	for (i=0;i<MAX_PLAYER;++i) 
@@ -566,7 +524,6 @@ void Game::render()
 				}
 			}
 		}*/
-#ifndef _DX_
 		// Les particules
 		glPushAttrib(GL_ENABLE_BIT);
 			glDisable(GL_FOG);
@@ -581,7 +538,6 @@ void Game::render()
 			#endif
 			dkpRender();
 		glPopAttrib();
-#endif
 
 		//--- Le weather
 			#ifdef RENDER_LAYER_TOGGLE
@@ -589,7 +545,6 @@ void Game::render()
 			#endif
 		if (map->m_weather) map->m_weather->render();
 
-#ifndef _DX_
 		//--- Nuke flash!!!!!!
 		glPushAttrib(GL_ENABLE_BIT | GL_DEPTH_BUFFER_BIT | GL_CURRENT_BIT);
 			glDepthMask(GL_FALSE);
@@ -605,7 +560,6 @@ void Game::render()
 				nikeFlashes[i]->render();
 			}
 		glPopAttrib();
-#endif
 
 		// Le hit point
 	/*	glPushAttrib(GL_CURRENT_BIT);
@@ -628,7 +582,6 @@ void Game::render()
 
 		CVector2i res = dkwGetResolution();
 		if(gameVar.r_widescreen > 1) res[0] = static_cast<int>(res[1]*1.333f);
-#ifndef _DX_
 		dkglPushOrtho((float)res[0], (float)res[1]);
 			glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT);
 				glEnable(GL_TEXTURE_2D);
@@ -644,7 +597,6 @@ void Game::render()
 			//	dkfPrint(50,0,100,0,CString("%i",(int)projectiles.size()).s);
 			glPopAttrib();
 		dkglPopOrtho();
-#endif
 	}
 
 	//--- On render le voting
@@ -652,13 +604,12 @@ void Game::render()
 	{
 		CVector2i res = dkwGetResolution();
 		if(gameVar.r_widescreen > 1) res[0] = static_cast<int>(res[1]*1.333f);
-#ifndef _DX_
 		dkglPushOrtho((float)res[0], (float)res[1]);
 			glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT);
 				glEnable(GL_TEXTURE_2D);
 				glEnable(GL_BLEND);
 				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-				//--- Render le vote à l'écran
+				//--- Render le vote Ã  l'Ã©cran
 				if (voting.votingInProgress)
 				{
 					if (scene->client->blink <= .25f) printRightText((float)res[0] - 10, 10, 30, CString("\x9VOTING : %i", (int)(voting.remaining)));
@@ -687,14 +638,13 @@ void Game::render()
 				}
 			glPopAttrib();
 		dkglPopOrtho();
-#endif
 	}
 }
 
 
 
 //
-// Pour afficher la minimap (ouff, je mélange pomal les affaires, tk)
+// Pour afficher la minimap (ouff, je mÃ©lange pomal les affaires, tk)
 // On la render ici et non dans l'objet map, 
 // car on a besoin de plein d'info comme la position des joueurs, flag, etc
 //
@@ -702,7 +652,6 @@ void Game::renderMiniMap()
 {
 	CVector2i res(800,600);// = dkwGetResolution();
 
-#ifndef _DX_
 	dkglPushOrtho((float)res[0], (float)res[1]);
 		glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT);
 			glEnable(GL_BLEND);
@@ -898,7 +847,6 @@ void Game::renderMiniMap()
 			glPopMatrix();
 		glPopAttrib();
 	dkglPopOrtho();
-#endif
 }
 #endif
 

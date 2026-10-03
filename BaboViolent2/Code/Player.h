@@ -25,9 +25,7 @@
 #include "Helper.h"
 #include "GameVar.h"
 
-#ifdef _PRO_
 #include <list>
-#endif
 
 
 #define PLAYER_STATUS_ALIVE 0
@@ -51,9 +49,7 @@ struct CoordFrame
 	long frameID;
 	float angle;
 	CVector3f mousePosOnMap;
-#ifdef _PRO_
 	float camPosZ;
-#endif
 
 	CoordFrame()
 	{
@@ -158,7 +154,6 @@ struct PlayerStats
 
 #define PING_LOG_SIZE 60
 
-#ifdef _PRO_
 
 class Player;
 
@@ -204,7 +199,6 @@ public:
 	void MakeNukeBot();
 	void Think(float delay);
 };
-#endif
 
 class Player
 {
@@ -222,11 +216,9 @@ public:
 
 	CVector3f shootShakeDis;
 
-#ifdef _PRO_
 
    int spawnSlot;
 
-#endif
 
 	// anti cheat for projectiles and shots
 	float mfElapsedSinceLastShot;
@@ -330,10 +322,8 @@ public:
 	// To send the position at each x frame
 	int sendPosFrame;
 #ifndef CONSOLE
-#ifndef _DX_
 	// Pour dessiner notre sphere
 	GLUquadricObj* qObj;
-#endif
 
 	// Si on est le joueur controll�
 	bool isThisPlayer;
@@ -428,10 +418,8 @@ public:
 	CVector3f p1;
 	CVector3f p2;
 
-#ifdef _PRO_
 	//--- His bot
 	CMiniBot * minibot;
-#endif
 
 public:
 	// Constructeur
@@ -468,9 +456,7 @@ public:
 
 	// Pour setter le coordframe du player
 	void setCoordFrame(net_clsv_svcl_player_coord_frame & playerCoordFrame);
-#ifdef _PRO_
 	void setCoordFrameMinibot(net_svcl_minibot_coord_frame & minibotCoordFrame);
-#endif
 
 	// Si on se fait toucher !
 #ifndef CONSOLE
@@ -487,11 +473,9 @@ public:
 	void updateSkin();
 #endif
 
-	#ifdef _PRO_
 		void SpawnMiniBotSV();
 		void SpawnNukeBotSV();
 		void SpawnMiniBot(const CVector3f & spawnPoint, const CVector3f & mousePos);
-	#endif
 };
 
 

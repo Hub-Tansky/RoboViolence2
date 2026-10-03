@@ -33,7 +33,7 @@
 class CDkoModel;
 
 
-// On a ça pour chaque frame
+// On a Ã§a pour chaque frame
 struct _typMeshAtFrame
 {
 	float* vertexArray;

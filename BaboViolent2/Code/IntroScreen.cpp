@@ -74,7 +74,6 @@ void IntroScreen::update(float delay)
 //
 void IntroScreen::render()
 {
-#ifndef _DX_
 	dkglPushOrtho(1,1);
 		glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT);
 			glEnable(GL_TEXTURE_2D);
@@ -150,7 +149,6 @@ void IntroScreen::render()
 			}*/
 		glPopAttrib();
 	dkglPopOrtho();
-#endif
 }
 #endif
 

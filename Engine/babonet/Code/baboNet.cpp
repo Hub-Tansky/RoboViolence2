@@ -29,9 +29,6 @@
 	#pragma comment (lib,"iphlpapi.lib")
 	#include "winsock2.h"
 	#include <iphlpapi.h> // this is used for getting mac adress
-	#if defined(_DEBUG) && defined(USE_VLD)
-		#include <vld.h>
-	#endif
 #endif
 #ifdef __MACOSX__
 	#include <net/route.h>

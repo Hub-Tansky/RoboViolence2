@@ -20,9 +20,6 @@
 
 
 #include "dkii.h"
-#if defined(_DEBUG) && defined(USE_VLD)
-#include <vld.h>
-#endif
 
 #ifndef WIN32
 #include "dkw.h"
@@ -62,7 +59,7 @@ float CDki::downTimer = 0;
 
 #ifdef WIN32
 //
-// Call back pour énumérer les axes du joystick
+// Call back pour Ã©numÃ©rer les axes du joystick
 //
 BOOL CALLBACK EnumAxesCallback( const DIDEVICEOBJECTINSTANCE* pdidoi, VOID* pContext )
 {
@@ -85,7 +82,7 @@ BOOL CALLBACK EnumAxesCallback( const DIDEVICEOBJECTINSTANCE* pdidoi, VOID* pCon
 
 #ifdef WIN32
 //
-// Call back pour énumérer les game pad
+// Call back pour Ã©numÃ©rer les game pad
 //
 BOOL CALLBACK EnumJoysticksCallback(const DIDEVICEINSTANCE* pdidInstance, VOID* pContext)
 {
@@ -102,7 +99,7 @@ BOOL CALLBACK EnumJoysticksCallback(const DIDEVICEINSTANCE* pdidInstance, VOID* 
 
 
 //
-// Pour obtenir la première touche pressé (utile pour setter les touche dans les options)
+// Pour obtenir la premiÃ¨re touche pressÃ© (utile pour setter les touche dans les options)
 //
 int				dkiGetFirstDown()
 {
@@ -145,7 +142,7 @@ CVector2i		dkiGetMouseVel()
 
 
 //
-// Pour obtenir l'état d'une touche ou d'un bouton
+// Pour obtenir l'Ã©tat d'une touche ou d'un bouton
 //
 int				dkiGetState(int inputID)
 {
@@ -186,7 +183,7 @@ CVector3f		dkiGetJoyVel()
 //
 int				dkiInit(HINSTANCE appInstance, HWND appHandle)
 {
-	// On fou nos input à 0
+	// On fou nos input Ã  0
 	int i;
 	for (i=0;i<256;i++)
 	{
@@ -281,7 +278,7 @@ void			dkiUpdate(float elapsef, int width, int height)
 	HRESULT hr; 
 	hr = CDki::diKeyboard->GetDeviceState(256,(LPVOID)&(CDki::keyboardStateDI));
 
-	// Bon, si on a perdu le focus probablement qu'on a perdu le clavier, on le repogne de même dans un while
+	// Bon, si on a perdu le focus probablement qu'on a perdu le clavier, on le repogne de mÃªme dans un while
 	if (FAILED(hr))
 	{
 		hr = CDki::diKeyboard->Acquire();
@@ -332,7 +329,7 @@ void			dkiUpdate(float elapsef, int width, int height)
 	// On capte la mouse
 	hr = CDki::diMouse->GetDeviceState(sizeof(DIMOUSESTATE2),(LPVOID)&(CDki::mouseStateDI));
 
-	// Bon, si on a perdu le focus probablement qu'on a perdu la mouse, on la repogne de même dans un while
+	// Bon, si on a perdu le focus probablement qu'on a perdu la mouse, on la repogne de mÃªme dans un while
 	if (FAILED(hr))
 	{
 		hr = CDki::diMouse->Acquire();

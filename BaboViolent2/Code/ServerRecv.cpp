@@ -27,9 +27,7 @@
 #include <string.h>
 extern Scene* scene;
 
-#ifdef _PRO_
-	#include "md5.h"
-#endif
+	#include "md5class.h"
 
 using std::min;
 
@@ -187,7 +185,6 @@ void Server::recvPacket(char * buffer, int typeID, unsigned long bbnetID)
 		}
 	case NET_CLSV_ADMIN_REQUEST:
 		{
-#ifdef _PRO_
 			net_clsv_admin_request adminRequest;
 			memcpy(&adminRequest, buffer, sizeof(net_clsv_admin_request));
 			CString loginRecv(adminRequest.login);
@@ -211,11 +208,11 @@ void Server::recvPacket(char * buffer, int typeID, unsigned long bbnetID)
 					}
 					break;
 				}
-				RSA::MD5 login_((unsigned char*)gameVar.zsv_adminUser.s);
-				CString login(login_.hex_digest());
+				CMD5 login_(gameVar.zsv_adminUser.s);
+				CString login(login_.getMD5Digest());
 
-				RSA::MD5 pwd_((unsigned char*)gameVar.zsv_adminPass.s);
-				CString pwd(pwd_.hex_digest());
+				CMD5 pwd_(gameVar.zsv_adminPass.s);
+				CString pwd(pwd_.getMD5Digest());
 
 				/*console->add(CString("\x9> L: %s", login.s));
 				console->add(CString("\x9> P: %s", loginRecv.s));
@@ -264,44 +261,6 @@ void Server::recvPacket(char * buffer, int typeID, unsigned long bbnetID)
 					}
 				}
 			}
-#else
-			CString adminRequest = buffer;
-			if (!gameVar.zsv_adminPass.isNull() &&
-				!gameVar.zsv_adminUser.isNull())
-			{
-				if (adminRequest.isNull())
-				{
-					for (int i=0;i<MAX_PLAYER;++i)
-					{
-						if (game->players[i])
-						{
-							if (game->players[i]->babonetID == bbnetID)
-							{
-								game->players[i]->isAdmin = false;
-								break;
-							}
-						}
-					}
-					break;
-				}
-				if (adminRequest == gameVar.zsv_adminUser + " " + gameVar.zsv_adminPass)
-				{
-					//--- Admin accepted !!
-					for (int i=0;i<MAX_PLAYER;++i)
-					{
-						if (game->players[i])
-						{
-							if (game->players[i]->babonetID == bbnetID)
-							{
-								bb_serverSend(0, 0, NET_SVCL_ADMIN_ACCEPTED, bbnetID);
-								game->players[i]->isAdmin = true;
-								break;
-							}
-						}
-					}
-				}
-			}
-#endif
 			break;
 		}
 	case NET_CLSV_GAMEVERSION_ACCEPTED:
@@ -463,12 +422,6 @@ void Server::recvPacket(char * buffer, int typeID, unsigned long bbnetID)
 #endif
 				// broadcast the info at remote admins
 				if( master ) master->RA_NewPlayer( textColorLess(playerInfo.playerName).s, playerInfo.playerIP, (long)playerInfo.playerID );
-
-#ifdef _PRO_
-				// if we are using the pro client/serv, generate a new hash query
-				m_checksumQueries.push_back( new CChecksumQuery(playerInfo.playerID,bbnetID) );
-#endif
-
 
 				// Password is transfered sans null terminator, already MD5'd
 				char pw[33];
@@ -707,9 +660,7 @@ void Server::recvPacket(char * buffer, int typeID, unsigned long bbnetID)
 						if (!(spawnRequest.meleeID == WEAPON_KNIVES ||
 							spawnRequest.meleeID == WEAPON_NUCLEAR ||
 							spawnRequest.meleeID == WEAPON_SHIELD
-							#ifdef _PRO_
 								|| spawnRequest.meleeID == WEAPON_MINIBOT
-							#endif
 							))
 						{
 							//--- Kick him so HARD!
@@ -794,7 +745,6 @@ void Server::recvPacket(char * buffer, int typeID, unsigned long bbnetID)
 			memcpy(&playerCoordFrame, buffer, sizeof(net_clsv_svcl_player_coord_frame));
 			if (game->players[playerCoordFrame.playerID])
 			{
-#ifdef _PRO_
 				if (gameVar.sv_beGoodServer == false &&
 					(game->players[playerCoordFrame.playerID]->teamID == PLAYER_TEAM_RED ||
 					game->players[playerCoordFrame.playerID]->teamID == PLAYER_TEAM_BLUE) &&
@@ -804,7 +754,6 @@ void Server::recvPacket(char * buffer, int typeID, unsigned long bbnetID)
 					addDelayedKick(game->players[playerCoordFrame.playerID]->babonetID,
 						playerCoordFrame.playerID, 7);
 				}
-#endif
 				//--- Is he alive? Else we ignore it
 				if (game->players[playerCoordFrame.playerID]->status == PLAYER_STATUS_ALIVE)
 				{
@@ -979,7 +928,6 @@ void Server::recvPacket(char * buffer, int typeID, unsigned long bbnetID)
 					//special case with the shotty and sniper that shots 2 and 5 bullets on the same frame :(
 					if( playerShoot.weaponID == WEAPON_SHOTGUN || playerShoot.weaponID == WEAPON_SNIPER )
 					{
-#ifdef _PRO_
 						if (game->players[playerShoot.playerID]->weapon->weaponID == WEAPON_SNIPER)
 						{
 							if (game->players[playerShoot.playerID]->currentCF.camPosZ >= 10.0f)
@@ -987,7 +935,6 @@ void Server::recvPacket(char * buffer, int typeID, unsigned long bbnetID)
 							else
 								game->players[playerShoot.playerID]->weapon->nbShot = 2;
 						}
-#endif
 						if( game->players[playerShoot.playerID]->mfElapsedSinceLastShot + 0.061f > gameVar.weapons[playerShoot.weaponID]->fireDelay )
 						{
 							//we are ok to shoot our first bullet
@@ -1195,46 +1142,6 @@ void Server::recvPacket(char * buffer, int typeID, unsigned long bbnetID)
 			}
 			break;
 		}
-#ifdef _PRO_
-	case NET_SVCL_HASH_SEED_REPLY:
-		{
-			net_svcl_hash_seed hashseed;
-			memcpy(&hashseed, buffer, sizeof(net_svcl_hash_seed));
-
-			// find associated checksum query
-			for( unsigned int y=0; y<m_checksumQueries.size(); y++ )
-			{
-				if( m_checksumQueries[y]->GetBBid() == bbnetID )
-				{
-					// we found it
-					if( m_checksumQueries[y]->isValid( hashseed ) )
-					{
-						// this client is good
-						console->add(CString("\x9> Player %s was successfully authenticated", game->players[m_checksumQueries[y]->GetID()]->name.s));
-					}
-					else
-					{
-						console->add(CString("\x9> Player %s was NOT successfully authenticated", game->players[m_checksumQueries[y]->GetID()]->name.s));
-						// this client isnt good, log IP + Name in the local database
-						sqlite3 *DB=0;
-						sqlite3_open("bv2.db",&DB);
-						char	SQL[300];
-						
-						sprintf(SQL,"Insert into BadChecksum(IP,Name) Values('%s','%s')", game->players[m_checksumQueries[y]->GetID()]->playerIP,game->players[m_checksumQueries[y]->GetID()]->name.s);
-						sqlite3_exec(DB,SQL,0,0,0);
-						
-						sqlite3_close(DB);						
-					}
-					delete m_checksumQueries[y];
-					m_checksumQueries.erase( m_checksumQueries.begin() + y );
-					return;
-				}
-			}
-			// if we arrive here, thats abnormal, kick the client
-
-			break;
-		}
-
 	case NET_CLSV_SVCL_PLAYER_UPDATE_SKIN:
 		{
 			net_clsv_svcl_player_update_skin updateSkin;
@@ -1253,7 +1160,6 @@ void Server::recvPacket(char * buffer, int typeID, unsigned long bbnetID)
 			break;
 		}
 
-#endif
 	}
 }
 

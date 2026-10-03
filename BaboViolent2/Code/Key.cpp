@@ -57,7 +57,7 @@ void Key::setKeyValue(int keyValue)
 
 
 //
-// L'updater le gèrer
+// L'updater le gÃ¨rer
 //
 void Key::update(float delay)
 {

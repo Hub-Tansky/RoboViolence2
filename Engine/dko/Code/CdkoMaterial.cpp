@@ -67,17 +67,16 @@ CdkoMaterial::~CdkoMaterial()
 
 
 //
-// Les pass pour les différentes couches du rendu
+// Les pass pour les diffÃ©rentes couches du rendu
 //
 void CdkoMaterial::setDiffusePass()
 {
 #ifndef CONSOLE
-#ifndef _DX_
 	glMaterialfv(GL_FRONT,GL_AMBIENT,ambient); // L'ambient
 	glMaterialfv(GL_FRONT,GL_DIFFUSE,diffuse); // La couleur diffuse
-	glMaterialfv(GL_FRONT,GL_SPECULAR,specular); // La couleur et intensité spécular
+	glMaterialfv(GL_FRONT,GL_SPECULAR,specular); // La couleur et intensitÃ© spÃ©cular
 	glMaterialfv(GL_FRONT,GL_EMISSION,emissive); // Le seft illumination
-	glMateriali(GL_FRONT,GL_SHININESS, shininess); // L'intensité du spécular : reflet de lumière
+	glMateriali(GL_FRONT,GL_SHININESS, shininess); // L'intensitÃ© du spÃ©cular : reflet de lumiÃ¨re
 
 	glPushAttrib(GL_POLYGON_BIT | GL_LINE_BIT | GL_ENABLE_BIT);
 	glMatrixMode(GL_TEXTURE);
@@ -115,13 +114,11 @@ void CdkoMaterial::setDiffusePass()
 		glLineWidth(wireSize);
 	}
 #endif
-#endif
 }
 
 void CdkoMaterial::setDetailPass()
 {
 #ifndef CONSOLE
-#ifndef _DX_
 	glPushAttrib(GL_POLYGON_BIT | GL_LINE_BIT | GL_ENABLE_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glDisable(GL_LIGHTING);
@@ -145,19 +142,17 @@ void CdkoMaterial::setDetailPass()
 
 //	glDepthMask(GL_TRUE);
 #endif
-#endif
 }
 
 void CdkoMaterial::setSpecularPass()
 {
 #ifndef CONSOLE
-#ifndef _DX_
 	float zero[] = {0,0,0,1};
 	glMaterialfv(GL_FRONT,GL_AMBIENT,zero); // L'ambient
 	glMaterialfv(GL_FRONT,GL_DIFFUSE,zero); // La couleur diffuse
-	glMaterialfv(GL_FRONT,GL_SPECULAR,specular); // La couleur et intensité spécular
+	glMaterialfv(GL_FRONT,GL_SPECULAR,specular); // La couleur et intensitÃ© spÃ©cular
 	glMaterialfv(GL_FRONT,GL_EMISSION,zero); // Le seft illumination
-	glMateriali(GL_FRONT,GL_SHININESS, shininess); // L'intensité du spécular : reflet de lumière
+	glMateriali(GL_FRONT,GL_SHININESS, shininess); // L'intensitÃ© du spÃ©cular : reflet de lumiÃ¨re
 
 	glPushAttrib(GL_POLYGON_BIT | GL_LINE_BIT | GL_ENABLE_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -166,7 +161,7 @@ void CdkoMaterial::setSpecularPass()
 	if ((textureMat || texSpecular) && CDko::renderStateBitField & DKO_SPECULAR_MAP)
 	{
 	//	float one[] = {1,1,1,1};
-	//	glMaterialfv(GL_FRONT,GL_SPECULAR,one); // La texture remplace la couleur spéculaire
+	//	glMaterialfv(GL_FRONT,GL_SPECULAR,one); // La texture remplace la couleur spÃ©culaire
 		glEnable(GL_TEXTURE_2D);
 		if (textureMat)
 		{
@@ -195,13 +190,11 @@ void CdkoMaterial::setSpecularPass()
 
 //	glDepthMask(GL_TRUE);
 #endif
-#endif
 }
 
 void CdkoMaterial::setSelfIllPass()
 {
 #ifndef CONSOLE
-#ifndef _DX_
 	glPushAttrib(GL_POLYGON_BIT | GL_LINE_BIT | GL_ENABLE_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glDisable(GL_LIGHTING);
@@ -229,7 +222,6 @@ void CdkoMaterial::setSelfIllPass()
 
 //	glDepthMask(GL_TRUE);
 #endif
-#endif
 }
 
 
@@ -239,7 +231,7 @@ void CdkoMaterial::setSelfIllPass()
 //
 int CdkoMaterial::loadFromFile(FILE *ficIn, char *path)
 {
-	// On load chunk par chunk jusqu'à ce qu'on pogne le chunk End
+	// On load chunk par chunk jusqu'Ã  ce qu'on pogne le chunk End
 	short chunkID = readChunk(ficIn);
 
 	while (chunkID != CHUNK_DKO_END)

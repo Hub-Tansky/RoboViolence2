@@ -162,7 +162,7 @@ private:
 	int m_sizeX;
 	int m_sizeY;
 
-	/** Pathnode list */ // lol voir que jfais une liste à la old school
+	/** Pathnode list */ // lol voir que jfais une liste Ã  la old school
 	CPathNode * m_lstNodes[2];
 
 	/** The maximum path size.

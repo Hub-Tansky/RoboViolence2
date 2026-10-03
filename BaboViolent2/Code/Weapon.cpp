@@ -46,7 +46,7 @@ Weapon::Weapon(CString dkoFilename, CString soundFilename, float pFireDelay, CSt
 	weaponName = pWeaponName;
 
 	fireDelay = pFireDelay;
-	currentFireDelay = 0; // On est ready à tirer au début
+	currentFireDelay = 0; // On est ready Ã  tirer au dÃ©but
 
 #ifndef CONSOLE
 	dkoFile = dkoFilename;
@@ -171,7 +171,6 @@ void NuzzleFlash::render()
 {
 	if (delay > 0)
 	{
-#ifndef _DX_
 		glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT | GL_LIGHTING_BIT);
 			glDisable(GL_FOG);
 			glDisable(GL_LIGHTING);
@@ -228,7 +227,6 @@ void NuzzleFlash::render()
 				glEnd();
 			glPopMatrix();
 		glPopAttrib();
-#endif
 	}
 }
 #endif
@@ -317,7 +315,7 @@ void Weapon::shoot(Player * owner)
 			chainOverHeat = 0;
 			if (weaponID == WEAPON_CHAIN_GUN)
 			{
-				// Un ptit son pour agrémenter tout ça!
+				// Un ptit son pour agrÃ©menter tout Ã§a!
 				net_svcl_play_sound playSound;
 				playSound.position[0] = (unsigned char)(owner->currentCF.position[0]);
 				playSound.position[1] = (unsigned char)(owner->currentCF.position[1]);
@@ -337,7 +335,7 @@ void Weapon::shoot(Player * owner)
 		if (firingNuzzle >= (int)nuzzleFlashes.size()) firingNuzzle = 0;
 		currentFireDelay = fireDelay;
 
-		//--- Si on est shotgun, pis que ça fait 6 shot, on reload
+		//--- Si on est shotgun, pis que Ã§a fait 6 shot, on reload
 		shotInc++;
 		if (shotInc >= 6 && weaponID == WEAPON_SHOTGUN)
 		{
@@ -380,7 +378,7 @@ void Weapon::shoot(Player * owner)
 			// On subit un recul
 			owner->currentCF.vel -= gameVar.dkpp_firingSmoke.direction * reculVel;
 
-			// On entends ça
+			// On entends Ã§a
 			if (owner->fireFrameDelay == 0)
 			{
 				dksPlay3DSound(sfx_sound, -1, 5, owner->currentCF.position,255);
@@ -388,23 +386,11 @@ void Weapon::shoot(Player * owner)
 			}
 
 			// On en shot le nb qui faut
-#ifdef _PRO_
 			owner->shootShakeDis = -gameVar.dkpp_firingSmoke.direction * reculVel * .5f;
 			//for (int i=0;i<nbShot;++i)
 			{
 				owner->game->shoot(gameVar.dkpp_firingSmoke.positionFrom, gameVar.dkpp_firingSmoke.direction, 0, damage, owner, projectileType);
 			}			
-#else
-			{
-				currentImp += 3;
-				if (currentImp > impressision) currentImp = impressision;
-				owner->shootShakeDis = -gameVar.dkpp_firingSmoke.direction * reculVel * .5f;
-				for (int i=0;i<nbShot;++i)
-				{
-					owner->game->shoot(gameVar.dkpp_firingSmoke.positionFrom, gameVar.dkpp_firingSmoke.direction, currentImp, damage, owner, projectileType);
-				}
-			}
-#endif
 
 
 			if (projectileType == PROJECTILE_DIRECT && weaponID != WEAPON_FLAME_THROWER && weaponID != WEAPON_PHOTON_RIFLE)
@@ -431,7 +417,7 @@ void Weapon::shoot(Player * owner)
 				playerShootMelee.playerID = owner->playerID;
 				bb_clientSend(scene->client->uniqueClientID, (char*)&playerShootMelee, sizeof(net_clsv_svcl_player_shoot_melee), NET_CLSV_SVCL_PLAYER_SHOOT_MELEE);
 
-				// On entends ça
+				// On entends Ã§a
 				if (owner->fireFrameDelay == 0)
 				{
 					dksPlay3DSound(sfx_sound, -1, 5, owner->currentCF.position,255);
@@ -466,12 +452,10 @@ void Weapon::shootMeleeSV(Player * owner)
 		//--- Protect this player for 2 seconde
 		owner->protection = 2;
 		break;
-#ifdef _PRO_
 	case WEAPON_MINIBOT:
 		if (!owner->minibot)
 			owner->SpawnMiniBotSV();
 		break;
-#endif
 	}
 }
 #ifndef CONSOLE
@@ -519,7 +503,7 @@ void Weapon::shoot(net_svcl_player_shoot & playerShoot, Player * owner)
 	gameVar.dkpp_firingSmoke.direction = rotateAboutAxis(gameVar.dkpp_firingSmoke.direction, owner->currentCF.angle, CVector3f(0,0,1));
 	gameVar.dkpp_firingSmoke.pitchTo = 45;
 
-	// Un ptit son pour agrémenter tout ça!
+	// Un ptit son pour agrÃ©menter tout Ã§a!
 	dksPlay3DSound(sfx_sound, -1, 5, gameVar.dkpp_firingSmoke.positionFrom,150);
 
 	dkpCreateParticleExP(gameVar.dkpp_firingSmoke);
@@ -602,7 +586,7 @@ void Weapon::update(float delay)
 	//--- flame thrower need a tite flame bleu
 	if (weaponID == WEAPON_FLAME_THROWER)
 	{
-		//--- On va oublier ça pour tout suite
+		//--- On va oublier Ã§a pour tout suite
 	}
 	if (currentFireDelay > 0)
 	{
@@ -707,17 +691,14 @@ void Weapon::render()
 {
 	if (weaponID == WEAPON_KNIVES)
 	{
-#ifndef _DX_
 		glPushAttrib(GL_ENABLE_BIT);
 			glEnable(GL_ALPHA_TEST);
 			glAlphaFunc(GL_GREATER, 0.3f);
 			dkoRender(dkoModel, modelAnim);
 		glPopAttrib();
-#endif
 	}
 	else if (weaponID == WEAPON_SHIELD)
 	{
-#ifndef _DX_
 		dkoRender(dkoAlternative, modelAnim);
 		glPushAttrib(GL_ENABLE_BIT | GL_DEPTH_BUFFER_BIT);
 			glPushMatrix();
@@ -733,10 +714,8 @@ void Weapon::render()
 				}
 			glPopMatrix();
 		glPopAttrib();
-#endif
 		if (modelAnim < 10)
 		{
-#ifndef _DX_
 			glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT | GL_LIGHTING_BIT);
 				glDisable(GL_FOG);
 				glDisable(GL_LIGHTING);
@@ -762,14 +741,12 @@ void Weapon::render()
 					glEnable(GL_DEPTH_TEST);
 				glPopMatrix();
 			glPopAttrib();
-#endif
 		}
 	}
 	else if (weaponID == WEAPON_NUCLEAR)
 	{
 		if (nukeFrameID % 45 < 23 && m_owner->minibot && this->currentFireDelay > 0)
 		{
-#ifndef _DX_
 			glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT | GL_LIGHTING_BIT);
 				glDisable(GL_FOG);
 				glDisable(GL_LIGHTING);
@@ -795,7 +772,6 @@ void Weapon::render()
 					glEnable(GL_DEPTH_TEST);
 				glPopMatrix();
 			glPopAttrib();
-#endif
 		}
 		dkoRender(dkoModel);
 	}

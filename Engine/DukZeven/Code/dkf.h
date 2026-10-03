@@ -16,19 +16,19 @@
 	BaboViolent 2 source code. If not, see http://www.gnu.org/licenses/.
 */
 
-/// \brief Module de gestion des polices de caractères
+/// \brief Module de gestion des polices de caractÃ¨res
 ///
 /// \file dkf.h
-/// Ce module prend en charge la gestion des polices de caractères créées à partir d'ume image TGA.
+/// Ce module prend en charge la gestion des polices de caractÃ¨res crÃ©Ã©es Ã  partir d'ume image TGA.
 /// Ceci comprend :
-/// 	- une fonction de chargement de police de caractères
-/// 	- une fonction de destruction de polices de caractères
-/// 	- des fonctions retournant diverses informations sur une chaine de caractère selon la police choisie
-/// 	- une fonction de sélection de la police à utiliser
-/// 	- une fonction de destruction de toutes les polices de caractères présentement chargées
-/// 	- une fonction permettant de dessiner une chaine de caractère sur un QUAD (polygone a 4 coté) en 3D d'une certaine taille et avec une certaine couleur
+/// 	- une fonction de chargement de police de caractÃ¨res
+/// 	- une fonction de destruction de polices de caractÃ¨res
+/// 	- des fonctions retournant diverses informations sur une chaine de caractÃ¨re selon la police choisie
+/// 	- une fonction de sÃ©lection de la police Ã  utiliser
+/// 	- une fonction de destruction de toutes les polices de caractÃ¨res prÃ©sentement chargÃ©es
+/// 	- une fonction permettant de dessiner une chaine de caractÃ¨re sur un QUAD (polygone a 4 cotÃ©) en 3D d'une certaine taille et avec une certaine couleur
 ///
-/// Les couleurs peuvent être spécifiées à même la chaine de caractères. Voici la liste des couleurs disponibles et leur caractère correspondant (la couleur sera utilisé pour les caractère suivant) :
+/// Les couleurs peuvent Ãªtre spÃ©cifiÃ©es Ã  mÃªme la chaine de caractÃ¨res. Voici la liste des couleurs disponibles et leur caractÃ¨re correspondant (la couleur sera utilisÃ© pour les caractÃ¨re suivant) :
 /// 	- \x1 = texte bleu
 /// 	- \x2 = texte vert
 /// 	- \x3 = texte cyan
@@ -36,12 +36,12 @@
 /// 	- \x5 = texte magenta
 /// 	- \x6 = texte brun
 /// 	- \x7 = texte gris clair
-/// 	- \x8 = texte gris foncé
+/// 	- \x8 = texte gris foncÃ©
 /// 	- \x9 = texte jaune
 ///
-/// De plus, le caractère retour de chariot (\n) peut être utilisé afin de pouvoir écrire sur plus d'une ligne avec un seul appel à dkfPrint().
+/// De plus, le caractÃ¨re retour de chariot (\n) peut Ãªtre utilisÃ© afin de pouvoir Ã©crire sur plus d'une ligne avec un seul appel Ã  dkfPrint().
 /// \author David St-Louis (alias Daivuk)
-/// \author Louis Poirier (à des fins de documentation seulement)
+/// \author Louis Poirier (Ã  des fins de documentation seulement)
 ///
 
 
@@ -55,103 +55,103 @@
 
 // Les fonction du DKT
 
-/// \brief spécifie la police de caractère à devant être utilisé
+/// \brief spÃ©cifie la police de caractÃ¨re Ã  devant Ãªtre utilisÃ©
 ///
-/// Cette fonction permet de spécifier la police de caractères qui sera active. La police de caractères active est celle qui sera utilisé pour l'affichage d'une chaine de caractères et pour divers calculs de longueurs de chaines.
-/// Si on désire changer de police, un nouvel appel spécifiant la nouvelle police de caractère devant être active devra être fait.
+/// Cette fonction permet de spÃ©cifier la police de caractÃ¨res qui sera active. La police de caractÃ¨res active est celle qui sera utilisÃ© pour l'affichage d'une chaine de caractÃ¨res et pour divers calculs de longueurs de chaines.
+/// Si on dÃ©sire changer de police, un nouvel appel spÃ©cifiant la nouvelle police de caractÃ¨re devant Ãªtre active devra Ãªtre fait.
 ///
-/// \param ID identifiant unique de la police de caractères
+/// \param ID identifiant unique de la police de caractÃ¨res
 void			dkfBindFont(unsigned int ID);
 
 
 
-/// \brief crée une police de caractères
+/// \brief crÃ©e une police de caractÃ¨res
 ///
-/// Cette fonction crée une police de caractères à partir d'une image TGA valide. Pour être considérer valide, une image TGA doit respecter certaine règle:
-/// 	- doit être de dimension 512x512 pixels
-/// 	- doit représenter un caractère dans une zone de 32x64 pixels maximum (afin de disposer d'assez d'aire pour 128 caractères)
-/// 	- un masque alpha doit délimiter verticalement chaque caractère avec au moins une ligne de 64 pixels de couleur (0,0,0) (ceci veut aussi dire que le dessin d'un caractère ne doit pas être divisé en deux par une ligne verticale de 64 pixels de noir)
-/// 	- les caractères représentées doivent être ceux entre le code ASCII 32 et 160 exclusivement et dans l'ordre
-/// 	- le premier caractère (33) doit être représenté à partir du coin supérieur gauche de l'image, les caractères suivants étant successivement représentés vers la droite et ensuite de nouveau à partir de gauche lorsqu'on atteint la limite de l'image
+/// Cette fonction crÃ©e une police de caractÃ¨res Ã  partir d'une image TGA valide. Pour Ãªtre considÃ©rer valide, une image TGA doit respecter certaine rÃ¨gle:
+/// 	- doit Ãªtre de dimension 512x512 pixels
+/// 	- doit reprÃ©senter un caractÃ¨re dans une zone de 32x64 pixels maximum (afin de disposer d'assez d'aire pour 128 caractÃ¨res)
+/// 	- un masque alpha doit dÃ©limiter verticalement chaque caractÃ¨re avec au moins une ligne de 64 pixels de couleur (0,0,0) (ceci veut aussi dire que le dessin d'un caractÃ¨re ne doit pas Ãªtre divisÃ© en deux par une ligne verticale de 64 pixels de noir)
+/// 	- les caractÃ¨res reprÃ©sentÃ©es doivent Ãªtre ceux entre le code ASCII 32 et 160 exclusivement et dans l'ordre
+/// 	- le premier caractÃ¨re (33) doit Ãªtre reprÃ©sentÃ© Ã  partir du coin supÃ©rieur gauche de l'image, les caractÃ¨res suivants Ã©tant successivement reprÃ©sentÃ©s vers la droite et ensuite de nouveau Ã  partir de gauche lorsqu'on atteint la limite de l'image
 ///
-/// \param filename chemin menant au fichier image TGA depuis l'endroit où se situe le fichier EXE du programme à partir de laquelle une police de caractère sera créé
-/// \return identifiant unique référant la nouvelle police de caractère
+/// \param filename chemin menant au fichier image TGA depuis l'endroit oÃ¹ se situe le fichier EXE du programme Ã  partir de laquelle une police de caractÃ¨re sera crÃ©Ã©
+/// \return identifiant unique rÃ©fÃ©rant la nouvelle police de caractÃ¨re
 unsigned int	dkfCreateFont(char *filename);
 
 
 
-/// \brief destruction d'une police de caractères
+/// \brief destruction d'une police de caractÃ¨res
 ///
-/// Cette fonction libère la mémoire allouée dans la création d'une police de caractères
+/// Cette fonction libÃ¨re la mÃ©moire allouÃ©e dans la crÃ©ation d'une police de caractÃ¨res
 ///
-/// \param ID pointeur vers l'identifiant unique référant la police de caractères devant être effacée
+/// \param ID pointeur vers l'identifiant unique rÃ©fÃ©rant la police de caractÃ¨res devant Ãªtre effacÃ©e
 void			dkfDeleteFont(unsigned int *ID);
 
 
 
-/// \brief obtient la position d'un caractère dans une chaine de caractère
+/// \brief obtient la position d'un caractÃ¨re dans une chaine de caractÃ¨re
 ///
-/// Cette fonction obtient la position de la première occurence d'un caractère qui se trouve possiblement dans une chaine de caractère.
-/// La police de caractères active est utilisé pour évaluer la largeur de chaque caractère. Les caractères \n sont aussi considérés dans le calcul. Ce qui veut dire que la hauteur du caractère peut ne pas être nulle.
+/// Cette fonction obtient la position de la premiÃ¨re occurence d'un caractÃ¨re qui se trouve possiblement dans une chaine de caractÃ¨re.
+/// La police de caractÃ¨res active est utilisÃ© pour Ã©valuer la largeur de chaque caractÃ¨re. Les caractÃ¨res \n sont aussi considÃ©rÃ©s dans le calcul. Ce qui veut dire que la hauteur du caractÃ¨re peut ne pas Ãªtre nulle.
 ///
-/// \param size hauteur en pixel de la chaine de caractères
-/// \param text chaine de caractères à considérer
-/// \param caracter caractère dont la position sera retourner
-/// \return position de la première occurence du caractère dans la chaine de caractères à considérer
+/// \param size hauteur en pixel de la chaine de caractÃ¨res
+/// \param text chaine de caractÃ¨res Ã  considÃ©rer
+/// \param caracter caractÃ¨re dont la position sera retourner
+/// \return position de la premiÃ¨re occurence du caractÃ¨re dans la chaine de caractÃ¨res Ã  considÃ©rer
 CPoint2f		dkfGetCaracterPos(float size, char *text, int caracter);
 
 
 
-/// \brief obtient l'index du caractère se trouvant à une certaine position dans une chaine de caractères
+/// \brief obtient l'index du caractÃ¨re se trouvant Ã  une certaine position dans une chaine de caractÃ¨res
 ///
-/// Cette fonction retourne le nombre désignant le n ième caractère d'une chaine de caractères qui se trouve à la position onStringPos.
+/// Cette fonction retourne le nombre dÃ©signant le n iÃ¨me caractÃ¨re d'une chaine de caractÃ¨res qui se trouve Ã  la position onStringPos.
 ///
-/// \param size hauteur en pixel de la chaine de caractères
-/// \param text chaine de caractères à considérer
-/// \param onStringPos position cible en pixel dont l'origine se trouve dans le coin supérieur gauche du premier caractère
-/// \return le n ième caractère d'une chaine de caractères qui se trouve à la position onStringPos
+/// \param size hauteur en pixel de la chaine de caractÃ¨res
+/// \param text chaine de caractÃ¨res Ã  considÃ©rer
+/// \param onStringPos position cible en pixel dont l'origine se trouve dans le coin supÃ©rieur gauche du premier caractÃ¨re
+/// \return le n iÃ¨me caractÃ¨re d'une chaine de caractÃ¨res qui se trouve Ã  la position onStringPos
 int				dkfGetOverStringCaracter(float size, char *text, CPoint2f & onStringPos);
 
 
 
-/// \brief retourne la hauteur total d'une chaine de caractères en considérant les caractères \n
+/// \brief retourne la hauteur total d'une chaine de caractÃ¨res en considÃ©rant les caractÃ¨res \n
 ///
-/// Cette fonction retourne la hauteur total en pixel d'une chaine de caractères en considérant les caractères \n.
+/// Cette fonction retourne la hauteur total en pixel d'une chaine de caractÃ¨res en considÃ©rant les caractÃ¨res \n.
 ///
-/// \param size hauteur en pixel d'un caractère
-/// \param text chaine de caractères à considérer
+/// \param size hauteur en pixel d'un caractÃ¨re
+/// \param text chaine de caractÃ¨res Ã  considÃ©rer
 /// \return hauteur total en pixels
 float			dkfGetStringHeight(float size, char *text);
 
 
 
-/// \brief retourne la largeur de la plus grande sous-chaine d'une chaine de caractères délimitées par les caractères \n
+/// \brief retourne la largeur de la plus grande sous-chaine d'une chaine de caractÃ¨res dÃ©limitÃ©es par les caractÃ¨res \n
 ///
-/// Cette fonction retourne la largeur de la plus grande sous-chaine d'une chaine de caractères délimitées par les caractères \n
+/// Cette fonction retourne la largeur de la plus grande sous-chaine d'une chaine de caractÃ¨res dÃ©limitÃ©es par les caractÃ¨res \n
 ///
-/// \param size hauteur en pixel d'un caractère
-/// \param text chaine de caractères à considérer
+/// \param size hauteur en pixel d'un caractÃ¨re
+/// \param text chaine de caractÃ¨res Ã  considÃ©rer
 /// \return largeur de la plus grande sous-chaine
 float			dkfGetStringWidth(float size, char *text);
 
 
 
-/// \brief dessine une chaine de caractères
+/// \brief dessine une chaine de caractÃ¨res
 ///
-/// Cette fonction dessine une chaine de caractères sur un QUAD (polygone à 4 coté) en 3D en utilisant la police de caractères active, les caractères de couleurs et le caractères retour de chariot (\n).
+/// Cette fonction dessine une chaine de caractÃ¨res sur un QUAD (polygone Ã  4 cotÃ©) en 3D en utilisant la police de caractÃ¨res active, les caractÃ¨res de couleurs et le caractÃ¨res retour de chariot (\n).
 ///
-/// \param size grandeur du texte à dessiner en pourcentage par rapport à la hauteur originale (l'aggrandissement est valide pour la largeur et la hauteur du texte)
+/// \param size grandeur du texte Ã  dessiner en pourcentage par rapport Ã  la hauteur originale (l'aggrandissement est valide pour la largeur et la hauteur du texte)
 /// \param x position du texte en 3D
 /// \param y position du texte en 3D
 /// \param z position du texte en 3D
-/// \param text chaine de caractères à dessiner à l'écran
+/// \param text chaine de caractÃ¨res Ã  dessiner Ã  l'Ã©cran
 void			dkfPrint(float size, float x, float y, float z, char *text);
 
 
 
-/// \brief destruction de toutes les polices de caractères présentement chargées en mémoire
+/// \brief destruction de toutes les polices de caractÃ¨res prÃ©sentement chargÃ©es en mÃ©moire
 ///
-/// Cette fonction libère toute la mémoire allouée pour toutes les polices de caractères présentement chargées.
+/// Cette fonction libÃ¨re toute la mÃ©moire allouÃ©e pour toutes les polices de caractÃ¨res prÃ©sentement chargÃ©es.
 ///
 void			dkfShutDown();
 

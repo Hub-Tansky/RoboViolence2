@@ -49,7 +49,7 @@ struct NuzzleFlash
 	CMatrix3x3f matrix;
 	CVector3f position;
 	float delay; // le delait d'affichage du feu
-	float angle; // l'angle du nuzzle flash, ça c random
+	float angle; // l'angle du nuzzle flash, Ã§a c random
 	NuzzleFlash(CMatrix3x3f & pMatrix, CVector3f & pPosition)
 	{
 		delay = 0;
@@ -102,7 +102,7 @@ public:
 	std::vector<NuzzleFlash*> nuzzleFlashes;
 	std::vector<NuzzleFlash*> ejectingBrass;
 
-	// À quel nuzzle on est rendu à tirer
+	// Ã€ quel nuzzle on est rendu Ã  tirer
 	int firingNuzzle;
 #endif
 	
