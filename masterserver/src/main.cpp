@@ -1,8 +1,9 @@
 
-#ifndef BV2_PLATFORM_WINDOWS
-	#include <chrono>
+#include <chrono>
 #include <thread>
-#include "sys/times.h"
+
+#ifndef BV2_PLATFORM_WINDOWS
+	#include "sys/times.h"
 
 	#define stricmp strcasecmp //helper define
 #else

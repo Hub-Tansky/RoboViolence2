@@ -22,6 +22,7 @@
 #include "Scene.h"
 #include "Console.h"
 #include <exception>
+#include <iostream>
 #include <cstdlib>
 #include <cstring>
 #include "CMaster.h"

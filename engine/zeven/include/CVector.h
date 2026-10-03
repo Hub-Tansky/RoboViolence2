@@ -378,7 +378,7 @@ public:
 	float& x() {return s[0];}	///< obtenir x
 	float& y() {return s[1];}	///< obtenir y
 	float& z() {return s[2];}	///< obtenir z
-	float& r() {return s[4];}	///< obtenir w
+	float& r() {return s[3];}	///< obtenir w
 
 	/// Sa grandeur
 	float length() {return sqrtf(s[0]*s[0] + s[1]*s[1] + s[2]*s[2] + s[3]*s[3]);}	///< longueur du vecteur

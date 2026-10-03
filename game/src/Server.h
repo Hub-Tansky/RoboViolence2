@@ -22,10 +22,10 @@
 
 #include "Game.h"
 #include <map>
+#include <string>
 
 #ifndef BV2_PLATFORM_WINDOWS
 	#include "platform.h"
-    #include <string>
 #endif
 #include <vector>
 

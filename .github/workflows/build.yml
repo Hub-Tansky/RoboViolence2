@@ -35,7 +35,7 @@ jobs:
           eval "$(tools/setup-dev.sh --linux-packages | sed 's/^sudo apt install/sudo apt-get install -y/')"
       - name: macOS tools
         if: runner.os == 'macOS'
-        run: brew install ninja autoconf automake libtool || true
+        run: brew install ninja autoconf autoconf-archive automake libtool
       - name: MSVC environment
         if: runner.os == 'Windows'
         uses: ilammy/msvc-dev-cmd@v1
