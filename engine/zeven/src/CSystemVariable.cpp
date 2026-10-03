@@ -90,7 +90,8 @@ void CSystemVariable::loadConfig(char * filename, bool transient)
 	while (!ficIn.eof())
 	{
 		char variable[256];
-		ficIn >> variable;
+		if (!(ficIn >> variable))
+			break; // end of file: the old name would be reloaded with a failed read (0 or "")
 		if ((variable[0] == '/') && (variable[1] == '/'))
 		{
 			ficIn.ignore(512, '\n');
@@ -130,7 +131,8 @@ void CSystemVariable::loadConfigSVOnly(char * filename)
 	while (!ficIn.eof())
 	{
 		char variable[256];
-		ficIn >> variable;
+		if (!(ficIn >> variable))
+			break; // end of file: the old name would be reloaded with a failed read (0 or "")
 		if ((variable[0] == '/') && (variable[1] == '/'))
 		{
 			ficIn.ignore(512, '\n');
@@ -191,9 +193,10 @@ void CSystemVariable::saveConfig(char * filename)
 		CSVType *svType = variables.at(i);
 
 		CString varNameTmp = svType->variableName;
-		if (isTransient(varNameTmp.getFirstToken(' ')))
+		CString shortName = varNameTmp.getFirstToken(' '); // consumes the token from varNameTmp
+		if (isTransient(shortName))
 			continue; // came from the environment or a local file: not ours to persist
-		ficOut <<varNameTmp.getFirstToken(' ').s << " ";
+		ficOut << shortName.s << " ";
 		svType->saveConfig(ficOut);
 		ficOut << endl;
 	}
