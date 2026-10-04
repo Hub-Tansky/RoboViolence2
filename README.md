@@ -1,5 +1,5 @@
-# RoboViolence 2
-RoboViolence 2 is an unofficial fork of BaboViolent 2 by bitHeads / RndLabs
+# Robo Violence 2
+Robo Violence 2 is an unofficial fork of BaboViolent 2 by bitHeads / RndLabs
 (GPLv3 source release): <https://github.com/Daivuk/BaboViolent2>
 Not affiliated with or endorsed by the original authors.
 
@@ -49,6 +49,5 @@ cmake --build --preset linux-x64 --target bv2dedicated bv2master
 ## Where to read more
 - [AGENTS.md](AGENTS.md): project rules for fellow robots, agents and even human contributors
 - [ARCHITECTURE.md](ARCHITECTURE.md): architecture index
-- [docs/refactoring/](docs/refactoring/README.md): step-by-step refactoring plan
-- [docs/analysis/](docs/analysis/README.md): code analysis
-- [config/README.md](config/README.md): config and secrets policy
+- [docs/refactoring/](docs/refactoring/README.md): step-by-step refactoring plan in progress
+- [docs/analysis/](docs/analysis/README.md): original bv2 code analysis v1

@@ -1,6 +1,6 @@
 # Architecture
 
-RoboViolence 2: unofficial fork of BaboViolent 2, a top-down multiplayer shooter (C++, GPLv3). State after Step 3: SDL3 + miniaudio + glad platform layer.
+Robo Violence 2: unofficial fork of BaboViolent 2, a top-down multiplayer shooter (C++, GPLv3). State after Step 3: SDL3 + miniaudio + glad platform layer.
 
 ## Summary
 
@@ -19,7 +19,7 @@ RoboViolence 2: unofficial fork of BaboViolent 2, a top-down multiplayer shooter
 | Assets | The original assets are removed and blocked by hash (`tools/check-original-assets.py`). Only `content/languages/en.lang` and `content/LaunchScript/` remain; the build generates placeholders (`tools/gen-placeholder-content.py`). |
 | Encoding | UTF-8 without BOM, LF; `tools/check-encoding.py`. Some comments hold U+FFFD where upstream lost accents. |
 | Known defects | [docs/analysis/KEY_QUESTIONS.md](docs/analysis/KEY_QUESTIONS.md). |
-| Decisions | [docs/decisions/README.md](docs/decisions/README.md): 0001 Ninja, 0002 libcurl compiled out, 0003 OpenGL 2.1 kept, 0004 project name, 0005 `main/` data root, 0006 platform layer, 0007 data root, pref dir and config layers. |
+| Decisions | [docs/decisions/README.md](docs/decisions/README.md): 0001 Ninja, 0002 libcurl compiled out, 0003 OpenGL 2.1 kept, 0004 project name (superseded by 0008), 0005 `main/` data root, 0006 platform layer, 0007 data root, pref dir and config layers, 0008 display name "Robo Violence 2". |
 
 ### Open items
 
@@ -147,6 +147,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/decisions/0004-project-name-roboviolence2.md` | ADR 0004 |
 | `docs/decisions/0005-runtime-main-data-root.md` | ADR 0005 |
 | `docs/decisions/0006-sdl3-miniaudio-glad-platform-layer.md` | ADR 0006 |
+| `docs/decisions/0008-display-name-robo-violence-2.md` | ADR 0008 |
 | `docs/decisions/README.md` | ADR format and index |
 
 ### `docs/refactoring`

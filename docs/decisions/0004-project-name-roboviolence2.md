@@ -1,6 +1,6 @@
 # 0004: Name the project RoboViolence 2, an unofficial fork of BaboViolent 2
 
-- Status: Accepted
+- Status: Superseded by 0008
 - Date: 2026-10-03
 - Affects: [step0 §0.2](../refactoring/step0-fork-rename-and-asset-removal.md)
 
