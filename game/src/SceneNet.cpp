@@ -174,7 +174,7 @@ void Scene::disconnect()
 	ZEVEN_SAFE_DELETE(editor);
 	console->unlock(); // Petit bug quand on chattait ;)
 //	menu->show();
-	menuManager.root->visible = true;
+	if (menuManager.root) menuManager.root->visible = true; // null while the intro screen is showing
 //	if (wrongVersion) menu->currentMenu = MENU_WRONG_VERSION;
 #endif
 }
