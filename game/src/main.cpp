@@ -445,7 +445,7 @@ int main(int argc, char* argv[])
 	dksvarSaveConfig((char*)configPath.c_str()); // On cre8 le config file aussi
 
 	// On load tout suite le language utilise par le joueur
-	if (!gameVar.isLanguageLoaded())
+	if (!gameVar.reloadLanguage())
 	{
 		dkwShowMessage("Error", "Can not load language file\nTry deleting the config file.");
 		return 0;

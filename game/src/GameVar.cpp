@@ -272,7 +272,7 @@ GameVar::GameVar()
 	dksvarRegister(CString("languageFile [string : \"\"]"), &languageFile, true);
 
 #ifndef CONSOLE
-	loadLanguage(languageFile.s);
+	// Weapon names stay empty until main() calls reloadLanguage(): gameVar is a static, so this runs before pathsInit()
 	weapons[WEAPON_DUAL_MACHINE_GUN] = new Weapon("main/models/DualMachineGun.DKO", "main/sounds/DualMachineGun.wav", .1f, gameVar.lang_dualMachineGun.s, 
 		.13f, 10, 1, .8f, 2, WEAPON_DUAL_MACHINE_GUN, PROJECTILE_DIRECT);
 	weapons[WEAPON_SMG] = new Weapon("main/models/SMG.DKO", "main/sounds/SMG.wav", .1f, gameVar.lang_subMachineGun.s,
@@ -1226,6 +1226,7 @@ bool GameVar::loadLanguage(char * filename)
 	FILE * fic = fopen(filename, "r");
 	
 	if (!fic) return false;
+	languageLoaded = false;
 
 	char varName[256];
 	char varValue[512];
@@ -1234,6 +1235,7 @@ bool GameVar::loadLanguage(char * filename)
 		fscanf(fic, "%s", varName);
 		if (strcmp(varName, "END") == 0)
 		{
+			fclose(fic);
 			languageLoaded = true;
 			return true;
 		}
@@ -1327,6 +1329,19 @@ bool GameVar::loadLanguage(char * filename)
 		}
 	}
 	languageLoaded = true;
+	return true;
+}
+
+bool GameVar::reloadLanguage()
+{
+	if (!loadLanguage(languageFile.s)) return false;
+	weapons[WEAPON_DUAL_MACHINE_GUN]->weaponName = lang_dualMachineGun;
+	weapons[WEAPON_SMG]->weaponName = lang_subMachineGun;
+	weapons[WEAPON_CHAIN_GUN]->weaponName = lang_changGun;
+	weapons[WEAPON_SHOTGUN]->weaponName = lang_shotgun;
+	weapons[WEAPON_SNIPER]->weaponName = lang_sniper;
+	weapons[WEAPON_BAZOOKA]->weaponName = lang_bazooka;
+	weapons[WEAPON_GRENADE]->weaponName = lang_grenade;
 	return true;
 }
 
