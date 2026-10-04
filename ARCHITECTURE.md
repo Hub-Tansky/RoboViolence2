@@ -561,7 +561,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tools/original-assets.sha256` | SHA-256 of every removed original file |
 | `tools/convert-encoding.py` | One-off UTF-8/LF converter used in step 1.4 |
 | `tools/placeholder-manifest.tsv` | Files the game loads at startup and their formats, for the placeholder generator |
-| `tools/gen-placeholder-content.py` | Writes placeholder maps, textures, sounds and models for dev and CI |
+| `tools/gen-placeholder-content.py` | Writes placeholder maps, textures, a readable font atlas, sounds and models for dev and CI |
 | `tools/check-hygiene.py` | Fails on spaces in paths, tracked ignored files, files over 5 MB, bad encoding |
 | `tools/seed_db.cpp` | Creates a SQLite DB from SQL files (build helper) |
 | `tools/setup-dev.ps1` | Activates hooks, checks tools (Windows) |
