@@ -560,6 +560,8 @@ public:
 	bool languageLoaded;
 	// Pour loader les lang_ var
 	bool loadLanguage(char * filename);
+	// Load languageFile (relative to the data root) and refresh the weapon names; call after pathsInit()
+	bool reloadLanguage();
 	bool isLanguageLoaded();
 #endif
 };
