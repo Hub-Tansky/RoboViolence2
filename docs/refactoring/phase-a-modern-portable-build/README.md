@@ -16,7 +16,7 @@ Gameplay, security, bots and anti-cheat are out of scope here; see [future-phase
 
 | Topic | Decision |
 |---|---|
-| Fork and name | GitHub fork renamed `RoboViolence2`, local dir `RoboViolence2-master`. Code identifiers (`bv2`) stay until [future-phases.md](../future-phases.md) §H ([step0](step0-fork-rename-and-asset-removal.md)) |
+| Fork and name | GitHub fork renamed `RoboViolence2`, local dir `RoboViolence2-main`. Code identifiers (`bv2`) stay until [future-phases.md](../future-phases.md) §H ([step0](step0-fork-rename-and-asset-removal.md)) |
 | Original assets | Not committed or redistributed. Removed from `main` in [step0](step0-fork-rename-and-asset-removal.md) §0.4; every removed file is catalogued in the asset inventory (kept outside this repository) for recreation; a hash blocklist stops them coming back. Local runs use your own copy via `BV2_DATA_DIR`; CI uses generated placeholders |
 | Platforms | **Linux, macOS, Windows**. All three are equivalent first-class targets: none is secondary, and each one blocks a release. Linux x64 (Ubuntu 24.04 LTS as the reference distro; X11 and Wayland); macOS 12+ (arm64); Windows 11 and later (x64). arm64 Linux/Windows and x86_64 macOS are optional extras |
 | Protocol | Free to break compatibility with 2.11 clients. Bump `GAME_VERSION_SV/CL` once |

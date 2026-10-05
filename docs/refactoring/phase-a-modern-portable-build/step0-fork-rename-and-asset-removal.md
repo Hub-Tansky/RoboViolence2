@@ -80,9 +80,9 @@ Prints the noreply address, then `Hi Hub-Tansky!`.
    ```bash
    GH_TOKEN=$(gh auth token --user Hub-Tansky) gh api -X POST repos/Hub-Tansky/RoboViolence2/branches/master/rename -f new_name=main
    ```
-2. Clone to `~/Dev/BaboViolent_2_relaunch/RoboViolence2-master`:
+2. Clone to `~/Dev/BaboViolent_2_relaunch/RoboViolence2-main`:
    ```bash
-   git clone git@github.com:Hub-Tansky/RoboViolence2.git RoboViolence2-master
+   git clone git@github.com:Hub-Tansky/RoboViolence2.git RoboViolence2-main
    ```
 3. Port the existing local commits. Their history is unrelated, so cherry-pick everything after the root commit:
    ```bash
@@ -98,7 +98,7 @@ Prints the noreply address, then `Hi Hub-Tansky!`.
 
 ### 0.2 Rename the local directory and project
 
-- The working dir is `RoboViolence2-master`; the GitHub repo is `RoboViolence2`.
+- The working dir is `RoboViolence2-main`; the GitHub repo is `RoboViolence2`.
 - Project name: **RoboViolence 2**, an unofficial fork of BaboViolent 2. Write ADR `docs/decisions/0004-project-name-roboviolence2.md` and add it to the ADR index.
 - Update the first line of `AGENTS.md` and the README index. Code identifiers (`bv2`, `babo`) stay until §H.
 - Claude Code keys its memory and `settings.local.json` by path. Copy `~/.claude/projects/-Users-piotr-Dev-BaboViolent-2-relaunch-BaboViolent2-master/` to the key for the new path, or start fresh.
@@ -191,7 +191,7 @@ Prints only `337104978+Hub-Tansky@users.noreply.github.com`. Add the remote firs
 ```bash
 git remote get-url origin
 ```
-Ends in `/RoboViolence2.git`, and `basename "$PWD"` is `RoboViolence2-master`.
+Ends in `/RoboViolence2.git`, and `basename "$PWD"` is `RoboViolence2-main`.
 
 ```bash
 git ls-files | grep -iE '\.(bvm|dko|tga|wav|ogg|max|dle|dll|doc)$|^BaboViolent2/(Assets|Design)/|Content/main/License\.txt'
