@@ -41,7 +41,7 @@ After Steps 1–4 the project builds on modern toolchains. This step adds the en
 ### 5.4 CI (GitHub Actions); all jobs required
 
 - **`build`** matrix, all three required:
-  - `windows-latest` (Windows Server 2022+/MSVC; stands in for the Windows 11 target), preset `win-x64-msvc` (set up the MSVC environment with `ilammy/msvc-dev-cmd`, [ADR 0001](../decisions/0001-ninja-generator-on-all-presets.md));
+  - `windows-latest` (Windows Server 2022+/MSVC; stands in for the Windows 11 target), preset `win-x64-msvc` (set up the MSVC environment with `ilammy/msvc-dev-cmd`, [ADR 0001](../../decisions/0001-ninja-generator-on-all-presets.md));
   - `macos-14` (arm64), preset `macos-arm64`;
   - `ubuntu-24.04`, preset `linux-x64`; install the apt packages from step 2 §2.5.
   - vcpkg binary cache.
@@ -59,7 +59,7 @@ After Steps 1–4 the project builds on modern toolchains. This step adds the en
 ### 5.5 First tests
 
 - `tests/` with a CTest target.
-- Candidates, which also serve [future-phases.md](future-phases.md):
+- Candidates, which also serve [future-phases.md](../future-phases.md):
   - `netPacket.h` round-trips and size asserts;
   - loading every placeholder map (and, locally, every original map via `BV2_DATA_DIR`);
   - `dksvar` parsing and the config layering order (step 4 §4.5);

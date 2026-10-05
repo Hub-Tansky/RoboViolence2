@@ -2,7 +2,7 @@
 
 - Status: Superseded by 0008
 - Date: 2026-10-03
-- Affects: [step0 §0.2](../refactoring/step0-fork-rename-and-asset-removal.md)
+- Affects: [step0 §0.2](../refactoring/phase-a-modern-portable-build/step0-fork-rename-and-asset-removal.md)
 
 ## Context
 - The GPLv3 covers code only. The name "BaboViolent 2" and its logos are claimed by RndLabs Inc. (`License.txt` §2c) with no grant (the asset licence notes (kept outside this repository)).

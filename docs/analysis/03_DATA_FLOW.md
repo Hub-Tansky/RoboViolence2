@@ -6,36 +6,55 @@
 
 ## 1. Connection handshake
 
-```
- CLIENT                                   SERVER
- ──────                                   ──────
- Scene::join → Client::join
-   bb_clientConnect(ip, port)  ─── TCP connect ───►  bb_serverUpdate returns new babonetID
-                                                     ban-list IP check
-                                                     Game::createNewPlayerSV(babonetID)
-            ◄── NET_SVCL_NEWPLAYER (broadcast) ────  { slot, babonetID }
-            ◄── NET_SVCL_GAMEVERSION (to client) ──  { GAME_VERSION_SV }
- first NEWPLAYER → thisPlayer = players[slot]
- version == GAME_VERSION_CL ?
-   no  → needToShutDown, wrongVersionReason
-   yes ─── NET_CLSV_SVCL_PLAYER_INFO ─────────►     name, MD5(pw), MAC
-                                                     → broadcast PLAYER_INFO
-                                                     → HTTP auth request (CCurl)
-                                                     → master CACHE_BANNED query
-       ─── NET_CLSV_GAMEVERSION_ACCEPTED ──────►     password check (sv_password)
-            ◄── NET_SVCL_SERVER_INFO ──────────────  map name, scores, game type
-            ◄── NET_SVCL_GAME_STATE ───────────────  roundState
-            ◄── NET_SVCL_SV_CHANGE × N ────────────  every sv_* variable
-            ◄── NET_SVCL_PLAYER_ENUM_STATE × N ────  every other player
-            ◄── NET_CLSV_SVCL_PLAYER_PROJECTILE × N  every live projectile
-            ◄── NET_SVCL_FLAG_ENUM (CTF only) ─────
- SERVER_INFO: gotGameState = true
-   map missing locally?
-     → NET_CLSV_MAP_REQUEST ───────────────►         mapTransfers.push_back
-            ◄── NET_SVCL_MAP_CHUNK × k (250 B) ────  rate-limited per tick
-            ◄── NET_SVCL_MAP_CHUNK size=0 ─────────  end of file
-     createMap() from buffer
-     → NET_CLSV_GAMEVERSION_ACCEPTED (again) ──►     full state re-sent
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant S as Server
+    participant O as Other clients
+
+    Note over C: Scene::join → Client::join
+    C->>S: bb_clientConnect(ip, port) (TCP connect)
+    Note over S: bb_serverUpdate returns new babonetID<br/>ban-list IP check<br/>Game::createNewPlayerSV: first free slot
+    S->>C: NET_SVCL_NEWPLAYER { slot, babonetID } (broadcast)
+    S->>O: NET_SVCL_NEWPLAYER
+    S->>C: NET_SVCL_GAMEVERSION { GAME_VERSION_SV }
+    Note over C: first NEWPLAYER → thisPlayer = players[slot]
+    alt version != GAME_VERSION_CL
+        Note over C: needToShutDown, wrongVersionReason
+    else version matches
+        C->>S: NET_CLSV_SVCL_PLAYER_INFO { name, MD5(pw), MAC }
+        S->>O: PLAYER_INFO (broadcast)
+        Note over S: HTTP auth request (CCurl)<br/>master CACHE_BANNED query
+        C->>S: NET_CLSV_GAMEVERSION_ACCEPTED
+        Note over S: password check (sv_password)
+        S->>C: NET_SVCL_SERVER_INFO (map name, scores, game type)
+        S->>C: NET_SVCL_GAME_STATE (roundState)
+        loop every sv_* variable
+            S->>C: NET_SVCL_SV_CHANGE
+        end
+        loop every other player
+            S->>C: NET_SVCL_PLAYER_ENUM_STATE
+        end
+        loop every live projectile
+            S->>C: NET_CLSV_SVCL_PLAYER_PROJECTILE
+        end
+        opt CTF
+            S->>C: NET_SVCL_FLAG_ENUM
+        end
+        Note over C: SERVER_INFO: gotGameState = true
+        opt map missing locally
+            C->>S: NET_CLSV_MAP_REQUEST
+            Note over S: mapTransfers.push_back
+            loop rate-limited per tick
+                S->>C: NET_SVCL_MAP_CHUNK (250 B)
+            end
+            S->>C: NET_SVCL_MAP_CHUNK size=0 (end of file)
+            Note over C: createMap() from buffer
+            C->>S: NET_CLSV_GAMEVERSION_ACCEPTED (again)
+            Note over S: full state re-sent
+        end
+    end
+    Note over C,S: The server now sends all game events to this client.
 ```
 
 Evidence, in order:

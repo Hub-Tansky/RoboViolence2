@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-10-03
-- Affects: [step 3](../refactoring/step3-dependency-upgrades.md)
+- Affects: [step 3](../refactoring/phase-a-modern-portable-build/step3-dependency-upgrades.md)
 
 ## Context
 - The platform modules were a Win32/WGL window, DirectInput, FMOD 3 and an SDL 1.2 path that never had a client `main` (`game/src/main.cpp` had only `WinMain` for the client).

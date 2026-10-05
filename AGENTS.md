@@ -39,7 +39,7 @@ cmake --build --preset <preset> --target bv2dedicated bv2master
 
 ## Agent rules
 
-- Work one step at a time, from its scope file in `docs/refactoring/`. Stay inside the step's **Allowed paths**; note out-of-scope work instead of doing it.
+- Work one step at a time, from its scope file in `docs/refactoring/<phase>/`. Stay inside the step's **Allowed paths**; note out-of-scope work instead of doing it.
 - Branch `refactor/stepN-<slug>`, one commit per task item (`stepN.M: <summary>`), one PR per step. Step 0 was the only step committed straight to `main`.
 - Never commit secrets, real hosts or IPs. Never use `--no-verify`.
 - Finish every step by updating `ARCHITECTURE.md` (inventory and changed facts) and running `tools/check-architecture.sh`.
@@ -55,7 +55,7 @@ cmake --build --preset <preset> --target bv2dedicated bv2master
 
 - All commits, merges, pushes and GitHub actions for this project run as **`Hub-Tansky`**: `user.email = 337104978+Hub-Tansky@users.noreply.github.com`. Never `patpi`, never a personal email.
 - Run `gh` as `GH_TOKEN=$(gh auth token --user Hub-Tansky) gh …`. Don't run `gh auth switch`; other projects rely on `patpi` being active.
-- Setup and guard hook: `docs/refactoring/step0-fork-rename-and-asset-removal.md` §0.0.
+- Setup and guard hook: `docs/refactoring/phase-a-modern-portable-build/step0-fork-rename-and-asset-removal.md` §0.0.
 
 ## Conventions and gotchas
 

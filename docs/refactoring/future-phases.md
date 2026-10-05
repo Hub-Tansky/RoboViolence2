@@ -1,6 +1,6 @@
 # Future phases (after Phase A)
 
-**Depends on:** Phase A complete ([README.md](README.md)). Each section becomes its own scope files (copies of [_template-step.md](_template-step.md)) before work starts.
+**Depends on:** Phase A complete ([README.md](phase-a-modern-portable-build/README.md)). Each section becomes its own scope files (copies of [_template-step.md](_template-step.md)) before work starts.
 
 Phase A leaves a modern, portable build with the gameplay unchanged. Everything below changes behaviour, security or scope.
 

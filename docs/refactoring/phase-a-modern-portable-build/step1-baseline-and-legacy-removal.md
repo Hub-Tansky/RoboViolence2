@@ -10,7 +10,7 @@
 | In scope | Tasks 1.0–1.14 below |
 | Out of scope | Any build system (Step 2); dependency upgrades (Step 3); code fixes beyond removing dead branches; the loader code for layered config (Step 4 §4.5); moving directories (Step 2 §2.0) |
 | Allowed paths | Whole repository (this step mostly deletes). New root files: `.gitignore`, `.gitattributes`, `.gitleaks.toml`, `.editorconfig`, `.git-blame-ignore-revs`, `.githooks/`, `.github/workflows/secret-scan.yml`, `tools/`, `config/`, `content-seed/`, `ARCHITECTURE.md`, `AGENTS.md`, `CLAUDE.md` |
-| Inputs | `AGENTS.md`, [../analysis/01_SYSTEM_OVERVIEW.md](../analysis/01_SYSTEM_OVERVIEW.md), [../analysis/KEY_QUESTIONS.md](../analysis/KEY_QUESTIONS.md) |
+| Inputs | `AGENTS.md`, [../../analysis/01_SYSTEM_OVERVIEW.md](../../analysis/01_SYSTEM_OVERVIEW.md), [../../analysis/KEY_QUESTIONS.md](../../analysis/KEY_QUESTIONS.md) |
 | Deliverables | Secret blocking active on the fork; one commit per task item; `ARCHITECTURE.md` |
 | Definition of done | "Acceptance checks" below all pass |
 
@@ -161,9 +161,9 @@ Do this right after §1.3, **before any other code edit**, so every later diff a
 
 - Scope: 134 lines in 35 files. Keep the `#ifdef _PRO_` branches.
 - In `Server.h` / `Client.h`, keep a single `GAME_VERSION_SV/CL`. Step 4 bumps it.
-- Remove the **client binary checksum challenge**, since it can't work with open-source builds. See `BaboViolent2/Code/ClientRecv.cpp:38-80`, the server side in `ServerRecv.cpp`, and the `BadChecksum` insert at `ServerRecv.cpp:1198`, which is also an SQL injection (Q-S3). A real integrity approach is in [future-phases.md](future-phases.md) §C.
+- Remove the **client binary checksum challenge**, since it can't work with open-source builds. See `BaboViolent2/Code/ClientRecv.cpp:38-80`, the server side in `ServerRecv.cpp`, and the `BadChecksum` insert at `ServerRecv.cpp:1198`, which is also an SQL injection (Q-S3). A real integrity approach is in [future-phases.md](../future-phases.md) §C.
 - Keep the Minibot weapon (`MINIBOT`, 33 lines). It's a deployable drone weapon, not an AI player.
-- Read [../analysis/KEY_QUESTIONS.md](../analysis/KEY_QUESTIONS.md) Q6 first.
+- Read [../../analysis/KEY_QUESTIONS.md](../../analysis/KEY_QUESTIONS.md) Q6 first.
 
 ### 1.8 Remove Visual Leak Detector
 
@@ -199,12 +199,12 @@ Do this right after §1.3, **before any other code edit**, so every later diff a
 ### 1.12 Remove unbuilt auxiliary tools
 
 - `BaboViolent2/Bv2Launcher/`, `BaboViolent2/Bv2UpdateServer/` (32-bit ELF + `fl.db`), `BaboViolent2/Bv2RemoteAdmin/` (wxWidgets).
-- A secure admin replacement is in [future-phases.md](future-phases.md) §D.
+- A secure admin replacement is in [future-phases.md](../future-phases.md) §D.
 
 ### 1.13 Consolidate MD5 and drop OpenSSL
 
 - Keep babonet's `md5class`. Switch `CMaster.cpp:28` (`<openssl/md5.h>`) and the `md5_2.h` users to it, then delete `md5_2.h`. OpenSSL is no longer a dependency.
-- Replacing MD5 for passwords is part of [future-phases.md](future-phases.md) §B.
+- Replacing MD5 for passwords is part of [future-phases.md](../future-phases.md) §B.
 
 ### 1.14 Content and READMEs
 

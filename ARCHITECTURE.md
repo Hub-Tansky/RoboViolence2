@@ -27,7 +27,7 @@ Robo Violence 2: unofficial fork of BaboViolent 2, a top-down multiplayer shoote
 - **GLU:** still the system library (headers and link) for `dko`, `zeven_client` and the game, so the headless server needs GLU dev packages; `dkt` is stubbed there. The renderer itself is unchanged fixed-function GL 2.1 (ADR 0003).
 - **OGG music** needs `stb_vorbis.c` (vcpkg `stb`, found in CI builds); the placeholders have no music, and playback was never heard.
 - **HiDPI:** `dkwGetResolution()` is the pixel size; the UI math assumes nothing else. Untested on a Retina display.
-- **Dead code:** 16 old-menu `.cpp` files in `game/src` are not built (see [game/README.md](game/README.md)). `game/src/bv2.bmp` and `icon1.ico` are original artwork; replace in §H.
+- **Dead code:** 16 old-menu `.cpp` files in `game/src` are not built (see [game/README.md](game/README.md)).
 - UBSan reports pre-existing defects (out-of-range `bool` loads, NaN casts in `CUserLogin.cpp`).
 - **Warnings:** every target except `glad` builds with `-Werror` / `/WX`. Cosmetic classes (unused names, signed compares, initialiser order) are off for `game` and `masterserver` (`bv2_target_legacy_strict`); about 4800 string-literal-to-`char*` warnings are suppressed.
 - **clang-tidy** runs in CI as a non-required job.
@@ -61,6 +61,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `packaging/linux/roboviolence2.desktop` | Linux desktop entry |
 | `packaging/macos/Info.plist.in` | macOS bundle `Info.plist` template |
 | `packaging/windows/bv2.manifest` | Windows manifest: PerMonitorV2 DPI, UTF-8 code page, Windows 10/11 |
+| `packaging/windows/bv2.rc.in` | Windows resource script template; CMake fills in the generated icon |
 | `tests/CMakeLists.txt` | ctest targets: netPacket, config, fileio, dedicated-server smoke |
 | `tests/smoke_server.py` | Starts `bv2dedicated` headless, runs the CTF script, quits |
 | `tests/test_config.cpp` | dksvar config layering, transient values not saved, secrets masked |
@@ -154,15 +155,21 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 
 | path | purpose |
 |---|---|
-| `docs/refactoring/README.md` | Phase A handoff and step index |
 | `docs/refactoring/_template-step.md` | Template for step files |
 | `docs/refactoring/future-phases.md` | Work after Phase A (sections A to H) |
-| `docs/refactoring/step0-fork-rename-and-asset-removal.md` | Scope file for step0 |
-| `docs/refactoring/step1-baseline-and-legacy-removal.md` | Scope file for step1 |
-| `docs/refactoring/step2-cmake-build.md` | Scope file for step2 |
-| `docs/refactoring/step3-dependency-upgrades.md` | Scope file for step3 |
-| `docs/refactoring/step4-64bit-and-cross-platform.md` | Scope file for step4 |
-| `docs/refactoring/step5-code-hygiene-and-ci.md` | Scope file for step5 |
+
+### `docs/refactoring/phase-a-modern-portable-build`
+
+| path | purpose |
+|---|---|
+| `docs/refactoring/phase-a-modern-portable-build/README.md` | Phase A handoff and step index |
+| `docs/refactoring/phase-a-modern-portable-build/phase-a-manual-test.md` | Manual gameplay and master-listing checklist per OS |
+| `docs/refactoring/phase-a-modern-portable-build/step0-fork-rename-and-asset-removal.md` | Scope file for step0 |
+| `docs/refactoring/phase-a-modern-portable-build/step1-baseline-and-legacy-removal.md` | Scope file for step1 |
+| `docs/refactoring/phase-a-modern-portable-build/step2-cmake-build.md` | Scope file for step2 |
+| `docs/refactoring/phase-a-modern-portable-build/step3-dependency-upgrades.md` | Scope file for step3 |
+| `docs/refactoring/phase-a-modern-portable-build/step4-64bit-and-cross-platform.md` | Scope file for step4 |
+| `docs/refactoring/phase-a-modern-portable-build/step5-code-hygiene-and-ci.md` | Scope file for step5 |
 
 ### `engine/babonet`
 
@@ -495,7 +502,6 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/RemoteAdminPackets.h` | Wire structs for the remote-admin protocol |
 | `game/src/ReportGen.cpp` | XML server report generation |
 | `game/src/ReportGen.h` | XML server report generation |
-| `game/src/ResIco.rc` | Windows resource script (icon) |
 | `game/src/Scene.cpp` | Top-level scene: main loop, menus, game and editor switching, rendering setup |
 | `game/src/Scene.h` | Top-level scene: main loop, menus, game and editor switching, rendering setup |
 | `game/src/SceneNet.cpp` | Scene: starts and stops client and server, hosting and joining |
@@ -513,12 +519,9 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/Writting.h` | Chat input handling |
 | `game/src/WrongVersion.h` | Dialog: client/server version mismatch |
 | `game/src/Zeven.h` | Umbrella include for engine headers and common types |
-| `game/src/bv2.bmp` | Windows resource bitmap (original art; replace in §H) |
 | `game/src/changes-log.txt` | Upstream change log |
-| `game/src/icon1.ico` | Windows application icon (original art; replace in §H) |
 | `game/src/main.cpp` | Program entry: window, engine init, main loop |
 | `game/src/netPacket.h` | Wire structs and message IDs (raw memcpy'd structs) |
-| `game/src/resource3.h` | Resource IDs for ResIco.rc |
 | `game/src/screengrab.cpp` | Screenshot capture |
 | `game/src/screengrab.h` | Screenshot capture |
 | `game/src/tinyxml.cpp` | TinyXML (third-party XML parser) |
@@ -562,6 +565,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tools/convert-encoding.py` | One-off UTF-8/LF converter used in step 1.4 |
 | `tools/placeholder-manifest.tsv` | Files the game loads at startup and their formats, for the placeholder generator |
 | `tools/gen-placeholder-content.py` | Writes placeholder maps, textures, a readable font atlas, sounds and models for dev and CI |
+| `tools/gen-placeholder-icon.py` | Writes the placeholder Windows application icon at build time |
 | `tools/check-hygiene.py` | Fails on spaces in paths, tracked ignored files, files over 5 MB, bad encoding |
 | `tools/seed_db.cpp` | Creates a SQLite DB from SQL files (build helper) |
 | `tools/setup-dev.ps1` | Activates hooks, checks tools (Windows) |
