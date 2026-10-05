@@ -158,7 +158,19 @@ if(BV2_BUILD_CLIENT)
   bv2_game_target(bv2)
   target_link_libraries(bv2 PRIVATE zeven_client)
   if(WIN32)
-    target_sources(bv2 PRIVATE src/ResIco.rc "${CMAKE_SOURCE_DIR}/packaging/windows/bv2.manifest")
+    # Placeholder icon, generated so no icon binary is committed (the original is not redistributable)
+    find_package(Python3 REQUIRED COMPONENTS Interpreter)
+    set(BV2_ICON_FILE "${CMAKE_CURRENT_BINARY_DIR}/bv2.ico")
+    add_custom_command(
+      OUTPUT "${BV2_ICON_FILE}"
+      COMMAND Python3::Interpreter "${CMAKE_SOURCE_DIR}/tools/gen-placeholder-icon.py" "${BV2_ICON_FILE}"
+      DEPENDS "${CMAKE_SOURCE_DIR}/tools/gen-placeholder-icon.py"
+      COMMENT "Generating placeholder icon")
+    add_custom_target(bv2_icon DEPENDS "${BV2_ICON_FILE}")
+    configure_file("${CMAKE_SOURCE_DIR}/packaging/windows/bv2.rc.in" "${CMAKE_CURRENT_BINARY_DIR}/bv2.rc" @ONLY)
+    set_source_files_properties("${CMAKE_CURRENT_BINARY_DIR}/bv2.rc" PROPERTIES OBJECT_DEPENDS "${BV2_ICON_FILE}")
+    target_sources(bv2 PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/bv2.rc" "${CMAKE_SOURCE_DIR}/packaging/windows/bv2.manifest")
+    add_dependencies(bv2 bv2_icon)
   endif()
   if(WIN32)
     # Visual Studio generator (win-x64-vs): debug from the runtime dir, where main/ lives.
