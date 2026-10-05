@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-10-02
-- Affects: [step 3 §3.1, §3.3](../refactoring/step3-dependency-upgrades.md), [future-phases §D](../refactoring/future-phases.md#d-relaunch-infrastructure-and-scope-decisions)
+- Affects: [step 3 §3.1, §3.3](../refactoring/phase-a-modern-portable-build/step3-dependency-upgrades.md), [future-phases §D](../refactoring/future-phases.md#d-relaunch-infrastructure-and-scope-decisions)
 
 ## Context
 

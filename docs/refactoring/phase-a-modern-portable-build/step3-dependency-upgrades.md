@@ -8,9 +8,9 @@
 |---|---|
 | Goal | Every dependency comes from `vcpkg.json`; the client runs on Windows 11, macOS and Linux through SDL3 + miniaudio + glad behind the unchanged `dk*` APIs |
 | In scope | Tasks 3.1–3.10 below |
-| Out of scope | Protocol and struct changes (Step 4); prepared-statement SQL fixes and other security fixes ([future-phases.md](future-phases.md) §A); renderer rewrite (§F, [ADR 0003](../decisions/0003-keep-opengl-2.1-then-sdl-gpu.md)); babonet defect R7 unless it blocks testing |
+| Out of scope | Protocol and struct changes (Step 4); prepared-statement SQL fixes and other security fixes ([future-phases.md](../future-phases.md) §A); renderer rewrite (§F, [ADR 0003](../../decisions/0003-keep-opengl-2.1-then-sdl-gpu.md)); babonet defect R7 unless it blocks testing |
 | Allowed paths | `vcpkg.json`, `CMakeLists.txt` files, `engine/zeven/**`, `engine/babonet/src/**` (portability only), `game/src/{main.cpp,CCurl.cpp,CCurlStub.cpp,CStatus.cpp,CFriends.cpp}` and call sites that break because of API changes, `ARCHITECTURE.md`, `AGENTS.md` |
-| Inputs | `AGENTS.md`, `ARCHITECTURE.md`, [../analysis/01_SYSTEM_OVERVIEW.md](../analysis/01_SYSTEM_OVERVIEW.md) (engine subsystems), [../analysis/KEY_QUESTIONS.md](../analysis/KEY_QUESTIONS.md) Q1, R11, R14, ADRs [0002](../decisions/0002-compile-out-libcurl.md) and [0003](../decisions/0003-keep-opengl-2.1-then-sdl-gpu.md) |
+| Inputs | `AGENTS.md`, `ARCHITECTURE.md`, [../../analysis/01_SYSTEM_OVERVIEW.md](../../analysis/01_SYSTEM_OVERVIEW.md) (engine subsystems), [../../analysis/KEY_QUESTIONS.md](../../analysis/KEY_QUESTIONS.md) Q1, R11, R14, ADRs [0002](../../decisions/0002-compile-out-libcurl.md) and [0003](../../decisions/0003-keep-opengl-2.1-then-sdl-gpu.md) |
 | Deliverables | The vcpkg manifest; rewritten `dkw`, `dki`, `dks`, `dkc` and GL loading; `CCurl` stub behind `BV2_WITH_HTTP` |
 | Definition of done | "Acceptance checks" below pass on all three OSes |
 
@@ -41,7 +41,7 @@ Pin the `builtin-baseline`. Dependencies:
 
 The client-only packages sit behind a vcpkg feature `client`, so server-only builds (for example a Linux server container) stay small. `curl` sits behind a vcpkg feature `http`, enabled only with `BV2_WITH_HTTP` (3.3).
 
-No libcurl in the default build ([ADR 0002](../decisions/0002-compile-out-libcurl.md)).
+No libcurl in the default build ([ADR 0002](../../decisions/0002-compile-out-libcurl.md)).
 
 ### 3.2 SQLite 3.3.10 → current 3.x
 
@@ -51,7 +51,7 @@ No libcurl in the default build ([ADR 0002](../decisions/0002-compile-out-libcur
 
 ### 3.3 libcurl: compile out behind `BV2_WITH_HTTP`
 
-Its only backend (the account/ladder server) is gone; see [ADR 0002](../decisions/0002-compile-out-libcurl.md).
+Its only backend (the account/ladder server) is gone; see [ADR 0002](../../decisions/0002-compile-out-libcurl.md).
 
 - Add the CMake option `BV2_WITH_HTTP`, default **OFF**.
 - OFF: build `game/src/CCurlStub.cpp` instead of `CCurl.cpp`. Same `CCurl.h` API; every request finishes at once with 0 bytes received. Remove `#pragma comment(lib, "libcurl.lib")` (old `main.cpp:49`).
@@ -87,7 +87,7 @@ Its only backend (the account/ladder server) is gone; see [ADR 0002](../decision
 
 ### 3.7 GL loading: `glext.h` v29 → glad
 
-OpenGL 2.1 stays for Phase A; renderer isolation and the SDL_GPU move come later ([ADR 0003](../decisions/0003-keep-opengl-2.1-then-sdl-gpu.md)).
+OpenGL 2.1 stays for Phase A; renderer isolation and the SDL_GPU move come later ([ADR 0003](../../decisions/0003-keep-opengl-2.1-then-sdl-gpu.md)).
 
 - Collect the extensions in use with `grep -rhn "gl[A-Z][a-zA-Z]*ARB\|wglGetProcAddress\|glXGetProcAddress" engine game/src`.
 - Generate glad for GL 2.1 compat + those extensions, and load through `SDL_GL_GetProcAddress`.
@@ -128,7 +128,7 @@ OpenGL 2.1 stays for Phase A; renderer isolation and the SDL_GPU move come later
   - the client reaches the main menu;
   - key binds and chat input work;
   - effects and music play;
-  - hosting a listen server works ([../analysis/KEY_QUESTIONS.md](../analysis/KEY_QUESTIONS.md) Q7);
+  - hosting a listen server works ([../../analysis/KEY_QUESTIONS.md](../../analysis/KEY_QUESTIONS.md) Q7);
   - joining a separate `bv2dedicated` and downloading a map works.
 - The `-asan` preset run has no new ASan reports in `dkw`, `dki`, `dks` or `dkc`.
 - `ARCHITECTURE.md` is updated (dependency list, platform layer summary); the secret scan is clean.

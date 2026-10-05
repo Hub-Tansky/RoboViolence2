@@ -1,6 +1,6 @@
 # Phase B: work after Phase A
 
-**Depends on:** Phase A complete ([README.md](README.md)). Each section becomes its own scope files (copies of [_template-step.md](_template-step.md)) before work starts.
+**Depends on:** Phase A complete ([README.md](phase-a-modern-portable-build/README.md)). Each section becomes its own scope files (copies of [_template-step.md](_template-step.md)) before work starts.
 
 Phase A leaves a modern, portable build with the gameplay unchanged. Everything below changes behaviour, security or scope.
 
@@ -30,7 +30,7 @@ Repo settings change as `Hub-Tansky` (Settings → Advanced Security).
 1. **Dependency graph** on. GitHub can't parse `vcpkg.json`, so add a workflow that submits the resolved vcpkg dependencies through the dependency submission API (vcpkg's `dependencygraph` feature flag with `GITHUB_TOKEN`, `contents: write`) on pushes to `main`. Done when Insights → Dependency graph lists the vcpkg ports.
 2. **Dependabot alerts** and security updates on, plus `.github/dependabot.yml` for the `github-actions` ecosystem (weekly). This covers GitHub Actions only: the GitHub Advisory Database has no C/C++ ecosystem, so vcpkg ports in the graph get no alerts. vcpkg ports are covered by:
    - **OSV-Scanner** (`google/osv-scanner-action` reusable workflow) on PRs and weekly, results uploaded to code scanning. Its C/C++ coverage is partial; record which ports it resolves when adding it.
-   - a manual **vcpkg baseline bump** monthly, or sooner when a port has a published CVE ([step3](step3-dependency-upgrades.md) process).
+   - a manual **vcpkg baseline bump** monthly, or sooner when a port has a published CVE ([step3](phase-a-modern-portable-build/step3-dependency-upgrades.md) process).
 3. **CodeQL** advanced setup: `.github/workflows/codeql.yml`, languages `c-cpp` (manual build of `linux-x64`: `bv2`, `bv2dedicated`, `bv2master`) and `actions`; on push, PR and weekly. Not a required check until the first alerts are triaged; findings go into §A.
 
 Update `ARCHITECTURE.md` and `AGENTS.md` (CI list).

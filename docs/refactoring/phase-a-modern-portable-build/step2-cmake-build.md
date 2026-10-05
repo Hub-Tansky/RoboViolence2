@@ -8,7 +8,7 @@
 |---|---|
 | Goal | The code lives in the AI-ready layout, and one CMake project builds `bv2dedicated` and `bv2master` on Windows, macOS and Linux, with the `bv2` client target defined |
 | In scope | Tasks 2.0–2.8 below |
-| Out of scope | Replacing FMOD, DirectInput, the Win32 window or SDL1 (Step 3); fixing warnings (Step 4); CI (Step 5); splitting the game into client/server/sim libraries ([future-phases.md](future-phases.md) §C.1) |
+| Out of scope | Replacing FMOD, DirectInput, the Win32 window or SDL1 (Step 3); fixing warnings (Step 4); CI (Step 5); splitting the game into client/server/sim libraries ([future-phases.md](../future-phases.md) §C.1) |
 | Allowed paths | Everything moved in 2.0; new `CMakeLists.txt` files, `CMakePresets.json`, `vcpkg.json`, `engine/*/README.md`, `game/README.md`, `masterserver/README.md`, `engine/zeven/include/platform.h`; `#include` lines and platform `#if` lines in sources; `AGENTS.md`, `ARCHITECTURE.md`, `README.md` |
 | Inputs | `AGENTS.md`, `ARCHITECTURE.md`, [README.md](README.md) "Target repository layout", the root `Makefile`, `BaboViolent2/Code/BaboViolent2.vcxproj` |
 | Deliverables | Moved tree; CMake build; per-module READMEs; old build files deleted |
@@ -82,7 +82,7 @@ Declare include directories per target (`target_include_directories(... PUBLIC i
 
 ### 2.4 Presets
 
-`CMakePresets.json`, Ninja generator on every preset ([ADR 0001](../decisions/0001-ninja-generator-on-all-presets.md)):
+`CMakePresets.json`, Ninja generator on every preset ([ADR 0001](../../decisions/0001-ninja-generator-on-all-presets.md)):
 
 - `win-x64-msvc` (Ninja + MSVC from Visual Studio 2022+, `toolset`/`architecture` strategy `external`; run from a Developer PowerShell); optional `win-arm64-msvc`, and optional `win-x64-vs` (Visual Studio generator, for a `.sln`).
 - `macos-arm64` (`CMAKE_OSX_ARCHITECTURES=arm64`, deployment target 12.0); optional `macos-universal`.
@@ -111,7 +111,7 @@ Declare include directories per target (`target_include_directories(... PUBLIC i
 - Step 4 teaches the code to find these locations.
 - **Data for running:** the original assets aren't in the repo (Step 0).
   - Local manual runs: point the runtime `main/` at your own original data (`BV2_DATA_DIR`, step 0 §0.5).
-  - CI and agents: `tools/gen-placeholder-content.py` (stdlib only) writes a minimal data set made for this project into the build dir: one small `.bvm` map per game mode (format: [../analysis/02_DATA_STRUCTURES.md](../analysis/02_DATA_STRUCTURES.md)), solid-colour TGAs and short silent WAVs under every file name listed as `required` in the asset inventory (kept outside this repository). It's never committed as data; only the generator is.
+  - CI and agents: `tools/gen-placeholder-content.py` (stdlib only) writes a minimal data set made for this project into the build dir: one small `.bvm` map per game mode (format: [../../analysis/02_DATA_STRUCTURES.md](../../analysis/02_DATA_STRUCTURES.md)), solid-colour TGAs and short silent WAVs under every file name listed as `required` in the asset inventory (kept outside this repository). It's never committed as data; only the generator is.
 
 ### 2.7 Module READMEs
 

@@ -49,5 +49,5 @@ cmake --build --preset linux-x64 --target bv2dedicated bv2master
 ## Where to read more
 - [AGENTS.md](AGENTS.md): project rules for fellow robots, agents and even human contributors
 - [ARCHITECTURE.md](ARCHITECTURE.md): architecture index
-- [docs/refactoring/](docs/refactoring/README.md): step-by-step refactoring plan in progress
+- [docs/refactoring/phase-a-modern-portable-build/](docs/refactoring/phase-a-modern-portable-build/README.md): step-by-step refactoring plan in progress
 - [docs/analysis/](docs/analysis/README.md): original bv2 code analysis v1
