@@ -10,8 +10,8 @@ zero=0000000000000000000000000000000000000000
 fail=0
 while read -r local_ref local_sha remote_ref remote_sha; do
   [ "$local_sha" = "$zero" ] && continue
-  if [ "$remote_sha" = "$zero" ]; then range="$local_sha --not --remotes=$remote"; else range="$remote_sha..$local_sha"; fi
-  bad=$(git log --format='%h %ae %ce' $range | awk -v e="$expected" '$2!=e || $3!=e')
+  # Only commits not on the remote yet: merged-in base commits (e.g. GitHub's PR merges) are already published.
+  bad=$(git log --format='%h %ae %ce' "$local_sha" --not --remotes="$remote" | awk -v e="$expected" '$2!=e || $3!=e')
   if [ -n "$bad" ]; then
     echo "pre-push: commits with a non-Hub-Tansky email in $local_ref:" >&2
     echo "$bad" >&2
