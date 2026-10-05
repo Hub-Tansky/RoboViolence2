@@ -121,5 +121,7 @@ Rules that make it AI-friendly:
 - No vendored SDKs or committed binaries remain.
 - On each of Linux, macOS and Windows 11, using local original data (`BV2_DATA_DIR`), the client connects to a `bv2dedicated` and plays DM, TDM and CTF rounds with sound, input and map download working.
 - The master server lists that game server.
+
+The two items above are checked by hand: [phase-a-manual-test.md](phase-a-manual-test.md).
 - CI is **required and green** on all three OSes, including the secret scan and the `ARCHITECTURE.md` inventory check.
 - `gitleaks git` over all commits after the fork point (`tools/FORK_BASE`) finds nothing, and `tools/check-original-assets.py` passes.

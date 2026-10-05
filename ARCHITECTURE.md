@@ -163,6 +163,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | path | purpose |
 |---|---|
 | `docs/refactoring/phase-a-modern-portable-build/README.md` | Phase A handoff and step index |
+| `docs/refactoring/phase-a-modern-portable-build/phase-a-manual-test.md` | Manual gameplay and master-listing checklist per OS |
 | `docs/refactoring/phase-a-modern-portable-build/step0-fork-rename-and-asset-removal.md` | Scope file for step0 |
 | `docs/refactoring/phase-a-modern-portable-build/step1-baseline-and-legacy-removal.md` | Scope file for step1 |
 | `docs/refactoring/phase-a-modern-portable-build/step2-cmake-build.md` | Scope file for step2 |
