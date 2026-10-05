@@ -1,6 +1,6 @@
 # Step N: <title>
 
-**Depends on:** <steps>. **Next:** <step>. **Index:** [README.md](README.md)
+**Depends on:** <steps>. **Next:** <step>. **Index:** [README.md](phase-a-modern-portable-build/README.md)
 
 ## Scope
 

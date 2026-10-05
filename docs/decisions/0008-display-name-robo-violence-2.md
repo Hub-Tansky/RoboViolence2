@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-10-04
-- Affects: [step0 §0.2](../refactoring/step0-fork-rename-and-asset-removal.md); supersedes [0004](0004-project-name-roboviolence2.md)
+- Affects: [step0 §0.2](../refactoring/phase-a-modern-portable-build/step0-fork-rename-and-asset-removal.md); supersedes [0004](0004-project-name-roboviolence2.md)
 
 ## Context
 - [ADR 0004](0004-project-name-roboviolence2.md) named the project "RoboViolence 2" for the trademark reasons it lists; those still hold.

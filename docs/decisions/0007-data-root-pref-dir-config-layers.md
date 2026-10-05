@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-10-03
-- Affects: [step 4 §4.4, §4.5](../refactoring/step4-64bit-and-cross-platform.md); refines [ADR 0005](0005-runtime-main-data-root.md)
+- Affects: [step 4 §4.4, §4.5](../refactoring/phase-a-modern-portable-build/step4-64bit-and-cross-platform.md); refines [ADR 0005](0005-runtime-main-data-root.md)
 
 ## Context
 - The game wrote `bv2.cfg`, `bv2.db`, logs, screenshots and downloaded maps into `main/` and the working directory. That fails in read-only installs and dirties the repo.

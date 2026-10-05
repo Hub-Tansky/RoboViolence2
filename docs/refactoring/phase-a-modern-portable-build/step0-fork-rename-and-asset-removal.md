@@ -8,7 +8,7 @@
 |---|---|
 | Goal | The project lives in a GitHub fork of `Daivuk/BaboViolent2`, named `RoboViolence2`. Its `main` branch contains none of the original assets listed in the asset licence notes (kept outside this repository); every removed file is catalogued for recreation; `README.txt` states the fork and the removal |
 | In scope | Tasks 0.0–0.7 below |
-| Out of scope | Renaming code identifiers, binaries (`bv2*`), window titles or in-game strings ([future-phases.md](future-phases.md) §H); creating replacement assets (§H); all Step 1+ work |
+| Out of scope | Renaming code identifiers, binaries (`bv2*`), window titles or in-game strings ([future-phases.md](../future-phases.md) §H); creating replacement assets (§H); all Step 1+ work |
 | Allowed paths | Repository root dir name; `~/.gitconfig` include, `~/.gitconfig-hubtansky`, `~/.config/git/hubtansky-hooks/` (0.0); deletions of the paths in 0.4; `README.txt`; `docs/decisions/0004-*`; `tools/check-original-assets.py`; `tools/original-assets.sha256`; `.gitignore`; `AGENTS.md`; `docs/refactoring/**` |
 | Inputs | the asset licence notes (kept outside this repository), the permission request (kept outside this repository), `AGENTS.md` |
 | Deliverables | Renamed fork and local clone; the asset inventory (kept outside this repository); `tools/original-assets.sha256`; asset-removal commit; new `README.txt`; ADR 0004 |
@@ -116,7 +116,7 @@ A one-off script (Python 3, stdlib only, kept outside this repository) writes th
 | Recreate | `required` (referenced by code), `content` (map or skin chosen at runtime), `source` (`.max`/`.jpg` source art; the replacement needs a source file, not this one), `drop` (unreferenced or third-party binary) |
 | Replaced by | empty; filled by §H |
 
-- Group rows by folder. Under each folder heading, record the constraints a replacement must meet (power-of-two TGA sizes, alpha usage, sample rate, `.DKO` scale and orientation, `.bvm` format reference [../analysis/02_DATA_STRUCTURES.md](../analysis/02_DATA_STRUCTURES.md)).
+- Group rows by folder. Under each folder heading, record the constraints a replacement must meet (power-of-two TGA sizes, alpha usage, sample rate, `.DKO` scale and orientation, `.bvm` format reference [../../analysis/02_DATA_STRUCTURES.md](../../analysis/02_DATA_STRUCTURES.md)).
 - Add a summary table at the top: counts per folder and per `Recreate` class.
 - `original-assets.sha256` holds the SHA-256 of every removed file. Hashes contain no copyrighted content.
 - `tools/check-original-assets.py` fails if any tracked file matches a hash in that list. Step 1 wires it into the pre-commit hook and CI, so originals can't come back, even renamed.

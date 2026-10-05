@@ -155,15 +155,20 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 
 | path | purpose |
 |---|---|
-| `docs/refactoring/README.md` | Phase A handoff and step index |
 | `docs/refactoring/_template-step.md` | Template for step files |
 | `docs/refactoring/future-phases.md` | Work after Phase A (sections A to H) |
-| `docs/refactoring/step0-fork-rename-and-asset-removal.md` | Scope file for step0 |
-| `docs/refactoring/step1-baseline-and-legacy-removal.md` | Scope file for step1 |
-| `docs/refactoring/step2-cmake-build.md` | Scope file for step2 |
-| `docs/refactoring/step3-dependency-upgrades.md` | Scope file for step3 |
-| `docs/refactoring/step4-64bit-and-cross-platform.md` | Scope file for step4 |
-| `docs/refactoring/step5-code-hygiene-and-ci.md` | Scope file for step5 |
+
+### `docs/refactoring/phase-a-modern-portable-build`
+
+| path | purpose |
+|---|---|
+| `docs/refactoring/phase-a-modern-portable-build/README.md` | Phase A handoff and step index |
+| `docs/refactoring/phase-a-modern-portable-build/step0-fork-rename-and-asset-removal.md` | Scope file for step0 |
+| `docs/refactoring/phase-a-modern-portable-build/step1-baseline-and-legacy-removal.md` | Scope file for step1 |
+| `docs/refactoring/phase-a-modern-portable-build/step2-cmake-build.md` | Scope file for step2 |
+| `docs/refactoring/phase-a-modern-portable-build/step3-dependency-upgrades.md` | Scope file for step3 |
+| `docs/refactoring/phase-a-modern-portable-build/step4-64bit-and-cross-platform.md` | Scope file for step4 |
+| `docs/refactoring/phase-a-modern-portable-build/step5-code-hygiene-and-ci.md` | Scope file for step5 |
 
 ### `engine/babonet`
 

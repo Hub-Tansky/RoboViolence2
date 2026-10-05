@@ -10,22 +10,22 @@ Phase A turns the 2012 source release into a project with **one CMake + vcpkg bu
 - the dedicated server `bv2dedicated`,
 - the master server `bv2master`.
 
-Gameplay, security, bots and anti-cheat are out of scope here; see [future-phases.md](future-phases.md).
+Gameplay, security, bots and anti-cheat are out of scope here; see [future-phases.md](../future-phases.md).
 
 ## Decisions already made
 
 | Topic | Decision |
 |---|---|
-| Fork and name | GitHub fork renamed `RoboViolence2`, local dir `RoboViolence2-master`. Code identifiers (`bv2`) stay until [future-phases.md](future-phases.md) §H ([step0](step0-fork-rename-and-asset-removal.md)) |
+| Fork and name | GitHub fork renamed `RoboViolence2`, local dir `RoboViolence2-master`. Code identifiers (`bv2`) stay until [future-phases.md](../future-phases.md) §H ([step0](step0-fork-rename-and-asset-removal.md)) |
 | Original assets | Not committed or redistributed. Removed from `main` in [step0](step0-fork-rename-and-asset-removal.md) §0.4; every removed file is catalogued in the asset inventory (kept outside this repository) for recreation; a hash blocklist stops them coming back. Local runs use your own copy via `BV2_DATA_DIR`; CI uses generated placeholders |
 | Platforms | **Linux, macOS, Windows**. All three are equivalent first-class targets: none is secondary, and each one blocks a release. Linux x64 (Ubuntu 24.04 LTS as the reference distro; X11 and Wayland); macOS 12+ (arm64); Windows 11 and later (x64). arm64 Linux/Windows and x86_64 macOS are optional extras |
 | Protocol | Free to break compatibility with 2.11 clients. Bump `GAME_VERSION_SV/CL` once |
-| Build system | CMake + `CMakePresets.json`, Ninja generator on every preset ([ADR 0001](../decisions/0001-ninja-generator-on-all-presets.md)) |
+| Build system | CMake + `CMakePresets.json`, Ninja generator on every preset ([ADR 0001](../../decisions/0001-ninja-generator-on-all-presets.md)) |
 | Dependencies | vcpkg manifest (`vcpkg.json`, pinned baseline); no vendored headers or binaries |
 | Audio | miniaudio replaces FMOD |
 | Window/input | SDL3 replaces Win32/WGL, DirectInput 8 and SDL 1.2 |
-| Rendering | OpenGL 2.1 + GLU stays for Phase A; isolate, then SDL_GPU ([ADR 0003](../decisions/0003-keep-opengl-2.1-then-sdl-gpu.md)) |
-| HTTP | libcurl compiled out (`BV2_WITH_HTTP` OFF); its backend is gone ([ADR 0002](../decisions/0002-compile-out-libcurl.md)) |
+| Rendering | OpenGL 2.1 + GLU stays for Phase A; isolate, then SDL_GPU ([ADR 0003](../../decisions/0003-keep-opengl-2.1-then-sdl-gpu.md)) |
+| HTTP | libcurl compiled out (`BV2_WITH_HTTP` OFF); its backend is gone ([ADR 0002](../../decisions/0002-compile-out-libcurl.md)) |
 | Source encoding | All text files are UTF-8 (no BOM) with LF, converted in one scripted commit in [step1](step1-baseline-and-legacy-removal.md) §1.4 and enforced by the hook and CI |
 | Legacy | Drop `_DX_`, the non-Pro ruleset, VLD, VS200x projects, Launcher, UpdateServer, RemoteAdmin, and committed binaries |
 | Secrets | No credentials, server IPs/hosts or private server config in the repo. Blocked by a pre-commit hook, CI and GitHub push protection ([step1](step1-baseline-and-legacy-removal.md) §1.2) |
@@ -41,7 +41,7 @@ Gameplay, security, bots and anti-cheat are out of scope here; see [future-phase
 | 3 | [step3-dependency-upgrades.md](step3-dependency-upgrades.md) | 2 | vcpkg deps; SDL3, miniaudio and glad platform layer; client runs on Windows, macOS and Linux |
 | 4 | [step4-64bit-and-cross-platform.md](step4-64bit-and-cross-platform.md) | 2 (can overlap 3) | Warning-clean x64/arm64 builds; fixed-width packets; portable paths; config and secrets outside the install directory |
 | 5 | [step5-code-hygiene-and-ci.md](step5-code-hygiene-and-ci.md) | 2 (CI), 4 (warnings) | Encoding guard, clang-format, required CI on 3 OSes including the secret scan |
-| — | [future-phases.md](future-phases.md) | Phase A complete | Security fixes, bot and anti-cheat foundations, infrastructure, networking, renderer |
+| — | [future-phases.md](../future-phases.md) | Phase A complete | Security fixes, bot and anti-cheat foundations, infrastructure, networking, renderer |
 
 Steps 3 and 4 touch the same engine files, so run them one after the other or coordinate them. Nothing else should run in parallel on the engine.
 
@@ -59,7 +59,7 @@ Each step file begins with a **Scope** block with these fields:
 | Deliverables | Files and commits that must exist at the end |
 | Definition of done | The acceptance checks. All must pass |
 
-A new step starts as a copy of [_template-step.md](_template-step.md).
+A new step starts as a copy of [_template-step.md](../_template-step.md).
 
 ## Working rules for agents
 
@@ -68,7 +68,7 @@ A new step starts as a copy of [_template-step.md](_template-step.md).
 2. Read `AGENTS.md`, `ARCHITECTURE.md` and the step's **Inputs** first. Don't edit outside **Allowed paths**.
 3. **Never commit secrets**: passwords, hashes, tokens, keys, real server IPs or hostnames, private server config. Use the `*.example` / `*.local.*` pattern from step 1 §1.2. Never bypass hooks (`--no-verify`).
 4. Every step ends by updating `ARCHITECTURE.md`: its file inventory and any changed summary facts. CI checks the inventory from step 5 on.
-5. Record non-obvious decisions as short ADRs in `docs/decisions/NNNN-title.md`; format and index in [../decisions/README.md](../decisions/README.md).
+5. Record non-obvious decisions as short ADRs in `docs/decisions/NNNN-title.md`; format and index in [../../decisions/README.md](../../decisions/README.md).
 6. If a step can't meet its Definition of done, stop and write down what is blocking it in the PR description. Don't widen the scope.
 
 ## Target repository layout (AI-ready)
@@ -110,10 +110,10 @@ Rules that make it AI-friendly:
 
 ## Background reading
 
-- [../analysis/README.md](../analysis/README.md): architecture analysis index
-- [../analysis/01_SYSTEM_OVERVIEW.md](../analysis/01_SYSTEM_OVERVIEW.md): deliverables, macros, module map
-- [../analysis/KEY_QUESTIONS.md](../analysis/KEY_QUESTIONS.md): defect register (R1–R15) and security findings (Q-S1…Q-S8)
-- [../../AGENTS.md](../../AGENTS.md): conventions (30 Hz step, packet rules, encoding)
+- [../../analysis/README.md](../../analysis/README.md): architecture analysis index
+- [../../analysis/01_SYSTEM_OVERVIEW.md](../../analysis/01_SYSTEM_OVERVIEW.md): deliverables, macros, module map
+- [../../analysis/KEY_QUESTIONS.md](../../analysis/KEY_QUESTIONS.md): defect register (R1–R15) and security findings (Q-S1…Q-S8)
+- [../../../AGENTS.md](../../../AGENTS.md): conventions (30 Hz step, packet rules, encoding)
 
 ## Phase A done when
 
