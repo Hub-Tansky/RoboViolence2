@@ -19,7 +19,7 @@ Robo Violence 2: unofficial fork of BaboViolent 2, a top-down multiplayer shoote
 | Assets | The original assets are removed and blocked by hash (`tools/check-original-assets.py`). Only `content/languages/en.lang` and `content/LaunchScript/` remain; the build generates placeholders (`tools/gen-placeholder-content.py`). |
 | Encoding | UTF-8 without BOM, LF; `tools/check-encoding.py`. Some comments hold U+FFFD where upstream lost accents. |
 | Known defects | [docs/analysis/KEY_QUESTIONS.md](docs/analysis/KEY_QUESTIONS.md). |
-| Decisions | [docs/decisions/README.md](docs/decisions/README.md): 0001 Ninja, 0002 libcurl compiled out, 0003 OpenGL 2.1 kept, 0004 project name (superseded by 0008), 0005 `main/` data root, 0006 platform layer, 0007 data root, pref dir and config layers, 0008 display name "Robo Violence 2". |
+| Decisions | [docs/decisions/README.md](docs/decisions/README.md): 0001 Ninja, 0002 libcurl compiled out, 0003 OpenGL 2.1 kept, 0004 project name (superseded by 0008), 0005 `main/` data root, 0006 platform layer, 0007 data root, pref dir and config layers, 0008 display name "Robo Violence 2", 0009 internal renaming, 0010 BV2 asset compatibility and GUI freeze, 0011 gettext PO translations. |
 
 ### Open items
 
@@ -148,6 +148,9 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/decisions/0005-runtime-main-data-root.md` | ADR 0005 |
 | `docs/decisions/0006-sdl3-miniaudio-glad-platform-layer.md` | ADR 0006 |
 | `docs/decisions/0008-display-name-robo-violence-2.md` | ADR 0008 |
+| `docs/decisions/0009-rename-internal-identifiers-continuously.md` | ADR 0009 |
+| `docs/decisions/0010-bv2-asset-compat-and-gui-freeze.md` | ADR 0010 |
+| `docs/decisions/0011-gettext-po-translations.md` | ADR 0011 |
 | `docs/decisions/README.md` | ADR format and index |
 
 ### `docs/refactoring`
@@ -156,7 +159,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 |---|---|
 | `docs/refactoring/README.md` | Phase A handoff and step index |
 | `docs/refactoring/_template-step.md` | Template for step files |
-| `docs/refactoring/future-phases.md` | Work after Phase A (sections A to H) |
+| `docs/refactoring/future-phases.md` | Phase B plan: ground rules, sections 0 and A to I |
 | `docs/refactoring/step0-fork-rename-and-asset-removal.md` | Scope file for step0 |
 | `docs/refactoring/step1-baseline-and-legacy-removal.md` | Scope file for step1 |
 | `docs/refactoring/step2-cmake-build.md` | Scope file for step2 |
