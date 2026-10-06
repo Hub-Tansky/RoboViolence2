@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-10-06
-- Affects: [future-phases.md](../roadmap/future-phases.md) ground rule 3, §G, §H.7; amends [0008](0008-display-name-robo-violence-2.md)
+- Affects: [roadmap ground rules](../roadmap/README.md#ground-rules-every-phase) 3–4, [PNS-19](../roadmap/possible-new-scope.md#pns-19-code-modernisation-continuous), [PNS-20](../roadmap/possible-new-scope.md#pns-20-replacement-assets-and-rebrand) H.7; amends [0008](0008-display-name-robo-violence-2.md)
 
 ## Context
 - [ADR 0008](0008-display-name-robo-violence-2.md) kept every `bv2`/`babo` identifier until §H.

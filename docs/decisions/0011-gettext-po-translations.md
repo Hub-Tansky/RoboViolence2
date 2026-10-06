@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-10-06
-- Affects: [future-phases.md](../roadmap/future-phases.md) §I
+- Affects: [Phase B step 13](../roadmap/phase-b-security-infrastructure-anti-cheat/step13-localisation.md), [PNS-21](../roadmap/possible-new-scope.md#pns-21-localisation-beyond-the-foundations)
 
 ## Context
 - Strings live in `content/languages/en.lang` (`key<TAB>text`), loaded from `languageFile` (`game/src/GameVar.cpp:271`); English is the only language.

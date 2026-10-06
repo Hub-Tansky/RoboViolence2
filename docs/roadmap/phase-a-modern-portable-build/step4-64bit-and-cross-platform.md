@@ -10,7 +10,7 @@
 |---|---|
 | Goal | x64 and arm64 builds on Windows 11, macOS and Linux are free of truncation, signedness and format warnings; packets have fixed layouts; the game finds its content and keeps user config and secrets outside the install and repo |
 | In scope | Tasks 4.1–4.6 below |
-| Out of scope | Packet validation, player-slot binding and other security fixes ([future-phases.md](../future-phases.md) §A), even where the same lines are touched; UTF-8 conversion (Step 5); raising warnings to `-Wextra` (Step 5) |
+| Out of scope | Packet validation, player-slot binding and other security fixes ([Phase B](../phase-b-security-infrastructure-anti-cheat/README.md) steps 4–7), even where the same lines are touched; UTF-8 conversion (Step 5); raising warnings to `-Wextra` (Step 5) |
 | Allowed paths | `engine/**`, `game/src/**`, `masterserver/src/**`, `config/**`, `CMakeLists.txt` files, `ARCHITECTURE.md`, `AGENTS.md` |
 | Inputs | `AGENTS.md`, `ARCHITECTURE.md`, [../../analysis/02_DATA_STRUCTURES.md](../../analysis/02_DATA_STRUCTURES.md), [../../analysis/KEY_QUESTIONS.md](../../analysis/KEY_QUESTIONS.md) Q-S2, Q12 |
 | Deliverables | Fixed-width `netPacket.h` with size asserts; one `GAME_VERSION` bump; portable paths; the layered config loader |

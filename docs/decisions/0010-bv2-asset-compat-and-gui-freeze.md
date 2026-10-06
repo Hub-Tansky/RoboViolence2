@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-10-06
-- Affects: [future-phases.md](../roadmap/future-phases.md) ground rules 1 and 2, §F, §H.1
+- Affects: [roadmap ground rules](../roadmap/README.md#ground-rules-every-phase) 1–2, [PNS-18](../roadmap/possible-new-scope.md#pns-18-renderer-isolation-and-replacement), [PNS-20](../roadmap/possible-new-scope.md#pns-20-replacement-assets-and-rebrand) H.1
 
 ## Context
 - Replacement assets (§H) will take a long time; until then the game is tested with the owner's local BV2 data (`BV2_DATA_DIR`).

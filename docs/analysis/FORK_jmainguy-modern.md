@@ -49,7 +49,7 @@ Breaking the protocol is fine for us: Phase A already allows it ([../roadmap/pha
 - **Encoding damage:** Latin-1 bytes were replaced by U+FFFD in 68 `src` files (41 already damaged in Daivuk `modern`). The French comments can't be recovered from the fork. Our step 1 §1.4 conversion is lossless.
 - **Conflicting decisions:** SDL2 + SDL2_mixer + submodules vs our SDL3 + miniaudio + vcpkg. Windows and macOS are silent. No macOS CI.
 - **Rule violations:** committed binaries (`src/MasterListingServer/libBaboNet.a`, `libDKC.a`, `linuxmaster`, `Content/*.dll`) and a hard-coded public host (`babo.soh.re`), both banned by our Phase A rules.
-- **Anti-cheat removed** rather than fixed. Future phases need it ([../roadmap/future-phases.md](../roadmap/future-phases.md)).
+- **Anti-cheat removed** rather than fixed. Future phases need it ([Phase B steps 8–9](../roadmap/phase-b-security-infrastructure-anti-cheat/step8-server-validator.md)).
 
 ## Harvest list: implemented 2026-10-02
 

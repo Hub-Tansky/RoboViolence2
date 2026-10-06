@@ -1,6 +1,6 @@
 # Possible new scope
 
-Knowledge gained while working on a step that affects later phases or work outside any planned step. Each entry starts as **Proposed**. The owner moves it into a phase plan (**Accepted**, with the target) drops it (**Rejected**, with the reason), or folds it into another entry (**Merged into PNS-n**).
+Knowledge gained while working on a step that affects later phases or work outside any planned step. Each entry starts as **Proposed**. The owner moves it into a phase plan (**Accepted**, with the target), drops it (**Rejected**, with the reason), or folds it into another entry (**Merged into PNS-n**).
 
 Entry format: ID, where it was found, an extract of the source, why it matters, suggested home, status.
 
@@ -166,6 +166,7 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 
 - **Source:** former §H.1–§H.8; absorbs PNS-10 (file-format tests as exporter spec) and the art side of PNS-2.
 - **Extract:** "**Minimum playable set:** every `required` row. Textures, skins, fonts, models …, effects and one map per game mode. Use CC0/CC-BY or original work only." "**Toolchain:** … Write a Blender exporter, or convert from glTF in `tools/`" "**Fonts:** the replacement font covers Latin Extended at least" "**Rebrand** **[GUI]**: window title, menus, credits, binary names (`bv2*`), `BV2_*` env vars, config/pref-path names, master-server game ID. Keep a 'based on BaboViolent 2 by bitHeads / RndLabs' credit."
+- **Also covers:** H.2 record every replacement (author, licence, source) and keep the hash blocklist on; H.3 recreate maps with the editor under new names; H.5 new effects and music; H.8 record any rights the original authors grant (re-adding a granted original needs an ADR).
 - **Why deferred:** A separate art and asset track; ADR 0010 keeps BV2 compatibility until H.1 ships. Rebranding is **[GUI]**.
 - **Suggested home:** its own phase, in parallel from now on; nothing ships publicly before H.1.
 - **Status:** Proposed

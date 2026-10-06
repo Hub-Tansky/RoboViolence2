@@ -6,7 +6,7 @@ Agents check every change against this file before calling it done.
 
 - Stays inside the step's **Allowed paths** and scope ([AGENTS.md](AGENTS.md) Agent rules).
 - Builds warning-clean on all three presets; `ctest` passes; `tools/check-architecture.sh` and `python3 tools/check-hygiene.py` pass.
-- Follows the Phase B ground rules ([docs/roadmap/future-phases.md](docs/roadmap/future-phases.md)): BV2 assets still load, no unapproved **[GUI]** change, renames only as separate mechanical commits.
+- Follows the roadmap ground rules ([docs/roadmap/README.md](docs/roadmap/README.md#ground-rules-every-phase)): BV2 assets still load, no unapproved **[GUI]** change, renames only as separate mechanical commits.
 - New behaviour has a test; fixes have a test that failed before.
 - No secrets, real hosts or IPs; no `--no-verify`.
 - `ARCHITECTURE.md` and any affected README or ADR are updated; non-obvious decisions have an ADR.

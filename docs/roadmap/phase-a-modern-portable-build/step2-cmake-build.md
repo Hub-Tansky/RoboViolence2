@@ -10,7 +10,7 @@
 |---|---|
 | Goal | The code lives in the AI-ready layout, and one CMake project builds `bv2dedicated` and `bv2master` on Windows, macOS and Linux, with the `bv2` client target defined |
 | In scope | Tasks 2.0–2.8 below |
-| Out of scope | Replacing FMOD, DirectInput, the Win32 window or SDL1 (Step 3); fixing warnings (Step 4); CI (Step 5); splitting the game into client/server/sim libraries ([future-phases.md](../future-phases.md) §C.1) |
+| Out of scope | Replacing FMOD, DirectInput, the Win32 window or SDL1 (Step 3); fixing warnings (Step 4); CI (Step 5); splitting the game into client/server/sim libraries ([PNS-12](../possible-new-scope.md#pns-12-headless-sim-core-player-commands-seeded-rng)) |
 | Allowed paths | Everything moved in 2.0; new `CMakeLists.txt` files, `CMakePresets.json`, `vcpkg.json`, `engine/*/README.md`, `game/README.md`, `masterserver/README.md`, `engine/zeven/include/platform.h`; `#include` lines and platform `#if` lines in sources; `AGENTS.md`, `ARCHITECTURE.md`, `README.md` |
 | Inputs | `AGENTS.md`, `ARCHITECTURE.md`, [README.md](README.md) "Target repository layout", the root `Makefile`, `BaboViolent2/Code/BaboViolent2.vcxproj` |
 | Deliverables | Moved tree; CMake build; per-module READMEs; old build files deleted |

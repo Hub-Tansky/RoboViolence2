@@ -61,7 +61,7 @@ After Steps 1–4 the project builds on modern toolchains. This step adds the en
 ### 5.5 First tests
 
 - `tests/` with a CTest target.
-- Candidates, which also serve [future-phases.md](../future-phases.md):
+- Candidates, which also serve [Phase B](../phase-b-security-infrastructure-anti-cheat/README.md):
   - `netPacket.h` round-trips and size asserts;
   - loading every placeholder map (and, locally, every original map via `BV2_DATA_DIR`);
   - `dksvar` parsing and the config layering order (step 4 §4.5);

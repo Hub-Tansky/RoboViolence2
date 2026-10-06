@@ -9,7 +9,7 @@
 - The owner chose the two-word spelling for the display name.
 
 ## Decision
-The project's display name is **Robo Violence 2**, an unofficial fork of BaboViolent 2. Identifiers keep the one-word form: GitHub repo `Hub-Tansky/RoboViolence2`, local dir `RoboViolence2-main`, vcpkg name and desktop file `roboviolence2`, bundle/app id `org.roboviolence.bv2`. Code identifiers, binaries and in-game strings keep the old `bv2`/`babo` names until [future-phases.md](../roadmap/future-phases.md) §H.
+The project's display name is **Robo Violence 2**, an unofficial fork of BaboViolent 2. Identifiers keep the one-word form: GitHub repo `Hub-Tansky/RoboViolence2`, local dir `RoboViolence2-main`, vcpkg name and desktop file `roboviolence2`, bundle/app id `org.roboviolence.bv2`. Code identifiers, binaries and in-game strings keep the old `bv2`/`babo` names until the rebrand ([PNS-20](../roadmap/possible-new-scope.md#pns-20-replacement-assets-and-rebrand)).
 
 ## Consequences
 - Docs, README and OS-visible names (`packaging/macos/Info.plist.in` `CFBundleName`/`CFBundleDisplayName`, `packaging/linux/roboviolence2.desktop` `Name`) say "Robo Violence 2" and "unofficial fork"; they never imply endorsement by the original authors.
