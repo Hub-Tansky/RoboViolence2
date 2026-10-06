@@ -1,6 +1,6 @@
 # Step 0: Supply-chain security
 
-**Status:** TODO
+**Status:** DONE (2026-10-07)
 
 **Depends on:** Phase A. **Next:** [step1-playtest-builds-and-build-guides.md](step1-playtest-builds-and-build-guides.md). **Index:** [README.md](README.md)
 
@@ -13,7 +13,7 @@
 | Out of scope | Fixing CodeQL findings (steps 4–7, or `possible-new-scope.md`); making CodeQL a required check before its alerts are triaged; vcpkg baseline bumps beyond what a finding needs |
 | Allowed paths | `.github/workflows/**`, `.github/dependabot.yml`, `AGENTS.md`, `ARCHITECTURE.md`, `docs/roadmap/**` |
 | Inputs | `AGENTS.md`, `ARCHITECTURE.md`, `vcpkg.json`, `.github/workflows/build.yml`, [Phase A step 3](../phase-a-modern-portable-build/step3-dependency-upgrades.md) |
-| Deliverables | Workflows `dependency-graph.yml`, `codeql.yml`, `osv-scanner.yml`; `.github/dependabot.yml`; repository settings on; `ARCHITECTURE.md` facts current |
+| Deliverables | Workflows `dependency-graph.yml`, `codeql.yml`; `.github/dependabot.yml`; repository settings on; `ARCHITECTURE.md` facts current. OSV-Scanner dropped (see 0.3) |
 | Definition of done | See "Acceptance checks". All must pass. `ARCHITECTURE.md` is updated |
 
 ## Context
@@ -37,6 +37,7 @@
 
 - `.github/dependabot.yml`: `github-actions` ecosystem, weekly.
 - `.github/workflows/osv-scanner.yml`: `google/osv-scanner-action` reusable workflow on PRs and weekly, uploading SARIF to code scanning. List the vcpkg ports it resolves in `ARCHITECTURE.md`.
+- **Outcome:** dropped (owner decision, 2026-10-07). OSV-Scanner 2.6.0 run on the vcpkg SPDX files (`vcpkg_installed/<triplet>/share/*/vcpkg.spdx.json`) found all 6 ports but filtered every one as unscannable: their purls are `pkg:vcpkg/...`, and OSV has no vcpkg ecosystem. The repo has no other manifest OSV reads. See PNS-22.
 
 ### 0.4 CodeQL
 

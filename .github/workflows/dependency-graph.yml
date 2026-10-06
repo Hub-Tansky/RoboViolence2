@@ -1,0 +1,35 @@
+name: dependency-graph
+# Submits the resolved vcpkg ports to GitHub's dependency graph; GitHub can't parse vcpkg.json itself.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: write
+env:
+  VCPKG_BINARY_SOURCES: clear;files,${{ github.workspace }}/.vcpkg-bin,readwrite
+jobs:
+  submit:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use the runner's vcpkg, with the pinned baseline fetched
+        run: |
+          echo "VCPKG_ROOT=$VCPKG_INSTALLATION_ROOT" >> "$GITHUB_ENV"
+          baseline=$(sed -n 's/.*"builtin-baseline": *"\([0-9a-f]*\)".*/\1/p' vcpkg.json)
+          git -C "$VCPKG_INSTALLATION_ROOT" fetch --quiet origin "$baseline" || git -C "$VCPKG_INSTALLATION_ROOT" fetch --quiet --unshallow origin
+          git -C "$VCPKG_INSTALLATION_ROOT" checkout --quiet --force "$baseline"
+      - name: Packages
+        run: |
+          sudo apt-get update
+          eval "$(tools/setup-dev.sh --linux-packages | sed 's/^sudo apt install/sudo apt-get install -y/')"
+      - uses: actions/cache@v4
+        with:
+          path: .vcpkg-bin
+          key: vcpkg-linux-x64-${{ hashFiles('vcpkg.json') }}
+          restore-keys: vcpkg-linux-x64-
+      - name: Configure (vcpkg install submits the dependency snapshot)
+        env:
+          VCPKG_FEATURE_FLAGS: dependencygraph
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: cmake --preset linux-x64

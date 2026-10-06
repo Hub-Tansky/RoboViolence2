@@ -1,0 +1,7 @@
+# vcpkg has no Dependabot ecosystem: its ports are bumped by hand (monthly baseline bump, see ARCHITECTURE.md).
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
