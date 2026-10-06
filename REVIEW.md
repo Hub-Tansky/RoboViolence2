@@ -1,4 +1,4 @@
-# review.md: when delivered code is up to standard
+# REVIEW.md: when delivered code is up to standard
 
 Agents check every change against this file before calling it done.
 
