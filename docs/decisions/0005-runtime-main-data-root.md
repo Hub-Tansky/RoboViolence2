@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-10-03
-- Affects: [step 2 §2.0, §2.6](../refactoring/phase-a-modern-portable-build/step2-cmake-build.md)
+- Affects: [step 2 §2.0, §2.6](../roadmap/phase-a-modern-portable-build/step2-cmake-build.md)
 
 ## Context
 - Game code opens files as `main/...` (`game/src/GameVar.cpp`, `Map.cpp`, `Console.cpp:655`). Hundreds of literals, plus `main/bv2.cfg` and `main/LaunchScript/`.

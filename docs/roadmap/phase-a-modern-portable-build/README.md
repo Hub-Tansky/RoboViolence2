@@ -1,5 +1,7 @@
 # Refactoring handoff: Phase A (build, dependencies, legacy cleanup)
 
+**Status:** DONE (2026-10-06)
+
 Project: **Robo Violence 2**, an unofficial fork of [Daivuk/BaboViolent2](https://github.com/Daivuk/BaboViolent2), without the original assets (the asset licence notes (kept outside this repository)).
 
 This repository is developed **only by AI agents**. Every step of the refactor has one scope file here. An agent picks up exactly one step, stays inside that step's scope, and finishes by passing its acceptance checks and updating `ARCHITECTURE.md`.
@@ -87,7 +89,7 @@ CMakeLists.txt  CMakePresets.json  vcpkg.json
 .github/workflows/     # CI: build matrix, secret scan, architecture inventory check
 docs/
   analysis/            # code analysis (was "docs/code analysis")
-  refactoring/         # this plan: one scope file per step
+  roadmap/             # plan: one folder per phase, one scope file per step
   decisions/           # ADRs
 engine/
   babonet/  zeven/  dko/   # each: include/, src/, README.md, CMakeLists.txt

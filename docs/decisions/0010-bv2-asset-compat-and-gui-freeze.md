@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-10-06
-- Affects: [future-phases.md](../refactoring/future-phases.md) ground rules 1 and 2, §F, §H.1
+- Affects: [future-phases.md](../roadmap/future-phases.md) ground rules 1 and 2, §F, §H.1
 
 ## Context
 - Replacement assets (§H) will take a long time; until then the game is tested with the owner's local BV2 data (`BV2_DATA_DIR`).

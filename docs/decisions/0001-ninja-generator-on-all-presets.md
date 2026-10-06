@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-10-02
-- Affects: [step 2 §2.4](../refactoring/phase-a-modern-portable-build/step2-cmake-build.md#24-presets), [step 5 §5.4](../refactoring/phase-a-modern-portable-build/step5-code-hygiene-and-ci.md)
+- Affects: [step 2 §2.4](../roadmap/phase-a-modern-portable-build/step2-cmake-build.md#24-presets), [step 5 §5.4](../roadmap/phase-a-modern-portable-build/step5-code-hygiene-and-ci.md)
 
 ## Context
 

@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-10-02
-- Affects: [step 3 §3.5, §3.7](../refactoring/phase-a-modern-portable-build/step3-dependency-upgrades.md), [future-phases §F](../refactoring/future-phases.md#f-rendering-and-ui)
+- Affects: [step 3 §3.5, §3.7](../roadmap/phase-a-modern-portable-build/step3-dependency-upgrades.md), [future-phases §F](../roadmap/future-phases.md#f-rendering-and-ui)
 
 ## Context
 

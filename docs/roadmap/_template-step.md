@@ -1,6 +1,8 @@
 # Step N: <title>
 
-**Depends on:** <steps>. **Next:** <step>. **Index:** [README.md](phase-a-modern-portable-build/README.md)
+**Status:** TODO | IN PROGRESS | DONE (YYYY-MM-DD)
+
+**Depends on:** <steps>. **Next:** <step>. **Index:** [README.md](README.md) (the phase README)
 
 ## Scope
 

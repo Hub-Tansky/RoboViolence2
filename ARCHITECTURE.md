@@ -55,6 +55,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `CMakePresets.json` | Presets: linux-x64, macos-arm64, win-x64-msvc, -asan variants (Ninja) |
 | `LICENSE.txt` | GPLv3 text (code only) |
 | `README.md` | Project overview, fork and asset-removal statement |
+| `REVIEW.md` | Code review standard: checklist, when to run the thermo-nuclear review, how to act on findings |
 | `docs/decisions/0007-data-root-pref-dir-config-layers.md` | ADR 0007 |
 | `game/src/Paths.cpp` | Data root search, per-user pref dir, layered config loading, map and DB path helpers |
 | `game/src/Paths.h` | Interface of `Paths.cpp` (namespace `bv2`) |
@@ -154,25 +155,27 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/decisions/0011-gettext-po-translations.md` | ADR 0011 |
 | `docs/decisions/README.md` | ADR format and index |
 
-### `docs/refactoring`
+### `docs/roadmap`
 
 | path | purpose |
 |---|---|
-| `docs/refactoring/_template-step.md` | Template for step files |
-| `docs/refactoring/future-phases.md` | Phase B plan: ground rules, sections 0 and A to I |
+| `docs/roadmap/README.md` | Roadmap index: phases, step status and closing rules |
+| `docs/roadmap/_template-step.md` | Template for step files |
+| `docs/roadmap/future-phases.md` | Phase B plan: ground rules, sections 0 and A to I |
+| `docs/roadmap/possible-new-scope.md` | Findings from closed steps that may change later phases, pending owner decision |
 
-### `docs/refactoring/phase-a-modern-portable-build`
+### `docs/roadmap/phase-a-modern-portable-build`
 
 | path | purpose |
 |---|---|
-| `docs/refactoring/phase-a-modern-portable-build/README.md` | Phase A handoff and step index |
-| `docs/refactoring/phase-a-modern-portable-build/phase-a-manual-test.md` | Manual gameplay and master-listing checklist per OS |
-| `docs/refactoring/phase-a-modern-portable-build/step0-fork-rename-and-asset-removal.md` | Scope file for step0 |
-| `docs/refactoring/phase-a-modern-portable-build/step1-baseline-and-legacy-removal.md` | Scope file for step1 |
-| `docs/refactoring/phase-a-modern-portable-build/step2-cmake-build.md` | Scope file for step2 |
-| `docs/refactoring/phase-a-modern-portable-build/step3-dependency-upgrades.md` | Scope file for step3 |
-| `docs/refactoring/phase-a-modern-portable-build/step4-64bit-and-cross-platform.md` | Scope file for step4 |
-| `docs/refactoring/phase-a-modern-portable-build/step5-code-hygiene-and-ci.md` | Scope file for step5 |
+| `docs/roadmap/phase-a-modern-portable-build/README.md` | Phase A handoff and step index |
+| `docs/roadmap/phase-a-modern-portable-build/phase-a-manual-test.md` | Manual gameplay and master-listing checklist per OS |
+| `docs/roadmap/phase-a-modern-portable-build/step0-fork-rename-and-asset-removal.md` | Scope file for step0 |
+| `docs/roadmap/phase-a-modern-portable-build/step1-baseline-and-legacy-removal.md` | Scope file for step1 |
+| `docs/roadmap/phase-a-modern-portable-build/step2-cmake-build.md` | Scope file for step2 |
+| `docs/roadmap/phase-a-modern-portable-build/step3-dependency-upgrades.md` | Scope file for step3 |
+| `docs/roadmap/phase-a-modern-portable-build/step4-64bit-and-cross-platform.md` | Scope file for step4 |
+| `docs/roadmap/phase-a-modern-portable-build/step5-code-hygiene-and-ci.md` | Scope file for step5 |
 
 ### `engine/babonet`
 

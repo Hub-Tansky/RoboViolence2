@@ -1,5 +1,7 @@
 # Step 2: Target layout and CMake build
 
+**Status:** DONE (2026-10-06)
+
 **Depends on:** [Step 1](step1-baseline-and-legacy-removal.md). **Next:** [step3-dependency-upgrades.md](step3-dependency-upgrades.md). **Index:** [README.md](README.md)
 
 ## Scope
