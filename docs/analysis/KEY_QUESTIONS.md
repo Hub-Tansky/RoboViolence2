@@ -150,6 +150,7 @@ No secret; the sequence is derivable from the public source. See `ALGORITHM_01` 
 | R17 | High | Config loader reads `ficIn >> variable` into `char variable[256]` with no width: a long token overflows the stack. CodeQL `cpp/dangerous-cin` | [VERIFY: engine/zeven/src/CSystemVariable.cpp:93] [VERIFY: engine/zeven/src/CSystemVariable.cpp:134] |
 | R18 | High | Allocation sizes `w*h*3` / `w*h*bpp` computed in `int` before widening; with sizes read from map or texture files they overflow and under-allocate. CodeQL `cpp/integer-multiplication-cast-to-long` | [VERIFY: game/src/Map.cpp:1112] [VERIFY: game/src/Map.cpp:1682] [VERIFY: engine/dko/src/ePTexture.cpp:214] [VERIFY: game/src/CHost.cpp:167] [VERIFY: game/src/CAStar.cpp:91] [VERIFY: game/src/CAStar.cpp:95] [VERIFY: game/src/CAStar.cpp:195] [VERIFY: game/src/tinyxmlparser.cpp:467-494] |
 | R19 | Low | `%i` used for an `unsigned long` `bbnetID`. CodeQL `cpp/wrong-type-format-argument` | [VERIFY: game/src/Console.cpp:2253] |
+| R20 | Medium | `dksPlayMusic` streams music with `MA_SOUND_FLAG_STREAM`; when the file is missing (placeholder data has no `Menu.ogg`), `ma_sound_init_from_file` fails and frees the stream while miniaudio's job thread still writes to it: heap-use-after-free, timing-dependent. Seen once in the CI smoke job (ASan), 2026-10-07 | [VERIFY: engine/zeven/src/dks.cpp:241] [VERIFY: game/src/Scene.cpp:205] |
 
 ---
 
