@@ -27,7 +27,7 @@ jobs:
           - { language: c-cpp, build-mode: manual }
           - { language: actions, build-mode: none }
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Use the runner's vcpkg, with the pinned baseline fetched
         if: matrix.language == 'c-cpp'
         run: |
