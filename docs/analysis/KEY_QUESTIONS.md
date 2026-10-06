@@ -146,6 +146,10 @@ No secret; the sequence is derivable from the public source. See `ALGORITHM_01` 
 | R13 | Low | Pro SND spawn bound check uses `>` instead of `>=` | [VERIFY: BaboViolent2/Code/GameSpawn.cpp:195] |
 | R14 | Low | No cap on catch-up steps in `dkcUpdateTimer` | [VERIFY: Engine/DukZeven/Code/dkc.cpp:159-164] |
 | R15 | Low | Ping moving average divides a 59-sample sum by 60 | [VERIFY: BaboViolent2/Code/PlayerUpdate.cpp:37-42] |
+| R16 | Critical | `FileIO` returns file text through `CString(char* fmt, ...)` (`engine/zeven/include/CString.h:62`), so a `%` in file data is a printf format string; `getString()` writes an unbounded string into `char tmp[256]`. Reached by files from disk and by downloaded maps. Found by CodeQL (`cpp/tainted-format-string`), 2026-10-07 | [VERIFY: game/src/FileIO.cpp:73] [VERIFY: game/src/FileIO.cpp:213] [VERIFY: game/src/FileIO.cpp:225] |
+| R17 | High | Config loader reads `ficIn >> variable` into `char variable[256]` with no width: a long token overflows the stack. CodeQL `cpp/dangerous-cin` | [VERIFY: engine/zeven/src/CSystemVariable.cpp:93] [VERIFY: engine/zeven/src/CSystemVariable.cpp:134] |
+| R18 | High | Allocation sizes `w*h*3` / `w*h*bpp` computed in `int` before widening; with sizes read from map or texture files they overflow and under-allocate. CodeQL `cpp/integer-multiplication-cast-to-long` | [VERIFY: game/src/Map.cpp:1112] [VERIFY: game/src/Map.cpp:1682] [VERIFY: engine/dko/src/ePTexture.cpp:214] [VERIFY: game/src/CHost.cpp:167] [VERIFY: game/src/CAStar.cpp:91] [VERIFY: game/src/CAStar.cpp:95] [VERIFY: game/src/CAStar.cpp:195] [VERIFY: game/src/tinyxmlparser.cpp:467-494] |
+| R19 | Low | `%i` used for an `unsigned long` `bbnetID`. CodeQL `cpp/wrong-type-format-argument` | [VERIFY: game/src/Console.cpp:2253] |
 
 ---
 

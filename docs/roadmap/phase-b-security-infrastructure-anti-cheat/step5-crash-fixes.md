@@ -8,8 +8,8 @@
 
 | Field | Value |
 |---|---|
-| Goal | The high-severity defects R1–R5, the known UBSan reports and the start-up/teardown null dereferences are fixed, each with a test |
-| In scope | Tasks 5.1–5.4 below |
+| Goal | The high-severity defects R1–R5, the CodeQL findings R16–R18, the known UBSan reports and the start-up/teardown null dereferences are fixed, each with a test |
+| In scope | Tasks 5.1–5.5 below |
 | Out of scope | Medium and low defects (step 7); SQL (step 6); restructuring object lifetimes (`unique_ptr`, PNS-19) |
 | Allowed paths | `game/src/**`, `engine/babonet/src/**`, `tests/**`, `docs/analysis/KEY_QUESTIONS.md`, `docs/decisions/**`, `ARCHITECTURE.md`, `docs/roadmap/**` |
 | Inputs | `AGENTS.md`, `ARCHITECTURE.md`, `docs/analysis/KEY_QUESTIONS.md` Part D, PNS-5, PNS-6 |
@@ -25,6 +25,9 @@
 - R3: `if ((gameVar.sv_serverType = 1))` (`game/src/GameProjectile.cpp:714`) is an assignment that forces Pro rules. It is load-bearing: fixing it changes the ruleset on servers that set `sv_serverType 0`.
 - R4: the master ban answer kicks `players[ID]` without a null check (`game/src/Server.cpp`).
 - R5: the map loader keeps `isValid` true for unknown versions and never bounds-checks `size` (`game/src/Map.cpp:110–206`); clients load server-supplied maps.
+- R16 (critical, CodeQL): `FileIO` passes file text to `CString(char* fmt, ...)` as a format string, and `getString()` overflows `char tmp[256]` (`game/src/FileIO.cpp:73, 213, 225`). Downloaded maps reach it.
+- R17 (CodeQL): unbounded `ficIn >> char[256]` in the config loader (`engine/zeven/src/CSystemVariable.cpp:93, 134`).
+- R18 (CodeQL): `w*h*3` allocation sizes overflow in `int`; the map and texture sites (`game/src/Map.cpp:1112, 1682`, `engine/dko/src/ePTexture.cpp:214`) take sizes from files. The other R18 sites are in step 7.
 - PNS-5: UBSan out-of-range `bool` loads and NaN casts in `CUserLogin.cpp`.
 - PNS-6: null dereferences in start-up and teardown (`Scene::disconnect`, the `Server` calls fixed in Phase A); more are likely.
 
@@ -38,11 +41,15 @@
 
 - One commit each, each with a harness or unit test that crashed under ASan before.
 
-### 5.3 UBSan defects
+### 5.3 CodeQL findings R16–R18
+
+- R16: never pass data as a format (`CString("%s", buf)` or a non-format constructor); bound `getString()`. R17: `std::string` or `std::setw`. R18 (map and texture sites): compute in `size_t` and reject sizes above a sane limit. Each with a test; the CodeQL alerts close on the next scan.
+
+### 5.4 UBSan defects
 
 - Fix the reports listed in `ARCHITECTURE.md` Open items. Remove that line when they're gone.
 
-### 5.4 Start-up and teardown audit
+### 5.5 Start-up and teardown audit
 
 - Run client and server start-up/quit paths under ASan/UBSan (quit at each scene, `dedicate` before `set sv_*`, disconnect mid-map-download). Fix null dereferences; list anything larger in `possible-new-scope.md`.
 
@@ -56,7 +63,8 @@
 ctest --test-dir build/linux-x64-asan --output-on-failure
 ```
 
-- Passes with a new test for each of R1, R2, R4, R5.
+- Passes with a new test for each of R1, R2, R4, R5, R16, R17 and the R18 map/texture sites.
+- No open CodeQL alert for R16–R17 or the R18 map/texture sites.
 - The R3 ADR exists and its decision is implemented.
 - The CI smoke job (client under xvfb, ASan) reports no UBSan errors.
 - R1–R5 are marked fixed in `KEY_QUESTIONS.md`.

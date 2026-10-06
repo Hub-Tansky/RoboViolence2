@@ -43,6 +43,7 @@
 
 - `.github/workflows/codeql.yml` (advanced setup): `c-cpp` with a manual build of `linux-x64` (`bv2`, `bv2dedicated`, `bv2master`), plus `actions`. Runs on push, PR and weekly. Not a required check.
 - Triage the first run: each alert is fixed later by step 4–7 or listed in `possible-new-scope.md`.
+- **Outcome** (first scan, 57 alerts): 34 in vcpkg's `miniaudio.h` under `build/` are filtered out before upload; 6 missing workflow `permissions` fixed here; the 17 C/C++ findings became R16–R19 in `docs/analysis/KEY_QUESTIONS.md`, scheduled in steps 5 and 7.
 
 ### 0.5 Docs
 
