@@ -55,6 +55,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `CMakePresets.json` | Presets: linux-x64, macos-arm64, win-x64-msvc, -asan variants (Ninja) |
 | `LICENSE.txt` | GPLv3 text (code only) |
 | `README.md` | Project overview, fork and asset-removal statement |
+| `review.md` | Code review standard: checklist, when to run the thermo-nuclear review, how to act on findings |
 | `docs/decisions/0007-data-root-pref-dir-config-layers.md` | ADR 0007 |
 | `game/src/Paths.cpp` | Data root search, per-user pref dir, layered config loading, map and DB path helpers |
 | `game/src/Paths.h` | Interface of `Paths.cpp` (namespace `bv2`) |

@@ -44,6 +44,7 @@ cmake --build --preset <preset> --target bv2dedicated bv2master
 - Never commit secrets, real hosts or IPs. Never use `--no-verify`.
 - Finish every step by updating `ARCHITECTURE.md` (inventory and changed facts) and running `tools/check-architecture.sh`.
 - Record non-obvious decisions as ADRs in `docs/decisions/`.
+- Judge delivered code against [review.md](review.md); big steps and architecture-changing PRs get the `/thermo-nuclear-code-quality-review` skill.
 - Don't mix mechanical rewrites (encoding, renames, formatting) with functional changes in one commit.
 
 ## Compile-time variants
