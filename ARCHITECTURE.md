@@ -161,7 +161,6 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 |---|---|
 | `docs/roadmap/README.md` | Roadmap index: phases, step status and closing rules |
 | `docs/roadmap/_template-step.md` | Template for step files |
-| `docs/roadmap/future-phases.md` | Phase B plan: ground rules, sections 0 and A to I |
 | `docs/roadmap/possible-new-scope.md` | Findings from closed steps that may change later phases, pending owner decision |
 
 ### `docs/roadmap/phase-a-modern-portable-build`
@@ -176,6 +175,26 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/roadmap/phase-a-modern-portable-build/step3-dependency-upgrades.md` | Scope file for step3 |
 | `docs/roadmap/phase-a-modern-portable-build/step4-64bit-and-cross-platform.md` | Scope file for step4 |
 | `docs/roadmap/phase-a-modern-portable-build/step5-code-hygiene-and-ci.md` | Scope file for step5 |
+
+### `docs/roadmap/phase-b-security-infrastructure-anti-cheat`
+
+| path | purpose |
+|---|---|
+| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/README.md` | Phase B index: goal, steps, done-when, risks |
+| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/step0-supply-chain-security.md` | Scope file for step0 |
+| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/step1-playtest-builds-and-build-guides.md` | Scope file for step1 |
+| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/step2-cross-os-playtest.md` | Scope file for step2 |
+| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/step3-test-harness.md` | Scope file for step3 |
+| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/step4-packet-hygiene.md` | Scope file for step4 |
+| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/step5-crash-fixes.md` | Scope file for step5 |
+| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/step6-sql-prepared-statements.md` | Scope file for step6 |
+| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/step7-medium-low-defects.md` | Scope file for step7 |
+| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/step8-server-validator.md` | Scope file for step8 |
+| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/step9-anti-cheat-checks.md` | Scope file for step9 |
+| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/step10-server-credentials.md` | Scope file for step10 |
+| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/step11-server-containers.md` | Scope file for step11 |
+| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/step12-remote-admin.md` | Scope file for step12 |
+| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/step13-localisation.md` | Scope file for step13 |
 
 ### `engine/babonet`
 

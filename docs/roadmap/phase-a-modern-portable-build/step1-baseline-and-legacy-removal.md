@@ -163,7 +163,7 @@ Do this right after §1.3, **before any other code edit**, so every later diff a
 
 - Scope: 134 lines in 35 files. Keep the `#ifdef _PRO_` branches.
 - In `Server.h` / `Client.h`, keep a single `GAME_VERSION_SV/CL`. Step 4 bumps it.
-- Remove the **client binary checksum challenge**, since it can't work with open-source builds. See `BaboViolent2/Code/ClientRecv.cpp:38-80`, the server side in `ServerRecv.cpp`, and the `BadChecksum` insert at `ServerRecv.cpp:1198`, which is also an SQL injection (Q-S3). A real integrity approach is in [future-phases.md](../future-phases.md) §C.
+- Remove the **client binary checksum challenge**, since it can't work with open-source builds. See `BaboViolent2/Code/ClientRecv.cpp:38-80`, the server side in `ServerRecv.cpp`, and the `BadChecksum` insert at `ServerRecv.cpp:1198`, which is also an SQL injection (Q-S3). Server-side anti-cheat replaces it: [Phase B steps 8–9](../phase-b-security-infrastructure-anti-cheat/step8-server-validator.md).
 - Keep the Minibot weapon (`MINIBOT`, 33 lines). It's a deployable drone weapon, not an AI player.
 - Read [../../analysis/KEY_QUESTIONS.md](../../analysis/KEY_QUESTIONS.md) Q6 first.
 
@@ -201,12 +201,12 @@ Do this right after §1.3, **before any other code edit**, so every later diff a
 ### 1.12 Remove unbuilt auxiliary tools
 
 - `BaboViolent2/Bv2Launcher/`, `BaboViolent2/Bv2UpdateServer/` (32-bit ELF + `fl.db`), `BaboViolent2/Bv2RemoteAdmin/` (wxWidgets).
-- A secure admin replacement is in [future-phases.md](../future-phases.md) §D.
+- A secure admin replacement is [Phase B step 12](../phase-b-security-infrastructure-anti-cheat/step12-remote-admin.md).
 
 ### 1.13 Consolidate MD5 and drop OpenSSL
 
 - Keep babonet's `md5class`. Switch `CMaster.cpp:28` (`<openssl/md5.h>`) and the `md5_2.h` users to it, then delete `md5_2.h`. OpenSSL is no longer a dependency.
-- Replacing MD5 for passwords is part of [future-phases.md](../future-phases.md) §B.
+- Replacing MD5 for passwords: [Phase B step 10](../phase-b-security-infrastructure-anti-cheat/step10-server-credentials.md) (server and admin), [PNS-14](../possible-new-scope.md#pns-14-account-tokens-and-modern-kdf) (accounts).
 
 ### 1.14 Content and READMEs
 

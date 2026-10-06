@@ -10,7 +10,7 @@
 - Binaries, window titles, in-game strings and code identifiers (`bv2`, `babo`) still carry the old name.
 
 ## Decision
-The project is **RoboViolence 2**, an unofficial fork of BaboViolent 2. GitHub repo `Hub-Tansky/RoboViolence2`; local dir `RoboViolence2-master`. Code identifiers, binaries and in-game strings keep the old names until [future-phases.md](../roadmap/future-phases.md) §H.
+The project is **RoboViolence 2**, an unofficial fork of BaboViolent 2. GitHub repo `Hub-Tansky/RoboViolence2`; local dir `RoboViolence2-master`. Code identifiers, binaries and in-game strings keep the old names until the rebrand ([PNS-20](../roadmap/possible-new-scope.md#pns-20-replacement-assets-and-rebrand)).
 
 ## Consequences
 - Docs and README say "RoboViolence 2" and "unofficial fork"; they never imply endorsement by the original authors.

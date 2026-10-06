@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-10-02
-- Affects: [step 3 §3.1, §3.3](../roadmap/phase-a-modern-portable-build/step3-dependency-upgrades.md), [future-phases §D](../roadmap/future-phases.md#d-relaunch-infrastructure-and-scope-decisions)
+- Affects: [step 3 §3.1, §3.3](../roadmap/phase-a-modern-portable-build/step3-dependency-upgrades.md), [PNS-15](../roadmap/possible-new-scope.md#pns-15-account-and-ladder-system-service-endpoints)
 
 ## Context
 
@@ -21,5 +21,5 @@ Add the CMake option `BV2_WITH_HTTP`, default **OFF**. When OFF, `CCurl.cpp` is 
 - No libcurl and no TLS stack in Phase A builds; one fewer dependency on all three OSes. The callers stay unchanged.
 - Accounts, friends, ladder stats and report upload are inactive in Phase A, as they already are after step 1.
 - Callers must handle an empty response without crashing; `CStatus` and `CFriends` need checking (`Server.cpp:605` already does).
-- An own account/stats service (future-phases §B, §D) turns `BV2_WITH_HTTP` on, or replaces `CCurl` with a client chosen then.
+- An own account/stats service (PNS-14, PNS-15) turns `BV2_WITH_HTTP` on, or replaces `CCurl` with a client chosen then.
 - Rejected: upgrade now (cost with no user); delete `CCurl` and its callers (larger diff in UI code that §D may keep).

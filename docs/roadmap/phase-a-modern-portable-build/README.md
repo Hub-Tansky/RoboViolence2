@@ -12,13 +12,13 @@ Phase A turns the 2012 source release into a project with **one CMake + vcpkg bu
 - the dedicated server `bv2dedicated`,
 - the master server `bv2master`.
 
-Gameplay, security and anti-cheat are out of scope here; see [future-phases.md](../future-phases.md) (Phase B).
+Gameplay, security and anti-cheat are out of scope here; see [Phase B](../phase-b-security-infrastructure-anti-cheat/README.md).
 
 ## Decisions already made
 
 | Topic | Decision |
 |---|---|
-| Fork and name | GitHub fork renamed `RoboViolence2`, local dir `RoboViolence2-main`. Internal code identifiers move from `bv2` to `roboviolence2` as files are touched; binaries, env vars, paths and visible names stay until [future-phases.md](../future-phases.md) §H ([ADR 0009](../../decisions/0009-rename-internal-identifiers-continuously.md)) |
+| Fork and name | GitHub fork renamed `RoboViolence2`, local dir `RoboViolence2-main`. Internal code identifiers move from `bv2` to `roboviolence2` as files are touched; binaries, env vars, paths and visible names stay until the rebrand ([PNS-20](../possible-new-scope.md#pns-20-replacement-assets-and-rebrand), [ADR 0009](../../decisions/0009-rename-internal-identifiers-continuously.md)) |
 | Original assets | Not committed or redistributed. Removed from `main` in [step0](step0-fork-rename-and-asset-removal.md) §0.4; every removed file is catalogued in the asset inventory (kept outside this repository) for recreation; a hash blocklist stops them coming back. Local runs use your own copy via `BV2_DATA_DIR`; CI uses generated placeholders |
 | Platforms | **Linux, macOS, Windows**. All three are equivalent first-class targets: none is secondary, and each one blocks a release. Linux x64 (Ubuntu 24.04 LTS as the reference distro; X11 and Wayland); macOS 12+ (arm64); Windows 11 and later (x64). arm64 Linux/Windows and x86_64 macOS are optional extras |
 | Protocol | Free to break compatibility with 2.11 clients. Bump `GAME_VERSION_SV/CL` once |
@@ -43,7 +43,7 @@ Gameplay, security and anti-cheat are out of scope here; see [future-phases.md](
 | 3 | [step3-dependency-upgrades.md](step3-dependency-upgrades.md) | 2 | vcpkg deps; SDL3, miniaudio and glad platform layer; client runs on Windows, macOS and Linux |
 | 4 | [step4-64bit-and-cross-platform.md](step4-64bit-and-cross-platform.md) | 2 (can overlap 3) | Warning-clean x64/arm64 builds; fixed-width packets; portable paths; config and secrets outside the install directory |
 | 5 | [step5-code-hygiene-and-ci.md](step5-code-hygiene-and-ci.md) | 2 (CI), 4 (warnings) | Encoding guard, clang-format, required CI on 3 OSes including the secret scan |
-| — | [future-phases.md](../future-phases.md) | Phase A complete | Phase B: supply-chain security, security fixes, anti-cheat foundations, infrastructure, networking, renderer, localisation, assets |
+| — | [Phase B](../phase-b-security-infrastructure-anti-cheat/README.md) | Phase A complete | Supply-chain security, play-test builds, security fixes, anti-cheat, server credentials, containers, remote admin, localisation |
 
 Steps 3 and 4 touch the same engine files, so run them one after the other or coordinate them. Nothing else should run in parallel on the engine.
 

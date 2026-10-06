@@ -10,7 +10,7 @@
 |---|---|
 | Goal | Every dependency comes from `vcpkg.json`; the client runs on Windows 11, macOS and Linux through SDL3 + miniaudio + glad behind the unchanged `dk*` APIs |
 | In scope | Tasks 3.1–3.10 below |
-| Out of scope | Protocol and struct changes (Step 4); prepared-statement SQL fixes and other security fixes ([future-phases.md](../future-phases.md) §A); renderer rewrite (§F, [ADR 0003](../../decisions/0003-keep-opengl-2.1-then-sdl-gpu.md)); babonet defect R7 unless it blocks testing |
+| Out of scope | Protocol and struct changes (Step 4); prepared-statement SQL fixes and other security fixes ([Phase B](../phase-b-security-infrastructure-anti-cheat/README.md) steps 4–7); renderer rewrite ([PNS-18](../possible-new-scope.md#pns-18-renderer-isolation-and-replacement), [ADR 0003](../../decisions/0003-keep-opengl-2.1-then-sdl-gpu.md)); babonet defect R7 unless it blocks testing |
 | Allowed paths | `vcpkg.json`, `CMakeLists.txt` files, `engine/zeven/**`, `engine/babonet/src/**` (portability only), `game/src/{main.cpp,CCurl.cpp,CCurlStub.cpp,CStatus.cpp,CFriends.cpp}` and call sites that break because of API changes, `ARCHITECTURE.md`, `AGENTS.md` |
 | Inputs | `AGENTS.md`, `ARCHITECTURE.md`, [../../analysis/01_SYSTEM_OVERVIEW.md](../../analysis/01_SYSTEM_OVERVIEW.md) (engine subsystems), [../../analysis/KEY_QUESTIONS.md](../../analysis/KEY_QUESTIONS.md) Q1, R11, R14, ADRs [0002](../../decisions/0002-compile-out-libcurl.md) and [0003](../../decisions/0003-keep-opengl-2.1-then-sdl-gpu.md) |
 | Deliverables | The vcpkg manifest; rewritten `dkw`, `dki`, `dks`, `dkc` and GL loading; `CCurl` stub behind `BV2_WITH_HTTP` |
