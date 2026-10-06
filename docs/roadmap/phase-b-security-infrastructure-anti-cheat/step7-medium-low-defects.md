@@ -8,7 +8,7 @@
 
 | Field | Value |
 |---|---|
-| Goal | The remaining register defects R6–R10, R12, R13, R15 and babonet R7 are fixed, each with a test |
+| Goal | The remaining register defects R6–R10, R12, R13, R15, R19, the remaining R18 sites and babonet R7 are fixed, each with a test |
 | In scope | Tasks 7.1–7.3 below |
 | Out of scope | R11 and R14 (fixed in Phase A step 3); gameplay balance changes beyond the defect; babonet UDP / `cPeer2Peer` (PNS-17) |
 | Allowed paths | `game/src/**`, `engine/babonet/src/**`, `tests/**`, `docs/analysis/KEY_QUESTIONS.md`, `ARCHITECTURE.md`, `docs/roadmap/**` |
@@ -28,6 +28,8 @@ Current locations (the `KEY_QUESTIONS.md` paths predate step 2):
 - R12: the two CTF dropped-flag radii differ, and the red-return log text is wrong (`game/src/ServerCTF.cpp`).
 - R13: the Pro SND spawn bound check uses `>` instead of `>=` (`game/src/GameSpawn.cpp`).
 - R15: the ping average divides a 59-sample sum by 60 (`game/src/PlayerUpdate.cpp`).
+- R18 (CodeQL, rest): `int` multiplication before widening in `game/src/CHost.cpp:167`, `game/src/CAStar.cpp:91, 95, 195`, and the vendored `game/src/tinyxmlparser.cpp:467–494`.
+- R19 (CodeQL): `%i` for an `unsigned long` (`game/src/Console.cpp:2253`).
 
 ## Tasks
 
@@ -39,7 +41,7 @@ Current locations (the `KEY_QUESTIONS.md` paths predate step 2):
 
 - Tests through the step 3 harness. R8 is visible to players (team moves): describe the fixed behaviour in the PR.
 
-### 7.3 Small fixes: R12, R15
+### 7.3 Small fixes: R12, R15, R18 (rest), R19
 
 - R12 makes both flag radii equal; ask the owner which value (0.5 or 0.25) before changing it, since it is gameplay.
 
