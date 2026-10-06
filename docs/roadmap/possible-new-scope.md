@@ -178,3 +178,13 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Why deferred:** **[GUI]** changes need the owner's approval. Non-ASCII languages also need UTF-8 decoding in `CFont` (`engine/zeven/src/CFont.cpp:156`) and new fonts (PNS-20).
 - **Suggested home:** after Phase B step 13 and PNS-20 fonts.
 - **Status:** Proposed
+
+## From Phase B
+
+### PNS-22: No vulnerability alerts for vcpkg ports
+
+- **Found in:** Phase B step 0 (2026-10-07), local OSV-Scanner 2.6.0 run.
+- **Extract:** OSV-Scanner on `build/macos-arm64/vcpkg_installed`: "Filtered 6 local/unscannable package/s from the scan." vcpkg's SPDX gives `pkg:vcpkg/sqlite3@3.53.4?port_version=2&...`.
+- **Why it matters:** Neither Dependabot (no C/C++ ecosystem in the GitHub Advisory Database) nor OSV checks sqlite3, SDL3, miniaudio or stb. The only defence is the manual monthly baseline bump.
+- **Suggested home:** re-check when OSV or GitHub adds a vcpkg ecosystem, or generate an SBOM that maps ports to upstream `pkg:github/...` purls with versions OSV can match (OSS-Fuzz entries for sqlite and SDL exist). Any phase; small.
+- **Status:** Proposed
