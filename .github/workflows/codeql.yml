@@ -59,3 +59,21 @@ jobs:
       - uses: github/codeql-action/analyze@v4
         with:
           category: /language:${{ matrix.language }}
+          output: sarif-results
+          upload: failure-only
+      - name: Locate the SARIF file
+        id: sarif
+        run: echo "file=$(ls sarif-results/*.sarif)" >> "$GITHUB_OUTPUT"
+      # Third-party headers under build/ (vcpkg_installed, e.g. miniaudio.h) are compiled into our
+      # targets; their alerts aren't ours to fix, so drop them before upload.
+      - uses: advanced-security/filter-sarif@v1.1
+        with:
+          patterns: |
+            +**
+            -build/**
+          input: ${{ steps.sarif.outputs.file }}
+          output: ${{ steps.sarif.outputs.file }}
+      - uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: ${{ steps.sarif.outputs.file }}
+          category: /language:${{ matrix.language }}
