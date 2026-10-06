@@ -1,5 +1,7 @@
 # Step 3: Dependency upgrades and platform layer
 
+**Status:** DONE (2026-10-06)
+
 **Depends on:** [Step 2](step2-cmake-build.md). **Coordinate with:** [Step 4](step4-64bit-and-cross-platform.md), which touches the same engine files. **Index:** [README.md](README.md)
 
 ## Scope

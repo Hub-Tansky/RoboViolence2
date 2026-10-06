@@ -1,5 +1,7 @@
 # Step 0: Fork, rename, asset inventory and removal
 
+**Status:** DONE (2026-10-06)
+
 **Depends on:** nothing. Runs before every other step. **Next:** [step1-baseline-and-legacy-removal.md](step1-baseline-and-legacy-removal.md). **Index:** [README.md](README.md)
 
 ## Scope

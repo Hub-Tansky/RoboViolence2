@@ -1,5 +1,7 @@
 # Step 5: Code hygiene and CI
 
+**Status:** DONE (2026-10-06)
+
 **Depends on:** [Step 2](step2-cmake-build.md) for CI and [Step 4](step4-64bit-and-cross-platform.md) for raising the warning level. **Index:** [README.md](README.md)
 
 ## Scope

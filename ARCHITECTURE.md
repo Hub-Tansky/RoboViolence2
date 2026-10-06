@@ -159,8 +159,10 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 
 | path | purpose |
 |---|---|
+| `docs/roadmap/README.md` | Roadmap index: phases, step status and closing rules |
 | `docs/roadmap/_template-step.md` | Template for step files |
 | `docs/roadmap/future-phases.md` | Phase B plan: ground rules, sections 0 and A to I |
+| `docs/roadmap/possible-new-scope.md` | Findings from closed steps that may change later phases, pending owner decision |
 
 ### `docs/roadmap/phase-a-modern-portable-build`
 

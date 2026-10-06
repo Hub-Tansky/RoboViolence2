@@ -1,5 +1,7 @@
 # Step 4: 64-bit, cross-platform correctness and local config
 
+**Status:** DONE (2026-10-06)
+
 **Depends on:** [Step 2](step2-cmake-build.md); can overlap [Step 3](step3-dependency-upgrades.md), but coordinate engine file edits with it. **Index:** [README.md](README.md)
 
 ## Scope

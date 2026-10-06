@@ -1,5 +1,7 @@
 # Step 1: Baseline, repo hygiene, secret blocking, legacy removal
 
+**Status:** DONE (2026-10-06)
+
 **Depends on:** [Step 0](step0-fork-rename-and-asset-removal.md). **Next:** [step2-cmake-build.md](step2-cmake-build.md). **Index:** [README.md](README.md)
 
 ## Scope
