@@ -87,7 +87,7 @@ CMakeLists.txt  CMakePresets.json  vcpkg.json
 .github/workflows/     # CI: build matrix, secret scan, architecture inventory check
 docs/
   analysis/            # code analysis (was "docs/code analysis")
-  refactoring/         # this plan: one scope file per step
+  roadmap/             # plan: one folder per phase, one scope file per step
   decisions/           # ADRs
 engine/
   babonet/  zeven/  dko/   # each: include/, src/, README.md, CMakeLists.txt

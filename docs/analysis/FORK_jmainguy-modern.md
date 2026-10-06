@@ -41,15 +41,15 @@ Daivuk/BaboViolent2 master (7171c84)   == ours, byte-identical except our docs/A
 | Master protocol | **No** | `stBV2list.Version` and `stBV2row.Version` grow from `char[5]` to `char[16]` (`src/Game/Master/cMSstruct.h:276,309`, `src/Version.h:12`). Fork servers and clients only work with the fork master |
 | Behaviour | Partly | Servers no longer enforce PRO checksums, accounts or speed-hack kicks. Old clients still connect |
 
-Breaking the protocol is fine for us: Phase A already allows it ([../refactoring/phase-a-modern-portable-build/README.md](../refactoring/phase-a-modern-portable-build/README.md), "Protocol"). The fork keeps the game wire format; it doesn't fix it. Step 4's fixed-width `netPacket.h` with size asserts and its single version bump are still needed, because the fork has neither and dropped macOS arm64 (unsigned `char`) from CI.
+Breaking the protocol is fine for us: Phase A already allows it ([../roadmap/phase-a-modern-portable-build/README.md](../roadmap/phase-a-modern-portable-build/README.md), "Protocol"). The fork keeps the game wire format; it doesn't fix it. Step 4's fixed-width `netPacket.h` with size asserts and its single version bump are still needed, because the fork has neither and dropped macOS arm64 (unsigned `char`) from CI.
 
 ## Why not merge
 
-- **Layout:** `src/` flat layout vs our target `engine/ game/ masterserver/` ([../refactoring/phase-a-modern-portable-build/README.md](../refactoring/phase-a-modern-portable-build/README.md#target-repository-layout-ai-ready)). A merge would be a rewrite either way.
+- **Layout:** `src/` flat layout vs our target `engine/ game/ masterserver/` ([../roadmap/phase-a-modern-portable-build/README.md](../roadmap/phase-a-modern-portable-build/README.md#target-repository-layout-ai-ready)). A merge would be a rewrite either way.
 - **Encoding damage:** Latin-1 bytes were replaced by U+FFFD in 68 `src` files (41 already damaged in Daivuk `modern`). The French comments can't be recovered from the fork. Our step 1 §1.4 conversion is lossless.
 - **Conflicting decisions:** SDL2 + SDL2_mixer + submodules vs our SDL3 + miniaudio + vcpkg. Windows and macOS are silent. No macOS CI.
 - **Rule violations:** committed binaries (`src/MasterListingServer/libBaboNet.a`, `libDKC.a`, `linuxmaster`, `Content/*.dll`) and a hard-coded public host (`babo.soh.re`), both banned by our Phase A rules.
-- **Anti-cheat removed** rather than fixed. Future phases need it ([../refactoring/future-phases.md](../refactoring/future-phases.md)).
+- **Anti-cheat removed** rather than fixed. Future phases need it ([../roadmap/future-phases.md](../roadmap/future-phases.md)).
 
 ## Harvest list: implemented 2026-10-02
 

@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-10-06
-- Affects: [future-phases.md](../refactoring/future-phases.md) §I
+- Affects: [future-phases.md](../roadmap/future-phases.md) §I
 
 ## Context
 - Strings live in `content/languages/en.lang` (`key<TAB>text`), loaded from `languageFile` (`game/src/GameVar.cpp:271`); English is the only language.

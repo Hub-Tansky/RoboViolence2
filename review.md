@@ -6,7 +6,7 @@ Agents check every change against this file before calling it done.
 
 - Stays inside the step's **Allowed paths** and scope ([AGENTS.md](AGENTS.md) Agent rules).
 - Builds warning-clean on all three presets; `ctest` passes; `tools/check-architecture.sh` and `python3 tools/check-hygiene.py` pass.
-- Follows the Phase B ground rules ([docs/refactoring/future-phases.md](docs/refactoring/future-phases.md)): BV2 assets still load, no unapproved **[GUI]** change, renames only as separate mechanical commits.
+- Follows the Phase B ground rules ([docs/roadmap/future-phases.md](docs/roadmap/future-phases.md)): BV2 assets still load, no unapproved **[GUI]** change, renames only as separate mechanical commits.
 - New behaviour has a test; fixes have a test that failed before.
 - No secrets, real hosts or IPs; no `--no-verify`.
 - `ARCHITECTURE.md` and any affected README or ADR are updated; non-obvious decisions have an ADR.
@@ -16,7 +16,7 @@ Agents check every change against this file before calling it done.
 
 Run the `/thermo-nuclear-code-quality-review` skill when a chunk of work is done that is either:
 
-- a whole step (`docs/refactoring/<phase>/stepN-*.md`), or
+- a whole step (`docs/roadmap/<phase>/stepN-*.md`), or
 - a PR that changes the code's architecture: new or moved modules, libraries or interfaces, changed ownership or data flow, protocol or file-format changes.
 
 Run it on the full diff against `main`, before marking the PR ready. If the skill isn't available, stop and tell the owner; don't substitute another review silently.
