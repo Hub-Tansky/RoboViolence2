@@ -1,6 +1,6 @@
 # 0008: Spell the display name "Robo Violence 2"
 
-- Status: Accepted
+- Status: Accepted; code-identifier timing amended by [0009](0009-rename-internal-identifiers-continuously.md)
 - Date: 2026-10-04
 - Affects: [step0 §0.2](../refactoring/phase-a-modern-portable-build/step0-fork-rename-and-asset-removal.md); supersedes [0004](0004-project-name-roboviolence2.md)
 
