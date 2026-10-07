@@ -152,6 +152,7 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Extract:** "gather the 144 `glBegin` blocks, display lists and GLU calls into one batched sprite/mesh renderer, still on GL 2.1" "move that renderer to SDL_GPU (Metal, Vulkan, D3D12)" "**[GUI]** HiDPI and ultrawide UI scaling, gamepad menus."
 - **Why deferred:** ADR 0003 triggers (first playable match, then Apple's GL removal or regular players) are not met. HiDPI and gamepad menus are **[GUI]**. First analyse rendering, menus, the editor and `CMeshBuilder` with the `codebase-analysis` skill.
 - **Suggested home:** after Phase B's cross-OS play-test (step 2) shows the GL path holding up.
+- **Play-test note (2026-10-08, macOS arm64):** Apple's GL layer logs `FALLBACK (log once): Fallback to SW fragment processing (outputInfo.polygonModeMismatch)`, i.e. some draws run in software (`glPolygonMode` use: `game/src/Player.cpp:539, 553`, `game/src/CUserLogin.cpp:411`). The game still ran smoothly; recheck frame rate when isolating the renderer.
 - **Status:** Proposed
 
 ### PNS-19: Code modernisation (continuous)
@@ -160,6 +161,7 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Extract:** "Replace raw `sprintf`/`strcpy`/`strcat` (90 call sites) with `snprintf` or `std::string` as files are touched." "raw `new`/`delete` of `Player`, `Projectile` and `CControl` → `std::unique_ptr` where lifetimes are clear." "Internal `bv2` → `roboviolence2` renames"
 - **Why deferred:** Continuous rule, not a step: done in files a step already touches ([roadmap README](README.md) ground rules). A dedicated cleanup step (delete the 16 unbuilt menu files, burn down suppressed warnings, make clang-tidy required) can be scheduled at any time.
 - **Suggested home:** a cleanup step in any phase; the rule applies throughout.
+- **Owner note (2026-10-08):** remove the debug print `printf("nbVertex: …")` in `engine/dko/src/CdkoMesh.cpp:125`; it floods the client's terminal on every model load.
 - **Status:** Proposed
 
 ### PNS-20: Replacement assets and rebrand
@@ -203,5 +205,13 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Extract:** "the build still generates `runtime/bv2.db` (`tools/CMakeLists.txt:11-25` …). The game never reads it: `openClientDb` uses the pref dir (`game/src/Paths.cpp:275`)."
 - **Why it matters:** Dead build output that the docs have to explain, and a second copy of client-database seed data.
 - **Suggested home:** any step touching `tools/CMakeLists.txt`; check first that nothing seeds the pref-dir `bv2.db` from it.
+- **Status:** Proposed
+
+### PNS-25: Hide the "Color depth" option
+
+- **Found in:** owner play-test on macOS, 2026-10-08.
+- **Extract:** Options → "Color depth" (16/32) changes nothing. It sets `r_bitdepth` (`game/src/COption.cpp:146`), passed to `dkwInit` (`game/src/main.cpp:460`), but SDL3 and modern OpenGL pick the colour depth themselves.
+- **Why it matters:** a control with no effect confuses players.
+- **Suggested home:** a **[GUI]** change (owner approval), e.g. with the rebrand (PNS-20) or menu work. Fullscreen and resolution apply after a restart (confirmed); a "restart required" hint would be the same kind of change.
 - **Status:** Proposed
 
