@@ -39,7 +39,7 @@ else
 fi
 
 # Scope, anti-gaming and DONE gate: one Python pass over the diff.
-check diff-rules env REVIEW_BASE="$mb" REVIEW_STEP="$step" REVIEW_BRANCH="${GITHUB_HEAD_REF:-$(git rev-parse --abbrev-ref HEAD)}" python3 - <<'EOF'
+check diff-rules env REVIEW_BASE="$mb" REVIEW_STEP="$step" REVIEW_BRANCH="${GITHUB_HEAD_REF:-${GITHUB_REF_NAME:-$(git rev-parse --abbrev-ref HEAD)}}" python3 - <<'EOF'
 import glob, os, re, subprocess, sys
 
 base, step, branch = os.environ["REVIEW_BASE"], os.environ["REVIEW_STEP"], os.environ["REVIEW_BRANCH"]
