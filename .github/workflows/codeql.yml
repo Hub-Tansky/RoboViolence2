@@ -40,7 +40,7 @@ jobs:
         run: |
           sudo apt-get update
           eval "$(tools/setup-dev.sh --linux-packages | sed 's/^sudo apt install/sudo apt-get install -y/')"
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         if: matrix.language == 'c-cpp'
         with:
           path: .vcpkg-bin
