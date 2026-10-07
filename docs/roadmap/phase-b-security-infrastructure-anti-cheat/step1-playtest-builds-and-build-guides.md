@@ -1,6 +1,6 @@
 # Step 1: Play-test builds and build guides
 
-**Status:** DONE (2026-10-08)
+**Status:** IN PROGRESS
 
 **Depends on:** [Step 0](step0-supply-chain-security.md). **Next:** [step2-cross-os-playtest.md](step2-cross-os-playtest.md). **Index:** [README.md](README.md)
 
