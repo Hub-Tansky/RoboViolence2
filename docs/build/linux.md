@@ -10,7 +10,7 @@ Add the folder that contains your BaboViolent 2 `main/` to `~/.profile` (replace
 echo 'export BV2_DATA_DIR="$HOME/Games/bv2-data"' >> ~/.profile
 ```
 
-Check; this must list `.bvm` map files:
+Check; this must list `.bvm` map files (if you pointed it at `main/` itself, drop `/main`):
 
 ```bash
 ls "$BV2_DATA_DIR/main/maps"
@@ -35,7 +35,7 @@ ls "$BV2_DATA_DIR/main/maps"
    cd roboviolence2-linux-x64 && ./run-server.sh
    ```
 
-   Also `./run-master.sh` and `./run-client.sh connect 127.0.0.1`.
+   Then `./run-client.sh connect 127.0.0.1` in another terminal. `./run-master.sh` is only needed for the server browser ([README](README.md#playing-a-local-game)).
 
 ## Build from source
 

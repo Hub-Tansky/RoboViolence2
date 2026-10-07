@@ -10,7 +10,7 @@ Find your BaboViolent 2 data folder: the one that contains `main/` with `maps/`,
 echo 'export BV2_DATA_DIR="$HOME/Games/bv2-data"' >> ~/.zshrc
 ```
 
-Check it in the new tab; this must list `.bvm` map files:
+Check it in the new tab; this must list `.bvm` map files (if you pointed it at `main/` itself, drop `/main`):
 
 ```bash
 ls "$BV2_DATA_DIR/main/maps"
@@ -27,7 +27,7 @@ Terminal tabs and the run scripts now use your data. Starting the app by double-
    xattr -dr com.apple.quarantine roboviolence2-macos-arm64
    ```
 
-3. In that folder, run each in its own Terminal tab: `./run-master.sh`, `./run-server.sh`, `./run-client.sh connect 127.0.0.1`.
+3. In that folder, run each in its own Terminal tab: `./run-server.sh`, then `./run-client.sh connect 127.0.0.1`. Add `./run-master.sh` only for the server browser ([README](README.md#playing-a-local-game)).
 
 The package's own `main/` copies (one in `bv2.app/Contents/Resources/` for the client, one in the folder for the servers) hold placeholders; `BV2_DATA_DIR` takes priority over both.
 

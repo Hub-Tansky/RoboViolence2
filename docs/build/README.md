@@ -9,7 +9,7 @@ Pick your OS: [macOS](macos.md), [Linux](linux.md), [Windows](windows.md). Each 
 
 ## Game data (required)
 
-- You need your own copy of the original BaboViolent 2 data; it is never in this repository or the packages. Find the folder that contains `main/` (with `maps/`, `textures/`, `sounds/`, `fonts/`) and set `BV2_DATA_DIR` to it permanently, as each OS guide shows. Do this before the first run.
+- Playing needs your own copy of the original BaboViolent 2 data; it is never in this repository or the packages. Find the folder that contains `main/` (with `maps/`, `textures/`, `sounds/`, `fonts/`) and set `BV2_DATA_DIR` to it permanently, as each OS guide shows, before the first game. Pointing it at `main/` itself also works. Building and the tests work without it.
 - The client and the game server both read `BV2_DATA_DIR`: the server loads its maps and launch scripts from there and sends missing maps to clients.
 - Without it the game falls back to generated placeholder maps, textures and sounds. That is only for CI and development: it looks rough, has no music, and doesn't match other players' maps.
 - Saved settings, `bv2.db`, logs and downloaded maps go to the per-user pref dir ([ADR 0007](../decisions/0007-data-root-pref-dir-config-layers.md)); `BV2_PREF_DIR` overrides it:
@@ -26,8 +26,8 @@ Run each program from its folder (a package folder, or `build/<preset>/runtime/`
 
 | Program | Package | Arguments |
 |---|---|---|
-| Master server | `run-master` | none |
-| Game server | `run-server` | launch script name, default `CTF` (`main/LaunchScript/CTF.cfg`) |
+| Master server | `run-master` | none; only needed for the server browser, with `BV2_MASTER_SERVERS` (below) |
+| Game server | `run-server` | launch script name, default `CTF` (`main/LaunchScript/CTF.cfg`). The default applies only with no arguments: with `--config <file>`, also name the script |
 | Client | `run-client` | one console command, e.g. `connect 127.0.0.1` |
 
 - To list the server in the client's server browser, start the master first and set `BV2_MASTER_SERVERS=127.0.0.1:10207` for both the server and the client.

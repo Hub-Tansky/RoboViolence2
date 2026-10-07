@@ -23,7 +23,7 @@ dir "$env:BV2_DATA_DIR\main\maps"
 ## Use a downloaded package
 
 1. Extract `roboviolence2-win-x64-msvc.zip` (right-click → Extract All).
-2. Double-click `run-master.cmd`, `run-server.cmd`, then `run-client.cmd`. The builds are unsigned: on the SmartScreen warning choose **More info → Run anyway**.
+2. Double-click `run-server.cmd`, then `run-client.cmd` (`run-master.cmd` only for the server browser, see [README](README.md#playing-a-local-game)). The builds are unsigned: on the SmartScreen warning choose **More info → Run anyway**.
 3. Allow the servers through Windows Defender Firewall when asked (private networks), so other machines can join.
 4. To join from a terminal: `run-client.cmd connect 127.0.0.1`.
 
