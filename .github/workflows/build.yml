@@ -53,19 +53,26 @@ jobs:
         with:
           name: roboviolence2-linux-x64.tar.gz
       - name: Install only the documented runtime packages
+        shell: bash
         run: |
+          pkgs=$(tools/setup-dev.sh --linux-runtime-packages)
+          grep -qF "sudo apt install $pkgs" docs/build/linux.md || { echo "docs/build/linux.md must list: sudo apt install $pkgs"; exit 1; }
           apt-get update
-          eval "$(tools/setup-dev.sh --linux-runtime-packages | sed 's/^sudo apt install/apt-get install -y --no-install-recommends/')"
-      - name: Every library resolves; both servers start from the package
+          apt-get install -y --no-install-recommends $pkgs
+      - name: Every library resolves; server and master start from the package
+        shell: bash
         run: |
+          set -euo pipefail
           tar -xzf roboviolence2-linux-x64.tar.gz
           cd roboviolence2-linux-x64
           if ldd bv2 bv2dedicated bv2master | grep "not found"; then exit 1; fi
           export BV2_PREF_DIR="$RUNNER_TEMP/pref"
-          printf 'quit\n' | ./run-server.sh | grep "Dedicated Server"
+          printf 'quit\n' | ./run-server.sh > server.log 2>&1   # pipefail: the server's exit code counts
+          grep "Server Created on port 3333" server.log           # printed after data root, launch script, map and network init
           ./run-master.sh & pid=$!
-          sleep 3
-          kill -0 "$pid" && kill "$pid"
+          for i in $(seq 1 20); do (exec 3<>/dev/tcp/127.0.0.1/10207) 2>/dev/null && break; sleep 0.5; done
+          (exec 3<>/dev/tcp/127.0.0.1/10207)                      # master listens on 10207
+          kill "$pid"
   smoke:
     name: smoke (linux-x64-asan)
     runs-on: ubuntu-24.04
