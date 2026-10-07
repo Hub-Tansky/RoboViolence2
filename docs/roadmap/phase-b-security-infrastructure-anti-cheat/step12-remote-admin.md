@@ -51,6 +51,6 @@ ctest --test-dir build/linux-x64-asan --output-on-failure -R admin
 
 - Passes: a wrong token is rejected, a burst is limited, and every command leaves an audit line with secrets masked.
 - With the compose stack, a remote `status` command over TLS returns the server state.
-- [REVIEW.md](../../../REVIEW.md) checklist and `/anthropic-skills:thermo-nuclear-code-quality-review` done on the step diff; every finding fixed or confirmed with the owner.
+- `tools/review.sh --full <preset>` passes, and the fresh-context review record `reviews/step12.md` exists ([REVIEW.md](../../../REVIEW.md) section 5).
 - `ARCHITECTURE.md` lists every file added, moved or removed in this step.
 - The secret scan (`gitleaks git --staged` / CI) is clean.

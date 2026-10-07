@@ -56,7 +56,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `CMakePresets.json` | Presets: linux-x64, macos-arm64, win-x64-msvc, -asan variants (Ninja) |
 | `LICENSE.txt` | GPLv3 text (code only) |
 | `README.md` | Project overview, fork and asset-removal statement |
-| `REVIEW.md` | Code review standard: checklist, when to run the thermo-nuclear review, how to act on findings |
+| `REVIEW.md` | Definition of done: `tools/review.sh` checks, reviewer checklist, defined terms, forbidden shortcuts, fresh-context step review and its record |
 | `docs/decisions/0007-data-root-pref-dir-config-layers.md` | ADR 0007 |
 | `game/src/Paths.cpp` | Data root search, per-user pref dir, layered config loading, map and DB path helpers |
 | `game/src/Paths.h` | Interface of `Paths.cpp` (namespace `bv2`) |
@@ -97,7 +97,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 |---|---|
 | `.github/workflows/secret-scan.yml` | CI: gitleaks over commits after the fork point and original-asset check |
 | `.github/workflows/build.yml` | CI: build and ctest on Windows, macOS, Linux; ASan smoke job with client under xvfb; artifacts |
-| `.github/workflows/hygiene.yml` | CI: ARCHITECTURE.md inventory, repository hygiene, content case |
+| `.github/workflows/hygiene.yml` | CI: ARCHITECTURE.md inventory, repository hygiene, content case; `review` (`tools/review.sh`) on PRs |
 | `.github/workflows/codeql.yml` | CodeQL: `c-cpp` (manual linux-x64 build of the three executables) and `actions`; push, PR, weekly; alerts under `build/` (vcpkg headers) filtered out |
 | `.github/workflows/dependency-graph.yml` | Submits resolved vcpkg ports to the dependency graph on push to `main` |
 
@@ -608,5 +608,6 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tools/gen-placeholder-icon.py` | Writes the placeholder Windows application icon at build time |
 | `tools/check-hygiene.py` | Fails on spaces in paths, tracked ignored files, files over 5 MB, bad encoding |
 | `tools/seed_db.cpp` | Creates a SQLite DB from SQL files (build helper) |
+| `tools/review.sh` | Review gate (REVIEW.md section 1): all checks, scope against the step's Allowed paths, anti-gaming, DONE gate; `--full` builds and tests |
 | `tools/setup-dev.ps1` | Activates hooks, checks tools (Windows) |
 | `tools/setup-dev.sh` | Activates hooks, checks tools (Unix) |
