@@ -4,6 +4,22 @@ Common steps (game data, ports, playing a local game): [README.md](README.md).
 
 Not yet verified by a person on Windows; CI builds and tests this preset. Report anything that differs (Phase B step 2).
 
+## Point the game at your original data (required, once)
+
+In PowerShell, with the folder that contains your BaboViolent 2 `main\` (replace the path):
+
+```powershell
+setx BV2_DATA_DIR "C:\Games\bv2-data"
+```
+
+Open a new window and check; this must list `.bvm` map files:
+
+```powershell
+dir "$env:BV2_DATA_DIR\main\maps"
+```
+
+`setx` applies to new windows and to programs started from Explorer, including the `.cmd` scripts.
+
 ## Use a downloaded package
 
 1. Extract `roboviolence2-win-x64-msvc.zip` (right-click → Extract All).
@@ -59,14 +75,6 @@ cd build\win-x64-msvc\runtime; .\bv2dedicated.exe CTF
 build\win-x64-msvc\runtime\bv2.exe
 ```
 
-## Point the game at your original data
-
-```powershell
-setx BV2_DATA_DIR "C:\Games\bv2-data"
-```
-
-The folder must contain `main\`. `setx` applies to new windows and to programs started from Explorer; for the current window use `$env:BV2_DATA_DIR="C:\Games\bv2-data"`.
-
 ## Troubleshooting
 
 | Symptom | Fix |
@@ -75,4 +83,4 @@ The folder must contain `main\`. `setx` applies to new windows and to programs s
 | vcpkg errors at configure | `VCPKG_ROOT` is unset in this window: open a new one after `setx` |
 | "Windows protected your PC" | SmartScreen: **More info → Run anyway** |
 | "running scripts is disabled on this system" | Windows blocks `.ps1` files by default: use the `-ExecutionPolicy Bypass -File` form above |
-| "Can not load language file" | No `main\` found: check `BV2_DATA_DIR`, or start from the package or `runtime\` folder |
+| "Can not load language file", or placeholder graphics | `BV2_DATA_DIR` is unset in this window or doesn't contain `main\`: open a new window, check with `dir "$env:BV2_DATA_DIR\main\maps"` |

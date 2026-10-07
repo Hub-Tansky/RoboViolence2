@@ -7,10 +7,11 @@ Pick your OS: [macOS](macos.md), [Linux](linux.md), [Windows](windows.md). Each 
 - **Download:** every CI run of the `build` workflow on GitHub (Actions → build → a green run → Artifacts; you need to be signed in to GitHub, and artifacts expire after 90 days) publishes one package per OS: `roboviolence2-win-x64-msvc.zip`, `roboviolence2-macos-arm64.zip` and `roboviolence2-linux-x64.tar.gz`. Each holds one folder with the client, `bv2dedicated`, `bv2master`, `main/`, `master.db`, `web.db` and run scripts. The builds are unsigned; each guide says how to get past the OS warning.
 - **Build:** CMake 3.25+, Ninja, Python 3 and vcpkg. The first build is slow because vcpkg compiles SDL3, miniaudio and SQLite; later builds reuse them.
 
-## Game data
+## Game data (required)
 
-- Without anything else, the game uses generated placeholder maps, textures and sounds. It runs, but looks rough and has no music.
-- With your own copy of the original BaboViolent 2 data, set `BV2_DATA_DIR` to the folder that contains `main/` (or to `main/` itself). The client and the game server both read it: the server loads its maps and launch scripts from there and sends missing maps to clients. The original data is never in this repository.
+- You need your own copy of the original BaboViolent 2 data; it is never in this repository or the packages. Find the folder that contains `main/` (with `maps/`, `textures/`, `sounds/`, `fonts/`) and set `BV2_DATA_DIR` to it permanently, as each OS guide shows. Do this before the first run.
+- The client and the game server both read `BV2_DATA_DIR`: the server loads its maps and launch scripts from there and sends missing maps to clients.
+- Without it the game falls back to generated placeholder maps, textures and sounds. That is only for CI and development: it looks rough, has no music, and doesn't match other players' maps.
 - Saved settings, `bv2.db`, logs and downloaded maps go to the per-user pref dir ([ADR 0007](../decisions/0007-data-root-pref-dir-config-layers.md)); `BV2_PREF_DIR` overrides it:
 
   | OS | Pref dir |

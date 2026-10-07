@@ -2,6 +2,22 @@
 
 Common steps (game data, ports, playing a local game): [README.md](README.md).
 
+## Point the game at your original data (required, once)
+
+Find your BaboViolent 2 data folder: the one that contains `main/` with `maps/`, `textures/` and `sounds/` inside. Add it to `~/.zshrc` (replace the path with yours), then open a new Terminal tab:
+
+```bash
+echo 'export BV2_DATA_DIR="$HOME/Games/bv2-data"' >> ~/.zshrc
+```
+
+Check it in the new tab; this must list `.bvm` map files:
+
+```bash
+ls "$BV2_DATA_DIR/main/maps"
+```
+
+Terminal tabs and the run scripts now use your data. Starting the app by double-click or `open bv2.app` doesn't read `~/.zshrc`: run `launchctl setenv BV2_DATA_DIR "$BV2_DATA_DIR"` once per login for that.
+
 ## Use a downloaded package
 
 1. Unzip `roboviolence2-macos-arm64.zip`.
@@ -11,9 +27,9 @@ Common steps (game data, ports, playing a local game): [README.md](README.md).
    xattr -dr com.apple.quarantine roboviolence2-macos-arm64
    ```
 
-3. In that folder: `./run-master.sh`, `./run-server.sh`, `./run-client.sh connect 127.0.0.1`.
+3. In that folder, run each in its own Terminal tab: `./run-master.sh`, `./run-server.sh`, `./run-client.sh connect 127.0.0.1`.
 
-The package holds `main/` twice: the client reads `bv2.app/Contents/Resources/main` (so a double-click works), the servers read the folder's own `main/`. To use other data, set `BV2_DATA_DIR` (both read it) instead of editing either copy.
+The package's own `main/` copies (one in `bv2.app/Contents/Resources/` for the client, one in the folder for the servers) hold placeholders; `BV2_DATA_DIR` takes priority over both.
 
 ## Build from source
 
@@ -70,15 +86,12 @@ Starting the binary directly shows its log in the terminal. `open bv2.app` hides
 cd build/macos-arm64/runtime && ./bv2dedicated CTF
 ```
 
-## Point the game at your original data
+## Other ways to set the data folder
 
-The game looks for `main/` in `BV2_DATA_DIR` first. Example with the data in `~/Games/bv2-data/main/`:
-
-| How you start the client | How to set it |
+| Case | How |
 |---|---|
-| From Terminal | `BV2_DATA_DIR="$HOME/Games/bv2-data" build/macos-arm64/runtime/bv2.app/Contents/MacOS/bv2`, or add `export BV2_DATA_DIR="$HOME/Games/bv2-data"` to `~/.zshrc` |
-| Double-click or `open bv2.app` | GUI apps don't read `~/.zshrc`. `launchctl setenv BV2_DATA_DIR "$HOME/Games/bv2-data"` sets it until the next reboot |
-| No variable | Replace `bv2.app/Contents/Resources/main` with a link to your `main/`, then re-sign with `codesign --force --sign - bv2.app` (the change breaks the bundle signature). A rebuild or a new package undoes it |
+| One command only | Prefix it: `BV2_DATA_DIR="$HOME/Games/bv2-data" ./run-client.sh` |
+| No variable at all | Replace `bv2.app/Contents/Resources/main` with a link to your `main/`, then re-sign with `codesign --force --sign - bv2.app` (the change breaks the bundle signature). A rebuild or a new package undoes it |
 
 ## Troubleshooting
 
@@ -86,5 +99,5 @@ The game looks for `main/` in `BV2_DATA_DIR` first. Example with the data in `~/
 |---|---|
 | `Could not find toolchain file` / vcpkg errors at configure | `VCPKG_ROOT` is unset or wrong in this shell |
 | Black window or immediate exit | Start the binary from Terminal and read the log |
-| "Can not load language file" | No `main/` found: check `BV2_DATA_DIR`, or start from `runtime/` |
+| "Can not load language file", or placeholder graphics | `BV2_DATA_DIR` is unset in this tab or doesn't contain `main/`: open a new tab, check with `ls "$BV2_DATA_DIR/main/maps"` |
 | "app is damaged" on a downloaded zip | Run the `xattr` command above |

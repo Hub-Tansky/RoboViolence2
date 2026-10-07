@@ -2,6 +2,20 @@
 
 Common steps (game data, ports, playing a local game): [README.md](README.md).
 
+## Point the game at your original data (required, once)
+
+Add the folder that contains your BaboViolent 2 `main/` to `~/.profile` (replace the path), then log out and in:
+
+```bash
+echo 'export BV2_DATA_DIR="$HOME/Games/bv2-data"' >> ~/.profile
+```
+
+Check; this must list `.bvm` map files:
+
+```bash
+ls "$BV2_DATA_DIR/main/maps"
+```
+
 ## Use a downloaded package
 
 1. Install the runtime libraries: the client and `bv2dedicated` link GL and GLU; `bv2master` needs nothing extra. On Ubuntu 24.04:
@@ -69,10 +83,6 @@ build/linux-x64/runtime/bv2
 
 SDL3 picks Wayland or X11 automatically; force one with `SDL_VIDEODRIVER=x11` or `SDL_VIDEODRIVER=wayland`.
 
-## Point the game at your original data
-
-Add `export BV2_DATA_DIR="$HOME/Games/bv2-data"` (the folder containing `main/`) to `~/.profile`, or prefix one command with it.
-
 ## Troubleshooting
 
 | Symptom | Fix |
@@ -80,4 +90,4 @@ Add `export BV2_DATA_DIR="$HOME/Games/bv2-data"` (the folder containing `main/`)
 | `error while loading shared libraries: libGLU.so.1` | Install the runtime packages above |
 | vcpkg port fails to build (autoconf, libtool) | Install the full `--linux-packages` line |
 | No window under Wayland | Try `SDL_VIDEODRIVER=x11` |
-| "Can not load language file" | No `main/` found: check `BV2_DATA_DIR`, or start from the package or `runtime/` folder |
+| "Can not load language file", or placeholder graphics | `BV2_DATA_DIR` is unset or doesn't contain `main/`: check with `ls "$BV2_DATA_DIR/main/maps"` |
