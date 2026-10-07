@@ -38,7 +38,7 @@ jobs:
           upload: failure-only
       # Third-party headers under build/ (vcpkg_installed, e.g. miniaudio.h) are compiled into our
       # targets; their alerts aren't ours to fix, so drop them before upload.
-      - uses: advanced-security/filter-sarif@v1.1
+      - uses: advanced-security/filter-sarif@2da736ff05ef065cb2894ac6892e47b5eac2c3c0 # v1.1
         with:
           patterns: |
             +**
