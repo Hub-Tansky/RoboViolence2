@@ -21,7 +21,7 @@ jobs:
           - { os: macos-14, preset: macos-arm64 }
           - { os: ubuntu-24.04, preset: linux-x64 }
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Use the runner's vcpkg, with the pinned baseline fetched
         shell: bash
         run: |
@@ -79,7 +79,7 @@ jobs:
     name: smoke (linux-x64-asan)
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Use the runner's vcpkg, with the pinned baseline fetched
         run: |
           echo "VCPKG_ROOT=$VCPKG_INSTALLATION_ROOT" >> "$GITHUB_ENV"
@@ -120,7 +120,7 @@ jobs:
     runs-on: ubuntu-24.04
     continue-on-error: true
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Use the runner's vcpkg, with the pinned baseline fetched
         run: |
           echo "VCPKG_ROOT=$VCPKG_INSTALLATION_ROOT" >> "$GITHUB_ENV"
