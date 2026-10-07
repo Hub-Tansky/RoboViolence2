@@ -102,6 +102,10 @@ for f in changed:
         problems.append(f"DONE gate: {rec} lacks 'Reviewer: fresh-context subagent' or '## Findings'")
     elif re.search(r"\|\s*pending\s*\|", text):
         problems.append(f"DONE gate: {rec} still has pending findings")
+    elif not os.path.exists(rep := f"{sm.group(1)}/reviews/step{sm.group(2)}-report.md"):
+        problems.append(f"DONE gate: {rec} has no raw reviewer report {rep}")
+    elif "SKILL: Launching skill: thermo-nuclear-code-quality-review" not in (rtext := open(rep, encoding="utf-8").read()) or "SKILL: NOT LOADED" in rtext:
+        problems.append(f"DONE gate: {rep} lacks the skill's load line, or says NOT LOADED")
     else:
         pns = open("docs/roadmap/possible-new-scope.md", encoding="utf-8").read()
         for row in re.findall(r"^\|.*\bdeferred\b.*\|\s*$", text, re.M):

@@ -231,6 +231,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 
 | path | purpose |
 |---|---|
+| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step1-report.md` | Raw reviewer report for step 1 (round 2; round 1 not kept) |
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step1.md` | Fresh-context review record for step 1 |
 
 ### `engine/babonet`

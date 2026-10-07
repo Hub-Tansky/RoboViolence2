@@ -57,6 +57,6 @@ ctest --test-dir build/linux-x64-asan --output-on-failure
 
 - Passes with a test for each defect.
 - Every listed defect is marked fixed in `KEY_QUESTIONS.md`, with the commit.
-- `tools/review.sh --full <preset>` passes, and the fresh-context review record `reviews/step7.md` exists ([REVIEW.md](../../../REVIEW.md) section 5).
+- `tools/review.sh --full <preset>` passes, and the fresh-context review record `reviews/step7.md` and the raw reviewer report `reviews/step7-report.md` (with the skill's load line) exist ([REVIEW.md](../../../REVIEW.md) section 5).
 - `ARCHITECTURE.md` lists every file added, moved or removed in this step.
 - The secret scan (`gitleaks git --staged` / CI) is clean.

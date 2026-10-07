@@ -56,6 +56,6 @@ ctest --test-dir build/linux-x64 --output-on-failure -R lang
 - With `LANG=pl_PL.UTF-8` and a test `pl.po` containing only ASCII, the Linux client shows Polish strings; with no PO file it shows English.
 - With original BV2 data, `en.lang` loads and the menus look unchanged (owner).
 - `python3 tools/check-hygiene.py` runs the translation check.
-- `tools/review.sh --full <preset>` passes, and the fresh-context review record `reviews/step13.md` exists ([REVIEW.md](../../../REVIEW.md) section 5).
+- `tools/review.sh --full <preset>` passes, and the fresh-context review record `reviews/step13.md` and the raw reviewer report `reviews/step13-report.md` (with the skill's load line) exist ([REVIEW.md](../../../REVIEW.md) section 5).
 - `ARCHITECTURE.md` lists every file added, moved or removed in this step.
 - The secret scan (`gitleaks git --staged` / CI) is clean.

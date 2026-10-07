@@ -48,6 +48,6 @@ grep -nE "sqlite3_(exec|get_table|mprintf)" game/src/*.cpp masterserver/src/*.cp
 - Lists only constant DDL, each with a comment saying so.
 - `ctest` passes, including the injection tests.
 - Q-S3 is marked fixed in `KEY_QUESTIONS.md`.
-- `tools/review.sh --full <preset>` passes, and the fresh-context review record `reviews/step6.md` exists ([REVIEW.md](../../../REVIEW.md) section 5).
+- `tools/review.sh --full <preset>` passes, and the fresh-context review record `reviews/step6.md` and the raw reviewer report `reviews/step6-report.md` (with the skill's load line) exist ([REVIEW.md](../../../REVIEW.md) section 5).
 - `ARCHITECTURE.md` lists every file added, moved or removed in this step.
 - The secret scan (`gitleaks git --staged` / CI) is clean.

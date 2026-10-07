@@ -61,6 +61,6 @@ ctest --test-dir build/linux-x64-asan --output-on-failure
 - The CI `fuzz` job finds no crash in 2 min per message type.
 - The manual test DM round passes on one OS (owner).
 - Q-S1, Q-S2, Q-S4, Q-S6 and Q-S7 in `KEY_QUESTIONS.md` are marked fixed, with the commit.
-- `tools/review.sh --full <preset>` passes, and the fresh-context review record `reviews/step4.md` exists ([REVIEW.md](../../../REVIEW.md) section 5).
+- `tools/review.sh --full <preset>` passes, and the fresh-context review record `reviews/step4.md` and the raw reviewer report `reviews/step4-report.md` (with the skill's load line) exist ([REVIEW.md](../../../REVIEW.md) section 5).
 - `ARCHITECTURE.md` lists every file added, moved or removed in this step.
 - The secret scan (`gitleaks git --staged` / CI) is clean.

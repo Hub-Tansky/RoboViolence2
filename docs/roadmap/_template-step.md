@@ -33,6 +33,6 @@
 ## Acceptance checks
 
 - <commands, each in its own code block, and their expected results>
-- `tools/review.sh --full <preset>` passes, and the fresh-context review record `reviews/stepN.md` exists (`REVIEW.md` section 5).
+- `tools/review.sh --full <preset>` passes, and the fresh-context review record `reviews/stepN.md` and the raw reviewer report `reviews/stepN-report.md` (with the skill's load line) exist (`REVIEW.md` section 5).
 - `ARCHITECTURE.md` lists every file added, moved or removed in this step.
 - The secret scan (`gitleaks git --staged` / CI) is clean.
