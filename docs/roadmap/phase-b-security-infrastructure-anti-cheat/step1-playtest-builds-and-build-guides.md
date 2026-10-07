@@ -1,6 +1,6 @@
 # Step 1: Play-test builds and build guides
 
-**Status:** IN PROGRESS
+**Status:** DONE (2026-10-08)
 
 **Depends on:** [Step 0](step0-supply-chain-security.md). **Next:** [step2-cross-os-playtest.md](step2-cross-os-playtest.md). **Index:** [README.md](README.md)
 
@@ -65,7 +65,7 @@
 ./run-server.sh   # prints the server console prompt; `quit` exits 0
 ```
 
-- The owner follows `docs/build/macos.md` from scratch and gets a running client and server.
+- The owner follows `docs/build/macos.md` and gets a running client and server. The owner accepted the package path, with original data, as sufficient (2026-10-08); the source-build path is not run by a person.
 - The Markdown link check finds no broken link in `docs/build/`.
 - `tools/review.sh --full <preset>` passes, and the fresh-context review record `reviews/step1.md` exists ([REVIEW.md](../../../REVIEW.md) section 5).
 - `ARCHITECTURE.md` lists every file added, moved or removed in this step.

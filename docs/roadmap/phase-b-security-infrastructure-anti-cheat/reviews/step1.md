@@ -37,7 +37,7 @@ After round 2 fixes, `tools/review.sh --full macos-arm64` at 1563ba7: architectu
 |---|---|---|
 | 1 | Status set to DONE before the post-review commits (e8d9d7a, 857e42e, 4ef26cd) were reviewed or run through `--full` | fixed in 6bef875 (back to IN PROGRESS); this round reviews them; `--full` rerun below |
 | 2 | Record claims the skill without evidence | fixed in this record (skill evidence line); REVIEW.md/`review.sh` evidence rule follows in a separate PR (owner decision) |
-| 3 | Two acceptance checks unproven: the owner ran the package, not the source build in `macos.md`; no link-check tool exists | listed under Not done / unsure; owner asked about the source build |
+| 3 | Two acceptance checks unproven: the owner ran the package, not the source build in `macos.md`; no link-check tool exists | confirmed with owner: the package run is accepted (acceptance check amended); manual link check recorded under Not done / unsure |
 | 4 | Step 2 task 2.4 touches `game/src/Client.cpp` for a non-blocking request without recorded approval | fixed in 6bef875 (approval next to the path) |
 | 5 | Task 2.4 wording: folder creation already exists; manual-only proof; HiDPI framebuffer size | fixed in 6bef875 |
 | 6 | PNS-25 says colour depth is ignored; `dkw.cpp:352–355` uses it as minimum sizes | fixed in 6bef875 |
@@ -63,7 +63,7 @@ These fixes change scripts, CI and docs, not game code, so the proof is the chec
 
 ## Not done / unsure
 
-- The owner ran the macOS **package**; the **build-from-source** path of `docs/build/macos.md` hasn't been followed by a person (acceptance check).
+- The owner ran the macOS **package**; the **build-from-source** path of `docs/build/macos.md` hasn't been followed by a person. The owner accepted the package run for the acceptance check (2026-10-08).
 - Links in `docs/build/` were checked by hand (both reviewers); there is no link-check tool.
 - The Windows package and guide have never been run on Windows (step 2).
 - The Linux package has only run in CI's clean container, not on a desktop (step 2).
