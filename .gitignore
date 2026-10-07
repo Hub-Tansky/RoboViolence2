@@ -55,7 +55,7 @@ $RECYCLE.BIN/
 .windsurf/
 
 # ---- Build outputs ----
-build/
+/build/
 out/
 cmake-build-*/
 CMakeUserPresets.json
