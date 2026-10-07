@@ -61,6 +61,13 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/Paths.cpp` | Data root search, per-user pref dir, layered config loading, map and DB path helpers |
 | `game/src/Paths.h` | Interface of `Paths.cpp` (namespace `bv2`) |
 | `packaging/linux/roboviolence2.desktop` | Linux desktop entry |
+| `packaging/make-package.py` | Builds the per-OS play-test package from `runtime/` (links resolved, macOS bundle re-signed) |
+| `packaging/scripts/run-client.cmd` | Package script: starts the client (Windows) |
+| `packaging/scripts/run-client.sh` | Package script: starts the client (macOS bundle or Linux binary) |
+| `packaging/scripts/run-master.cmd` | Package script: starts the master server (Windows) |
+| `packaging/scripts/run-master.sh` | Package script: starts the master server (Unix) |
+| `packaging/scripts/run-server.cmd` | Package script: starts the dedicated server, default launch script CTF (Windows) |
+| `packaging/scripts/run-server.sh` | Package script: starts the dedicated server, default launch script CTF (Unix) |
 | `packaging/macos/Info.plist.in` | macOS bundle `Info.plist` template |
 | `packaging/windows/bv2.manifest` | Windows manifest: PerMonitorV2 DPI, UTF-8 code page, Windows 10/11 |
 | `packaging/windows/bv2.rc.in` | Windows resource script template; CMake fills in the generated icon |
@@ -96,7 +103,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | path | purpose |
 |---|---|
 | `.github/workflows/secret-scan.yml` | CI: gitleaks over commits after the fork point and original-asset check |
-| `.github/workflows/build.yml` | CI: build and ctest on Windows, macOS, Linux; ASan smoke job with client under xvfb; artifacts |
+| `.github/workflows/build.yml` | CI: build, ctest and package on Windows, macOS, Linux (`roboviolence2-<preset>` artifacts); `package-check` of the Linux package in a clean `ubuntu:24.04`; ASan smoke job with client under xvfb |
 | `.github/workflows/hygiene.yml` | CI: ARCHITECTURE.md inventory, repository hygiene, content case; `review` (`tools/review.sh`) on PRs |
 | `.github/workflows/codeql.yml` | CodeQL: `c-cpp` (manual linux-x64 build of the three executables) and `actions`; push, PR, weekly; alerts under `build/` (vcpkg headers) filtered out |
 | `.github/workflows/dependency-graph.yml` | Submits resolved vcpkg ports to the dependency graph on push to `main` |
@@ -138,6 +145,15 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 
 | path | purpose |
 |---|---|
+
+### `docs/build`
+
+| path | purpose |
+|---|---|
+| `docs/build/README.md` | Download vs build, game data, playing a local game, tests |
+| `docs/build/linux.md` | Linux build and run guide |
+| `docs/build/macos.md` | macOS build and run guide |
+| `docs/build/windows.md` | Windows build and run guide |
 
 ### `docs/analysis`
 
@@ -210,6 +226,12 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/step11-server-containers.md` | Scope file for step11 |
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/step12-remote-admin.md` | Scope file for step12 |
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/step13-localisation.md` | Scope file for step13 |
+
+### `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews`
+
+| path | purpose |
+|---|---|
+| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step1.md` | Fresh-context review record for step 1 |
 
 ### `engine/babonet`
 
@@ -610,4 +632,4 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tools/seed_db.cpp` | Creates a SQLite DB from SQL files (build helper) |
 | `tools/review.sh` | Review gate (REVIEW.md section 1): all checks, scope against the step's Allowed paths, anti-gaming, DONE gate; `--full` builds and tests |
 | `tools/setup-dev.ps1` | Activates hooks, checks tools (Windows) |
-| `tools/setup-dev.sh` | Activates hooks, checks tools (Unix) |
+| `tools/setup-dev.sh` | Activates hooks, checks tools (Unix); prints the apt line for building and the package names for running a package |

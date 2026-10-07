@@ -34,27 +34,45 @@ jobs:
         run: cmake --build --preset ${{ matrix.preset }} -- -k 0
       - name: Test
         run: ctest --test-dir build/${{ matrix.preset }} --output-on-failure
-      - name: Package (Windows)
-        if: runner.os == 'Windows'
+      - name: Package (client, servers, main/, databases, run scripts)
         shell: bash
-        run: |
-          mkdir out && cp build/${{ matrix.preset }}/runtime/bv2dedicated.exe out/
-      - name: Package (macOS)
-        if: runner.os == 'macOS'
-        run: |
-          mkdir out
-          cp build/${{ matrix.preset }}/runtime/bv2dedicated out/
-          ditto -c -k --keepParent build/${{ matrix.preset }}/runtime/bv2.app out/bv2-macos-arm64.zip
-      - name: Package (Linux)
-        if: runner.os == 'Linux'
-        run: |
-          mkdir out
-          cp build/${{ matrix.preset }}/runtime/bv2dedicated out/
-          tar -C build/${{ matrix.preset }}/runtime -hczf out/bv2-linux-x64.tar.gz bv2 bv2dedicated main
+        run: ${{ runner.os == 'Windows' && 'python' || 'python3' }} packaging/make-package.py build/${{ matrix.preset }}/runtime ${{ matrix.preset }} out
+      # archive: false uploads the package as-is (no zip around the zip); the artifact takes the file's name.
       - uses: actions/upload-artifact@v7
         with:
-          name: bv2-${{ matrix.preset }}
-          path: out/
+          path: out/roboviolence2-${{ matrix.preset }}.*
+          archive: false
+  package-check:
+    name: package-check (clean ubuntu:24.04)
+    needs: build
+    runs-on: ubuntu-24.04
+    container: ubuntu:24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          name: roboviolence2-linux-x64.tar.gz
+      - name: Install only the documented runtime packages
+        shell: bash
+        run: |
+          pkgs=$(tools/setup-dev.sh --linux-runtime-packages)
+          grep -qF "sudo apt install $pkgs" docs/build/linux.md || { echo "docs/build/linux.md must list: sudo apt install $pkgs"; exit 1; }
+          apt-get update
+          apt-get install -y --no-install-recommends $pkgs
+      - name: Every library resolves; server and master start from the package
+        shell: bash
+        run: |
+          set -euo pipefail
+          tar -xzf roboviolence2-linux-x64.tar.gz
+          cd roboviolence2-linux-x64
+          if ldd bv2 bv2dedicated bv2master | grep "not found"; then exit 1; fi
+          export BV2_PREF_DIR="$RUNNER_TEMP/pref"
+          printf 'quit\n' | ./run-server.sh > server.log 2>&1   # pipefail: the server's exit code counts
+          grep "Server Created on port 3333" server.log           # printed after data root, launch script, map and network init
+          ./run-master.sh & pid=$!
+          for i in $(seq 1 20); do (exec 3<>/dev/tcp/127.0.0.1/10207) 2>/dev/null && break; sleep 0.5; done
+          (exec 3<>/dev/tcp/127.0.0.1/10207)                      # master listens on 10207
+          kill "$pid"
   smoke:
     name: smoke (linux-x64-asan)
     runs-on: ubuntu-24.04

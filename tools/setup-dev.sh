@@ -1,7 +1,16 @@
 #!/bin/sh
-# Activates the repo hooks and checks required tools. Pass --linux-packages to print the apt line.
+# Activates the repo hooks and checks required tools. --linux-packages prints the apt line for building,
+# --linux-runtime-packages the package names for running a downloaded package (docs/build/linux.md).
 set -e
 cd "$(dirname "$0")/.."
+
+if [ "$1" = "--linux-runtime-packages" ]; then
+  # Ubuntu 24.04. The client and bv2dedicated link GL and GLU (GLU: ARCHITECTURE.md open items); bv2master needs
+  # neither. SDL3 loads the X11/Wayland and audio libraries at run time, and every Ubuntu desktop has them.
+  # CI's package-check installs exactly these and checks that docs/build/linux.md lists them.
+  echo "libgl1 libglu1-mesa"
+  exit 0
+fi
 
 if [ "$1" = "--linux-packages" ]; then
   # Ubuntu 24.04 package names. vcpkg builds most libraries; these are the host packages

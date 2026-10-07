@@ -18,11 +18,11 @@ cmake --preset <linux-x64|macos-arm64|win-x64-msvc>
 cmake --build --preset <preset> --target bv2dedicated bv2master
 ```
 
-- Needs `VCPKG_ROOT`, CMake 3.25+, Ninja, Python 3. `-asan` presets add ASan + UBSan.
-- Output: `build/<preset>/runtime/` (executables, `main/`, `bv2.db`, `master.db`). Run the server from there ([ADR 0005](docs/decisions/0005-runtime-main-data-root.md)).
+- Needs `VCPKG_ROOT`, CMake 3.25+, Ninja, Python 3. `-asan` presets add ASan + UBSan. Per-OS setup and running: [docs/build/](docs/build/README.md).
+- Output: `build/<preset>/runtime/` (executables, `main/`, `master.db`, `web.db`; also a `bv2.db` the game doesn't read, PNS-24). Run the server from there ([ADR 0005](docs/decisions/0005-runtime-main-data-root.md)). CI packages it per OS with `packaging/make-package.py`.
 - `bv2` (client) needs the vcpkg `client` feature (SDL3, miniaudio, stb); `-DBV2_BUILD_CLIENT=OFF` builds the servers only. `-DBV2_WITH_HTTP=ON` adds libcurl (off by default, ADR 0002).
 - Tests: `ctest --test-dir build/<preset> --output-on-failure` (`tests/`: netPacket layout, config layering and secret mask, dedicated-server smoke).
-- CI (`.github/workflows/`), all required: `build` (Windows, macOS, Linux), `smoke` (Linux ASan: ctest and a 10 s client run under xvfb), `secret-scan`, `architecture`, `hygiene` (paths, ignored files, size, encoding, content case), `review` (`tools/review.sh` on PRs: scope, anti-gaming, DONE gate). Not required: `codeql`, `clang-tidy`; `dependency-graph` runs on `main`. vcpkg ports get no vulnerability alerts: bump the baseline monthly. Run them locally with `tools/review.sh` (`--full <preset>` adds build and ctest).
+- CI (`.github/workflows/`), all required: `build` (Windows, macOS, Linux; uploads the `roboviolence2-<preset>` packages), `smoke` (Linux ASan: ctest and a 10 s client run under xvfb), `secret-scan`, `architecture`, `hygiene` (paths, ignored files, size, encoding, content case), `review` (`tools/review.sh` on PRs: scope, anti-gaming, DONE gate). Not required: `codeql`, `clang-tidy`, `package-check` (Linux package in a clean `ubuntu:24.04`); `dependency-graph` runs on `main`. vcpkg ports get no vulnerability alerts: bump the baseline monthly. Run them locally with `tools/review.sh` (`--full <preset>` adds build and ctest).
 - Warnings are errors (`bv2_target_strict`) on `babonet`, `dko`, `zeven_core`; add a target once it is clean. Format only touched lines with `git clang-format`; never mass-reformat.
 
 ## Assets

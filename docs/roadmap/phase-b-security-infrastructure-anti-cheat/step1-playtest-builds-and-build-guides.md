@@ -1,6 +1,6 @@
 # Step 1: Play-test builds and build guides
 
-**Status:** TODO
+**Status:** DONE (2026-10-08)
 
 **Depends on:** [Step 0](step0-supply-chain-security.md). **Next:** [step2-cross-os-playtest.md](step2-cross-os-playtest.md). **Index:** [README.md](README.md)
 
@@ -11,7 +11,7 @@
 | Goal | Every CI run publishes a play-test package per OS (client, `bv2dedicated`, `bv2master`, `main/`), and `docs/build/` explains how to build and run on macOS, Windows and Linux |
 | In scope | Tasks 1.1–1.5 below |
 | Out of scope | Signed installers, notarisation, AppImage/Flatpak/.deb (PNS-16); fixing gameplay bugs found while testing (step 2); renaming binaries (§H, PNS-20) |
-| Allowed paths | `.github/workflows/build.yml`, `packaging/**`, `tools/run-*`, `tools/setup-dev.*`, `docs/build/**`, `README.md`, `AGENTS.md`, `ARCHITECTURE.md`, `docs/roadmap/**`, `CMakeLists.txt` (install rules only) |
+| Allowed paths | `.github/workflows/build.yml`, `packaging/**`, `tools/setup-dev.*`, `docs/build/**`, `README.md`, `AGENTS.md`, `ARCHITECTURE.md`, `docs/roadmap/**`, `CMakeLists.txt` (install rules only), `.gitignore` (owner-approved 2026-10-07: anchor `build/` so `docs/build/` is tracked) |
 | Inputs | `AGENTS.md`, `ARCHITECTURE.md`, earlier review records `reviews/step*.md`, `README.md` "Platforms and build", `tools/setup-dev.sh`, `.github/workflows/build.yml`, [ADR 0005](../../decisions/0005-runtime-main-data-root.md), [ADR 0007](../../decisions/0007-data-root-pref-dir-config-layers.md) |
 | Deliverables | Artifacts `roboviolence2-<preset>` per OS; `docs/build/README.md`, `macos.md`, `linux.md`, `windows.md`; run scripts |
 | Definition of done | See "Acceptance checks". All must pass. `ARCHITECTURE.md` is updated |
@@ -32,7 +32,8 @@
 
 ### 1.2 Run scripts
 
-- `run-server` and `run-master` scripts (`.sh`, `.ps1`) start the servers from the package directory and pass `BV2_DATA_DIR` through.
+- `packaging/scripts/run-{server,master,client}.sh` and `.cmd` start each program from the package folder and pass their arguments through (`BV2_DATA_DIR` too).
+- Windows uses `.cmd`, not the planned `.ps1`: PowerShell's default execution policy blocks downloaded scripts, while a `.cmd` runs on double-click. Recording the package format as an ADR is PNS-23.
 
 ### 1.3 Build guides
 
@@ -64,7 +65,7 @@
 ./run-server.sh   # prints the server console prompt; `quit` exits 0
 ```
 
-- The owner follows `docs/build/macos.md` from scratch and gets a running client and server.
+- The owner follows `docs/build/macos.md` and gets a running client and server. The owner accepted the package path, with original data, as sufficient (2026-10-08); the source-build path is not run by a person.
 - The Markdown link check finds no broken link in `docs/build/`.
 - `tools/review.sh --full <preset>` passes, and the fresh-context review record `reviews/step1.md` exists ([REVIEW.md](../../../REVIEW.md) section 5).
 - `ARCHITECTURE.md` lists every file added, moved or removed in this step.
