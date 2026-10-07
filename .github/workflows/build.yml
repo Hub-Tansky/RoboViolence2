@@ -37,10 +37,11 @@ jobs:
       - name: Package (client, servers, main/, databases, run scripts)
         shell: bash
         run: ${{ runner.os == 'Windows' && 'python' || 'python3' }} packaging/make-package.py build/${{ matrix.preset }}/runtime ${{ matrix.preset }} out
+      # archive: false uploads the package as-is (no zip around the zip); the artifact takes the file's name.
       - uses: actions/upload-artifact@v7
         with:
-          name: roboviolence2-${{ matrix.preset }}
           path: out/roboviolence2-${{ matrix.preset }}.*
+          archive: false
   package-check:
     name: package-check (clean ubuntu:24.04)
     needs: build
@@ -50,7 +51,7 @@ jobs:
       - uses: actions/checkout@v7
       - uses: actions/download-artifact@v8
         with:
-          name: roboviolence2-linux-x64
+          name: roboviolence2-linux-x64.tar.gz
       - name: Install only the documented runtime packages
         run: |
           apt-get update
