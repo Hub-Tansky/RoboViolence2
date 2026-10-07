@@ -12,7 +12,7 @@
 | In scope | Tasks N.1 … N.M below |
 | Out of scope | <tempting work that belongs elsewhere, with the step or phase it belongs to> |
 | Allowed paths | <globs the agent may create or modify; add `docs/analysis/KEY_QUESTIONS.md` if the step may find defects> |
-| Inputs | `AGENTS.md`, `ARCHITECTURE.md`, <analysis docs, files> |
+| Inputs | `AGENTS.md`, `ARCHITECTURE.md`, earlier review records `reviews/step*.md`, <analysis docs, files> |
 | Deliverables | <files and commits that must exist> |
 | Definition of done | See "Acceptance checks". All must pass. `ARCHITECTURE.md` is updated |
 
@@ -33,6 +33,6 @@
 ## Acceptance checks
 
 - <commands, each in its own code block, and their expected results>
-- `REVIEW.md` checklist and `/anthropic-skills:thermo-nuclear-code-quality-review` done on the step diff; every finding fixed or confirmed with the owner.
+- `tools/review.sh --full <preset>` passes, and the fresh-context review record `reviews/stepN.md` exists (`REVIEW.md` section 5).
 - `ARCHITECTURE.md` lists every file added, moved or removed in this step.
 - The secret scan (`gitleaks git --staged` / CI) is clean.

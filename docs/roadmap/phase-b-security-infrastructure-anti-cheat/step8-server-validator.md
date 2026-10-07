@@ -12,7 +12,7 @@
 | In scope | Tasks 8.1–8.4 below |
 | Out of scope | New checks and rate limits (step 9); telemetry and replays (PNS-13); server-authoritative movement (PNS-13); client-side changes |
 | Allowed paths | `game/src/ServerRecv.cpp`, `game/src/Server.{h,cpp}`, `game/src/ServerValidator.{h,cpp}` (new), `game/src/Player.{h,cpp}` (`speedHackCount` only), `game/src/GameVar.{h,cpp}` (new `sv_*` only), `game/CMakeLists.txt`, `tests/**`, `ARCHITECTURE.md`, `docs/roadmap/**` |
-| Inputs | `AGENTS.md`, `ARCHITECTURE.md`, `docs/analysis/ALGORITHM_02-Movement-Collision-Interpolation.md` §5, `docs/analysis/KEY_QUESTIONS.md` Q2, step 4 slot binding |
+| Inputs | `AGENTS.md`, `ARCHITECTURE.md`, earlier review records `reviews/step*.md`, `docs/analysis/ALGORITHM_02-Movement-Collision-Interpolation.md` §5, `docs/analysis/KEY_QUESTIONS.md` Q2, step 4 slot binding |
 | Deliverables | `ServerValidator` class; tests pinning today's kick behaviour; `ARCHITECTURE.md` note |
 | Definition of done | See "Acceptance checks". All must pass. `ARCHITECTURE.md` is updated |
 
@@ -55,6 +55,6 @@ ctest --test-dir build/linux-x64-asan --output-on-failure -R validator
 
 - The 8.1 tests pass unchanged before and after the refactor.
 - `grep -n speedHackCount game/src` finds nothing.
-- [REVIEW.md](../../../REVIEW.md) checklist and `/anthropic-skills:thermo-nuclear-code-quality-review` done on the step diff; every finding fixed or confirmed with the owner.
+- `tools/review.sh --full <preset>` passes, and the fresh-context review record `reviews/step8.md` exists ([REVIEW.md](../../../REVIEW.md) section 5).
 - `ARCHITECTURE.md` lists every file added, moved or removed in this step.
 - The secret scan (`gitleaks git --staged` / CI) is clean.

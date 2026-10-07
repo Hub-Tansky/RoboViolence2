@@ -12,7 +12,7 @@
 | In scope | Tasks 2.1–2.4 below |
 | Out of scope | Security fixes (steps 4–7); visual polish, HiDPI (PNS-18); anything that changes the interface (**[GUI]**); bugs that don't block a game (record them in `possible-new-scope.md`) |
 | Allowed paths | `docs/roadmap/phase-a-modern-portable-build/phase-a-manual-test.md` (Results only), `docs/build/**`, `engine/zeven/src/**`, `game/src/**` (blocking fixes only), `tests/**`, `ARCHITECTURE.md`, `docs/roadmap/**`, `docs/analysis/KEY_QUESTIONS.md` |
-| Inputs | `AGENTS.md`, `ARCHITECTURE.md`, [phase-a-manual-test.md](../phase-a-modern-portable-build/phase-a-manual-test.md), `docs/build/` |
+| Inputs | `AGENTS.md`, `ARCHITECTURE.md`, earlier review records `reviews/step*.md`, [phase-a-manual-test.md](../phase-a-modern-portable-build/phase-a-manual-test.md), `docs/build/` |
 | Deliverables | Filled Results table; one commit per blocking fix, each with a test where possible; issues filed for the rest |
 | Definition of done | See "Acceptance checks". All must pass. `ARCHITECTURE.md` is updated |
 
@@ -50,6 +50,6 @@
 
 - Every Results cell for Linux, macOS and Windows is a pass, and Notes records the cross-OS game.
 - `ctest --test-dir build/<preset> --output-on-failure` passes on all three OSes (CI).
-- [REVIEW.md](../../../REVIEW.md) checklist and `/anthropic-skills:thermo-nuclear-code-quality-review` done on the step diff; every finding fixed or confirmed with the owner.
+- `tools/review.sh --full <preset>` passes, and the fresh-context review record `reviews/step2.md` exists ([REVIEW.md](../../../REVIEW.md) section 5).
 - `ARCHITECTURE.md` lists every file added, moved or removed in this step.
 - The secret scan (`gitleaks git --staged` / CI) is clean.

@@ -12,7 +12,7 @@
 | In scope | Tasks 1.1–1.5 below |
 | Out of scope | Signed installers, notarisation, AppImage/Flatpak/.deb (PNS-16); fixing gameplay bugs found while testing (step 2); renaming binaries (§H, PNS-20) |
 | Allowed paths | `.github/workflows/build.yml`, `packaging/**`, `tools/run-*`, `tools/setup-dev.*`, `docs/build/**`, `README.md`, `AGENTS.md`, `ARCHITECTURE.md`, `docs/roadmap/**`, `CMakeLists.txt` (install rules only) |
-| Inputs | `AGENTS.md`, `ARCHITECTURE.md`, `README.md` "Platforms and build", `tools/setup-dev.sh`, `.github/workflows/build.yml`, [ADR 0005](../../decisions/0005-runtime-main-data-root.md), [ADR 0007](../../decisions/0007-data-root-pref-dir-config-layers.md) |
+| Inputs | `AGENTS.md`, `ARCHITECTURE.md`, earlier review records `reviews/step*.md`, `README.md` "Platforms and build", `tools/setup-dev.sh`, `.github/workflows/build.yml`, [ADR 0005](../../decisions/0005-runtime-main-data-root.md), [ADR 0007](../../decisions/0007-data-root-pref-dir-config-layers.md) |
 | Deliverables | Artifacts `roboviolence2-<preset>` per OS; `docs/build/README.md`, `macos.md`, `linux.md`, `windows.md`; run scripts |
 | Definition of done | See "Acceptance checks". All must pass. `ARCHITECTURE.md` is updated |
 
@@ -66,6 +66,6 @@
 
 - The owner follows `docs/build/macos.md` from scratch and gets a running client and server.
 - The Markdown link check finds no broken link in `docs/build/`.
-- [REVIEW.md](../../../REVIEW.md) checklist and `/anthropic-skills:thermo-nuclear-code-quality-review` done on the step diff; every finding fixed or confirmed with the owner.
+- `tools/review.sh --full <preset>` passes, and the fresh-context review record `reviews/step1.md` exists ([REVIEW.md](../../../REVIEW.md) section 5).
 - `ARCHITECTURE.md` lists every file added, moved or removed in this step.
 - The secret scan (`gitleaks git --staged` / CI) is clean.

@@ -12,7 +12,7 @@
 | In scope | Tasks 12.1–12.4 below |
 | Out of scope | A graphical admin tool; the C.12 report review tool (PNS-13); plaintext UDP admin authorised by IP:port (never) |
 | Allowed paths | `game/src/**` (admin channel and console glue), `engine/**` (only if the ADR needs it), `vcpkg.json`, `packaging/docker/**`, `docs/ops/**`, `docs/decisions/**`, `tests/**`, `ARCHITECTURE.md`, `docs/roadmap/**` |
-| Inputs | `AGENTS.md`, `ARCHITECTURE.md`, [ADR 0002](../../decisions/0002-compile-out-libcurl.md), step 10 ADR, step 11 runbook |
+| Inputs | `AGENTS.md`, `ARCHITECTURE.md`, earlier review records `reviews/step*.md`, [ADR 0002](../../decisions/0002-compile-out-libcurl.md), step 10 ADR, step 11 runbook |
 | Deliverables | Admin channel in `bv2dedicated`; ADR on transport and TLS; audit log; runbook section |
 | Definition of done | See "Acceptance checks". All must pass. `ARCHITECTURE.md` is updated |
 
@@ -51,6 +51,6 @@ ctest --test-dir build/linux-x64-asan --output-on-failure -R admin
 
 - Passes: a wrong token is rejected, a burst is limited, and every command leaves an audit line with secrets masked.
 - With the compose stack, a remote `status` command over TLS returns the server state.
-- [REVIEW.md](../../../REVIEW.md) checklist and `/anthropic-skills:thermo-nuclear-code-quality-review` done on the step diff; every finding fixed or confirmed with the owner.
+- `tools/review.sh --full <preset>` passes, and the fresh-context review record `reviews/step12.md` exists ([REVIEW.md](../../../REVIEW.md) section 5).
 - `ARCHITECTURE.md` lists every file added, moved or removed in this step.
 - The secret scan (`gitleaks git --staged` / CI) is clean.

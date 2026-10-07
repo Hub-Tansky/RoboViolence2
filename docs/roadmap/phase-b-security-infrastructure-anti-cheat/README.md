@@ -29,7 +29,7 @@ Out of Phase B: the sim core, replays, server-authoritative movement, accounts, 
 | 12 | [step12-remote-admin.md](step12-remote-admin.md) | 10, 11 | Authenticated, rate-limited, audited admin channel |
 | 13 | [step13-localisation.md](step13-localisation.md) | 2 | OS language default, gettext PO, checker, translator guide |
 
-Order: 0 → 1 → 2. Steps 3–7 run one at a time (they share `ServerRecv.cpp` and `Server.cpp`). Steps 8–10 follow step 4. Steps 11–13 can run alongside once their dependencies are DONE. Every step closes with [REVIEW.md](../../../REVIEW.md): its checklist and the `/anthropic-skills:thermo-nuclear-code-quality-review`.
+Order: 0 → 1 → 2. Steps 3–7 run one at a time (they share `ServerRecv.cpp` and `Server.cpp`). Steps 8–10 follow step 4. Steps 11–13 can run alongside once their dependencies are DONE. Every step closes with [REVIEW.md](../../../REVIEW.md) section 5: `tools/review.sh --full`, a fresh-context `/thermo-nuclear-code-quality-review`, and a record in `reviews/stepN.md`.
 
 ## Phase B done when
 

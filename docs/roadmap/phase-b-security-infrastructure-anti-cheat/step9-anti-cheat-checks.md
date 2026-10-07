@@ -12,7 +12,7 @@
 | In scope | Tasks 9.1–9.4 below |
 | Out of scope | Aimbot and wallhack detection, telemetry, replays, information hiding, reports and sanctions (PNS-13); server-authoritative movement (PNS-13); bans by account (PNS-14) |
 | Allowed paths | `game/src/ServerValidator.{h,cpp}`, `game/src/ServerRecv.cpp`, `game/src/Server.{h,cpp}`, `game/src/GameVar.{h,cpp}` (new `sv_*` only), `tests/**`, `docs/analysis/**`, `ARCHITECTURE.md`, `docs/roadmap/**` |
-| Inputs | `AGENTS.md`, `ARCHITECTURE.md`, `docs/analysis/ALGORITHM_02-Movement-Collision-Interpolation.md`, `docs/analysis/ALGORITHM_03-Weapons-Hitscan-Projectiles.md`, step 8 validator |
+| Inputs | `AGENTS.md`, `ARCHITECTURE.md`, earlier review records `reviews/step*.md`, `docs/analysis/ALGORITHM_02-Movement-Collision-Interpolation.md`, `docs/analysis/ALGORITHM_03-Weapons-Hitscan-Projectiles.md`, step 8 validator |
 | Deliverables | Rules in `ServerValidator`; `sv_antiCheat`; tests per rule; a tuning note in `docs/analysis/` |
 | Definition of done | See "Acceptance checks". All must pass. `ARCHITECTURE.md` is updated |
 
@@ -52,6 +52,6 @@ ctest --test-dir build/linux-x64-asan --output-on-failure -R validator
 
 - Each rule has a positive test (cheat detected) and a negative test (normal play, jittered packets, not flagged).
 - A 10-minute owner play-test at `sv_antiCheat 1` logs no violations for honest players; the log is attached to the PR.
-- [REVIEW.md](../../../REVIEW.md) checklist and `/anthropic-skills:thermo-nuclear-code-quality-review` done on the step diff; every finding fixed or confirmed with the owner.
+- `tools/review.sh --full <preset>` passes, and the fresh-context review record `reviews/step9.md` exists ([REVIEW.md](../../../REVIEW.md) section 5).
 - `ARCHITECTURE.md` lists every file added, moved or removed in this step.
 - The secret scan (`gitleaks git --staged` / CI) is clean.

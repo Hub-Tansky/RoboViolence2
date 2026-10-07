@@ -12,7 +12,7 @@
 | In scope | Tasks 3.1–3.4 below |
 | Out of scope | Fixing the defects the harness finds (steps 4–7); the gameplay replay recording of C.9 (PNS-13); changing packet layouts |
 | Allowed paths | `tests/**`, `tools/fuzz-*`, `game/CMakeLists.txt` (test hooks only), `masterserver/CMakeLists.txt` (test hooks only), `.github/workflows/build.yml` (fuzz job), `docs/analysis/KEY_QUESTIONS.md` (defects found), `ARCHITECTURE.md`, `docs/roadmap/**` |
-| Inputs | `AGENTS.md`, `ARCHITECTURE.md`, `docs/analysis/KEY_QUESTIONS.md` Parts C–D, `game/src/netPacket.h`, `tests/CMakeLists.txt`, `tests/smoke_server.py`, `masterserver/README.md` |
+| Inputs | `AGENTS.md`, `ARCHITECTURE.md`, earlier review records `reviews/step*.md`, `docs/analysis/KEY_QUESTIONS.md` Parts C–D, `game/src/netPacket.h`, `tests/CMakeLists.txt`, `tests/smoke_server.py`, `masterserver/README.md` |
 | Deliverables | In-process harness target, corpus in `tests/corpus/`, master register/list tests, a CI fuzz job (not required) |
 | Definition of done | See "Acceptance checks". All must pass. `ARCHITECTURE.md` is updated |
 
@@ -57,6 +57,6 @@ ctest --test-dir build/linux-x64-asan --output-on-failure -R "replay|master"
 
 - Passes. Known-crashing inputs (Q-S2 out-of-range `playerID`) are present in the corpus and marked expected-failure until step 4.
 - The CI `fuzz` job runs and uploads any new crash inputs as artifacts.
-- [REVIEW.md](../../../REVIEW.md) checklist and `/anthropic-skills:thermo-nuclear-code-quality-review` done on the step diff; every finding fixed or confirmed with the owner.
+- `tools/review.sh --full <preset>` passes, and the fresh-context review record `reviews/step3.md` exists ([REVIEW.md](../../../REVIEW.md) section 5).
 - `ARCHITECTURE.md` lists every file added, moved or removed in this step.
 - The secret scan (`gitleaks git --staged` / CI) is clean.

@@ -12,7 +12,7 @@
 | In scope | Tasks 13.1–13.4 below |
 | Out of scope | An in-game language picker, moving hard-coded strings, non-ASCII rendering (all PNS-21); new fonts (PNS-20); shipping translations other than English |
 | Allowed paths | `game/src/GameVar.{h,cpp}`, `game/src/main.cpp`, `game/src/Lang*.{h,cpp}` (new), `game/CMakeLists.txt`, `content/languages/**`, `tools/lang-*`, `tools/check-hygiene.py`, `tests/**`, `ARCHITECTURE.md`, `docs/roadmap/**` |
-| Inputs | `AGENTS.md`, `ARCHITECTURE.md`, [ADR 0011](../../decisions/0011-gettext-po-translations.md), [ADR 0010](../../decisions/0010-bv2-asset-compat-and-gui-freeze.md), PNS-2 |
+| Inputs | `AGENTS.md`, `ARCHITECTURE.md`, earlier review records `reviews/step*.md`, [ADR 0011](../../decisions/0011-gettext-po-translations.md), [ADR 0010](../../decisions/0010-bv2-asset-compat-and-gui-freeze.md), PNS-2 |
 | Deliverables | Locale detection; PO loader; `en.pot` generator; translation checker in `hygiene`; `content/languages/README.md` |
 | Definition of done | See "Acceptance checks". All must pass. `ARCHITECTURE.md` is updated |
 
@@ -56,6 +56,6 @@ ctest --test-dir build/linux-x64 --output-on-failure -R lang
 - With `LANG=pl_PL.UTF-8` and a test `pl.po` containing only ASCII, the Linux client shows Polish strings; with no PO file it shows English.
 - With original BV2 data, `en.lang` loads and the menus look unchanged (owner).
 - `python3 tools/check-hygiene.py` runs the translation check.
-- [REVIEW.md](../../../REVIEW.md) checklist and `/anthropic-skills:thermo-nuclear-code-quality-review` done on the step diff; every finding fixed or confirmed with the owner.
+- `tools/review.sh --full <preset>` passes, and the fresh-context review record `reviews/step13.md` exists ([REVIEW.md](../../../REVIEW.md) section 5).
 - `ARCHITECTURE.md` lists every file added, moved or removed in this step.
 - The secret scan (`gitleaks git --staged` / CI) is clean.

@@ -12,7 +12,7 @@
 | In scope | Tasks 7.1–7.3 below |
 | Out of scope | R11 and R14 (fixed in Phase A step 3); gameplay balance changes beyond the defect; babonet UDP / `cPeer2Peer` (PNS-17) |
 | Allowed paths | `game/src/**`, `engine/babonet/src/**`, `tests/**`, `docs/analysis/KEY_QUESTIONS.md`, `ARCHITECTURE.md`, `docs/roadmap/**` |
-| Inputs | `AGENTS.md`, `ARCHITECTURE.md`, `docs/analysis/KEY_QUESTIONS.md` Part D |
+| Inputs | `AGENTS.md`, `ARCHITECTURE.md`, earlier review records `reviews/step*.md`, `docs/analysis/KEY_QUESTIONS.md` Part D |
 | Deliverables | One commit per defect with its test |
 | Definition of done | See "Acceptance checks". All must pass. `ARCHITECTURE.md` is updated |
 
@@ -57,6 +57,6 @@ ctest --test-dir build/linux-x64-asan --output-on-failure
 
 - Passes with a test for each defect.
 - Every listed defect is marked fixed in `KEY_QUESTIONS.md`, with the commit.
-- [REVIEW.md](../../../REVIEW.md) checklist and `/anthropic-skills:thermo-nuclear-code-quality-review` done on the step diff; every finding fixed or confirmed with the owner.
+- `tools/review.sh --full <preset>` passes, and the fresh-context review record `reviews/step7.md` exists ([REVIEW.md](../../../REVIEW.md) section 5).
 - `ARCHITECTURE.md` lists every file added, moved or removed in this step.
 - The secret scan (`gitleaks git --staged` / CI) is clean.

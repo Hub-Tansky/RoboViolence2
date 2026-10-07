@@ -12,7 +12,7 @@
 | In scope | Tasks 5.1–5.6 below |
 | Out of scope | Medium and low defects (step 7); SQL (step 6); restructuring object lifetimes (`unique_ptr`, PNS-19) |
 | Allowed paths | `game/src/**`, `engine/babonet/src/**`, `tests/**`, `docs/analysis/KEY_QUESTIONS.md`, `docs/decisions/**`, `ARCHITECTURE.md`, `docs/roadmap/**` |
-| Inputs | `AGENTS.md`, `ARCHITECTURE.md`, `docs/analysis/KEY_QUESTIONS.md` Part D, PNS-5, PNS-6 |
+| Inputs | `AGENTS.md`, `ARCHITECTURE.md`, earlier review records `reviews/step*.md`, `docs/analysis/KEY_QUESTIONS.md` Part D, PNS-5, PNS-6 |
 | Deliverables | One commit per defect with its test; an ADR for R3 |
 | Definition of done | See "Acceptance checks". All must pass. `ARCHITECTURE.md` is updated |
 
@@ -75,6 +75,6 @@ ctest --test-dir build/linux-x64-asan --output-on-failure
 - The R3 ADR exists and its decision is implemented.
 - The CI smoke job (client under xvfb, ASan) reports no UBSan errors.
 - R1–R5 are marked fixed in `KEY_QUESTIONS.md`.
-- [REVIEW.md](../../../REVIEW.md) checklist and `/anthropic-skills:thermo-nuclear-code-quality-review` done on the step diff; every finding fixed or confirmed with the owner.
+- `tools/review.sh --full <preset>` passes, and the fresh-context review record `reviews/step5.md` exists ([REVIEW.md](../../../REVIEW.md) section 5).
 - `ARCHITECTURE.md` lists every file added, moved or removed in this step.
 - The secret scan (`gitleaks git --staged` / CI) is clean.

@@ -12,7 +12,7 @@
 | In scope | Tasks 11.1–11.4 below |
 | Out of scope | Choosing or provisioning a host; real hostnames or IPs (never committed); the admin channel (step 12); account services (PNS-15) |
 | Allowed paths | `packaging/docker/**`, `.github/workflows/**`, `docs/ops/**`, `.dockerignore`, `ARCHITECTURE.md`, `docs/roadmap/**` |
-| Inputs | `AGENTS.md`, `ARCHITECTURE.md`, `config/README.md`, [ADR 0007](../../decisions/0007-data-root-pref-dir-config-layers.md), step 1 Linux package |
+| Inputs | `AGENTS.md`, `ARCHITECTURE.md`, earlier review records `reviews/step*.md`, `config/README.md`, [ADR 0007](../../decisions/0007-data-root-pref-dir-config-layers.md), step 1 Linux package |
 | Deliverables | Two Dockerfiles; CI image build (and push to GHCR on `main`); `docs/ops/runbook.md` |
 | Definition of done | See "Acceptance checks". All must pass. `ARCHITECTURE.md` is updated |
 
@@ -53,6 +53,6 @@ docker compose -f packaging/docker/compose.example.yml up -d && docker compose p
 - Both services are healthy. A local client connects to the containerised server, which appears in the containerised master's list.
 - `docker run --rm <image> id -u` is not 0.
 - gitleaks and `.gitleaks.toml` host rules find nothing in `packaging/docker/` or `docs/ops/`.
-- [REVIEW.md](../../../REVIEW.md) checklist and `/anthropic-skills:thermo-nuclear-code-quality-review` done on the step diff; every finding fixed or confirmed with the owner.
+- `tools/review.sh --full <preset>` passes, and the fresh-context review record `reviews/step11.md` exists ([REVIEW.md](../../../REVIEW.md) section 5).
 - `ARCHITECTURE.md` lists every file added, moved or removed in this step.
 - The secret scan (`gitleaks git --staged` / CI) is clean.

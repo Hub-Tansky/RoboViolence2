@@ -22,7 +22,7 @@ cmake --build --preset <preset> --target bv2dedicated bv2master
 - Output: `build/<preset>/runtime/` (executables, `main/`, `master.db`, `web.db`). Run the server from there ([ADR 0005](docs/decisions/0005-runtime-main-data-root.md)). CI packages it per OS with `packaging/make-package.py`.
 - `bv2` (client) needs the vcpkg `client` feature (SDL3, miniaudio, stb); `-DBV2_BUILD_CLIENT=OFF` builds the servers only. `-DBV2_WITH_HTTP=ON` adds libcurl (off by default, ADR 0002).
 - Tests: `ctest --test-dir build/<preset> --output-on-failure` (`tests/`: netPacket layout, config layering and secret mask, dedicated-server smoke).
-- CI (`.github/workflows/`), all required: `build` (Windows, macOS, Linux; uploads the `roboviolence2-<preset>` packages), `smoke` (Linux ASan: ctest and a 10 s client run under xvfb), `secret-scan`, `architecture`, `hygiene` (paths, ignored files, size, encoding, content case). Not required: `codeql`, `clang-tidy`, `package-check` (Linux package in a clean `ubuntu:24.04`); `dependency-graph` runs on `main`. vcpkg ports get no vulnerability alerts: bump the baseline monthly. Run the cheap ones locally: `tools/check-architecture.sh`, `python3 tools/check-hygiene.py`.
+- CI (`.github/workflows/`), all required: `build` (Windows, macOS, Linux; uploads the `roboviolence2-<preset>` packages), `smoke` (Linux ASan: ctest and a 10 s client run under xvfb), `secret-scan`, `architecture`, `hygiene` (paths, ignored files, size, encoding, content case), `review` (`tools/review.sh` on PRs: scope, anti-gaming, DONE gate). Not required: `codeql`, `clang-tidy`, `package-check` (Linux package in a clean `ubuntu:24.04`); `dependency-graph` runs on `main`. vcpkg ports get no vulnerability alerts: bump the baseline monthly. Run them locally with `tools/review.sh` (`--full <preset>` adds build and ctest).
 - Warnings are errors (`bv2_target_strict`) on `babonet`, `dko`, `zeven_core`; add a target once it is clean. Format only touched lines with `git clang-format`; never mass-reformat.
 
 ## Assets
@@ -45,7 +45,7 @@ cmake --build --preset <preset> --target bv2dedicated bv2master
 - Finish every step by updating `ARCHITECTURE.md` (inventory and changed facts) and running `tools/check-architecture.sh`.
 - When a step closes, set its **Status** to `DONE (YYYY-MM-DD)` and add what you learned about later phases or out-of-scope work to [docs/roadmap/possible-new-scope.md](docs/roadmap/possible-new-scope.md) ([docs/roadmap/README.md](docs/roadmap/README.md)).
 - Record non-obvious decisions as ADRs in `docs/decisions/`.
-- Judge delivered code against [REVIEW.md](REVIEW.md); every step and every architecture-changing PR gets the `/anthropic-skills:thermo-nuclear-code-quality-review` skill before its Status becomes DONE.
+- Work is done only per [REVIEW.md](REVIEW.md): `tools/review.sh` passes (CI `review` check), and a step closes with a fresh-context `/thermo-nuclear-code-quality-review` recorded in `docs/roadmap/<phase>/reviews/stepN.md`. Its stop rule and forbidden shortcuts apply to every change.
 - Don't mix mechanical rewrites (encoding, renames, formatting) with functional changes in one commit.
 
 ## Compile-time variants
