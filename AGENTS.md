@@ -40,12 +40,12 @@ cmake --build --preset <preset> --target bv2dedicated bv2master
 ## Agent rules
 
 - Work one step at a time, from its scope file in `docs/roadmap/<phase>/`. Stay inside the step's **Allowed paths**; note out-of-scope work instead of doing it.
-- Branch `refactor/stepN-<slug>`, one commit per task item (`stepN.M: <summary>`), one PR per step. Step 0 was the only step committed straight to `main`.
+- Branch `refactor/<phase>-stepN-<slug>` (e.g. `refactor/phase-b-step1-playtest-builds`), one commit per task item (`stepN.M: <summary>`), one PR per step. Phase A step 0 was the only step committed straight to `main`.
 - Never commit secrets, real hosts or IPs. Never use `--no-verify`.
 - Finish every step by updating `ARCHITECTURE.md` (inventory and changed facts) and running `tools/check-architecture.sh`.
 - When a step closes, set its **Status** to `DONE (YYYY-MM-DD)` and add what you learned about later phases or out-of-scope work to [docs/roadmap/possible-new-scope.md](docs/roadmap/possible-new-scope.md) ([docs/roadmap/README.md](docs/roadmap/README.md)).
 - Record non-obvious decisions as ADRs in `docs/decisions/`.
-- Judge delivered code against [REVIEW.md](REVIEW.md); big steps and architecture-changing PRs get the `/thermo-nuclear-code-quality-review` skill.
+- Judge delivered code against [REVIEW.md](REVIEW.md); every step and every architecture-changing PR gets the `/anthropic-skills:thermo-nuclear-code-quality-review` skill before its Status becomes DONE.
 - Don't mix mechanical rewrites (encoding, renames, formatting) with functional changes in one commit.
 
 ## Compile-time variants

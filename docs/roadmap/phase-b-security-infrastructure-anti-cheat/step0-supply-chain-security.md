@@ -8,10 +8,10 @@
 
 | Field | Value |
 |---|---|
-| Goal | GitHub tracks the vcpkg dependencies, alerts on vulnerable Actions, and scans the code with CodeQL and OSV-Scanner on every PR |
+| Goal | GitHub tracks the vcpkg dependencies, alerts on vulnerable Actions, and scans the code with CodeQL on every PR |
 | In scope | Tasks 0.1–0.5 below |
 | Out of scope | Fixing CodeQL findings (steps 4–7, or `possible-new-scope.md`); making CodeQL a required check before its alerts are triaged; vcpkg baseline bumps beyond what a finding needs |
-| Allowed paths | `.github/workflows/**`, `.github/dependabot.yml`, `AGENTS.md`, `ARCHITECTURE.md`, `docs/roadmap/**` |
+| Allowed paths | `.github/workflows/**`, `.github/dependabot.yml`, `AGENTS.md`, `ARCHITECTURE.md`, `docs/roadmap/**`, `docs/analysis/KEY_QUESTIONS.md` (triage, added after the fact) |
 | Inputs | `AGENTS.md`, `ARCHITECTURE.md`, `vcpkg.json`, `.github/workflows/build.yml`, [Phase A step 3](../phase-a-modern-portable-build/step3-dependency-upgrades.md) |
 | Deliverables | Workflows `dependency-graph.yml`, `codeql.yml`; `.github/dependabot.yml`; repository settings on; `ARCHITECTURE.md` facts current. OSV-Scanner dropped (see 0.3) |
 | Definition of done | See "Acceptance checks". All must pass. `ARCHITECTURE.md` is updated |
@@ -19,7 +19,7 @@
 ## Context
 
 - GitHub can't parse `vcpkg.json`. vcpkg can submit its resolved ports through the dependency submission API (`VCPKG_FEATURE_FLAGS=dependencygraph` with `GITHUB_TOKEN`).
-- The GitHub Advisory Database has no C/C++ ecosystem, so Dependabot alerts cover GitHub Actions only. vcpkg ports are covered by OSV-Scanner (partial C/C++ coverage) and a manual monthly baseline bump.
+- The GitHub Advisory Database has no C/C++ ecosystem, so Dependabot alerts cover GitHub Actions only. vcpkg ports are covered only by a manual monthly baseline bump (OSV-Scanner can't read them, see 0.3).
 - `ARCHITECTURE.md` still says "State after Step 3", protocol 21100 (the code has `GAME_VERSION_SV 22000`, `game/src/Server.h:32`) and "Linux and Windows are untested" (PNS-11).
 
 ## Tasks
@@ -57,8 +57,9 @@
 ## Acceptance checks
 
 - Insights → Dependency graph lists the vcpkg ports (sqlite3, sdl3, miniaudio, stb).
-- The Security tab shows CodeQL (`c-cpp`, `actions`) and OSV-Scanner results for `main`.
-- `.github/dependabot.yml` is valid: Insights → Dependency graph → Dependabot shows no errors.
+- The Security tab shows CodeQL (`c-cpp`, `actions`) results for `main`.
+- `.github/dependabot.yml` is valid: Insights → Dependency graph → Dependabot shows no errors. Verified: its first run opened PRs #20–#22.
+- [REVIEW.md](../../../REVIEW.md) checklist and `/anthropic-skills:thermo-nuclear-code-quality-review` done; findings fixed or confirmed with the owner (done after the fact, 2026-10-07).
 - `ARCHITECTURE.md` names protocol 22000 and no longer says "State after Step 3".
 - `ARCHITECTURE.md` lists every file added, moved or removed in this step.
 - The secret scan (`gitleaks git --staged` / CI) is clean.

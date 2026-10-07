@@ -53,7 +53,7 @@ ctest --test-dir build/linux-x64-asan --output-on-failure
 - Passes, including a handshake test that captures the traffic and finds no password or MD5 of it.
 - `grep -rn macAddr game/src masterserver/src` finds nothing.
 - The owner joins a password-protected server and logs in as admin on one OS.
-- `/thermo-nuclear-code-quality-review` has run on the step diff.
 - Q-S5 is marked fixed in `KEY_QUESTIONS.md`.
+- [REVIEW.md](../../../REVIEW.md) checklist and `/anthropic-skills:thermo-nuclear-code-quality-review` done on the step diff; every finding fixed or confirmed with the owner.
 - `ARCHITECTURE.md` lists every file added, moved or removed in this step.
 - The secret scan (`gitleaks git --staged` / CI) is clean.
