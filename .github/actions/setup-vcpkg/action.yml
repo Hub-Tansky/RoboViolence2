@@ -1,0 +1,33 @@
+name: setup-vcpkg
+description: Runner's vcpkg at the pinned baseline, host packages, and the vcpkg binary cache. Run after actions/checkout.
+inputs:
+  cache-key:
+    description: Cache key prefix, usually the preset (e.g. linux-x64)
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Use the runner's vcpkg, with the pinned baseline fetched
+      shell: bash
+      run: |
+        echo "VCPKG_ROOT=$VCPKG_INSTALLATION_ROOT" >> "$GITHUB_ENV"
+        echo "VCPKG_BINARY_SOURCES=clear;files,$GITHUB_WORKSPACE/.vcpkg-bin,readwrite" >> "$GITHUB_ENV"
+        baseline=$(sed -n 's/.*"builtin-baseline": *"\([0-9a-f]*\)".*/\1/p' vcpkg.json)
+        git -C "$VCPKG_INSTALLATION_ROOT" fetch --quiet origin "$baseline" || git -C "$VCPKG_INSTALLATION_ROOT" fetch --quiet --unshallow origin
+        # The builtin registry reads its version database from this checkout: it must be at the baseline.
+        git -C "$VCPKG_INSTALLATION_ROOT" checkout --quiet --force "$baseline"
+    - name: Linux packages
+      if: runner.os == 'Linux'
+      shell: bash
+      run: |
+        sudo apt-get update
+        eval "$(tools/setup-dev.sh --linux-packages | sed 's/^sudo apt install/sudo apt-get install -y/')"
+    - name: macOS tools
+      if: runner.os == 'macOS'
+      shell: bash
+      run: brew install ninja autoconf autoconf-archive automake libtool
+    - uses: actions/cache@v6
+      with:
+        path: .vcpkg-bin
+        key: vcpkg-${{ inputs.cache-key }}-${{ hashFiles('vcpkg.json') }}
+        restore-keys: vcpkg-${{ inputs.cache-key }}-

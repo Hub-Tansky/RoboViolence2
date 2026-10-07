@@ -10,8 +10,6 @@ concurrency:
   cancel-in-progress: true
 permissions:
   contents: read
-env:
-  VCPKG_BINARY_SOURCES: clear;files,${{ github.workspace }}/.vcpkg-bin,readwrite
 jobs:
   cpp:
     name: codeql (c-cpp)
@@ -22,21 +20,9 @@ jobs:
       security-events: write
     steps:
       - uses: actions/checkout@v7
-      - name: Use the runner's vcpkg, with the pinned baseline fetched
-        run: |
-          echo "VCPKG_ROOT=$VCPKG_INSTALLATION_ROOT" >> "$GITHUB_ENV"
-          baseline=$(sed -n 's/.*"builtin-baseline": *"\([0-9a-f]*\)".*/\1/p' vcpkg.json)
-          git -C "$VCPKG_INSTALLATION_ROOT" fetch --quiet origin "$baseline" || git -C "$VCPKG_INSTALLATION_ROOT" fetch --quiet --unshallow origin
-          git -C "$VCPKG_INSTALLATION_ROOT" checkout --quiet --force "$baseline"
-      - name: Packages
-        run: |
-          sudo apt-get update
-          eval "$(tools/setup-dev.sh --linux-packages | sed 's/^sudo apt install/sudo apt-get install -y/')"
-      - uses: actions/cache@v6
+      - uses: ./.github/actions/setup-vcpkg
         with:
-          path: .vcpkg-bin
-          key: vcpkg-linux-x64-${{ hashFiles('vcpkg.json') }}
-          restore-keys: vcpkg-linux-x64-
+          cache-key: linux-x64
       - name: Configure (outside the trace, so vcpkg ports aren't analysed)
         run: cmake --preset linux-x64
       - uses: github/codeql-action/init@v4

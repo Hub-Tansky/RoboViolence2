@@ -7,8 +7,6 @@ concurrency:
   cancel-in-progress: true
 permissions:
   contents: read
-env:
-  VCPKG_BINARY_SOURCES: clear;files,${{ github.workspace }}/.vcpkg-bin,readwrite
 jobs:
   build:
     name: build (${{ matrix.preset }})
@@ -22,32 +20,14 @@ jobs:
           - { os: ubuntu-24.04, preset: linux-x64 }
     steps:
       - uses: actions/checkout@v7
-      - name: Use the runner's vcpkg, with the pinned baseline fetched
-        shell: bash
-        run: |
-          echo "VCPKG_ROOT=$VCPKG_INSTALLATION_ROOT" >> "$GITHUB_ENV"
-          baseline=$(sed -n 's/.*"builtin-baseline": *"\([0-9a-f]*\)".*/\1/p' vcpkg.json)
-          git -C "$VCPKG_INSTALLATION_ROOT" fetch --quiet origin "$baseline" || git -C "$VCPKG_INSTALLATION_ROOT" fetch --quiet --unshallow origin
-          # The builtin registry reads its version database from this checkout: it must be at the baseline.
-          git -C "$VCPKG_INSTALLATION_ROOT" checkout --quiet --force "$baseline"
-      - name: Linux packages
-        if: runner.os == 'Linux'
-        run: |
-          sudo apt-get update
-          eval "$(tools/setup-dev.sh --linux-packages | sed 's/^sudo apt install/sudo apt-get install -y/')"
-      - name: macOS tools
-        if: runner.os == 'macOS'
-        run: brew install ninja autoconf autoconf-archive automake libtool
+      - uses: ./.github/actions/setup-vcpkg
+        with:
+          cache-key: ${{ matrix.preset }}
       - name: MSVC environment
         if: runner.os == 'Windows'
         uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: x64
-      - uses: actions/cache@v6
-        with:
-          path: .vcpkg-bin
-          key: vcpkg-${{ matrix.preset }}-${{ hashFiles('vcpkg.json') }}
-          restore-keys: vcpkg-${{ matrix.preset }}-
       - name: Configure
         run: cmake --preset ${{ matrix.preset }}
       - name: Build (keep going, so one run lists every failure)
@@ -80,23 +60,11 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
-      - name: Use the runner's vcpkg, with the pinned baseline fetched
-        run: |
-          echo "VCPKG_ROOT=$VCPKG_INSTALLATION_ROOT" >> "$GITHUB_ENV"
-          baseline=$(sed -n 's/.*"builtin-baseline": *"\([0-9a-f]*\)".*/\1/p' vcpkg.json)
-          git -C "$VCPKG_INSTALLATION_ROOT" fetch --quiet origin "$baseline" || git -C "$VCPKG_INSTALLATION_ROOT" fetch --quiet --unshallow origin
-          # The builtin registry reads its version database from this checkout: it must be at the baseline.
-          git -C "$VCPKG_INSTALLATION_ROOT" checkout --quiet --force "$baseline"
-      - name: Packages
-        run: |
-          sudo apt-get update
-          eval "$(tools/setup-dev.sh --linux-packages | sed 's/^sudo apt install/sudo apt-get install -y/')"
-          sudo apt-get install -y xvfb libgl1-mesa-dri
-      - uses: actions/cache@v6
+      - uses: ./.github/actions/setup-vcpkg
         with:
-          path: .vcpkg-bin
-          key: vcpkg-linux-x64-asan-${{ hashFiles('vcpkg.json') }}
-          restore-keys: vcpkg-linux-x64-asan-
+          cache-key: linux-x64-asan
+      - name: Extra packages
+        run: sudo apt-get install -y xvfb libgl1-mesa-dri
       - run: cmake --preset linux-x64-asan
       - run: cmake --build --preset linux-x64-asan
       - name: Server smoke (loads the CTF launch script, quits) and unit tests
@@ -121,22 +89,11 @@ jobs:
     continue-on-error: true
     steps:
       - uses: actions/checkout@v7
-      - name: Use the runner's vcpkg, with the pinned baseline fetched
-        run: |
-          echo "VCPKG_ROOT=$VCPKG_INSTALLATION_ROOT" >> "$GITHUB_ENV"
-          baseline=$(sed -n 's/.*"builtin-baseline": *"\([0-9a-f]*\)".*/\1/p' vcpkg.json)
-          git -C "$VCPKG_INSTALLATION_ROOT" fetch --quiet origin "$baseline" || git -C "$VCPKG_INSTALLATION_ROOT" fetch --quiet --unshallow origin
-          git -C "$VCPKG_INSTALLATION_ROOT" checkout --quiet --force "$baseline"
-      - name: Packages
-        run: |
-          sudo apt-get update
-          eval "$(tools/setup-dev.sh --linux-packages | sed 's/^sudo apt install/sudo apt-get install -y/')"
-          sudo apt-get install -y clang-tidy
-      - uses: actions/cache@v6
+      - uses: ./.github/actions/setup-vcpkg
         with:
-          path: .vcpkg-bin
-          key: vcpkg-linux-x64-tidy-${{ hashFiles('vcpkg.json') }}
-          restore-keys: vcpkg-linux-x64-tidy-
+          cache-key: linux-x64-tidy
+      - name: Extra packages
+        run: sudo apt-get install -y clang-tidy
       - run: cmake --preset linux-x64
       - name: clang-tidy over the engine libraries and the game (.clang-tidy)
         run: |
