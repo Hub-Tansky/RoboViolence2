@@ -227,6 +227,12 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/step12-remote-admin.md` | Scope file for step12 |
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/step13-localisation.md` | Scope file for step13 |
 
+### `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews`
+
+| path | purpose |
+|---|---|
+| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step1.md` | Fresh-context review record for step 1 |
+
 ### `engine/babonet`
 
 | path | purpose |
