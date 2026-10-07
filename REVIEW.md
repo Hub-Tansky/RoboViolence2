@@ -12,14 +12,14 @@ Agents check every change against this file before calling it done.
 - `ARCHITECTURE.md` and any affected README or ADR are updated; non-obvious decisions have an ADR.
 - Mechanical rewrites (encoding, renames, formatting) are not mixed with functional changes in one commit.
 
-## Big changes: thermo-nuclear review
+## Steps and big changes: thermo-nuclear review
 
-Run the `/thermo-nuclear-code-quality-review` skill when a chunk of work is done that is either:
+Run the `/anthropic-skills:thermo-nuclear-code-quality-review` skill when a chunk of work is done that is either:
 
 - a whole step (`docs/roadmap/<phase>/stepN-*.md`), or
 - a PR that changes the code's architecture: new or moved modules, libraries or interfaces, changed ownership or data flow, protocol or file-format changes.
 
-Run it on the full diff against `main`, before marking the PR ready. If the skill isn't available, stop and tell the owner; don't substitute another review silently.
+Run it on the full diff against `main`, before marking the PR ready and before setting the step's Status to DONE. The step file's acceptance checks include it. If the skill isn't available, stop and tell the owner; don't substitute another review silently.
 
 ## Acting on findings
 

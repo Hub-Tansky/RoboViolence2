@@ -61,5 +61,6 @@ ctest --test-dir build/linux-x64-asan --output-on-failure
 - The CI `fuzz` job finds no crash in 2 min per message type.
 - The manual test DM round passes on one OS (owner).
 - Q-S1, Q-S2, Q-S4, Q-S6 and Q-S7 in `KEY_QUESTIONS.md` are marked fixed, with the commit.
+- [REVIEW.md](../../../REVIEW.md) checklist and `/anthropic-skills:thermo-nuclear-code-quality-review` done on the step diff; every finding fixed or confirmed with the owner.
 - `ARCHITECTURE.md` lists every file added, moved or removed in this step.
 - The secret scan (`gitleaks git --staged` / CI) is clean.

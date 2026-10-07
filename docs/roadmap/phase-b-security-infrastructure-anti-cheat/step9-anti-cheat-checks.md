@@ -52,6 +52,6 @@ ctest --test-dir build/linux-x64-asan --output-on-failure -R validator
 
 - Each rule has a positive test (cheat detected) and a negative test (normal play, jittered packets, not flagged).
 - A 10-minute owner play-test at `sv_antiCheat 1` logs no violations for honest players; the log is attached to the PR.
-- `/thermo-nuclear-code-quality-review` has run on the step diff.
+- [REVIEW.md](../../../REVIEW.md) checklist and `/anthropic-skills:thermo-nuclear-code-quality-review` done on the step diff; every finding fixed or confirmed with the owner.
 - `ARCHITECTURE.md` lists every file added, moved or removed in this step.
 - The secret scan (`gitleaks git --staged` / CI) is clean.

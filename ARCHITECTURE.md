@@ -85,6 +85,12 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 |---|---|
 | `.github/dependabot.yml` | Dependabot version updates: GitHub Actions, weekly |
 
+### `.github/actions/setup-vcpkg`
+
+| path | purpose |
+|---|---|
+| `.github/actions/setup-vcpkg/action.yml` | Composite action: runner's vcpkg at the pinned baseline, host packages, vcpkg binary cache; used by every workflow that builds |
+
 ### `.github/workflows`
 
 | path | purpose |

@@ -66,5 +66,6 @@
 
 - The owner follows `docs/build/macos.md` from scratch and gets a running client and server.
 - The Markdown link check finds no broken link in `docs/build/`.
+- [REVIEW.md](../../../REVIEW.md) checklist and `/anthropic-skills:thermo-nuclear-code-quality-review` done on the step diff; every finding fixed or confirmed with the owner.
 - `ARCHITECTURE.md` lists every file added, moved or removed in this step.
 - The secret scan (`gitleaks git --staged` / CI) is clean.

@@ -56,5 +56,6 @@ ctest --test-dir build/linux-x64 --output-on-failure -R lang
 - With `LANG=pl_PL.UTF-8` and a test `pl.po` containing only ASCII, the Linux client shows Polish strings; with no PO file it shows English.
 - With original BV2 data, `en.lang` loads and the menus look unchanged (owner).
 - `python3 tools/check-hygiene.py` runs the translation check.
+- [REVIEW.md](../../../REVIEW.md) checklist and `/anthropic-skills:thermo-nuclear-code-quality-review` done on the step diff; every finding fixed or confirmed with the owner.
 - `ARCHITECTURE.md` lists every file added, moved or removed in this step.
 - The secret scan (`gitleaks git --staged` / CI) is clean.

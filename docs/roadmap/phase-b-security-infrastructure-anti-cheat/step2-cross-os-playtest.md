@@ -50,5 +50,6 @@
 
 - Every Results cell for Linux, macOS and Windows is a pass, and Notes records the cross-OS game.
 - `ctest --test-dir build/<preset> --output-on-failure` passes on all three OSes (CI).
+- [REVIEW.md](../../../REVIEW.md) checklist and `/anthropic-skills:thermo-nuclear-code-quality-review` done on the step diff; every finding fixed or confirmed with the owner.
 - `ARCHITECTURE.md` lists every file added, moved or removed in this step.
 - The secret scan (`gitleaks git --staged` / CI) is clean.

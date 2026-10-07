@@ -48,5 +48,6 @@ grep -nE "sqlite3_(exec|get_table|mprintf)" game/src/*.cpp masterserver/src/*.cp
 - Lists only constant DDL, each with a comment saying so.
 - `ctest` passes, including the injection tests.
 - Q-S3 is marked fixed in `KEY_QUESTIONS.md`.
+- [REVIEW.md](../../../REVIEW.md) checklist and `/anthropic-skills:thermo-nuclear-code-quality-review` done on the step diff; every finding fixed or confirmed with the owner.
 - `ARCHITECTURE.md` lists every file added, moved or removed in this step.
 - The secret scan (`gitleaks git --staged` / CI) is clean.

@@ -10,70 +10,58 @@ concurrency:
   cancel-in-progress: true
 permissions:
   contents: read
-env:
-  VCPKG_BINARY_SOURCES: clear;files,${{ github.workspace }}/.vcpkg-bin,readwrite
 jobs:
-  analyze:
-    name: codeql (${{ matrix.language }})
+  cpp:
+    name: codeql (c-cpp)
     runs-on: ubuntu-24.04
     permissions:
       actions: read
       contents: read
       security-events: write
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - { language: c-cpp, build-mode: manual }
-          - { language: actions, build-mode: none }
     steps:
       - uses: actions/checkout@v7
-      - name: Use the runner's vcpkg, with the pinned baseline fetched
-        if: matrix.language == 'c-cpp'
-        run: |
-          echo "VCPKG_ROOT=$VCPKG_INSTALLATION_ROOT" >> "$GITHUB_ENV"
-          baseline=$(sed -n 's/.*"builtin-baseline": *"\([0-9a-f]*\)".*/\1/p' vcpkg.json)
-          git -C "$VCPKG_INSTALLATION_ROOT" fetch --quiet origin "$baseline" || git -C "$VCPKG_INSTALLATION_ROOT" fetch --quiet --unshallow origin
-          git -C "$VCPKG_INSTALLATION_ROOT" checkout --quiet --force "$baseline"
-      - name: Packages
-        if: matrix.language == 'c-cpp'
-        run: |
-          sudo apt-get update
-          eval "$(tools/setup-dev.sh --linux-packages | sed 's/^sudo apt install/sudo apt-get install -y/')"
-      - uses: actions/cache@v6
-        if: matrix.language == 'c-cpp'
+      - uses: ./.github/actions/setup-vcpkg
         with:
-          path: .vcpkg-bin
-          key: vcpkg-linux-x64-${{ hashFiles('vcpkg.json') }}
-          restore-keys: vcpkg-linux-x64-
+          cache-key: linux-x64
       - name: Configure (outside the trace, so vcpkg ports aren't analysed)
-        if: matrix.language == 'c-cpp'
         run: cmake --preset linux-x64
       - uses: github/codeql-action/init@v4
         with:
-          languages: ${{ matrix.language }}
-          build-mode: ${{ matrix.build-mode }}
+          languages: c-cpp
+          build-mode: manual
       - name: Build bv2, bv2dedicated, bv2master
-        if: matrix.language == 'c-cpp'
         run: cmake --build --preset linux-x64 --target bv2 bv2dedicated bv2master
       - uses: github/codeql-action/analyze@v4
         with:
-          category: /language:${{ matrix.language }}
+          category: /language:c-cpp
           output: sarif-results
           upload: failure-only
-      - name: Locate the SARIF file
-        id: sarif
-        run: echo "file=$(ls sarif-results/*.sarif)" >> "$GITHUB_OUTPUT"
       # Third-party headers under build/ (vcpkg_installed, e.g. miniaudio.h) are compiled into our
       # targets; their alerts aren't ours to fix, so drop them before upload.
-      - uses: advanced-security/filter-sarif@v1.1
+      - uses: advanced-security/filter-sarif@2da736ff05ef065cb2894ac6892e47b5eac2c3c0 # v1.1
         with:
           patterns: |
             +**
             -build/**
-          input: ${{ steps.sarif.outputs.file }}
-          output: ${{ steps.sarif.outputs.file }}
+          input: sarif-results/cpp.sarif
+          output: sarif-results/cpp.sarif
       - uses: github/codeql-action/upload-sarif@v4
         with:
-          sarif_file: ${{ steps.sarif.outputs.file }}
-          category: /language:${{ matrix.language }}
+          sarif_file: sarif-results/cpp.sarif
+          category: /language:c-cpp
+  actions:
+    name: codeql (actions)
+    runs-on: ubuntu-24.04
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: github/codeql-action/init@v4
+        with:
+          languages: actions
+          build-mode: none
+      - uses: github/codeql-action/analyze@v4
+        with:
+          category: /language:actions
