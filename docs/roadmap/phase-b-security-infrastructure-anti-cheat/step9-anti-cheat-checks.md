@@ -12,7 +12,7 @@
 | In scope | Tasks 9.1–9.4 below |
 | Out of scope | Aimbot and wallhack detection, telemetry, replays, information hiding, reports and sanctions (PNS-13); server-authoritative movement (PNS-13); bans by account (PNS-14) |
 | Allowed paths | `game/src/ServerValidator.{h,cpp}`, `game/src/ServerRecv.cpp`, `game/src/Server.{h,cpp}`, `game/src/GameVar.{h,cpp}` (new `sv_*` only), `tests/**`, `docs/analysis/**`, `ARCHITECTURE.md`, `docs/roadmap/**` |
-| Inputs | `AGENTS.md`, `ARCHITECTURE.md`, `docs/analysis/ALGORITHM_02-Movement-Collision-Interpolation.md`, `docs/analysis/ALGORITHM_03-Weapons-Hitscan-Projectiles.md`, step 8 validator |
+| Inputs | `AGENTS.md`, `ARCHITECTURE.md`, earlier review records `reviews/step*.md`, `docs/analysis/ALGORITHM_02-Movement-Collision-Interpolation.md`, `docs/analysis/ALGORITHM_03-Weapons-Hitscan-Projectiles.md`, step 8 validator |
 | Deliverables | Rules in `ServerValidator`; `sv_antiCheat`; tests per rule; a tuning note in `docs/analysis/` |
 | Definition of done | See "Acceptance checks". All must pass. `ARCHITECTURE.md` is updated |
 

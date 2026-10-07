@@ -12,7 +12,7 @@
 | In scope | Tasks 12.1–12.4 below |
 | Out of scope | A graphical admin tool; the C.12 report review tool (PNS-13); plaintext UDP admin authorised by IP:port (never) |
 | Allowed paths | `game/src/**` (admin channel and console glue), `engine/**` (only if the ADR needs it), `vcpkg.json`, `packaging/docker/**`, `docs/ops/**`, `docs/decisions/**`, `tests/**`, `ARCHITECTURE.md`, `docs/roadmap/**` |
-| Inputs | `AGENTS.md`, `ARCHITECTURE.md`, [ADR 0002](../../decisions/0002-compile-out-libcurl.md), step 10 ADR, step 11 runbook |
+| Inputs | `AGENTS.md`, `ARCHITECTURE.md`, earlier review records `reviews/step*.md`, [ADR 0002](../../decisions/0002-compile-out-libcurl.md), step 10 ADR, step 11 runbook |
 | Deliverables | Admin channel in `bv2dedicated`; ADR on transport and TLS; audit log; runbook section |
 | Definition of done | See "Acceptance checks". All must pass. `ARCHITECTURE.md` is updated |
 

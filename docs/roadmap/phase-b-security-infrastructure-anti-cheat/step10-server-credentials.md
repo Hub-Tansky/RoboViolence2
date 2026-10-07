@@ -12,7 +12,7 @@
 | In scope | Tasks 10.1–10.4 below |
 | Out of scope | Account login, session tokens and KDF (PNS-14, blocked on PNS-15); the remote admin channel (step 12); new password prompts or fields (**[GUI]**) |
 | Allowed paths | `game/src/ServerRecv.cpp`, `game/src/ClientRecv.cpp`, `game/src/Client*.{h,cpp}`, `game/src/Server.{h,cpp}`, `game/src/Console.cpp`, `game/src/netPacket.h`, `game/src/CMaster.cpp`, `engine/babonet/src/MD5.h`, `masterserver/src/**`, `content-seed/**`, `tests/**`, `docs/analysis/KEY_QUESTIONS.md`, `docs/decisions/**`, `ARCHITECTURE.md`, `docs/roadmap/**` |
-| Inputs | `AGENTS.md`, `ARCHITECTURE.md`, `docs/analysis/KEY_QUESTIONS.md` Q-S3, Q-S5, `config/README.md` |
+| Inputs | `AGENTS.md`, `ARCHITECTURE.md`, earlier review records `reviews/step*.md`, `docs/analysis/KEY_QUESTIONS.md` Q-S3, Q-S5, `config/README.md` |
 | Deliverables | Challenge-response handshake; protocol bump; MAC removed; ADR for the HMAC choice |
 | Definition of done | See "Acceptance checks". All must pass. `ARCHITECTURE.md` is updated |
 
