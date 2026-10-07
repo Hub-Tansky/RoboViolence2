@@ -57,6 +57,6 @@ ctest --test-dir build/linux-x64-asan --output-on-failure -R "replay|master"
 
 - Passes. Known-crashing inputs (Q-S2 out-of-range `playerID`) are present in the corpus and marked expected-failure until step 4.
 - The CI `fuzz` job runs and uploads any new crash inputs as artifacts.
-- [REVIEW.md](../../../REVIEW.md) checklist and `/anthropic-skills:thermo-nuclear-code-quality-review` done on the step diff; every finding fixed or confirmed with the owner.
+- `tools/review.sh --full <preset>` passes, and the fresh-context review record `reviews/step3.md` exists ([REVIEW.md](../../../REVIEW.md) section 5).
 - `ARCHITECTURE.md` lists every file added, moved or removed in this step.
 - The secret scan (`gitleaks git --staged` / CI) is clean.

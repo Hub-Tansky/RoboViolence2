@@ -55,6 +55,6 @@ ctest --test-dir build/linux-x64-asan --output-on-failure -R validator
 
 - The 8.1 tests pass unchanged before and after the refactor.
 - `grep -n speedHackCount game/src` finds nothing.
-- [REVIEW.md](../../../REVIEW.md) checklist and `/anthropic-skills:thermo-nuclear-code-quality-review` done on the step diff; every finding fixed or confirmed with the owner.
+- `tools/review.sh --full <preset>` passes, and the fresh-context review record `reviews/step8.md` exists ([REVIEW.md](../../../REVIEW.md) section 5).
 - `ARCHITECTURE.md` lists every file added, moved or removed in this step.
 - The secret scan (`gitleaks git --staged` / CI) is clean.
