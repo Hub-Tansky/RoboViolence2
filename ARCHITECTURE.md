@@ -626,4 +626,4 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tools/seed_db.cpp` | Creates a SQLite DB from SQL files (build helper) |
 | `tools/review.sh` | Review gate (REVIEW.md section 1): all checks, scope against the step's Allowed paths, anti-gaming, DONE gate; `--full` builds and tests |
 | `tools/setup-dev.ps1` | Activates hooks, checks tools (Windows) |
-| `tools/setup-dev.sh` | Activates hooks, checks tools (Unix); prints the apt lines for building and for running a package |
+| `tools/setup-dev.sh` | Activates hooks, checks tools (Unix); prints the apt line for building and the package names for running a package |

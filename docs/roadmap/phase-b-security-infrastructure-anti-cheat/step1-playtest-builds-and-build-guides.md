@@ -32,7 +32,8 @@
 
 ### 1.2 Run scripts
 
-- `run-server` and `run-master` scripts (`.sh`, `.ps1`) start the servers from the package directory and pass `BV2_DATA_DIR` through.
+- `packaging/scripts/run-{server,master,client}.sh` and `.cmd` start each program from the package folder and pass their arguments through (`BV2_DATA_DIR` too).
+- Windows uses `.cmd`, not the planned `.ps1`: PowerShell's default execution policy blocks downloaded scripts, while a `.cmd` runs on double-click. Recording the package format as an ADR is PNS-23.
 
 ### 1.3 Build guides
 
