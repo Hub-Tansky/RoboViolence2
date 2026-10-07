@@ -21,7 +21,7 @@ jobs:
           - { os: macos-14, preset: macos-arm64 }
           - { os: ubuntu-24.04, preset: linux-x64 }
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Use the runner's vcpkg, with the pinned baseline fetched
         shell: bash
         run: |
@@ -43,7 +43,7 @@ jobs:
         uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: x64
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         with:
           path: .vcpkg-bin
           key: vcpkg-${{ matrix.preset }}-${{ hashFiles('vcpkg.json') }}
@@ -71,7 +71,7 @@ jobs:
           mkdir out
           cp build/${{ matrix.preset }}/runtime/bv2dedicated out/
           tar -C build/${{ matrix.preset }}/runtime -hczf out/bv2-linux-x64.tar.gz bv2 bv2dedicated main
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: bv2-${{ matrix.preset }}
           path: out/
@@ -79,7 +79,7 @@ jobs:
     name: smoke (linux-x64-asan)
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Use the runner's vcpkg, with the pinned baseline fetched
         run: |
           echo "VCPKG_ROOT=$VCPKG_INSTALLATION_ROOT" >> "$GITHUB_ENV"
@@ -92,7 +92,7 @@ jobs:
           sudo apt-get update
           eval "$(tools/setup-dev.sh --linux-packages | sed 's/^sudo apt install/sudo apt-get install -y/')"
           sudo apt-get install -y xvfb libgl1-mesa-dri
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         with:
           path: .vcpkg-bin
           key: vcpkg-linux-x64-asan-${{ hashFiles('vcpkg.json') }}
@@ -120,7 +120,7 @@ jobs:
     runs-on: ubuntu-24.04
     continue-on-error: true
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Use the runner's vcpkg, with the pinned baseline fetched
         run: |
           echo "VCPKG_ROOT=$VCPKG_INSTALLATION_ROOT" >> "$GITHUB_ENV"
@@ -132,7 +132,7 @@ jobs:
           sudo apt-get update
           eval "$(tools/setup-dev.sh --linux-packages | sed 's/^sudo apt install/sudo apt-get install -y/')"
           sudo apt-get install -y clang-tidy
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         with:
           path: .vcpkg-bin
           key: vcpkg-linux-x64-tidy-${{ hashFiles('vcpkg.json') }}
@@ -143,7 +143,7 @@ jobs:
           files=$(git ls-files 'engine/*/src/*.cpp' 'game/src/*.cpp' 'masterserver/src/*.cpp' | grep -v 'third_party')
           clang-tidy -p build/linux-x64 --quiet $files 2>&1 | tee tidy.log | tail -50
           echo "findings: $(grep -c 'warning:' tidy.log)"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: clang-tidy-log
           path: tidy.log

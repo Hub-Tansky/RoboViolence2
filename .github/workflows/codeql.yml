@@ -21,7 +21,7 @@ jobs:
       contents: read
       security-events: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Use the runner's vcpkg, with the pinned baseline fetched
         run: |
           echo "VCPKG_ROOT=$VCPKG_INSTALLATION_ROOT" >> "$GITHUB_ENV"
@@ -32,7 +32,7 @@ jobs:
         run: |
           sudo apt-get update
           eval "$(tools/setup-dev.sh --linux-packages | sed 's/^sudo apt install/sudo apt-get install -y/')"
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         with:
           path: .vcpkg-bin
           key: vcpkg-linux-x64-${{ hashFiles('vcpkg.json') }}
@@ -71,7 +71,7 @@ jobs:
       contents: read
       security-events: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: github/codeql-action/init@v4
         with:
           languages: actions
