@@ -13,6 +13,8 @@ Common steps (game data, ports, playing a local game): [README.md](README.md).
 
 3. In that folder: `./run-master.sh`, `./run-server.sh`, `./run-client.sh connect 127.0.0.1`.
 
+The package holds `main/` twice: the client reads `bv2.app/Contents/Resources/main` (so a double-click works), the servers read the folder's own `main/`. To use other data, set `BV2_DATA_DIR` (both read it) instead of editing either copy.
+
 ## Build from source
 
 Prerequisites, with [Homebrew](https://brew.sh):
@@ -76,7 +78,7 @@ The game looks for `main/` in `BV2_DATA_DIR` first. Example with the data in `~/
 |---|---|
 | From Terminal | `BV2_DATA_DIR="$HOME/Games/bv2-data" build/macos-arm64/runtime/bv2.app/Contents/MacOS/bv2`, or add `export BV2_DATA_DIR="$HOME/Games/bv2-data"` to `~/.zshrc` |
 | Double-click or `open bv2.app` | GUI apps don't read `~/.zshrc`. `launchctl setenv BV2_DATA_DIR "$HOME/Games/bv2-data"` sets it until the next reboot |
-| No variable | Replace `bv2.app/Contents/Resources/main` with a link to your `main/`. A rebuild or a new package undoes it |
+| No variable | Replace `bv2.app/Contents/Resources/main` with a link to your `main/`, then re-sign with `codesign --force --sign - bv2.app` (the change breaks the bundle signature). A rebuild or a new package undoes it |
 
 ## Troubleshooting
 

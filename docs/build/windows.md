@@ -36,7 +36,7 @@ setx VCPKG_ROOT "$HOME\vcpkg"
 Open a new **Developer PowerShell for VS 2022** (it sets up MSVC), then from the repository root:
 
 ```powershell
-tools\setup-dev.ps1
+powershell -ExecutionPolicy Bypass -File tools\setup-dev.ps1
 ```
 
 ```powershell
@@ -74,4 +74,5 @@ The folder must contain `main\`. `setx` applies to new windows and to programs s
 | `cl.exe` not found, or the wrong compiler at configure | Use the Developer PowerShell for VS 2022 |
 | vcpkg errors at configure | `VCPKG_ROOT` is unset in this window: open a new one after `setx` |
 | "Windows protected your PC" | SmartScreen: **More info → Run anyway** |
+| "running scripts is disabled on this system" | Windows blocks `.ps1` files by default: use the `-ExecutionPolicy Bypass -File` form above |
 | "Can not load language file" | No `main\` found: check `BV2_DATA_DIR`, or start from the package or `runtime\` folder |

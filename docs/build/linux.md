@@ -4,13 +4,13 @@ Common steps (game data, ports, playing a local game): [README.md](README.md).
 
 ## Use a downloaded package
 
-1. Install the runtime libraries (the client and both servers link GL and GLU). Print the exact line with `tools/setup-dev.sh --linux-runtime-packages`; on Ubuntu 24.04 it is:
+1. Install the runtime libraries: the client and `bv2dedicated` link GL and GLU; `bv2master` needs nothing extra. On Ubuntu 24.04:
 
    ```bash
    sudo apt install libgl1 libglu1-mesa
    ```
 
-   The client also needs the X11 or Wayland and audio libraries that every desktop install has. CI checks the package against a clean `ubuntu:24.04` with only these two packages (`package-check` job).
+   The client also needs the X11 or Wayland and audio libraries that every desktop install has. CI installs exactly these packages (from `tools/setup-dev.sh --linux-runtime-packages`) in a clean `ubuntu:24.04` and starts the server and master from the package (`package-check` job).
 2. Unpack and run:
 
    ```bash
