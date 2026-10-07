@@ -14,7 +14,7 @@ Run `tools/review.sh` while working, and `tools/review.sh --full <preset>` befor
 | secrets | gitleaks finds a secret in `merge-base..HEAD` (skipped locally if gitleaks is missing; CI `secret-scan` runs it) |
 | scope | a changed file is outside the step's **Allowed paths** (step from the `refactor/<phase>-stepN-*` branch, or `--step`) |
 | anti-gaming | an added line switches a check off: `#pragma warning`/`diagnostic`, `NOLINT`, `-Wno-`, `DISABLED_`, `--no-verify`, `continue-on-error: true`. A justified line carries `review: allow <reason>` |
-| DONE gate | a step file says DONE without `reviews/stepN.md` naming a fresh-context reviewer, with a finding still `pending`, or with a `deferred` finding that doesn't name an existing `PNS-n` |
+| DONE gate | a step file says DONE without `reviews/stepN.md` naming a fresh-context reviewer, with a finding still `pending`, or with a `deferred` finding that doesn't name an existing `PNS-n`; or without `reviews/stepN-report.md` containing the skill's load line and no `SKILL: NOT LOADED` |
 | `--full` | configure, build (warnings are errors) or `ctest` fails |
 
 Outside a step branch, changes to guard files (`tools/check-*`, `tools/review.sh`, `.githooks/`, `.github/`, `.gitleaks.toml`, `.gitignore`, this file) print a NOTE: the owner must approve them.
@@ -50,7 +50,8 @@ Outside a step branch, changes to guard files (`tools/check-*`, `tools/review.sh
 Also required for an architecture-changing PR outside a step (new or moved modules, libraries or interfaces, changed ownership or data flow, protocol or file-format changes); its record goes in the PR description.
 
 1. `tools/review.sh --full <preset>` passes.
-2. Spawn a **fresh subagent** (Agent tool). Its prompt holds only the step file path, this file, the merge-base and the paths of the phase's earlier records (`docs/roadmap/<phase>/reviews/step*.md`). It reads `git diff <merge-base>..HEAD`, runs `/thermo-nuclear-code-quality-review` on it and checks section 2. From the earlier records it doesn't re-raise findings already rejected or deferred, and it flags a finding that repeats an earlier one. The author doesn't pre-filter its findings. If the skill isn't available, stop and tell the owner.
+2. Spawn a **fresh subagent** (Agent tool). Its prompt holds only the step file path, this file, the merge-base and the paths of the phase's earlier records (`docs/roadmap/<phase>/reviews/step*.md`). It first calls the Skill tool with `thermo-nuclear-code-quality-review` and starts its report with `SKILL: <the tool's result, verbatim>`, or `SKILL: NOT LOADED – <reason>`. It then reads `git diff <merge-base>..HEAD`, applies the skill and checks section 2. From the earlier records it doesn't re-raise findings already rejected or deferred, and it flags a finding that repeats an earlier one. The author doesn't pre-filter its findings. If the skill isn't available, stop and tell the owner.
+   Save the report unedited as `docs/roadmap/<phase>/reviews/stepN-report.md` (later rounds are appended under `## Round k`). It is evidence, not proof: the author could forge it, so the owner may spot-check it against the session.
 3. Act on every finding:
 
    | Implement directly | Confirm with the owner first |
@@ -62,7 +63,7 @@ Also required for an architecture-changing PR outside a step (new or moved modul
 
    Fixes go in their own commits (`stepN.M: review: <summary>`). A finding left for later gets a `possible-new-scope.md` entry and the outcome `deferred → PNS-n`. Ask the owner all open questions in one message, each with the finding, the proposed change and a recommendation.
 4. Write `docs/roadmap/<phase>/reviews/stepN.md` from the template below.
-5. Set the step's Status to DONE. `tools/review.sh` checks the record.
+5. Set the step's Status to DONE only after the last review round covers every commit of the step and `--full` passed on the final head. `tools/review.sh` checks the record and the report.
 
 ## Review record template
 

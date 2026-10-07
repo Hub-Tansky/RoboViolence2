@@ -53,6 +53,6 @@ docker compose -f packaging/docker/compose.example.yml up -d && docker compose p
 - Both services are healthy. A local client connects to the containerised server, which appears in the containerised master's list.
 - `docker run --rm <image> id -u` is not 0.
 - gitleaks and `.gitleaks.toml` host rules find nothing in `packaging/docker/` or `docs/ops/`.
-- `tools/review.sh --full <preset>` passes, and the fresh-context review record `reviews/step11.md` exists ([REVIEW.md](../../../REVIEW.md) section 5).
+- `tools/review.sh --full <preset>` passes, and the fresh-context review record `reviews/step11.md` and the raw reviewer report `reviews/step11-report.md` (with the skill's load line) exist ([REVIEW.md](../../../REVIEW.md) section 5).
 - `ARCHITECTURE.md` lists every file added, moved or removed in this step.
 - The secret scan (`gitleaks git --staged` / CI) is clean.

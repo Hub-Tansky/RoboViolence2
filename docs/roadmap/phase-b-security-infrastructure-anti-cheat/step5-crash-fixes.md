@@ -75,6 +75,6 @@ ctest --test-dir build/linux-x64-asan --output-on-failure
 - The R3 ADR exists and its decision is implemented.
 - The CI smoke job (client under xvfb, ASan) reports no UBSan errors.
 - R1–R5 are marked fixed in `KEY_QUESTIONS.md`.
-- `tools/review.sh --full <preset>` passes, and the fresh-context review record `reviews/step5.md` exists ([REVIEW.md](../../../REVIEW.md) section 5).
+- `tools/review.sh --full <preset>` passes, and the fresh-context review record `reviews/step5.md` and the raw reviewer report `reviews/step5-report.md` (with the skill's load line) exist ([REVIEW.md](../../../REVIEW.md) section 5).
 - `ARCHITECTURE.md` lists every file added, moved or removed in this step.
 - The secret scan (`gitleaks git --staged` / CI) is clean.
