@@ -36,8 +36,13 @@ These fixes change scripts, CI and docs, not game code, so the proof is the chec
 - 3, 14: verified by this PR's `package-check` run (the job fails if the server doesn't reach "Server Created", the master doesn't listen, or `linux.md` lacks the package line).
 - 2: `run-server.sh --config x.cfg CTF` now reaches `bv2dedicated` unchanged (`exec ./bv2dedicated "$@"`).
 
+## Owner acceptance (2026-10-08)
+
+- The owner ran the macOS package from this PR's CI with original data (`BV2_DATA_DIR` in `~/.zshrc`): server, master and client started, a CTF game played, smoothly.
+- Owner request after the run, applied after this review: original data is a required first step in every guide (`docs/build/*.md`). Docs only; no code changed.
+- Play-test findings moved on: screenshot/stats keys → step 2 task 2.4; colour depth → PNS-25; `nbVertex` print → PNS-19; GL software fallback → PNS-18.
+
 ## Not done / unsure
 
-- Owner's from-scratch run of `docs/build/macos.md` (step acceptance check): not done yet. The step stays IN PROGRESS until it is.
 - The Windows package and guide have never been run on Windows (step 2).
-- Original BV2 data was not available to the reviewer; loading it from the packages is checked in step 2.
+- The Linux package has only run in CI's clean container, not on a desktop (step 2).
