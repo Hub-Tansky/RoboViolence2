@@ -4,7 +4,7 @@
 Usage: make-package.py <runtime dir> <preset> <out dir>
 
 Writes <out dir>/roboviolence2-<preset>.<tar.gz|zip> holding one folder with the client, bv2dedicated,
-bv2master, main/ (links resolved), the generated databases and the run scripts from tools/.
+bv2master, main/ (links resolved), the generated databases and the run scripts from packaging/scripts/.
 The macOS bundle gets a real Contents/Resources/main instead of the build's symlink, then an ad-hoc signature.
 """
 import os
@@ -37,7 +37,7 @@ def main():
         shutil.copy2(runtime / ("bv2" + exe), stage)
     for db in ("master.db", "web.db"):
         shutil.copy2(runtime / db, stage)
-    for script in (REPO / "tools").glob("run-*" + (".cmd" if windows else ".sh")):
+    for script in (REPO / "packaging" / "scripts").glob("run-*" + (".cmd" if windows else ".sh")):
         shutil.copy2(script, stage)
 
     if windows:

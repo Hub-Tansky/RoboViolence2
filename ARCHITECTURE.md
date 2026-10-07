@@ -62,6 +62,12 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/Paths.h` | Interface of `Paths.cpp` (namespace `bv2`) |
 | `packaging/linux/roboviolence2.desktop` | Linux desktop entry |
 | `packaging/make-package.py` | Builds the per-OS play-test package from `runtime/` (links resolved, macOS bundle re-signed) |
+| `packaging/scripts/run-client.cmd` | Package script: starts the client (Windows) |
+| `packaging/scripts/run-client.sh` | Package script: starts the client (macOS bundle or Linux binary) |
+| `packaging/scripts/run-master.cmd` | Package script: starts the master server (Windows) |
+| `packaging/scripts/run-master.sh` | Package script: starts the master server (Unix) |
+| `packaging/scripts/run-server.cmd` | Package script: starts the dedicated server, default launch script CTF (Windows) |
+| `packaging/scripts/run-server.sh` | Package script: starts the dedicated server, default launch script CTF (Unix) |
 | `packaging/macos/Info.plist.in` | macOS bundle `Info.plist` template |
 | `packaging/windows/bv2.manifest` | Windows manifest: PerMonitorV2 DPI, UTF-8 code page, Windows 10/11 |
 | `packaging/windows/bv2.rc.in` | Windows resource script template; CMake fills in the generated icon |
@@ -621,9 +627,3 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tools/review.sh` | Review gate (REVIEW.md section 1): all checks, scope against the step's Allowed paths, anti-gaming, DONE gate; `--full` builds and tests |
 | `tools/setup-dev.ps1` | Activates hooks, checks tools (Windows) |
 | `tools/setup-dev.sh` | Activates hooks, checks tools (Unix); prints the apt lines for building and for running a package |
-| `tools/run-client.cmd` | Package script: starts the client (Windows) |
-| `tools/run-client.sh` | Package script: starts the client (macOS bundle or Linux binary) |
-| `tools/run-master.cmd` | Package script: starts the master server (Windows) |
-| `tools/run-master.sh` | Package script: starts the master server (Unix) |
-| `tools/run-server.cmd` | Package script: starts the dedicated server, default launch script CTF (Windows) |
-| `tools/run-server.sh` | Package script: starts the dedicated server, default launch script CTF (Unix) |
