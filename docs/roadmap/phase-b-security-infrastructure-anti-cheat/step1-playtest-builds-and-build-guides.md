@@ -1,6 +1,6 @@
 # Step 1: Play-test builds and build guides
 
-**Status:** TODO
+**Status:** IN PROGRESS
 
 **Depends on:** [Step 0](step0-supply-chain-security.md). **Next:** [step2-cross-os-playtest.md](step2-cross-os-playtest.md). **Index:** [README.md](README.md)
 
@@ -11,7 +11,7 @@
 | Goal | Every CI run publishes a play-test package per OS (client, `bv2dedicated`, `bv2master`, `main/`), and `docs/build/` explains how to build and run on macOS, Windows and Linux |
 | In scope | Tasks 1.1–1.5 below |
 | Out of scope | Signed installers, notarisation, AppImage/Flatpak/.deb (PNS-16); fixing gameplay bugs found while testing (step 2); renaming binaries (§H, PNS-20) |
-| Allowed paths | `.github/workflows/build.yml`, `packaging/**`, `tools/run-*`, `tools/setup-dev.*`, `docs/build/**`, `README.md`, `AGENTS.md`, `ARCHITECTURE.md`, `docs/roadmap/**`, `CMakeLists.txt` (install rules only) |
+| Allowed paths | `.github/workflows/build.yml`, `packaging/**`, `tools/run-*`, `tools/setup-dev.*`, `docs/build/**`, `README.md`, `AGENTS.md`, `ARCHITECTURE.md`, `docs/roadmap/**`, `CMakeLists.txt` (install rules only), `.gitignore` (owner-approved 2026-10-07: anchor `build/` so `docs/build/` is tracked) |
 | Inputs | `AGENTS.md`, `ARCHITECTURE.md`, earlier review records `reviews/step*.md`, `README.md` "Platforms and build", `tools/setup-dev.sh`, `.github/workflows/build.yml`, [ADR 0005](../../decisions/0005-runtime-main-data-root.md), [ADR 0007](../../decisions/0007-data-root-pref-dir-config-layers.md) |
 | Deliverables | Artifacts `roboviolence2-<preset>` per OS; `docs/build/README.md`, `macos.md`, `linux.md`, `windows.md`; run scripts |
 | Definition of done | See "Acceptance checks". All must pass. `ARCHITECTURE.md` is updated |
