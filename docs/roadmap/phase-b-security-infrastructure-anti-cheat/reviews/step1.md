@@ -8,6 +8,8 @@ Skill evidence: round 1, none recorded (the reviewer's report didn't quote the s
 
 Before the fixes, `tools/review.sh --full macos-arm64` at a350528: architecture, hygiene, content-case, original-assets, secrets, diff-rules, configure, build, ctest all PASS.
 
+After round 2 fixes, `tools/review.sh --full macos-arm64` at 1563ba7: architecture, hygiene, content-case, original-assets, secrets, diff-rules, configure, build, ctest all PASS.
+
 ## Findings (round 1)
 
 | # | Finding | Outcome |
