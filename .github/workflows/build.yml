@@ -71,7 +71,7 @@ jobs:
           mkdir out
           cp build/${{ matrix.preset }}/runtime/bv2dedicated out/
           tar -C build/${{ matrix.preset }}/runtime -hczf out/bv2-linux-x64.tar.gz bv2 bv2dedicated main
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: bv2-${{ matrix.preset }}
           path: out/
@@ -143,7 +143,7 @@ jobs:
           files=$(git ls-files 'engine/*/src/*.cpp' 'game/src/*.cpp' 'masterserver/src/*.cpp' | grep -v 'third_party')
           clang-tidy -p build/linux-x64 --quiet $files 2>&1 | tee tidy.log | tail -50
           echo "findings: $(grep -c 'warning:' tidy.log)"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: clang-tidy-log
           path: tidy.log
