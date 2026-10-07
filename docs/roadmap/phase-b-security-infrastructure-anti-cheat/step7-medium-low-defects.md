@@ -12,7 +12,7 @@
 | In scope | Tasks 7.1–7.3 below |
 | Out of scope | R11 and R14 (fixed in Phase A step 3); gameplay balance changes beyond the defect; babonet UDP / `cPeer2Peer` (PNS-17) |
 | Allowed paths | `game/src/**`, `engine/babonet/src/**`, `tests/**`, `docs/analysis/KEY_QUESTIONS.md`, `ARCHITECTURE.md`, `docs/roadmap/**` |
-| Inputs | `AGENTS.md`, `ARCHITECTURE.md`, `docs/analysis/KEY_QUESTIONS.md` Part D |
+| Inputs | `AGENTS.md`, `ARCHITECTURE.md`, earlier review records `reviews/step*.md`, `docs/analysis/KEY_QUESTIONS.md` Part D |
 | Deliverables | One commit per defect with its test |
 | Definition of done | See "Acceptance checks". All must pass. `ARCHITECTURE.md` is updated |
 

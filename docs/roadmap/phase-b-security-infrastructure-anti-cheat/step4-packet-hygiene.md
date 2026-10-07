@@ -12,7 +12,7 @@
 | In scope | Tasks 4.1–4.5 below |
 | Out of scope | Anti-cheat rules (steps 8–9); crash fixes R1–R5 (step 5); a new serialisation format (PNS-17); anything visible to players (**[GUI]**) |
 | Allowed paths | `game/src/ServerRecv.cpp`, `game/src/ClientRecv.cpp`, `game/src/Server.{h,cpp}`, `game/src/Client.h`, `game/src/netPacket.h`, `game/src/Console.cpp` (`svChange` only), `tests/**`, `docs/analysis/KEY_QUESTIONS.md`, `ARCHITECTURE.md`, `docs/roadmap/**` |
-| Inputs | `AGENTS.md`, `ARCHITECTURE.md`, `docs/analysis/KEY_QUESTIONS.md` Q-S1, Q-S2, Q-S4, Q-S6, Q-S7, step 3 harness |
+| Inputs | `AGENTS.md`, `ARCHITECTURE.md`, earlier review records `reviews/step*.md`, `docs/analysis/KEY_QUESTIONS.md` Q-S1, Q-S2, Q-S4, Q-S6, Q-S7, step 3 harness |
 | Deliverables | One slot-binding helper used by every handler; range and size checks; tests per finding |
 | Definition of done | See "Acceptance checks". All must pass. `ARCHITECTURE.md` is updated |
 

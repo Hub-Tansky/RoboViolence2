@@ -102,6 +102,15 @@ for f in changed:
         problems.append(f"DONE gate: {rec} lacks 'Reviewer: fresh-context subagent' or '## Findings'")
     elif re.search(r"\|\s*pending\s*\|", text):
         problems.append(f"DONE gate: {rec} still has pending findings")
+    else:
+        pns = open("docs/roadmap/possible-new-scope.md", encoding="utf-8").read()
+        for row in re.findall(r"^\|.*\bdeferred\b.*\|\s*$", text, re.M):
+            ids = re.findall(r"PNS-(\d+)", row)
+            if not ids:
+                problems.append(f"DONE gate: {rec}: deferred finding without a PNS-n: {row.strip()[:100]}")
+            for n in ids:
+                if f"### PNS-{n}:" not in pns:
+                    problems.append(f"DONE gate: {rec}: PNS-{n} is not in possible-new-scope.md")
 
 print(f"step: {step or 'none (not a step branch)'}; {len(changed)} changed files")
 for p in problems:

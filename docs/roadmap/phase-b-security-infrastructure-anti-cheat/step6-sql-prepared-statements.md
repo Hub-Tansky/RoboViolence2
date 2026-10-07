@@ -12,7 +12,7 @@
 | In scope | Tasks 6.1–6.3 below |
 | Out of scope | Schema changes beyond what binding needs; removing MAC from identity (step 10); account storage and KDF (PNS-14) |
 | Allowed paths | `game/src/CMaster.cpp`, `game/src/GameVar.cpp`, `game/src/Paths.cpp`, `game/src/Scene.cpp`, `masterserver/src/**`, `content-seed/**`, `tests/**`, `docs/analysis/KEY_QUESTIONS.md`, `ARCHITECTURE.md`, `docs/roadmap/**` |
-| Inputs | `AGENTS.md`, `ARCHITECTURE.md`, `docs/analysis/KEY_QUESTIONS.md` Q-S3, step 3 master tests |
+| Inputs | `AGENTS.md`, `ARCHITECTURE.md`, earlier review records `reviews/step*.md`, `docs/analysis/KEY_QUESTIONS.md` Q-S3, step 3 master tests |
 | Deliverables | A small statement helper per program; all call sites converted; injection tests |
 | Definition of done | See "Acceptance checks". All must pass. `ARCHITECTURE.md` is updated |
 
