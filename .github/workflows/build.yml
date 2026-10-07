@@ -41,6 +41,30 @@ jobs:
         with:
           name: roboviolence2-${{ matrix.preset }}
           path: out/roboviolence2-${{ matrix.preset }}.*
+  package-check:
+    name: package-check (clean ubuntu:24.04)
+    needs: build
+    runs-on: ubuntu-24.04
+    container: ubuntu:24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          name: roboviolence2-linux-x64
+      - name: Install only the documented runtime packages
+        run: |
+          apt-get update
+          eval "$(tools/setup-dev.sh --linux-runtime-packages | sed 's/^sudo apt install/apt-get install -y --no-install-recommends/')"
+      - name: Every library resolves; both servers start from the package
+        run: |
+          tar -xzf roboviolence2-linux-x64.tar.gz
+          cd roboviolence2-linux-x64
+          if ldd bv2 bv2dedicated bv2master | grep "not found"; then exit 1; fi
+          export BV2_PREF_DIR="$RUNNER_TEMP/pref"
+          printf 'quit\n' | ./run-server.sh | grep "Dedicated Server"
+          ./run-master.sh & pid=$!
+          sleep 3
+          kill -0 "$pid" && kill "$pid"
   smoke:
     name: smoke (linux-x64-asan)
     runs-on: ubuntu-24.04
