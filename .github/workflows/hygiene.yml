@@ -16,3 +16,12 @@ jobs:
       - uses: actions/checkout@v7
       - run: python3 tools/check-hygiene.py
       - run: python3 tools/check-content-case.py
+  review:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: tools/review.sh against the PR base (REVIEW.md section 1)
+        run: tools/review.sh --base origin/${{ github.base_ref }}
