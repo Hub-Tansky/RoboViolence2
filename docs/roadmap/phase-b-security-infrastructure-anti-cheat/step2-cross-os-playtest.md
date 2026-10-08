@@ -1,6 +1,6 @@
 # Step 2: Cross-OS play-test
 
-**Status:** TODO
+**Status:** IN PROGRESS
 
 **Depends on:** [Step 1](step1-playtest-builds-and-build-guides.md). **Next:** [step3-test-harness.md](step3-test-harness.md). **Index:** [README.md](README.md)
 
@@ -23,6 +23,8 @@
 - The owner runs the tests with their own BV2 data (`BV2_DATA_DIR`); agents can't. Agents fix what the owner reports.
 
 - Owner play-test, macOS arm64 with original data (2026-10-08): the game runs smoothly. Mid-match weapon choice applies on respawn (original behaviour). Fullscreen and resolution apply after a restart (original behaviour). Screenshot (P) and stats (L) do nothing on macOS and Linux: `game/src/Client.cpp:444` compiles them for Windows only (`#ifdef BV2_PLATFORM_WINDOWS`).
+
+- macOS packages are probably limited to the CI runner's macOS (14+), not the documented 12+: vcpkg ports ignore the deployment target (PNS-26). Ask testers for their macOS version.
 
 ## Tasks
 

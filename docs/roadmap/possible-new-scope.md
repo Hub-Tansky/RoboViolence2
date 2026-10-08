@@ -215,3 +215,11 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Suggested home:** a **[GUI]** change (owner approval), e.g. with the rebrand (PNS-20) or menu work. Fullscreen and resolution apply after a restart (confirmed); a "restart required" hint would be the same kind of change.
 - **Status:** Proposed
 
+### PNS-26: vcpkg ports ignore the macOS 12 deployment target
+
+- **Found in:** Phase B step 2 (2026-10-08), building the client on macOS.
+- **Extract:** `ld: warning: object file (…/vcpkg_installed/arm64-osx/debug/lib/libSDL3.a[248](SDL_dummysensor.c.o)) was built for newer 'macOS' version (27.0) than being linked (12.0)`.
+- **Why it matters:** `CMakePresets.json:58` sets `CMAKE_OSX_DEPLOYMENT_TARGET` 12.0 for our code, but the `arm64-osx` triplet builds SDL3 and the other ports for the build machine's macOS. The CI package (built on `macos-14`) therefore likely needs macOS 14+, while the docs promise 12+. Friends on older Macs may not be able to start it.
+- **Suggested home:** an overlay triplet setting `VCPKG_OSX_DEPLOYMENT_TARGET 12.0` for the macOS presets (touches `CMakePresets.json` and a new `triplets/`), or change the documented minimum. Before Phase B step 2's cross-OS game if a tester has macOS < 14.
+- **Status:** Proposed
+
