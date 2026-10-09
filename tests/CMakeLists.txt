@@ -14,11 +14,12 @@ if(BV2_BUILD_SERVER)
   find_package(Python3 REQUIRED COMPONENTS Interpreter)
   add_test(NAME smoke_server
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/smoke_server.py $<TARGET_FILE:bv2dedicated> "${BV2_TEST_SCRATCH}/smoke-pref")
-  set_tests_properties(smoke_server PROPERTIES TIMEOUT 60)
-  if(WIN32)
+  set_tests_properties(smoke_server PROPERTIES TIMEOUT 60 RESOURCE_LOCK bv2_server_port)
+  if(WIN32)  # non-ASCII install path needs the UTF-8 code page manifest (ADR 0012)
     add_test(NAME smoke_server_utf8_path
-      COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/smoke_server_utf8_path.py $<TARGET_FILE:bv2dedicated> "${BV2_TEST_SCRATCH}")
-    set_tests_properties(smoke_server_utf8_path PROPERTIES TIMEOUT 60)
+      COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/smoke_server.py $<TARGET_FILE:bv2dedicated> "${BV2_TEST_SCRATCH}/utf8-pref"
+        --install-under "${BV2_TEST_SCRATCH}/utf8-path")
+    set_tests_properties(smoke_server_utf8_path PROPERTIES TIMEOUT 60 RESOURCE_LOCK bv2_server_port)
   endif()
 endif()
 

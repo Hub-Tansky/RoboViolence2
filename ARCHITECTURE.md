@@ -71,9 +71,8 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `packaging/macos/Info.plist.in` | macOS bundle `Info.plist` template |
 | `packaging/windows/bv2.manifest` | Windows manifest for `bv2`, `bv2dedicated` and `bv2master`: PerMonitorV2 DPI, UTF-8 code page, Windows 10/11 |
 | `packaging/windows/bv2.rc.in` | Windows resource script template; CMake fills in the generated icon |
-| `tests/CMakeLists.txt` | ctest targets: netPacket, config, fileio, dedicated-server smoke |
-| `tests/smoke_server.py` | Starts `bv2dedicated` headless, runs the CTF script, quits |
-| `tests/smoke_server_utf8_path.py` | Windows: `bv2dedicated` finds `main/` from a non-ASCII install path (UTF-8 code page manifest) |
+| `tests/CMakeLists.txt` | ctest targets: netPacket, config, fileio, dedicated-server smoke; on Windows also the non-ASCII install path smoke |
+| `tests/smoke_server.py` | Starts `bv2dedicated` headless, runs the CTF script, quits; checks exit code, server creation and `bv2.cfg`. `--install-under` runs it from a non-ASCII path (Windows UTF-8 code page) |
 | `tests/test_config.cpp` | dksvar config layering, transient values not saved, secrets masked |
 | `tests/test_fileio.cpp` | `FileIO` byte widths for `.bvm` data and the widths the `.DKO` loader relies on |
 | `tests/test_netpacket.cpp` | Byte-level layout of the packed wire structs |
