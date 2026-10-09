@@ -73,6 +73,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `packaging/windows/bv2.rc.in` | Windows resource script template; CMake fills in the generated icon |
 | `tests/CMakeLists.txt` | ctest targets: netPacket, config, fileio, dedicated-server smoke |
 | `tests/smoke_server.py` | Starts `bv2dedicated` headless, runs the CTF script, quits |
+| `tests/smoke_server_utf8_path.py` | Windows: `bv2dedicated` finds `main/` from a non-ASCII install path (UTF-8 code page manifest) |
 | `tests/test_config.cpp` | dksvar config layering, transient values not saved, secrets masked |
 | `tests/test_fileio.cpp` | `FileIO` byte widths for `.bvm` data and the widths the `.DKO` loader relies on |
 | `tests/test_netpacket.cpp` | Byte-level layout of the packed wire structs |

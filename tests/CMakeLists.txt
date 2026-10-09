@@ -15,6 +15,11 @@ if(BV2_BUILD_SERVER)
   add_test(NAME smoke_server
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/smoke_server.py $<TARGET_FILE:bv2dedicated> "${BV2_TEST_SCRATCH}/smoke-pref")
   set_tests_properties(smoke_server PROPERTIES TIMEOUT 60)
+  if(WIN32)
+    add_test(NAME smoke_server_utf8_path
+      COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/smoke_server_utf8_path.py $<TARGET_FILE:bv2dedicated> "${BV2_TEST_SCRATCH}")
+    set_tests_properties(smoke_server_utf8_path PROPERTIES TIMEOUT 60)
+  endif()
 endif()
 
 add_executable(test_fileio test_fileio.cpp ${CMAKE_SOURCE_DIR}/game/src/FileIO.cpp)
