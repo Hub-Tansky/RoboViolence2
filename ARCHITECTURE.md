@@ -215,6 +215,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/step0-supply-chain-security.md` | Scope file for step0 |
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/step1-playtest-builds-and-build-guides.md` | Scope file for step1 |
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/step2-cross-os-playtest.md` | Scope file for step2 |
+| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/step2a-windows-10-target.md` | Scope file for step2a |
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/step3-test-harness.md` | Scope file for step3 |
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/step4-packet-hygiene.md` | Scope file for step4 |
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/step5-crash-fixes.md` | Scope file for step5 |
