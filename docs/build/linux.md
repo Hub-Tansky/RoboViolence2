@@ -1,22 +1,28 @@
-# Linux (x64; reference: Ubuntu 24.04)
+# Linux (x64; reference: Ubuntu 24.04 and Linux Mint 22.3)
 
 Common steps (game data, ports, playing a local game): [README.md](README.md).
 
-## Point the game at your original data (required, once)
+# HOW TO INSTALL
 
-Add the folder that contains your BaboViolent 2 `main/` to `~/.profile` (replace the path), then log out and in:
+## Point the game at your original assets data for BaboViolent 2 (required, once)
+
+Add the folder that contains your BaboViolent 2 `main/` to `~/.profile` (replace the path)
 
 ```bash
 echo 'export BV2_DATA_DIR="$HOME/Games/bv2-data"' >> ~/.profile
 ```
 
-Check; this must list `.bvm` map files (if you pointed it at `main/` itself, drop `/main`):
+Then log out from desktop and log in again. 
+
+Check: 
 
 ```bash
 ls "$BV2_DATA_DIR/main/maps"
 ```
 
-## Use a downloaded package
+this should show a list of `.bvm` map files (if you pointed it at `main/` itself, drop `/main`).
+
+## Use a downloaded package of Robo Violence 2
 
 1. Install the runtime libraries: the client and `bv2dedicated` link GL and GLU; `bv2master` needs nothing extra. On Ubuntu 24.04:
 
@@ -25,6 +31,7 @@ ls "$BV2_DATA_DIR/main/maps"
    ```
 
    The client also needs the X11 or Wayland and audio libraries that every desktop install has. CI installs exactly these packages (from `tools/setup-dev.sh --linux-runtime-packages`) in a clean `ubuntu:24.04` and starts the server and master from the package (`package-check` job).
+
 2. Unpack and run:
 
    ```bash
@@ -36,6 +43,9 @@ ls "$BV2_DATA_DIR/main/maps"
    ```
 
    Then `./run-client.sh connect 127.0.0.1` in another terminal. `./run-master.sh` is only needed for the server browser ([README](README.md#playing-a-local-game)).
+
+
+# Advanced section 
 
 ## Build from source
 
