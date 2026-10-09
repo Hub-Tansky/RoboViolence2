@@ -44,7 +44,7 @@ Order: 0 → 1 → 2. Step 2a runs while step 2 is IN PROGRESS; step 2's Windows
 
 | Risk | Mitigation |
 |---|---|
-| No Windows 11 machine; only Windows 10 22H2 is tested by a person | Step 2a makes 22H2 the floor; Windows 11 shares its API level, and CI builds on Windows Server 2022 |
+| No Windows 11 machine; only Windows 10 22H2 is tested by a person | Step 2a makes 22H2 the floor. CI runs `windows-latest` (Server 2025, Windows 11 24H2 generation), so only the owner's machine covers Windows 10 at runtime; `NTDDI_VERSION` is CI's only Windows 10 guard |
 | The Windows client has never been run; step 2 may grow | Fix only what blocks a game; record the rest in `possible-new-scope.md` |
 | Unsigned test builds are blocked by Gatekeeper and SmartScreen | The guides document the workaround; signing is PNS-16 |
 | The manual test needs the owner and three machines | Between runs, rely on CI, the fuzz harness and the behaviour-pinning tests (step 8) |

@@ -22,7 +22,7 @@
 - The code already targets the Windows 10 API level: `_WIN32_WINNT=0x0A00` (`CMakeLists.txt:70`). The manifest's `supportedOS` GUID covers Windows 10 and 11 (`packaging/windows/bv2.manifest:6`). The code calls only `WSAStartup`, `GetModuleFileNameW`, `MessageBox` and `Get/SetProcessAffinityMask`. SDL3, miniaudio and sqlite3 support Windows 7 or later.
 - `activeCodePage UTF-8` (`bv2.manifest:13`) needs Windows 10 1903 or later. 22H2 has it.
 - Only `bv2` links the manifest (`game/CMakeLists.txt:172`). `bv2dedicated` compiles `game/src/Paths.cpp`, which turns the executable's directory into UTF-8 (`Paths.cpp:62`) and opens files through narrow `fopen`/`fstream`. Without the UTF-8 code page, a non-ASCII install path (for example `C:\Gry\Łódź\`) breaks loading `main/`, on Windows 10 and 11 alike. `bv2master` opens only relative ASCII paths (`masterserver/src/cMasterServer.cpp:59`), but gets the manifest for consistency.
-- CI's `windows-latest` (Windows Server 2022, build 20348) is a Windows 10-generation kernel. GitHub has no Windows 10 desktop runners, so the owner's machine is the only Windows 10 desktop check.
+- CI's `windows-latest` is Windows Server 2025 (build 26100, the Windows 11 24H2 generation; corrected in review, run 38002113508). Nothing in CI runs a Windows 10-generation kernel, so the owner's machine is the only Windows 10 runtime check.
 - `tools/review.sh:52` and `:94` match `step(\d+)`. A `step2a` branch is not recognised as a step: no scope check, and no DONE gate for this file.
 
 ## Tasks
