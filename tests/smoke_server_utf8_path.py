@@ -30,5 +30,5 @@ except subprocess.TimeoutExpired:
 out = r.stdout.decode(errors="replace")
 print(out[-2000:])
 if "Server Created on port" not in out:  # printed only after main/, the launch script and the map loaded
-    print("FAIL: the server did not find main/ under", dest)
+    print("FAIL: the server did not find main/ under", ascii(dest))  # ascii(): the Windows console is not UTF-8
     sys.exit(1)
