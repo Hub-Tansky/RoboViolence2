@@ -33,7 +33,7 @@ Assets and the name "BaboViolent 2" are not covered.
 
 ## Platforms and build
 
-Targets: Windows 11, macOS 12+ (arm64) and Linux x64, built with CMake, Ninja and vcpkg. Download a package from CI or build from source: [docs/build/](docs/build/README.md) ([macOS](docs/build/macos.md), [Linux](docs/build/linux.md), [Windows](docs/build/windows.md)).
+Targets: Windows 10 22H2 or later (x64), macOS 12+ (arm64) and Linux x64, built with CMake, Ninja and vcpkg. Download a package from CI or build from source: [docs/build/](docs/build/README.md) ([macOS](docs/build/macos.md), [Linux](docs/build/linux.md), [Windows](docs/build/windows.md)).
 
 ## Where to read more
 - [AGENTS.md](AGENTS.md): project rules for fellow robots, agents and even human contributors

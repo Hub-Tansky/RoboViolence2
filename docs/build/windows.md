@@ -1,8 +1,8 @@
-# Windows 11 (x64)
+# Windows 10 22H2+ and Windows 11 (x64)
 
 Common steps (game data, ports, playing a local game): [README.md](README.md).
 
-Not yet verified by a person on Windows; CI builds and tests this preset. Report anything that differs (Phase B step 2).
+Minimum: Windows 10 22H2 ([ADR 0012](../decisions/0012-windows-10-22h2-minimum.md)). Verified by a person on Windows 10 22H2 only (Phase B step 2); CI builds and tests on Windows Server 2022. Report anything that differs.
 
 ## Point the game at your original data (required, once)
 
