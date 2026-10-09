@@ -52,7 +52,8 @@
 - Remove the `#ifdef BV2_PLATFORM_WINDOWS` around P (screenshot) and L (screenshot + stats text) at `game/src/Client.cpp:444–455`. The save paths already use `bv2::userFile` (`game/src/screengrab.cpp:70–86`), which creates `screenshots/` in the pref dir. This restores the Windows behaviour on macOS and Linux; it adds no new control.
 - Check that `SaveScreenGrab` reads the framebuffer at pixel size on HiDPI (Retina: points vs pixels).
 - Proof is manual, because it needs a GL context: the owner presses P and L in a game and the `.bmp`/`.txt` files appear. Unit-test the BMP writer if it can be separated from GL.
-- **Done (owner, 2026-10-10, macOS 27.0.1 on a MacBook Air M3, local build of 56a0d08):** P and L save `.bmp` and `.txt` files in `~/Library/Application Support/BaboViolent2/bv2/screenshots/`; the `.bmp` shows the full game window. - **Done (owner, 2026-10-10, Linux Mint 22.3, CI package):** P and L save correct files in `~/.local/share/BaboViolent2/bv2/screenshots/`.
+- **Done (owner, 2026-10-10, macOS 27.0.1 on a MacBook Air M3, local build of 56a0d08):** P and L save `.bmp` and `.txt` files in `~/Library/Application Support/BaboViolent2/bv2/screenshots/`; the `.bmp` shows the full game window.
+- **Done (owner, 2026-10-10, Linux Mint 22.3, CI package):** P and L save correct files in `~/.local/share/BaboViolent2/bv2/screenshots/`.
 
 ### 2.5 Mouse wheel zooms the map behind an open menu (owner report, Linux)
 
