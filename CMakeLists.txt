@@ -41,7 +41,7 @@ endif()
 
 set(BV2_PLATFORM_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/engine/zeven/include/platform.h")
 
-# Flags shared by every target: platform.h force-included, Windows 10/11 API level, sanitizers.
+# Flags shared by every target: platform.h force-included, Windows 10 20H1 API level (ADR 0012), sanitizers.
 function(bv2_target_defaults target)
   if(MSVC)
     target_compile_options(${target} PRIVATE "/FI${BV2_PLATFORM_HEADER}" /utf-8 /W4
@@ -67,7 +67,8 @@ function(bv2_target_defaults target)
     target_compile_definitions(${target} PRIVATE GL_SILENCE_DEPRECATION)
   endif()
   if(WIN32)
-    target_compile_definitions(${target} PRIVATE _WIN32_WINNT=0x0A00 WINVER=0x0A00)
+    # NTDDI_WIN10_VB: the API surface of Windows 10 2004-22H2, so a Windows 11-only API fails to compile (ADR 0012)
+    target_compile_definitions(${target} PRIVATE _WIN32_WINNT=0x0A00 WINVER=0x0A00 NTDDI_VERSION=0x0A000008)
   endif()
 endfunction()
 
