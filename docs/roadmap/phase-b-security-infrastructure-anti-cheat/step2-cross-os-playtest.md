@@ -9,9 +9,9 @@
 | Field | Value |
 |---|---|
 | Goal | The owner has played DM, TDM and CTF on macOS, Windows and Linux, including one cross-OS game, and every row of the manual test passes |
-| In scope | Tasks 2.1–2.5 below |
+| In scope | Tasks 2.1–2.6 below |
 | Out of scope | Security fixes (steps 4–7); visual polish, HiDPI (PNS-18); anything that changes the interface (**[GUI]**); bugs that don't block a game (record them in `possible-new-scope.md`) |
-| Allowed paths | `docs/roadmap/phase-a-modern-portable-build/phase-a-manual-test.md` (Results only), `docs/build/**`, `engine/zeven/src/**`, `game/src/**` (blocking fixes only), `game/src/Client.cpp` (owner-approved 2026-10-08: task 2.4), `tests/**`, `ARCHITECTURE.md`, `docs/roadmap/**`, `docs/analysis/KEY_QUESTIONS.md` |
+| Allowed paths | `docs/roadmap/phase-a-modern-portable-build/phase-a-manual-test.md` (Results only), `docs/build/**`, `engine/zeven/src/**`, `game/src/**` (blocking fixes only), `game/src/Client.cpp` (owner-approved 2026-10-08: task 2.4), `game/src/Map.cpp` (owner-approved 2026-10-10: task 2.5), `tests/**`, `ARCHITECTURE.md`, `docs/roadmap/**`, `docs/analysis/KEY_QUESTIONS.md` |
 | Inputs | `AGENTS.md`, `ARCHITECTURE.md`, earlier review records `reviews/step*.md`, [phase-a-manual-test.md](../phase-a-modern-portable-build/phase-a-manual-test.md), `docs/build/` |
 | Deliverables | Filled Results table; one commit per blocking fix, each with a test where possible; issues filed for the rest |
 | Definition of done | See "Acceptance checks". All must pass. `ARCHITECTURE.md` is updated |
@@ -36,6 +36,8 @@
 
 - The owner runs the manual test on each OS with the step 1 artifacts or a local build, and reports failures with console logs.
 
+- **Linux done (owner, 2026-10-10, Linux Mint 22.3 Cinnamon, CI package of 285e15b):** the game runs with original data; terminal shows only `Cannot open texutre file: main/textures/sky.tga` (the original data has no `sky.tga`, harmless). Found the wheel bug in 2.5.
+
 ### 2.2 Owner: cross-OS game
 
 - A Linux `bv2dedicated` and `bv2master` with a macOS and a Windows client in one game. Record it in Notes.
@@ -50,9 +52,15 @@
 - Remove the `#ifdef BV2_PLATFORM_WINDOWS` around P (screenshot) and L (screenshot + stats text) at `game/src/Client.cpp:444–455`. The save paths already use `bv2::userFile` (`game/src/screengrab.cpp:70–86`), which creates `screenshots/` in the pref dir. This restores the Windows behaviour on macOS and Linux; it adds no new control.
 - Check that `SaveScreenGrab` reads the framebuffer at pixel size on HiDPI (Retina: points vs pixels).
 - Proof is manual, because it needs a GL context: the owner presses P and L in a game and the `.bmp`/`.txt` files appear. Unit-test the BMP writer if it can be separated from GL.
-- **Done (owner, 2026-10-10, macOS 27.0.1 on a MacBook Air M3, local build of 56a0d08):** P and L save `.bmp` and `.txt` files in `~/Library/Application Support/BaboViolent2/bv2/screenshots/`; the `.bmp` shows the full game window. Linux check follows in 2.1.
+- **Done (owner, 2026-10-10, macOS 27.0.1 on a MacBook Air M3, local build of 56a0d08):** P and L save `.bmp` and `.txt` files in `~/Library/Application Support/BaboViolent2/bv2/screenshots/`; the `.bmp` shows the full game window. - **Done (owner, 2026-10-10, Linux Mint 22.3, CI package):** P and L save correct files in `~/.local/share/BaboViolent2/bv2/screenshots/`.
 
-### 2.5 Record results
+### 2.5 Mouse wheel zooms the map behind an open menu (owner report, Linux)
+
+- Owner, Linux Mint 22.3 (2026-10-10): in a game, pause → main menu → Options; scrolling the options list with the wheel also zooms the map behind it. Not seen on macOS.
+- Cause: `Map::update` zooms on `dkiGetMouseWheelVel()` for spectators and the editor (`game/src/Map.cpp`) without checking whether a menu or the console has the input.
+- Fix: `wheelUsedByUi()` skips the zoom while the pause, main or options menu or the console is open. Proof is manual (needs a GL window): the owner repeats the steps on Linux; the map no longer zooms.
+
+### 2.6 Record results
 
 - Fill the Results rows (OS version, commit, date, tester, pass per column, notes).
 
