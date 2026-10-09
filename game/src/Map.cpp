@@ -23,6 +23,7 @@
 #include "Console.h"
 #include "Game.h"
 #include "Scene.h"
+#include "CMenuManager.h"
 
 #ifndef CONSOLE
 #include "CRain.h"
@@ -1154,6 +1155,13 @@ void Map::setCameraPos(const CVector3f & pCamPos)
 #endif
 
 #ifndef CONSOLE
+// The mouse wheel belongs to an open menu or the console, not to the camera zoom behind it
+static bool wheelUsedByUi()
+{
+	return (console && console->isActive()) || (menuManager.root && menuManager.root->visible)
+		|| (scene && scene->client && scene->client->showMenu);
+}
+
 //
 // Update
 //
@@ -1221,7 +1229,7 @@ void Map::update(float delay, Player * thisPlayer)
 		{
 			// Update zoom
 			int longestSide = (size[0]>size[1])?size[0]:size[1];;
-			zoom += -dkiGetMouseWheelVel()*0.01f;
+			if (!wheelUsedByUi()) zoom += -dkiGetMouseWheelVel()*0.01f;
 			zoom = (zoom < -8)?-8:zoom;
 			zoom = (zoom > longestSide/2)?longestSide/2:zoom;
 			
@@ -1233,7 +1241,7 @@ void Map::update(float delay, Player * thisPlayer)
 	{
 		// Update zoom
 		int longestSide = (size[0]>size[1])?size[0]:size[1];;
-		zoom += -dkiGetMouseWheelVel()*0.01f;
+		if (!wheelUsedByUi()) zoom += -dkiGetMouseWheelVel()*0.01f;
 		zoom = (zoom < -8)?-8:zoom;
 		zoom = (zoom > longestSide/2)?longestSide/2:zoom;
 		
