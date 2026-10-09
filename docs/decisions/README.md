@@ -43,3 +43,4 @@ What we do, in one or two sentences.
 | [0009](0009-rename-internal-identifiers-continuously.md) | Rename internal identifiers continuously; interface names wait for §H | Accepted |
 | [0010](0010-bv2-asset-compat-and-gui-freeze.md) | Keep BV2 asset compatibility and the BV2 interface until replacement assets ship | Accepted |
 | [0011](0011-gettext-po-translations.md) | Use gettext PO for translations, keep .lang loading, default to the OS language | Accepted |
+| [0012](0012-windows-10-22h2-minimum.md) | Support Windows 10 22H2 and later as the minimum Windows target | Accepted |
