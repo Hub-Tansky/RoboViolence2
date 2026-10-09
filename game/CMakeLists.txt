@@ -147,6 +147,8 @@ if(BV2_BUILD_SERVER)
   target_link_libraries(bv2dedicated PRIVATE zeven_console)
   if(WIN32)
     set_target_properties(bv2dedicated PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${BV2_RUNTIME_DIR}")
+    # UTF-8 code page for the narrow paths in Paths.cpp (ADR 0012); the DPI entries don't affect console programs
+    target_sources(bv2dedicated PRIVATE "${CMAKE_SOURCE_DIR}/packaging/windows/bv2.manifest")
   endif()
   if(TARGET bv2_placeholder_content)
     add_dependencies(bv2dedicated bv2_placeholder_content)
