@@ -28,6 +28,8 @@
 
 - macOS packages are probably limited to the CI runner's macOS (14+), not the documented 12+: vcpkg ports ignore the deployment target (PNS-26). Ask testers for their macOS version.
 
+- Test machines (owner): MacBook Air M3 2024 (macOS 27.0.1), Windows 10 Pro 22H2 (needs [step 2a](step2a-windows-10-target.md) first), Linux Mint 22.3 Cinnamon (Ubuntu 24.04 base, matching the Linux reference).
+
 ## Tasks
 
 ### 2.1 Owner: single-OS runs
@@ -48,6 +50,7 @@
 - Remove the `#ifdef BV2_PLATFORM_WINDOWS` around P (screenshot) and L (screenshot + stats text) at `game/src/Client.cpp:444–455`. The save paths already use `bv2::userFile` (`game/src/screengrab.cpp:70–86`), which creates `screenshots/` in the pref dir. This restores the Windows behaviour on macOS and Linux; it adds no new control.
 - Check that `SaveScreenGrab` reads the framebuffer at pixel size on HiDPI (Retina: points vs pixels).
 - Proof is manual, because it needs a GL context: the owner presses P and L in a game and the `.bmp`/`.txt` files appear. Unit-test the BMP writer if it can be separated from GL.
+- **Done (owner, 2026-10-10, macOS 27.0.1 on a MacBook Air M3, local build of 56a0d08):** P and L save `.bmp` and `.txt` files in `~/Library/Application Support/BaboViolent2/bv2/screenshots/`; the `.bmp` shows the full game window. Linux check follows in 2.1.
 
 ### 2.5 Record results
 
