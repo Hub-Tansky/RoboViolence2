@@ -2,7 +2,7 @@
 
 **Status:** DONE (2026-10-06). The Results table was never filled in; see [possible-new-scope.md](../possible-new-scope.md) PNS-1.
 
-Covers the two "Phase A done when" items CI can't check ([README.md](README.md#phase-a-done-when)): gameplay with original data on each OS, and the master server listing. Run it once per OS (Linux, macOS, Windows 11) and fill in [Results](#results).
+Covers the two "Phase A done when" items CI can't check ([README.md](README.md#phase-a-done-when)): gameplay with original data on each OS, and the master server listing. Run it once per OS (Linux, macOS, Windows 10 22H2 or 11) and fill in [Results](#results).
 
 ## Setup
 
@@ -102,6 +102,6 @@ One row per OS. All three hosts run server, master and both clients locally; not
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | Linux (distro, X11/Wayland) | | | | | | | | | | | |
 | macOS | | | | | | | | | | | |
-| Windows 11 | | | | | | | | | | | |
+| Windows (10 22H2 or 11; note which) | | | | | | | | | | | |
 
 File each failure as an issue and link it in Notes. Phase A is done when every cell is a pass.
