@@ -71,11 +71,15 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `packaging/macos/Info.plist.in` | macOS bundle `Info.plist` template |
 | `packaging/windows/bv2.manifest` | Windows manifest for `bv2`, `bv2dedicated` and `bv2master`: PerMonitorV2 DPI, UTF-8 code page, Windows 10/11 |
 | `packaging/windows/bv2.rc.in` | Windows resource script template; CMake fills in the generated icon |
-| `tests/CMakeLists.txt` | ctest targets: netPacket, config, fileio, dedicated-server smoke; on Windows also the non-ASCII install path smoke and the no-VC++-runtime-DLL check |
+| `tests/CMakeLists.txt` | ctest targets: netPacket, config, fileio, dedicated-server smoke, in-process server harness (`bv2server_lib` + fake babonet); on Windows also the non-ASCII install path smoke and the no-VC++-runtime-DLL check |
 | `tests/check_windows_deps.py` | Windows: fails if `bv2`, `bv2dedicated` or `bv2master` needs a Visual C++ runtime DLL |
+| `tests/harness/fake_babonet.cpp` | Test `bb_*` API: queued connects and messages in, captured sends out; linked before babonet |
+| `tests/harness/server_harness.cpp` | In-process dedicated server for tests: start, connect, deliver, tick |
+| `tests/harness/server_harness.h` | Harness API |
 | `tests/smoke_server.py` | Starts `bv2dedicated` headless, runs the CTF script, quits; checks exit code, server creation and `bv2.cfg`. `--install-under` runs it from a non-ASCII path (Windows UTF-8 code page) |
 | `tests/test_config.cpp` | dksvar config layering, transient values not saved, secrets masked |
 | `tests/test_fileio.cpp` | `FileIO` byte widths for `.bvm` data and the widths the `.DKO` loader relies on; `bv2ReadBytes` zero-fills a short read; fixed-string length prefix round trip; unterminated `CString::loadFromFile` (overflows under ASan without its bound) |
+| `tests/test_server_harness.cpp` | The in-process server starts on the placeholder CTF map, accepts a client and sends it the game state |
 | `tests/test_netpacket.cpp` | Byte-level layout of the packed wire structs |
 | `tools/check-content-case.py` | Fails when a literal `main/...` path differs from a real file name only by case |
 | `vcpkg.json` | vcpkg manifest (sqlite3, curl; Step 3 completes it) |
@@ -419,7 +423,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 
 | path | purpose |
 |---|---|
-| `game/CMakeLists.txt` | Targets bv2dedicated (explicit CONSOLE file list) and bv2 (client) |
+| `game/CMakeLists.txt` | Targets bv2dedicated (explicit CONSOLE file list), bv2 (client) and, for tests, `bv2server_lib` (the server without `main.cpp`) |
 | `game/README.md` | Module README: game |
 
 ### `game/src`

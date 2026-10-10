@@ -23,6 +23,23 @@ if(BV2_BUILD_SERVER)
   endif()
 endif()
 
+if(TARGET bv2server_lib)
+  # In-process server on a fake babonet (tests/harness): its bb_* objects come before babonet on the link line.
+  add_library(bv2_server_harness OBJECT harness/fake_babonet.cpp harness/server_harness.cpp)
+  target_include_directories(bv2_server_harness PUBLIC harness)
+  target_link_libraries(bv2_server_harness PUBLIC bv2server_lib)
+  bv2_target_defaults(bv2_server_harness)
+
+  add_executable(test_server_harness test_server_harness.cpp)
+  target_link_libraries(test_server_harness PRIVATE bv2_server_harness)
+  bv2_target_defaults(test_server_harness)
+  if(TARGET bv2_placeholder_content)
+    add_dependencies(test_server_harness bv2_placeholder_content)
+  endif()
+  add_test(NAME server_harness COMMAND test_server_harness)
+  set_tests_properties(server_harness PROPERTIES ENVIRONMENT "BV2_PREF_DIR=${BV2_TEST_SCRATCH}/harness-pref")
+endif()
+
 add_executable(test_fileio test_fileio.cpp ${CMAKE_SOURCE_DIR}/game/src/FileIO.cpp)
 target_include_directories(test_fileio PRIVATE ${CMAKE_SOURCE_DIR}/game/src)
 target_link_libraries(test_fileio PRIVATE zeven_core)

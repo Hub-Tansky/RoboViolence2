@@ -1,6 +1,6 @@
 # Step 3: Packet fuzz/replay harness and master-server tests
 
-**Status:** TODO
+**Status:** IN PROGRESS
 
 **Depends on:** [Step 1](step1-playtest-builds-and-build-guides.md). **Next:** [step4-packet-hygiene.md](step4-packet-hygiene.md). **Index:** [README.md](README.md)
 
