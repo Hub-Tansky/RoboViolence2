@@ -72,15 +72,8 @@ if(TARGET bv2master_lib)
   target_link_libraries(test_master PRIVATE bv2master_lib)
   bv2_target_defaults(test_master)
   add_dependencies(test_master bv2_seed_master_db)
-  if(WIN32)
-    # R28 (KEY_QUESTIONS.md): babonet crashes on Windows when a connection closes. Expected to fail (or crash) until
-    # its fix; turns red once test_master passes. WILL_FAIL can't do this: ctest counts a crash as a failure anyway.
-    find_package(Python3 REQUIRED COMPONENTS Interpreter)
-    add_test(NAME master_expected_fail_r28 COMMAND ${Python3_EXECUTABLE} -c
-      "import subprocess, sys; sys.exit(0 if subprocess.run(sys.argv[1:]).returncode != 0 else 1)"
-      $<TARGET_FILE:test_master> "${BV2_RUNTIME_DIR}" "${BV2_TEST_SCRATCH}/master")
-    set_tests_properties(master_expected_fail_r28 PROPERTIES TIMEOUT 60 RESOURCE_LOCK bv2_master_port)
-  else()
+  # Not on Windows (owner, 2026-10-10): R28, an intermittent babonet crash when a connection closes; step 5 re-enables it.
+  if(NOT WIN32)
     add_test(NAME master COMMAND test_master "${BV2_RUNTIME_DIR}" "${BV2_TEST_SCRATCH}/master")
     set_tests_properties(master PROPERTIES TIMEOUT 60 RESOURCE_LOCK bv2_master_port)
   endif()

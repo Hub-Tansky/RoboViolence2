@@ -20,7 +20,7 @@ Skill evidence: `SKILL: Launching skill: thermo-nuclear-code-quality-review` (ra
 | 6 | Link-order comments give the wrong reason; fake lacks six `bb_*` functions | fixed in 64b4c04 (object-file wording; all of `baboNet.h` covered) |
 | 7 | `bv2server_lib` doesn't export sqlite | fixed in 64b4c04 |
 | 8 | Server sources compiled twice | deferred → PNS-33 |
-| 9 | Leftover R28 workaround leaves list connections open | fixed in 64b4c04 (closes again; Windows runs as expected-fail) |
+| 9 | Leftover R28 workaround leaves list connections open | fixed in 64b4c04 (closes again); Windows no longer runs the master test (R28, owner) |
 | 10 | `start` once per process undocumented; internal queue functions in the public header | fixed in 64b4c04 (documented; marked internal) |
 | 11 | Commit subjects `step3:` (repeat of step2a #8, step2 #10) | rejected: pushed history not rewritten |
 
@@ -35,5 +35,5 @@ Skill evidence: `SKILL: Launching skill: thermo-nuclear-code-quality-review` (ra
 ## Not done / unsure
 
 - R25 and R26 have no corpus input (state-dependent).
-- R28 (Windows babonet crash on disconnect): cause not found; Windows runs the master test as `master_expected_fail_r28`.
+- R28 (Windows babonet crash on disconnect) is intermittent: the expected-fail test failed when the master test passed (CI run 38077124684). Owner: the master test doesn't run on Windows until step 5 fixes R28.
 - The `fuzz` job stays red on player shoot and projectile until R25 is fixed.
