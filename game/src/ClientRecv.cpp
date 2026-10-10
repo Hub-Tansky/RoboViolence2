@@ -153,6 +153,16 @@ namespace
 #undef END
 }
 
+// Weapon::shoot indexes the weapon's nuzzle and brass lists with nuzzleID; only the client build has them.
+static bool validNuzzle(Weapon * weapon, int nuzzleID)
+{
+	if (!weapon || nuzzleID < 0) return false;
+	if (weapon->weaponID != WEAPON_FLAME_THROWER && nuzzleID >= (int)weapon->nuzzleFlashes.size()) return false;
+	if (weapon->projectileType == PROJECTILE_DIRECT && weapon->weaponID != WEAPON_FLAME_THROWER &&
+		weapon->weaponID != WEAPON_PHOTON_RIFLE && nuzzleID >= (int)weapon->ejectingBrass.size()) return false;
+	return true;
+}
+
 // Runs before the recvPacket switch: rejects unknown types, wrong sizes and out-of-range indices; NUL-terminates
 // strings. On success `out` holds the payload (text with a '\0' added).
 static bool checkServerPacket(const char * buffer, int size, int typeID, std::vector<char> & out)
@@ -817,7 +827,7 @@ void Client::recvPacket(char * wire, int size, int typeID)
 				}
 				
 				// Sinon on c'est un autre player, on spawn la trail et le feu de son gun
-				if (!itsMine) 
+				if (!itsMine && validNuzzle(game->players[playerShoot.playerID]->weapon, playerShoot.nuzzleID))
 				{
 					game->players[playerShoot.playerID]->firedShowDelay = 2;
 					game->players[playerShoot.playerID]->weapon->shoot(playerShoot, game->players[playerShoot.playerID]);
@@ -854,7 +864,8 @@ void Client::recvPacket(char * wire, int size, int typeID)
 					playerShoot.p1[0] = (short)(playerProjectile.position[0] * 100);
 					playerShoot.p1[1] = (short)(playerProjectile.position[1] * 100);
 					playerShoot.p1[2] = (short)(playerProjectile.position[2] * 100);
-					if (game->players[playerShoot.playerID]->weapon->weaponID == playerShoot.weaponID)
+					if (game->players[playerShoot.playerID]->weapon->weaponID == playerShoot.weaponID &&
+						validNuzzle(game->players[playerShoot.playerID]->weapon, playerShoot.nuzzleID))
 					{
 						game->players[playerShoot.playerID]->weapon->shoot(playerShoot, game->players[playerShoot.playerID]);
 					}
