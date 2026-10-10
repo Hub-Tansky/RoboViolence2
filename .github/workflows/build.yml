@@ -38,7 +38,7 @@ jobs:
       - name: Configure, build and test Release
         run: |
           cmake --preset ${{ matrix.preset }}-release
-          cmake --build --preset ${{ matrix.preset }}-release
+          cmake --build --preset ${{ matrix.preset }}-release -- -k 0
           ctest --test-dir build/${{ matrix.preset }}-release --output-on-failure
       - name: Package (client, servers, main/, databases, run scripts)
         shell: bash
