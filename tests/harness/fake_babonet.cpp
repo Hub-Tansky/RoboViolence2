@@ -4,6 +4,7 @@
 #include "server_harness.h"
 
 #include <deque>
+#include <memory>
 
 namespace
 {
@@ -15,7 +16,7 @@ namespace
 	};
 	std::deque<UINT4> pendingConnects;
 	std::deque<Incoming> pendingMessages;
-	std::vector<char> current; // buffer handed to the server; valid until the next bb_serverReceive
+	std::unique_ptr<char[]> current; // exact-size copy handed to the server; valid until the next bb_serverReceive
 	std::vector<harness::SentPacket> sentPackets;
 	char noError[] = "";
 	char version[] = "4.0";
@@ -55,11 +56,13 @@ char * bb_serverReceive(UINT4 & babonetID, int & typeID, int * size)
 	if (pendingMessages.empty()) return 0;
 	Incoming m = pendingMessages.front();
 	pendingMessages.pop_front();
-	current = m.data; // exactly the delivered bytes, as on the wire: ASan sees any read past them
+	// A fresh allocation of exactly the delivered bytes, as on the wire: ASan sees any read past them
+	current.reset(new char[m.data.empty() ? 1 : m.data.size()]);
+	memcpy(current.get(), m.data.data(), m.data.size());
 	babonetID = m.from;
 	typeID = m.typeID;
-	if (size) *size = (int)current.size();
-	return current.empty() ? noError : current.data();
+	if (size) *size = (int)m.data.size();
+	return current.get();
 }
 char * bb_serverGetLastError() { return noError; }
 char * bb_serverGetLastMessage() { return noError; }

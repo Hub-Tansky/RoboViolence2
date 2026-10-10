@@ -27,7 +27,7 @@ if(TARGET bv2server_lib)
   # In-process server on a fake babonet (tests/harness): its bb_* objects come before babonet on the link line.
   add_library(bv2_server_harness OBJECT harness/fake_babonet.cpp harness/server_harness.cpp)
   target_include_directories(bv2_server_harness PUBLIC harness)
-  target_link_libraries(bv2_server_harness PUBLIC bv2server_lib)
+  target_link_libraries(bv2_server_harness PUBLIC bv2server_lib ${BV2_SQLITE_TARGET})  # CMaster.h includes sqlite3.h
   bv2_target_defaults(bv2_server_harness)
 
   add_executable(test_server_harness test_server_harness.cpp)
