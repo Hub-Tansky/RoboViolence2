@@ -12,7 +12,7 @@ Entry format: ID, where it was found, an extract of the source, why it matters, 
 - **Extract:** "The manual test has not been run yet on any OS." (PR #13); "Not verified: Windows `/WX` on game targets (first CI run), OGG playback, HiDPI, audio, a real two-machine game." (PR #7)
 - **Why:** The README's "Phase A done when" requires DM, TDM and CTF rounds with sound, input and map download on all three OSes. The Results table in [phase-a-manual-test.md](phase-a-modern-portable-build/phase-a-manual-test.md) is empty. Phase B changes (§A packet hygiene, §C.5 validator) need this baseline to detect regressions.
 - **Suggested home:** run before Phase B §A starts; record results in the table.
-- **Status:** Accepted → Phase B [step 1](phase-b-security-infrastructure-anti-cheat/step1-playtest-builds-and-build-guides.md) and [step 2](phase-b-security-infrastructure-anti-cheat/step2-cross-os-playtest.md)
+- **Status:** Accepted → Phase B [step 1](phase-b-security-infrastructure-anti-cheat/step1-playtest-builds-and-build-guides.md) and [step 2](phase-b-security-infrastructure-anti-cheat/step2-cross-os-playtest.md); the rest → PNS-31
 
 ### PNS-2: Font loader is single-byte, codes 33–159 only
 
@@ -220,7 +220,7 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Found in:** Phase B step 2 (2026-10-08), building the client on macOS.
 - **Extract:** `ld: warning: object file (…/vcpkg_installed/arm64-osx/debug/lib/libSDL3.a[248](SDL_dummysensor.c.o)) was built for newer 'macOS' version (27.0) than being linked (12.0)`.
 - **Why it matters:** `CMakePresets.json:58` sets `CMAKE_OSX_DEPLOYMENT_TARGET` 12.0 for our code, but the `arm64-osx` triplet builds SDL3 and the other ports for the build machine's macOS. The CI package (built on `macos-14`) therefore likely needs macOS 14+, while the docs promise 12+. Friends on older Macs may not be able to start it.
-- **Suggested home:** an overlay triplet setting `VCPKG_OSX_DEPLOYMENT_TARGET 12.0` for the macOS presets (touches `CMakePresets.json` and a new `triplets/`), or change the documented minimum. Before Phase B step 2's cross-OS game if a tester has macOS < 14.
+- **Suggested home:** an overlay triplet setting `VCPKG_OSX_DEPLOYMENT_TARGET 12.0` for the macOS presets (touches `CMakePresets.json` and a new `triplets/`), or change the documented minimum. Before the PNS-31 cross-OS game if a tester has macOS < 14.
 - **Status:** Proposed
 
 ### PNS-27: Pin the Windows CI runner image
@@ -259,5 +259,5 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
   - Windows client run on a PC with an OpenGL 2.1 driver.
   - Task 2.5 wheel fix re-test on Linux.
   - Results rows in `phase-a-manual-test.md` (task 2.6).
-- **Suggested home:** the next Linux build check (wheel); the cross-OS game and Windows client run when a suitable PC is available.
+- **Suggested home:** the next Linux build check (wheel); the cross-OS game and Windows client run when a suitable PC is available; the Results rows before step 4 (regression baseline, PNS-1).
 - **Status:** Accepted (owner-deferred)

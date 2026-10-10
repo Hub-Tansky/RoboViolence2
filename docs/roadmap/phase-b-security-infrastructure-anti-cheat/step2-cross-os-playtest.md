@@ -1,6 +1,6 @@
 # Step 2: Cross-OS play-test
 
-**Status:** IN PROGRESS
+**Status:** DONE (2026-10-10)
 
 **Depends on:** [Step 1](step1-playtest-builds-and-build-guides.md); the Windows run also on [step 2a](step2a-windows-10-target.md). **Next:** [step2a-windows-10-target.md](step2a-windows-10-target.md). **Index:** [README.md](README.md)
 
@@ -8,12 +8,12 @@
 
 | Field | Value |
 |---|---|
-| Goal | The owner has played DM, TDM and CTF on macOS, Windows and Linux, including one cross-OS game, and every row of the manual test passes |
+| Goal | The owner has played on macOS and Linux; the screenshot/stats keys and the wheel zoom are fixed. The cross-OS game, the Windows client run, the Linux re-test of 2.5 and the Results rows are deferred → PNS-31 (owner, 2026-10-10) |
 | In scope | Tasks 2.1–2.6 below |
 | Out of scope | Security fixes (steps 4–7); visual polish, HiDPI (PNS-18); anything that changes the interface (**[GUI]**); bugs that don't block a game (record them in `possible-new-scope.md`) |
 | Allowed paths | `docs/roadmap/phase-a-modern-portable-build/phase-a-manual-test.md` (Results only), `docs/build/**`, `engine/zeven/src/**`, `game/src/**` (blocking fixes only), `game/src/Client.cpp` (owner-approved 2026-10-08: task 2.4), `game/src/Map.cpp` (owner-approved 2026-10-10: task 2.5), `tests/**`, `ARCHITECTURE.md`, `docs/roadmap/**`, `docs/analysis/KEY_QUESTIONS.md` |
 | Inputs | `AGENTS.md`, `ARCHITECTURE.md`, earlier review records `reviews/step*.md`, [phase-a-manual-test.md](../phase-a-modern-portable-build/phase-a-manual-test.md), `docs/build/` |
-| Deliverables | Filled Results table; one commit per blocking fix, each with a test where possible; issues filed for the rest |
+| Deliverables | One commit per blocking fix, each with a test where possible; issues filed for the rest |
 | Definition of done | See "Acceptance checks". All must pass. `ARCHITECTURE.md` is updated |
 
 ## Context
@@ -43,6 +43,7 @@
 ### 2.2 Owner: cross-OS game
 
 - A Linux `bv2dedicated` and `bv2master` with a macOS and a Windows client in one game. Record it in Notes.
+- **Deferred → PNS-31** (owner, 2026-10-10).
 
 ### 2.3 Agent: blocking fixes
 
@@ -62,10 +63,12 @@
 - Owner, Linux Mint 22.3 (2026-10-10): in a game, pause → main menu → Options; scrolling the options list with the wheel also zooms the map behind it. Not seen on macOS.
 - Cause: `Map::update` zooms on `dkiGetMouseWheelVel()` for spectators and the editor (`game/src/Map.cpp`) without checking whether a menu or the console has the input.
 - Fix: `wheelUsedByUi()` skips the zoom while the pause, main or options menu or the console is open. Proof is manual (needs a GL window): the owner repeats the steps on Linux; the map no longer zooms.
+- **Linux re-test deferred → PNS-31** (owner, 2026-10-10).
 
 ### 2.6 Record results
 
 - Fill the Results rows (OS version, commit, date, tester, pass per column, notes).
+- **Deferred → PNS-31** (owner, 2026-10-10).
 
 ## Critical files
 
@@ -74,7 +77,7 @@
 
 ## Acceptance checks
 
-- Every Results cell for Linux, macOS and Windows is a pass, and Notes records the cross-OS game.
+- The owner has played on macOS and Linux, and confirmed task 2.4 on both. The Results rows, the cross-OS game, the Windows client run and the 2.5 re-test are deferred → PNS-31 (owner, 2026-10-10).
 - `ctest --test-dir build/<preset> --output-on-failure` passes on all three OSes (CI).
 - `tools/review.sh --full <preset>` passes, and the fresh-context review record `reviews/step2.md` and the raw reviewer report `reviews/step2-report.md` (with the skill's load line) exist ([REVIEW.md](../../../REVIEW.md) section 5).
 - `ARCHITECTURE.md` lists every file added, moved or removed in this step.
