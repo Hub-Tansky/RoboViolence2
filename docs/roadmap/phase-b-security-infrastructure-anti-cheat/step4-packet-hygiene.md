@@ -61,6 +61,7 @@
 - 4.2: the server can't bound `nuzzleID` (nuzzle lists exist only in the client build), so the client checks it against the shooter's weapon before `Weapon::shoot` (`validNuzzle`). No test: the client needs a GL window.
 - 4.3: wire text also reached `CString(char* fmt, ...)` as a format in places the plan didn't list (R21–R23, the client's chat, map list and console text, `textColorLess(playerName)`); all now use `"%s"`.
 - R25 (shots from a player without a weapon) is fixed here, not in step 5: the fuzz acceptance check needs it.
+- R1 (`fclose(NULL)` in the map upload loop) is fixed here too: the `fixed-unterminated.bin` input requests a missing map, which crashed the Linux replay (glibc) once R24 no longer stopped it earlier.
 - `Server::sendSVChange` allowed 255 characters into the 80-byte `svChange`; now 79.
 - Commits: 4.1–4.4 share one commit (the same handlers); 4.5 and the tests are separate.
 

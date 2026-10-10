@@ -131,7 +131,7 @@ No secret; the sequence is derivable from the public source. See `ALGORITHM_01` 
 
 | ID | Sev | Defect | Evidence |
 |---|---|---|---|
-| R1 | High | `fclose(fic)` outside `if (fic)` in map upload loop → `fclose(NULL)` if a requested map file doesn't exist | [VERIFY: BaboViolent2/Code/Server.cpp:1359-1383] |
+| R1 | High | `fclose(fic)` outside `if (fic)` in map upload loop → `fclose(NULL)` if a requested map file doesn't exist | [VERIFY: BaboViolent2/Code/Server.cpp:1359-1383] | **Fixed in step 4**: a request for a missing map reached it once map names were checked (Linux CI, replay).
 | R2 | High | Rocket owner dereferenced without null check (owner disconnected mid-flight) | [VERIFY: BaboViolent2/Code/GameProjectile.cpp:733] [VERIFY: BaboViolent2/Code/GameProjectile.cpp:756] |
 | R3 | High | `if (gameVar.sv_serverType = 1)` assignment flips servers to Pro rules | [VERIFY: BaboViolent2/Code/GameProjectile.cpp:718] |
 | R4 | High | Master ban answer kicks `players[ID]` without null check | [VERIFY: BaboViolent2/Code/Server.cpp:684-693] |

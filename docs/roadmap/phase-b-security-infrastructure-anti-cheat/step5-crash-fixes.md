@@ -20,7 +20,7 @@
 
 `KEY_QUESTIONS.md` paths predate the step 2 move; current locations:
 
-- R1: `fclose(fic)` outside `if (fic)` in the map upload loop, `game/src/Server.cpp` (`fclose` at 213, 239, 1297).
+- R1: fixed in step 4 (the map upload loop closed a file that never opened; the `fclose` at 213 and 239 were already guarded).
 - R2: rocket owner dereferenced without a null check, `game/src/GameProjectile.cpp`.
 - R3: `if ((gameVar.sv_serverType = 1))` (`game/src/GameProjectile.cpp:714`) is an assignment that forces Pro rules. It is load-bearing: fixing it changes the ruleset on servers that set `sv_serverType 0`.
 - R4: the master ban answer kicks `players[ID]` without a null check (`game/src/Server.cpp`).
