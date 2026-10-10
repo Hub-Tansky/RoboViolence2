@@ -6,15 +6,15 @@
 
 ## Scope
 
-| Field | Value |
-|---|---|
-| Goal | CI builds the play-test packages in Release, so they start fullscreen, carry no debug C++ runtime, and run at full speed; development presets stay Debug |
-| In scope | Tasks 2b.1–2b.3 below |
-| Out of scope | Changing the Debug development presets; code signing (PNS-16); a startup OpenGL version check (owner: no code change) |
-| Allowed paths | `CMakePresets.json`, `.github/workflows/build.yml`, `packaging/**`, `tests/**`, `docs/build/**`, `docs/decisions/**`, `docs/roadmap/**`, `ARCHITECTURE.md`, `AGENTS.md` |
-| Inputs | `AGENTS.md`, `ARCHITECTURE.md`, earlier review records `reviews/step*.md`, `CMakePresets.json`, `.github/workflows/build.yml`, [ADR 0012](../../decisions/0012-windows-10-22h2-minimum.md) |
-| Deliverables | Release build of each package in CI; packages built from it; docs and inventory updated |
-| Definition of done | See "Acceptance checks". All must pass. `ARCHITECTURE.md` is updated |
+| Field              | Value                                                                                                                                                                                      |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Goal               | CI builds the play-test packages in Release, so they start fullscreen, carry no debug C++ runtime, and run at full speed; development presets stay Debug                                   |
+| In scope           | Tasks 2b.1–2b.3 below                                                                                                                                                                      |
+| Out of scope       | Changing the Debug development presets; code signing (PNS-16); a startup OpenGL version check (owner: no code change)                                                                      |
+| Allowed paths      | `CMakePresets.json`, `.github/workflows/build.yml`, `packaging/**`, `tests/**`, `docs/build/**`, `docs/decisions/**`, `docs/roadmap/**`, `ARCHITECTURE.md`, `AGENTS.md`                    |
+| Inputs             | `AGENTS.md`, `ARCHITECTURE.md`, earlier review records `reviews/step*.md`, `CMakePresets.json`, `.github/workflows/build.yml`, [ADR 0012](../../decisions/0012-windows-10-22h2-minimum.md) |
+| Deliverables       | Release build of each package in CI; packages built from it; docs and inventory updated                                                                                                    |
+| Definition of done | See "Acceptance checks". All must pass. `ARCHITECTURE.md` is updated                                                                                                                       |
 
 ## Context
 
