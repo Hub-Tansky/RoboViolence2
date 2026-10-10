@@ -71,7 +71,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `packaging/macos/Info.plist.in` | macOS bundle `Info.plist` template |
 | `packaging/windows/bv2.manifest` | Windows manifest for `bv2`, `bv2dedicated` and `bv2master`: PerMonitorV2 DPI, UTF-8 code page, Windows 10/11 |
 | `packaging/windows/bv2.rc.in` | Windows resource script template; CMake fills in the generated icon |
-| `tests/CMakeLists.txt` | ctest targets: netPacket, config, fileio, dedicated-server smoke, in-process server harness (`bv2server_lib` + fake babonet), corpus replay, known-crash inputs (ASan presets); on Windows also the non-ASCII install path smoke and the no-VC++-runtime-DLL check |
+| `tests/CMakeLists.txt` | ctest targets: netPacket, config, fileio, dedicated-server smoke, in-process server harness (`bv2server_lib` + fake babonet), corpus replay, known-crash inputs (ASan presets), master server; on Windows also the non-ASCII install path smoke and the no-VC++-runtime-DLL check |
 | `tests/check_windows_deps.py` | Windows: fails if `bv2`, `bv2dedicated` or `bv2master` needs a Visual C++ runtime DLL |
 | `tests/corpus/clsv_admin_request/valid.bin` | Replay corpus: valid `clsv_admin_request` payload (`gen_corpus`) |
 | `tests/corpus/clsv_gameversion_accepted/valid.bin` | Replay corpus: valid `clsv_gameversion_accepted` payload (`gen_corpus`) |
@@ -109,6 +109,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/test_replay.cpp` | Replays the corpus through the in-process server: no crash, expected replies; one `crash-*.bin` per ctest under ASan |
 | `tests/fuzz_server.cpp` | Random-mutation fuzzer for one message type on the in-process server; writes the crashing input to `<out>/<type>/last.bin` (CI job `fuzz`) |
 | `tests/test_server_harness.cpp` | The in-process server starts on the placeholder CTF map, accepts a client and sends it the game state |
+| `tests/test_master.cpp` | In-process master on port 10207 with a scratch `master.db`: register, list, heartbeat timeout (simulated 61 s), removal by `KILL_SERV` |
 | `tests/test_netpacket.cpp` | Byte-level layout of the packed wire structs |
 | `tools/check-content-case.py` | Fails when a literal `main/...` path differs from a real file name only by case |
 | `vcpkg.json` | vcpkg manifest (sqlite3, curl; Step 3 completes it) |
@@ -639,7 +640,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 
 | path | purpose |
 |---|---|
-| `masterserver/CMakeLists.txt` | Target bv2master |
+| `masterserver/CMakeLists.txt` | Target bv2master and, for tests, `bv2master_lib` (the master without `main.cpp`) |
 | `masterserver/README.md` | Module README: master server |
 
 ### `masterserver/src`
