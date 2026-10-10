@@ -96,7 +96,20 @@ int main(int argc, char ** argv)
 		FileIO in(CString("%s", fixedPath.c_str()), "rb");
 		CHECK(std::string(in.getFixedString().s) == text);
 	}
+	{
+		// CString::loadFromFile on 600 bytes without a '\0' keeps a terminated 511-character string.
+		std::string longPath = std::string(argv[1]) + "/unterminated.bin";
+		FILE * f = std::fopen(longPath.c_str(), "wb");
+		std::string text(600, 'y');
+		std::fwrite(text.data(), 1, text.size(), f);
+		std::fclose(f);
+		f = std::fopen(longPath.c_str(), "rb");
+		CString loaded;
+		loaded.loadFromFile(f);
+		std::fclose(f);
+		CHECK(loaded.len() == 511);
+	}
 	if (failures == 0)
-		std::printf("ok: FileIO widths, bv2ReadBytes, fixed string\n");
+		std::printf("ok: FileIO widths, bv2ReadBytes, fixed string, unterminated CString\n");
 	return failures ? 1 : 0;
 }

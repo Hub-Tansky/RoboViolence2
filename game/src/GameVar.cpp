@@ -1278,7 +1278,7 @@ bool GameVar::loadLanguage(char * filename)
 			{
 				continue;
 			}
-			if (character == '\n')
+			if (character == '\n' || character == EOF || i >= 510) // end of line, end of file or buffer full
 			{
 				varValue[i] = '\0';
 				break;

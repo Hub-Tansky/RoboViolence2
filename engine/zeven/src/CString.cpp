@@ -653,7 +653,7 @@ void CString::loadFromFile(FILE *fic)
 {
 	char tmp[MAX_CARAC] = {0};
 
-	for (int i=0;i<MAX_CARAC;i++)
+	for (int i=0;i<MAX_CARAC-1;i++) // the last byte stays '\0'
 	{
 		if (!bv2ReadBytes(fic, &tmp[i], 1) || tmp[i] == 0) break;
 	}

@@ -98,6 +98,12 @@ const unsigned short CHUNK_VERSION_END = 0x9000;
 //
 // Pour le loader
 //
+// Reads the next chunk; at end of file it becomes the caller's end chunk, so the loop stops.
+static void readChunkDKT(FILE* ficIn, _typChunkDKT& chunk, unsigned short endID)
+{
+	if (!bv2ReadBytes(ficIn, &chunk, sizeof(chunk))) chunk.chunkID = endID;
+}
+
 void ePTexture::loadIt(char* filename)
 {
 	// On ouvre le fichier
@@ -123,7 +129,7 @@ void ePTexture::loadIt(char* filename)
 		}
 
 	// On li le chunk
-       if (!bv2ReadBytes(ficIn, &chunk, sizeof(chunk))) chunk.chunkID = CHUNK_VERSION_END;
+       readChunkDKT(ficIn, chunk, CHUNK_VERSION_END);
 
 	// Ensuite on passe tout les chunk jusqu'à fin
 	while (chunk.chunkID != CHUNK_VERSION_END)
@@ -135,7 +141,7 @@ void ePTexture::loadIt(char* filename)
 		}
 
 		// On li le chunk
-        if (!bv2ReadBytes(ficIn, &chunk, sizeof(chunk))) chunk.chunkID = CHUNK_VERSION_END;
+        readChunkDKT(ficIn, chunk, CHUNK_VERSION_END);
 	}
 
 	// On ferme le fichier
@@ -148,7 +154,7 @@ void ePTexture::loadMap(FILE* ficIn)
 
 	// On li le premier chunk
 	_typChunkDKT chunk;
-    if (!bv2ReadBytes(ficIn, &chunk, sizeof(chunk))) chunk.chunkID = CHUNK_MAP_END;
+    readChunkDKT(ficIn, chunk, CHUNK_MAP_END);
 
 	while (chunk.chunkID != CHUNK_MAP_END)
 	{
@@ -173,7 +179,7 @@ void ePTexture::loadMap(FILE* ficIn)
 		}
 
 		// On li le chunk suivant
-        if (!bv2ReadBytes(ficIn, &chunk, sizeof(chunk))) chunk.chunkID = CHUNK_MAP_END;
+        readChunkDKT(ficIn, chunk, CHUNK_MAP_END);
 	}
 }
 
@@ -181,7 +187,7 @@ void ePTexture::loadTexture(_typLayer* ptrLayer, FILE* ficIn)
 {
 	// On li le premier chunk
 	_typChunkDKT chunk;
-    if (!bv2ReadBytes(ficIn, &chunk, sizeof(chunk))) chunk.chunkID = CHUNK_MAP_TEXTURE_END;
+    readChunkDKT(ficIn, chunk, CHUNK_MAP_TEXTURE_END);
 
 	// On passe les autres apres
 	while (chunk.chunkID != CHUNK_MAP_TEXTURE_END)
@@ -206,12 +212,9 @@ void ePTexture::loadTexture(_typLayer* ptrLayer, FILE* ficIn)
 			}
 		case CHUNK_MAP_TEXTURE_DATA:
 			{
-#ifndef CONSOLE
-					GLubyte* imageData = new GLubyte [ptrLayer->w*ptrLayer->h*ptrLayer->bpp];
-#else
-				unsigned char* imageData = new unsigned char [ptrLayer->w*ptrLayer->h*ptrLayer->bpp];
-#endif
-				bv2ReadBytes(ficIn, imageData, (size_t)ptrLayer->w*ptrLayer->h*ptrLayer->bpp);
+				size_t size = (size_t)ptrLayer->w*ptrLayer->h*ptrLayer->bpp; // one size for the buffer and the read
+				unsigned char* imageData = new unsigned char [size];
+				bv2ReadBytes(ficIn, imageData, size);
 				if (ptrLayer->bpp == 4)
 					ptrLayer->textureID = createTextureFromBuffer(imageData, ptrLayer->w, ptrLayer->h, ptrLayer->bpp, 1, false);
 				else
@@ -221,7 +224,7 @@ void ePTexture::loadTexture(_typLayer* ptrLayer, FILE* ficIn)
 		}
 
 		// On li le chunk suivant
-        if (!bv2ReadBytes(ficIn, &chunk, sizeof(chunk))) chunk.chunkID = CHUNK_MAP_TEXTURE_END;
+        readChunkDKT(ficIn, chunk, CHUNK_MAP_TEXTURE_END);
 	}
 }
 
