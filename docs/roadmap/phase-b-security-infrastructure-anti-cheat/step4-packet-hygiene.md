@@ -58,7 +58,7 @@
 ## Notes
 
 - 4.1: `Server::checkPacket` and `checkServerPacket` (client) also NUL-terminate text payloads and every `char[]` field the client reads; the server terminates its fields in the handlers.
-- 4.2: the server can't bound `nuzzleID` (nuzzle lists exist only in the client build); `checkServerPacket` can't either, so the client indexes them only after its weapon is known. Covered by the fuzzer, not a range table.
+- 4.2: the server can't bound `nuzzleID` (nuzzle lists exist only in the client build), so the client checks it against the shooter's weapon before `Weapon::shoot` (`validNuzzle`). No test: the client needs a GL window.
 - 4.3: wire text also reached `CString(char* fmt, ...)` as a format in places the plan didn't list (R21–R23, the client's chat, map list and console text, `textColorLess(playerName)`); all now use `"%s"`.
 - R25 (shots from a player without a weapon) is fixed here, not in step 5: the fuzz acceptance check needs it.
 - `Server::sendSVChange` allowed 255 characters into the 80-byte `svChange`; now 79.
