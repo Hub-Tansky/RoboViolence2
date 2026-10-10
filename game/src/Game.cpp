@@ -1405,7 +1405,7 @@ void Game::shootSV(int playerID, int nuzzleID, float imp, CVector3f p1, CVector3
 		   CVector3f dir = p2 - p1;
 		   normalize(dir);
 		   
-         float clampShot;
+         float clampShot = gameVar.sv_shottyRange;
 		 float variation = 0.01f;
          if(gameVar.sv_serverType == SERVER_TYPE_PRO) 
 		 {	//clampShot = gameVar.sv_shottyRange;

@@ -1232,7 +1232,7 @@ bool GameVar::loadLanguage(char * filename)
 	char varValue[512];
 	while (true)
 	{
-		fscanf(fic, "%s", varName);
+		if (fscanf(fic, "%255s", varName) != 1) { fclose(fic); return false; } // no END line
 		if (strcmp(varName, "END") == 0)
 		{
 			fclose(fic);

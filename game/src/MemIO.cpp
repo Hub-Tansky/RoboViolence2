@@ -177,7 +177,7 @@ CString MemIO::getFixedString()
 	unsigned long finalLen = 0;
 
 	unsigned char result = getUByte();
-	typ_prefixByte prefix = *((typ_prefixByte*)(&result));
+	typ_prefixByte prefix = { result & 0x7Fu, (unsigned)result >> 7 }; // low 7 bits: length; high bit: more bytes follow
 
 	finalLen = finalLen | (unsigned long)prefix.len;
 
@@ -187,7 +187,7 @@ CString MemIO::getFixedString()
 	{
 		bitshift += 7;
 		result = getUByte();
-		prefix = *((typ_prefixByte*)(&result));
+		prefix = { result & 0x7Fu, (unsigned)result >> 7 };
 		finalLen = finalLen | ((unsigned long)prefix.len) << bitshift;
 	}
 

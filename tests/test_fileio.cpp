@@ -85,7 +85,18 @@ int main(int argc, char ** argv)
 		CHECK(buf[0] == 200 && buf[1] == 1 && buf[2] == 0 && buf[3] == 0);
 		std::fclose(f);
 	}
+	{
+		// getFixedString's length prefix: 7 bits per byte, high bit = more bytes. 200 chars need two bytes.
+		std::string fixedPath = std::string(argv[1]) + "/fixedstring.bin";
+		std::string text(200, 'x');
+		{
+			FileIO out(CString("%s", fixedPath.c_str()), "wb");
+			out.putFixedString(CString("%s", text.c_str()));
+		}
+		FileIO in(CString("%s", fixedPath.c_str()), "rb");
+		CHECK(std::string(in.getFixedString().s) == text);
+	}
 	if (failures == 0)
-		std::printf("ok: FileIO widths, bv2ReadBytes\n");
+		std::printf("ok: FileIO widths, bv2ReadBytes, fixed string\n");
 	return failures ? 1 : 0;
 }

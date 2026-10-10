@@ -69,7 +69,7 @@ void FileIO::putLine(CString line)
 CString FileIO::getLine()
 {
 	char buffer[160];
-	fgets(buffer, 160, m_file);
+	if (!fgets(buffer, 160, m_file)) buffer[0] = 0; // end of file: empty line
 	return buffer;
 }
 
@@ -86,98 +86,98 @@ bool FileIO::getBool()
 char FileIO::getByte()
 {
 	char tmp;
-	fread(&tmp, 1, sizeof(char), m_file);
+	bv2ReadBytes(m_file, &tmp, sizeof(char));
 	return tmp;
 }
 
 char * FileIO::getByteArray(int size)
 {
 	char * tmp = new char [size];
-	fread(tmp, 1, sizeof(char)*size, m_file);
+	bv2ReadBytes(m_file, tmp, sizeof(char)*size);
 	return tmp;
 }
 
 unsigned char FileIO::getUByte()
 {
 	unsigned char tmp;
-	fread(&tmp, 1, sizeof(unsigned char), m_file);
+	bv2ReadBytes(m_file, &tmp, sizeof(unsigned char));
 	return tmp;
 }
 
 unsigned char * FileIO::getUByteArray(int size)
 {
 	unsigned char * tmp = new unsigned char [size];
-	fread(tmp, 1, sizeof(unsigned char)*size, m_file);
+	bv2ReadBytes(m_file, tmp, sizeof(unsigned char)*size);
 	return tmp;
 }
 
 int FileIO::getInt()
 {
 	short tmp;
-	fread(&tmp, 1, sizeof(short), m_file);
+	bv2ReadBytes(m_file, &tmp, sizeof(short));
 	return tmp;
 }
 
 unsigned int FileIO::getUInt()
 {
 	unsigned short tmp;
-	fread(&tmp, 1, sizeof(unsigned short), m_file);
+	bv2ReadBytes(m_file, &tmp, sizeof(unsigned short));
 	return tmp;
 }
 
 int32_t FileIO::getLong()
 {
 	int32_t tmp;
-	fread(&tmp, sizeof(tmp), 1, m_file);
+	bv2ReadBytes(m_file, &tmp, sizeof(tmp));
 	return tmp;
 }
 
 int32_t * FileIO::getLongArray(int size)
 {
 	int32_t * tmp = new int32_t [size];
-	fread(tmp, sizeof(int32_t), size, m_file);
+	bv2ReadBytes(m_file, tmp, sizeof(int32_t) * size);
 	return tmp;
 }
 
 uint32_t FileIO::getULong()
 {
 	uint32_t tmp;
-	fread(&tmp, sizeof(tmp), 1, m_file);
+	bv2ReadBytes(m_file, &tmp, sizeof(tmp));
 	return tmp;
 }
 
 uint32_t * FileIO::getULongArray(int size)
 {
 	uint32_t * tmp = new uint32_t [size];
-	fread(tmp, sizeof(uint32_t), size, m_file);
+	bv2ReadBytes(m_file, tmp, sizeof(uint32_t) * size);
 	return tmp;
 }
 
 float FileIO::getFloat()
 {
 	float tmp;
-	fread(&tmp, 1, sizeof(float), m_file);
+	bv2ReadBytes(m_file, &tmp, sizeof(float));
 	return tmp;
 }
 
 float * FileIO::getFloatArray(int size)
 {
 	float * tmp = new float [size];
-	fread(tmp, 1, sizeof(float)*size, m_file);
+	bv2ReadBytes(m_file, tmp, sizeof(float)*size);
 	return tmp;
 }
 
 double FileIO::getDouble()
 {
 	double tmp;
-	fread(&tmp, 1, sizeof(double), m_file);
+	bv2ReadBytes(m_file, &tmp, sizeof(double));
 	return tmp;
 }
 
 double * FileIO::getDoubleArray(int size)
 {
 	double * tmp = new double [size];
-	fread(tmp, 1, sizeof(double)*size, m_file);
+	bv2ReadBytes(m_file, tmp, sizeof(double)*size);
 	return tmp;
 }
 
@@ -192,7 +192,7 @@ CString FileIO::getFixedString()
 	unsigned long finalLen = 0;
 
 	unsigned char result = getUByte();
-	typ_prefixByte prefix = *((typ_prefixByte*)(&result));
+	typ_prefixByte prefix = { result & 0x7Fu, (unsigned)result >> 7 }; // low 7 bits: length; high bit: more bytes follow
 
 	finalLen = finalLen | (unsigned long)prefix.len;
 
@@ -202,7 +202,7 @@ CString FileIO::getFixedString()
 	{
 		bitshift += 7;
 		result = getUByte();
-		prefix = *((typ_prefixByte*)(&result));
+		prefix = { result & 0x7Fu, (unsigned)result >> 7 };
 		finalLen = finalLen | ((unsigned long)prefix.len) << bitshift;
 	}
 
