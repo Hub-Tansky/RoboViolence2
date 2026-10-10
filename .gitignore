@@ -34,6 +34,8 @@ $RECYCLE.BIN/
 
 # ---- Knowledge and editor tools ----
 .obsidian/
+# Private notes: every docs/prv_* folder stays local, never on GitHub
+/docs/prv_*/
 .trash/
 .vscode/
 .idea/
