@@ -3,6 +3,7 @@
 #pragma once
 #include "netPacket.h"
 
+#include <cstddef>
 #include <cstring>
 #include <string>
 #include <vector>
@@ -15,30 +16,31 @@ namespace corpus
 		int id;
 		int size;      // payload bytes the server memcpy's (0: text, any length)
 		int reply;     // a message the server sends after the valid sample, 0 if none is checked
+		int playerID;  // offset of the int8 playerID field, -1 if none (the fuzzer keeps it in 0..31 until step 4)
 	};
 
 	// In replay order: the join handshake first.
 	const Type types[] = {
-		{"clsv_gameversion_accepted", NET_CLSV_GAMEVERSION_ACCEPTED, sizeof(net_clsv_gameversion_accepted), NET_SVCL_SERVER_INFO},
-		{"clsv_svcl_player_info", NET_CLSV_SVCL_PLAYER_INFO, sizeof(net_clsv_svcl_player_info), NET_CLSV_SVCL_PLAYER_INFO},
-		{"clsv_pong", NET_CLSV_PONG, sizeof(net_clsv_pong), 0},
-		{"clsv_spawn_request", NET_CLSV_SPAWN_REQUEST, sizeof(net_clsv_spawn_request), 0},
-		{"clsv_player_shoot", NET_CLSV_PLAYER_SHOOT, sizeof(net_clsv_player_shoot), 0},
-		{"clsv_pickup_request", NET_CLSV_PICKUP_REQUEST, sizeof(net_clsv_pickup_request), 0},
-		{"clsv_admin_request", NET_CLSV_ADMIN_REQUEST, sizeof(net_clsv_admin_request), 0},
-		{"clsv_vote", NET_CLSV_VOTE, sizeof(net_clsv_vote), 0},
-		{"clsv_map_list_request", NET_CLSV_MAP_LIST_REQUEST, sizeof(net_clsv_map_list_request), NET_SVCL_MAP_LIST},
-		{"clsv_svcl_chat", NET_CLSV_SVCL_CHAT, sizeof(net_clsv_svcl_chat), NET_CLSV_SVCL_CHAT},
-		{"clsv_svcl_team_request", NET_CLSV_SVCL_TEAM_REQUEST, sizeof(net_clsv_svcl_team_request), NET_CLSV_SVCL_TEAM_REQUEST},
-		{"clsv_svcl_player_coord_frame", NET_CLSV_SVCL_PLAYER_COORD_FRAME, sizeof(net_clsv_svcl_player_coord_frame), 0},
-		{"clsv_svcl_player_change_name", NET_CLSV_SVCL_PLAYER_CHANGE_NAME, sizeof(net_clsv_svcl_player_change_name), 0},
-		{"clsv_svcl_player_projectile", NET_CLSV_SVCL_PLAYER_PROJECTILE, sizeof(net_clsv_svcl_player_projectile), 0},
-		{"clsv_svcl_player_shoot_melee", NET_CLSV_SVCL_PLAYER_SHOOT_MELEE, sizeof(net_clsv_svcl_player_shoot_melee), 0},
-		{"clsv_svcl_vote_request", NET_CLSV_SVCL_VOTE_REQUEST, sizeof(net_clsv_svcl_vote_request), 0},
-		{"clsv_map_request", NET_CLSV_MAP_REQUEST, sizeof(net_clsv_map_request), 0},
-		{"clsv_svcl_player_update_skin", NET_CLSV_SVCL_PLAYER_UPDATE_SKIN, sizeof(net_clsv_svcl_player_update_skin), 0},
-		{"svcl_play_sound", NET_SVCL_PLAY_SOUND, sizeof(net_svcl_play_sound), 0},
-		{"svcl_console", NET_SVCL_CONSOLE, 0, 0},
+		{"clsv_gameversion_accepted", NET_CLSV_GAMEVERSION_ACCEPTED, sizeof(net_clsv_gameversion_accepted), NET_SVCL_SERVER_INFO, offsetof(net_clsv_gameversion_accepted, playerID)},
+		{"clsv_svcl_player_info", NET_CLSV_SVCL_PLAYER_INFO, sizeof(net_clsv_svcl_player_info), NET_CLSV_SVCL_PLAYER_INFO, offsetof(net_clsv_svcl_player_info, playerID)},
+		{"clsv_pong", NET_CLSV_PONG, sizeof(net_clsv_pong), 0, offsetof(net_clsv_pong, playerID)},
+		{"clsv_spawn_request", NET_CLSV_SPAWN_REQUEST, sizeof(net_clsv_spawn_request), 0, offsetof(net_clsv_spawn_request, playerID)},
+		{"clsv_player_shoot", NET_CLSV_PLAYER_SHOOT, sizeof(net_clsv_player_shoot), 0, offsetof(net_clsv_player_shoot, playerID)},
+		{"clsv_pickup_request", NET_CLSV_PICKUP_REQUEST, sizeof(net_clsv_pickup_request), 0, offsetof(net_clsv_pickup_request, playerID)},
+		{"clsv_admin_request", NET_CLSV_ADMIN_REQUEST, sizeof(net_clsv_admin_request), 0, -1},
+		{"clsv_vote", NET_CLSV_VOTE, sizeof(net_clsv_vote), 0, offsetof(net_clsv_vote, playerID)},
+		{"clsv_map_list_request", NET_CLSV_MAP_LIST_REQUEST, sizeof(net_clsv_map_list_request), NET_SVCL_MAP_LIST, offsetof(net_clsv_map_list_request, playerID)},
+		{"clsv_svcl_chat", NET_CLSV_SVCL_CHAT, sizeof(net_clsv_svcl_chat), NET_CLSV_SVCL_CHAT, -1},
+		{"clsv_svcl_team_request", NET_CLSV_SVCL_TEAM_REQUEST, sizeof(net_clsv_svcl_team_request), NET_CLSV_SVCL_TEAM_REQUEST, offsetof(net_clsv_svcl_team_request, playerID)},
+		{"clsv_svcl_player_coord_frame", NET_CLSV_SVCL_PLAYER_COORD_FRAME, sizeof(net_clsv_svcl_player_coord_frame), 0, offsetof(net_clsv_svcl_player_coord_frame, playerID)},
+		{"clsv_svcl_player_change_name", NET_CLSV_SVCL_PLAYER_CHANGE_NAME, sizeof(net_clsv_svcl_player_change_name), 0, offsetof(net_clsv_svcl_player_change_name, playerID)},
+		{"clsv_svcl_player_projectile", NET_CLSV_SVCL_PLAYER_PROJECTILE, sizeof(net_clsv_svcl_player_projectile), 0, offsetof(net_clsv_svcl_player_projectile, playerID)},
+		{"clsv_svcl_player_shoot_melee", NET_CLSV_SVCL_PLAYER_SHOOT_MELEE, sizeof(net_clsv_svcl_player_shoot_melee), 0, offsetof(net_clsv_svcl_player_shoot_melee, playerID)},
+		{"clsv_svcl_vote_request", NET_CLSV_SVCL_VOTE_REQUEST, sizeof(net_clsv_svcl_vote_request), 0, offsetof(net_clsv_svcl_vote_request, playerID)},
+		{"clsv_map_request", NET_CLSV_MAP_REQUEST, sizeof(net_clsv_map_request), 0, -1},
+		{"clsv_svcl_player_update_skin", NET_CLSV_SVCL_PLAYER_UPDATE_SKIN, sizeof(net_clsv_svcl_player_update_skin), 0, offsetof(net_clsv_svcl_player_update_skin, playerID)},
+		{"svcl_play_sound", NET_SVCL_PLAY_SOUND, sizeof(net_svcl_play_sound), 0, -1},
+		{"svcl_console", NET_SVCL_CONSOLE, 0, 0, -1},
 	};
 
 	inline const Type * find(const std::string & name)
@@ -94,6 +96,19 @@ namespace corpus
 	{
 		net_clsv_svcl_team_request team = {};
 		team.playerID = 100; // Q-S2: indexes players[32] unchecked
-		return {{"clsv_svcl_team_request", "crash-playerid-out-of-range", bytes(team)}};
+		net_clsv_svcl_chat chat = {};
+		chat.teamID = -2;
+		strcpy(chat.message, "%s%s%s%s%s%s%s%s%s%s"); // R21: chat text is a printf format
+		const char console[] = {'s', 't', 'a', 't'}; // R22: no '\0'; read as a format string
+		net_clsv_admin_request admin = {};
+		strcpy(admin.login, "%s%s%s%s%s%s%s%s%s%s"); // R23: login is a printf format
+		net_clsv_map_request map = {};
+		memset(map.mapName, 'A', sizeof(map.mapName)); // R24: mapName without '\0'
+		map.uniqueClientID = 0x41414141; // nor in the field after it
+		return {{"clsv_svcl_team_request", "crash-playerid-out-of-range", bytes(team)},
+			{"clsv_svcl_chat", "crash-format-string", bytes(chat)},
+			{"svcl_console", "crash-unterminated", std::vector<char>(console, console + sizeof(console))},
+			{"clsv_admin_request", "crash-format-string", bytes(admin)},
+			{"clsv_map_request", "crash-unterminated", bytes(map)}};
 	}
 }

@@ -1,6 +1,6 @@
 // Replays tests/corpus through the in-process server: no crash, and the expected reply to each valid sample.
 //   test_replay <corpus dir>          every file except crash-*.bin (known defects, see KEY_QUESTIONS.md)
-//   test_replay <corpus dir> <file>   one file (ctest runs each crash-*.bin this way, expected to fail until fixed)
+//   test_replay <corpus dir> <file>   the same, then <file> (ctest runs each crash-*.bin this way under ASan)
 #include "corpus_types.h"
 #include "server_harness.h"
 
@@ -43,13 +43,8 @@ int main(int argc, char ** argv)
 	for (const corpus::Type & t : corpus::types)
 	{
 		std::vector<fs::path> files;
-		if (argc == 3)
-		{
-			if (fs::path(argv[2]).parent_path().filename() == t.name) files.push_back(argv[2]);
-		}
-		else
-			for (const fs::directory_entry & e : fs::directory_iterator(fs::path(argv[1]) / t.name))
-				if (e.path().filename().string().rfind("crash-", 0) != 0) files.push_back(e.path());
+		for (const fs::directory_entry & e : fs::directory_iterator(fs::path(argv[1]) / t.name))
+			if (e.path().filename().string().rfind("crash-", 0) != 0) files.push_back(e.path());
 		std::sort(files.begin(), files.end());
 		for (const fs::path & f : files)
 		{
@@ -63,6 +58,13 @@ int main(int argc, char ** argv)
 				++failures;
 			}
 		}
+	}
+	if (argc == 3)
+	{
+		const corpus::Type * t = corpus::find(fs::path(argv[2]).parent_path().filename().string());
+		std::vector<char> data = readFile(argv[2]);
+		if (t) harness::deliver(client, t->id, data.data(), (int)data.size());
+		harness::tick(2);
 	}
 	harness::stop();
 	if (failures == 0) std::printf("ok: corpus replayed\n");

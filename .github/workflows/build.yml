@@ -107,6 +107,35 @@ jobs:
           rc=$?
           # 124 = still running when the timeout fired: it did not crash.
           [ "$rc" = 124 ] || { echo "client exited early with $rc"; exit 1; }
+  fuzz:
+    name: fuzz (not required)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup-vcpkg
+        with:
+          cache-key: linux-x64-asan
+      - run: cmake --preset linux-x64-asan -DBV2_BUILD_CLIENT=OFF
+      - run: cmake --build --preset linux-x64-asan --target fuzz_server
+      - name: Fuzz each client message type for 2 min (ASan)
+        working-directory: build/linux-x64-asan/runtime
+        shell: bash  # -eo pipefail: a crash fails its pipe
+        env:
+          ASAN_OPTIONS: detect_leaks=0
+          BV2_PREF_DIR: ${{ runner.temp }}/bv2-pref
+        run: |
+          status=0
+          for dir in ../../../tests/corpus/*/; do
+            ./fuzz_server ../../../tests/corpus "$(basename "$dir")" 120 "$GITHUB_RUN_ID" "$GITHUB_WORKSPACE/fuzz-out" 2>&1 | tail -40 || status=1
+          done
+          exit $status
+      # last.bin of a crashed type is its reproducer: add it to tests/corpus/<type>/ as crash-<name>.bin
+      - if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: fuzz-crashes
+          path: fuzz-out/
+
   tidy:
     name: clang-tidy (not required)
     runs-on: ubuntu-24.04

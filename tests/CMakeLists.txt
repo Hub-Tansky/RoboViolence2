@@ -49,6 +49,10 @@ if(TARGET bv2server_lib)
   set(BV2_CORPUS "${CMAKE_CURRENT_SOURCE_DIR}/corpus")
   add_test(NAME replay COMMAND test_replay "${BV2_CORPUS}")
   set_tests_properties(replay PROPERTIES ENVIRONMENT "BV2_PREF_DIR=${BV2_TEST_SCRATCH}/replay-pref")
+  # Fuzzer (not a ctest; CI job `fuzz` runs it per type): fuzz_server <corpus> <type> <seconds> <seed> <out>
+  add_executable(fuzz_server fuzz_server.cpp)
+  target_link_libraries(fuzz_server PRIVATE bv2_server_harness)
+  bv2_target_defaults(fuzz_server)
   # Known defects (crash-*.bin, KEY_QUESTIONS.md): passes only while ASan reports the defect; its fix step deletes the file.
   if(BV2_SANITIZE)
     file(GLOB BV2_CRASH_INPUTS CONFIGURE_DEPENDS "${BV2_CORPUS}/*/crash-*.bin")

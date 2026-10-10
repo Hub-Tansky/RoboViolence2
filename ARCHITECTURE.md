@@ -88,12 +88,16 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/corpus/clsv_svcl_player_projectile/valid.bin` | Replay corpus: valid `clsv_svcl_player_projectile` payload (`gen_corpus`) |
 | `tests/corpus/clsv_svcl_player_shoot_melee/valid.bin` | Replay corpus: valid `clsv_svcl_player_shoot_melee` payload (`gen_corpus`) |
 | `tests/corpus/clsv_svcl_player_update_skin/valid.bin` | Replay corpus: valid `clsv_svcl_player_update_skin` payload (`gen_corpus`) |
-| `tests/corpus/clsv_svcl_team_request/crash-playerid-out-of-range.bin` | Known defect input for `clsv_svcl_team_request` (Q-S2: `playerID` 100); ASan must report it until step 4 |
+| `tests/corpus/clsv_svcl_team_request/crash-playerid-out-of-range.bin` | Known defect input (Q-S2: `playerID` 100); ASan must report it until its fix step |
 | `tests/corpus/clsv_svcl_team_request/valid.bin` | Replay corpus: valid `clsv_svcl_team_request` payload (`gen_corpus`) |
 | `tests/corpus/clsv_svcl_vote_request/valid.bin` | Replay corpus: valid `clsv_svcl_vote_request` payload (`gen_corpus`) |
 | `tests/corpus/clsv_vote/valid.bin` | Replay corpus: valid `clsv_vote` payload (`gen_corpus`) |
 | `tests/corpus/svcl_console/valid.bin` | Replay corpus: valid `svcl_console` payload (`gen_corpus`) |
 | `tests/corpus/svcl_play_sound/valid.bin` | Replay corpus: valid `svcl_play_sound` payload (`gen_corpus`) |
+| `tests/corpus/clsv_admin_request/crash-format-string.bin` | Known defect input (R23: admin login as a format string); ASan must report it until its fix step |
+| `tests/corpus/clsv_map_request/crash-unterminated.bin` | Known defect input (R24: map name without `\0`); ASan must report it until its fix step |
+| `tests/corpus/clsv_svcl_chat/crash-format-string.bin` | Known defect input (R21: chat text as a format string); ASan must report it until its fix step |
+| `tests/corpus/svcl_console/crash-unterminated.bin` | Known defect input (R22: console text without `\0`); ASan must report it until its fix step |
 | `tests/corpus_types.h` | Client-to-server message types, valid samples and known crash inputs for the corpus, replay and fuzz tests |
 | `tests/gen_corpus.cpp` | Writes `tests/corpus/<type>/valid.bin` and the known crash inputs from `netPacket.h` structs |
 | `tests/harness/fake_babonet.cpp` | Test `bb_*` API: queued connects and messages in, captured sends out; linked before babonet |
@@ -103,6 +107,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/test_config.cpp` | dksvar config layering, transient values not saved, secrets masked |
 | `tests/test_fileio.cpp` | `FileIO` byte widths for `.bvm` data and the widths the `.DKO` loader relies on; `bv2ReadBytes` zero-fills a short read; fixed-string length prefix round trip; unterminated `CString::loadFromFile` (overflows under ASan without its bound) |
 | `tests/test_replay.cpp` | Replays the corpus through the in-process server: no crash, expected replies; one `crash-*.bin` per ctest under ASan |
+| `tests/fuzz_server.cpp` | Random-mutation fuzzer for one message type on the in-process server; writes the crashing input to `<out>/<type>/last.bin` (CI job `fuzz`) |
 | `tests/test_server_harness.cpp` | The in-process server starts on the placeholder CTF map, accepts a client and sends it the game state |
 | `tests/test_netpacket.cpp` | Byte-level layout of the packed wire structs |
 | `tools/check-content-case.py` | Fails when a literal `main/...` path differs from a real file name only by case |
@@ -132,7 +137,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | path | purpose |
 |---|---|
 | `.github/workflows/secret-scan.yml` | CI: gitleaks over commits after the fork point and original-asset check |
-| `.github/workflows/build.yml` | CI: Debug and Release build and ctest, Release package on Windows, macOS, Linux (`roboviolence2-<preset>` artifacts); `package-check` of the Linux package in a clean `ubuntu:24.04`; ASan smoke job with client under xvfb |
+| `.github/workflows/build.yml` | CI: Debug and Release build and ctest, Release package on Windows, macOS, Linux (`roboviolence2-<preset>` artifacts); `package-check` of the Linux package in a clean `ubuntu:24.04`; ASan smoke job with client under xvfb; `fuzz` job (not required): 2 min per client message type, uploads crash inputs |
 | `.github/workflows/hygiene.yml` | CI: ARCHITECTURE.md inventory, repository hygiene, content case; `review` (`tools/review.sh`) on PRs |
 | `.github/workflows/codeql.yml` | CodeQL: `c-cpp` (manual linux-x64 build of the three executables) and `actions`; push, PR, weekly; alerts under `build/` (vcpkg headers) filtered out |
 | `.github/workflows/dependency-graph.yml` | Submits resolved vcpkg ports to the dependency graph on push to `main` |
