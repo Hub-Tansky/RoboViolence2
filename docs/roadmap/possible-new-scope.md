@@ -249,3 +249,15 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
   - When on, draw the shadow as a 1 px border only and remove the mid-height step, so "on" is a refined version of "off".
 - **Suggested home:** a **[GUI]** change (owner approval), with menu work or the rebrand (PNS-20).
 - **Status:** Proposed
+
+### PNS-31: Finish the step 2 play-test checks
+
+- **Found in:** Phase B step 2 close (2026-10-10); the owner merges step 2 with these checks open.
+- **Extract:** owner: "task 2.2, windows client play-test have to be checked later, re-test mouse-wheel i will do on next linux build check."
+- **Open checks:**
+  - Task 2.2 cross-OS game (Linux servers, macOS and Windows clients).
+  - Windows client run on a PC with an OpenGL 2.1 driver.
+  - Task 2.5 wheel fix re-test on Linux.
+  - Results rows in `phase-a-manual-test.md` (task 2.6).
+- **Suggested home:** the next Linux build check (wheel); the cross-OS game and Windows client run when a suitable PC is available.
+- **Status:** Accepted (owner-deferred)

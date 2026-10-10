@@ -30,6 +30,8 @@
 
 - Test machines (owner): MacBook Air M3 2024 (macOS 27.0.1), Windows 10 Pro 22H2 (needs [step 2a](step2a-windows-10-target.md) first), Linux Mint 22.3 Cinnamon (Ubuntu 24.04 base, matching the Linux reference).
 
+- Owner, 2026-10-10: task 2.2, the Windows client run, the Linux re-test of 2.5 and the Results rows are deferred → PNS-31; the step closes without them.
+
 ## Tasks
 
 ### 2.1 Owner: single-OS runs
