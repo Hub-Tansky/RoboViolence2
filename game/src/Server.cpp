@@ -1293,9 +1293,8 @@ void Server::update(float delay)
                     mapTransfers[i].chunkNum++;
                     temp.push_back(mapTransfers[i]);
                 }
+                fclose(fic); // R1: only a file that opened (a missing map ends the transfer)
             }
-
-            fclose(fic);
         }
 	}
 
