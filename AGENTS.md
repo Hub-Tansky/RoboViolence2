@@ -67,6 +67,7 @@ cmake --build --preset <preset> --target bv2dedicated bv2master
 - All text files are UTF-8 (no BOM) with LF line endings. Keep them that way; the hook and CI reject other encodings (`tools/check-encoding.py`). Some comments contain U+FFFD where upstream lost accented characters; leave them.
 - Fixed 30 Hz step: every `update(float delay)` gets `delay = 1/30`, and "frames" are a time unit (30 = 1 s).
 - Network messages are raw structs in `game/src/netPacket.h`, `memcpy`'d on the wire. Positions are `short` ×100, velocities `char` ×10. Changing a struct layout requires bumping `GAME_VERSION_SV/CL` in `Server.h`/`Client.h`. Removed message IDs leave gaps; don't renumber.
+- Wire data is untrusted until the pre-dispatch check passes (`Server::checkPacket` in `ServerRecv.cpp`, `checkServerPacket` in `ClientRecv.cpp`): exact size, sender slot, index ranges, string ends. A new message type needs an entry in that table. Turn wire text into a `CString` with `CString("%s", text)`, never `CString(text)` (it is a printf format).
 - `playerID` (slot 0–31) is not `babonetID` (connection handle). `bb_serverSend` takes the babonetID; destination 0 means broadcast.
 - The server is authoritative for hits, damage, spawns, projectiles and flags. Clients are authoritative for their own movement.
 - Server variables (`sv_*`) are registered in `game/src/GameVar.cpp` via `dksvarRegister` and pushed to clients.

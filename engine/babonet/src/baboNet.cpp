@@ -513,7 +513,7 @@ int	bb_clientSend(UINT4 clientID,char* dataToSend,int dataSize,int typeID,int pr
 }
 
 
-char* bb_clientReceive(UINT4 clientID,int *typeID)
+char* bb_clientReceive(UINT4 clientID,int *typeID, int * size)
 {
 
 	cClient *c = getClientByID(clientID);
@@ -531,6 +531,10 @@ char* bb_clientReceive(UINT4 clientID,int *typeID)
 	if(p)
 	{
 		*typeID = p->TypeID;
+		if(size)
+		{
+			*size = p->Size;
+		}
 		return p->Data == 0 ? (char *)1 : p->Data;
 	}
 

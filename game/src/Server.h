@@ -143,7 +143,9 @@ public:
 #endif
 
 	// On a re�u un message y�� !
-	void recvPacket(char * buffer, int typeID, unsigned long bbnetID);
+	void recvPacket(char * buffer, int size, int typeID, unsigned long bbnetID);
+	// recvPacket's pre-dispatch check (Phase B step 4); returns the sender's slot or -1
+	int checkPacket(const char * buffer, int size, int typeID, unsigned long bbnetID, std::vector<char> & out);
 
 	// Pour modifier une variable remotly
 	void sendSVChange(CString varCom);

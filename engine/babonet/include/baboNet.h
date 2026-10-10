@@ -132,7 +132,7 @@
 	BBNET_DLL_API(int)			bb_clientUpdate(UINT4 clientID,float elapsed,int updateMsg=0);							//donne de l'attention au client,retourne 3 lorsque la connection est etablie, retourne 2 si le serveur a disconnecter,retourne 1 si un probleme, 0 on succes, voir le serverUpdate pour le updateMsg : updateMsg est ignorer pendant la connection
 	BBNET_DLL_API(UINT4)bb_clientConnect(const char* HostIP,unsigned short Port);										//permet de connecter notre client a un serveur
 	BBNET_DLL_API(int)			bb_clientSend(UINT4 clientID,char* dataToSend,int dataSize,int typeID,int protocol=0);	//permet d'envoyer des donnees du client vers le serveur, protocol 0 = TCP(safe) 1 = UDP(unsafe)
-	BBNET_DLL_API(char*)		bb_clientReceive(UINT4 clientID,int *typeID);
+	BBNET_DLL_API(char*)		bb_clientReceive(UINT4 clientID,int *typeID, int * size=NULL);								// size: payload bytes
 	BBNET_DLL_API(char*)		bb_clientGetLastError(UINT4 clientID);													//retourne une version textuel de la derniere erreur, cote client
 	BBNET_DLL_API(char*)		bb_clientGetLastMessage(UINT4 clientID);												//retourne une version textuel de ce qui c passer au dernier cycle, cote client
 	BBNET_DLL_API(int)			bb_clientDisconnect(UINT4 clientID);													//permet de disconnecter notre client du serveur

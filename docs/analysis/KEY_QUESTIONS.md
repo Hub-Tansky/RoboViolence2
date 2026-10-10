@@ -76,7 +76,7 @@ For a relaunch, these endpoints (and `bv2.db` defaults) need to point at infrast
 
 ## Part C — Security findings
 
-### Q-S1. Can one client act as another player? — **Yes (High)**
+### Q-S1. Can one client act as another player? — **Yes (High)** — **Fixed in Phase B step 4 (ecf939b)**: `Server::checkPacket` resolves the sender's slot from `bbnetID` and overwrites the packet's `playerID` before any handler runs
 Most client→server messages carry a `playerID` that the server uses directly as `game->players[playerID]` without checking that the slot belongs to the sending connection (`bbnetID`). Only `COORD_FRAME` compares `babonetID`.
 
 | Message | Unbound use of `playerID` | Consequence |
@@ -90,7 +90,7 @@ Most client→server messages carry a `playerID` that the server uses directly a
 Contrast with the coord-frame check: [VERIFY: BaboViolent2/Code/ServerRecv.cpp:798]
 Fix: resolve the slot from `bbnetID` once at the top of `recvPacket` and ignore the packet's `playerID`.
 
-### Q-S2. Can a malformed packet crash the server? — **Yes (Critical)**
+### Q-S2. Can a malformed packet crash the server? — **Yes (Critical)** — **Fixed in Phase B step 4 (ecf939b)**: exact payload size per message type, `playerID` bound to the sender, `weaponID`, projectile type and team range-checked; the client checks server messages the same way (`checkServerPacket`)
 `playerID` is a signed `char` (−128..127) indexing a 32-element array, never range-checked. A value ≥ 32 or < 0 reads outside `players[]`, and a non-null garbage pointer is then dereferenced.
 [VERIFY: BaboViolent2/Code/netPacket.h:40] [VERIFY: BaboViolent2/Code/Game.h:34] [VERIFY: BaboViolent2/Code/ServerRecv.cpp:674]
 `weaponID` likewise indexes `gameVar.weapons[20]` unchecked: [VERIFY: BaboViolent2/Code/ServerRecv.cpp:966] [VERIFY: BaboViolent2/Code/GameVar.h:312]
@@ -102,7 +102,7 @@ The client-side mirror (`createNewPlayerCL`) *does* range-check, which shows the
 - Game/map names on the master are "escaped" by replacing `'` with a backtick only. [VERIFY: MasterServer/Source/src/cMasterServer.cpp:642-662]
 Fix: `sqlite3_prepare_v2` + bound parameters.
 
-### Q-S4. Can a server attack its clients? — **Medium**
+### Q-S4. Can a server attack its clients? — **Medium** — **Fixed in Phase B step 4 (0e189c6)**: `Console::svChange` applies only `set sv_*`
 `NET_SVCL_SV_CHANGE` is executed as `set <anything>` on the client; `CSystemVariable::command` accepts any registered variable, not just `sv_*`. A malicious server can rewrite client settings (name, key binds, render options, stored account username/password vars), which the client saves back to `main/bv2.cfg` on exit.
 [VERIFY: BaboViolent2/Code/ClientRecv.cpp:562-566] [VERIFY: Engine/DukZeven/Code/dksvar.cpp:36-46] [VERIFY: Engine/DukZeven/Code/CSystemVariable.cpp:240-263] [VERIFY: BaboViolent2/Code/GameVar.cpp:562-566] [VERIFY: BaboViolent2/Code/main.cpp:923]
 Fix: on the client, reject `SV_CHANGE` unless the variable name starts with `sv_`.
@@ -113,11 +113,11 @@ Fix: on the client, reject `SV_CHANGE` unless the variable name starts with `sv_
 - Remote admin: plaintext user/pass over UDP; no attempt throttling; afterwards authorised by `peerID` (IP:port), which is spoofable over UDP. [VERIFY: BaboViolent2/Code/CMaster.cpp:381-405] [VERIFY: BaboViolent2/Code/CMaster.cpp:449-465]
 - Account password: unsalted MD5 sent to every game server you join, which forwards it to the account server over HTTP. A malicious game server collects reusable hashes. [VERIFY: BaboViolent2/Code/ClientRecv.cpp:272-274] [VERIFY: BaboViolent2/Code/ServerRecv.cpp:463-483]
 
-### Q-S6. Map download path handling — **Medium**
+### Q-S6. Map download path handling — **Medium** — **Fixed in Phase B step 4 (ecf939b)**: `mapName` is NUL-terminated and limited to `[A-Za-z0-9_-]`
 The client-supplied `mapName` (16 bytes, not guaranteed NUL-terminated) is formatted into `main/maps/%s.bvm` and opened. `../` sequences let a client read other `.bvm`-suffixed files outside `main/maps`; the missing terminator can read past the struct.
 [VERIFY: BaboViolent2/Code/ServerRecv.cpp:47-56] [VERIFY: BaboViolent2/Code/Server.cpp:1357-1359]
 
-### Q-S7. Amplification — **Medium**
+### Q-S7. Amplification — **Medium** — **Fixed in Phase B step 4 (ecf939b)**: one `UPDATE_SKIN` broadcast; `PLAY_SOUND` relayed only for a known sound inside the map, from a sender with a player slot
 - `UPDATE_SKIN` (Pro): the server broadcasts it once *per connected player* (the loop sends to everyone each iteration): N² messages per request. [VERIFY: BaboViolent2/Code/ServerRecv.cpp:1218-1227]
 - `PLAY_SOUND`: any client packet is relayed verbatim to every other client without validation. [VERIFY: BaboViolent2/Code/ServerRecv.cpp:537-551]
 
@@ -131,7 +131,7 @@ No secret; the sequence is derivable from the public source. See `ALGORITHM_01` 
 
 | ID | Sev | Defect | Evidence |
 |---|---|---|---|
-| R1 | High | `fclose(fic)` outside `if (fic)` in map upload loop → `fclose(NULL)` if a requested map file doesn't exist | [VERIFY: BaboViolent2/Code/Server.cpp:1359-1383] |
+| R1 | High | `fclose(fic)` outside `if (fic)` in map upload loop → `fclose(NULL)` if a requested map file doesn't exist | [VERIFY: BaboViolent2/Code/Server.cpp:1359-1383] | **Fixed in step 4**: a request for a missing map reached it once map names were checked (Linux CI, replay).
 | R2 | High | Rocket owner dereferenced without null check (owner disconnected mid-flight) | [VERIFY: BaboViolent2/Code/GameProjectile.cpp:733] [VERIFY: BaboViolent2/Code/GameProjectile.cpp:756] |
 | R3 | High | `if (gameVar.sv_serverType = 1)` assignment flips servers to Pro rules | [VERIFY: BaboViolent2/Code/GameProjectile.cpp:718] |
 | R4 | High | Master ban answer kicks `players[ID]` without null check | [VERIFY: BaboViolent2/Code/Server.cpp:684-693] |
@@ -151,11 +151,11 @@ No secret; the sequence is derivable from the public source. See `ALGORITHM_01` 
 | R18 | High | Allocation sizes `w*h*3` / `w*h*bpp` computed in `int` before widening; with sizes read from map or texture files they overflow and under-allocate. CodeQL `cpp/integer-multiplication-cast-to-long` | [VERIFY: game/src/Map.cpp:1112] [VERIFY: game/src/Map.cpp:1682] [VERIFY: engine/dko/src/ePTexture.cpp:214] [VERIFY: game/src/CHost.cpp:167] [VERIFY: game/src/CAStar.cpp:91] [VERIFY: game/src/CAStar.cpp:95] [VERIFY: game/src/CAStar.cpp:195] [VERIFY: game/src/tinyxmlparser.cpp:467-494] |
 | R19 | Low | `%i` used for an `unsigned long` `bbnetID`. CodeQL `cpp/wrong-type-format-argument` | [VERIFY: game/src/Console.cpp:2253] |
 | R20 | Medium | `dksPlayMusic` streams music with `MA_SOUND_FLAG_STREAM`; when the file is missing (placeholder data has no `Menu.ogg`), `ma_sound_init_from_file` fails and frees the stream while miniaudio's job thread still writes to it: heap-use-after-free, timing-dependent. Seen once in the CI smoke job (ASan), 2026-10-07 | [VERIFY: engine/zeven/src/dks.cpp:241] [VERIFY: game/src/Scene.cpp:205] |
-| R21 | Critical | Any client crashes the server with a chat message containing `%s`: `console->add(chat.message)` turns it into `CString(char* fmt, ...)`, a printf format string. Found by the step 3 fuzzer; input `tests/corpus/clsv_svcl_chat/crash-format-string.bin` | [VERIFY: game/src/ServerRecv.cpp:521] |
-| R22 | Critical | `NET_SVCL_CONSOLE` from any client (before the admin check): `CString adminCommand = buffer` reads the payload as a NUL-terminated format string, so a short unterminated or `%`-bearing message crashes the server. Found by the step 3 fuzzer; input `tests/corpus/svcl_console/crash-unterminated.bin` | [VERIFY: game/src/ServerRecv.cpp:167] |
-| R23 | Critical | `NET_CLSV_ADMIN_REQUEST` from any client: `CString loginRecv(adminRequest.login)` uses the login as a printf format. Found by the step 3 fuzzer; input `tests/corpus/clsv_admin_request/crash-format-string.bin` | [VERIFY: game/src/ServerRecv.cpp:190] |
-| R24 | High | `NET_CLSV_MAP_REQUEST`: `mtrans.mapName = request.mapName` reads the 16-byte name past its end when it has no `\0` (stack overflow read). Found by the step 3 fuzzer; input `tests/corpus/clsv_map_request/crash-unterminated.bin` | [VERIFY: game/src/ServerRecv.cpp:50] |
-| R25 | High | `NET_CLSV_PLAYER_SHOOT` and `NET_CLSV_SVCL_PLAYER_PROJECTILE` dereference a null `player->weapon`: from a joined player who never spawned (`Game::shootSV`), or one who died less than 0.2 s ago (the server accepts shots then). Found by the step 3 fuzzer; no corpus input (state-dependent), the fuzzer hits it in seconds on both types | [VERIFY: game/src/Game.cpp:1220] [VERIFY: game/src/ServerRecv.cpp:925-931] [VERIFY: game/src/ServerRecv.cpp:1017] |
+| R21 | Critical | Any client crashes the server with a chat message containing `%s`: `console->add(chat.message)` turns it into `CString(char* fmt, ...)`, a printf format string. Found by the step 3 fuzzer; input `tests/corpus/clsv_svcl_chat/crash-format-string.bin` | [VERIFY: game/src/ServerRecv.cpp:521] | **Fixed in step 4 (ecf939b)**: chat text goes through `"%s"`.
+| R22 | Critical | `NET_SVCL_CONSOLE` from any client (before the admin check): `CString adminCommand = buffer` reads the payload as a NUL-terminated format string, so a short unterminated or `%`-bearing message crashes the server. Found by the step 3 fuzzer; input `tests/corpus/svcl_console/crash-unterminated.bin` | [VERIFY: game/src/ServerRecv.cpp:167] | **Fixed in step 4 (ecf939b)**: the console payload is NUL-terminated and goes through `"%s"`.
+| R23 | Critical | `NET_CLSV_ADMIN_REQUEST` from any client: `CString loginRecv(adminRequest.login)` uses the login as a printf format. Found by the step 3 fuzzer; input `tests/corpus/clsv_admin_request/crash-format-string.bin` | [VERIFY: game/src/ServerRecv.cpp:190] | **Fixed in step 4 (ecf939b)**: login and password are NUL-terminated and go through `"%s"`.
+| R24 | High | `NET_CLSV_MAP_REQUEST`: `mtrans.mapName = request.mapName` reads the 16-byte name past its end when it has no `\0` (stack overflow read). Found by the step 3 fuzzer; input `tests/corpus/clsv_map_request/crash-unterminated.bin` | [VERIFY: game/src/ServerRecv.cpp:50] | **Fixed in step 4 (ecf939b)**: Q-S6.
+| R25 | High | `NET_CLSV_PLAYER_SHOOT` and `NET_CLSV_SVCL_PLAYER_PROJECTILE` dereference a null `player->weapon`: from a joined player who never spawned (`Game::shootSV`), or one who died less than 0.2 s ago (the server accepts shots then). Found by the step 3 fuzzer; no corpus input (state-dependent), the fuzzer hits it in seconds on both types | [VERIFY: game/src/Game.cpp:1220] [VERIFY: game/src/ServerRecv.cpp:925-931] [VERIFY: game/src/ServerRecv.cpp:1017] | **Fixed in step 4 (ecf939b)**: shots and projectiles need a player holding a weapon.
 | R26 | Unknown | `NET_CLSV_SVCL_VOTE_REQUEST`: the fuzzer aborts the server (exit 134, no sanitizer report) after many invalid votes; cause not analysed. Not reproduced since the fuzzer spawns its player and frees disconnected slots; `last.txt` now gives the seed and input count for an exact rerun | [VERIFY: game/src/ServerRecv.cpp:94-139] |
 | R27 | Medium | babonet `cPacket::~cPacket` freed its `new char[]` buffer with `delete` (undefined behaviour on every sent packet, client and server). Found by Linux ASan in the step 3 master test; fixed in step 3 | [VERIFY: engine/babonet/src/cPacket.cpp:213] |
 | R28 | High | On Windows, babonet intermittently crashes (access violation) when a TCP connection closes: a client's `bb_clientDisconnect` right after receiving, and the master dropping timed-out clients. macOS and Linux (ASan) are clean. Found by the step 3 master test: crashed in CI runs 38073594887 and 38074969674, passed in 38077124684; cause not found. The master test doesn't run on Windows until this is fixed (step 5) | [VERIFY: tests/test_master.cpp] [VERIFY: engine/babonet/src/cConnection.cpp] |
