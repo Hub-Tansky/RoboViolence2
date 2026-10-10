@@ -157,6 +157,7 @@ No secret; the sequence is derivable from the public source. See `ALGORITHM_01` 
 | R24 | High | `NET_CLSV_MAP_REQUEST`: `mtrans.mapName = request.mapName` reads the 16-byte name past its end when it has no `\0` (stack overflow read). Found by the step 3 fuzzer; input `tests/corpus/clsv_map_request/crash-unterminated.bin` | [VERIFY: game/src/ServerRecv.cpp:50] |
 | R25 | High | `NET_CLSV_PLAYER_SHOOT` from a joined player who has not spawned: `Game::shootSV` dereferences the null `player->weapon`. Found by the step 3 fuzzer; no corpus input yet (needs a second, unspawned player in the replay) | [VERIFY: game/src/Game.cpp:1220] |
 | R26 | Unknown | `NET_CLSV_SVCL_VOTE_REQUEST`: the fuzzer aborts the server (exit 134, no sanitizer report) after many invalid votes; cause not analysed. Rerun: `fuzz_server <corpus> clsv_svcl_vote_request 3 7 <out>` on macOS ASan | [VERIFY: game/src/ServerRecv.cpp:94-139] |
+| R27 | Medium | babonet `cPacket::~cPacket` freed its `new char[]` buffer with `delete` (undefined behaviour on every sent packet, client and server). Found by Linux ASan in the step 3 master test; fixed in step 3 | [VERIFY: engine/babonet/src/cPacket.cpp:213] |
 
 ---
 
