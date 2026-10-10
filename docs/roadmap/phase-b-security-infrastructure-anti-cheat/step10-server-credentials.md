@@ -52,6 +52,7 @@ ctest --test-dir build/linux-x64-asan --output-on-failure
 
 - Passes, including a handshake test that captures the traffic and finds no password or MD5 of it.
 - `grep -rn macAddr game/src masterserver/src` finds nothing.
+- The corpus is regenerated for the new `GAMEVERSION_ACCEPTED` and `PLAYER_INFO` layouts (`tests/gen_corpus.cpp`), and the replay test and CI `fuzz` job pass on it.
 - The owner joins a password-protected server and logs in as admin on one OS.
 - Q-S5 is marked fixed in `KEY_QUESTIONS.md`.
 - `tools/review.sh --full <preset>` passes, and the fresh-context review record `reviews/step10.md` and the raw reviewer report `reviews/step10-report.md` (with the skill's load line) exist ([REVIEW.md](../../../REVIEW.md) section 5).

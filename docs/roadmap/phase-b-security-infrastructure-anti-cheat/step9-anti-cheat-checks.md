@@ -27,6 +27,7 @@
 ### 9.1 `sv_antiCheat`
 
 - `0` off, `1` log only (default), `2` enforce. Violations always add to the score; actions apply only at `2`.
+- At `1`, every packet is applied unchanged. At `2`, a weapon-rule violation drops the packet (the server decides hits, so nothing desyncs). A movement-rule violation never drops `COORD_FRAME`s: there is no server-to-client position correction, so dropped frames freeze the player for everyone else. It scores, and the score's action (warn, kick) applies.
 
 ### 9.2 Weapon rules
 
