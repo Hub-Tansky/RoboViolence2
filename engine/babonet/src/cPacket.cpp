@@ -210,5 +210,5 @@ cPacket::~cPacket()
 	Next		=	0;
 	Previous	=	0;
 
-	if(Data) delete Data;
+	if(Data) delete [] Data;
 }

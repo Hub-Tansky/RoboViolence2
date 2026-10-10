@@ -29,6 +29,7 @@
 - R17 (CodeQL): unbounded `ficIn >> char[256]` in the config loader (`engine/zeven/src/CSystemVariable.cpp:93, 134`).
 - R18 (CodeQL): `w*h*3` allocation sizes overflow in `int`; the map and texture sites (`game/src/Map.cpp:1112, 1682`, `engine/dko/src/ePTexture.cpp:214`) take sizes from files. The other R18 sites are in step 7.
 - R20 (CI smoke, ASan): `dksPlayMusic` (`engine/zeven/src/dks.cpp:241`) fails to open a missing music file in streaming mode, and miniaudio frees the stream while its job thread still writes to it (heap-use-after-free). Timing-dependent: one failed smoke run in 30.
+- R25–R28 (step 3 harness and fuzzer): R25 null `weapon` on shots from a dead or unspawned player; R26 vote-request abort; R27 fixed in step 3; R28 intermittent Windows babonet crash on disconnect. Fixing R28 re-enables the master test on Windows (`tests/CMakeLists.txt`).
 - PNS-5: UBSan out-of-range `bool` loads and NaN casts in `CUserLogin.cpp`.
 - PNS-6: null dereferences in start-up and teardown (`Scene::disconnect`, the `Server` calls fixed in Phase A); more are likely.
 
