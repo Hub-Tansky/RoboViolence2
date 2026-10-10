@@ -9,11 +9,11 @@
 | Field | Value |
 |---|---|
 | Goal | No client can act as another player, and no malformed client or server message can read out of bounds |
-| In scope | Tasks 4.1–4.5 below |
+| In scope | Tasks 4.1–4.6 below |
 | Out of scope | Anti-cheat rules (steps 8–9); crash fixes R1–R5 (step 5); a new serialisation format (PNS-17); anything visible to players (**[GUI]**) |
-| Allowed paths | `game/src/ServerRecv.cpp`, `game/src/ClientRecv.cpp`, `game/src/Server.{h,cpp}`, `game/src/Client.h`, `game/src/netPacket.h`, `game/src/Console.cpp` (`svChange` only), `tests/**`, `docs/analysis/KEY_QUESTIONS.md`, `ARCHITECTURE.md`, `docs/roadmap/**` |
+| Allowed paths | `game/src/ServerRecv.cpp`, `game/src/ClientRecv.cpp`, `game/src/Server.{h,cpp}`, `game/src/Client.{h,cpp}` (receive loop only), `game/src/netPacket.h`, `engine/babonet/include/baboNet.h`, `engine/babonet/src/baboNet.cpp` (`bb_clientReceive` size only), `game/src/Console.cpp` (`svChange` only), `tests/**`, `docs/analysis/KEY_QUESTIONS.md`, `ARCHITECTURE.md`, `AGENTS.md` (untrusted-data line only), `docs/roadmap/**` |
 | Inputs | `AGENTS.md`, `ARCHITECTURE.md`, earlier review records `reviews/step*.md`, `docs/analysis/KEY_QUESTIONS.md` Q-S1, Q-S2, Q-S4, Q-S6, Q-S7, step 3 harness |
-| Deliverables | One slot-binding helper used by every handler; range and size checks; tests per finding |
+| Deliverables | One pre-dispatch check (size and sender slot) before the `recvPacket` switch; range checks; tests per finding |
 | Definition of done | See "Acceptance checks". All must pass. `ARCHITECTURE.md` is updated |
 
 ## Context
@@ -23,17 +23,21 @@
 - Q-S6: `MAP_REQUEST` copies `mapName` (`ServerRecv.cpp:50`) without NUL-termination or path checks.
 - Q-S7: `PLAYER_UPDATE_SKIN` (`ServerRecv.cpp:1145`) rebroadcasts once per player (N²); `PLAY_SOUND` (`ServerRecv.cpp:500`) relays unvalidated.
 - Q-S4: the client applies any variable from `SV_CHANGE` (`game/src/ClientRecv.cpp:544`), not only `sv_*`.
+- The received size is discarded: `bb_serverReceive` has an `int* size` out-parameter (`engine/babonet/include/baboNet.h:121`), but `Server.cpp:921` doesn't pass it, and `bb_clientReceive` (`baboNet.h:135`) has none, so `Client.cpp:425` can't get it. Both `recvPacket`s `memcpy` `sizeof(struct)` from a shorter buffer.
 - This binding is the slot ownership of former C.3 and the base of `ServerValidator` (step 8).
 
 ## Tasks
 
-### 4.1 Resolve the sender's slot once
+### 4.1 Pre-dispatch check
 
-- At the top of `recvPacket`, map `bbnetID` to the player slot. Handlers use it and ignore the packet's `playerID`; unknown senders get only the handshake messages.
+- Pass the received `size` from `bb_serverReceive` into `Server::recvPacket`. Add the same `int* size = NULL` out-parameter to `bb_clientReceive` and pass it into `Client::recvPacket`.
+- One function runs before the `switch`: a `typeID → sizeof` table rejects unknown types and wrong sizes, then it maps `bbnetID` to the player slot. Step 8 moves this function into `ServerValidator`.
+- Handlers use the resolved slot and ignore the packet's `playerID`; unknown senders get only the handshake messages.
 
-### 4.2 Range and size checks
+### 4.2 Range checks and rejection
 
-- Check `typeID` against the expected struct size. Range-check `playerID`, `weaponID`, `projectileID` and team/vote indices before use. Drop and log invalid packets.
+- Range-check `playerID`, `weaponID`, `projectileID` and team/vote indices before use.
+- A rejected packet is dropped with no reply and nothing applied. It is logged once per sender and message type, so a flood cannot fill the log; scoring and rate limits are steps 8–9.
 
 ### 4.3 Strings
 
@@ -47,6 +51,10 @@
 
 - Accept only variables whose name starts with `sv_`; ignore and log the rest.
 
+### 4.6 Untrusted-data rule
+
+- Add to `AGENTS.md` "Conventions and gotchas": wire data is untrusted until the `recvPacket` pre-dispatch check passes; new message types get a size-table entry.
+
 ## Critical files
 
 - `game/src/ServerRecv.cpp`, `game/src/ClientRecv.cpp`, `game/src/netPacket.h`
@@ -57,7 +65,7 @@
 ctest --test-dir build/linux-x64-asan --output-on-failure
 ```
 
-- Passes, including one test per Q-S item above. The step 3 expected-failure inputs now pass.
+- Passes, including one test per Q-S item above and a truncated-packet test per message type. The step 3 expected-failure inputs now pass.
 - The CI `fuzz` job finds no crash in 2 min per message type.
 - The manual test DM round passes on one OS (owner).
 - Q-S1, Q-S2, Q-S4, Q-S6 and Q-S7 in `KEY_QUESTIONS.md` are marked fixed, with the commit.
