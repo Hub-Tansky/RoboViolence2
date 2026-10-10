@@ -155,8 +155,8 @@ if(BV2_BUILD_SERVER)
   endif()
 endif()
 
-# Test hook (tests/harness): the dedicated server without main.cpp. Tests link their own bb_* functions before
-# babonet, so babonet's baboNet.cpp is never pulled in and the server talks to a fake network.
+# Test hook (tests/harness): the dedicated server without main.cpp. The harness's fake bb_* object file wins over
+# babonet's archive, so baboNet.cpp is never pulled in and the server talks to a fake network.
 if(BV2_BUILD_SERVER AND BV2_BUILD_TESTS)
   set(BV2_SERVER_LIB_SOURCES ${BV2_SERVER_SOURCES})
   list(REMOVE_ITEM BV2_SERVER_LIB_SOURCES src/main.cpp)
@@ -164,7 +164,7 @@ if(BV2_BUILD_SERVER AND BV2_BUILD_TESTS)
   target_compile_definitions(bv2server_lib PUBLIC CONSOLE)
   bv2_game_target(bv2server_lib)
   target_include_directories(bv2server_lib PUBLIC src)
-  target_link_libraries(bv2server_lib PUBLIC babonet dko zeven_core zeven_console)
+  target_link_libraries(bv2server_lib PUBLIC babonet dko zeven_core zeven_console ${BV2_SQLITE_TARGET})  # CMaster.h includes sqlite3.h
 endif()
 
 if(BV2_BUILD_CLIENT)

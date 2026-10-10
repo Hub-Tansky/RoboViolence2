@@ -14,7 +14,14 @@ int main(int argc, char ** argv)
 	}
 	std::vector<corpus::Crash> files = corpus::knownCrashes();
 	for (const corpus::Type & t : corpus::types)
+	{
 		files.push_back({t.name, "valid", corpus::valid(t.id)});
+		if (files.back().data.empty())
+		{
+			std::printf("no valid sample for %s: add it to corpus::valid()\n", t.name);
+			return 1;
+		}
+	}
 	for (const corpus::Crash & c : files)
 	{
 		std::filesystem::path dir = std::filesystem::path(argv[1]) / c.type;

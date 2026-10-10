@@ -24,10 +24,10 @@ if(BV2_BUILD_SERVER)
 endif()
 
 if(TARGET bv2server_lib)
-  # In-process server on a fake babonet (tests/harness): its bb_* objects come before babonet on the link line.
+  # In-process server on a fake babonet (tests/harness): an OBJECT library, so its bb_* win over babonet's archive.
   add_library(bv2_server_harness OBJECT harness/fake_babonet.cpp harness/server_harness.cpp)
   target_include_directories(bv2_server_harness PUBLIC harness)
-  target_link_libraries(bv2_server_harness PUBLIC bv2server_lib ${BV2_SQLITE_TARGET})  # CMaster.h includes sqlite3.h
+  target_link_libraries(bv2_server_harness PUBLIC bv2server_lib)
   bv2_target_defaults(bv2_server_harness)
 
   add_executable(test_server_harness test_server_harness.cpp)
@@ -61,7 +61,7 @@ if(TARGET bv2server_lib)
       get_filename_component(type "${dir}" NAME)
       get_filename_component(name "${input}" NAME_WE)
       add_test(NAME replay_${type}_${name} COMMAND test_replay "${BV2_CORPUS}" "${input}")
-      set_tests_properties(replay_${type}_${name} PROPERTIES PASS_REGULAR_EXPRESSION "ERROR: AddressSanitizer"
+      set_tests_properties(replay_${type}_${name} PROPERTIES PASS_REGULAR_EXPRESSION "delivering crash input.*ERROR: AddressSanitizer"
         ENVIRONMENT "BV2_PREF_DIR=${BV2_TEST_SCRATCH}/replay-pref;ASAN_OPTIONS=abort_on_error=0:detect_leaks=0")
     endforeach()
   endif()

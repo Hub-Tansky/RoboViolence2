@@ -63,6 +63,8 @@ int main(int argc, char ** argv)
 	{
 		const corpus::Type * t = corpus::find(fs::path(argv[2]).parent_path().filename().string());
 		std::vector<char> data = readFile(argv[2]);
+		std::printf("delivering crash input\n"); // ctest expects the ASan report after this line
+		std::fflush(stdout);
 		if (t) harness::deliver(client, t->id, data.data(), (int)data.size());
 		harness::tick(2);
 	}

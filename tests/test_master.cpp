@@ -54,8 +54,9 @@ static std::vector<std::string> list()
 	int typeID;
 	while (char * buffer = bb_clientReceive(c, &typeID))
 		if (typeID == BV2_ROW) names.push_back(((stBV2row *)buffer)->serverName);
-	std::printf("listed %d\n", (int)names.size());
-	return names; // the connection stays open (closing it crashes on Windows, R28)
+	bb_clientDisconnect(c);
+	pump({});
+	return names;
 }
 
 static void registerGame(UINT4 c)

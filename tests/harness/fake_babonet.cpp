@@ -1,5 +1,8 @@
-// The bb_* API for tests: linked before babonet, so the server's network calls land here instead of in sockets.
-// Server side: connects and messages come from the harness queues; sends are captured. Client and peer calls fail.
+// The bb_* API for tests. This is an object file, so its bb_* always win over babonet's archive; babonet's baboNet.o
+// is pulled in only if the server references a bb_* (or other symbol) defined there and not here, and the link then
+// fails with duplicate bb_* symbols: add the missing function below. Covers every function in baboNet.h.
+// Server side: connects, disconnects and messages come from the harness queues; sends are captured. Client and peer
+// calls fail.
 #include "baboNet.h"
 #include "server_harness.h"
 
@@ -14,7 +17,7 @@ namespace
 		int typeID;
 		std::vector<char> data;
 	};
-	std::deque<UINT4> pendingConnects;
+	std::deque<INT4> pendingEvents; // > 0 new client, < 0 client gone (what bb_serverUpdate reports)
 	std::deque<Incoming> pendingMessages;
 	std::unique_ptr<char[]> current; // exact-size copy handed to the server; valid until the next bb_serverReceive
 	std::vector<harness::SentPacket> sentPackets;
@@ -25,7 +28,8 @@ namespace
 
 namespace harness
 {
-	void queueConnect(UINT4 id) { pendingConnects.push_back(id); }
+	void queueConnect(UINT4 id) { pendingEvents.push_back((INT4)id); }
+	void disconnect(UINT4 id) { pendingEvents.push_back(-(INT4)id); }
 	void queueMessage(UINT4 from, int typeID, const void * data, int size)
 	{
 		const char * p = static_cast<const char *>(data);
@@ -39,11 +43,11 @@ void bb_shutdown() {}
 
 INT4 bb_serverUpdate(float, int, char * NewIP)
 {
-	if (pendingConnects.empty()) return 0;
-	UINT4 id = pendingConnects.front();
-	pendingConnects.pop_front();
-	if (NewIP) strcpy(NewIP, localIP);
-	return (INT4)id;
+	if (pendingEvents.empty()) return 0;
+	INT4 id = pendingEvents.front();
+	pendingEvents.pop_front();
+	if (NewIP && id > 0) strcpy(NewIP, localIP);
+	return id;
 }
 int bb_serverCreate(bool, int, unsigned short) { return 0; }
 int bb_serverSend(char * dataToSend, int dataSize, int typeID, INT4 destination, int)
@@ -66,10 +70,12 @@ char * bb_serverReceive(UINT4 & babonetID, int & typeID, int * size)
 }
 char * bb_serverGetLastError() { return noError; }
 char * bb_serverGetLastMessage() { return noError; }
-int bb_serverDisconnectClient(UINT4) { return 0; }
+int bb_serverDisconnectClient(UINT4 baboNetID) { harness::disconnect(baboNetID); return 0; } // like babonet: reported next update
 int bb_serverShutdown() { return 0; }
 UINT4 bb_serverGetBytesSent() { return 0; }
 UINT4 bb_serverGetBytesReceived() { return 0; }
+int bb_serverGetQueueCount(int) { return 0; }
+int bb_serverSetClientRate(int, UINT4) { return 0; }
 
 int bb_clientUpdate(UINT4, float, int) { return 1; }
 UINT4 bb_clientConnect(const char *, unsigned short) { return 0; }
@@ -80,6 +86,7 @@ char * bb_clientGetLastMessage(UINT4) { return noError; }
 int bb_clientDisconnect(UINT4) { return 0; }
 UINT4 bb_clientGetBytesSent(UINT4) { return 0; }
 UINT4 bb_clientGetBytesReceived(UINT4) { return 0; }
+int bb_clientSetRate(UINT4, int) { return 0; }
 
 int bb_peerUpdate(float, bool & isNew) { isNew = false; return 0; }
 int bb_peerBindPort(unsigned short) { return 0; }
@@ -90,9 +97,12 @@ int bb_peerGetIPport(UINT4, char *, unsigned short *) { return 1; }
 int bb_peerDelete(UINT4, bool) { return 0; }
 int bb_peerShutdown() { return 0; }
 char * bb_peerGetLastError() { return noError; }
+char * bb_peerGetLastMessage() { return noError; }
 UINT4 bb_peerGetBytesSent() { return 0; }
 UINT4 bb_peerGetBytesReceived() { return 0; }
 
 char * bb_getVersion() { return version; }
 char * bb_getMyIP() { return localIP; }
 void bb_getMyMAC(unsigned char * AddrOut) { memset(AddrOut, 0, 6); }
+void bb_enable(unsigned char) {}
+void bb_disable(unsigned char) {}
