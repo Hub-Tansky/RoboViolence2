@@ -1,4 +1,4 @@
-// Writes tests/corpus/<type>/valid.bin for every type in corpus_types.h, and the known crash inputs. Run it after changing netPacket.h:
+// Writes tests/corpus/<type>/valid.bin for every type in corpus_types.h, and the known-defect inputs. Run it after changing netPacket.h:
 //   gen_corpus <repo>/tests/corpus
 #include "corpus_types.h"
 
@@ -12,7 +12,7 @@ int main(int argc, char ** argv)
 		std::printf("usage: gen_corpus <corpus dir>\n");
 		return 1;
 	}
-	std::vector<corpus::Crash> files = corpus::knownCrashes();
+	std::vector<corpus::Input> files = corpus::knownDefects();
 	for (const corpus::Type & t : corpus::types)
 	{
 		files.push_back({t.name, "valid", corpus::valid(t.id)});
@@ -22,7 +22,7 @@ int main(int argc, char ** argv)
 			return 1;
 		}
 	}
-	for (const corpus::Crash & c : files)
+	for (const corpus::Input & c : files)
 	{
 		std::filesystem::path dir = std::filesystem::path(argv[1]) / c.type;
 		std::filesystem::create_directories(dir);
