@@ -223,3 +223,14 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Suggested home:** an overlay triplet setting `VCPKG_OSX_DEPLOYMENT_TARGET 12.0` for the macOS presets (touches `CMakePresets.json` and a new `triplets/`), or change the documented minimum. Before Phase B step 2's cross-OS game if a tester has macOS < 14.
 - **Status:** Proposed
 
+
+### PNS-27: "High detail menus" looks worse than off
+
+- **Found in:** owner play-test on macOS and Linux, Phase B step 2 (2026-10-10).
+- **Extract:** Options → "High detail menus" (`r_highDetailMenu`, default `true`, `game/src/GameVar.cpp:677`) drives `renderMenuQuad` (`game/src/Helper.cpp:248`), upstream code. Off (`game/src/Helper.cpp:342`): one smooth translucent vertical gradient. On (`game/src/Helper.cpp:296`): a two-part gradient with a hard step at mid-height, and four full-size black quads at alpha 0.25 meant as a 1 px shadow, which darken the whole panel by about 68%.
+- **Why it matters:** the default setting gives the worse-looking, less translucent menus.
+- **Proposed changes:**
+  - Change the default to `false` (one line).
+  - When on, draw the shadow as a 1 px border only and remove the mid-height step, so "on" is a refined version of "off".
+- **Suggested home:** a **[GUI]** change (owner approval), with menu work or the rebrand (PNS-20).
+- **Status:** Proposed
