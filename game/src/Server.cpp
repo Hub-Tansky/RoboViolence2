@@ -916,11 +916,12 @@ void Server::update(float delay)
 		// On recv les messages
 		char * buffer;
 		int messageID;
+		int size;
 		UINT4 babonetID;
-		while ((buffer = bb_serverReceive(babonetID, messageID)))
+		while ((buffer = bb_serverReceive(babonetID, messageID, &size)))
 		{
 			// On g�e les messages re�the 
-			recvPacket(buffer, messageID, babonetID);
+			recvPacket(buffer, size, messageID, babonetID);
 		}
 
 		int nbPlayers = 0;
@@ -1419,7 +1420,7 @@ void Server::sendSVChange(CString varCom)
 	{
 		gameVar.weapons[WEAPON_NUCLEAR]->fireDelay = gameVar.sv_nukeReload;
 	}
-	if (varCom.len() > 255) varCom.resize(255);
+	if (varCom.len() > 79) varCom.resize(79); // svChange holds 79 characters and the '\0'
 	net_svcl_sv_change svChange;
 	memcpy(svChange.svChange, varCom.s, varCom.len()+1);
 	bb_serverSend((char*)&svChange,sizeof(net_svcl_sv_change),NET_SVCL_SV_CHANGE,0);

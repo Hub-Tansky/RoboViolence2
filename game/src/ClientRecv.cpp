@@ -18,6 +18,9 @@
 
 #ifndef CONSOLE
 #include "Client.h"
+#include <cstddef>
+#include <set>
+#include <vector>
 #include "netPacket.h"
 #include "Console.h"
 #include "Scene.h"
@@ -66,11 +69,128 @@ void Client::sendJoinHandshake()
 	bb_clientSend(uniqueClientID, (char*)&gameVersionAccepted, sizeof(net_clsv_gameversion_accepted), NET_CLSV_GAMEVERSION_ACCEPTED);
 }
 
+namespace
+{
+	// Pre-dispatch check (Phase B step 4): what a server may send. size: exact payload bytes (0: none; -1: text, at
+	// least one byte); fields: int8 indices that must be in [min, max] (int16 where noted); ends: last byte of each
+	// char[] field, set to '\0'. A new server message type needs an entry here.
+	struct Field
+	{
+		int offset;
+		int min;
+		int max;
+		bool wide; // int16
+	};
+	struct ServerMessage
+	{
+		int typeID;
+		int size;
+		std::vector<Field> fields;
+		std::vector<int> ends;
+	};
+	const int SLOT = MAX_PLAYER - 1;
+	const int WEAPON = 19; // gameVar.weapons[20]
+#define F(type, field, min, max) Field{(int)offsetof(type, field), min, max, false}
+#define END(type, field) (int)(offsetof(type, field) + sizeof(((type *)0)->field) - 1)
+	const ServerMessage serverMessages[] = {
+		{NET_SVCL_MAP_CHUNK, sizeof(net_svcl_map_chunk), {Field{(int)offsetof(net_svcl_map_chunk, size), 0, 250, true}}, {}},
+		{NET_SVCL_VOTE_RESULT, sizeof(net_svcl_vote_result), {}, {}},
+		{NET_SVCL_UPDATE_VOTE, sizeof(net_svcl_update_vote), {}, {}},
+		{NET_SVCL_MSG, sizeof(net_svcl_msg), {}, {END(net_svcl_msg, message)}},
+		{NET_SVCL_PLAYER_UPDATE_STATS, sizeof(net_svcl_player_update_stats), {F(net_svcl_player_update_stats, playerID, 0, SLOT)}, {}},
+		{NET_CLSV_SVCL_VOTE_REQUEST, sizeof(net_clsv_svcl_vote_request), {F(net_clsv_svcl_vote_request, playerID, 0, SLOT)}, {END(net_clsv_svcl_vote_request, vote)}},
+		{NET_CLSV_SVCL_PLAYER_SHOOT_MELEE, sizeof(net_clsv_svcl_player_shoot_melee), {F(net_clsv_svcl_player_shoot_melee, playerID, 0, SLOT)}, {}},
+		{NET_SVCL_ADMIN_ACCEPTED, 0, {}, {}},
+		{NET_SVCL_NEWPLAYER, sizeof(net_svcl_newplayer), {F(net_svcl_newplayer, newPlayerID, 0, SLOT)}, {}},
+		{NET_SVCL_GAMEVERSION, sizeof(net_svcl_gameversion), {}, {}},
+		{NET_CLSV_SVCL_PLAYER_INFO, sizeof(net_clsv_svcl_player_info), {F(net_clsv_svcl_player_info, playerID, 0, SLOT)},
+			{END(net_clsv_svcl_player_info, playerIP), END(net_clsv_svcl_player_info, playerName), END(net_clsv_svcl_player_info, username), END(net_clsv_svcl_player_info, macAddr)}},
+		{NET_CLSV_SVCL_CHAT, sizeof(net_clsv_svcl_chat), {}, {END(net_clsv_svcl_chat, message)}},
+		{NET_SVCL_PLAYER_DISCONNECT, sizeof(net_svcl_player_disconnect), {F(net_svcl_player_disconnect, playerID, 0, SLOT)}, {}},
+		{NET_SVCL_SERVER_INFO, sizeof(net_svcl_server_info), {}, {END(net_svcl_server_info, mapName)}},
+		{NET_SVCL_PLAYER_ENUM_STATE, sizeof(net_svcl_player_enum_state),
+			{F(net_svcl_player_enum_state, playerID, 0, SLOT), F(net_svcl_player_enum_state, teamID, PLAYER_TEAM_SPECTATOR, PLAYER_TEAM_AUTO_ASSIGN), F(net_svcl_player_enum_state, weaponID, 0, WEAPON)},
+			{END(net_svcl_player_enum_state, playerName), END(net_svcl_player_enum_state, playerIP), END(net_svcl_player_enum_state, skin)}},
+		{NET_CLSV_SVCL_TEAM_REQUEST, sizeof(net_clsv_svcl_team_request),
+			{F(net_clsv_svcl_team_request, playerID, 0, SLOT), F(net_clsv_svcl_team_request, teamRequested, PLAYER_TEAM_SPECTATOR, PLAYER_TEAM_AUTO_ASSIGN)}, {}},
+		{NET_SVCL_PING, sizeof(net_svcl_ping), {F(net_svcl_ping, playerID, 0, SLOT)}, {}},
+		{NET_SVCL_PLAYER_PING, sizeof(net_svcl_player_ping), {F(net_svcl_player_ping, playerID, 0, SLOT)}, {}},
+		{NET_SVCL_PLAYER_SPAWN, sizeof(net_svcl_player_spawn),
+			{F(net_svcl_player_spawn, playerID, 0, SLOT), F(net_svcl_player_spawn, weaponID, 0, WEAPON), F(net_svcl_player_spawn, meleeID, 0, WEAPON)}, {END(net_svcl_player_spawn, skin)}},
+		{NET_CLSV_SVCL_PLAYER_COORD_FRAME, sizeof(net_clsv_svcl_player_coord_frame), {F(net_clsv_svcl_player_coord_frame, playerID, 0, SLOT)}, {}},
+		{NET_SVCL_MINIBOT_COORD_FRAME, sizeof(net_svcl_minibot_coord_frame), {F(net_svcl_minibot_coord_frame, playerID, 0, SLOT)}, {}},
+		{NET_SVCL_CREATE_MINIBOT, sizeof(net_svcl_create_minibot), {F(net_svcl_create_minibot, playerID, 0, SLOT)}, {}},
+		{NET_SVCL_PROJECTILE_COORD_FRAME, sizeof(net_svcl_projectile_coord_frame), {}, {}},
+		{NET_SVCL_SV_CHANGE, sizeof(net_svcl_sv_change), {}, {END(net_svcl_sv_change, svChange)}},
+		{NET_CLSV_SVCL_PLAYER_CHANGE_NAME, sizeof(net_clsv_svcl_player_change_name), {F(net_clsv_svcl_player_change_name, playerID, 0, SLOT)}, {END(net_clsv_svcl_player_change_name, playerName)}},
+		// weaponID 100 is the minibot's gun (WEAPON_MINIBOT_WEAPON); the handler checks the rest
+		{NET_SVCL_PLAYER_SHOOT, sizeof(net_svcl_player_shoot),
+			{F(net_svcl_player_shoot, playerID, 0, SLOT), F(net_svcl_player_shoot, hitPlayerID, -1, SLOT), F(net_svcl_player_shoot, weaponID, 0, WEAPON_MINIBOT_WEAPON)}, {}},
+		{NET_CLSV_SVCL_PLAYER_PROJECTILE, sizeof(net_clsv_svcl_player_projectile),
+			{F(net_clsv_svcl_player_projectile, playerID, 0, SLOT), F(net_clsv_svcl_player_projectile, weaponID, 0, WEAPON)}, {}},
+		{NET_SVCL_DELETE_PROJECTILE, sizeof(net_svcl_delete_projectile), {}, {}},
+		{NET_SVCL_FLAME_STICK_TO_PLAYER, sizeof(net_svcl_flame_stick_to_player),
+			{Field{(int)offsetof(net_svcl_flame_stick_to_player, projectileID), 0, 32767, true}, F(net_svcl_flame_stick_to_player, playerID, -1, SLOT)}, {}},
+		{NET_SVCL_EXPLOSION, sizeof(net_svcl_explosion), {F(net_svcl_explosion, playerID, 0, SLOT)}, {}},
+		{NET_SVCL_PLAYER_HIT, sizeof(net_svcl_player_hit),
+			{F(net_svcl_player_hit, playerID, 0, SLOT), F(net_svcl_player_hit, fromID, -1, SLOT), F(net_svcl_player_hit, weaponID, 0, WEAPON_MINIBOT_WEAPON)}, {}},
+		{NET_SVCL_AUTOBALANCE, 0, {}, {}},
+		{NET_SVCL_PLAY_SOUND, sizeof(net_svcl_play_sound), {}, {}},
+		{NET_SVCL_CONSOLE, -1, {}, {}},
+		{NET_SVCL_SYNCHRONIZE_TIMER, sizeof(net_svcl_synchronize_timer), {}, {}},
+		{NET_SVCL_CHANGE_FLAG_STATE, sizeof(net_svcl_change_flag_state),
+			{F(net_svcl_change_flag_state, flagID, 0, 1), F(net_svcl_change_flag_state, playerID, -1, SLOT)}, {}},
+		{NET_SVCL_DROP_FLAG, sizeof(net_svcl_drop_flag), {F(net_svcl_drop_flag, flagID, 0, 1)}, {}},
+		{NET_SVCL_FLAG_ENUM, sizeof(net_svcl_flag_enum), {}, {}},
+		{NET_SVCL_GAME_STATE, sizeof(net_svcl_round_state), {}, {}},
+		{NET_SVCL_CHANGE_GAME_TYPE, sizeof(net_svcl_change_game_type), {}, {}},
+		{NET_SVCL_MAP_CHANGE, sizeof(net_svcl_map_change), {}, {END(net_svcl_map_change, mapName)}},
+		{NET_SVCL_PICKUP_ITEM, sizeof(net_svcl_pickup_item), {F(net_svcl_pickup_item, playerID, 0, SLOT)}, {}},
+		{NET_SVCL_MAP_LIST, sizeof(net_svcl_map_list), {}, {END(net_svcl_map_list, mapName)}},
+		{NET_CLSV_SVCL_PLAYER_UPDATE_SKIN, sizeof(net_clsv_svcl_player_update_skin), {F(net_clsv_svcl_player_update_skin, playerID, 0, SLOT)}, {END(net_clsv_svcl_player_update_skin, skin)}},
+	};
+#undef F
+#undef END
+}
+
+// Runs before the recvPacket switch: rejects unknown types, wrong sizes and out-of-range indices; NUL-terminates
+// strings. On success `out` holds the payload (text with a '\0' added).
+static bool checkServerPacket(const char * buffer, int size, int typeID, std::vector<char> & out)
+{
+	const ServerMessage * rule = 0;
+	for (const ServerMessage & m : serverMessages)
+		if (m.typeID == typeID) rule = &m;
+	bool ok = rule && (rule->size < 0 ? size >= 1 : size == rule->size);
+	if (ok)
+	{
+		out.assign(buffer, buffer + size);
+		if (rule->size < 0) out.push_back('\0');
+		for (const Field & f : rule->fields)
+		{
+			int value;
+			if (f.wide) { int16_t v; memcpy(&v, &out[f.offset], 2); value = v; }
+			else value = (int8_t)out[f.offset];
+			if (f.min == 0 && f.max == WEAPON_MINIBOT_WEAPON) ok = ok && (value == WEAPON_MINIBOT_WEAPON || value <= 19);
+			if (value < f.min || value > f.max) ok = false;
+		}
+		for (int end : rule->ends) out[end] = '\0';
+	}
+	if (!ok)
+	{
+		static std::set<int> logged; // once per message type, so a flood can't fill the log
+		if (logged.insert(typeID).second) console->add(CString("\x4> Dropped server message %i (size %i)", typeID, size));
+	}
+	return ok;
+}
+
 //
 // On a reçu un message yéé !
 //
-void Client::recvPacket(char * buffer, int typeID)
+void Client::recvPacket(char * wire, int size, int typeID)
 {
+	std::vector<char> checked;
+	if (!checkServerPacket(wire, size, typeID, checked)) return;
+	char * buffer = checked.data();
    
 	// Answer heartbeats immediately, even while joining or in menus: a late pong
 	// got players kicked ("no respond since 3sec") right after team pick / spawn.
@@ -311,7 +431,7 @@ void Client::recvPacket(char * buffer, int typeID)
 			{
 				if ((chat.teamID < PLAYER_TEAM_SPECTATOR || chat.teamID == game->thisPlayer->teamID))
 				{
-					console->add(chat.message, false, false);
+					console->add(CString("%s", chat.message), false, false); // data, not a format
 					chatMessages.push_back(TimedMessage(chat.message));
 					dksPlaySound(m_sfxChat, -1, 200);
 				}
@@ -897,7 +1017,7 @@ void Client::recvPacket(char * buffer, int typeID)
 	case NET_SVCL_CONSOLE:
 		{
 			//--- Pas plus compliqué que ça !
-			console->add(buffer);
+			console->add(CString("%s", buffer)); // data, not a format
 			break;
 		}
 	case NET_SVCL_SYNCHRONIZE_TIMER:
@@ -1163,7 +1283,7 @@ void Client::recvPacket(char * buffer, int typeID)
 		{
 			net_svcl_map_list mapl;
 			memcpy(&mapl, buffer, sizeof(net_svcl_map_list));
-			console->add(mapl.mapName);
+			console->add(CString("%s", mapl.mapName));
 			break;
 		}
 	case NET_CLSV_SVCL_PLAYER_UPDATE_SKIN:

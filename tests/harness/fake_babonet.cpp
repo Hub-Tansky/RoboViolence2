@@ -80,7 +80,7 @@ int bb_serverSetClientRate(int, UINT4) { return 0; }
 int bb_clientUpdate(UINT4, float, int) { return 1; }
 UINT4 bb_clientConnect(const char *, unsigned short) { return 0; }
 int bb_clientSend(UINT4, char *, int, int, int) { return 1; }
-char * bb_clientReceive(UINT4, int *) { return 0; }
+char * bb_clientReceive(UINT4, int *, int *) { return 0; }
 char * bb_clientGetLastError(UINT4) { return noError; }
 char * bb_clientGetLastMessage(UINT4) { return noError; }
 int bb_clientDisconnect(UINT4) { return 0; }
