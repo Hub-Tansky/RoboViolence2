@@ -11,7 +11,7 @@
 | Goal | ctest can feed any byte sequence to `Server::recvPacket` and to the master server, replay a recorded corpus, and fuzz each message type under ASan |
 | In scope | Tasks 3.1–3.4 below |
 | Out of scope | Fixing the defects the harness finds (steps 4–7); the gameplay replay recording of C.9 (PNS-13); changing packet layouts |
-| Allowed paths | `tests/**`, `tools/fuzz-*`, `game/CMakeLists.txt` (test hooks only), `masterserver/CMakeLists.txt` (test hooks only), `.github/workflows/build.yml` (fuzz job), `docs/analysis/KEY_QUESTIONS.md` (defects found), `ARCHITECTURE.md`, `docs/roadmap/**` |
+| Allowed paths | `tests/**`, `tools/fuzz-*`, `game/CMakeLists.txt` (test hooks only), `masterserver/CMakeLists.txt` (test hooks only), `.github/workflows/build.yml` (fuzz job), `docs/analysis/KEY_QUESTIONS.md` (defects found), `ARCHITECTURE.md`, `docs/roadmap/**`, `engine/babonet/src/cPacket.cpp` and `game/src/CMaster.cpp` (owner-approved 2026-10-10: one-line fixes CI found, R27 and a GCC Release error) |
 | Inputs | `AGENTS.md`, `ARCHITECTURE.md`, earlier review records `reviews/step*.md`, `docs/analysis/KEY_QUESTIONS.md` Parts C–D, `game/src/netPacket.h`, `tests/CMakeLists.txt`, `tests/smoke_server.py`, `masterserver/README.md` |
 | Deliverables | In-process harness target, corpus in `tests/corpus/`, master register/list tests, a CI fuzz job (not required) |
 | Definition of done | See "Acceptance checks". All must pass. `ARCHITECTURE.md` is updated |
