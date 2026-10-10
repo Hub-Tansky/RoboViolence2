@@ -49,7 +49,7 @@ changed += [f for f in git("ls-files", "--others", "--exclude-standard").split()
 problems = []
 
 # Step file: given, or derived from refactor/<phase>-stepN-<slug>
-m = re.match(r"refactor/(phase-[a-z]+)-step(\d+)-", branch)
+m = re.match(r"refactor/(phase-[a-z]+)-step(\d+[a-z]?)-", branch)
 if not step and m:
     hits = glob.glob(f"docs/roadmap/{m.group(1)}-*/step{m.group(2)}-*.md")
     if len(hits) != 1:
@@ -91,7 +91,7 @@ for line in git("diff", "-U0", "--src-prefix=a/", "--dst-prefix=b/", base).split
 
 # DONE gate: a step set to DONE needs its fresh-context review record.
 for f in changed:
-    sm = re.match(r"(docs/roadmap/[^/]+)/step(\d+)-[^/]*\.md$", f)
+    sm = re.match(r"(docs/roadmap/[^/]+)/step(\d+[a-z]?)-[^/]*\.md$", f)
     if not sm or not os.path.exists(f) or "**Status:** DONE" not in open(f, encoding="utf-8").read():
         continue
     rec = f"{sm.group(1)}/reviews/step{sm.group(2)}.md"

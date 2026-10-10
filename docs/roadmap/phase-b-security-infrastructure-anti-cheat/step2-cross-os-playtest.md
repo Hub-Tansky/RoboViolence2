@@ -2,7 +2,7 @@
 
 **Status:** TODO
 
-**Depends on:** [Step 1](step1-playtest-builds-and-build-guides.md). **Next:** [step3-test-harness.md](step3-test-harness.md). **Index:** [README.md](README.md)
+**Depends on:** [Step 1](step1-playtest-builds-and-build-guides.md); the Windows run also on [step 2a](step2a-windows-10-target.md). **Next:** [step2a-windows-10-target.md](step2a-windows-10-target.md). **Index:** [README.md](README.md)
 
 ## Scope
 
@@ -23,6 +23,8 @@
 - The owner runs the tests with their own BV2 data (`BV2_DATA_DIR`); agents can't. Agents fix what the owner reports.
 
 - Owner play-test, macOS arm64 with original data (2026-10-08): the game runs smoothly. Mid-match weapon choice applies on respawn (original behaviour). Fullscreen and resolution apply after a restart (original behaviour). Screenshot (P) and stats (L) do nothing on macOS and Linux: `game/src/Client.cpp:444` compiles them for Windows only (`#ifdef BV2_PLATFORM_WINDOWS`).
+
+- The owner's only Windows machine is Windows 10 Pro 22H2 (2026-10-10). The Windows run happens there, after step 2a makes 22H2 the supported floor.
 
 ## Tasks
 

@@ -8,7 +8,7 @@ Robo Violence 2: unofficial fork of BaboViolent 2, a top-down multiplayer shoote
 |---|---|
 | Deliverables | `bv2` (client), `bv2dedicated` (headless server, `CONSOLE`) and `bv2master`. CI builds and tests all three on Windows, macOS and Linux; the client runs 10 s under xvfb (ASan). Real games on each OS: not yet verified (Phase B step 2). |
 | Build | CMake 3.25+, Ninja presets (`CMakePresets.json`), vcpkg manifest. Output in `build/<preset>/runtime/` ([ADR 0005](docs/decisions/0005-runtime-main-data-root.md)). |
-| Platforms | Targets: Linux x64, macOS 12+ arm64, Windows 11. `engine/zeven/include/platform.h` defines `BV2_PLATFORM_*`, `BV2_POSIX`; CMake force-includes it. |
+| Platforms | Targets: Linux x64, macOS 12+ arm64, Windows 10 22H2 or later x64 ([ADR 0012](docs/decisions/0012-windows-10-22h2-minimum.md)); Windows API level pinned to Windows 10 20H1 (`NTDDI_VERSION`). `engine/zeven/include/platform.h` defines `BV2_PLATFORM_*`, `BV2_POSIX`; CMake force-includes it. |
 | Modules | `game` (client, server, editor); `engine/babonet` networking (`bb_*`, `CThread` on `std::thread`); `engine/zeven` utilities (`zeven_core`: `dkc dksvar` + `CString/CVector/CMatrix`; `zeven_console`: no-op `dkt` for the server; `zeven_client`: `dkw dki dkgl dkt dkf dkp dks`); `engine/dko` model loader; `masterserver`. |
 | Dependencies | vcpkg (`vcpkg.json`, pinned baseline): sqlite3; feature `client`: sdl3, miniaudio, stb; feature `http`: curl (off, ADR 0002). Generated, committed: glad GL 2.1 (`engine/zeven/third_party/glad`). System: GLU. No libcurl or OpenSSL is linked by default. |
 | Platform layer | SDL3 window and input (`dkw`, `dki`), miniaudio (`dks`), glad ([ADR 0006](docs/decisions/0006-sdl3-miniaudio-glad-platform-layer.md)). One client `main()` for all OSes. |
@@ -20,7 +20,7 @@ Robo Violence 2: unofficial fork of BaboViolent 2, a top-down multiplayer shoote
 | Encoding | UTF-8 without BOM, LF; `tools/check-encoding.py`. Some comments hold U+FFFD where upstream lost accents. |
 | Supply chain | Dependency graph fed by vcpkg (`dependency-graph.yml`, on push to `main`); Dependabot alerts and security updates on; Dependabot version updates for GitHub Actions (`.github/dependabot.yml`); CodeQL `c-cpp` and `actions` (`codeql.yml`, not required). Dependabot and OSV can't check vcpkg ports (no C/C++ advisory ecosystem; OSV filters `pkg:vcpkg` purls), so bump the vcpkg baseline monthly, or sooner for a published CVE. |
 | Known defects | [docs/analysis/KEY_QUESTIONS.md](docs/analysis/KEY_QUESTIONS.md). |
-| Decisions | [docs/decisions/README.md](docs/decisions/README.md): 0001 Ninja, 0002 libcurl compiled out, 0003 OpenGL 2.1 kept, 0004 project name (superseded by 0008), 0005 `main/` data root, 0006 platform layer, 0007 data root, pref dir and config layers, 0008 display name "Robo Violence 2", 0009 internal renaming, 0010 BV2 asset compatibility and GUI freeze, 0011 gettext PO translations. |
+| Decisions | [docs/decisions/README.md](docs/decisions/README.md): 0001 Ninja, 0002 libcurl compiled out, 0003 OpenGL 2.1 kept, 0004 project name (superseded by 0008), 0005 `main/` data root, 0006 platform layer, 0007 data root, pref dir and config layers, 0008 display name "Robo Violence 2", 0009 internal renaming, 0010 BV2 asset compatibility and GUI freeze, 0011 gettext PO translations, 0012 Windows 10 22H2 minimum. |
 
 ### Open items
 
@@ -69,10 +69,11 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `packaging/scripts/run-server.cmd` | Package script: starts the dedicated server, default launch script CTF (Windows) |
 | `packaging/scripts/run-server.sh` | Package script: starts the dedicated server, default launch script CTF (Unix) |
 | `packaging/macos/Info.plist.in` | macOS bundle `Info.plist` template |
-| `packaging/windows/bv2.manifest` | Windows manifest: PerMonitorV2 DPI, UTF-8 code page, Windows 10/11 |
+| `packaging/windows/bv2.manifest` | Windows manifest for `bv2`, `bv2dedicated` and `bv2master`: PerMonitorV2 DPI, UTF-8 code page, Windows 10/11 |
 | `packaging/windows/bv2.rc.in` | Windows resource script template; CMake fills in the generated icon |
-| `tests/CMakeLists.txt` | ctest targets: netPacket, config, fileio, dedicated-server smoke |
-| `tests/smoke_server.py` | Starts `bv2dedicated` headless, runs the CTF script, quits |
+| `tests/CMakeLists.txt` | ctest targets: netPacket, config, fileio, dedicated-server smoke; on Windows also the non-ASCII install path smoke and the no-VC++-runtime-DLL check |
+| `tests/check_windows_deps.py` | Windows: fails if `bv2`, `bv2dedicated` or `bv2master` needs a Visual C++ runtime DLL |
+| `tests/smoke_server.py` | Starts `bv2dedicated` headless, runs the CTF script, quits; checks exit code, server creation and `bv2.cfg`. `--install-under` runs it from a non-ASCII path (Windows UTF-8 code page) |
 | `tests/test_config.cpp` | dksvar config layering, transient values not saved, secrets masked |
 | `tests/test_fileio.cpp` | `FileIO` byte widths for `.bvm` data and the widths the `.DKO` loader relies on |
 | `tests/test_netpacket.cpp` | Byte-level layout of the packed wire structs |
@@ -184,6 +185,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/decisions/0009-rename-internal-identifiers-continuously.md` | ADR 0009 |
 | `docs/decisions/0010-bv2-asset-compat-and-gui-freeze.md` | ADR 0010 |
 | `docs/decisions/0011-gettext-po-translations.md` | ADR 0011 |
+| `docs/decisions/0012-windows-10-22h2-minimum.md` | ADR 0012 |
 | `docs/decisions/README.md` | ADR format and index |
 
 ### `docs/roadmap`
@@ -215,6 +217,8 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/step0-supply-chain-security.md` | Scope file for step0 |
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/step1-playtest-builds-and-build-guides.md` | Scope file for step1 |
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/step2-cross-os-playtest.md` | Scope file for step2 |
+| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/step2a-windows-10-target.md` | Scope file for step2a |
+| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/step2b-release-packages.md` | Scope file for step2b |
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/step3-test-harness.md` | Scope file for step3 |
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/step4-packet-hygiene.md` | Scope file for step4 |
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/step5-crash-fixes.md` | Scope file for step5 |
@@ -233,6 +237,8 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 |---|---|
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step1-report.md` | Raw reviewer report for step 1 (round 2; round 1 not kept) |
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step1.md` | Fresh-context review record for step 1 |
+| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step2a-report.md` | Raw reviewer report for step 2a |
+| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step2a.md` | Fresh-context review record for step 2a |
 
 ### `engine/babonet`
 

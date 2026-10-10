@@ -215,3 +215,19 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Suggested home:** a **[GUI]** change (owner approval), e.g. with the rebrand (PNS-20) or menu work. Fullscreen and resolution apply after a restart (confirmed); a "restart required" hint would be the same kind of change.
 - **Status:** Proposed
 
+### PNS-27: Pin the Windows CI runner image
+
+- **Found in:** Phase B step 2a fresh-context review (2026-10-10), finding 1.
+- **Extract:** "The CI log of run 38002113508 shows `Operating System: Microsoft Windows Server 2025`, `Image: windows-2025-vs2026` … Optionally pin `windows-2025` instead of `windows-latest` so the fact can't drift silently."
+- **Why it matters:** The docs and ADR 0012 name the Windows version CI tests on; `windows-latest` can change under them. `.github/workflows/` is outside step 2a's Allowed paths.
+- **Suggested home:** the next step that touches `.github/workflows/build.yml` (step 3 adds a fuzz job there).
+- **Status:** Proposed
+
+### PNS-28: Start in fullscreen on every OS
+
+- **Found in:** owner request after the Windows 10 play-test (2026-10-10).
+- **Extract:** "on all systems game starts in fullscreen mode."
+- **Why it matters:** the packages start windowed because they are Debug builds: `r_fullScreen` defaults to false only under `_DEBUG` (`game/src/GameVar.cpp:642–646`), true otherwise (step 2a review round 2, finding 2).
+- **Suggested home:** owner-approved (2026-10-10). Release packages give fullscreen without a code change.
+- **Status:** Accepted → Phase B [step 2b](phase-b-security-infrastructure-anti-cheat/step2b-release-packages.md)
+
