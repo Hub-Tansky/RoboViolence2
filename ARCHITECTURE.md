@@ -104,7 +104,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | path | purpose |
 |---|---|
 | `.github/workflows/secret-scan.yml` | CI: gitleaks over commits after the fork point and original-asset check |
-| `.github/workflows/build.yml` | CI: build, ctest and package on Windows, macOS, Linux (`roboviolence2-<preset>` artifacts); `package-check` of the Linux package in a clean `ubuntu:24.04`; ASan smoke job with client under xvfb |
+| `.github/workflows/build.yml` | CI: Release build, ctest and package on Windows, macOS, Linux (`roboviolence2-<preset>` artifacts); `package-check` of the Linux package in a clean `ubuntu:24.04`; ASan smoke job with client under xvfb |
 | `.github/workflows/hygiene.yml` | CI: ARCHITECTURE.md inventory, repository hygiene, content case; `review` (`tools/review.sh`) on PRs |
 | `.github/workflows/codeql.yml` | CodeQL: `c-cpp` (manual linux-x64 build of the three executables) and `actions`; push, PR, weekly; alerts under `build/` (vcpkg headers) filtered out |
 | `.github/workflows/dependency-graph.yml` | Submits resolved vcpkg ports to the dependency graph on push to `main` |

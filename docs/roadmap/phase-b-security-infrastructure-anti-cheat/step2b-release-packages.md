@@ -1,6 +1,6 @@
 # Step 2b: Release play-test packages
 
-**Status:** TODO
+**Status:** IN PROGRESS
 
 **Depends on:** [Step 2a](step2a-windows-10-target.md). **Next:** [step3-test-harness.md](step3-test-harness.md). **Index:** [README.md](README.md)
 
@@ -31,6 +31,7 @@
 ### 2b.2 Package the Release build
 
 - `packaging/make-package.py` packages the Release runtime directory. The `windows_no_crt_dlls` test also covers the Release executables.
+- Done in 2b.1 without a change here: the CI build directory is now Release, so `make-package.py` and the build job's ctest (including `windows_no_crt_dlls`) see the Release executables.
 
 ### 2b.3 Docs
 

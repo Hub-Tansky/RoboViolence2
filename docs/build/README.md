@@ -4,7 +4,7 @@ Pick your OS: [macOS](macos.md), [Linux](linux.md), [Windows](windows.md). Each 
 
 ## Download or build
 
-- **Download:** every CI run of the `build` workflow on GitHub (Actions → build → a green run → Artifacts; you need to be signed in to GitHub, and artifacts expire after 90 days) publishes one package per OS: `roboviolence2-win-x64-msvc.zip`, `roboviolence2-macos-arm64.zip` and `roboviolence2-linux-x64.tar.gz`. Each holds one folder with the client, `bv2dedicated`, `bv2master`, `main/`, `master.db`, `web.db` and run scripts. The builds are unsigned; each guide says how to get past the OS warning.
+- **Download:** every CI run of the `build` workflow on GitHub (Actions → build → a green run → Artifacts; you need to be signed in to GitHub, and artifacts expire after 90 days) publishes one package per OS: `roboviolence2-win-x64-msvc.zip`, `roboviolence2-macos-arm64.zip` and `roboviolence2-linux-x64.tar.gz`. Each holds one folder with the client, `bv2dedicated`, `bv2master`, `main/`, `master.db`, `web.db` and run scripts. Packages are Release builds and start fullscreen; local builds from the presets are Debug and start windowed. The builds are unsigned; each guide says how to get past the OS warning.
 - **Build:** CMake 3.25+, Ninja, Python 3 and vcpkg. The first build is slow because vcpkg compiles SDL3, miniaudio and SQLite; later builds reuse them.
 
 ## Game data (required)
