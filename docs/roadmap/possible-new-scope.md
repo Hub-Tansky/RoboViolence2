@@ -277,3 +277,11 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Why it matters:** cosmetic; every player sees it in fullscreen. Cause not analysed (likely the menu's fixed layout on a wide or HiDPI screen).
 - **Suggested home:** a **[GUI]** change (owner approval), with HiDPI and ultrawide scaling (PNS-18).
 - **Status:** Proposed
+
+### PNS-33: Build `bv2dedicated` from `bv2server_lib`
+
+- **Found in:** Phase B step 3 fresh-context review (2026-10-10), finding 8.
+- **Extract:** "The whole server is compiled twice: `bv2dedicated` and `bv2server_lib` share the same `BV2_SERVER_SOURCES` minus main.cpp … The bigger simplification is `bv2dedicated = main.cpp + bv2server_lib`."
+- **Why it matters:** every test build compiles the server twice, and the two targets can drift apart in flags.
+- **Suggested home:** a build-only change to `game/CMakeLists.txt` in any later step that touches it; check the harness still links its fake `bb_*` first.
+- **Status:** Proposed
