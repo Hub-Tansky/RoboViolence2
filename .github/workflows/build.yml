@@ -109,6 +109,8 @@ jobs:
           [ "$rc" = 124 ] || { echo "client exited early with $rc"; exit 1; }
   fuzz:
     name: fuzz (not required)
+    # Main only (owner, 2026-10-10): ~40 min, and red until steps 4-7 fix the known defects
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
