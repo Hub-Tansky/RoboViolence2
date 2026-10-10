@@ -28,16 +28,21 @@ jobs:
         uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
         with:
           arch: x64
-      # Release: the packages are what testers play (fullscreen, no debug C++ runtime). The presets stay Debug for development.
-      - name: Configure (Release)
-        run: cmake --preset ${{ matrix.preset }} -DCMAKE_BUILD_TYPE=Release
+      - name: Configure
+        run: cmake --preset ${{ matrix.preset }}
       - name: Build (keep going, so one run lists every failure)
         run: cmake --build --preset ${{ matrix.preset }} -- -k 0
       - name: Test
         run: ctest --test-dir build/${{ matrix.preset }} --output-on-failure
+      # The packages are Release: fullscreen by default, no debug C++ runtime.
+      - name: Configure, build and test Release
+        run: |
+          cmake --preset ${{ matrix.preset }}-release
+          cmake --build --preset ${{ matrix.preset }}-release
+          ctest --test-dir build/${{ matrix.preset }}-release --output-on-failure
       - name: Package (client, servers, main/, databases, run scripts)
         shell: bash
-        run: ${{ runner.os == 'Windows' && 'python' || 'python3' }} packaging/make-package.py build/${{ matrix.preset }}/runtime ${{ matrix.preset }} out
+        run: ${{ runner.os == 'Windows' && 'python' || 'python3' }} packaging/make-package.py build/${{ matrix.preset }}-release/runtime ${{ matrix.preset }} out
       # archive: false uploads the package as-is (no zip around the zip); the artifact takes the file's name.
       - uses: actions/upload-artifact@v7
         with:
