@@ -64,17 +64,17 @@ int CdkoMesh::loadFromFile(FILE *ficIn, char *path)
 			}
 		case CHUNK_DKO_POSITION:
 			{
-				fread(position, 3, sizeof(float), ficIn);
+				bv2ReadBytes(ficIn, position, 3 * sizeof(float));
 				break;
 			}
 		case CHUNK_DKO_MATRIX:
 			{
-				fread(matrix, 9, sizeof(float), ficIn);
+				bv2ReadBytes(ficIn, matrix, 9 * sizeof(float));
 				break;
 			}
 		case CHUNK_DKO_NB_MAT_GROUP:
 			{
-				fread(&nbMatGroup, 1, sizeof(short), ficIn);
+				bv2ReadBytes(ficIn, &nbMatGroup, sizeof(short));
 
 				// On load les sous-objet
 				if (matGroupArray) delete [] matGroupArray;
@@ -115,13 +115,13 @@ int CdkoMesh::loadMatGroup(FILE *ficIn, _typMatGroup *matGroup)
 		case CHUNK_DKO_MAT_ID:
 			{
 				short MatID;
-				fread(&MatID, 1, sizeof(short), ficIn);
+				bv2ReadBytes(ficIn, &MatID, sizeof(short));
 				matGroup->material = &(((CDkoModel*)parent)->materialArray[MatID]);
 				break;
 			}
 		case CHUNK_DKO_NB_VERTEX:
 			{
-				fread(&(matGroup->nbVertex), 1, sizeof(matGroup->nbVertex), ficIn);
+				bv2ReadBytes(ficIn, &(matGroup->nbVertex), sizeof(matGroup->nbVertex));
                 printf("nbVertex: %ld\n", (long)matGroup->nbVertex);
 				break;
 			}
@@ -134,7 +134,7 @@ int CdkoMesh::loadMatGroup(FILE *ficIn, _typMatGroup *matGroup)
 				{
 					if (matGroup->meshAtFrame[f].vertexArray) delete [] matGroup->meshAtFrame[f].vertexArray;
 					matGroup->meshAtFrame[f].vertexArray = new float [matGroup->nbVertex*3];
-					fread(matGroup->meshAtFrame[f].vertexArray, matGroup->nbVertex*3, sizeof(float), ficIn);
+					bv2ReadBytes(ficIn, matGroup->meshAtFrame[f].vertexArray, matGroup->nbVertex*3 * sizeof(float));
 				}
 
 				// On pogne son parent
@@ -189,7 +189,7 @@ int CdkoMesh::loadMatGroup(FILE *ficIn, _typMatGroup *matGroup)
 				{
 					if (matGroup->meshAtFrame[f].normalArray) delete [] matGroup->meshAtFrame[f].normalArray;
 					matGroup->meshAtFrame[f].normalArray = new float [matGroup->nbVertex*3];
-					fread(matGroup->meshAtFrame[f].normalArray, matGroup->nbVertex*3, sizeof(float), ficIn);
+					bv2ReadBytes(ficIn, matGroup->meshAtFrame[f].normalArray, matGroup->nbVertex*3 * sizeof(float));
 				}
 				break;
 			}
@@ -200,7 +200,7 @@ int CdkoMesh::loadMatGroup(FILE *ficIn, _typMatGroup *matGroup)
 			//	fread(matGroup->texCoordArray, matGroup->nbVertex*2, sizeof(float), ficIn);
 				if (matGroup->meshAtFrame[0].texCoordArray) delete [] matGroup->meshAtFrame[0].texCoordArray;
 				matGroup->meshAtFrame[0].texCoordArray = new float [matGroup->nbVertex*2];
-				fread(matGroup->meshAtFrame[0].texCoordArray, matGroup->nbVertex*2, sizeof(float), ficIn);
+				bv2ReadBytes(ficIn, matGroup->meshAtFrame[0].texCoordArray, matGroup->nbVertex*2 * sizeof(float));
 				break;
 			}
 		case CHUNK_DKO_TEXCOORD_ARRAY_ANIM:
@@ -213,7 +213,7 @@ int CdkoMesh::loadMatGroup(FILE *ficIn, _typMatGroup *matGroup)
 				{
 					if (matGroup->meshAtFrame[f].texCoordArray) delete [] matGroup->meshAtFrame[f].texCoordArray;
 					matGroup->meshAtFrame[f].texCoordArray = new float [matGroup->nbVertex*2];
-					fread(matGroup->meshAtFrame[f].texCoordArray, matGroup->nbVertex*2, sizeof(float), ficIn);
+					bv2ReadBytes(ficIn, matGroup->meshAtFrame[f].texCoordArray, matGroup->nbVertex*2 * sizeof(float));
 				}
 				break;
 			}

@@ -655,8 +655,7 @@ void CString::loadFromFile(FILE *fic)
 
 	for (int i=0;i<MAX_CARAC;i++)
 	{
-		fread(&(tmp[i]), 1, sizeof(char), fic);
-		if (tmp[i] == 0) break;
+		if (!bv2ReadBytes(fic, &tmp[i], 1) || tmp[i] == 0) break;
 	}
 
 	set("%s", tmp);

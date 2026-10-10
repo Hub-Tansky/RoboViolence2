@@ -75,7 +75,17 @@ int main(int argc, char ** argv)
 		CHECK(in.getUByte() == 200);
 		CHECK(in.getBool() == true);
 	}
+	{
+		// bv2ReadBytes (platform.h): a short read zero-fills the rest and returns false. 18 bytes in the file.
+		FILE * f = std::fopen(path.c_str(), "rb");
+		unsigned char buf[20];
+		std::memset(buf, 0xAA, sizeof(buf));
+		CHECK(bv2ReadBytes(f, buf, 16));
+		CHECK(!bv2ReadBytes(f, buf, 4));
+		CHECK(buf[0] == 200 && buf[1] == 1 && buf[2] == 0 && buf[3] == 0);
+		std::fclose(f);
+	}
 	if (failures == 0)
-		std::printf("ok: FileIO widths\n");
+		std::printf("ok: FileIO widths, bv2ReadBytes\n");
 	return failures ? 1 : 0;
 }

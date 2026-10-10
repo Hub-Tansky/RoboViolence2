@@ -89,7 +89,7 @@ int CDkoModel::loadFromFile(FILE *ficIn, char *path)
 			{
 				// On check si on a la bonne version
 				short version;
-				fread(&version, 1, sizeof(short), ficIn);
+				bv2ReadBytes(ficIn, &version, sizeof(short));
 				if (version > DKO_VERSION)
 				{
 					CDko::updateLastError("Incorrect version of file");
@@ -100,7 +100,7 @@ int CDkoModel::loadFromFile(FILE *ficIn, char *path)
 		case CHUNK_DKO_TIME_INFO:
 			{
 				// On importe le start frame, le end frame et la duration dans un ti array de short
-				fread(timeInfo, 1, sizeof(short)*3, ficIn);
+				bv2ReadBytes(ficIn, timeInfo, sizeof(short)*3);
 
 				// Ça va nous servir pour allouer l'espace pour nos meshes
 				break;
@@ -112,7 +112,7 @@ int CDkoModel::loadFromFile(FILE *ficIn, char *path)
 			}
 		case CHUNK_DKO_MATLIST:
 			{
-				fread(&nbMat, 1, sizeof(short), ficIn);
+				bv2ReadBytes(ficIn, &nbMat, sizeof(short));
 				if (nbMat)
 				{
 					materialArray = new CdkoMaterial[nbMat];
@@ -188,7 +188,7 @@ void CDkoModel::loadDummy(FILE *ficIn)
 			{
 				for (int i=0;i<timeInfo[2];i++)
 				{
-					fread(newDum->position[i].v, 3, sizeof(float), ficIn);
+					bv2ReadBytes(ficIn, newDum->position[i].v, 3 * sizeof(float));
 				}
 				break;
 			}
@@ -196,7 +196,7 @@ void CDkoModel::loadDummy(FILE *ficIn)
 			{
 				for (int i=0;i<timeInfo[2];i++)
 				{
-					fread(newDum->matrix[i].m, 9, sizeof(float), ficIn);
+					bv2ReadBytes(ficIn, newDum->matrix[i].m, 9 * sizeof(float));
 				}
 				break;
 			}
@@ -231,12 +231,12 @@ void CDkoModel::loadProperties(FILE *ficIn)
 			}
 		case CHUNK_DKO_POSITION:
 			{
-				fread(position, 3, sizeof(float), ficIn);
+				bv2ReadBytes(ficIn, position, 3 * sizeof(float));
 				break;
 			}
 		case CHUNK_DKO_MATRIX:
 			{
-				fread(matrix, 9, sizeof(float), ficIn);
+				bv2ReadBytes(ficIn, matrix, 9 * sizeof(float));
 				break;
 			}
 		}
@@ -253,7 +253,7 @@ void CDkoModel::loadProperties(FILE *ficIn)
 short readChunk(FILE *ficIn)
 {
 	short chunkID;
-	fread(&chunkID, 1, sizeof(short), ficIn);
+	if (!bv2ReadBytes(ficIn, &chunkID, sizeof(short))) return CHUNK_DKO_END; // truncated file: stop the chunk loop
 	return chunkID;
 }
 
@@ -266,10 +266,10 @@ char *readString(FILE *ficIn)
 {
 	char tmp[256];
 	int i = 0;
-	fread(tmp, 1, 1, ficIn); // On li le premier caractère
+	bv2ReadBytes(ficIn, tmp, 1); // On li le premier caractère
 	while (*(tmp + i++) != 0)  // Tant qu'on pogne pas le caractère 0, NULL, '\0', toute la même chose
 	{
-		fread(tmp + i, 1, 1, ficIn);	// On li le prochain caractère
+		if (i == 255 || !bv2ReadBytes(ficIn, tmp + i, 1)) tmp[i] = 0; // buffer full or end of file: end the string
 	}
 	
 	// On cré un string dynamique et on retourne ça

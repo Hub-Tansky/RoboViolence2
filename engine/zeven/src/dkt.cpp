@@ -179,10 +179,10 @@ void reloadTGA(CTexture * texture)
 	}
 
 	// On li le header du fichier (12 premiers byte)
-	fread(TGAcompare,1,sizeof(TGAcompare),file);
+	bv2ReadBytes(file, TGAcompare, sizeof(TGAcompare));
 
 	// On li la suite du header
-	fread(header,1,sizeof(header),file);
+	bv2ReadBytes(file, header, sizeof(header));
 
 	// On prend le width et le height du header
 	width  = header[1] * 256 + header[0];
@@ -203,7 +203,7 @@ void reloadTGA(CTexture * texture)
 	imageData = new unsigned char [imageSize];
 
 	// On li maintenant le gros bloc de données
-	fread(imageData, 1, imageSize, file);
+	bv2ReadBytes(file, imageData, imageSize);
 
 	// On défini si c'est RGB ou RGBA
 	GLint Level = (bytesPerPixel == 3) ? GL_RGB : GL_RGBA;
@@ -275,10 +275,10 @@ unsigned int createTextureTGA(char * filename, int filter){
 		}
 
 		// On li le header du fichier (12 premiers byte)
-		fread(TGAcompare,1,sizeof(TGAcompare),file);
+		bv2ReadBytes(file, TGAcompare, sizeof(TGAcompare));
 
 		// On li la suite du header
-		fread(header,1,sizeof(header),file);
+		bv2ReadBytes(file, header, sizeof(header));
 
 		// On prend le width et le height du header
 		width  = header[1] * 256 + header[0];
@@ -297,7 +297,7 @@ unsigned int createTextureTGA(char * filename, int filter){
 		imageData = new unsigned char [imageSize];
 
 		// On li maintenant le gros bloc de données
-		fread(imageData, 1, imageSize, file);
+		bv2ReadBytes(file, imageData, imageSize);
 
 		// On défini si c'est RGB ou RGBA
 		GLint Level = (bytesPerPixel == 3) ? GL_RGB : GL_RGBA;
