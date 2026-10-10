@@ -1158,7 +1158,7 @@ void Map::setCameraPos(const CVector3f & pCamPos)
 // The mouse wheel belongs to an open menu or the console, not to the camera zoom behind it
 static bool wheelUsedByUi()
 {
-	return (console && console->isActive()) || (menuManager.root && menuManager.root->visible)
+	return console->isActive() || (menuManager.root && menuManager.root->visible)
 		|| (scene && scene->client && scene->client->showMenu);
 }
 
