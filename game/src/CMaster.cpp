@@ -1207,8 +1207,8 @@ bool AccountManagerClient::changePassword(int userID, char* oldPass, char* newPa
 	master->HashPass((char*)outputNew);
 
 	cp.UserID = userID;
-	strncpy( cp.HashedOldPassMD5, (char*)outputOld, 16 );
-	strncpy( cp.HashedNewPassMD5, (char*)outputNew, 16 );
+	memcpy( cp.HashedOldPassMD5, outputOld, 16 ); // the first 16 hash characters, no '\0' (as strncpy did)
+	memcpy( cp.HashedNewPassMD5, outputNew, 16 );
 	master->sendPacket( (char*)&cp , sizeof(stChangePassword) , CHANGE_PASSWORD );
 	return true;
 }
