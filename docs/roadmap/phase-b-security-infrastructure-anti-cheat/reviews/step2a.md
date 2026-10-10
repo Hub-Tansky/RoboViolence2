@@ -27,8 +27,14 @@ Before the review, `tools/review.sh --full macos-arm64` at 59bacb7: architecture
 - The UTF-8 code page manifest: `smoke_server_utf8_path` failed on `windows-latest` without it (run 38000906829: banner, then quit, no "Server Created on port") and passed with it (run 38002113508).
 - Finding 2/5/6: `tests/smoke_server.py … --install-under` passes locally on macOS; the Windows run follows in this PR's CI.
 
+## Owner acceptance (2026-10-10, Windows 10 Pro 22H2, Intel G41 Express, CI package of 11c3e62)
+
+- First package (49ed746): `bv2dedicated.exe` failed with "MSVCP140D.dll was not found". Fixed in 11c3e62 (static C++ runtime), with the `windows_no_crt_dlls` test failing before (run 38045503231) and passing after (run 38046255900).
+- Fixed package: `bv2dedicated` runs (`Server Created on port 3333` with original data, CTF-Crazy). The client starts but renders garbled text, flickers and ignores clicks: the G41's Microsoft WDDM 1.1 driver has no OpenGL ICD, so Windows gives OpenGL 1.1. Owner decision: no code change; the Windows guide states the OpenGL 2.1 driver requirement.
+- Accepted by the owner: the servers on Windows 10 22H2; the client is blocked by this PC's hardware, not by the package.
+
 ## Not done / unsure
 
-- Owner acceptance: start `bv2`, `bv2dedicated` and `bv2master` from the CI Windows package on Windows 10 Pro 22H2 and join a local game. Not done yet; the step stays IN PROGRESS.
+- The client could not be play-tested on Windows: the owner's only Windows PC has an Intel G41 GPU without an OpenGL 2.1 driver (see Owner acceptance). Step 2's Windows play-test needs another Windows 10/11 PC.
 - `--full` after the review fixes: to rerun at the final head.
 - The UTF-8 ACP and the console code page: non-ASCII server console output isn't tested.

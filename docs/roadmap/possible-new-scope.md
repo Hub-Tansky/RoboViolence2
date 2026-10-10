@@ -223,3 +223,11 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Suggested home:** the next step that touches `.github/workflows/build.yml` (step 3 adds a fuzz job there).
 - **Status:** Proposed
 
+### PNS-28: Start in fullscreen on every OS
+
+- **Found in:** owner request after the Windows 10 play-test (2026-10-10).
+- **Extract:** "on all systems game starts in fullscreen mode."
+- **Why it matters:** the client starts windowed (`r_fullScreen` defaults to false, `game/src/GameVar.cpp`); players expect fullscreen. Fullscreen and resolution already apply after a restart (Phase B step 2 context).
+- **Suggested home:** a **[GUI]** change, approved by the owner (2026-10-10): flip the default and test the first start on macOS, Windows and Linux (Retina/HiDPI sizes).
+- **Status:** Proposed
+
