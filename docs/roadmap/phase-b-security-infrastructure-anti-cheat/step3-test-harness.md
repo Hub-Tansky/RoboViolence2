@@ -28,20 +28,26 @@
 ### 3.1 In-process server harness
 
 - A test library that builds the `CONSOLE` server sources with a fake babonet send layer. It starts a `Game` on a placeholder map and exposes `deliver(typeID, bytes, bbnetID)` and the captured outgoing packets.
+- Done: `bv2server_lib` (`game/CMakeLists.txt`) and `tests/harness/`. The fake `bb_*` objects are linked before babonet, so `baboNet.cpp` is never pulled in. Messages go through the real `Server::updateNet` with exactly the delivered bytes.
 
 ### 3.2 Corpus and replay
 
 - `tests/corpus/<message>/*.bin`: one valid sample per message type, built from `netPacket.h` structs by a generator.
 - A replay test runs every corpus file through `deliver` and checks there is no crash and the expected replies.
+- Done: `tests/corpus_types.h` (types, valid samples, known crash inputs), `gen_corpus`, `test_replay`. Each `crash-*.bin` is its own ctest under ASan and passes only while ASan reports it; its fix step deletes the file.
 
 ### 3.3 Fuzzer
 
 - A libFuzzer target where available (Clang), plus a portable random-mutation runner for MSVC/GCC. Runs per message type for a time budget; crashes are saved into the corpus.
 - CI job `fuzz` (Linux, ASan, 2 min per message type, not required).
+- Done: `tests/fuzz_server.cpp`, a portable random-mutation runner at each type's wire size; CI job `fuzz`. Known defects are masked so fuzzing reaches further (Q-S2 `playerID`, R21/R22 `%` and missing `\0`); their fix steps remove the masks.
+- Not done: a libFuzzer target. CI's Linux ASan build uses GCC, which has no libFuzzer, so it would never run there (confirm with the owner).
+- The first local runs found R21–R26 (`docs/analysis/KEY_QUESTIONS.md` Part D).
 
 ### 3.4 Master-server tests
 
 - Start `bv2master` on a loopback port with a scratch `master.db`. Test register, list, heartbeat timeout and server removal.
+- Done: `tests/test_master.cpp` runs the master in-process (`bv2master_lib`) on its fixed port 10207 (`RESOURCE_LOCK`), with real babonet clients. `Update(61 s)` simulates the heartbeat timeout; removal uses `KILL_SERV`.
 
 ## Critical files
 
