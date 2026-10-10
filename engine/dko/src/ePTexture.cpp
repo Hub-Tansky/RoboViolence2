@@ -98,6 +98,12 @@ const unsigned short CHUNK_VERSION_END = 0x9000;
 //
 // Pour le loader
 //
+// Reads the next chunk; at end of file it becomes the caller's end chunk, so the loop stops.
+static void readChunkDKT(FILE* ficIn, _typChunkDKT& chunk, unsigned short endID)
+{
+	if (!bv2ReadBytes(ficIn, &chunk, sizeof(chunk))) chunk.chunkID = endID;
+}
+
 void ePTexture::loadIt(char* filename)
 {
 	// On ouvre le fichier
@@ -108,13 +114,13 @@ void ePTexture::loadIt(char* filename)
 
 	// On check la version (ceci doit être le premier chunk, sinon ce n'est pas un fichier valide
 	_typChunkDKT chunk;
-    fread(&chunk, 1, sizeof(chunk), ficIn);
+    bv2ReadBytes(ficIn, &chunk, sizeof(chunk));
 
 		if (chunk.chunkID == CHUNK_VERSION)
 		{
 			// La première version
 			short version;
-			fread(&version, 1, 2, ficIn);
+			bv2ReadBytes(ficIn, &version, 2);
 			if (version != 0x0001) return;
 		}
 		else
@@ -123,7 +129,7 @@ void ePTexture::loadIt(char* filename)
 		}
 
 	// On li le chunk
-       fread(&chunk, 1, sizeof(chunk), ficIn);
+       readChunkDKT(ficIn, chunk, CHUNK_VERSION_END);
 
 	// Ensuite on passe tout les chunk jusqu'à fin
 	while (chunk.chunkID != CHUNK_VERSION_END)
@@ -135,7 +141,7 @@ void ePTexture::loadIt(char* filename)
 		}
 
 		// On li le chunk
-        fread(&chunk, 1, sizeof(chunk), ficIn);
+        readChunkDKT(ficIn, chunk, CHUNK_VERSION_END);
 	}
 
 	// On ferme le fichier
@@ -148,7 +154,7 @@ void ePTexture::loadMap(FILE* ficIn)
 
 	// On li le premier chunk
 	_typChunkDKT chunk;
-    fread(&chunk, 1, sizeof(chunk), ficIn);
+    readChunkDKT(ficIn, chunk, CHUNK_MAP_END);
 
 	while (chunk.chunkID != CHUNK_MAP_END)
 	{
@@ -173,7 +179,7 @@ void ePTexture::loadMap(FILE* ficIn)
 		}
 
 		// On li le chunk suivant
-        fread(&chunk, 1, sizeof(chunk), ficIn);
+        readChunkDKT(ficIn, chunk, CHUNK_MAP_END);
 	}
 }
 
@@ -181,7 +187,7 @@ void ePTexture::loadTexture(_typLayer* ptrLayer, FILE* ficIn)
 {
 	// On li le premier chunk
 	_typChunkDKT chunk;
-    fread(&chunk, 1, sizeof(chunk), ficIn);
+    readChunkDKT(ficIn, chunk, CHUNK_MAP_TEXTURE_END);
 
 	// On passe les autres apres
 	while (chunk.chunkID != CHUNK_MAP_TEXTURE_END)
@@ -191,7 +197,7 @@ void ePTexture::loadTexture(_typLayer* ptrLayer, FILE* ficIn)
 		case CHUNK_MAP_TEXTURE_DIMENSION:
 			{
 				_typDimension dim;
-				fread(&dim, 1, sizeof(_typDimension), ficIn);
+				bv2ReadBytes(ficIn, &dim, sizeof(_typDimension));
 				ptrLayer->w = dim.width;
 				ptrLayer->h = dim.height;
 				ptrLayer->bpp = dim.bpp;	
@@ -200,18 +206,15 @@ void ePTexture::loadTexture(_typLayer* ptrLayer, FILE* ficIn)
 		case CHUNK_MAP_TEXTURE_TRANSFORMATION:
 			{
 				_typTransformation trans;
-				fread(&trans, 1, sizeof(_typTransformation), ficIn);
+				bv2ReadBytes(ficIn, &trans, sizeof(_typTransformation));
 				ptrLayer->scale = trans.scaleU;
 				break;
 			}
 		case CHUNK_MAP_TEXTURE_DATA:
 			{
-#ifndef CONSOLE
-					GLubyte* imageData = new GLubyte [ptrLayer->w*ptrLayer->h*ptrLayer->bpp];
-#else
-				unsigned char* imageData = new unsigned char [ptrLayer->w*ptrLayer->h*ptrLayer->bpp];
-#endif
-				fread(imageData, 1, ptrLayer->w*ptrLayer->h*ptrLayer->bpp, ficIn);
+				size_t size = (size_t)ptrLayer->w*ptrLayer->h*ptrLayer->bpp; // one size for the buffer and the read
+				unsigned char* imageData = new unsigned char [size];
+				bv2ReadBytes(ficIn, imageData, size);
 				if (ptrLayer->bpp == 4)
 					ptrLayer->textureID = createTextureFromBuffer(imageData, ptrLayer->w, ptrLayer->h, ptrLayer->bpp, 1, false);
 				else
@@ -221,7 +224,7 @@ void ePTexture::loadTexture(_typLayer* ptrLayer, FILE* ficIn)
 		}
 
 		// On li le chunk suivant
-        fread(&chunk, 1, sizeof(chunk), ficIn);
+        readChunkDKT(ficIn, chunk, CHUNK_MAP_TEXTURE_END);
 	}
 }
 
@@ -234,10 +237,11 @@ void ePTexture::loadString(char* string, FILE* ficIn)
 {
 	// On load le premier caractère
 	int i=0;
-	fread(&(string[i++]), 1, 1, ficIn);
+	bv2ReadBytes(ficIn, &(string[i++]), 1);
 
 	// On load le reste
-	for (; string[i-1]; fread(&(string[i++]), 1, 1, ficIn));
+	for (; string[i-1]; i++)
+		if (i == 255 || !bv2ReadBytes(ficIn, &string[i], 1)) string[i] = 0; // buffer full or end of file: end the string
 }
 
 

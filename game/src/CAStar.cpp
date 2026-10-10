@@ -293,7 +293,7 @@ void CAStar::CreateNodes(int in_x, int in_y, int in_size)
 {
 	//--- Check is there is something in the way
 	int x,y;
-	unsigned char value;
+	unsigned char value = 0;
 	for (y=in_y;y<in_y+in_size;++y)
 	{
 		for (x=in_x;x<in_x+in_size;++x)

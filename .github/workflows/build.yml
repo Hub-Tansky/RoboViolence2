@@ -34,9 +34,15 @@ jobs:
         run: cmake --build --preset ${{ matrix.preset }} -- -k 0
       - name: Test
         run: ctest --test-dir build/${{ matrix.preset }} --output-on-failure
+      # The packages are Release: fullscreen by default, no debug C++ runtime.
+      - name: Configure, build and test Release
+        run: |
+          cmake --preset ${{ matrix.preset }}-release
+          cmake --build --preset ${{ matrix.preset }}-release -- -k 0
+          ctest --test-dir build/${{ matrix.preset }}-release --output-on-failure
       - name: Package (client, servers, main/, databases, run scripts)
         shell: bash
-        run: ${{ runner.os == 'Windows' && 'python' || 'python3' }} packaging/make-package.py build/${{ matrix.preset }}/runtime ${{ matrix.preset }} out
+        run: ${{ runner.os == 'Windows' && 'python' || 'python3' }} packaging/make-package.py build/${{ matrix.preset }}-release/runtime ${{ matrix.preset }} out
       # archive: false uploads the package as-is (no zip around the zip); the artifact takes the file's name.
       - uses: actions/upload-artifact@v7
         with:

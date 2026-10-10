@@ -75,7 +75,41 @@ int main(int argc, char ** argv)
 		CHECK(in.getUByte() == 200);
 		CHECK(in.getBool() == true);
 	}
+	{
+		// bv2ReadBytes (platform.h): a short read zero-fills the rest and returns false. 18 bytes in the file.
+		FILE * f = std::fopen(path.c_str(), "rb");
+		unsigned char buf[20];
+		std::memset(buf, 0xAA, sizeof(buf));
+		CHECK(bv2ReadBytes(f, buf, 16));
+		CHECK(!bv2ReadBytes(f, buf, 4));
+		CHECK(buf[0] == 200 && buf[1] == 1 && buf[2] == 0 && buf[3] == 0);
+		std::fclose(f);
+	}
+	{
+		// getFixedString's length prefix: 7 bits per byte, high bit = more bytes. 200 chars need two bytes.
+		std::string fixedPath = std::string(argv[1]) + "/fixedstring.bin";
+		std::string text(200, 'x');
+		{
+			FileIO out(CString("%s", fixedPath.c_str()), "wb");
+			out.putFixedString(CString("%s", text.c_str()));
+		}
+		FileIO in(CString("%s", fixedPath.c_str()), "rb");
+		CHECK(std::string(in.getFixedString().s) == text);
+	}
+	{
+		// CString::loadFromFile on 600 bytes without a '\0' keeps a terminated 511-character string.
+		std::string longPath = std::string(argv[1]) + "/unterminated.bin";
+		FILE * f = std::fopen(longPath.c_str(), "wb");
+		std::string text(600, 'y');
+		std::fwrite(text.data(), 1, text.size(), f);
+		std::fclose(f);
+		f = std::fopen(longPath.c_str(), "rb");
+		CString loaded;
+		loaded.loadFromFile(f);
+		std::fclose(f);
+		CHECK(loaded.len() == 511);
+	}
 	if (failures == 0)
-		std::printf("ok: FileIO widths\n");
+		std::printf("ok: FileIO widths, bv2ReadBytes, fixed string, unterminated CString\n");
 	return failures ? 1 : 0;
 }

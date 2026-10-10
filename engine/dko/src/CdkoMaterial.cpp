@@ -299,51 +299,51 @@ int CdkoMaterial::loadFromFile(FILE *ficIn, char *path)
 			}
 		case CHUNK_DKO_AMBIENT:
 			{
-				fread(ambient, 4, sizeof(float), ficIn);
+				bv2ReadBytes(ficIn, ambient, 4 * sizeof(float));
 				break;
 			}
 		case CHUNK_DKO_DIFFUSE:
 			{
-				fread(diffuse, 4, sizeof(float), ficIn);
+				bv2ReadBytes(ficIn, diffuse, 4 * sizeof(float));
 				break;
 			}
 		case CHUNK_DKO_SPECULAR:
 			{
-				fread(specular, 4, sizeof(float), ficIn);
+				bv2ReadBytes(ficIn, specular, 4 * sizeof(float));
 				break;
 			}
 		case CHUNK_DKO_EMISSIVE:
 			{
-				fread(emissive, 4, sizeof(float), ficIn);
+				bv2ReadBytes(ficIn, emissive, 4 * sizeof(float));
 				break;
 			}
 		case CHUNK_DKO_SHININESS:
 			{
-				fread(&shininess, 1, sizeof(short), ficIn);
+				bv2ReadBytes(ficIn, &shininess, sizeof(short));
 				break;
 			}
 		case CHUNK_DKO_TRANSPARENCY:
 			{
-				fread(&transparency, 1, sizeof(float), ficIn);
+				bv2ReadBytes(ficIn, &transparency, sizeof(float));
 				break;
 			}
 		case CHUNK_DKO_TWO_SIDED:
 			{
 				char temp;
-				fread(&temp, 1, sizeof(char), ficIn);
+				bv2ReadBytes(ficIn, &temp, sizeof(char));
 				twoSided = (temp) ? true : false;
 				break;
 			}
 		case CHUNK_DKO_WIRE_FRAME:
 			{
 				char temp;
-				fread(&temp, 1, sizeof(char), ficIn);
+				bv2ReadBytes(ficIn, &temp, sizeof(char));
 				wire = (temp) ? true : false;
 				break;
 			}
 		case CHUNK_DKO_WIRE_WIDTH:
 			{
-				fread(&wireSize, 1, sizeof(float), ficIn);
+				bv2ReadBytes(ficIn, &wireSize, sizeof(float));
 				break;
 			}
 		}

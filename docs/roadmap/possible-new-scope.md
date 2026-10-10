@@ -239,6 +239,14 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Suggested home:** owner-approved (2026-10-10). Release packages give fullscreen without a code change.
 - **Status:** Accepted → Phase B [step 2b](phase-b-security-infrastructure-anti-cheat/step2b-release-packages.md)
 
+### PNS-29: Shareable debug-capable Windows packages
+
+- **Found in:** owner decision on step 2b (2026-10-10): CI ships Release packages only.
+- **Extract:** "investigation if i can change software stack to be able to distribute debug packages (replacement of Windows Debug package)".
+- **Why it matters:** a Windows Debug build links Microsoft's debug C++ runtime, which may not be redistributed, so testers can't get a crash-friendly build.
+- **Suggested home:** a small investigation step. Candidates: RelWithDebInfo packages (release runtime plus `.pdb` symbols, redistributable); a toolchain whose debug runtime is redistributable (clang/LLVM-MinGW with libc++). Compare crash-report value, size and CI time.
+- **Status:** Proposed
+
 ### PNS-30: "High detail menus" looks worse than off
 
 - **Found in:** owner play-test on macOS and Linux, Phase B step 2 (2026-10-10).
@@ -261,3 +269,11 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
   - Results rows in `phase-a-manual-test.md` (task 2.6).
 - **Suggested home:** the next Linux build check (wheel); the cross-OS game and Windows client run when a suitable PC is available; the Results rows before step 4 (regression baseline, PNS-1).
 - **Status:** Accepted (owner-deferred)
+
+### PNS-32: In-game menu sits left of centre in fullscreen
+
+- **Found in:** owner play-test of the step 2b macOS Release package, fullscreen (2026-10-10).
+- **Extract:** "menu during play is shifted a little to the left. It is not centered." Screenshot (1703 px wide): the team and weapon buttons span x 46–1598, leaving 46 px left and 105 px right.
+- **Why it matters:** cosmetic; every player sees it in fullscreen. Cause not analysed (likely the menu's fixed layout on a wide or HiDPI screen).
+- **Suggested home:** a **[GUI]** change (owner approval), with HiDPI and ultrawide scaling (PNS-18).
+- **Status:** Proposed

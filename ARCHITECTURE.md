@@ -53,7 +53,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `AGENTS.md` | Canonical agent and contributor instructions |
 | `ARCHITECTURE.md` | This file: summary and file inventory |
 | `CMakeLists.txt` | Root CMake project: options, runtime layout, placeholder content, subdirectories |
-| `CMakePresets.json` | Presets: linux-x64, macos-arm64, win-x64-msvc, -asan variants (Ninja) |
+| `CMakePresets.json` | Presets: linux-x64, macos-arm64, win-x64-msvc (Debug), -asan and -release variants (Ninja) |
 | `LICENSE.txt` | GPLv3 text (code only) |
 | `README.md` | Project overview, fork and asset-removal statement |
 | `REVIEW.md` | Definition of done: `tools/review.sh` checks, reviewer checklist, defined terms, forbidden shortcuts, fresh-context step review and its record |
@@ -61,7 +61,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/Paths.cpp` | Data root search, per-user pref dir, layered config loading, map and DB path helpers |
 | `game/src/Paths.h` | Interface of `Paths.cpp` (namespace `bv2`) |
 | `packaging/linux/roboviolence2.desktop` | Linux desktop entry |
-| `packaging/make-package.py` | Builds the per-OS play-test package from `runtime/` (links resolved, macOS bundle re-signed) |
+| `packaging/make-package.py` | Builds the per-OS play-test package from a Release `runtime/` (links resolved, macOS bundle re-signed) |
 | `packaging/scripts/run-client.cmd` | Package script: starts the client (Windows) |
 | `packaging/scripts/run-client.sh` | Package script: starts the client (macOS bundle or Linux binary) |
 | `packaging/scripts/run-master.cmd` | Package script: starts the master server (Windows) |
@@ -75,7 +75,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/check_windows_deps.py` | Windows: fails if `bv2`, `bv2dedicated` or `bv2master` needs a Visual C++ runtime DLL |
 | `tests/smoke_server.py` | Starts `bv2dedicated` headless, runs the CTF script, quits; checks exit code, server creation and `bv2.cfg`. `--install-under` runs it from a non-ASCII path (Windows UTF-8 code page) |
 | `tests/test_config.cpp` | dksvar config layering, transient values not saved, secrets masked |
-| `tests/test_fileio.cpp` | `FileIO` byte widths for `.bvm` data and the widths the `.DKO` loader relies on |
+| `tests/test_fileio.cpp` | `FileIO` byte widths for `.bvm` data and the widths the `.DKO` loader relies on; `bv2ReadBytes` zero-fills a short read; fixed-string length prefix round trip; unterminated `CString::loadFromFile` (overflows under ASan without its bound) |
 | `tests/test_netpacket.cpp` | Byte-level layout of the packed wire structs |
 | `tools/check-content-case.py` | Fails when a literal `main/...` path differs from a real file name only by case |
 | `vcpkg.json` | vcpkg manifest (sqlite3, curl; Step 3 completes it) |
@@ -104,7 +104,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | path | purpose |
 |---|---|
 | `.github/workflows/secret-scan.yml` | CI: gitleaks over commits after the fork point and original-asset check |
-| `.github/workflows/build.yml` | CI: build, ctest and package on Windows, macOS, Linux (`roboviolence2-<preset>` artifacts); `package-check` of the Linux package in a clean `ubuntu:24.04`; ASan smoke job with client under xvfb |
+| `.github/workflows/build.yml` | CI: Debug and Release build and ctest, Release package on Windows, macOS, Linux (`roboviolence2-<preset>` artifacts); `package-check` of the Linux package in a clean `ubuntu:24.04`; ASan smoke job with client under xvfb |
 | `.github/workflows/hygiene.yml` | CI: ARCHITECTURE.md inventory, repository hygiene, content case; `review` (`tools/review.sh`) on PRs |
 | `.github/workflows/codeql.yml` | CodeQL: `c-cpp` (manual linux-x64 build of the three executables) and `actions`; push, PR, weekly; alerts under `build/` (vcpkg headers) filtered out |
 | `.github/workflows/dependency-graph.yml` | Submits resolved vcpkg ports to the dependency graph on push to `main` |
@@ -239,6 +239,8 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step1.md` | Fresh-context review record for step 1 |
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step2-report.md` | Raw reviewer report for step 2 |
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step2.md` | Fresh-context review record for step 2 |
+| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step2b-report.md` | Raw reviewer report for step 2b |
+| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step2b.md` | Fresh-context review record for step 2b |
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step2a-report.md` | Raw reviewer report for step 2a |
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step2a.md` | Fresh-context review record for step 2a |
 
@@ -360,7 +362,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `engine/zeven/include/dkt.h` | dkt: texture loading (TGA) and binding |
 | `engine/zeven/include/dkw.h` | dkw: window creation and events |
 | `engine/zeven/include/glheaders.h` | The only OpenGL include: glad, then GLU |
-| `engine/zeven/include/platform.h` | Platform macros (BV2_PLATFORM_*, BV2_POSIX), INT4/UINT4, POSIX includes and Win32 type shims; force-included |
+| `engine/zeven/include/platform.h` | Platform macros (BV2_PLATFORM_*, BV2_POSIX), INT4/UINT4, `bv2ReadBytes` (checked `fread` for the engine loaders and `FileIO`), POSIX includes and Win32 type shims; force-included |
 
 ### `engine/zeven/src`
 

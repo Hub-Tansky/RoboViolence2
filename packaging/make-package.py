@@ -7,7 +7,7 @@ Writes <out dir>/roboviolence2-<preset>.<zip|tar.gz> holding one folder with the
 bv2master, main/ (links resolved), the generated databases and the run scripts from packaging/scripts/.
 The macOS bundle gets a real Contents/Resources/main instead of the build's symlink, then an ad-hoc signature;
 the servers read the folder's own main/ (docs/build/macos.md).
-Fails if anything the package must hold is missing.
+Fails if the build is not Release, or if anything the package must hold is missing.
 """
 import shutil
 import subprocess
@@ -19,6 +19,9 @@ SCRIPTS = Path(__file__).resolve().parent / "scripts"
 
 def main():
     runtime, preset, out = Path(sys.argv[1]), sys.argv[2], Path(sys.argv[3])
+    # Players get Release only: Debug starts windowed and, on Windows, carries the debug C++ runtime.
+    if "CMAKE_BUILD_TYPE:STRING=Release" not in (runtime.parent / "CMakeCache.txt").read_text().splitlines():
+        sys.exit(f"{runtime.parent} is not a Release build")
     windows, macos = sys.platform == "win32", sys.platform == "darwin"
     exe, script_ext = (".exe", ".cmd") if windows else ("", ".sh")
     name = f"roboviolence2-{preset}"

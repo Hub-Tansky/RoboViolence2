@@ -1136,7 +1136,7 @@ void Server::recvPacket(char * buffer, int typeID, unsigned long bbnetID)
 				for (int i = 0; i < (int)maps.size(); i++)
 				{
 					memset(mapl.mapName, 0, 16);
-					strncpy(mapl.mapName, maps[i].s, min(maps[i].len(), 16));
+					memcpy(mapl.mapName, maps[i].s, min(maps[i].len(), 15)); // keep the '\0' in byte 16
 					bb_serverSend((char*)&mapl, sizeof(net_svcl_map_list), NET_SVCL_MAP_LIST, game->players[maplRequest.playerID]->babonetID);
 				}
 			}

@@ -66,7 +66,7 @@ def expand(g):  # {a,b} alternatives
 
 GUARDS = re.compile(r"^(tools/check-|tools/review\.sh$|tools/original-assets|\.githooks/|\.github/|\.gitleaks\.toml$|\.gitignore$|REVIEW\.md$)")
 if step:
-    row = next((l for l in open(step, encoding="utf-8") if l.startswith("| Allowed paths |")), None)
+    row = next((l for l in open(step, encoding="utf-8") if re.match(r"\|\s*Allowed paths\s*\|", l)), None)
     if row is None:
         problems.append(f"{step}: no '| Allowed paths |' row")
     else:

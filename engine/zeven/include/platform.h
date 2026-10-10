@@ -44,6 +44,16 @@
 	#include <algorithm>
 	using std::min;
 	using std::max;
+
+	#include <cstdio>
+	#include <cstring>
+	// Reads n bytes. A truncated file leaves the rest zeroed instead of uninitialised, and returns false.
+	inline bool bv2ReadBytes(FILE * f, void * dst, size_t n)
+	{
+		size_t got = fread(dst, 1, n, f);
+		if (got < n) memset(static_cast<char *>(dst) + got, 0, n - got);
+		return got == n;
+	}
 #endif
 
 /* 32-bit wire types (the old code used long on 32-bit and int on LP64). */
