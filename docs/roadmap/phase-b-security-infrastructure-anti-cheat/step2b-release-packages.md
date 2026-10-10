@@ -51,6 +51,7 @@
 
 - CI uploads Release packages for all three OSes; `package-check` passes on the Linux one.
 - The owner starts the macOS package and it opens fullscreen.
+  - **Done (owner, 2026-10-10, macOS 27.0.1, CI package of 107de51):** the client starts fullscreen. The in-game menu sits left of centre → PNS-32.
 - `tools/review.sh --full <preset>` passes, and the fresh-context review record `reviews/step2b.md` and the raw reviewer report `reviews/step2b-report.md` (with the skill's load line) exist ([REVIEW.md](../../../REVIEW.md) section 5).
 - `ARCHITECTURE.md` lists every file added, moved or removed in this step.
 - The secret scan (`gitleaks git --staged` / CI) is clean.

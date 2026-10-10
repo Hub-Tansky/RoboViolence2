@@ -269,3 +269,11 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
   - Results rows in `phase-a-manual-test.md` (task 2.6).
 - **Suggested home:** the next Linux build check (wheel); the cross-OS game and Windows client run when a suitable PC is available; the Results rows before step 4 (regression baseline, PNS-1).
 - **Status:** Accepted (owner-deferred)
+
+### PNS-32: In-game menu sits left of centre in fullscreen
+
+- **Found in:** owner play-test of the step 2b macOS Release package, fullscreen (2026-10-10).
+- **Extract:** "menu during play is shifted a little to the left. It is not centered." Screenshot (1703 px wide): the team and weapon buttons span x 46–1598, leaving 46 px left and 105 px right.
+- **Why it matters:** cosmetic; every player sees it in fullscreen. Cause not analysed (likely the menu's fixed layout on a wide or HiDPI screen).
+- **Suggested home:** a **[GUI]** change (owner approval), with HiDPI and ultrawide scaling (PNS-18).
+- **Status:** Proposed
