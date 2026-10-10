@@ -195,7 +195,7 @@ CString MemIO::getFixedString()
 	char * tmpString = new char [finalLen + 1];
 	memcpy(tmpString, string, finalLen);
 	tmpString[finalLen] = '\0';
-	CString finalString(tmpString);
+	CString finalString("%s", tmpString);
 	delete [] tmpString;
 	delete [] string;
 
@@ -207,7 +207,7 @@ CString MemIO::getString()
 	char tmp[256];
 	char carac = 1;
 	for (int i=0;carac!='\0';carac = tmp[i++] = getByte());
-	return tmp;
+	return CString("%s", tmp);
 }
 
 CVector3f MemIO::getVector3f()

@@ -70,7 +70,7 @@ CString FileIO::getLine()
 {
 	char buffer[160];
 	if (!fgets(buffer, 160, m_file)) buffer[0] = 0; // end of file: empty line
-	return buffer;
+	return CString("%s", buffer); // file text is data, not a format
 }
 
 
@@ -210,7 +210,7 @@ CString FileIO::getFixedString()
 	char * tmpString = new char [finalLen + 1];
 	memcpy(tmpString, string, finalLen);
 	tmpString[finalLen] = '\0';
-	CString finalString(tmpString);
+	CString finalString("%s", tmpString);
 	delete [] tmpString;
 	delete [] string;
 
@@ -222,7 +222,7 @@ CString FileIO::getString()
 	char tmp[256];
 	char carac = 1;
 	for (int i=0;carac!='\0';carac = tmp[i++] = getByte());
-	return tmp;
+	return CString("%s", tmp);
 }
 
 CVector3f FileIO::getVector3f()
