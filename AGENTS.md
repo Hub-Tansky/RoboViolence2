@@ -40,6 +40,9 @@ cmake --build --preset <preset> --target bv2dedicated bv2master
 ## Agent rules
 
 - Work one step at a time, from its scope file in `docs/roadmap/<phase>/`. Stay inside the step's **Allowed paths**; note out-of-scope work instead of doing it.
+- Propose Minimal Changes: Provide only the simplest, most direct code or solution required to make the step work or fix the bug.
+- Ignore Corner Cases: Do not write defensive code for rare edge cases, scale considerations, or downstream exceptions.
+- Deliverables: Your output must reflect a "Minimum Viable Product" mindset for scope of step or bug. Keep the diff or response as small and readable as possible.
 - Branch `refactor/<phase>-stepN-<slug>` (e.g. `refactor/phase-b-step1-playtest-builds`), one commit per task item (`stepN.M: <summary>`), one PR per step. Phase A step 0 was the only step committed straight to `main`.
 - Never commit secrets, real hosts or IPs. Never use `--no-verify`.
 - Finish every step by updating `ARCHITECTURE.md` (inventory and changed facts) and running `tools/check-architecture.sh`.
