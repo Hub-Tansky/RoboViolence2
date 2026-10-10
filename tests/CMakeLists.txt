@@ -28,3 +28,10 @@ target_include_directories(test_fileio PRIVATE ${CMAKE_SOURCE_DIR}/game/src)
 target_link_libraries(test_fileio PRIVATE zeven_core)
 bv2_target_defaults(test_fileio)
 add_test(NAME fileio COMMAND test_fileio "${BV2_TEST_SCRATCH}")
+
+if(WIN32 AND TARGET bv2 AND TARGET bv2dedicated AND TARGET bv2master)
+  find_package(Python3 REQUIRED COMPONENTS Interpreter)
+  add_test(NAME windows_no_crt_dlls
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/check_windows_deps.py
+      $<TARGET_FILE:bv2> $<TARGET_FILE:bv2dedicated> $<TARGET_FILE:bv2master>)
+endif()
