@@ -1,6 +1,6 @@
 # Step 2a: Windows 10 22H2 as the minimum Windows target
 
-**Status:** IN PROGRESS
+**Status:** DONE (2026-10-10)
 
 **Depends on:** [Step 1](step1-playtest-builds-and-build-guides.md). **Blocks:** the Windows run of [step 2](step2-cross-os-playtest.md). **Next:** [step2b-release-packages.md](step2b-release-packages.md). **Index:** [README.md](README.md)
 

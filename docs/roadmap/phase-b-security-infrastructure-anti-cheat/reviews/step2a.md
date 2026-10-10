@@ -57,10 +57,12 @@ Before the review, `tools/review.sh --full macos-arm64` at 59bacb7: architecture
 
 - First package (49ed746): `bv2dedicated.exe` failed with "MSVCP140D.dll was not found". Fixed in 11c3e62 (static C++ runtime), with the `windows_no_crt_dlls` test failing before (run 38045503231) and passing after (run 38046255900).
 - Fixed package: `bv2dedicated` runs (`Server Created on port 3333` with original data, CTF-Crazy). The client starts but renders garbled text, flickers and ignores clicks: the G41's Microsoft WDDM 1.1 driver has no OpenGL ICD, so Windows gives OpenGL 1.1. Owner decision: no code change; the Windows guide states the OpenGL 2.1 driver requirement.
+- `bv2master` from the same package: "Database opened successfully", "Web Database opened successfully", "Master Server Up and Running".
 - Accepted by the owner: the servers on Windows 10 22H2; the client is blocked by this PC's hardware, not by the package.
 
 ## Not done / unsure
 
 - The client could not be play-tested on Windows: the owner's only Windows PC has an Intel G41 GPU without an OpenGL 2.1 driver (see Owner acceptance). Step 2's Windows play-test needs another Windows 10/11 PC.
+- `--full` at a2ceaf6 (final code and docs): all PASS. This record's last commit only adds the master result and Status.
 - `--full` after the review fixes: to rerun at the final head.
 - The UTF-8 ACP and the console code page: non-ASCII server console output isn't tested.
