@@ -12,7 +12,7 @@ Entry format: ID, where it was found, an extract of the source, why it matters, 
 - **Extract:** "The manual test has not been run yet on any OS." (PR #13); "Not verified: Windows `/WX` on game targets (first CI run), OGG playback, HiDPI, audio, a real two-machine game." (PR #7)
 - **Why:** The README's "Phase A done when" requires DM, TDM and CTF rounds with sound, input and map download on all three OSes. The Results table in [phase-a-manual-test.md](phase-a-modern-portable-build/phase-a-manual-test.md) is empty. Phase B changes (§A packet hygiene, §C.5 validator) need this baseline to detect regressions.
 - **Suggested home:** run before Phase B §A starts; record results in the table.
-- **Status:** Accepted → Phase B [step 1](phase-b-security-infrastructure-anti-cheat/step1-playtest-builds-and-build-guides.md) and [step 2](phase-b-security-infrastructure-anti-cheat/step2-cross-os-playtest.md)
+- **Status:** Accepted → Phase B [step 1](phase-b-security-infrastructure-anti-cheat/step1-playtest-builds-and-build-guides.md) and [step 2](phase-b-security-infrastructure-anti-cheat/step2-cross-os-playtest.md); the rest → PNS-31
 
 ### PNS-2: Font loader is single-byte, codes 33–159 only
 
@@ -215,6 +215,14 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Suggested home:** a **[GUI]** change (owner approval), e.g. with the rebrand (PNS-20) or menu work. Fullscreen and resolution apply after a restart (confirmed); a "restart required" hint would be the same kind of change.
 - **Status:** Proposed
 
+### PNS-26: vcpkg ports ignore the macOS 12 deployment target
+
+- **Found in:** Phase B step 2 (2026-10-08), building the client on macOS.
+- **Extract:** `ld: warning: object file (…/vcpkg_installed/arm64-osx/debug/lib/libSDL3.a[248](SDL_dummysensor.c.o)) was built for newer 'macOS' version (27.0) than being linked (12.0)`.
+- **Why it matters:** `CMakePresets.json:58` sets `CMAKE_OSX_DEPLOYMENT_TARGET` 12.0 for our code, but the `arm64-osx` triplet builds SDL3 and the other ports for the build machine's macOS. The CI package (built on `macos-14`) therefore likely needs macOS 14+, while the docs promise 12+. Friends on older Macs may not be able to start it.
+- **Suggested home:** an overlay triplet setting `VCPKG_OSX_DEPLOYMENT_TARGET 12.0` for the macOS presets (touches `CMakePresets.json` and a new `triplets/`), or change the documented minimum. Before the PNS-31 cross-OS game if a tester has macOS < 14.
+- **Status:** Proposed
+
 ### PNS-27: Pin the Windows CI runner image
 
 - **Found in:** Phase B step 2a fresh-context review (2026-10-10), finding 1.
@@ -231,3 +239,25 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Suggested home:** owner-approved (2026-10-10). Release packages give fullscreen without a code change.
 - **Status:** Accepted → Phase B [step 2b](phase-b-security-infrastructure-anti-cheat/step2b-release-packages.md)
 
+### PNS-30: "High detail menus" looks worse than off
+
+- **Found in:** owner play-test on macOS and Linux, Phase B step 2 (2026-10-10).
+- **Extract:** Options → "High detail menus" (`r_highDetailMenu`, default `true`, `game/src/GameVar.cpp:677`) drives `renderMenuQuad` (`game/src/Helper.cpp:248`), upstream code. Off (`game/src/Helper.cpp:342`): one smooth translucent vertical gradient. On (`game/src/Helper.cpp:296`): a two-part gradient with a hard step at mid-height, and four full-size black quads at alpha 0.25 meant as a 1 px shadow, which darken the whole panel by about 68%.
+- **Why it matters:** the default setting gives the worse-looking, less translucent menus.
+- **Proposed changes:**
+  - Change the default to `false` (one line).
+  - When on, draw the shadow as a 1 px border only and remove the mid-height step, so "on" is a refined version of "off".
+- **Suggested home:** a **[GUI]** change (owner approval), with menu work or the rebrand (PNS-20).
+- **Status:** Proposed
+
+### PNS-31: Finish the step 2 play-test checks
+
+- **Found in:** Phase B step 2 close (2026-10-10); the owner merges step 2 with these checks open.
+- **Extract:** owner: "task 2.2, windows client play-test have to be checked later, re-test mouse-wheel i will do on next linux build check."
+- **Open checks:**
+  - Task 2.2 cross-OS game (Linux servers, macOS and Windows clients).
+  - Windows client run on a PC with an OpenGL 2.1 driver.
+  - Task 2.5 wheel fix re-test on Linux.
+  - Results rows in `phase-a-manual-test.md` (task 2.6).
+- **Suggested home:** the next Linux build check (wheel); the cross-OS game and Windows client run when a suitable PC is available; the Results rows before step 4 (regression baseline, PNS-1).
+- **Status:** Accepted (owner-deferred)

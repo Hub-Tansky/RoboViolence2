@@ -16,7 +16,7 @@ Out of Phase B: the sim core, replays, server-authoritative movement, accounts, 
 |---|---|---|---|
 | 0 | [step0-supply-chain-security.md](step0-supply-chain-security.md) | Phase A | Dependency graph, Dependabot, OSV-Scanner, CodeQL; stale `ARCHITECTURE.md` facts fixed |
 | 1 | [step1-playtest-builds-and-build-guides.md](step1-playtest-builds-and-build-guides.md) | 0 | CI artifacts with client and servers for all three OSes; build guides in `docs/build/` |
-| 2 | [step2-cross-os-playtest.md](step2-cross-os-playtest.md) | 1; 2a for the Windows run | Manual test passes on all three OSes and in a cross-OS game |
+| 2 | [step2-cross-os-playtest.md](step2-cross-os-playtest.md) | 1; 2a for the Windows run | macOS and Linux play-tested; P/L keys and wheel zoom fixed; cross-OS game, Windows client and Results rows → PNS-31 |
 | 2a | [step2a-windows-10-target.md](step2a-windows-10-target.md) | 1 | Windows 10 22H2 is the minimum Windows target (ADR 0012); all three executables carry the manifest |
 | 2b | [step2b-release-packages.md](step2b-release-packages.md) | 2a | Play-test packages built Release: fullscreen by default, no debug C++ runtime |
 | 3 | [step3-test-harness.md](step3-test-harness.md) | 1 | Packet fuzz/replay harness; master-server tests |
@@ -37,7 +37,7 @@ Order: 0 → 1 → 2. Step 2a runs while step 2 is IN PROGRESS; step 2's Windows
 
 - Every step is DONE.
 - CI is green, including CodeQL, and publishes macOS, Windows and Linux artifacts.
-- The [manual test](../phase-a-modern-portable-build/phase-a-manual-test.md) passes on all three OSes after step 2, and again after the last step.
+- The [manual test](../phase-a-modern-portable-build/phase-a-manual-test.md) passes on all three OSes after step 2 (PNS-31), and again after the last step.
 - A new contributor builds each OS by following only `docs/build/<os>.md`.
 - Fuzz runs (2 min per message type, ASan) find no crash.
 

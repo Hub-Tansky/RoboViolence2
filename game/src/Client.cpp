@@ -440,8 +440,7 @@ void Client::update(float delay)
 			}
 		}
 
-		// Screenshot
-#ifdef BV2_PLATFORM_WINDOWS
+		// Screenshot (P) and stats (L) save to <pref dir>/screenshots/ on every OS
 		if (dkiGetState(gameVar.k_screenShot) == DKI_DOWN && !console->isActive() && !chatting.haveFocus() && isConnected && !(menuManager.root && menuManager.root->visible))
 		{
       SaveScreenGrabAuto();
@@ -451,8 +450,6 @@ void Client::update(float delay)
 		{
       SaveStatsAuto();
 		}
-
-#endif
 
 		// On gère le menu (important, toujours tester si la console est là ou pas)
 		if (showMenu && !console->isActive() && isConnected)

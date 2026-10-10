@@ -237,6 +237,8 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 |---|---|
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step1-report.md` | Raw reviewer report for step 1 (round 2; round 1 not kept) |
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step1.md` | Fresh-context review record for step 1 |
+| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step2-report.md` | Raw reviewer report for step 2 |
+| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step2.md` | Fresh-context review record for step 2 |
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step2a-report.md` | Raw reviewer report for step 2a |
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step2a.md` | Fresh-context review record for step 2a |
 
