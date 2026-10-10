@@ -16,4 +16,5 @@ Support Windows 10 22H2 and Windows 11 (x64). Older Windows 10 builds are unsupp
 ## Consequences
 - No code changes needed. The SDK API level is pinned to Windows 10 20H1 (`NTDDI_VERSION`), so a Windows 11 API that the SDK headers guard by `NTDDI_VERSION` fails to compile instead of failing to load on Windows 10. Unguarded declarations and `GetProcAddress` lookups still compile; using a Windows 11 API needs a runtime check.
 - CI's `windows-latest` (Windows Server 2025, Windows 11 24H2 generation) covers Windows 11 at runtime; only the owner's machine covers Windows 10 22H2. Dropping Windows 10 later needs a new ADR.
+- The MSVC C++ runtime is linked statically (`CMAKE_MSVC_RUNTIME_LIBRARY`, `CMakeLists.txt`), matching the `x64-windows-static` vcpkg triplet, so players need no Visual C++ runtime DLL; `tests/check_windows_deps.py` enforces it. Rejected: shipping the VC++ redistributable or app-local runtime DLLs (an installer step for a zip package).
 - Rejected: Windows 11 only (the owner can't test it); Windows 10 1809 / LTSC 2019 (no UTF-8 code page, would need wide-character paths throughout).

@@ -227,7 +227,7 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 
 - **Found in:** owner request after the Windows 10 play-test (2026-10-10).
 - **Extract:** "on all systems game starts in fullscreen mode."
-- **Why it matters:** the client starts windowed (`r_fullScreen` defaults to false, `game/src/GameVar.cpp`); players expect fullscreen. Fullscreen and resolution already apply after a restart (Phase B step 2 context).
-- **Suggested home:** a **[GUI]** change, approved by the owner (2026-10-10): flip the default and test the first start on macOS, Windows and Linux (Retina/HiDPI sizes).
-- **Status:** Proposed
+- **Why it matters:** the packages start windowed because they are Debug builds: `r_fullScreen` defaults to false only under `_DEBUG` (`game/src/GameVar.cpp:642–646`), true otherwise (step 2a review round 2, finding 2).
+- **Suggested home:** owner-approved (2026-10-10). Release packages give fullscreen without a code change.
+- **Status:** Accepted → Phase B [step 2b](phase-b-security-infrastructure-anti-cheat/step2b-release-packages.md)
 

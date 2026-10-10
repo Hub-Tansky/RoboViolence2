@@ -2,7 +2,7 @@
 
 Common steps (game data, ports, playing a local game): [README.md](README.md).
 
-Minimum: Windows 10 22H2 ([ADR 0012](../decisions/0012-windows-10-22h2-minimum.md)). Verified by a person on Windows 10 22H2 only (Phase B step 2); CI builds and tests on `windows-latest` (Windows Server 2025, the Windows 11 24H2 generation), so Windows 10 runtime behaviour is covered only by that person's runs. Report anything that differs.
+Minimum: Windows 10 22H2 ([ADR 0012](../decisions/0012-windows-10-22h2-minimum.md)). Servers verified by a person on Windows 10 22H2 (Phase B step 2a); the client not yet, for lack of an OpenGL 2.1 GPU (see below); CI builds and tests on `windows-latest` (Windows Server 2025, the Windows 11 24H2 generation), so Windows 10 runtime behaviour is covered only by that person's runs. Report anything that differs.
 
 The client needs a GPU driver with OpenGL 2.1. GPUs without a vendor Windows 10 driver (e.g. Intel G41/GMA X4500, which Windows runs on its basic WDDM 1.1 driver) fall back to OpenGL 1.1: the client starts but draws garbled text and ignores clicks. The servers don't need a GPU.
 

@@ -18,6 +18,7 @@ Out of Phase B: the sim core, replays, server-authoritative movement, accounts, 
 | 1 | [step1-playtest-builds-and-build-guides.md](step1-playtest-builds-and-build-guides.md) | 0 | CI artifacts with client and servers for all three OSes; build guides in `docs/build/` |
 | 2 | [step2-cross-os-playtest.md](step2-cross-os-playtest.md) | 1; 2a for the Windows run | Manual test passes on all three OSes and in a cross-OS game |
 | 2a | [step2a-windows-10-target.md](step2a-windows-10-target.md) | 1 | Windows 10 22H2 is the minimum Windows target (ADR 0012); all three executables carry the manifest |
+| 2b | [step2b-release-packages.md](step2b-release-packages.md) | 2a | Play-test packages built Release: fullscreen by default, no debug C++ runtime |
 | 3 | [step3-test-harness.md](step3-test-harness.md) | 1 | Packet fuzz/replay harness; master-server tests |
 | 4 | [step4-packet-hygiene.md](step4-packet-hygiene.md) | 3 | Sender binding, range and size checks, `SV_CHANGE` filter |
 | 5 | [step5-crash-fixes.md](step5-crash-fixes.md) | 3 | R1–R5, UBSan defects, start-up and teardown null dereferences |

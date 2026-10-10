@@ -34,3 +34,41 @@ Not verifiable from the diff:
 - That the UTF-8 ACP doesn't change console or stdin byte handling for the dedicated server's non-ASCII output or input (console code page is separate from the ACP).
 - The ADR claim that SDL3, miniaudio and sqlite3 support Windows 7 or later.
 - The `--full macos-arm64` result: taken as given, not rerun.
+
+## Round 2
+
+SKILL: Launching skill: thermo-nuclear-code-quality-review
+
+Round 2 review of step 2a, covering commits 3100d29, 11c3e62 and ba9cac5 (`49ed746..HEAD` without the merge from main). Read-only.
+
+Code verdict: the static CRT line and the dumpbin test are minimal and correct, and I found no structural problem.
+- **Static CRT setting:**
+  - CMP0091 is NEW under `cmake_minimum_required(3.25)`.
+  - Setting `CMAKE_MSVC_RUNTIME_LIBRARY` after `project()` but before any `add_subdirectory` is correct, because the value is read when each target is created.
+  - It now matches the `x64-windows-static` and `arm64-windows-static` triplets (/MT and /MTd), so the earlier mix of /MDd and /MTd is gone.
+- **Test regex:** `(?im)^\s+((?:msvcp|vcruntime|ucrtbase|concrt)\S*\.dll)\s*$` catches `VCRUNTIME140_1` and `ucrtbased`. Release builds of the dynamic CRT import `api-ms-win-crt-*` DLLs, which the regex doesn't match, but `vcruntime140` is always imported alongside them, so there is no false pass.
+- **dumpbin missing from PATH:** `check=True` turns that into a test failure (FileNotFoundError), not a silent pass.
+
+Step verdict: the step is **not ready to be DONE**. The acceptance check "owner starts bv2, bv2dedicated and bv2master … and joins a local game" is not met (row 1), and `--full` has not been run at the final head yet.
+
+| # | Severity | Finding (file:line) | Suggested change |
+|---|---|---|---|
+| 1 | High (DONE gate / stop rule) | `reviews/step2a.md:31-37` against the step file's Acceptance checks. Only `bv2dedicated` is shown running. `bv2master` isn't mentioned at all. The client was not played and no local game was joined. Round 1's rejection of finding 8 relied on "the owner's Windows 10 run starts all three", and that premise is now false for `bv2master`. | Either run `bv2master` from the 11c3e62 package and record it, or have the owner amend the acceptance check in the step file with a dated approval (servers only; the client run moves to step 2 on another PC). Then reopen finding 8 or record a new outcome for it. Until then Status stays IN PROGRESS. |
+| 2 | Medium (root cause; doc accuracy) | `docs/roadmap/possible-new-scope.md:226-231` (PNS-28) says "`r_fullScreen` defaults to false". `game/src/GameVar.cpp:642-646` sets it to false only under `_DEBUG` and to true otherwise. The packages are built Debug (`CMakePresets.json` base `CMAKE_BUILD_TYPE=Debug`). That one choice explains both the windowed start and the `MSVCP140D`/`ucrtbased` imports. Shipping the debug CRT to players, even statically linked, is also questionable: Microsoft's licence doesn't allow redistributing debug CRT builds. | Correct PNS-28: the cause is the Debug package build, not the cvar default. Add or extend a PNS entry for "play-test packages built Release (or RelWithDebInfo)", which may make PNS-28 unnecessary. Static CRT is still right for Release builds. |
+| 3 | Medium (REVIEW.md §2: non-obvious decision needs an ADR) | `CMakeLists.txt:19` cites "(ADR 0012)", but ADR 0012 says nothing about the C++ runtime. Static vs dynamic CRT has rejected alternatives (shipping the VC++ redistributable, app-local DLLs, Release builds), and a later agent could reverse it. | Add a Consequences bullet to ADR 0012 (static MSVC runtime, matching the vcpkg static triplets, with the rejected alternatives), or write a short new ADR and fix the citation. |
+| 4 | Low (fix proof format) | `reviews/step2a.md:32`. REVIEW.md §3 asks for the failing assertion to be pasted. The record gives only the run IDs. | Paste the failing test output from run 38045503231 (the three `…: MSVCP140D.dll` style lines) under Fix proof. |
+| 5 | Low (record staleness) | `reviews/step2a.md:3-4` still says `Diff: 5e6ec03..59bacb7`. The Findings table has no round 2 entries yet. "`--full` … to rerun at the final head" is still open. | After this round, update the Diff line and the Findings table, and run `tools/review.sh --full` at the final head (the owner's untracked PNGs must be moved out first). |
+| 6 | Low (ARCHITECTURE accuracy; same kind as round 1 finding 9) | `ARCHITECTURE.md:74`: the `tests/CMakeLists.txt` row lists the ctest targets but not the new Windows-only `windows_no_crt_dlls`. | Append "and the no-VC++-runtime-DLL check" to that row. |
+| 7 | Low (doc accuracy) | `docs/build/windows.md:5` says "Verified by a person on Windows 10 22H2 only (Phase B step 2)". It was step 2a, and the person verified only the servers. | Change it to "Servers verified by a person on Windows 10 22H2 (Phase B step 2a); client not yet". |
+| 8 | Low (convention) | The commit subjects are `step2a: …`. AGENTS.md asks for `stepN.M: <summary>`. | For the remaining commits, use `step2a.M:` (for example a task number, or `step2a.6: review: …`). Don't rewrite the pushed history just for this. |
+| 9 | Low (silent skip) | `tests/CMakeLists.txt:32`: when any of the three targets is off (for example `BV2_BUILD_CLIENT=OFF`), the guard drops the whole test, including the server executables it could still check. | Acceptable under the minimal-change rule. Optionally pass whichever targets exist. No action required. |
+
+Repeats of earlier findings: row 6 is the same kind of omission as round 1 finding 9 (the `ARCHITECTURE.md` tests row was missing a new Windows test). Row 1 reopens the premise behind round 1 finding 8 (rejected because "the owner's Windows 10 run starts all three"); that premise no longer holds. Nothing else repeats round 1 or `reviews/step1.md`.
+
+Not verifiable from the diff:
+- **ASan preset:** whether `win-x64-msvc-asan` (`/fsanitize=address` with the static debug runtime `/MTd`) configures, links and runs. The MSVC docs list `/MTd` with ASan as supported, but this preset isn't in the required CI.
+- **arm64 preset:** whether `win-arm64-msvc` builds with the static runtime. It is optional and not in CI.
+- **CI runs:** the results of runs 38045503231 (failed) and 38046255900 (passed) are as stated in the brief; I did not inspect the logs.
+- **Owner's run:** the Windows 10 observations (G41 on the basic WDDM 1.1 driver giving OpenGL 1.1; garbled text, flicker and ignored clicks) and that `bv2master` was never started.
+- **win-x64-vs preset:** whether `dumpbin` is on PATH when ctest runs outside a Developer PowerShell (for example with this Visual Studio generator preset). If it isn't, the test fails loudly rather than passing.
+- **OpenGL version:** the client doesn't check the version at startup (`engine/zeven/src/dkgl.cpp` reads only `GL_EXTENSIONS`). A clear error on OpenGL below 2.1 instead of a garbled screen would be a possible PNS entry; the owner chose no code change.

@@ -2,7 +2,7 @@
 
 **Status:** IN PROGRESS
 
-**Depends on:** [Step 1](step1-playtest-builds-and-build-guides.md). **Blocks:** the Windows run of [step 2](step2-cross-os-playtest.md). **Next:** [step3-test-harness.md](step3-test-harness.md). **Index:** [README.md](README.md)
+**Depends on:** [Step 1](step1-playtest-builds-and-build-guides.md). **Blocks:** the Windows run of [step 2](step2-cross-os-playtest.md). **Next:** [step2b-release-packages.md](step2b-release-packages.md). **Index:** [README.md](README.md)
 
 ## Scope
 
@@ -83,7 +83,7 @@ Replace "Windows 11" as the floor with "Windows 10 22H2 or later (x64)" in the l
 ctest --test-dir build/win-x64-msvc --output-on-failure
 ```
 
-- The owner starts `bv2`, `bv2dedicated` and `bv2master` from the CI Windows package on Windows 10 Pro 22H2 and joins a local game (step 2 then runs the full manual test).
+- The owner starts `bv2dedicated` and `bv2master` from the CI Windows package on Windows 10 Pro 22H2. Amended with the owner (2026-10-10): the owner's only Windows PC (Intel G41) has no OpenGL 2.1 driver, so the client play-test moves to step 2 on another PC.
 - `grep -rn "Windows 11" README.md ARCHITECTURE.md docs/build docs/roadmap/phase-b-security-infrastructure-anti-cheat` shows no remaining "Windows 11 only" floor.
 - `tools/review.sh --full <preset>` passes, and the fresh-context review record `reviews/step2a.md` and the raw reviewer report `reviews/step2a-report.md` (with the skill's load line) exist ([REVIEW.md](../../../REVIEW.md) section 5).
 - `ARCHITECTURE.md` lists every file added, moved or removed in this step.
