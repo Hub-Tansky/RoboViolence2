@@ -78,6 +78,7 @@ int main(int argc, char ** argv)
 		std::printf("usage: test_master <dir with master.db and web.db> <scratch dir>\n");
 		return 1;
 	}
+	std::setvbuf(stdout, 0, _IONBF, 0); // a crash keeps the phase lines below
 	fs::create_directories(argv[2]);
 	for (const char * db : {"master.db", "web.db"})
 		fs::copy_file(fs::path(argv[1]) / db, fs::path(argv[2]) / db, fs::copy_options::overwrite_existing);
@@ -86,18 +87,18 @@ int main(int argc, char ** argv)
 	master = new cNetManager();
 	master->Init();
 
-	// Register, then list
+	std::printf("phase: register, list\n");
 	UINT4 game = connectClient();
 	registerGame(game);
 	std::vector<std::string> names = list();
 	CHECK(names.size() == 1 && names[0] == "Test Server");
 
-	// Heartbeat timeout: 61 s without an update drops the game (GAME_TIMEOUT 60)
+	std::printf("phase: heartbeat timeout\n"); // 61 s without an update drops the game (GAME_TIMEOUT 60)
 	master->Update(61.0f);
 	pump({game});
 	CHECK(list().empty());
 
-	// Removal: a registered game sends KILL_SERV for its port
+	std::printf("phase: removal\n"); // a registered game sends KILL_SERV for its port
 	bb_clientDisconnect(game);
 	game = connectClient();
 	registerGame(game);
