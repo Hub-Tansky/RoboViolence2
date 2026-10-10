@@ -16,6 +16,8 @@ endif()
 
 project(BaboViolent2 LANGUAGES C CXX)
 
+# Static C++ runtime, as the x64-windows-static vcpkg ports use: players have no (debug) runtime DLLs (ADR 0012)
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
