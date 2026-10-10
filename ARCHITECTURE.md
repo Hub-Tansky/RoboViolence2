@@ -71,14 +71,38 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `packaging/macos/Info.plist.in` | macOS bundle `Info.plist` template |
 | `packaging/windows/bv2.manifest` | Windows manifest for `bv2`, `bv2dedicated` and `bv2master`: PerMonitorV2 DPI, UTF-8 code page, Windows 10/11 |
 | `packaging/windows/bv2.rc.in` | Windows resource script template; CMake fills in the generated icon |
-| `tests/CMakeLists.txt` | ctest targets: netPacket, config, fileio, dedicated-server smoke, in-process server harness (`bv2server_lib` + fake babonet); on Windows also the non-ASCII install path smoke and the no-VC++-runtime-DLL check |
+| `tests/CMakeLists.txt` | ctest targets: netPacket, config, fileio, dedicated-server smoke, in-process server harness (`bv2server_lib` + fake babonet), corpus replay, known-crash inputs (ASan presets); on Windows also the non-ASCII install path smoke and the no-VC++-runtime-DLL check |
 | `tests/check_windows_deps.py` | Windows: fails if `bv2`, `bv2dedicated` or `bv2master` needs a Visual C++ runtime DLL |
+| `tests/corpus/clsv_admin_request/valid.bin` | Replay corpus: valid `clsv_admin_request` payload (`gen_corpus`) |
+| `tests/corpus/clsv_gameversion_accepted/valid.bin` | Replay corpus: valid `clsv_gameversion_accepted` payload (`gen_corpus`) |
+| `tests/corpus/clsv_map_list_request/valid.bin` | Replay corpus: valid `clsv_map_list_request` payload (`gen_corpus`) |
+| `tests/corpus/clsv_map_request/valid.bin` | Replay corpus: valid `clsv_map_request` payload (`gen_corpus`) |
+| `tests/corpus/clsv_pickup_request/valid.bin` | Replay corpus: valid `clsv_pickup_request` payload (`gen_corpus`) |
+| `tests/corpus/clsv_player_shoot/valid.bin` | Replay corpus: valid `clsv_player_shoot` payload (`gen_corpus`) |
+| `tests/corpus/clsv_pong/valid.bin` | Replay corpus: valid `clsv_pong` payload (`gen_corpus`) |
+| `tests/corpus/clsv_spawn_request/valid.bin` | Replay corpus: valid `clsv_spawn_request` payload (`gen_corpus`) |
+| `tests/corpus/clsv_svcl_chat/valid.bin` | Replay corpus: valid `clsv_svcl_chat` payload (`gen_corpus`) |
+| `tests/corpus/clsv_svcl_player_change_name/valid.bin` | Replay corpus: valid `clsv_svcl_player_change_name` payload (`gen_corpus`) |
+| `tests/corpus/clsv_svcl_player_coord_frame/valid.bin` | Replay corpus: valid `clsv_svcl_player_coord_frame` payload (`gen_corpus`) |
+| `tests/corpus/clsv_svcl_player_info/valid.bin` | Replay corpus: valid `clsv_svcl_player_info` payload (`gen_corpus`) |
+| `tests/corpus/clsv_svcl_player_projectile/valid.bin` | Replay corpus: valid `clsv_svcl_player_projectile` payload (`gen_corpus`) |
+| `tests/corpus/clsv_svcl_player_shoot_melee/valid.bin` | Replay corpus: valid `clsv_svcl_player_shoot_melee` payload (`gen_corpus`) |
+| `tests/corpus/clsv_svcl_player_update_skin/valid.bin` | Replay corpus: valid `clsv_svcl_player_update_skin` payload (`gen_corpus`) |
+| `tests/corpus/clsv_svcl_team_request/crash-playerid-out-of-range.bin` | Known defect input for `clsv_svcl_team_request` (Q-S2: `playerID` 100); ASan must report it until step 4 |
+| `tests/corpus/clsv_svcl_team_request/valid.bin` | Replay corpus: valid `clsv_svcl_team_request` payload (`gen_corpus`) |
+| `tests/corpus/clsv_svcl_vote_request/valid.bin` | Replay corpus: valid `clsv_svcl_vote_request` payload (`gen_corpus`) |
+| `tests/corpus/clsv_vote/valid.bin` | Replay corpus: valid `clsv_vote` payload (`gen_corpus`) |
+| `tests/corpus/svcl_console/valid.bin` | Replay corpus: valid `svcl_console` payload (`gen_corpus`) |
+| `tests/corpus/svcl_play_sound/valid.bin` | Replay corpus: valid `svcl_play_sound` payload (`gen_corpus`) |
+| `tests/corpus_types.h` | Client-to-server message types, valid samples and known crash inputs for the corpus, replay and fuzz tests |
+| `tests/gen_corpus.cpp` | Writes `tests/corpus/<type>/valid.bin` and the known crash inputs from `netPacket.h` structs |
 | `tests/harness/fake_babonet.cpp` | Test `bb_*` API: queued connects and messages in, captured sends out; linked before babonet |
 | `tests/harness/server_harness.cpp` | In-process dedicated server for tests: start, connect, deliver, tick |
 | `tests/harness/server_harness.h` | Harness API |
 | `tests/smoke_server.py` | Starts `bv2dedicated` headless, runs the CTF script, quits; checks exit code, server creation and `bv2.cfg`. `--install-under` runs it from a non-ASCII path (Windows UTF-8 code page) |
 | `tests/test_config.cpp` | dksvar config layering, transient values not saved, secrets masked |
 | `tests/test_fileio.cpp` | `FileIO` byte widths for `.bvm` data and the widths the `.DKO` loader relies on; `bv2ReadBytes` zero-fills a short read; fixed-string length prefix round trip; unterminated `CString::loadFromFile` (overflows under ASan without its bound) |
+| `tests/test_replay.cpp` | Replays the corpus through the in-process server: no crash, expected replies; one `crash-*.bin` per ctest under ASan |
 | `tests/test_server_harness.cpp` | The in-process server starts on the placeholder CTF map, accepts a client and sends it the game state |
 | `tests/test_netpacket.cpp` | Byte-level layout of the packed wire structs |
 | `tools/check-content-case.py` | Fails when a literal `main/...` path differs from a real file name only by case |
