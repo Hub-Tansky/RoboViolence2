@@ -211,7 +211,7 @@ void ePTexture::loadTexture(_typLayer* ptrLayer, FILE* ficIn)
 #else
 				unsigned char* imageData = new unsigned char [ptrLayer->w*ptrLayer->h*ptrLayer->bpp];
 #endif
-				bv2ReadBytes(ficIn, imageData, ptrLayer->w*ptrLayer->h*ptrLayer->bpp);
+				bv2ReadBytes(ficIn, imageData, (size_t)ptrLayer->w*ptrLayer->h*ptrLayer->bpp);
 				if (ptrLayer->bpp == 4)
 					ptrLayer->textureID = createTextureFromBuffer(imageData, ptrLayer->w, ptrLayer->h, ptrLayer->bpp, 1, false);
 				else
