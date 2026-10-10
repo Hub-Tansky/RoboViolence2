@@ -28,8 +28,9 @@ jobs:
         uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
         with:
           arch: x64
-      - name: Configure
-        run: cmake --preset ${{ matrix.preset }}
+      # Release: the packages are what testers play (fullscreen, no debug C++ runtime). The presets stay Debug for development.
+      - name: Configure (Release)
+        run: cmake --preset ${{ matrix.preset }} -DCMAKE_BUILD_TYPE=Release
       - name: Build (keep going, so one run lists every failure)
         run: cmake --build --preset ${{ matrix.preset }} -- -k 0
       - name: Test
