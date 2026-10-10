@@ -1,6 +1,6 @@
 # Step 2b: Release play-test packages
 
-**Status:** IN PROGRESS
+**Status:** DONE (2026-10-10)
 
 **Depends on:** [Step 2a](step2a-windows-10-target.md). **Next:** [step3-test-harness.md](step3-test-harness.md). **Index:** [README.md](README.md)
 
