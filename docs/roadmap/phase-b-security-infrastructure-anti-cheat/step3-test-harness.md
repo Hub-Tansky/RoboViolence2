@@ -1,6 +1,6 @@
 # Step 3: Packet fuzz/replay harness and master-server tests
 
-**Status:** IN PROGRESS
+**Status:** DONE (2026-10-10)
 
 **Depends on:** [Step 1](step1-playtest-builds-and-build-guides.md). **Next:** [step4-packet-hygiene.md](step4-packet-hygiene.md). **Index:** [README.md](README.md)
 
@@ -40,7 +40,7 @@
 
 - A libFuzzer target where available (Clang), plus a portable random-mutation runner for MSVC/GCC. Runs per message type for a time budget; crashes are saved into the corpus.
 - CI job `fuzz` (Linux, ASan, 2 min per message type, not required).
-- Done: `tests/fuzz_server.cpp`, a portable random-mutation runner at each type's wire size; CI job `fuzz`. Known defects are masked so fuzzing reaches further (Q-S2 `playerID`, R21/R22 `%` and missing `\0`); their fix steps remove the masks.
+- Done: `tests/fuzz_server.cpp`, a portable random-mutation runner at each type's wire size; CI job `fuzz`. The fuzzer's client joins and spawns, and rejoins every 200 inputs. Known defects are masked so fuzzing reaches further (Q-S2 `playerID` and `weaponID`, R21–R23 `%`, R22/R24 missing `\0`); their fix steps remove the masks. Player shoot and projectile still hit R25 (a just-killed player has no weapon), so the `fuzz` job stays red on them until R25 is fixed.
 - Not done: a libFuzzer target. CI's Linux ASan build uses GCC, which has no libFuzzer, so it would never run there (owner accepted dropping it, 2026-10-10).
 - The first local runs found R21–R26 (`docs/analysis/KEY_QUESTIONS.md` Part D).
 

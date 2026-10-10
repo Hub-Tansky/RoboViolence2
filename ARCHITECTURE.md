@@ -100,7 +100,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/corpus/svcl_console/crash-unterminated.bin` | Known defect input (R22: console text without `\0`); ASan must report it until its fix step |
 | `tests/corpus_types.h` | Client-to-server message types, valid samples and known crash inputs for the corpus, replay and fuzz tests |
 | `tests/gen_corpus.cpp` | Writes `tests/corpus/<type>/valid.bin` and the known crash inputs from `netPacket.h` structs |
-| `tests/harness/fake_babonet.cpp` | Test `bb_*` API: queued connects and messages in, captured sends out; linked before babonet |
+| `tests/harness/fake_babonet.cpp` | Test `bb_*` API: queued connects and messages in, captured sends out, disconnects reported back; an object file, so it wins over babonet's `baboNet.cpp` |
 | `tests/harness/server_harness.cpp` | In-process dedicated server for tests: start, connect, deliver, tick |
 | `tests/harness/server_harness.h` | Harness API |
 | `tests/smoke_server.py` | Starts `bv2dedicated` headless, runs the CTF script, quits; checks exit code, server creation and `bv2.cfg`. `--install-under` runs it from a non-ASCII path (Windows UTF-8 code page) |
@@ -275,6 +275,8 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step2.md` | Fresh-context review record for step 2 |
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step2b-report.md` | Raw reviewer report for step 2b |
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step2b.md` | Fresh-context review record for step 2b |
+| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step3-report.md` | Raw reviewer report for step 3 |
+| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step3.md` | Fresh-context review record for step 3 |
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step2a-report.md` | Raw reviewer report for step 2a |
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step2a.md` | Fresh-context review record for step 2a |
 
