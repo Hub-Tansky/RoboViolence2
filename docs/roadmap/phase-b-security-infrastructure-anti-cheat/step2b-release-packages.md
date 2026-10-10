@@ -39,9 +39,9 @@
 
 ### 2b.4 Checked file reads (owner-approved 2026-10-10)
 
-- The Linux Release build fails: at `-O3`, glibc marks `fread`'s result as must-use, and the `-Werror` targets (`dko`, `zeven_*`) ignore it at ~50 sites.
-- `bv2ReadBytes` (`engine/zeven/include/platform.h`) replaces them: a short read zero-fills the rest instead of leaving it uninitialised. Chunk loops in the DKO and DKT loaders end at end of file; string readers stop at end of file or at their 256-byte buffer. A test in `tests/test_fileio.cpp` covers the helper.
-- The game code has the same class of Release-only errors (owner-approved 2026-10-10: fix all): `FileIO` reads use `bv2ReadBytes`, `getLine` returns an empty line at end of file; `FileIO`/`MemIO::getFixedString` decode the length prefix from the byte instead of reading a 4-byte bitfield over it; the language loader stops at end of file without an `END` line and bounds `%s`; `CAStar::CreateNodes` and the shotgun `clampShot` get initial values; the map list copies at most 15 bytes into `mapName[16]`, keeping its `\0`. `tests/test_fileio.cpp` round-trips a two-byte-prefix fixed string.
+- The Linux Release build fails: at `-O3`, glibc marks `fread`'s result as must-use, and the `-Werror` targets (`dko`, `zeven_core`, `zeven_client`, the game) ignore it at ~50 sites.
+- `bv2ReadBytes` (`engine/zeven/include/platform.h`) replaces them: a short read zero-fills the rest instead of leaving it uninitialised. Chunk loops in the DKO and DKT loaders end at end of file; string readers stop at end of file or at the end of their buffer. A test in `tests/test_fileio.cpp` covers the helper.
+- The game code has the same class of Release-only errors (owner-approved 2026-10-10: fix all): `FileIO` reads use `bv2ReadBytes`, `getLine` returns an empty line at end of file; `FileIO`/`MemIO::getFixedString` decode the length prefix from the byte instead of reading a 4-byte bitfield over it; the language loader stops at end of file without an `END` line or a final newline, and bounds its name and value buffers; `CAStar::CreateNodes` and the shotgun `clampShot` get initial values; the map list copies at most 15 bytes into `mapName[16]`, keeping its `\0`. `tests/test_fileio.cpp` round-trips a two-byte-prefix fixed string.
 
 ## Critical files
 
