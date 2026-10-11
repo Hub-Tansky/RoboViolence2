@@ -18,6 +18,7 @@
 
 #include "Paths.h"
 #include "CMaster.h"
+#include "SqlStatement.h"
 #include "Console.h"
 #include "RemoteAdminPackets.h"
 #include "GameVar.h"
@@ -81,14 +82,8 @@ void CMaster::UpdateDB()
 {
 	sqlite3 *DB=bv2::openClientDb();
 	if (!DB) return;
-	char	SQL[300];
-	
-	sprintf(SQL,"Update LauncherSettings Set Value = '%i' Where Name = 'DBVersion';", gameVar.db_version);
-	sqlite3_exec(DB,SQL,0,0,0);
-
-	sprintf(SQL,"Update LauncherSettings Set Value = '%s' Where Name = 'AccountURL';", gameVar.db_accountServer.s);
-	sqlite3_exec(DB,SQL,0,0,0);	
-
+	SqlStatement(DB, "Update LauncherSettings Set Value = ? Where Name = 'DBVersion';").bindInt(1, gameVar.db_version).run();
+	SqlStatement(DB, "Update LauncherSettings Set Value = ? Where Name = 'AccountURL';").bindText(1, gameVar.db_accountServer.s).run();
 	sqlite3_close(DB);
 }
 
@@ -846,13 +841,10 @@ void CMaster::recvPacket(const char * buffer, int typeID)
 
 			//--- Write in db the 'surveySent' flag
 			sqlite3 *DB=bv2::openClientDb();
-			char	SQL[300];
 			if (DB)
 			{
-			
-			sprintf(SQL,"Update LauncherSettings Set Value = '1' Where Name = 'DidSurvey';");
-			sqlite3_exec(DB,SQL,0,0,0);
-			sqlite3_close(DB);
+				SqlStatement(DB, "Update LauncherSettings Set Value = '1' Where Name = 'DidSurvey';").run();
+				sqlite3_close(DB);
 			}
 			break;
 		}
@@ -979,21 +971,10 @@ void CMaster::GetMasterInfos()
 		console->add("Could not open the user database");
 		return;
 	}
-	char	*zErrMsg = 0;
-	char	**azResult = 0;
-	int		nRow = 0;
-	int		nColumn = 0;
-	char	SQL[256];
-	int		rc;
-
 	// get our current game version
-	sprintf(SQL,"Select Value From LauncherSettings Where Name = 'Version';");
-	rc = sqlite3_get_table(db,SQL,&azResult,&nRow,&nColumn,&zErrMsg);
-	if (rc == SQLITE_OK && azResult && nRow >= 1 && nColumn >= 1 && azResult[nColumn])
-		snprintf(m_CurrentVersion, sizeof(m_CurrentVersion), "%s", azResult[nColumn]);
-	if (zErrMsg) sqlite3_free(zErrMsg);
-
-	sqlite3_free_table(azResult);
+	std::string version = SqlStatement::value(db, "Select Value From LauncherSettings Where Name = 'Version';");
+	if (!version.empty())
+		snprintf(m_CurrentVersion, sizeof(m_CurrentVersion), "%s", version.c_str());
 	sqlite3_close( db );
 }
 

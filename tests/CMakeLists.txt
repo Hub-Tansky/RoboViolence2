@@ -80,6 +80,10 @@ if(TARGET bv2server_lib)
   endif()
 endif()
 
+# The game and the master each have a copy of SqlStatement.h (Phase B step 6); they must stay the same
+add_test(NAME sql_statement_copies COMMAND ${CMAKE_COMMAND} -E compare_files
+  ${CMAKE_SOURCE_DIR}/game/src/SqlStatement.h ${CMAKE_SOURCE_DIR}/masterserver/src/SqlStatement.h)
+
 if(TARGET bv2master_lib)
   add_executable(test_master test_master.cpp)
   target_link_libraries(test_master PRIVATE bv2master_lib)

@@ -1,6 +1,6 @@
 # Step 6: SQL prepared statements
 
-**Status:** TODO
+**Status:** DONE (2026-10-11)
 
 **Depends on:** [Step 3](step3-test-harness.md). **Next:** [step7-medium-low-defects.md](step7-medium-low-defects.md). **Index:** [README.md](README.md)
 
@@ -11,7 +11,7 @@
 | Goal | Every SQL statement in the game and the master server uses `sqlite3_prepare_v2` with bound parameters |
 | In scope | Tasks 6.1–6.3 below |
 | Out of scope | Schema changes beyond what binding needs; removing MAC from identity (step 10); account storage and KDF (PNS-14) |
-| Allowed paths | `game/src/CMaster.cpp`, `game/src/GameVar.cpp`, `game/src/Paths.cpp`, `game/src/Scene.cpp`, `masterserver/src/**`, `content-seed/**`, `tests/**`, `docs/analysis/KEY_QUESTIONS.md`, `ARCHITECTURE.md`, `docs/roadmap/**` |
+| Allowed paths | `game/src/CMaster.cpp`, `game/src/GameVar.cpp`, `game/src/Paths.cpp`, `game/src/Scene.cpp`, `game/src/SqlStatement.h` (owner-approved 2026-10-11: the game's helper), `masterserver/src/**`, `content-seed/**`, `tests/**`, `docs/analysis/KEY_QUESTIONS.md`, `ARCHITECTURE.md`, `docs/roadmap/**` |
 | Inputs | `AGENTS.md`, `ARCHITECTURE.md`, earlier review records `reviews/step*.md`, `docs/analysis/KEY_QUESTIONS.md` Q-S3, step 3 master tests |
 | Deliverables | A small statement helper per program; all call sites converted; injection tests |
 | Definition of done | See "Acceptance checks". All must pass. `ARCHITECTURE.md` is updated |
@@ -34,6 +34,17 @@
 ### 6.3 Injection tests
 
 - The master tests send names, IPs and MAC fields containing `'`, `--`, `;` and `%`. The tables are unchanged and the rows are stored literally.
+
+## Notes
+
+- The ban queries read `Select *` results through fixed offsets (`BV2_BAN_*` = `CurrentRow*nColumn+6`…) that assumed a column order the seeded `BanList` table doesn't have; they now name their columns, and the offset macros are gone.
+- Names, maps, nicks and survey text were "escaped" by turning `'` into a backtick; bound, they are stored as sent.
+- The master NUL-terminates the text fields of the ban messages (`CACHE_BAN_LIST`, `CACHE_BAN`, `CACHE_BANNED`) before binding them; the rest of the master's packet checks is not in this step.
+- Commented-out SQL (`RegisterPlayer`, `RegisterServer`) was deleted rather than converted.
+- The ban messages are authorised by a password compared in the source (`cNetManager.cpp`); that is Q-S5 (step 10).
+- The ban list's filter is `Nick LIKE '%' || ? || '%'`: an empty filter no longer lists rows whose `Nick` is NULL (only hand-inserted rows can have one; `AddBan` always sets it).
+- `SqlStatement` logs a failed prepare (schema drift) to stderr; a ctest keeps the two copies identical.
+- `masterserver/README.md` still describes `sprintf` SQL (outside this step's paths) → PNS-36.
 
 ## Critical files
 

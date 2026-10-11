@@ -1,4 +1,5 @@
 #include "cMasterServer.h"
+#include "SqlStatement.h"
 
 
 #ifdef BV2_PLATFORM_WINDOWS
@@ -78,114 +79,64 @@ cMasterServer::cMasterServer()
  	else
  	{
 		// clear game list
-		sqlite3_exec(m_webDB,"Delete from Games;",0,0,0);
+		SqlStatement(m_webDB, "Delete from Games;").run();
  		printf("Web Database opened successfully\n");
  	}
 
 	TimeSinceBanCheck = 0.0f;
 	
-	//char date[20];
-
-	////long dateLong = GetDateLong();
-	//GetDateString( date , dateLong );
-
-	//printf("time is %li\ndate is %s", dateLong , date);
-
-	//on clear les game de bv2
-	//sqlite3_exec(MasterDB,"Delete from Servers;",0,0,0);
-
 	//on indique la version courrante de bv2
 	sprintf(Version,"2.09");
 }
 
 void cMasterServer::SendBanList( UINT4 fromID , char * filter )
 {
-	//Quelques infos sur la table qu'on va loader
-	char	*zErrMsg;		// Contient un message d'erreur s'il y a lieu
-	char	**azResult;		// Contient le resultat de la requete
-	int	nRow;			// nombre denregistrement retourner par la requete
-	int	nColumn;		// nombre de column
-	char	SQL[300];
-
-
-	if( !stricmp( filter , "" ) )
+	// The filter matches nicks containing it; it is bound, so '%' or '_' in it only widen the match
+	SqlStatement bans(MasterDB, "Select Date, Duration, ID, IP, MAC, Nick From BanList Where Nick LIKE '%' || ? || '%' order by ID;");
+	bans.bindText(1, filter);
+	while (bans.row())
 	{
-		sprintf(SQL,"Select * From BanList order by ID;");
-	}
-	else
-	{
-		sprintf(SQL,"Select * From BanList Where Nick LIKE '%%%s%%' order by ID;", filter );
-		//printf("the final string : %s\n",SQL);
-	}
-
-	
-	int dbResult = sqlite3_get_table(MasterDB,SQL,&azResult,&nRow,&nColumn,&zErrMsg);
-	
-	
-
-	// we have bans
-	if(nRow)
-	{
-		for( int CurrentRow = 0; CurrentRow < nRow; CurrentRow ++ )
-		{
-			stCacheBan ban;
-
-			long dateLong = atol( azResult[BV2_BAN_DATE] );
+		stCacheBan ban;
+		memset(&ban, 0, sizeof(ban));
+		long dateLong = (long)bans.integer(0);
 #ifndef BV2_PLATFORM_WINDOWS
-			GetDateString( ban.Date , dateLong );
+		GetDateString( ban.Date , dateLong );
 #endif
-
-			ban.Duration 	= (char)atoi( azResult[BV2_BAN_DURATION] );
-			ban.ID 		= (short)atoi( azResult[BV2_BAN_ID] );
-
-			sprintf( ban.IP , "%s" , azResult[BV2_BAN_IP] );
-			sprintf( ban.MAC, "%s" , azResult[BV2_BAN_MAC] );
-			sprintf( ban.Nick, "%s" , azResult[BV2_BAN_NICK] );
-
-			bb_serverSend( (char*)&ban, sizeof(stCacheBan) , CACHE_BAN , fromID );
-		
-		}
+		ban.Duration	= (char)bans.integer(1);
+		ban.ID			= (short)bans.integer(2);
+		snprintf( ban.IP , sizeof(ban.IP) , "%s" , bans.text(3).c_str() );
+		snprintf( ban.MAC, sizeof(ban.MAC), "%s" , bans.text(4).c_str() );
+		snprintf( ban.Nick, sizeof(ban.Nick), "%s" , bans.text(5).c_str() );
+		bb_serverSend( (char*)&ban, sizeof(stCacheBan) , CACHE_BAN , fromID );
 	}
-	//we dont
-	
-	sqlite3_free_table(azResult);
+}
 
+// The ID of a ban on this IP or MAC, -1 if none
+long long cMasterServer::FindBan( const char * IP , const char * MAC )
+{
+	SqlStatement ban(MasterDB, "Select ID From BanList where IP = ? or MAC = ?;");
+	ban.bindText(1, IP).bindText(2, MAC);
+	return ban.row() ? ban.integer(0) : -1;
 }
 
 int cMasterServer::IsBanned( char * IP , char * MAC )
 {
-	
-	//Quelques infos sur la table qu'on va loader
-	char	*zErrMsg;		// Contient un message d'erreur s'il y a lieu
-	char	**azResult;		// Contient le resultat de la requete
-	int	nRow;			// nombre denregistrement retourner par la requete
-	int	nColumn;		// nombre de column
-	char	SQL[300];
+	return FindBan( IP , MAC ) >= 0 ? 1 : 0;
+}
 
-	sprintf(SQL,"Select * From BanList where IP = '%s' or MAC = '%s';", IP,MAC);
-
-	int dbResult = sqlite3_get_table(MasterDB,SQL,&azResult,&nRow,&nColumn,&zErrMsg);
-	sqlite3_free_table(azResult);
-
-	if( nRow )
-	{
-		return 1;
-	}
-	else
-	{
-		return 0;
-	}
-
+// Writes a game to the web database's Games table (names and maps are bound: stored as sent)
+void cMasterServer::WriteWebGame( const stBV2row & game , bool insert )
+{
+	if( !m_webDB ) return;
+	SqlStatement(m_webDB, insert
+		? "Insert into Games(Map,MaxPlayers,Name,NbPlayers,Password,IP,Port) Values(?,?,?,?,?,?,?);"
+		: "Update Games Set Map = ?, MaxPlayers = ?, Name = ?, NbPlayers = ?, Password = ? Where IP = ? and Port = ?;")
+		.bindText(1, game.map).bindInt(2, game.maxPlayer).bindText(3, game.serverName).bindInt(4, game.nbPlayer)
+		.bindInt(5, game.password[0] != '\0' ? 1 : 0).bindText(6, game.ip).bindInt(7, game.port).run();
 }
 
 void cMasterServer::AddBan( char * NickName , char * IP , char * MAC , int Duration )
 {
-	char	*zErrMsg;		// Contient un message d'erreur s'il y a lieu
-	char	**azResult;		// Contient le resultat de la requete
-	int	nRow;			// nombre denregistrement retourner par la requete
-	int	nColumn;		// nombre de column
-	char	SQL[300];
-
 	//filter ip adress
 	if( strstr( "192.168", IP ))
 	{
@@ -199,116 +150,64 @@ void cMasterServer::AddBan( char * NickName , char * IP , char * MAC , int Durat
 		return;
 	}
 
-	for( int g=0; g<strlen(NickName); g++ )
-	{
-		if( NickName[g] == '\0' )
-		{
-			break;
-		}
-		if( NickName[g] == '\'' )
-		{
-			NickName[g] = '`';
-		}
-	}
-
-	sprintf(SQL,"Select * From BanList where IP = '%s' or MAC = '%s';", IP , MAC );
-	int dbResult = sqlite3_get_table(MasterDB,SQL,&azResult,&nRow,&nColumn,&zErrMsg);
-
 	//get current time
 	time_t theTime;
 	theTime = time( NULL );
 
-	int CurrentRow = 0;
+	long long existing = FindBan( IP , MAC );
 
-	if( nRow )
+	if( existing >= 0 )
 	{
 		// just update current row
-		sprintf(SQL,"Update BanList Set Date = %li , Nick = '%s',IP = '%s',MAC = '%s',Duration = %i Where ID = %i;", (long)theTime , NickName , IP, MAC, Duration , atoi(azResult[BV2_BAN_ID]) );
-		sqlite3_exec(MasterDB,SQL,0,0,0);
-
-		printf("Updated ban with ID %i\n",atoi(azResult[BV2_BAN_ID]));
-
+		SqlStatement(MasterDB, "Update BanList Set Date = ?, Nick = ?, IP = ?, MAC = ?, Duration = ? Where ID = ?;")
+			.bindInt(1, (long long)theTime).bindText(2, NickName).bindText(3, IP).bindText(4, MAC).bindInt(5, Duration).bindInt(6, existing).run();
+		printf("Updated ban with ID %lli\n", existing);
 	}
 	else
 	{
 		// add new ban
-		sprintf(SQL,"Insert into BanList ( Date , Duration , IP , MAC , Nick ) values( %li , %i , '%s', '%s','%s');", (long)theTime , Duration , IP, MAC, NickName );
-		sqlite3_exec(MasterDB,SQL,0,0,0);
-
+		SqlStatement(MasterDB, "Insert into BanList ( Date , Duration , IP , MAC , Nick ) values( ?, ?, ?, ?, ? );")
+			.bindInt(1, (long long)theTime).bindInt(2, Duration).bindText(3, IP).bindText(4, MAC).bindText(5, NickName).run();
 		printf("Added ban : IP=%s  MAC=%s  NickName=%s\n",IP,MAC,NickName);
 	}
-
- 	sqlite3_free_table(azResult);
-
 }
 
 void cMasterServer::Unban( int ID )
 {
 	//let's delete the specified ID from the DB
-	char SQL[300];
-
-	sprintf(SQL,"Delete From BanList Where ID = %i", ID );
-	sqlite3_exec(MasterDB,SQL,0,0,0);
-
-
+	SqlStatement(MasterDB, "Delete From BanList Where ID = ?;").bindInt(1, ID).run();
 	printf("Ban with ID %i has been removed\n", ID);
 }
 
 void cMasterServer::CheckBans()
 {
-	//Quelques infos sur la table qu'on va loader
-	char	*zErrMsg;		// Contient un message d'erreur s'il y a lieu
-	char	**azResult;		// Contient le resultat de la requete
-	int	nRow;			// nombre denregistrement retourner par la requete
-	int	nColumn;		// nombre de column
-	char	SQL[300];
-	
-	sprintf(SQL,"Select * From BanList order by ID;");
-	
-	int dbResult = sqlite3_get_table(MasterDB,SQL,&azResult,&nRow,&nColumn,&zErrMsg);
-	
-	
 	//get current time
 	time_t theTime;
 	theTime = time( NULL );
 
-	
-	// we have bans
-	if(nRow)
+	SqlStatement bans(MasterDB, "Select Date, Duration, ID From BanList order by ID;");
+	while (bans.row())
 	{
-		for( int CurrentRow = 0; CurrentRow < nRow; CurrentRow ++ )
-		{
-	
-			long dateLong = atol( azResult[BV2_BAN_DATE] );
-			int Duration 	= atoi( azResult[BV2_BAN_DURATION] );
+		long dateLong = (long)bans.integer(0);
+		int Duration = (int)bans.integer(1);
 
-			// unlimited ban
-			if( !Duration )
-			{
-				continue;
-			}			
+		// unlimited ban
+		if( !Duration )
+		{
+			continue;
+		}
 
 #ifndef BV2_PLATFORM_WINDOWS
-			int nbDays = GetDayDiff( dateLong , theTime );
+		int nbDays = GetDayDiff( dateLong , theTime );
 #else
-			int nbDays = 0;
+		int nbDays = 0;
+		(void)dateLong;
 #endif
 
-			// we can remove the ban
-			if( nbDays >= Duration )
-			{
-				char SQL[512];
-				sprintf(SQL,"Delete From BanList Where ID = %i;",atoi(azResult[BV2_BAN_ID]));
-				sqlite3_exec(MasterDB,SQL,0,0,0);
-			}
-
-
-		}
+		// we can remove the ban
+		if( nbDays >= Duration )
+			SqlStatement(MasterDB, "Delete From BanList Where ID = ?;").bindInt(1, bans.integer(2)).run();
 	}
-	//we dont
-	
-	sqlite3_free_table(azResult);
-
 }
 
 int cMasterServer::Update(float elapsed)
@@ -364,9 +263,7 @@ int cMasterServer::Update(float elapsed)
 			// update web db if any
 			if( m_webDB )
 			{
-				char	SQL[300];
-				sprintf(SQL,"Delete from Games Where IP = '%s' and Port = %i;", G->GameInfos.ip, G->GameInfos.port);
-				sqlite3_exec(m_webDB,SQL,0,0,0);
+				SqlStatement(m_webDB, "Delete from Games Where IP = ? and Port = ?;").bindText(1, G->GameInfos.ip).bindInt(2, G->GameInfos.port).run();
 			}
 
 			delete G;
@@ -462,167 +359,27 @@ int cMasterServer::UpdateGame(stBV2row *row,UINT4 fromID)
 	c->Timeout = 0;
 
 	// let's check if the database version is good, if not, we'll send the new version/url
-	char	*zErrMsg;		// Contient un message d'erreur s'il y a lieu
-	char	**azResult;		// Contient le resultat de la requete
-	int	nRow;			// nombre denregistrement retourner par la requete
-	int	nColumn;		// nombre de column
-	char	SQL[300];
-	sprintf(SQL,"Select Value From Settings Where Name = 'DBVersion';");
-
-	azResult = 0;
-	zErrMsg = 0;
-	int dbResult = sqlite3_get_table(MasterDB,SQL,&azResult,&nRow,&nColumn,&zErrMsg);
-	unsigned short version = 0;
-	if (dbResult == SQLITE_OK && azResult && nRow >= 1 && nColumn >= 1 && azResult[nColumn])
-		version = (unsigned short)atoi(azResult[nColumn]);
-	if (zErrMsg)
-	{
-		sqlite3_free(zErrMsg);
-		zErrMsg = 0;
-	}
-	sqlite3_free_table(azResult);
-	azResult = 0;
+	unsigned short version = (unsigned short)atoi(SqlStatement::value(MasterDB, "Select Value From Settings Where Name = 'DBVersion';").c_str());
 
 	if( row->DBVersion != version )
 	{
-		sprintf(SQL,"Select Value From Settings Where Name = 'AccountURL';");
-		dbResult = sqlite3_get_table(MasterDB,SQL,&azResult,&nRow,&nColumn,&zErrMsg);
-
 		// send url! (DB value is data, never a format string)
-		if (dbResult == SQLITE_OK && azResult && nRow >= 1 && nColumn >= 1 && azResult[nColumn])
+		std::string url = SqlStatement::value(MasterDB, "Select Value From Settings Where Name = 'AccountURL';");
+		if (!url.empty())
 		{
 			char *buf = new char[512];
 			memset(buf, 0, 512);
 			memcpy(buf,&version,2);
-			snprintf(buf + 2, 510, "%s", azResult[nColumn]);
+			snprintf(buf + 2, 510, "%s", url.c_str());
 			bb_serverSend( buf,512,ACCOUNT_URL,fromID);
 			delete [] buf;
 		}
-		if (zErrMsg)
-		{
-			sqlite3_free(zErrMsg);
-			zErrMsg = 0;
-		}
-		sqlite3_free_table(azResult);
-		azResult = 0;
 	}
 
 	
 	int gameID = CreateGame(new cBV2game(c->IP,*row,fromID));
 	return gameID;
 }
-
-// int cMasterServer::RegisterPlayer(const stPlayerRegister & reg)
-// {
-// 	//let's check wich action the user wants
-// 	//Quelques infos sur la table qu'on va loader
-// 	char	*zErrMsg;		// Contient un message d'erreur s'il y a lieu
-// 	char	**azResult;		// Contient le resultat de la requete
-// 	int		nRow;			// nombre denregistrement retourner par la requete
-// 	int		nColumn;		// nombre de column
-// 	char	SQL[300];
-// 
-// 
-// 	if(reg.Action == 0) //user wants to create a new account, let's see if the username already exists
-// 	{
-// 		sprintf(SQL,"Select Username from Players where Username = '%s';",reg.Username);
-// 		sqlite3_get_table(MasterDB,SQL,&azResult,&nRow,&nColumn,&zErrMsg);
-// 
-// 		if(nRow > 0)//user already exists
-// 		{
-// 			sqlite3_free_table(azResult);
-// 			return 1;
-// 		}
-// 		sqlite3_free_table(azResult);
-// 		
-// 		//let's get the last emitted baboID
-// 		sprintf(SQL,"Select Max(BaboID) from Players;");
-// 		sqlite3_get_table(MasterDB,SQL,&azResult,&nRow,&nColumn,&zErrMsg);
-// 
-// 		UINT4 id = 0;
-// 		if(nRow > 0)//we have a max
-// 		{
-// 			id = atoi(azResult[1]) + 1;
-// 			sqlite3_free_table(azResult);
-// 		}
-// 		else
-// 		{
-// 			id = 1;
-// 			sqlite3_free_table(azResult);
-// 		}
-// 
-// 		sprintf(SQL,"Insert into Players Values(%i,'%s',%i,'%s');",id + 1,reg.Password,0,reg.Username);
-// 		sqlite3_exec(MasterDB,SQL,0,0,0);
-// 
-// 		return 0;
-// 	}
-// 	else
-// 	{	//we want to authenticate an existing account
-// 
-// 		sprintf(SQL,"Select * from Players where Username = '%s';",reg.Username);
-// 		sqlite3_get_table(MasterDB,SQL,&azResult,&nRow,&nColumn,&zErrMsg);
-// 
-// 		if(nRow > 0)//user exists!
-// 		{
-// 			//check the password
-// 			if(!stricmp(azResult[6],reg.Password))
-// 			{
-// 				//password is good
-// 				sqlite3_free_table(azResult);
-// 				return 2;
-// 			}
-// 			else
-// 			{
-// 				//good user, bad password
-// 				sqlite3_free_table(azResult);
-// 				return 3;
-// 			}
-// 		}
-// 		else
-// 		{
-// 			sqlite3_free_table(azResult);
-// 			return 4;
-// 		}
-// 	}
-// 
-// }
-
-// int cMasterServer::RegisterServer(const stServerRegister & reg,char *IP)
-// {
-// 	//Quelques infos sur la table qu'on va loader
-// 	char	*zErrMsg;		// Contient un message d'erreur s'il y a lieu
-// 	char	**azResult;		// Contient le resultat de la requete
-// 	int		nRow;			// nombre denregistrement retourner par la requete
-// 	int		nColumn;		// nombre de column
-// 	char	SQL[300];
-// 
-// 
-// 		sprintf(SQL,"Select * from RegisteredServers where Username = '%s';",reg.Username);
-// 		sqlite3_get_table(MasterDB,SQL,&azResult,&nRow,&nColumn,&zErrMsg);
-// 
-// 		if(nRow > 0)//server exists
-// 		{
-// 			//let's check password
-// 			if(!stricmp(reg.Password,azResult[13]))
-// 			{
-// 				//password ye bon
-// 				//on check si ca vient du bon IP
-// 				if(!stricmp(IP,azResult[10]))
-// 				{
-// 					//le IP est bon, on retourne le bon ID
-// 					int id = atoi(azResult[15]);
-// 					sqlite3_free_table(azResult);
-// 					return id;
-// 				}
-// 			}
-// 			sqlite3_free_table(azResult);
-// 			return 0;
-// 		}
-// 
-//         sqlite3_free_table(azResult);
-// 		return 0;
-// 
-// }
 
 int cMasterServer::CreateGame(cBV2game* newGame)
 {
@@ -647,37 +404,7 @@ int cMasterServer::CreateGame(cBV2game* newGame)
 					//la game existe deja on update,delete et on sort
 					memcpy(&(G->GameInfos),&(newGame->GameInfos),sizeof(stBV2row));
 
-					// update game in webdb if present
-					if( m_webDB )
-					{
-						// fix apostrophe's
-						int i=0;
-						char	MapName[17];
-						sprintf( MapName, "%s", G->GameInfos.map );
-						for( i=0; i<17; i++ )
-						{
-							if( MapName[i] == '\'' )
-							{
-								MapName[i] = '`';
-							}
-						}
-
-						char	GameName[64];
-						sprintf( GameName, "%s", G->GameInfos.serverName );
-						for( i=0; i<64; i++ )
-						{
-							if( GameName[i] == '\'' )
-							{
-								GameName[i] = '`';
-							}
-						}
-
-						int hasPassword = G->GameInfos.password[0] != '\0' ? 1 : 0;
-
-						char	SQL[300];
-						sprintf(SQL,"Update Games Set Map = '%s' , MaxPlayers = %i, Name = '%s', NbPlayers = %i, Password = %i Where IP = '%s' and Port = %i;", MapName , G->GameInfos.maxPlayer , GameName, G->GameInfos.nbPlayer, hasPassword, G->GameInfos.ip, G->GameInfos.port );
-						sqlite3_exec(m_webDB,SQL,0,0,0);
-					}
+					WriteWebGame(G->GameInfos, false);
 
 					delete newGame;
 					return 0;
@@ -697,37 +424,7 @@ int cMasterServer::CreateGame(cBV2game* newGame)
 				G->LastCheck = 0;
 				memcpy(&(G->GameInfos),&(newGame->GameInfos),sizeof(stBV2row));
 
-				// update game in webdb if present
-				if( m_webDB )
-				{
-					// fix apostrophe's
-					int i=0;
-					char	MapName[17];
-					sprintf( MapName, "%s", G->GameInfos.map );
-					for( i=0; i<17; i++ )
-					{
-						if( MapName[i] == '\'' )
-						{
-							MapName[i] = '`';
-						}
-					}
-
-					char	GameName[64];
-					sprintf( GameName, "%s", G->GameInfos.serverName );
-					for( i=0; i<64; i++ )
-					{
-						if( GameName[i] == '\'' )
-						{
-							GameName[i] = '`';
-						}
-					}
-
-					int hasPassword = G->GameInfos.password[0] != '\0' ? 1 : 0;
-
-					char	SQL[300];
-					sprintf(SQL,"Update Games Set Map = '%s' , MaxPlayers = %i, Name = '%s', NbPlayers = %i, Password = %i Where IP = '%s' and Port = %i;", MapName , G->GameInfos.maxPlayer , GameName, G->GameInfos.nbPlayer, hasPassword,G->GameInfos.ip,G->GameInfos.port );
-					sqlite3_exec(m_webDB,SQL,0,0,0);
-				}
+				WriteWebGame(G->GameInfos, false);
 
 				delete newGame;
 				return 0;
@@ -760,36 +457,7 @@ int cMasterServer::CreateGame(cBV2game* newGame)
 	//printf("CREATED Game with IP : %s port : %i\n",newGame->GameInfos.ip ,newGame->GameInfos.port);
 	//*exist = false;
 
-	// add game to web db
-	if( m_webDB )
-	{
-		// fix apostrophe's
-		int i=0;
-		char	MapName[17];
-		sprintf( MapName, "%s", newGame->GameInfos.map );
-		for( i=0; i<17; i++ )
-		{
-			if( MapName[i] == '\'' )
-			{
-				MapName[i] = '`';
-			}
-		}
-
-		char	GameName[64];
-		sprintf( GameName, "%s", newGame->GameInfos.serverName );
-		for( i=0; i<64; i++ )
-		{
-			if( GameName[i] == '\'' )
-			{
-				GameName[i] = '`';
-			}
-		}
-
-		int hasPassword = newGame->GameInfos.password[0] != '\0' ? 1 : 0;
-		char	SQL[300];
-		sprintf(SQL,"Insert into Games(IP,Map,MaxPlayers,Name,NbPlayers,Password,Port) Values('%s','%s',%i,'%s',%i,%i,%i);", newGame->GameInfos.ip, MapName, newGame->GameInfos.maxPlayer, GameName, newGame->GameInfos.nbPlayer, hasPassword, newGame->GameInfos.port);
-		sqlite3_exec(m_webDB,SQL,0,0,0);
-	}
+	WriteWebGame(newGame->GameInfos, true);
 
 	NbGames++;
 

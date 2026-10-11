@@ -15,27 +15,6 @@
 #include "sqlite3.h"
 
 
-	//Macros for field indexing 
-	
-	#define BV2_SERVERID		CurrentRow*nColumn+12
-	#define BV2_VERSION			CurrentRow*nColumn+13
-	#define BV2_ID				CurrentRow*nColumn+14
-	#define BV2_FLAGS			CurrentRow*nColumn+15
-	#define BV2_GAMETYPE		CurrentRow*nColumn+16
-	#define BV2_IP				CurrentRow*nColumn+17
-	#define BV2_MAP				CurrentRow*nColumn+18
-	#define BV2_MAXPLAYERS		CurrentRow*nColumn+19
-	#define BV2_NBPLAYERS		CurrentRow*nColumn+20
-	#define BV2_PASSWORD		CurrentRow*nColumn+21
-	#define BV2_PORT			CurrentRow*nColumn+22
-	#define BV2_SERVERNAME		CurrentRow*nColumn+23
-
-	#define BV2_BAN_DATE		CurrentRow*nColumn+6
-	#define BV2_BAN_DURATION	CurrentRow*nColumn+7
-	#define BV2_BAN_ID			CurrentRow*nColumn+8
-	#define BV2_BAN_IP			CurrentRow*nColumn+9
-	#define BV2_BAN_MAC			CurrentRow*nColumn+10
-	#define BV2_BAN_NICK		CurrentRow*nColumn+11
 
 
 
@@ -101,6 +80,8 @@ public:
 	void		Unban( int ID );											// unban someone by ID
 	void		SendBanList( UINT4 fromID , char * filter );							//function to send a ban list to a client	
 	int		IsBanned( char * IP , char * MAC );									// return 0 if the guy is not banned, return 1 if he is
+	long long	FindBan( const char * IP , const char * MAC );								// the ban's ID, -1 if none
+	void		WriteWebGame( const stBV2row & game , bool insert );						// a game's row in the web database
 
 	int		RegisterServer(const stServerRegister & reg,char *ip);							//authentification of a server, return 0 on failure, return the ServerID on success
 	int		RegisterPlayer(const stPlayerRegister & reg);								//tries to register a player

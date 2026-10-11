@@ -16,6 +16,7 @@
 	BaboViolent 2 source code. If not, see http://www.gnu.org/licenses/.
 */
 
+#include "SqlStatement.h"
 #include "Paths.h"
 #include "GameVar.h"
 #include "netPacket.h"
@@ -35,29 +36,14 @@ void FetchDBInfos()
 	if (!db)
 		return;
 
-	//some infos to load the data
-	char	*zErrMsg;		// holds error msg if any
-	char	**azResult;		// contains the actual returned data
-	int	nRow;			// number of record
-	int	nColumn;		// number of column
-	char	SQL[256];		// the query
-
-	sprintf(SQL,"Select Value From LauncherSettings Where Name = 'DBVersion';");
-	sqlite3_get_table(db,SQL,&azResult,&nRow,&nColumn,&zErrMsg);
-
-	if (nRow >= 1 && azResult[1])
-		gameVar.db_version = atoi(azResult[1]);
-	sqlite3_free_table(azResult);
-
-	sprintf(SQL,"Select Value From LauncherSettings Where Name = 'AccountURL';");
-	sqlite3_get_table(db,SQL,&azResult,&nRow,&nColumn,&zErrMsg);
-
-	if (nRow >= 1 && azResult[1])
-		gameVar.db_accountServer = CString( azResult[1] );
+	std::string version = SqlStatement::value(db, "Select Value From LauncherSettings Where Name = 'DBVersion';");
+	if (!version.empty())
+		gameVar.db_version = atoi(version.c_str());
+	std::string url = SqlStatement::value(db, "Select Value From LauncherSettings Where Name = 'AccountURL';");
+	if (!url.empty())
+		gameVar.db_accountServer = CString("%s", url.c_str()); // data, not a format
 	if (gameVar.cl_accountURL.len() > 0)
 		gameVar.db_accountServer = gameVar.cl_accountURL; // the config wins over what the master told us earlier
-
-	sqlite3_free_table(azResult);
 	sqlite3_close(db);
 }
 
