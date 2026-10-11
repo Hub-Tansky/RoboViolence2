@@ -334,3 +334,11 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Why it matters:** the difference may have been a deliberate balance for a map side, or a typo; players who knew the old behaviour may notice.
 - **Suggested home:** a gameplay review with the regulars (play-test both values); restoring a difference needs an ADR.
 - **Status:** Proposed
+
+### PNS-40: Temp-ban as a validator action
+
+- **Found in:** Phase B step 8 (2026-10-11).
+- **Extract:** step 8 lists the validator actions "log, warn, kick, temp-ban"; it ships kick only, and step 9 adds warn.
+- **Why it matters:** a kicked cheater reconnects at once. A temp-ban needs a ban list on the dedicated server (today only the master bans, by its password, Q-S5).
+- **Suggested home:** step 10 (server credentials) or step 12 (remote admin).
+- **Status:** Proposed

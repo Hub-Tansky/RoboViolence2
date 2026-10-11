@@ -70,7 +70,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `packaging/macos/Info.plist.in` | macOS bundle `Info.plist` template |
 | `packaging/windows/bv2.manifest` | Windows manifest for `bv2`, `bv2dedicated` and `bv2master`: PerMonitorV2 DPI, UTF-8 code page, Windows 10/11 |
 | `packaging/windows/bv2.rc.in` | Windows resource script template; CMake fills in the generated icon |
-| `tests/CMakeLists.txt` | ctest targets: netPacket, config, fileio, babonet large message, the two `SqlStatement.h` copies identical, crash fixes, missing music (client builds), dedicated-server smoke, in-process server harness (`bv2server_lib` + fake babonet), packet hygiene, corpus replay, crash-input tests for `crash-*.bin` under ASan (none at present), master server; on Windows also the non-ASCII install path smoke and the no-VC++-runtime-DLL check |
+| `tests/CMakeLists.txt` | ctest targets: netPacket, config, fileio, babonet large message, the two `SqlStatement.h` copies identical, crash fixes, validator, missing music (client builds), dedicated-server smoke, in-process server harness (`bv2server_lib` + fake babonet), packet hygiene, corpus replay, crash-input tests for `crash-*.bin` under ASan (none at present), master server; on Windows also the non-ASCII install path smoke and the no-VC++-runtime-DLL check |
 | `tests/check_windows_deps.py` | Windows: fails if `bv2`, `bv2dedicated` or `bv2master` needs a Visual C++ runtime DLL |
 | `tests/corpus/clsv_admin_request/valid.bin` | Replay corpus: valid `clsv_admin_request` payload (`gen_corpus`) |
 | `tests/corpus/clsv_gameversion_accepted/valid.bin` | Replay corpus: valid `clsv_gameversion_accepted` payload (`gen_corpus`) |
@@ -112,6 +112,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/test_replay.cpp` | Replays the corpus through the in-process server: no crash, expected replies; each `crash-*.bin` (none at present) is its own ctest under ASan |
 | `tests/fuzz_server.cpp` | Random-mutation fuzzer for one message type on the in-process server; writes the crashing input to `<out>/<type>/last.bin` (CI job `fuzz`) |
 | `tests/test_server_harness.cpp` | The in-process server starts on the placeholder CTF map, accepts a client and sends it the game state |
+| `tests/test_validator.cpp` | Step 8: the server kicks for a non-primary spawn weapon and for `sv_speedHackKick` (3) speed violations in a row, never a valid player |
 | `tests/test_master.cpp` | In-process master on port 10207 with a scratch `master.db`: register, list, heartbeat timeout (simulated 61 s), removal by `KILL_SERV`, SQL injection in names, maps, nicks, IPs and MACs, and the ban list with LIKE filters (Q-S3). Not run on Windows (R28) |
 | `tests/test_netpacket.cpp` | Byte-level layout of the packed wire structs |
 | `tools/check-content-case.py` | Fails when a literal `main/...` path differs from a real file name only by case |
@@ -285,6 +286,8 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step6.md` | Fresh-context review record for step 6 |
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step7-report.md` | Raw reviewer report for step 7 |
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step7.md` | Fresh-context review record for step 7 |
+| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step8-report.md` | Raw reviewer report for step 8 |
+| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step8.md` | Fresh-context review record for step 8 |
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step5-report.md` | Raw reviewer report for step 5 |
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step5.md` | Fresh-context review record for step 5 |
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step4-report.md` | Raw reviewer report for step 4 |
@@ -634,6 +637,8 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/ServerClose.h` | Dialog shown when the server closes the connection |
 | `game/src/ServerRecv.cpp` | Server: handlers for every client-to-server packet, after the pre-dispatch check `Server::checkPacket` |
 | `game/src/ServerSnD.cpp` | Server: search-and-destroy rules |
+| `game/src/ServerValidator.cpp` | Server cheat checks: spawn weapon whitelist, per-player speed/frame violation score |
+| `game/src/ServerValidator.h` | Server cheat checks (`Server::validator`), asked by the `ServerRecv.cpp` handlers |
 | `game/src/SqlStatement.h` | Prepared SQLite statement with bound parameters (the game's copy) |
 | `game/src/Weapon.cpp` | Weapon definitions and stats |
 | `game/src/Weapon.h` | Weapon definitions and stats |

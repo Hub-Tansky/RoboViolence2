@@ -79,6 +79,7 @@ set(BV2_GAME_SOURCES
   src/ServerCTF.cpp
   src/ServerRecv.cpp
   src/ServerSnD.cpp
+  src/ServerValidator.cpp
   src/Weapon.cpp
   src/Write.cpp
   src/Writting.cpp
@@ -121,6 +122,7 @@ set(BV2_SERVER_SOURCES
   src/ServerCTF.cpp
   src/ServerRecv.cpp
   src/ServerSnD.cpp
+  src/ServerValidator.cpp
   src/Weapon.cpp
   src/main.cpp
   src/tinyxml.cpp

@@ -395,7 +395,10 @@ void Server::updateNet(float delay, bool send)
 			console->add("\x3> Disconnecting client, server is full", true);
 		}
 		else
+		{
 			strcpy(game->players[playerID]->playerIP, IPDuGars);
+			validator.reset(*game->players[playerID]);
+		}
 		/*PlayerStats* ps = getStatsFromCache(game->players[playerID]->userID);
 		if (ps != 0)
 			ps->MergeStats(game->players[playerID]);*/
