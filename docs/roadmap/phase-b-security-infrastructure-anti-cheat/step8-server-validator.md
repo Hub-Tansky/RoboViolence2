@@ -1,6 +1,6 @@
 # Step 8: ServerValidator (refactor, no behaviour change)
 
-**Status:** IN PROGRESS
+**Status:** DONE (2026-10-11)
 
 **Depends on:** [Step 4](step4-packet-hygiene.md). **Next:** [step9-anti-cheat-checks.md](step9-anti-cheat-checks.md). **Index:** [README.md](README.md)
 
