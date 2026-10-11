@@ -841,6 +841,8 @@ void Player::reinit()
 	damage = 0;
 	ping = 0;
 	pingSum = 0;
+	memset(pingLog, 0, sizeof(int)*PING_LOG_SIZE); // R15: pingSum is the sum of pingLog
+	pingLogID = 0;
 	avgPing = 0;
 	babySitTime = 5.0f;
 	pingOverMax = 0.0f;

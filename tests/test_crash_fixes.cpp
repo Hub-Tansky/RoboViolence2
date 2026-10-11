@@ -217,6 +217,10 @@ static void r15()
 	p->ping = 10;
 	for (int i = 0; i < 2 * PING_LOG_SIZE; ++i) p->updatePing(p->pingLogInterval + 0.01f);
 	CHECK(p->avgPing == 10);
+	p->reinit(); // every map change
+	p->ping = 10;
+	for (int i = 0; i < 2 * PING_LOG_SIZE; ++i) p->updatePing(p->pingLogInterval + 0.01f);
+	CHECK(p->avgPing == 10);
 }
 
 int main(int, char ** argv)
