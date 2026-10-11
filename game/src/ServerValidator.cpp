@@ -43,5 +43,5 @@ ServerValidator::Verdict ServerValidator::onCoordFrame(int slot, const Player & 
 		score[slot] = 0;
 		return ACCEPT;
 	}
-	return ++score[slot] >= 3 ? KICK : ACCEPT;
+	return ++score[slot] >= gameVar.sv_speedHackKick ? KICK : ACCEPT;
 }

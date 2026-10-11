@@ -158,6 +158,7 @@ public:
 	int sv_autoSpectateIdleMaxTime;
 	bool sv_beGoodServer;
 	bool sv_validateWeapons;
+	int sv_speedHackKick;
 	CString sv_joinMessage;
 	bool sv_sendJoinMessage;
 

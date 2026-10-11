@@ -112,7 +112,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/test_replay.cpp` | Replays the corpus through the in-process server: no crash, expected replies; each `crash-*.bin` (none at present) is its own ctest under ASan |
 | `tests/fuzz_server.cpp` | Random-mutation fuzzer for one message type on the in-process server; writes the crashing input to `<out>/<type>/last.bin` (CI job `fuzz`) |
 | `tests/test_server_harness.cpp` | The in-process server starts on the placeholder CTF map, accepts a client and sends it the game state |
-| `tests/test_validator.cpp` | Step 8: the server kicks for a non-primary spawn weapon and for three speed violations in a row, never a valid player |
+| `tests/test_validator.cpp` | Step 8: the server kicks for a non-primary spawn weapon and for `sv_speedHackKick` (3) speed violations in a row, never a valid player |
 | `tests/test_master.cpp` | In-process master on port 10207 with a scratch `master.db`: register, list, heartbeat timeout (simulated 61 s), removal by `KILL_SERV`, SQL injection in names, maps, nicks, IPs and MACs, and the ban list with LIKE filters (Q-S3). Not run on Windows (R28) |
 | `tests/test_netpacket.cpp` | Byte-level layout of the packed wire structs |
 | `tools/check-content-case.py` | Fails when a literal `main/...` path differs from a real file name only by case |

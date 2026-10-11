@@ -447,6 +447,9 @@ GameVar::GameVar()
 	dksvarRegister(CString("sv_beGoodServer [bool : true | false (default true)]"), &sv_beGoodServer, true);
 	sv_validateWeapons = true;
 	dksvarRegister(CString("sv_validateWeapons [bool : true | false (default true)]"), &sv_validateWeapons, true);
+	sv_speedHackKick = 3;
+	dksvarRegister(CString("sv_speedHackKick [int : 3 s speed or frame-rate violations in a row that kick, 1 to unlimited (default 3)]"),
+		&sv_speedHackKick, 1, 0, LIMIT_MIN, true);
 	sv_minTilesPerBabo = 55.0;
 	dksvarRegister(CString("sv_minTilesPerBabo [float : 0.0 to 250.0 (default 55.0)]"), &sv_minTilesPerBabo, 0, 250,
 		LIMIT_MIN | LIMIT_MAX, true);

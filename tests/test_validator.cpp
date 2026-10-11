@@ -1,6 +1,7 @@
 // Phase B step 8: the server's cheat checks kick as they did before ServerValidator (8.1 pins this behaviour).
 #include "server_harness.h"
 
+#include "Console.h"
 #include "Game.h"
 #include "Scene.h"
 #include "Server.h"
@@ -85,12 +86,26 @@ static void validPlayer()
 	harness::tick();
 }
 
+// sv_speedHackKick sets how many violating windows in a row kick
+static void speedHackKickVar()
+{
+	console->sendCommand("set sv_speedHackKick 1");
+	UINT4 c = harness::spawned(WEAPON_SMG);
+	int slot = harness::slotOf(c);
+	window(c, 50);
+	CHECK(scene->server->game->players[slot] == nullptr);
+	harness::disconnect(c);
+	harness::tick();
+	console->sendCommand("set sv_speedHackKick 3");
+}
+
 int main(int, char ** argv)
 {
 	if (!harness::start(argv[0])) return 1;
 	weaponWhitelist();
 	speedHack();
 	validPlayer();
+	speedHackKickVar();
 	harness::stop();
 	if (harness::failures() == 0) std::printf("ok: validator\n");
 	return harness::failures() ? 1 : 0;
