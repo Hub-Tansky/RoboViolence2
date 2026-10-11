@@ -40,6 +40,14 @@
 
 - Drop `macAddr` from `PLAYER_INFO` (leave the message ID; don't renumber), from bans, the player cache and master reports. Bans stay IP-based until accounts exist (PNS-14).
 
+## Notes
+
+- Scheme: `GAMEVERSION` carries a 16-byte nonce per connection; the client answers `HMAC-SHA256(password, label + '\0' + nonce)` with label `join`, `admin user` or `admin password` (`game/src/Credentials.h`). The admin login reuses the join nonce. Version 22100.
+- Found and fixed: the server pushed `sv_password` in cleartext to every client (`GameVar::sendSVVar`, variable changes), and relayed each player's account username and MD5 password hash to all players with `PLAYER_INFO`.
+- MAC: gone from `PLAYER_INFO`, the server's player cache (now matched by IP; the old code overwrote the wrong entry on a match), the master's ban and cache messages and `BanList` (the seed; an existing `master.db` keeps an unused `MAC` column). `bb_getMyMAC` stays in babonet, unused.
+- Tests: `credentials` (RFC 4231), `join_password`, `admin_login`; fix proofs: with the server's check skipped, the wrong-password and replay cases fail (`test_join_password.cpp:71,75`, `test_admin_login.cpp:60`); without the blanking, the relay check fails (`test_join_password.cpp:82`); with the push restored, the capture check fails.
+- Open: a sniffed proof allows offline guessing of a weak password, and admin attempts are not limited → PNS-42.
+
 ## Critical files
 
 - `game/src/ServerRecv.cpp`, `game/src/ClientRecv.cpp`, `game/src/netPacket.h`, `game/src/Console.cpp`
