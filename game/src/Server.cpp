@@ -1342,65 +1342,42 @@ void Server::autoBalance()
 		}
 	}
 
+	// R8: move half the difference, a different player each time (one player moved again and again before), and
+	// broadcast the team the player actually got. carriedFlag: the enemy flag this team can be carrying.
+	auto balance = [this](std::vector<Player*> & from, int carriedFlag, char toTeam, int nbToSwitch)
+	{
+		while (nbToSwitch > 0 && !from.empty())
+		{
+			//--- Bon... comment on choisi les candidats, c'est simple, on switch les plus poche (le moins de temps joue)
+			int switchID = -1;
+			for (int i = (int)from.size() - 1; i >= 0; i--)
+			{
+				if (game->map->flagState[carriedFlag] == from[i]->playerID) continue; // never the flag carrier
+				if (switchID == -1 || from[switchID]->timePlayedCurGame > from[i]->timePlayedCurGame)
+					switchID = i;
+			}
+			if (switchID == -1) return;
+			Player * player = from[switchID];
+			from.erase(from.begin() + switchID);
+			char oldTeam = player->teamID;
+			player->teamID = game->assignPlayerTeam(player->playerID, toTeam);
+			if (player->teamID != oldTeam)
+			{
+				//--- Switch him team: on l'envoit a tout le monde
+				net_clsv_svcl_team_request teamRequest;
+				teamRequest.playerID = player->playerID;
+				teamRequest.teamRequested = player->teamID;
+				bb_serverSend((char*)&teamRequest, sizeof(net_clsv_svcl_team_request), NET_CLSV_SVCL_TEAM_REQUEST, 0);
+			}
+			nbToSwitch--;
+		}
+	};
+
 	//--- Check if they are uneven
 	if ((int)reds.size() < (int)blues.size() - 1)
-	{
-		//--- On balance!
-		int nbToSwitch = (int)blues.size() - 1 - (int)reds.size();
-
-		//--- Bon... comment on choisi les candidats, c'est simple, 
-		//    on switch les 2 plus poche en bas de la liste ^^
-		while (nbToSwitch > 0)
-		{
-			int switchID = (int)blues.size() - 1;
-			if(game->map->flagState[1] == blues[switchID]->playerID)
-				switchID--;
-			for(int i = switchID - 1; i >= 0; i--)
-			{
-				if(blues[switchID]->timePlayedCurGame > blues[i]->timePlayedCurGame && game->map->flagState[1] != blues[i]->playerID)
-					switchID = i;
-			}
-			blues[switchID]->teamID = game->assignPlayerTeam(blues[switchID]->playerID, PLAYER_TEAM_RED);
-			//--- Switch him team
-			net_clsv_svcl_team_request teamRequest;
-			teamRequest.playerID = blues[switchID]->playerID;
-			teamRequest.teamRequested = PLAYER_TEAM_RED;
-			// On l'envoit �tout le monde, (si � chang�
-			bb_serverSend((char*)&teamRequest, sizeof(net_clsv_svcl_team_request), NET_CLSV_SVCL_TEAM_REQUEST, 0);
-			nbToSwitch--;
-		}
-	}
+		balance(blues, 1, PLAYER_TEAM_RED, ((int)blues.size() - (int)reds.size()) / 2);
 	else if ((int)blues.size() < (int)reds.size() - 1)
-	{
-		//--- On balance
-		int nbToSwitch = (int)reds.size() - 1 - (int)blues.size();
-
-		//--- Bon... comment on choisi les candidats, c'est simple, 
-		//    on switch les 2 plus poche en bas de la liste ^^
-		while (nbToSwitch > 0)
-		{
-			int switchID = (int)reds.size() - 1;
-			if(game->map->flagState[0] == reds[switchID]->playerID)
-				switchID--;
-			for(int i = switchID - 1; i >= 0; i--)
-			{
-				if(reds[switchID]->timePlayedCurGame > reds[i]->timePlayedCurGame && game->map->flagState[0] != reds[i]->playerID)
-					switchID = i;
-			}
-			reds[switchID]->teamID = game->assignPlayerTeam(reds[switchID]->playerID, PLAYER_TEAM_BLUE);
-			//--- Switch him team
-			net_clsv_svcl_team_request teamRequest;
-			teamRequest.playerID = reds[switchID]->playerID;
-			teamRequest.teamRequested = PLAYER_TEAM_BLUE;
-			// On l'envoit �tout le monde, (si � chang�
-			bb_serverSend((char*)&teamRequest, sizeof(net_clsv_svcl_team_request), NET_CLSV_SVCL_TEAM_REQUEST, 0);
-			nbToSwitch--;
-		}
-	}
-	else
-	{
-		//--- Ha ok, les teams �aient balanc�
-	}
+		balance(reds, 0, PLAYER_TEAM_BLUE, ((int)reds.size() - (int)blues.size()) / 2);
 }
 
 

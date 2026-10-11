@@ -169,6 +169,31 @@ static void r13()
 	game->gameType = gameType;
 }
 
+// R8: auto-balance moves half the difference, a different player each time, and broadcasts the real team
+static void r8()
+{
+	Game * game = scene->server->game;
+	std::vector<int> slots;
+	for (int i = 0; i < 6; ++i) slots.push_back(harness::slotOf(harness::join()));
+	for (int i = 0; i < MAX_PLAYER; ++i)
+		if (game->players[i]) game->players[i]->teamID = PLAYER_TEAM_SPECTATOR;
+	for (size_t i = 0; i < slots.size(); ++i) game->players[slots[i]]->teamID = i == 0 ? PLAYER_TEAM_RED : PLAYER_TEAM_BLUE; // 1 red, 5 blue
+	harness::sent().clear();
+	scene->server->autoBalance();
+	int reds = 0, blues = 0;
+	for (int s : slots) (game->players[s]->teamID == PLAYER_TEAM_RED ? reds : blues)++;
+	CHECK(reds == 3 && blues == 3);
+	int moves = 0;
+	for (const harness::SentPacket & p : harness::sent())
+		if (p.typeID == NET_CLSV_SVCL_TEAM_REQUEST)
+		{
+			const net_clsv_svcl_team_request * t = (const net_clsv_svcl_team_request *)p.data.data();
+			CHECK(game->players[(int)t->playerID]->teamID == t->teamRequested);
+			++moves;
+		}
+	CHECK(moves == 2);
+}
+
 int main(int, char ** argv)
 {
 	if (!harness::start(argv[0])) return 1;
@@ -179,6 +204,7 @@ int main(int, char ** argv)
 	r10();
 	r9();
 	r13();
+	r8();
 	r18(bv2::userFile("").c_str());
 	harness::stop();
 	if (harness::failures() == 0) std::printf("ok: crash fixes\n");
