@@ -111,7 +111,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/test_replay.cpp` | Replays the corpus through the in-process server: no crash, expected replies; each `crash-*.bin` (none at present) is its own ctest under ASan |
 | `tests/fuzz_server.cpp` | Random-mutation fuzzer for one message type on the in-process server; writes the crashing input to `<out>/<type>/last.bin` (CI job `fuzz`) |
 | `tests/test_server_harness.cpp` | The in-process server starts on the placeholder CTF map, accepts a client and sends it the game state |
-| `tests/test_master.cpp` | In-process master on port 10207 with a scratch `master.db`: register, list, heartbeat timeout (simulated 61 s), removal by `KILL_SERV`. Not run on Windows (R28) |
+| `tests/test_master.cpp` | In-process master on port 10207 with a scratch `master.db`: register, list, heartbeat timeout (simulated 61 s), removal by `KILL_SERV`, SQL injection in names, maps, nicks and MACs (Q-S3). Not run on Windows (R28) |
 | `tests/test_netpacket.cpp` | Byte-level layout of the packed wire structs |
 | `tools/check-content-case.py` | Fails when a literal `main/...` path differs from a real file name only by case |
 | `vcpkg.json` | vcpkg manifest (sqlite3, curl; Step 3 completes it) |
@@ -622,6 +622,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/ReportGen.h` | XML server report generation |
 | `game/src/Scene.cpp` | Top-level scene: main loop, menus, game and editor switching, rendering setup |
 | `game/src/Scene.h` | Top-level scene: main loop, menus, game and editor switching, rendering setup |
+| `game/src/SqlStatement.h` | Prepared SQLite statement with bound parameters (the game's copy) |
 | `game/src/SceneNet.cpp` | Scene: starts and stops client and server, hosting and joining |
 | `game/src/Server.cpp` | Authoritative server: connections, joins, tick, map and mode control |
 | `game/src/Server.h` | Authoritative server: connections, joins, tick, map and mode control |
@@ -660,6 +661,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 |---|---|
 | `masterserver/src/MasterClient.cpp` | Master: connected-client record (reconstructed) |
 | `masterserver/src/MasterClient.h` | Master: connected-client record (reconstructed; see masterserver/README.md) |
+| `masterserver/src/SqlStatement.h` | Prepared SQLite statement with bound parameters (the master's copy) |
 | `masterserver/src/cBV2game.cpp` | Master: game list entry |
 | `masterserver/src/cBV2game.h` | Master: game list entry |
 | `masterserver/src/cMSstruct.h` | Master protocol structs (older subset of engine/babonet/include/cMSstruct.h) |
