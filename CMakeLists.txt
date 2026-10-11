@@ -31,6 +31,7 @@ find_package(Threads REQUIRED)
 # GL entry points come from glad; GLU (headers and library) is still the system's (see ARCHITECTURE.md).
 find_package(OpenGL REQUIRED COMPONENTS OpenGL OPTIONAL_COMPONENTS GLU)
 find_package(SQLite3 REQUIRED)
+find_package(unofficial-sodium CONFIG REQUIRED)  # credential HMAC and nonces (ADR 0014)
 # CMake 4.x renames the imported target; keep one name for both.
 if(TARGET SQLite3::SQLite3)
   set(BV2_SQLITE_TARGET SQLite3::SQLite3)

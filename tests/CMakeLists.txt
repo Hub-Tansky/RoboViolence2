@@ -115,6 +115,12 @@ bv2_target_defaults(test_babonet)
 add_test(NAME babonet_large_message COMMAND test_babonet)
 set_tests_properties(babonet_large_message PROPERTIES TIMEOUT 60)
 
+add_executable(test_credentials test_credentials.cpp ${CMAKE_SOURCE_DIR}/game/src/Credentials.cpp)
+target_include_directories(test_credentials PRIVATE ${CMAKE_SOURCE_DIR}/game/src)
+target_link_libraries(test_credentials PRIVATE unofficial-sodium::sodium)
+bv2_target_defaults(test_credentials)
+add_test(NAME credentials COMMAND test_credentials)
+
 add_executable(test_fileio test_fileio.cpp ${CMAKE_SOURCE_DIR}/game/src/FileIO.cpp ${CMAKE_SOURCE_DIR}/game/src/MemIO.cpp)
 target_include_directories(test_fileio PRIVATE ${CMAKE_SOURCE_DIR}/game/src)
 target_link_libraries(test_fileio PRIVATE zeven_core)
