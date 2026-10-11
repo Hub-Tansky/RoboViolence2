@@ -11,7 +11,7 @@
 | Goal | No client can act as another player, and no malformed client or server message can read out of bounds |
 | In scope | Tasks 4.1–4.6 below |
 | Out of scope | Anti-cheat rules (steps 8–9); crash fixes R1–R5 (step 5); a new serialisation format (PNS-17); anything visible to players (**[GUI]**) |
-| Allowed paths | `game/src/ServerRecv.cpp`, `game/src/ClientRecv.cpp`, `game/src/Server.{h,cpp}`, `game/src/Client.{h,cpp}` (receive loop only), `game/src/netPacket.h`, `engine/babonet/include/baboNet.h`, `engine/babonet/src/baboNet.cpp` (`bb_clientReceive` size only), `game/src/Console.cpp` (`svChange` only), `tests/**`, `docs/analysis/KEY_QUESTIONS.md`, `ARCHITECTURE.md`, `AGENTS.md` (untrusted-data line only), `docs/roadmap/**` |
+| Allowed paths | `game/src/ServerRecv.cpp`, `game/src/ClientRecv.cpp`, `game/src/Server.{h,cpp}`, `game/src/Client.{h,cpp}` (receive loop only), `game/src/netPacket.h`, `engine/babonet/include/baboNet.h`, `engine/babonet/src/baboNet.cpp` (`bb_clientReceive` size only), `game/src/Console.cpp` (`svChange` only), `tests/**`, `docs/analysis/KEY_QUESTIONS.md`, `ARCHITECTURE.md`, `AGENTS.md` (untrusted-data line only), `docs/roadmap/**`, `game/src/PacketCheck.{h,cpp}` and `game/CMakeLists.txt` (its lines only) (owner-approved 2026-10-11: testable client check) |
 | Inputs | `AGENTS.md`, `ARCHITECTURE.md`, earlier review records `reviews/step*.md`, `docs/analysis/KEY_QUESTIONS.md` Q-S1, Q-S2, Q-S4, Q-S6, Q-S7, step 3 harness |
 | Deliverables | One pre-dispatch check (size and sender slot) before the `recvPacket` switch; range checks; tests per finding |
 | Definition of done | See "Acceptance checks". All must pass. `ARCHITECTURE.md` is updated |
@@ -61,6 +61,7 @@
 - 4.2: the server can't bound `nuzzleID` (nuzzle lists exist only in the client build), so the client checks it against the shooter's weapon before `Weapon::shoot` (`validNuzzle`). No test: the client needs a GL window.
 - 4.3: wire text also reached `CString(char* fmt, ...)` as a format in places the plan didn't list (R21–R23, the client's chat, map list and console text, `textColorLess(playerName)`); all now use `"%s"`.
 - R25 (shots from a player without a weapon) is fixed here, not in step 5: the fuzz acceptance check needs it.
+- Owner, 2026-10-11: R1 and R25 stay in step 4.
 - R1 (`fclose(NULL)` in the map upload loop) is fixed here too: the `fixed-unterminated.bin` input requests a missing map, which crashed the Linux replay (glibc) once R24 no longer stopped it earlier.
 - `Server::sendSVChange` allowed 255 characters into the 80-byte `svChange`; now 79.
 - Commits: 4.1–4.4 share one commit (the same handlers); 4.5 and the tests are separate.
