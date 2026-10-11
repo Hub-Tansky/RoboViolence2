@@ -213,7 +213,12 @@ void ePTexture::loadTexture(_typLayer* ptrLayer, FILE* ficIn)
 		case CHUNK_MAP_TEXTURE_DATA:
 			{
 				// R18: sizes come from the file; a real DKT texture is at most 4096x4096 RGBA
-				if (ptrLayer->w < 1 || ptrLayer->w > 4096 || ptrLayer->h < 1 || ptrLayer->h > 4096 || ptrLayer->bpp < 1 || ptrLayer->bpp > 4) break;
+				// A bad size makes the rest of the file untrustworthy: stop reading it instead of parsing pixels as chunks
+				if (ptrLayer->w < 1 || ptrLayer->w > 4096 || ptrLayer->h < 1 || ptrLayer->h > 4096 || ptrLayer->bpp < 1 || ptrLayer->bpp > 4)
+				{
+					fseek(ficIn, 0, SEEK_END);
+					return;
+				}
 				size_t size = (size_t)ptrLayer->w*ptrLayer->h*ptrLayer->bpp; // one size for the buffer and the read
 				unsigned char* imageData = new unsigned char [size];
 				bv2ReadBytes(ficIn, imageData, size);
