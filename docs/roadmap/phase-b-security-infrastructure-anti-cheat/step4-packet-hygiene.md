@@ -1,6 +1,6 @@
 # Step 4: Packet hygiene and sender binding
 
-**Status:** IN PROGRESS
+**Status:** DONE (2026-10-11)
 
 **Depends on:** [Step 3](step3-test-harness.md). **Next:** [step5-crash-fixes.md](step5-crash-fixes.md). **Index:** [README.md](README.md)
 
