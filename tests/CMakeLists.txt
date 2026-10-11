@@ -52,6 +52,12 @@ if(TARGET bv2server_lib)
   add_test(NAME crash_fixes COMMAND test_crash_fixes)
   set_tests_properties(crash_fixes PROPERTIES ENVIRONMENT "BV2_PREF_DIR=${BV2_TEST_SCRATCH}/crash-pref")
 
+  add_executable(test_validator test_validator.cpp)
+  target_link_libraries(test_validator PRIVATE bv2_server_harness)
+  bv2_target_defaults(test_validator)
+  add_test(NAME validator COMMAND test_validator)
+  set_tests_properties(validator PROPERTIES ENVIRONMENT "BV2_PREF_DIR=${BV2_TEST_SCRATCH}/validator-pref")
+
   # Corpus (tests/corpus/<type>/*.bin): gen_corpus writes valid.bin per type; replay runs every file except crash-*.
   add_executable(gen_corpus gen_corpus.cpp)
   target_include_directories(gen_corpus PRIVATE ${CMAKE_SOURCE_DIR}/game/src ${CMAKE_SOURCE_DIR}/engine/babonet/include)
