@@ -100,6 +100,12 @@ int main(int argc, char ** argv)
 	CHECK(sink.last.find("hunter2") == std::string::npos);
 	CHECK(sink.last.find("***") != std::string::npos);
 
+	// R17: a name longer than the 256-byte buffer is cut, not written past it (ASan builds report the overflow)
+	std::string longName = dir + "/long.cfg";
+	write(longName, std::string(400, 'x') + " 1\n\ntest_kept 9\n\n");
+	dksvarLoadConfig((char *)longName.c_str());
+	CHECK(kept == 9);
+
 	if (failures == 0)
 		std::printf("ok: config layering, transient, secrets\n");
 	return failures ? 1 : 0;

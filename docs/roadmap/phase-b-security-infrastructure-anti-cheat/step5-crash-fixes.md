@@ -1,6 +1,6 @@
 # Step 5: Crash fixes R1–R5 and known undefined behaviour
 
-**Status:** TODO
+**Status:** DONE (2026-10-11)
 
 **Depends on:** [Step 3](step3-test-harness.md). **Next:** [step6-sql-prepared-statements.md](step6-sql-prepared-statements.md). **Index:** [README.md](README.md)
 
@@ -11,7 +11,7 @@
 | Goal | The high-severity defects R1–R5, the CodeQL findings R16–R18, the music-stream race R20, the known UBSan reports and the start-up/teardown null dereferences are fixed, each with a test |
 | In scope | Tasks 5.1–5.6 below |
 | Out of scope | Medium and low defects (step 7); SQL (step 6); restructuring object lifetimes (`unique_ptr`, PNS-19) |
-| Allowed paths | `game/src/**`, `engine/babonet/src/**`, `tests/**`, `docs/analysis/KEY_QUESTIONS.md`, `docs/decisions/**`, `ARCHITECTURE.md`, `docs/roadmap/**` |
+| Allowed paths | `game/src/**`, `engine/babonet/src/**`, `engine/zeven/src/CSystemVariable.cpp`, `engine/zeven/src/dks.cpp`, `engine/dko/src/ePTexture.cpp` (owner-approved 2026-10-11: R17, R20, R18), `engine/zeven/src/CString.cpp` (owner-approved 2026-10-11: R30), `tests/**`, `docs/analysis/KEY_QUESTIONS.md`, `docs/decisions/**`, `ARCHITECTURE.md`, `docs/roadmap/**` |
 | Inputs | `AGENTS.md`, `ARCHITECTURE.md`, earlier review records `reviews/step*.md`, `docs/analysis/KEY_QUESTIONS.md` Part D, PNS-5, PNS-6 |
 | Deliverables | One commit per defect with its test; an ADR for R3 |
 | Definition of done | See "Acceptance checks". All must pass. `ARCHITECTURE.md` is updated |
@@ -38,6 +38,7 @@
 ### 5.1 R3 ruleset decision (owner)
 
 - Ask the owner: keep Pro-only (remove the branch and `sv_serverType`'s effect), or restore the comparison. Record it as an ADR before changing code.
+- Owner, 2026-10-11: restore the comparison ([ADR 0013](../../decisions/0013-r3-restore-normal-and-pro-rulesets.md)).
 
 ### 5.2 R1, R2, R4, R5
 
@@ -59,6 +60,18 @@
 ### 5.6 Start-up and teardown audit
 
 - Run client and server start-up/quit paths under ASan/UBSan (quit at each scene, `dedicate` before `set sv_*`, disconnect mid-map-download). Fix null dereferences; list anything larger in `possible-new-scope.md`.
+
+## Notes
+
+- R20: `dksPlayMusic` checks the file opens before `ma_sound_init_from_file`. The race didn't reproduce locally without the fix (3 ASan runs of `test_dks` on macOS), so there is no fix proof; the CI smoke job is the long-run check. The vcpkg miniaudio is 0.11.25: 0.11.23 fixed a leak and an assertion in the resource manager when opening a file fails, and 0.11.24 a possible double-uninit when a decoder fails to initialise and a possible resource-manager crash (upstream `CHANGES.md`).
+
+- 5.5: the smoke job (CI run 38119883269) reported two UBSan `bool` loads (`Console::SetDisplayEvents`, `CMaster::update`); both fixed. The `CUserLogin.cpp` NaN casts in the old Open items line no longer appear.
+- 5.6, server: 11 start/quit sequences of the ASan `bv2dedicated` (quit at once, `dedicate` before `set sv_*`, missing map or script, `disconnect`, `changemap` without a server, `kick`/`ban` of empty slots, `removemap` then `changemap`) are clean after one fix: typed console lines were a printf format (`main.cpp`); `smoke_server.py` now types one.
+- 5.6, client: the smoke job's teardown use-after-free (global menus deleting sounds after `dks`'s list was destroyed) is fixed. Quitting at each client scene and disconnecting mid-download weren't run: they need a GL window (owner play-test).
+- R26 (vote-request abort) didn't recur: the fuzz job on `main` ran `clsv_svcl_vote_request` 2 min clean. R28 (Windows babonet crash on disconnect) is still open; its cause isn't known, so the master test stays off on Windows.
+- R5's map size limit 1..256: four times the editor's 64; every original map (81 files in the owner's data, versions 10011, 20201, 20202) is at most 63x48. A server whose rotation holds a rejected map stops, as for any invalid map.
+- R20 also initialises the stream with `MA_SOUND_FLAG_WAIT_INIT`, so a file that exists but fails to decode fails synchronously too.
+- Found while testing R18: R29 (`~_typLayer` deletes textures only when the ID is 0), outside this step's paths.
 
 ## Critical files
 

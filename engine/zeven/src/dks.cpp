@@ -59,7 +59,8 @@ namespace
 	ma_sound_group g_sfxGroup;
 	bool g_ready = false;
 	std::vector<Voice *> g_voices;
-	std::vector<DksSound *> g_sounds;
+	// Never destroyed: global menus delete their sounds during static destruction, after a plain global vector is gone
+	std::vector<DksSound *> & g_sounds = *new std::vector<DksSound *>();
 	unsigned int g_serial = 1;
 
 	ma_sound g_music;
@@ -152,6 +153,15 @@ void			dksShutDown()
 		delete g_voices[i];
 	}
 	g_voices.clear();
+	// Free the sounds while the engine still exists: global menus delete theirs during static destruction, after this
+	// (dksDeleteSound then finds nothing to free)
+	for (size_t i = 0; i < g_sounds.size(); ++i)
+	{
+		if (g_sounds[i]->loaded)
+			ma_sound_uninit(&g_sounds[i]->master);
+		delete g_sounds[i];
+	}
+	g_sounds.clear();
 	ma_sound_group_uninit(&g_sfxGroup);
 	ma_engine_uninit(&g_engine);
 	g_ready = false;
@@ -238,7 +248,16 @@ void			dksPlayMusic(char* filename, int channel, int volume)
 	dksStopMusic();
 	if (!g_ready || !filename)
 		return;
-	if (ma_sound_init_from_file(&g_engine, filename, MA_SOUND_FLAG_STREAM | MA_SOUND_FLAG_NO_SPATIALIZATION, 0, 0, &g_music) != MA_SUCCESS)
+	// R20: a missing file sent miniaudio down its failing stream path, which freed the stream while its job thread
+	// still wrote to it (heap-use-after-free); don't go there
+	FILE * f = fopen(filename, "rb");
+	if (!f)
+	{
+		fprintf(stderr, "dks: cannot play music %s\n", filename);
+		return;
+	}
+	fclose(f);
+	if (ma_sound_init_from_file(&g_engine, filename, MA_SOUND_FLAG_STREAM | MA_SOUND_FLAG_WAIT_INIT | MA_SOUND_FLAG_NO_SPATIALIZATION, 0, 0, &g_music) != MA_SUCCESS)
 	{
 		fprintf(stderr, "dks: cannot play music %s\n", filename);
 		return;

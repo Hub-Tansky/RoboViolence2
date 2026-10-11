@@ -44,7 +44,7 @@ Entry format: ID, where it was found, an extract of the source, why it matters, 
 - **Extract:** "UBSan reports pre-existing defects (out-of-range `bool` loads, NaN casts in `CUserLogin.cpp`)."
 - **Why:** Undefined behaviour in shipped code, not yet in the R1–R15 register.
 - **Suggested home:** §A.5; add them to `docs/analysis/KEY_QUESTIONS.md`.
-- **Status:** Accepted → Phase B [step 5](phase-b-security-infrastructure-anti-cheat/step5-crash-fixes.md)
+- **Status:** Done in Phase B step 5: the smoke job's two `bool` loads (`Console.cpp`, `CMaster.cpp`) fixed; the `CUserLogin.cpp` NaN casts no longer appear in the smoke job
 
 ### PNS-6: Lifecycle null-pointer crashes are a pattern
 
@@ -52,7 +52,7 @@ Entry format: ID, where it was found, an extract of the source, why it matters, 
 - **Extract:** "`~Scene()` calls `Scene::disconnect()`, which sets `menuManager.root->visible` without a null check" (PR #10); "Launch-script `set sv_*` before `dedicate` called into a null `Server`" (PR #5).
 - **Why:** Three separate null dereferences in start-up and teardown. More are likely, and §A fuzzing will hit them.
 - **Suggested home:** §A.2 (audit start-up and teardown paths under ASan).
-- **Status:** Accepted → Phase B [step 5](phase-b-security-infrastructure-anti-cheat/step5-crash-fixes.md)
+- **Status:** Done in Phase B step 5 for the server (11 start/quit sequences under ASan) and the client teardown the smoke job runs; quitting at each client scene is left to play-tests
 
 ### PNS-7: Static initialisation order is fragile
 
@@ -300,4 +300,28 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Extract:** "Every client receives `sv_password` … The `PLAYER_INFO` rebroadcast sends every joiner's account MD5 `password` and `macAddr` to all clients."
 - **Why it matters:** any player can read the server password and every other player's account hash and MAC address.
 - **Suggested home:** Phase B step 10 (server credentials, Q-S5): blank `password` and `macAddr` before the rebroadcast and stop pushing `sv_password`.
+- **Status:** Proposed
+
+### PNS-36: Update docs that still describe R3 as current
+
+- **Found in:** Phase B step 5 fresh-context review (2026-10-11), finding 4.
+- **Extract:** "`AGENTS.md:75` still lists the `sv_serverType = 1` assignment as a load-bearing known defect. `docs/analysis/README.md:27` and `ALGORITHM_03` W1 (`:230`) describe the bug as current … `AGENTS.md:57` says 'the non-Pro ruleset … removed'."
+- **Why it matters:** an agent reading them could undo ADR 0013.
+- **Suggested home:** the next step allowed to edit `AGENTS.md` and `docs/analysis/`; point each at ADR 0013.
+- **Status:** Proposed
+
+### PNS-37: One read primitive for `FileIO` and `MemIO`
+
+- **Found in:** Phase B step 5 fresh-context review (2026-10-11), findings 6 and 9.
+- **Extract:** "Make `read(void*, size_t)` the one protected virtual primitive in `FileIO` … delete about 20 overrides from `MemIO`." "Extract `static map_cell * readCells(FileIO &, CVector2i & size)` … use it in all 8 places."
+- **Why it matters:** every getter (and the R16 `getString` bound) exists twice; the map loader repeats the size check and cell loop eight times.
+- **Suggested home:** step 7 or a refactoring step that touches `FileIO`/`MemIO`/`Map.cpp`.
+- **Status:** Proposed
+
+### PNS-38: Open defects after step 5 (R28, R29)
+
+- **Found in:** Phase B step 3 (R28) and step 5 (R29).
+- **Extract:** KEY_QUESTIONS R28 "On Windows, babonet intermittently crashes … when a TCP connection closes"; R29 "`~_typLayer` calls `glDeleteTextures` when `textureID == 0` … `loadTexture` dereferences a null `ptrLayer`".
+- **Why it matters:** R28 can crash the Windows game and master when a player leaves; the master test is off on Windows until it is fixed. R29 leaks every DKT texture.
+- **Suggested home:** step 7 (R29 is in `engine/dko/src/ePTexture.h`); R28 needs a Windows debugging session (a crash dump from the owner's PC or a Windows CI run with a debugger).
 - **Status:** Proposed

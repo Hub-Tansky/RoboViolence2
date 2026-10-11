@@ -304,7 +304,7 @@ CString CString::getNextToken(int caracter)
 	// On va chercher le dernier ' ' trouv�
 	for (int i = len()-1; i >= -1; i--)
 	{
-		if (s[i] == caracter || i == -1)
+		if (i == -1 || s[i] == caracter) // R30: test i first, s[-1] is before the buffer
 		{
 			result = &(s[i+1]);
 			resize(i+1);

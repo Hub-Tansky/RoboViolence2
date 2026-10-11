@@ -13,38 +13,8 @@
 
 extern Scene * scene;
 
-static int failures = 0;
-
-#define CHECK(cond)                                                    \
-	do                                                                 \
-	{                                                                  \
-		if (!(cond))                                                   \
-		{                                                              \
-			std::printf("FAIL %s:%d: %s\n", __FILE__, __LINE__, #cond); \
-			++failures;                                                \
-		}                                                              \
-	} while (0)
 
 static Game * game() { return scene->server->game; }
-
-// A client that has joined (handshake and player info); returns its babonetID. Its slot is the next free one.
-static UINT4 join()
-{
-	UINT4 c = harness::connect();
-	for (int id : {NET_CLSV_GAMEVERSION_ACCEPTED, NET_CLSV_SVCL_PLAYER_INFO})
-	{
-		std::vector<char> m = corpus::valid(id);
-		harness::deliver(c, id, m.data(), (int)m.size());
-	}
-	return c;
-}
-
-static int slotOf(UINT4 c)
-{
-	for (int i = 0; i < MAX_PLAYER; ++i)
-		if (game()->players[i] && game()->players[i]->babonetID == (INT4)c) return i;
-	return -1;
-}
 
 static int sentOfType(int typeID)
 {
@@ -54,18 +24,20 @@ static int sentOfType(int typeID)
 	return n;
 }
 
+
+// Delivers one message after clearing what the server sent so far, so sentOfType sees only the reply to it
 template <typename T> static void deliver(UINT4 from, int typeID, const T & m)
 {
 	harness::sent().clear();
-	harness::deliver(from, typeID, &m, sizeof(m));
+	harness::deliver(from, typeID, m);
 }
 
 int main(int, char ** argv)
 {
 	if (!harness::start(argv[0])) return 1;
-	UINT4 a = join();
-	UINT4 b = join();
-	int slotA = slotOf(a), slotB = slotOf(b);
+	UINT4 a = harness::join();
+	UINT4 b = harness::join();
+	int slotA = harness::slotOf(a), slotB = harness::slotOf(b);
 	CHECK(slotA >= 0 && slotB >= 0 && slotA != slotB);
 
 	// Q-S1: B asks to move A to red; the server applies it to B's own slot
@@ -204,6 +176,6 @@ int main(int, char ** argv)
 	CHECK(!packet::checkServerMessage((char *)&list, sizeof(list), 9999, out));
 
 	harness::stop();
-	if (failures == 0) std::printf("ok: packet hygiene\n");
-	return failures ? 1 : 0;
+	if (harness::failures() == 0) std::printf("ok: packet hygiene\n");
+	return harness::failures() ? 1 : 0;
 }
