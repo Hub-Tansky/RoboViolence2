@@ -220,8 +220,10 @@ CString FileIO::getFixedString()
 CString FileIO::getString()
 {
 	char tmp[256];
-	char carac = 1;
-	for (int i=0;carac!='\0';carac = tmp[i++] = getByte());
+	int i = 0;
+	for (char c = getByte(); c != '\0'; c = getByte()) // R16: keep 255 characters, read the rest of the string
+		if (i < 255) tmp[i++] = c;
+	tmp[i] = '\0';
 	return CString("%s", tmp);
 }
 

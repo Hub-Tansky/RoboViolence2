@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "FileIO.h"
+#include "MemIO.h"
 
 static_assert(sizeof(INT4) == 4, "INT4 is 4 bytes (3DS/DKO chunk fields)");
 static_assert(sizeof(short) == 2 && sizeof(float) == 4, "DKO fields use short and float");
@@ -109,7 +110,28 @@ int main(int argc, char ** argv)
 		std::fclose(f);
 		CHECK(loaded.len() == 511);
 	}
+	{
+		// R16: getString keeps 255 characters of a longer string and still reads up to its '\0'
+		std::string stringPath = std::string(argv[1]) + "/longstring.bin";
+		{
+			FileIO out(CString("%s", stringPath.c_str()), "wb");
+			std::string text(300, 'z');
+			out.put((char *)text.c_str(), (int)text.size() + 1);
+			out.put((unsigned char)7);
+		}
+		FileIO in(CString("%s", stringPath.c_str()), "rb");
+		CHECK(in.getString().len() == 255);
+		CHECK(in.getUByte() == 7);
+	}
+	{
+		// R5: reading past the end of a MemIO buffer (a short map download) gives zeros, not the heap beyond it
+		MemIO mem(2);
+		char bytes[2] = {1, 2};
+		mem.put(bytes, 2);
+		mem.reset();
+		CHECK(mem.getLong() == 0x0201);
+	}
 	if (failures == 0)
-		std::printf("ok: FileIO widths, bv2ReadBytes, fixed string, unterminated CString\n");
+		std::printf("ok: FileIO widths, bv2ReadBytes, fixed string, unterminated CString, long string, MemIO bounds\n");
 	return failures ? 1 : 0;
 }

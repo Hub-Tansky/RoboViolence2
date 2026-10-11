@@ -33,6 +33,9 @@ private:
 	unsigned int	m_pos,
 					m_size;
 
+	// Reads n bytes at m_pos, zero past the end of the buffer
+	void read(void * dst, size_t n);
+
 
 public:
 	// Constructor

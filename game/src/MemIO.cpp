@@ -48,6 +48,16 @@ CString MemIO::getLine() { return ""; }
 
 
 
+// Copies the next n bytes; past the end of the buffer (a short or hostile map download) the rest reads as zero (R5)
+void MemIO::read(void * dst, size_t n)
+{
+	size_t left = m_pos < m_size ? m_size - m_pos : 0;
+	size_t got = n < left ? n : left;
+	memcpy(dst, m_data + m_pos, got);
+	memset(static_cast<char *>(dst) + got, 0, n - got);
+	m_pos += (unsigned int)n;
+}
+
 //
 // Les gets binary
 //
@@ -58,111 +68,99 @@ bool MemIO::getBool()
 
 char MemIO::getByte()
 {
-	char tmp = m_data[m_pos]; 
-	m_pos++;
+	char tmp;
+	read(&tmp, 1);
 	return tmp;
 }
 
 char * MemIO::getByteArray(int size)
 {
 	char * tmp = new char [size];
-	memcpy(tmp,&m_data[m_pos], size);
-	m_pos += size;
+	read(tmp, size);
 	return tmp;
 }
 
 unsigned char MemIO::getUByte()
 {
-	unsigned char tmp = (unsigned char)m_data[m_pos];
-	m_pos++;
+	unsigned char tmp;
+	read(&tmp, 1);
 	return tmp;
 }
 
 unsigned char * MemIO::getUByteArray(int size)
 {
 	unsigned char * tmp = new unsigned char [size];
-	memcpy(tmp,&m_data[m_pos], size);
-	m_pos += size;
+	read(tmp, size);
 	return tmp;
 }
 
 int MemIO::getInt()
 {
 	short tmp;
-	memcpy(&tmp,&m_data[m_pos], sizeof(short));
-	m_pos += sizeof(short);
+	read(&tmp, sizeof(short));
 	return tmp;
 }
 
 unsigned int MemIO::getUInt()
 {
 	unsigned short tmp;
-	memcpy(&tmp,&m_data[m_pos], sizeof(unsigned short));
-	m_pos += sizeof(unsigned short);
+	read(&tmp, sizeof(unsigned short));
 	return tmp;
 }
 
 int32_t MemIO::getLong()
 {
 	int32_t tmp;
-	memcpy(&tmp,&m_data[m_pos], sizeof(tmp));
-	m_pos += sizeof(tmp);
+	read(&tmp, sizeof(tmp));
 	return tmp;
 }
 
 int32_t * MemIO::getLongArray(int size)
 {
 	int32_t * tmp = new int32_t [size];
-	memcpy(tmp,&m_data[m_pos], size*sizeof(int32_t));
-	m_pos += size*sizeof(int32_t);
+	read(tmp, size*sizeof(int32_t));
 	return tmp;
 }
 
 uint32_t MemIO::getULong()
 {
 	uint32_t tmp;
-	memcpy(&tmp, &m_data[m_pos], sizeof(tmp));
-	m_pos += sizeof(tmp);
+	read(&tmp, sizeof(tmp));
 	return tmp;
 }
 
 uint32_t * MemIO::getULongArray(int size)
 {
 	uint32_t * tmp = new uint32_t [size];
-	memcpy(tmp,&m_data[m_pos], size*sizeof(uint32_t));
-	m_pos += size*sizeof(uint32_t);
+	read(tmp, size*sizeof(uint32_t));
 	return tmp;
 }
 
 float MemIO::getFloat()
 {
 	float tmp;
-	memcpy(&tmp,&m_data[m_pos], sizeof(float));
-	m_pos += sizeof(float);
+	read(&tmp, sizeof(float));
 	return tmp;
 }
 
 float * MemIO::getFloatArray(int size)
 {
 	float * tmp = new float [size];
-	memcpy(tmp,&m_data[m_pos], size*sizeof(float));
-	m_pos += size*sizeof(float);
+	read(tmp, size*sizeof(float));
 	return tmp;
 }
 
 double MemIO::getDouble()
 {
 	double tmp;
-	memcpy(&tmp,&m_data[m_pos], sizeof(double));
-	m_pos += sizeof(double);
+	read(&tmp, sizeof(double));
 	return tmp;
 }
 
 double * MemIO::getDoubleArray(int size)
 {
 	double * tmp = new double [size];
-	memcpy(tmp,&m_data[m_pos], size*sizeof(double));
-	m_pos += size*sizeof(double);
+	read(tmp, size*sizeof(double));
 	return tmp;
 }
 
@@ -205,8 +203,10 @@ CString MemIO::getFixedString()
 CString MemIO::getString()
 {
 	char tmp[256];
-	char carac = 1;
-	for (int i=0;carac!='\0';carac = tmp[i++] = getByte());
+	int i = 0;
+	for (char c = getByte(); c != '\0'; c = getByte()) // R16: keep 255 characters, read the rest of the string
+		if (i < 255) tmp[i++] = c;
+	tmp[i] = '\0';
 	return CString("%s", tmp);
 }
 

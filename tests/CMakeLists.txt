@@ -91,7 +91,7 @@ if(TARGET bv2master_lib)
   endif()
 endif()
 
-add_executable(test_fileio test_fileio.cpp ${CMAKE_SOURCE_DIR}/game/src/FileIO.cpp)
+add_executable(test_fileio test_fileio.cpp ${CMAKE_SOURCE_DIR}/game/src/FileIO.cpp ${CMAKE_SOURCE_DIR}/game/src/MemIO.cpp)
 target_include_directories(test_fileio PRIVATE ${CMAKE_SOURCE_DIR}/game/src)
 target_link_libraries(test_fileio PRIVATE zeven_core)
 bv2_target_defaults(test_fileio)
