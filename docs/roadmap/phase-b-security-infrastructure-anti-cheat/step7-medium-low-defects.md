@@ -46,6 +46,12 @@ Current locations (the `KEY_QUESTIONS.md` paths predate step 2):
 - R12 makes both flag radii equal; ask the owner which value (0.5 or 0.25) before changing it, since it is gameplay.
 - Owner, 2026-10-11: 0.25 for both; why they differed (and whether to restore it) → PNS-39.
 
+## Notes
+
+- Tests: `babonet_large_message` (R7), `crash_fixes` checks `r10`, `r9`, `r13`, `r8`, `r12`, `r15`.
+- Fix proof (fix reverted): R7 `FAIL: received 1, intact 0`; R8 `reds == 3 && blues == 3`, `moves == 2`; R12 `flagState[0] == -1`; R15 `avgPing == 10`; under ASan, R10 heap-buffer-overflow in `collisionClip`, R9 in `queryNextMap`, R13 in `spawnPlayer`.
+- No test: R6 (client-only code, the harness runs the server); R18 rest (sizes widened, CodeQL closes the alerts; `CAStar` copy is deleted, so nothing can call it); R19 (format string).
+
 ## Critical files
 
 - `game/src/Game.cpp`, `game/src/Server.cpp`, `engine/babonet/src/cClient.cpp`, `game/src/ServerCTF.cpp`
