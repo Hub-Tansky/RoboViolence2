@@ -3,11 +3,14 @@
 
 #include "Console.h"
 #include "Game.h"
+#include "Map.h"
 #include "Scene.h"
 #include "Server.h"
 
 #include <cstdio>
+#include <cmath>
 #include <cstring>
+#include <vector>
 
 extern Scene * scene;
 
@@ -285,6 +288,7 @@ static void weaponRules()
 	CHECK(score(c) == 0);
 	throwProjectile(c, WEAPON_GRENADE, PROJECTILE_GRENADE, 2);
 	CHECK(score(c) > 0.5f);
+	live(c, 4); // the grenades go off here, not on the next test's player
 	leave(c);
 
 	// A rocket without a bazooka
@@ -326,6 +330,107 @@ static void weaponRules()
 	console->sendCommand("set sv_antiCheat 1");
 }
 
+// A coord frame at (x, y), client frame `frame`, queued for the next server frame
+static void queueFrame(UINT4 c, float x, float y, int frame)
+{
+	net_clsv_svcl_player_coord_frame cf = {};
+	cf.position[0] = (short)(x * 100);
+	cf.position[1] = (short)(y * 100);
+	cf.position[2] = (short)(player(c)->currentCF.position[2] * 100);
+	cf.babonetID = (int32_t)c;
+	cf.frameID = frame;
+	cf.camPosZ = 7;
+	harness::queueMessage(c, NET_CLSV_SVCL_PLAYER_COORD_FRAME, &cf, sizeof(cf));
+}
+
+static void pong(UINT4 c)
+{
+	net_clsv_pong pong = {};
+	pong.playerID = (char)harness::slotOf(c);
+	harness::queueMessage(c, NET_CLSV_PONG, &pong, sizeof(pong));
+}
+
+// Back and forth along x around x0 (0.4 each way) at `speed` units/s for `seconds`, one server frame per client frame.
+// The client sends a frame every `every` client frames; lag holds them back and delivers `burst` at a time.
+static void walk(UINT4 c, float x0, float y0, float speed, float seconds, int every, int burst)
+{
+	struct Held { float x; int frame; };
+	std::vector<Held> held;
+	for (int frame = 1; frame <= (int)(seconds * 30); ++frame)
+	{
+		if (frame % every == 0)
+		{
+			float d = fmodf(speed * frame / 30.0f, 1.6f); // a 1.6-unit round trip
+			held.push_back({x0 - 0.4f + (d < 0.8f ? d : 1.6f - d), frame});
+		}
+		if ((int)held.size() == burst)
+		{
+			for (const Held & h : held) queueFrame(c, h.x, y0, h.frame);
+			held.clear();
+		}
+		if (frame % 30 == 0) pong(c);
+		harness::tick();
+	}
+}
+
+// 9.3 movement rules
+static void movementRules()
+{
+	// Honest walking at the client clamp (3.25 units/s), frames bunched by lag: nothing. Then a 5-unit jump in one frame: teleport.
+	UINT4 c = harness::spawned(WEAPON_SMG);
+	float x0 = player(c)->currentCF.position[0], y0 = player(c)->currentCF.position[1];
+	walk(c, x0, y0, 3.25f, 4, 3, 4);
+	CHECK(score(c) == 0);
+	queueFrame(c, x0 + 5, y0, 200);
+	harness::tick();
+	CHECK(score(c) > 0.5f);
+	leave(c);
+
+	// Twice the speed in small steps: no single jump, but the window's path is too long
+	c = harness::spawned(WEAPON_SMG);
+	x0 = player(c)->currentCF.position[0], y0 = player(c)->currentCF.position[1];
+	walk(c, x0, y0, 7, 4, 1, 1);
+	CHECK(score(c) > 0.5f);
+	leave(c);
+
+	// Through a wall cell with open cells on both sides, twice (a jump short enough to be legal over 0.5 s). The
+	// placeholder map has no one-cell walls: the test makes one between two open cells.
+	c = harness::spawned(WEAPON_SMG);
+	Map & map = *scene->server->game->map;
+	auto open = [&](int x, int y) { return map.cells[y * map.size[0] + x].passable; };
+	int wx = -1, wy = -1;
+	for (int y = 1; y < map.size[1] - 1 && wx < 0; ++y)
+		for (int x = 1; x < map.size[0] - 1 && wx < 0; ++x)
+			if (open(x - 1, y) && open(x, y) && open(x + 1, y)) wx = x, wy = y;
+	CHECK(wx > 0);
+	map_cell & wall = map.cells[wy * map.size[0] + wx];
+	wall.passable = false;
+	for (int i = 0; i < 3; ++i)
+	{
+		queueFrame(c, wx - 0.5f + (i % 2) * 2, wy + 0.5f, 100 + i * 15);
+		harness::tick(15);
+	}
+	CHECK(score(c) > 0.5f);
+	wall.passable = true;
+	leave(c);
+
+	// A respawn starts over: the first frame after it is far from the last one before death
+	c = harness::spawned(WEAPON_SMG);
+	x0 = player(c)->currentCF.position[0], y0 = player(c)->currentCF.position[1];
+	queueFrame(c, x0, y0, 10);
+	harness::tick(31);
+	player(c)->kill(true);
+	player(c)->timeToSpawn = 0;
+	net_clsv_spawn_request spawn = {};
+	spawn.weaponID = WEAPON_SMG;
+	spawn.meleeID = WEAPON_KNIVES;
+	harness::deliver(c, NET_CLSV_SPAWN_REQUEST, spawn);
+	queueFrame(c, x0 + 10, y0, 20);
+	harness::tick();
+	CHECK(score(c) == 0);
+	leave(c);
+}
+
 int main(int, char ** argv)
 {
 	if (!harness::start(argv[0])) return 1;
@@ -338,6 +443,7 @@ int main(int, char ** argv)
 	speedHackKickVar();
 	antiCheatLevels();
 	weaponRules();
+	movementRules();
 	harness::stop();
 	if (harness::failures() == 0) std::printf("ok: validator\n");
 	return harness::failures() ? 1 : 0;

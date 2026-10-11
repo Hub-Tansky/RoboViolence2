@@ -21,7 +21,9 @@ public:
 	const char * badSpawnWeapon(const net_clsv_spawn_request & spawn) const;
 	// Every coord frame from a living player. At the end of each 3 s window (Player::frameSinceLast >= 90) it compares
 	// client frames with server ticks and checks the horizontal speed: a window with a violation scores 1, a clean one
-	// resets the score, and sv_speedHackKick in a row kick.
+	// resets the score, and sv_speedHackKick in a row kick. Step 9 movement rules: a jump longer than the speed allows
+	// since the last frame (teleport), a frame-to-frame path through a wall, and a window's path longer than the
+	// speed allows (path speed). A spawn, death or new map starts over.
 	Verdict onCoordFrame(Player & player, const net_clsv_svcl_player_coord_frame & frame);
 	// A dead player: the speed score and the check window restart
 	void reset(Player & player);
@@ -43,4 +45,14 @@ private:
 	int breaks[MAX_PLAYER][RULE_COUNT] = {};
 	bool warned[MAX_PLAYER] = {};
 	float window = 0;
+	float time = 0;
+	// Movement rules: the last frame's position and time, the path walked in the step 8 window
+	struct Track
+	{
+		bool known = false;
+		float x = 0, y = 0, time = 0, timeAlive = 0, path = 0;
+		const Map * map = nullptr;
+	} track[MAX_PLAYER];
+
+	Verdict onMove(Player & player, float x, float y);
 };
