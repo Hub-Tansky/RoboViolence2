@@ -51,20 +51,25 @@ static void coordFrame(UINT4 c, int vel, int frameID)
 	harness::tick();
 }
 
-// One 3 s check window: a coord frame at its start and one at its end, `frames` client frames later, horizontal
-// speed vel/10. The client answers pings (the server drops it after 3 s without a pong). knockback: hit just before
-// the end.
-static void window(UINT4 c, int vel, int frames = 90, bool knockback = false)
+// `seconds` of server frames; the client answers pings (the server drops it after 3 s without a pong)
+static void live(UINT4 c, int seconds)
 {
-	if (harness::slotOf(c) == -1) return; // kicked
-	coordFrame(c, 20, 1000);
-	for (int i = 0; i < 3; ++i)
+	for (int i = 0; i < seconds; ++i)
 	{
 		net_clsv_pong pong = {};
 		pong.playerID = (char)harness::slotOf(c);
 		harness::deliver(c, NET_CLSV_PONG, pong);
 		harness::tick(30);
 	}
+}
+
+// One 3 s check window: a coord frame at its start and one at its end, `frames` client frames later, horizontal
+// speed vel/10. knockback: hit just before the end.
+static void window(UINT4 c, int vel, int frames = 90, bool knockback = false)
+{
+	if (harness::slotOf(c) == -1) return; // kicked
+	coordFrame(c, 20, 1000);
+	live(c, 3);
 	if (knockback) player(c)->framesSinceKnockback = 0;
 	coordFrame(c, vel, 1000 + frames);
 }
@@ -171,6 +176,46 @@ static void speedHackKickVar()
 	console->sendCommand("set sv_speedHackKick 3");
 }
 
+// 9.1 sv_antiCheat: 0 nothing (and no step 8 speed kick), 1 scores and logs only, 2 drops, warns, then kicks
+static void antiCheatLevels()
+{
+	ServerValidator & v = scene->server->validator;
+	UINT4 c = harness::spawned(WEAPON_SMG);
+	int slot = harness::slotOf(c);
+	console->sendCommand("set sv_antiCheat 0");
+	CHECK(v.violation(*player(c), ServerValidator::FLOOD_CHAT) == ServerValidator::ACCEPT && v.scoreOf(slot) == 0);
+	for (int i = 0; i < 4; ++i) window(c, 50);
+	CHECK(scene->server->game->players[slot] != nullptr); // speed kick off
+
+	console->sendCommand("set sv_antiCheat 1");
+	bool accepted = true;
+	for (int i = 0; i < 20; ++i) accepted &= v.violation(*player(c), ServerValidator::FLOOD_CHAT) == ServerValidator::ACCEPT;
+	CHECK(accepted && v.scoreOf(slot) >= 19 && scene->server->game->players[slot] != nullptr);
+	live(c, 10); // decays 1 point per 10 s
+	CHECK(v.scoreOf(slot) < 19.5f && v.scoreOf(slot) > 17);
+	CHECK(v.violation(*player(c), ServerValidator::FIRE_RATE) == ServerValidator::ACCEPT); // within tolerance: no score
+	harness::disconnect(c);
+	harness::tick();
+
+	console->sendCommand("set sv_antiCheat 2");
+	c = harness::spawned(WEAPON_SMG);
+	slot = harness::slotOf(c);
+	CHECK(v.scoreOf(slot) == 0); // a new player starts clean
+	harness::sent().clear();
+	bool dropped = true;
+	for (int i = 0; i < 5; ++i) dropped &= v.violation(*player(c), ServerValidator::FLOOD_CHAT) == ServerValidator::DROP;
+	int warnings = 0;
+	for (const harness::SentPacket & p : harness::sent())
+		warnings += p.typeID == NET_SVCL_CONSOLE && p.destination == (INT4)c && strstr(p.data.data(), "Anti-cheat warning");
+	CHECK(dropped && warnings == 1);
+	for (int i = 0; i < 4; ++i) v.violation(*player(c), ServerValidator::FLOOD_CHAT);
+	CHECK(v.violation(*player(c), ServerValidator::FLOOD_CHAT) == ServerValidator::KICK);
+	CHECK(scene->server->game->players[slot] == nullptr);
+	harness::disconnect(c);
+	harness::tick();
+	console->sendCommand("set sv_antiCheat 1");
+}
+
 int main(int, char ** argv)
 {
 	if (!harness::start(argv[0])) return 1;
@@ -181,6 +226,7 @@ int main(int, char ** argv)
 	knockback();
 	resets();
 	speedHackKickVar();
+	antiCheatLevels();
 	harness::stop();
 	if (harness::failures() == 0) std::printf("ok: validator\n");
 	return harness::failures() ? 1 : 0;

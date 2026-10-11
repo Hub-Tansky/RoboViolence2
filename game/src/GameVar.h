@@ -159,6 +159,9 @@ public:
 	bool sv_beGoodServer;
 	bool sv_validateWeapons;
 	int sv_speedHackKick;
+	int sv_antiCheat;
+	int sv_antiCheatWarn;
+	int sv_antiCheatKick;
 	CString sv_joinMessage;
 	bool sv_sendJoinMessage;
 

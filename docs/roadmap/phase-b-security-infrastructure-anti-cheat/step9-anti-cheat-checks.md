@@ -1,6 +1,6 @@
 # Step 9: First anti-cheat checks
 
-**Status:** TODO
+**Status:** IN PROGRESS
 
 **Depends on:** [Step 8](step8-server-validator.md). **Next:** [step10-server-credentials.md](step10-server-credentials.md). **Index:** [README.md](README.md)
 
@@ -27,15 +27,17 @@
 ### 9.1 `sv_antiCheat`
 
 - `0` off, `1` log only (default), `2` enforce. Violations always add to the score; actions apply only at `2`.
+- Owner, 2026-10-11: rules that drop or kick today (fire rate, rocket without bazooka, grenade ammo, spawn weapon whitelist) keep enforcing at every level and also score at `1` and `2`. The step 8 speed/frame kick stays at `1` and `2`, off at `0`. The rules below are new.
 - At `1`, every packet is applied unchanged. At `2`, a weapon-rule violation drops the packet (the server decides hits, so nothing desyncs). A movement-rule violation never drops `COORD_FRAME`s: there is no server-to-client position correction, so dropped frames freeze the player for everyone else. It scores, and the score's action (warn, kick) applies.
 
 ### 9.2 Weapon rules
 
-- Shots faster than `fireDelay` (with tolerance), shots with no ammo or during reload, weapon-switch timing, spawn and team rules.
+- Shots faster than `fireDelay` (with tolerance), a shot whose `weaponID` is not the held weapon, shots and projectiles long after death, grenade ammo, rockets without a bazooka, spawn requests while alive or before `sv_timeToSpawn`.
+- Owner, 2026-10-11: guns have no ammo or reload, and weapons change only by a server-decided pickup, so "reload" and "weapon-switch timing" are dropped.
 
 ### 9.3 Movement rules (interim until server-authoritative movement)
 
-- Per-tick maximum displacement against the speed rules, a wall-crossing check against `Map`, and teleport detection. Spawns, deaths and map changes reset state. Replaces the 8.3 speed rule.
+- Per-tick maximum displacement against the speed rules, a wall-crossing check against `Map`, and teleport detection. Spawns, deaths and map changes reset state. Runs beside the 8.3 speed rule (owner: it keeps its kick).
 
 ### 9.4 Rate limits
 

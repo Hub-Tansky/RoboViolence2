@@ -450,6 +450,15 @@ GameVar::GameVar()
 	sv_speedHackKick = 3;
 	dksvarRegister(CString("sv_speedHackKick [int : 3-second windows with a speed or frame-rate violation in a row that kick, 1 to unlimited (default 3)]"),
 		&sv_speedHackKick, 1, 0, LIMIT_MIN, true);
+	sv_antiCheat = 1;
+	dksvarRegister(CString("sv_antiCheat [int : 0 off, 1 log violations, 2 enforce: drop and warn/kick by score (default 1)]"),
+		&sv_antiCheat, 0, 2, LIMIT_MIN | LIMIT_MAX, true);
+	sv_antiCheatWarn = 5;
+	dksvarRegister(CString("sv_antiCheatWarn [int : anti-cheat score that warns the player at sv_antiCheat 2 (default 5)]"),
+		&sv_antiCheatWarn, 1, 0, LIMIT_MIN, true);
+	sv_antiCheatKick = 10;
+	dksvarRegister(CString("sv_antiCheatKick [int : anti-cheat score that kicks at sv_antiCheat 2 (default 10)]"),
+		&sv_antiCheatKick, 1, 0, LIMIT_MIN, true);
 	sv_minTilesPerBabo = 55.0;
 	dksvarRegister(CString("sv_minTilesPerBabo [float : 0.0 to 250.0 (default 55.0)]"), &sv_minTilesPerBabo, 0, 250,
 		LIMIT_MIN | LIMIT_MAX, true);
