@@ -415,6 +415,7 @@ void Server::updateNet(float delay, bool send)
 	}
 	else if (clientID < 0)
 	{
+		joined.erase((unsigned long)-clientID);
 		// On client a disconnect�
 		for (int i=0;i<MAX_PLAYER;++i)
 		{

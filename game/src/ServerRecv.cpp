@@ -21,6 +21,7 @@
 #include <cstddef>
 #include <set>
 #include "Server.h"
+#include "PacketCheck.h"
 #include "netPacket.h"
 #include "Console.h"
 #include "Scene.h"
@@ -36,44 +37,6 @@ using std::min;
 
 namespace
 {
-	// Pre-dispatch check (Phase B step 4: Q-S1, Q-S2): what a client may send. size: exact payload bytes, 0 for text
-	// (at least one byte); playerID: offset of the packet's playerID, overwritten with the sender's own slot (-1: none).
-	// A new client message type needs an entry here.
-	struct ClientMessage
-	{
-		int typeID;
-		int size;
-		int playerID;
-	};
-	const ClientMessage clientMessages[] = {
-		{NET_CLSV_PONG, sizeof(net_clsv_pong), offsetof(net_clsv_pong, playerID)},
-		{NET_CLSV_SPAWN_REQUEST, sizeof(net_clsv_spawn_request), offsetof(net_clsv_spawn_request, playerID)},
-		{NET_CLSV_PLAYER_SHOOT, sizeof(net_clsv_player_shoot), offsetof(net_clsv_player_shoot, playerID)},
-		{NET_CLSV_GAMEVERSION_ACCEPTED, sizeof(net_clsv_gameversion_accepted), offsetof(net_clsv_gameversion_accepted, playerID)},
-		{NET_CLSV_PICKUP_REQUEST, sizeof(net_clsv_pickup_request), offsetof(net_clsv_pickup_request, playerID)},
-		{NET_CLSV_ADMIN_REQUEST, sizeof(net_clsv_admin_request), -1},
-		{NET_CLSV_VOTE, sizeof(net_clsv_vote), offsetof(net_clsv_vote, playerID)},
-		{NET_CLSV_MAP_LIST_REQUEST, sizeof(net_clsv_map_list_request), offsetof(net_clsv_map_list_request, playerID)},
-		{NET_CLSV_SVCL_PLAYER_INFO, sizeof(net_clsv_svcl_player_info), offsetof(net_clsv_svcl_player_info, playerID)},
-		{NET_CLSV_SVCL_CHAT, sizeof(net_clsv_svcl_chat), -1},
-		{NET_CLSV_SVCL_TEAM_REQUEST, sizeof(net_clsv_svcl_team_request), offsetof(net_clsv_svcl_team_request, playerID)},
-		{NET_CLSV_SVCL_PLAYER_COORD_FRAME, sizeof(net_clsv_svcl_player_coord_frame), offsetof(net_clsv_svcl_player_coord_frame, playerID)},
-		{NET_CLSV_SVCL_PLAYER_CHANGE_NAME, sizeof(net_clsv_svcl_player_change_name), offsetof(net_clsv_svcl_player_change_name, playerID)},
-		{NET_CLSV_SVCL_PLAYER_PROJECTILE, sizeof(net_clsv_svcl_player_projectile), offsetof(net_clsv_svcl_player_projectile, playerID)},
-		{NET_CLSV_SVCL_PLAYER_SHOOT_MELEE, sizeof(net_clsv_svcl_player_shoot_melee), offsetof(net_clsv_svcl_player_shoot_melee, playerID)},
-		{NET_CLSV_SVCL_VOTE_REQUEST, sizeof(net_clsv_svcl_vote_request), offsetof(net_clsv_svcl_vote_request, playerID)},
-		{NET_CLSV_MAP_REQUEST, sizeof(net_clsv_map_request), -1},
-		{NET_CLSV_SVCL_PLAYER_UPDATE_SKIN, sizeof(net_clsv_svcl_player_update_skin), offsetof(net_clsv_svcl_player_update_skin, playerID)},
-		{NET_SVCL_PLAY_SOUND, sizeof(net_svcl_play_sound), -1},
-		{NET_SVCL_CONSOLE, 0, -1},
-	};
-
-	// A weaponID the server knows (indexes gameVar.weapons[20])
-	bool validWeapon(int weaponID)
-	{
-		return weaponID >= 0 && weaponID < 20 && gameVar.weapons[weaponID];
-	}
-
 	// Logs a rejected packet once per sender and message type, so a flood can't fill the log.
 	void logRejected(unsigned long bbnetID, int typeID, const char * why)
 	{
@@ -87,9 +50,7 @@ namespace
 // `out` holds the payload with the sender's own slot as playerID (text is NUL-terminated) and the slot is returned.
 int Server::checkPacket(const char * buffer, int size, int typeID, unsigned long bbnetID, std::vector<char> & out)
 {
-	const ClientMessage * rule = 0;
-	for (const ClientMessage & m : clientMessages)
-		if (m.typeID == typeID) rule = &m;
+	const packet::ClientRule * rule = packet::clientRule(typeID);
 	if (!rule) { logRejected(bbnetID, typeID, "unknown type"); return -1; }
 	if (rule->size ? size != rule->size : size < 1) { logRejected(bbnetID, typeID, "wrong size"); return -1; }
 
@@ -97,6 +58,12 @@ int Server::checkPacket(const char * buffer, int size, int typeID, unsigned long
 	for (int i = 0; i < MAX_PLAYER; ++i)
 		if (game->players[i] && game->players[i]->babonetID == (INT4)bbnetID) slot = i;
 	if (slot < 0) { logRejected(bbnetID, typeID, "no player"); return -1; }
+	// Before the join handshake (and its password check) passes, only the handshake itself and pings
+	if (!joined.count(bbnetID) && typeID != NET_CLSV_GAMEVERSION_ACCEPTED && typeID != NET_CLSV_SVCL_PLAYER_INFO && typeID != NET_CLSV_PONG)
+	{
+		logRejected(bbnetID, typeID, "before the handshake");
+		return -1;
+	}
 
 	out.assign(buffer, buffer + size);
 	if (rule->size == 0) out.push_back('\0');
@@ -111,7 +78,9 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 {
     int i;
 	std::vector<char> checked;
-	if (checkPacket(wire, size, typeID, bbnetID, checked) < 0) return;
+	int slot = checkPacket(wire, size, typeID, bbnetID, checked);
+	if (slot < 0) return;
+	Player * sender = game->players[slot];
 	char * buffer = checked.data();
 	switch (typeID)
 	{
@@ -121,7 +90,10 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 			memcpy(&request, buffer, sizeof(net_clsv_map_request));
 			request.mapName[15] = '\0';
 			if (!request.mapName[0] || strspn(request.mapName, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-") != strlen(request.mapName))
+			{
+				logRejected(bbnetID, typeID, "map name");
 				return; // Q-S6: a map name only, never a path
+			}
 
 			SMapTransfer mtrans;
             mtrans.chunkNum = 0;
@@ -245,20 +217,14 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 			if (game)
 			{
 				CString adminCommand("%s", buffer); // R22: data, not a format
-				for (int i=0;i<MAX_PLAYER;++i)
+				if (sender->isAdmin)
 				{
-					if (game->players[i])
-					{
-						if (game->players[i]->babonetID == bbnetID && game->players[i]->isAdmin)
-						{
-							CString log = "Executing command from ";
-							log += game->players[i]->name;
-							log += ", IP: ";
-							log += game->players[i]->playerIP;
-							console->add(log);
-							console->sendCommand(adminCommand, true, bbnetID);
-						}
-					}
+					CString log = "Executing command from ";
+					log += sender->name;
+					log += ", IP: ";
+					log += sender->playerIP;
+					console->add(log);
+					console->sendCommand(adminCommand, true, bbnetID);
 				}
 			}
 			break;
@@ -277,17 +243,7 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 			{
 				if (loginRecv.isNull() || pwdRecv.isNull())
 				{
-					for (int i=0;i<MAX_PLAYER;++i)
-					{
-						if (game->players[i])
-						{
-							if (game->players[i]->babonetID == bbnetID)
-							{
-								game->players[i]->isAdmin = false;
-								break;
-							}
-						}
-					}
+					sender->isAdmin = false;
 					break;
 				}
 				CMD5 login_(gameVar.zsv_adminUser.s);
@@ -304,43 +260,23 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 				if (loginRecv == login && pwdRecv == pwd)
 				{
 					//--- Admin accepted !!
-					for (int i=0;i<MAX_PLAYER;++i)
-					{
-						if (game->players[i])
-						{
-							if (game->players[i]->babonetID == bbnetID)
-							{
-								bb_serverSend(0, 0, NET_SVCL_ADMIN_ACCEPTED, bbnetID);
-								game->players[i]->isAdmin = true;
-								CString logInName = "Admin name: ";
-								CString logInIP = "Admin IP: ";
-								logInName += game->players[i]->name;
-								logInIP += game->players[i]->playerIP;
-								console->add(logInName);
-								console->add(logInIP);
-								break;
-							}
-						}
-					}
+					bb_serverSend(0, 0, NET_SVCL_ADMIN_ACCEPTED, bbnetID);
+					sender->isAdmin = true;
+					CString logInName = "Admin name: ";
+					CString logInIP = "Admin IP: ";
+					logInName += sender->name;
+					logInIP += sender->playerIP;
+					console->add(logInName);
+					console->add(logInIP);
 				}
 				else
 				{//Failed log in
-					for (int i=0;i<MAX_PLAYER;++i)
-					{
-						if (game->players[i])
-						{
-							if (game->players[i]->babonetID == bbnetID)
-							{
-								CString logInName = "Admin log-in attempt by: ";
-								CString logInIP = "Admin log-in attempt IP: ";
-								logInName += game->players[i]->name;
-								logInIP += game->players[i]->playerIP;
-								console->add(logInName);
-								console->add(logInIP);
-								break;
-							}
-						}
-					}
+					CString logInName = "Admin log-in attempt by: ";
+					CString logInIP = "Admin log-in attempt IP: ";
+					logInName += sender->name;
+					logInIP += sender->playerIP;
+					console->add(logInName);
+					console->add(logInIP);
 				}
 			}
 			break;
@@ -364,6 +300,7 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 				if (gameVar.c_netlog)
 					console->add(CString("server> [net] handshake OK slot=%i -> SERVER_INFO map=\"%s\"", (int)gameVersionAccepted.playerID, game->mapName.s), true);
 				// Handshake done: restart the ping watchdog so pre-accept time doesn't count.
+				joined.insert(bbnetID); // checkPacket now accepts the client's other messages
 				game->players[gameVersionAccepted.playerID]->waitForPong = false;
 				game->players[gameVersionAccepted.playerID]->currentPingFrame = 0;
 
@@ -584,12 +521,15 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 		}
 	case NET_SVCL_PLAY_SOUND:
 		{
-			// Q-S7: a known sound inside the map, else nothing is relayed
+			// Q-S7: a known sound from a living sender, played where the sender is (clients only send their own position)
 			net_svcl_play_sound playSound;
 			memcpy(&playSound, buffer, sizeof(net_svcl_play_sound));
-			if (playSound.soundID < SOUND_GRENADE_REBOUND || playSound.soundID > SOUND_PHOTON_START ||
-				!game->map || playSound.position[0] >= game->map->size[0] || playSound.position[1] >= game->map->size[1])
+			if (playSound.soundID < SOUND_GRENADE_REBOUND || playSound.soundID > SOUND_PHOTON_START || sender->status != PLAYER_STATUS_ALIVE)
+			{
+				logRejected(bbnetID, typeID, "sound");
 				return;
+			}
+			for (int k = 0; k < 3; ++k) playSound.position[k] = (unsigned char)sender->currentCF.position[k];
 			//--- On l'envoit �toute les autres player
 			for (int i=0;i<MAX_PLAYER;++i)
 			{
@@ -597,7 +537,7 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 				{
 					if (game->players[i]->babonetID != bbnetID)
 					{
-						bb_serverSend(buffer, sizeof(net_svcl_play_sound), NET_SVCL_PLAY_SOUND, game->players[i]->babonetID);
+						bb_serverSend((char*)&playSound, sizeof(net_svcl_play_sound), NET_SVCL_PLAY_SOUND, game->players[i]->babonetID);
 					}
 				}
 			}
@@ -661,20 +601,7 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 			chatString = textColorLess( chatString );
 			if( master )
 			{
-				// find the player id from bbnet id
-				int playerid = -1;
-				for (int i=0;i<MAX_PLAYER;++i)
-				{
-					if (game->players[i])
-					{
-						if (game->players[i]->babonetID == bbnetID )
-						{
-							playerid = i;
-							break;
-						}
-					}
-				}
-				master->RA_Chat( chatString.s, playerid );
+				master->RA_Chat( chatString.s, slot );
 			}
 		
 			break;
@@ -683,7 +610,11 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 		{
 			net_clsv_svcl_team_request teamRequest;
 			memcpy(&teamRequest, buffer, sizeof(net_clsv_svcl_team_request));
-			if (teamRequest.teamRequested < PLAYER_TEAM_SPECTATOR || teamRequest.teamRequested > PLAYER_TEAM_AUTO_ASSIGN) return;
+			if (teamRequest.teamRequested < PLAYER_TEAM_SPECTATOR || teamRequest.teamRequested > PLAYER_TEAM_AUTO_ASSIGN)
+			{
+				logRejected(bbnetID, typeID, "team");
+				return;
+			}
 
 			// Est-ce que ce player existe
 			if (game->players[teamRequest.playerID])
@@ -730,7 +661,11 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 				net_clsv_spawn_request spawnRequest;
 				memcpy(&spawnRequest, buffer, sizeof(net_clsv_spawn_request));
 				spawnRequest.skin[6] = '\0';
-				if (!validWeapon(spawnRequest.weaponID) || !validWeapon(spawnRequest.meleeID)) return; // Q-S2
+				if (!packet::knownWeapon(spawnRequest.weaponID) || !packet::knownWeapon(spawnRequest.meleeID)) // Q-S2
+				{
+					logRejected(bbnetID, typeID, "weapon");
+					return;
+				}
 				if (game->players[spawnRequest.playerID])
 				{
 					//--- Validate weapons, if the validation var is set
@@ -1015,7 +950,11 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 			net_clsv_player_shoot playerShoot;
 			memcpy(&playerShoot, buffer, sizeof(net_clsv_player_shoot));
 			// Q-S2, R25: a known weapon, from a player who holds one (not one who died just now). Clients bound nuzzleID.
-			if (!validWeapon(playerShoot.weaponID) || !game->players[playerShoot.playerID]->weapon) return;
+			if (!packet::knownWeapon(playerShoot.weaponID) || !sender->weapon)
+			{
+				logRejected(bbnetID, typeID, "weapon");
+				return;
+			}
 			if (game->players[playerShoot.playerID])
 			{
 				//--- Is he alive? Else we ignore it
@@ -1096,9 +1035,12 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 			net_clsv_svcl_player_projectile playerProjectile;
 			memcpy(&playerProjectile, buffer, sizeof(net_clsv_svcl_player_projectile));
 			// Q-S2, R25: a known weapon and projectile type, from a player who holds a weapon
-			if (!validWeapon(playerProjectile.weaponID) || !game->players[playerProjectile.playerID]->weapon ||
+			if (!packet::knownWeapon(playerProjectile.weaponID) || !sender->weapon ||
 				playerProjectile.projectileType < PROJECTILE_DIRECT || playerProjectile.projectileType > PROJECTILE_PHOTON)
+			{
+				logRejected(bbnetID, typeID, "weapon or projectile type");
 				return;
+			}
 			if (game->players[playerProjectile.playerID])
 			{
 				//--- Is he alive? Else we ignore it
