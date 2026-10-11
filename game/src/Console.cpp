@@ -47,7 +47,7 @@ void dkwForceQuit();
 //
 // Constructeurs
 //
-Console::Console(): m_maxCmdHistorySize(20), m_maxMsgHistorySize(300), m_historyMod(3)
+Console::Console(): displayEvents(true), m_maxCmdHistorySize(20), m_maxMsgHistorySize(300), m_historyMod(3)
 {
 	m_outputFilename = CString("%s", bv2::userFile("console.log").c_str());
 	FileIO *fileIO = new FileIO(m_outputFilename, "wb");

@@ -161,7 +161,7 @@ void CMaster::pingReceived(int ping)
 void CMaster::update(float in_delay)
 {
 	//--- Update peer connection
-	bool isNew;
+	bool isNew = false; // bb_peerUpdate doesn't set it on every path (UBSan)
 	int result = bb_peerUpdate(in_delay, isNew);
 	if (result == -1)
 	{
