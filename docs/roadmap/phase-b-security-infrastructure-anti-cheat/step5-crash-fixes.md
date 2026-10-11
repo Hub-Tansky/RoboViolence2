@@ -1,6 +1,6 @@
 # Step 5: Crash fixes R1–R5 and known undefined behaviour
 
-**Status:** TODO
+**Status:** IN PROGRESS
 
 **Depends on:** [Step 3](step3-test-harness.md). **Next:** [step6-sql-prepared-statements.md](step6-sql-prepared-statements.md). **Index:** [README.md](README.md)
 
@@ -11,7 +11,7 @@
 | Goal | The high-severity defects R1–R5, the CodeQL findings R16–R18, the music-stream race R20, the known UBSan reports and the start-up/teardown null dereferences are fixed, each with a test |
 | In scope | Tasks 5.1–5.6 below |
 | Out of scope | Medium and low defects (step 7); SQL (step 6); restructuring object lifetimes (`unique_ptr`, PNS-19) |
-| Allowed paths | `game/src/**`, `engine/babonet/src/**`, `tests/**`, `docs/analysis/KEY_QUESTIONS.md`, `docs/decisions/**`, `ARCHITECTURE.md`, `docs/roadmap/**` |
+| Allowed paths | `game/src/**`, `engine/babonet/src/**`, `engine/zeven/src/CSystemVariable.cpp`, `engine/zeven/src/dks.cpp`, `engine/dko/src/ePTexture.cpp` (owner-approved 2026-10-11: R17, R20, R18), `tests/**`, `docs/analysis/KEY_QUESTIONS.md`, `docs/decisions/**`, `ARCHITECTURE.md`, `docs/roadmap/**` |
 | Inputs | `AGENTS.md`, `ARCHITECTURE.md`, earlier review records `reviews/step*.md`, `docs/analysis/KEY_QUESTIONS.md` Part D, PNS-5, PNS-6 |
 | Deliverables | One commit per defect with its test; an ADR for R3 |
 | Definition of done | See "Acceptance checks". All must pass. `ARCHITECTURE.md` is updated |
@@ -38,6 +38,7 @@
 ### 5.1 R3 ruleset decision (owner)
 
 - Ask the owner: keep Pro-only (remove the branch and `sv_serverType`'s effect), or restore the comparison. Record it as an ADR before changing code.
+- Owner, 2026-10-11: restore the comparison ([ADR 0013](../../decisions/0013-r3-restore-normal-and-pro-rulesets.md)).
 
 ### 5.2 R1, R2, R4, R5
 

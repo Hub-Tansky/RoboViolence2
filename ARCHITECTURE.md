@@ -221,6 +221,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/decisions/0010-bv2-asset-compat-and-gui-freeze.md` | ADR 0010 |
 | `docs/decisions/0011-gettext-po-translations.md` | ADR 0011 |
 | `docs/decisions/0012-windows-10-22h2-minimum.md` | ADR 0012 |
+| `docs/decisions/0013-r3-restore-normal-and-pro-rulesets.md` | ADR: `sv_serverType` 0 plays the Normal rules again (R3) |
 | `docs/decisions/README.md` | ADR format and index |
 
 ### `docs/roadmap`
