@@ -238,6 +238,15 @@ void			dksPlayMusic(char* filename, int channel, int volume)
 	dksStopMusic();
 	if (!g_ready || !filename)
 		return;
+	// R20: a missing file sent miniaudio down its failing stream path, which freed the stream while its job thread
+	// still wrote to it (heap-use-after-free); don't go there
+	FILE * f = fopen(filename, "rb");
+	if (!f)
+	{
+		fprintf(stderr, "dks: cannot play music %s\n", filename);
+		return;
+	}
+	fclose(f);
 	if (ma_sound_init_from_file(&g_engine, filename, MA_SOUND_FLAG_STREAM | MA_SOUND_FLAG_NO_SPATIALIZATION, 0, 0, &g_music) != MA_SUCCESS)
 	{
 		fprintf(stderr, "dks: cannot play music %s\n", filename);

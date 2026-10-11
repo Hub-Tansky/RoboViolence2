@@ -92,6 +92,13 @@ if(TARGET bv2master_lib)
   endif()
 endif()
 
+if(TARGET zeven_client)
+  add_executable(test_dks test_dks.cpp)
+  target_link_libraries(test_dks PRIVATE zeven_client)
+  bv2_target_defaults(test_dks)
+  add_test(NAME dks_missing_music COMMAND test_dks)
+endif()
+
 add_executable(test_fileio test_fileio.cpp ${CMAKE_SOURCE_DIR}/game/src/FileIO.cpp ${CMAKE_SOURCE_DIR}/game/src/MemIO.cpp)
 target_include_directories(test_fileio PRIVATE ${CMAKE_SOURCE_DIR}/game/src)
 target_link_libraries(test_fileio PRIVATE zeven_core)

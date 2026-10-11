@@ -61,6 +61,10 @@
 
 - Run client and server start-up/quit paths under ASan/UBSan (quit at each scene, `dedicate` before `set sv_*`, disconnect mid-map-download). Fix null dereferences; list anything larger in `possible-new-scope.md`.
 
+## Notes
+
+- R20: `dksPlayMusic` checks the file opens before `ma_sound_init_from_file`. The race didn't reproduce locally without the fix (3 ASan runs of `test_dks` on macOS), so there is no fix proof; the CI smoke job is the long-run check. The vcpkg miniaudio is 0.11.25: 0.11.23 fixed a leak and an assertion in the resource manager when opening a file fails, and 0.11.24 a possible double-uninit when a decoder fails to initialise and a possible resource-manager crash (upstream `CHANGES.md`).
+
 ## Critical files
 
 - `game/src/Server.cpp`, `game/src/GameProjectile.cpp`, `game/src/Map.cpp`, `game/src/Scene*.cpp`, `game/src/CUserLogin.cpp`
