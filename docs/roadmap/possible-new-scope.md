@@ -265,7 +265,7 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Open checks:**
   - Task 2.2 cross-OS game (Linux servers, macOS and Windows clients).
   - Windows client run on a PC with an OpenGL 2.1 driver.
-  - Task 2.5 wheel fix re-test on Linux.
+  - ~~Task 2.5 wheel fix re-test on Linux~~: passed (owner, 2026-10-12).
   - Results rows in `phase-a-manual-test.md` (task 2.6).
 - **Suggested home:** the next Linux build check (wheel); the cross-OS game and Windows client run when a suitable PC is available; the Results rows before step 4 (regression baseline, PNS-1).
 - **Status:** Accepted (owner-deferred)

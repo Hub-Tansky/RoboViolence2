@@ -63,7 +63,7 @@
 - Owner, Linux Mint 22.3 (2026-10-10): in a game, pause → main menu → Options; scrolling the options list with the wheel also zooms the map behind it. Not seen on macOS.
 - Cause: `Map::update` zooms on `dkiGetMouseWheelVel()` for spectators and the editor (`game/src/Map.cpp`) without checking whether a menu or the console has the input.
 - Fix: `wheelUsedByUi()` skips the zoom while the pause, main or options menu or the console is open. Proof is manual (needs a GL window): the owner repeats the steps on Linux; the map no longer zooms.
-- **Linux re-test deferred → PNS-31** (owner, 2026-10-10).
+- **Linux re-test passed** (owner, 2026-10-12): the map no longer zooms behind the options menu.
 
 ### 2.6 Record results
 

@@ -41,5 +41,5 @@ Skill evidence: `SKILL: Launching skill: thermo-nuclear-code-quality-review` (ra
 
 ## Not done / unsure
 
-- Acceptance: the owner's 10-minute play-test at `sv_antiCheat 1` (log on the PR) is open; the step stays IN PROGRESS until it is attached.
+- Acceptance: the owner's play-test at `sv_antiCheat 1` (2026-10-12) logged no violation; the log is on the PR. It was short (five spawns), so PNS-41 and the thresholds still want a longer game.
 - The thresholds come from the code and the harness, not a networked game.

@@ -1,6 +1,6 @@
 # Step 9: First anti-cheat checks
 
-**Status:** IN PROGRESS
+**Status:** DONE (2026-10-12)
 
 **Depends on:** [Step 8](step8-server-validator.md). **Next:** [step10-server-credentials.md](step10-server-credentials.md). **Index:** [README.md](README.md)
 
@@ -49,6 +49,7 @@
 - Each rule has a positive and a negative test. Fix proof: with each rule, budget, tolerance or allowance (send interval, pickup grace, stuck-in-wall respawn, inner half of a wall cell, short chords, once per window) removed, a test fails.
 - No test tells apart: the path-speed window timed by client frames (a stall long enough to show it also trips the step 8 frame check, PNS-41), and the reset in `onSpawned` (the `timeAlive` fallback covers the same case).
 - Not caught: a speed up to about 4.25 units/s (path slack).
+- Play-test (owner, 2026-10-12, CI package of 5b70702, `sv_antiCheat 1`): macOS server, a macOS client on the server and a Linux client over the LAN, CTF. Spawns, team switches, chat, a spectator idle. The log has no `anti-cheat:` line; it is on PR #39 (LAN address masked).
 
 ## Critical files
 
