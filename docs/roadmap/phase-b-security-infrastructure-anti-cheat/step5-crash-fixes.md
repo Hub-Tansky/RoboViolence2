@@ -11,7 +11,7 @@
 | Goal | The high-severity defects R1–R5, the CodeQL findings R16–R18, the music-stream race R20, the known UBSan reports and the start-up/teardown null dereferences are fixed, each with a test |
 | In scope | Tasks 5.1–5.6 below |
 | Out of scope | Medium and low defects (step 7); SQL (step 6); restructuring object lifetimes (`unique_ptr`, PNS-19) |
-| Allowed paths | `game/src/**`, `engine/babonet/src/**`, `engine/zeven/src/CSystemVariable.cpp`, `engine/zeven/src/dks.cpp`, `engine/dko/src/ePTexture.cpp` (owner-approved 2026-10-11: R17, R20, R18), `tests/**`, `docs/analysis/KEY_QUESTIONS.md`, `docs/decisions/**`, `ARCHITECTURE.md`, `docs/roadmap/**` |
+| Allowed paths | `game/src/**`, `engine/babonet/src/**`, `engine/zeven/src/CSystemVariable.cpp`, `engine/zeven/src/dks.cpp`, `engine/dko/src/ePTexture.cpp` (owner-approved 2026-10-11: R17, R20, R18), `engine/zeven/src/CString.cpp` (owner-approved 2026-10-11: R30), `tests/**`, `docs/analysis/KEY_QUESTIONS.md`, `docs/decisions/**`, `ARCHITECTURE.md`, `docs/roadmap/**` |
 | Inputs | `AGENTS.md`, `ARCHITECTURE.md`, earlier review records `reviews/step*.md`, `docs/analysis/KEY_QUESTIONS.md` Part D, PNS-5, PNS-6 |
 | Deliverables | One commit per defect with its test; an ADR for R3 |
 | Definition of done | See "Acceptance checks". All must pass. `ARCHITECTURE.md` is updated |
