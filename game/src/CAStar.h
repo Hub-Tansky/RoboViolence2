@@ -44,16 +44,9 @@ public:
 	/** Default Constructor */
 	CAStar();
 
-	/** Copy constructor 
-	* @param in_aStar An another CAStar object.
-	*/
-	CAStar(const CAStar & in_aStar);
-
-	/** Copy operator
-	* @param in_aStar An another CAStar object.
-	* @return A reference on the object
-	*/
-	CAStar& operator=(const CAStar & in_aStar);
+	// Not copyable (R18): the copy code copied pointer arrays by element count, and nothing copies a CAStar
+	CAStar(const CAStar &) = delete;
+	CAStar & operator=(const CAStar &) = delete;
 
 	/** Destructor */
 	virtual ~CAStar();

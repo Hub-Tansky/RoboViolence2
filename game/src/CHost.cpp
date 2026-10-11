@@ -163,8 +163,9 @@ unsigned int loadMapPreview(CString mapFilename)
 		}
 		texMap = dktCreateEmptyTexture(width, height, 3, DKT_FILTER_NEAREST);
 
-		unsigned char * textureData = new unsigned char [width*height*3];
-		memset(textureData, 100, width*height*3);
+		const size_t textureDataSize = (size_t)width*height*3; // R18
+		unsigned char * textureData = new unsigned char [textureDataSize];
+		memset(textureData, 100, textureDataSize);
 
 		// On rempli le data dans la texture
 		for (int j=0;j<height;++j)

@@ -446,7 +446,7 @@ const char* TiXmlBase::GetEntity( const char* p, char* value, int* length, TiXml
 	{
 		unsigned long ucs = 0;
 		ptrdiff_t delta = 0;
-		unsigned mult = 1;
+		unsigned long mult = 1; // R18: the same width as ucs, so mult * digit doesn't widen an unsigned product
 
 		if ( *(p+2) == 'x' )
 		{
