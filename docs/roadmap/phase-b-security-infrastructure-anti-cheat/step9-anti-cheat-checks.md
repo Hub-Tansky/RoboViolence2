@@ -41,14 +41,14 @@
 
 ### 9.4 Rate limits
 
-- Per-message-type budget per player (chat, votes, name changes, skin updates, pings). Excess is dropped and scored.
+- Per-message-type budget per player (chat, votes, name changes, skin updates, pings, team requests). Excess scores, and at `2` is dropped.
 
 ## Notes
 
 - Rules, limits and tuning: [ANTI_CHEAT_TUNING.md](../../analysis/ANTI_CHEAT_TUNING.md). Tests: `validator`.
-- Each rule has a positive and a negative test. Fix proof: with each rule's report removed (or its budget, refill or respawn reset), its test fails.
-- Not caught: a speed up to about 4.25 units/s (path slack); a tighter speed limit is not caught by the honest-walk test (sampled positions cut the turns).
-- Map changes reset movement state by the map pointer; no test (the harness does not change maps).
+- Each rule has a positive and a negative test. Fix proof: with each rule, budget, tolerance or allowance (send interval, pickup grace, stuck-in-wall respawn, inner half of a wall cell, short chords, once per window) removed, a test fails.
+- No test tells apart: the path-speed window timed by client frames (a stall long enough to show it also trips the step 8 frame check, PNS-41), and the reset in `onSpawned` (the `timeAlive` fallback covers the same case).
+- Not caught: a speed up to about 4.25 units/s (path slack).
 
 ## Critical files
 

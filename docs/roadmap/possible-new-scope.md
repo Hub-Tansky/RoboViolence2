@@ -342,3 +342,11 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Why it matters:** a kicked cheater reconnects at once. A temp-ban needs a ban list on the dedicated server (today only the master bans, by its password, Q-S5).
 - **Suggested home:** step 10 (server credentials) or step 12 (remote admin).
 - **Status:** Proposed
+
+### PNS-41: The step 8 frame check flags lag stalls
+
+- **Found in:** Phase B step 9 (2026-10-11).
+- **Extract:** coord frames held back more than about 0.5 s across a 3 s window's start give `clientFrames > serverFrames + 5 + 10%` (`ServerValidator::onCoordFrame`); three such windows in a row kick (`sv_speedHackKick`).
+- **Why it matters:** a player on a link that stalls every few seconds can be kicked as a speed hacker. The rule is unchanged since upstream.
+- **Suggested home:** tune it from the step 9 play-test log (time the window by the client frames, or count only the drift beyond a stall).
+- **Status:** Proposed
