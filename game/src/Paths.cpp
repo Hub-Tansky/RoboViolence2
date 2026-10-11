@@ -280,6 +280,7 @@ namespace bv2
 			return 0;
 		}
 		// Same schema and defaults as content-seed/bv2.sql; the master list and account URL live in the config now.
+		// Constant DDL and defaults, no data: sqlite3_exec is fine here (Phase B step 6).
 		sqlite3_exec(db,
 			"CREATE TABLE IF NOT EXISTS LauncherSettings (Name TEXT, Value TEXT);"
 			"CREATE TABLE IF NOT EXISTS MasterServers (Score NUMERIC, ID INTEGER PRIMARY KEY, IP TEXT, Location TEXT, Port NUMERIC);"

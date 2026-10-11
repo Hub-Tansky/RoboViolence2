@@ -16,6 +16,7 @@
 	BaboViolent 2 source code. If not, see http://www.gnu.org/licenses/.
 */
 
+#include "SqlStatement.h"
 #include "Paths.h"
 #include "Scene.h"
 #include "Console.h"
@@ -119,22 +120,14 @@ Scene::Scene()
 	//--- Query from data base if we sent the survey already
 	sqlite3 *DB=bv2::openClientDb();
 
-	//some infos to load the data
-	char	*zErrMsg;		// holds error msg if any
-	char	**azResult;		// contains the actual returned data
-	int	nRow;			// number of record
-	int	nColumn;		// number of column
-	char	SQL[256];		// the query
-
-	// Get infos of master servers and choose the one with the lowest Score
 	int didSurvey = 1; // no database: do not ask
 	if (DB)
 	{
-		sprintf(SQL,"Select Value From LauncherSettings where Name = 'DidSurvey';");
-		sqlite3_get_table(DB,SQL,&azResult,&nRow,&nColumn,&zErrMsg);
-		if (nRow >= 1 && azResult[1])
-			didSurvey = atoi(azResult[1]);
-		sqlite3_free_table(azResult);
+		{
+			SqlStatement survey(DB, "Select Value From LauncherSettings where Name = 'DidSurvey';");
+			if (survey.row())
+				didSurvey = atoi(survey.text(0).c_str());
+		}
 		sqlite3_close( DB );
 	}
 	
