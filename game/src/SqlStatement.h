@@ -24,6 +24,7 @@
 
 #include <sqlite3.h>
 
+#include <cstdio>
 #include <cstring>
 #include <string>
 
@@ -32,7 +33,8 @@ class SqlStatement
 public:
 	SqlStatement(sqlite3 * db, const char * sql)
 	{
-		if (db) sqlite3_prepare_v2(db, sql, -1, &m_stmt, 0);
+		if (db && sqlite3_prepare_v2(db, sql, -1, &m_stmt, 0) != SQLITE_OK)
+			fprintf(stderr, "SQL: %s (%s)\n", sqlite3_errmsg(db), sql); // schema drift: say so, don't fail silently
 	}
 	~SqlStatement() { sqlite3_finalize(m_stmt); }
 	SqlStatement(const SqlStatement &) = delete;
@@ -44,6 +46,8 @@ public:
 		sqlite3_bind_text(m_stmt, i, text, (int)strnlen(text, max), SQLITE_TRANSIENT);
 		return *this;
 	}
+	// A fixed-size char array (a wire field): bounded by its size, so a missing '\0' can't overread
+	template <size_t N> SqlStatement & bindText(int i, const char (&text)[N]) { return bindText(i, text, N); }
 	SqlStatement & bindInt(int i, long long value)
 	{
 		sqlite3_bind_int64(m_stmt, i, value);
@@ -62,6 +66,13 @@ public:
 		return t ? std::string((const char *)t) : std::string();
 	}
 	long long integer(int col) const { return sqlite3_column_int64(m_stmt, col); }
+
+	// The first column of the first row of a constant query, "" when there is none
+	static std::string value(sqlite3 * db, const char * sql)
+	{
+		SqlStatement s(db, sql);
+		return s.row() ? s.text(0) : std::string();
+	}
 
 private:
 	sqlite3_stmt * m_stmt = 0;
