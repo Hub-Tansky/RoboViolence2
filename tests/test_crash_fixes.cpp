@@ -63,10 +63,31 @@ static void r3()
 	CHECK(gameVar.sv_serverType == 0);
 }
 
+// R2: a rocket whose shooter disconnects while it flies doesn't dereference the missing shooter
+static void r2()
+{
+	UINT4 c = spawned(WEAPON_BAZOOKA);
+	Player * p = scene->server->game->players[harness::slotOf(c)];
+	net_clsv_svcl_player_projectile rocket = {};
+	rocket.weaponID = WEAPON_BAZOOKA;
+	rocket.projectileType = PROJECTILE_ROCKET;
+	rocket.position[0] = (short)(p->currentCF.position[0] * 100);
+	rocket.position[1] = (short)(p->currentCF.position[1] * 100);
+	rocket.position[2] = (short)(p->currentCF.position[2] * 100);
+	rocket.vel[0] = 1; // slow, so it is still flying after the disconnect
+	deliver(c, NET_CLSV_SVCL_PLAYER_PROJECTILE, rocket);
+	size_t rockets = scene->server->game->projectiles.size();
+	CHECK(rockets > 0);
+	harness::disconnect(c);
+	harness::tick(300); // the rocket hits a wall without its shooter
+	CHECK(scene->server->game->projectiles.size() < rockets);
+}
+
 int main(int, char ** argv)
 {
 	if (!harness::start(argv[0])) return 1;
 	r3();
+	r2();
 	harness::stop();
 	if (failures == 0) std::printf("ok: crash fixes\n");
 	return failures ? 1 : 0;

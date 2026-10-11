@@ -722,12 +722,13 @@ void Projectile::update(float delay, Map* map)
 		if (map && projectileType == PROJECTILE_ROCKET && !remoteEntity && !needToBeDeleted)
 		{
 			// On test si on ne pogne pas un babo!
+			Player * owner = scene->server->game->players[fromID]; // R2: null once the shooter has left
 			Player * playerInRadius = (scene->server)?scene->server->game->playerInRadius(currentCF.position, .25f):0;
 			if (playerInRadius) if (playerInRadius->playerID == fromID) playerInRadius = 0;
 			if (playerInRadius)
 			{
-				scene->server->game->players[fromID]->rocketInAir = false;
-				scene->server->game->players[fromID]->detonateRocket = false;
+				if (owner) owner->rocketInAir = false;
+				if (owner) owner->detonateRocket = false;
 				// On frappe un mec !!! KKAAAABBOOOUUMM PLEIN DE SANG MOUHOUHAHAHAHHA
 				needToBeDeleted = true;
 				// On se cré DA explosion :P
@@ -749,10 +750,10 @@ void Projectile::update(float delay, Map* map)
 				CVector3f p1 = lastCF.position;
 				CVector3f p2 = currentCF.position;
 				CVector3f normal;
-				if (map->rayTest(p1, p2, normal) || scene->server->game->players[fromID]->detonateRocket)
+				if (map->rayTest(p1, p2, normal) || (owner && owner->detonateRocket))
 				{
-					scene->server->game->players[fromID]->rocketInAir = false;
-					scene->server->game->players[fromID]->detonateRocket = false;
+					if (owner) owner->rocketInAir = false;
+					if (owner) owner->detonateRocket = false;
 					p2 += normal * .1f;
 					// On frappe un mur !!! KKAAAABBOOOUUMM
 					needToBeDeleted = true;
