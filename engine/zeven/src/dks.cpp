@@ -59,7 +59,8 @@ namespace
 	ma_sound_group g_sfxGroup;
 	bool g_ready = false;
 	std::vector<Voice *> g_voices;
-	std::vector<DksSound *> g_sounds;
+	// Never destroyed: global menus delete their sounds during static destruction, after a plain global vector is gone
+	std::vector<DksSound *> & g_sounds = *new std::vector<DksSound *>();
 	unsigned int g_serial = 1;
 
 	ma_sound g_music;
