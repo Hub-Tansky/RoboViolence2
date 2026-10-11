@@ -81,10 +81,11 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 	int slot = checkPacket(wire, size, typeID, bbnetID, checked);
 	if (slot < 0) return;
 	Player * sender = game->players[slot];
-	// Step 9: a broken anti-cheat rule. True: drop the message (sv_antiCheat 2, or the sender was kicked and is gone).
-	auto broke = [&](ServerValidator::Rule rule) { return validator.violation(*sender, rule) != ServerValidator::ACCEPT; };
-	// 9.4: a rate-limited message past its budget. True: drop it.
-	auto flood = [&](ServerValidator::Rule rule) { return validator.budget(*sender, rule) != ServerValidator::ACCEPT; };
+	// Step 9: the anti-cheat's verdict on this message. True: drop it (sv_antiCheat 2, or the sender was kicked and is
+	// gone).
+	auto drop = [](ServerValidator::Verdict v) { return v != ServerValidator::ACCEPT; };
+	auto broke = [&](ServerValidator::Rule rule) { return drop(validator.violation(*sender, rule)); };
+	auto flood = [&](ServerValidator::Rule rule) { return drop(validator.budget(*sender, rule)); };
 	char * buffer = checked.data();
 	switch (typeID)
 	{
@@ -678,7 +679,7 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 				if (game->players[spawnRequest.playerID])
 				{
 					// The client asks once dead with its spawn timer run out; the server's timer starts earlier
-					if ((sender->status == PLAYER_STATUS_ALIVE || sender->timeToSpawn > 1.0f) && broke(ServerValidator::SPAWN_EARLY)) return;
+					if (drop(validator.onSpawnRequest(*sender))) return;
 					if (const char * which = validator.badSpawnWeapon(spawnRequest))
 					{
 						//--- Kick him so HARD!
@@ -701,6 +702,7 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 					// C'est impossible qu'il ne spawn pas (mais bon au cas)
 					if (game->spawnPlayer(spawnRequest.playerID))
 					{
+						validator.onSpawned(*sender);
 						// On renvois � �tout le monde
 						net_svcl_player_spawn playerSpawn;
 						memcpy(playerSpawn.skin, spawnRequest.skin, 7);
@@ -779,16 +781,8 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 					{
 						game->players[playerCoordFrame.playerID]->timeIdle = 0.0f;
 						//--- We compare the time between packet (important against cheating)
-						if (validator.onCoordFrame(*game->players[playerCoordFrame.playerID], playerCoordFrame) == ServerValidator::KICK)
-						{
-							if( master ) master->RA_DisconnectedPlayer( textColorLess(game->players[playerCoordFrame.playerID]->name).s, game->players[playerCoordFrame.playerID]->playerIP, (long)game->players[playerCoordFrame.playerID]->playerID);
-							bb_serverDisconnectClient(game->players[playerCoordFrame.playerID]->babonetID);
-							ZEVEN_SAFE_DELETE(game->players[playerCoordFrame.playerID]);
-							net_svcl_player_disconnect playerDisconnect;
-							playerDisconnect.playerID = (char)playerCoordFrame.playerID;
-							bb_serverSend((char*)&playerDisconnect,sizeof(net_svcl_player_disconnect),NET_SVCL_PLAYER_DISCONNECT,0);
+						if (validator.onCoordFrame(*game->players[playerCoordFrame.playerID], playerCoordFrame) == ServerValidator::KICKED)
 							return;
-						}
 						game->players[playerCoordFrame.playerID]->setCoordFrame(playerCoordFrame);
 
 						
@@ -889,10 +883,10 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 			}
 			if (game->players[playerShoot.playerID])
 			{
-				if (playerShoot.weaponID != sender->weapon->weaponID && broke(ServerValidator::SHOT_WEAPON)) return;
 				//--- Is he alive? Else we ignore it
 				if (game->players[playerShoot.playerID]->status == PLAYER_STATUS_ALIVE || ( game->players[playerShoot.playerID]->status == PLAYER_STATUS_DEAD && game->players[playerShoot.playerID]->timeDead < 0.2f))
 				{
+					if (drop(validator.onShot(*sender, playerShoot.weaponID))) return;
 
 					//special case with the shotty and sniper that shots 2 and 5 bullets on the same frame :(
 					if( playerShoot.weaponID == WEAPON_SHOTGUN || playerShoot.weaponID == WEAPON_SNIPER )
@@ -920,7 +914,6 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 							}
 							else
 							{
-								broke(ServerValidator::FIRE_RATE);
 								return;
 							}
 						}
@@ -953,7 +946,6 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 							//}
 							//else
 							//{
-								broke(ServerValidator::FIRE_RATE);
 								return;
 							//}
 						}
@@ -962,8 +954,8 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 						game->players[playerShoot.playerID]->firedShowDelay = 2;
 					}
 				}
-				else if (sender->status == PLAYER_STATUS_DEAD && sender->timeDead > 1.0f) // a lagged shot arrives within ~1 s
-					broke(ServerValidator::SHOT_DEAD);
+				else if (sender->status == PLAYER_STATUS_DEAD)
+					validator.onDeadShot(*sender);
 			}
 			break;
 		}
@@ -1014,6 +1006,7 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 					if (playerProjectile.weaponID != WEAPON_GRENADE &&
 						playerProjectile.weaponID != WEAPON_COCKTAIL_MOLOTOV ) 
 					{
+						if (drop(validator.onShot(*sender, playerProjectile.weaponID))) return;
 					
 						// Check if shotsPerSecond is set by Player::Update
 						//if(game->players[playerProjectile.playerID]->shotsPerSecond > 0)
@@ -1028,7 +1021,6 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 						}
 						else
 						{
-							broke(ServerValidator::FIRE_RATE);
 							return;
 						}
 						if(playerProjectile.projectileType == PROJECTILE_ROCKET)
@@ -1052,8 +1044,8 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 					bb_serverSend((char*)&playerProjectile, sizeof(net_clsv_svcl_player_projectile), NET_CLSV_SVCL_PLAYER_PROJECTILE, 0);
 
 				}
-				else if (sender->status == PLAYER_STATUS_DEAD && sender->timeDead > 1.0f)
-					broke(ServerValidator::SHOT_DEAD);
+				else if (sender->status == PLAYER_STATUS_DEAD)
+					validator.onDeadShot(*sender);
 			}
 			break;
 		}
@@ -1096,6 +1088,7 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 
 								// On pickup � !!
 								game->players[pickupRequest.playerID]->switchWeapon(projectile->fromID);
+								validator.onPickup(*game->players[pickupRequest.playerID], playerProjectile.weaponID);
 								net_svcl_pickup_item pickupItem;
 								pickupItem.playerID = pickupRequest.playerID;
 								pickupItem.itemType = ITEM_WEAPON;

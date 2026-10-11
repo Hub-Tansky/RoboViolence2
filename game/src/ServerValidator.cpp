@@ -3,21 +3,65 @@
 #include "GameVar.h"
 #include "Scene.h"
 
+#include <cmath>
+
 extern Scene * scene;
 
 namespace
 {
-	const char * const ruleName[ServerValidator::RULE_COUNT] = {"fire rate", "shot with another weapon",
-		"shot after death", "grenade without ammo", "rocket without bazooka", "early spawn", "chat flood", "vote flood",
-		"name flood", "skin flood", "pong flood", "team flood", "teleport", "path speed", "wall"};
-	// Breaks per 3 s window that don't score: lag bunches packets, and a pickup races shots in flight
-	const int tolerance[ServerValidator::RULE_COUNT] = {5, 2, 2, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1};
-	// Message budgets from FLOOD_CHAT on: burst, refill per second. The server pings once a second.
-	const float burst[] = {5, 3, 3, 3, 3, 3};
-	const float refill[] = {1, 0.2f, 0.1f, 0.1f, 2, 0.2f};
-}
+	struct RuleSettings
+	{
+		const char * name;
+		int tolerance; // breaks per 3 s window that don't score: lag bunches packets
+		bool drops;    // at sv_antiCheat 2 the message is dropped (never a COORD_FRAME: nothing corrects positions)
+		float burst, refill; // flood rules: the message budget and its refill per second
+	};
+	// In Rule order
+	const RuleSettings rules[] = {
+		{"fire rate", 1, true, 0, 0},
+		{"shot with another weapon", 2, true, 0, 0},
+		{"shot after death", 2, true, 0, 0},
+		{"grenade without ammo", 1, true, 0, 0},
+		{"rocket without bazooka", 1, true, 0, 0},
+		{"early spawn", 1, true, 0, 0},
+		{"chat flood", 0, true, 5, 1},
+		{"vote flood", 0, true, 3, 0.2f},
+		{"name flood", 0, true, 3, 0.1f},
+		{"skin flood", 0, true, 3, 0.1f},
+		{"pong flood", 0, true, 3, 2}, // the server pings once a second
+		{"team flood", 0, true, 3, 0.2f},
+		{"teleport", 0, false, 0, 0},
+		{"path speed", 0, false, 0, 0},
+		{"wall", 1, false, 0, 0},
+	};
+	static_assert(sizeof(rules) / sizeof(rules[0]) == ServerValidator::RULE_COUNT, "one setting per rule");
 
-#include <cmath>
+	const float maxSpeed = 3.25f + 0.5f; // the client clamp plus a margin, units per second
+
+	// In the inner half of a wall cell, or off the map. The player's centre stays 0.25 from walls, so an honest
+	// position, or a short path cutting a corner, never is.
+	bool inWall(const Map & map, float x, float y)
+	{
+		const int cx = (int)x, cy = (int)y;
+		if (x < 0 || y < 0 || cx >= map.size[0] || cy >= map.size[1]) return true;
+		const float fx = x - cx, fy = y - cy;
+		return !map.cells[cy * map.size[0] + cx].passable && fx > 0.25f && fx < 0.75f && fy > 0.25f && fy < 0.75f;
+	}
+
+	bool throughWall(const Map & map, float x0, float y0, float x1, float y1)
+	{
+		const int steps = (int)(sqrtf((x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0)) / 0.1f) + 1;
+		for (int i = 0; i <= steps; ++i)
+			if (inWall(map, x0 + (x1 - x0) * i / steps, y0 + (y1 - y0) * i / steps)) return true;
+		return false;
+	}
+
+	// The client sends a coord frame every max(its ping, sv_minSendInterval) frames
+	float sendInterval(const Player & player)
+	{
+		return fmaxf((float)player.avgPing, (float)gameVar.sv_minSendInterval) / 30.0f;
+	}
+}
 
 const char * ServerValidator::badSpawnWeapon(const net_clsv_spawn_request & spawn) const
 {
@@ -39,55 +83,86 @@ const char * ServerValidator::badSpawnWeapon(const net_clsv_spawn_request & spaw
 	}
 }
 
-namespace
+ServerValidator::Verdict ServerValidator::onSpawnRequest(Player & player)
 {
-	const float maxSpeed = 3.25f + 0.5f; // the client clamp plus a margin, units per second
-
-	// A path through the inside of a wall cell (not a corner cut: the player's centre stays 0.25 from walls)
-	bool throughWall(const Map & map, float x0, float y0, float x1, float y1)
-	{
-		const float length = sqrtf((x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0));
-		const int steps = (int)(length / 0.1f) + 1;
-		for (int i = 0; i <= steps; ++i)
-		{
-			const float x = x0 + (x1 - x0) * i / steps, y = y0 + (y1 - y0) * i / steps;
-			const int cx = (int)x, cy = (int)y;
-			if (cx < 0 || cy < 0 || cx >= map.size[0] || cy >= map.size[1]) return true;
-			const float fx = x - cx, fy = y - cy;
-			if (!map.cells[cy * map.size[0] + cx].passable && fx > 0.25f && fx < 0.75f && fy > 0.25f && fy < 0.75f)
-				return true;
-		}
-		return false;
-	}
+	// The client asks once dead with its timer run out (the server's timer starts earlier), or alive when stuck in a
+	// wall (Game.cpp)
+	const Map * map = player.game->map;
+	const bool early = player.status == PLAYER_STATUS_ALIVE
+		? !(map && !map->cells[(int)player.currentCF.position[1] * map->size[0] + (int)player.currentCF.position[0]].passable)
+		: player.timeToSpawn > 1.0f;
+	return early ? violation(player, SPAWN_EARLY) : ACCEPT;
 }
 
-ServerValidator::Verdict ServerValidator::onMove(Player & player, float x, float y)
+void ServerValidator::onSpawned(Player & player)
 {
-	Track & t = track[(int)player.playerID];
-	const bool knockback = player.framesSinceKnockback <= 60; // a hit pushes the player past the speed limit
-	Verdict v = ACCEPT;
-	if (t.known && player.timeAlive >= t.timeAlive && t.map == player.game->map)
+	slots[(int)player.playerID].track = Track();
+}
+
+ServerValidator::Verdict ServerValidator::onShot(Player & player, int weaponID)
+{
+	Slot & s = slots[(int)player.playerID];
+	const int held = player.weapon->weaponID;
+	if (weaponID != held && !(weaponID == s.oldWeapon && time - s.pickupTime < 1.0f)) // shots in flight at a pickup
+	{
+		const Verdict v = violation(player, SHOT_WEAPON);
+		if (v != ACCEPT) return v;
+	}
+	// A budget of 2 s of fire (at least 1.5 s), refilled at the held weapon's rate: a lag burst spends what the stall
+	// saved. Shotgun and sniper send one message per pellet.
+	const float perVolley = held == WEAPON_SHOTGUN ? 5.0f : held == WEAPON_SNIPER ? 3.0f : 1.0f;
+	const float fireDelay = player.weapon->fireDelay;
+	s.fireTokens = fminf(perVolley * fmaxf(2.0f, 1.5f / fireDelay), s.fireTokens + (time - s.fireTime) * perVolley / fireDelay);
+	s.fireTime = time;
+	if (s.fireTokens >= 1)
+	{
+		s.fireTokens -= 1;
+		return ACCEPT;
+	}
+	return violation(player, FIRE_RATE);
+}
+
+void ServerValidator::onPickup(Player & player, int oldWeaponID)
+{
+	Slot & s = slots[(int)player.playerID];
+	s.oldWeapon = oldWeaponID;
+	s.pickupTime = time;
+}
+
+void ServerValidator::onDeadShot(Player & player)
+{
+	if (player.timeDead > 2.0f) violation(player, SHOT_DEAD); // a lagged shot arrives within a stall
+}
+
+ServerValidator::Verdict ServerValidator::onMove(Player & player, const net_clsv_svcl_player_coord_frame & frame)
+{
+	const float x = frame.position[0] / 100.0f, y = frame.position[1] / 100.0f;
+	Track & t = slots[(int)player.playerID].track;
+	// A server-side spawn (search and destroy rounds) shows as timeAlive starting over
+	if (t.known && player.timeAlive >= t.timeAlive && player.game->map)
 	{
 		const float d = sqrtf((x - t.x) * (x - t.x) + (y - t.y) * (y - t.y));
-		if (!knockback && d > maxSpeed * (time - t.time) + 1.0f) v = violation(player, TELEPORT);
-		else if (player.game->map && throughWall(*player.game->map, t.x, t.y, x, y)) v = violation(player, WALL);
-		if (v == KICK) return KICK;
+		const bool knockback = player.framesSinceKnockback <= 60; // a hit pushes the player past the speed limit
+		Verdict v = ACCEPT;
+		// Frames held back by lag arrive together: allow the client's send interval at least
+		if (!knockback && d > maxSpeed * fmaxf(time - t.time, sendInterval(player)) + 1.0f)
+			v = violation(player, TELEPORT);
+		else if (inWall(*player.game->map, x, y) || (d <= 1.0f && throughWall(*player.game->map, t.x, t.y, x, y)))
+			v = violation(player, WALL); // a longer path between samples may cut a corner
+		if (v == KICKED) return KICKED;
 		t.path += d;
 	}
-	else
-		t.path = 0;
 	t.known = true;
 	t.x = x;
 	t.y = y;
 	t.time = time;
 	t.timeAlive = player.timeAlive;
-	t.map = player.game->map;
 	return ACCEPT;
 }
 
 ServerValidator::Verdict ServerValidator::onCoordFrame(Player & player, const net_clsv_svcl_player_coord_frame & frame)
 {
-	if (onMove(player, frame.position[0] / 100.0f, frame.position[1] / 100.0f) == KICK) return KICK;
+	if (onMove(player, frame) == KICKED) return KICKED;
 	if (player.lastFrame == 0) player.lastFrame = frame.frameID;
 	player.currentFrame = frame.frameID;
 	if (player.frameSinceLast < 90) return ACCEPT;
@@ -102,40 +177,41 @@ ServerValidator::Verdict ServerValidator::onCoordFrame(Player & player, const ne
 	float vx = frame.vel[0] / 10.0f, vy = frame.vel[1] / 10.0f;
 	bool speedHack = player.framesSinceKnockback > 60 && sqrtf(vx * vx + vy * vy) > 3.25f + 0.15f;
 
-	// Path speed: the positions walked this window against the time it took (no hit in the window)
-	Track & t = track[(int)player.playerID];
-	const bool pathSpeed = player.framesSinceKnockback > player.frameSinceLast &&
-		t.path > maxSpeed * player.frameSinceLast / 30.0f + 1.5f;
-	t.path = 0;
-	if (pathSpeed && violation(player, PATH_SPEED) == KICK) return KICK;
+	// Path speed: the path walked this window against the time it covers (no hit in the window). Frames held back
+	// across the window's start cover more client time than server time.
+	Slot & s = slots[(int)player.playerID];
+	const float seconds = fmaxf((float)player.frameSinceLast, (float)clientFrames) / 30.0f + sendInterval(player);
+	const bool pathSpeed = player.framesSinceKnockback > player.frameSinceLast && s.track.path > maxSpeed * seconds + 1.5f;
+	s.track.path = 0;
+	if (pathSpeed && violation(player, PATH_SPEED) == KICKED) return KICKED;
 
-	int & s = score[player.playerID];
-	s = frameHack || speedHack ? s + 1 : 0;
-	if (s >= gameVar.sv_speedHackKick && gameVar.sv_antiCheat > 0) return KICK;
+	s.badWindows = (frameHack || speedHack) && gameVar.sv_antiCheat > 0 ? s.badWindows + 1 : 0;
+	if (s.badWindows >= gameVar.sv_speedHackKick) return kick(player, nullptr);
 	player.frameSinceLast = player.lastFrame = player.currentFrame = 0; // the next window
 	return ACCEPT;
 }
 
 void ServerValidator::reset(Player & player)
 {
-	score[player.playerID] = 0;
-	track[(int)player.playerID] = Track();
+	Slot & s = slots[(int)player.playerID];
+	s.badWindows = 0;
+	s.track = Track();
 	player.frameSinceLast = player.lastFrame = player.currentFrame = 0;
 }
 
 void ServerValidator::join(Player & player)
 {
+	Slot & s = slots[(int)player.playerID];
+	s = Slot();
+	for (int r = 0; r < RULE_COUNT; ++r) s.tokens[r] = rules[r].burst;
+	s.fireTokens = 1000; // full: the first shot caps it to the weapon's budget
+	s.fireTime = time;
 	reset(player);
-	const int slot = player.playerID;
-	cheatScore[slot] = 0;
-	warned[slot] = false;
-	for (int & b : breaks[slot]) b = 0;
-	for (int i = 0; i < FLOODS; ++i) tokens[slot][i] = burst[i];
 }
 
 ServerValidator::Verdict ServerValidator::budget(Player & player, Rule flood)
 {
-	float & t = tokens[(int)player.playerID][flood - FLOOD_CHAT];
+	float & t = slots[(int)player.playerID].tokens[flood];
 	if (t >= 1)
 	{
 		t -= 1;
@@ -144,45 +220,47 @@ ServerValidator::Verdict ServerValidator::budget(Player & player, Rule flood)
 	return violation(player, flood);
 }
 
+ServerValidator::Verdict ServerValidator::kick(Player & player, const char * why)
+{
+	if (why) console->sendCommand(CString("sayall %s kicked by the anti-cheat (%s)", player.name.s, why));
+	scene->kick(player.playerID);
+	return KICKED;
+}
+
 ServerValidator::Verdict ServerValidator::violation(Player & player, Rule rule)
 {
 	if (gameVar.sv_antiCheat == 0) return ACCEPT;
-	const int slot = player.playerID;
-	if (++breaks[slot][rule] <= tolerance[rule]) return ACCEPT;
-	float & s = cheatScore[slot];
-	s += 1;
-	if (breaks[slot][rule] == tolerance[rule] + 1)
-		console->add(CString("\x9> anti-cheat: %s (%s) %s, score %.0f", player.name.s, player.playerIP, ruleName[rule], s), true);
-	if (gameVar.sv_antiCheat < 2) return ACCEPT;
-	if (s >= gameVar.sv_antiCheatKick)
+	Slot & s = slots[(int)player.playerID];
+	const int breaks = ++s.breaks[rule];
+	if (breaks <= rules[rule].tolerance) return ACCEPT;
+	if (breaks == rules[rule].tolerance + 1) // once per rule and window: one lag spike is one point
 	{
-		console->sendCommand(CString("sayall %s kicked by the anti-cheat (%s)", player.name.s, ruleName[rule]));
-		scene->kick(slot);
-		return KICK;
+		s.score += 1;
+		console->add(CString("\x9> anti-cheat: %s (%s) %s, score %.0f", player.name.s, player.playerIP, rules[rule].name, s.score), true);
 	}
-	if (s >= gameVar.sv_antiCheatWarn && !warned[slot])
+	if (gameVar.sv_antiCheat < 2) return ACCEPT;
+	if (s.score >= gameVar.sv_antiCheatKick) return kick(player, rules[rule].name);
+	if (s.score >= gameVar.sv_antiCheatWarn && !s.warned)
 	{
-		warned[slot] = true;
-		CString message("Anti-cheat warning: %s", ruleName[rule]);
+		s.warned = true;
+		CString message("Anti-cheat warning: %s", rules[rule].name);
 		bb_serverSend(message.s, message.len() + 1, NET_SVCL_CONSOLE, player.babonetID);
 	}
-	return rule < TELEPORT ? DROP : ACCEPT;
+	return rules[rule].drops ? DROP : ACCEPT;
 }
 
 void ServerValidator::update(float delay)
 {
 	time += delay;
 	window += delay;
-	if (window >= 3)
+	const bool newWindow = window >= 3;
+	if (newWindow) window = 0;
+	for (Slot & s : slots)
 	{
-		window = 0;
-		for (auto & slot : breaks)
-			for (int & b : slot) b = 0;
-	}
-	for (int i = 0; i < MAX_PLAYER; ++i)
-	{
-		for (int f = 0; f < FLOODS; ++f) tokens[i][f] = fminf(burst[f], tokens[i][f] + refill[f] * delay);
-		cheatScore[i] = cheatScore[i] > delay / 10 ? cheatScore[i] - delay / 10 : 0;
-		if (cheatScore[i] < gameVar.sv_antiCheatWarn) warned[i] = false;
+		if (newWindow)
+			for (int & b : s.breaks) b = 0;
+		for (int r = 0; r < RULE_COUNT; ++r) s.tokens[r] = fminf(rules[r].burst, s.tokens[r] + rules[r].refill * delay);
+		s.score = fmaxf(0, s.score - delay / 10);
+		if (s.score < gameVar.sv_antiCheatWarn) s.warned = false;
 	}
 }
