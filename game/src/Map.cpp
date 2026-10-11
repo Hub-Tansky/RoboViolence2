@@ -57,7 +57,7 @@ static bool saneMapSize(int x, int y)
 
 Map::Map(CString mapFilename, Game * _game, unsigned int font, bool editor, int sizeX, int sizeY)
 #ifndef CONSOLE
-: groundMesh(0), shadowMesh(0), wallMesh(0)
+: groundMesh(0), shadowMesh(0), wallMesh(0), texMap(0) // texMap: ~Map deletes it, also after an early R5 return
 #endif
 {
 	aStar = 0;
@@ -1123,8 +1123,9 @@ void Map::regenTex()
 	{
 		texMapSize[1] = float(size[1]) / float(height);
 	}
-	unsigned char * textureData = new unsigned char [(size_t)width*height*3]; // R18: width, height <= 256 (saneMapSize)
-	memset(textureData, 0, width*height*3);
+	const size_t textureDataSize = (size_t)width*height*3; // R18: width, height <= 256 (saneMapSize)
+	unsigned char * textureData = new unsigned char [textureDataSize];
+	memset(textureData, 0, textureDataSize);
 	// On rempli le data dans la texture
 	for (j=0;j < height;++j)
 	{
@@ -1693,6 +1694,8 @@ bool GetMapData(CString name, unsigned int & texture, CVector2i & textureSize, C
 				}
 				break;
 			}
+		default: // unknown version: nothing to show
+			return false;
 		}
 
 		textureSize.set(1, 1);
@@ -1704,8 +1707,9 @@ bool GetMapData(CString name, unsigned int & texture, CVector2i & textureSize, C
 		{
 			textureSize[1] *= 2;
 		}
-		unsigned char * textureBytes = new unsigned char[(size_t)textureSize[0] * textureSize[1] * 3]; // R18
-		memset(textureBytes, 0, textureSize[0] * textureSize[1] * 3);
+		const size_t textureBytesSize = (size_t)textureSize[0] * textureSize[1] * 3; // R18
+		unsigned char * textureBytes = new unsigned char[textureBytesSize];
+		memset(textureBytes, 0, textureBytesSize);
 		for(int j = 0; j < size[1]; ++j)
 		{
 			for(int i = 0; i < size[0]; ++i)
