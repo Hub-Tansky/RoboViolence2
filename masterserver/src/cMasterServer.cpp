@@ -85,16 +85,6 @@ cMasterServer::cMasterServer()
 
 	TimeSinceBanCheck = 0.0f;
 	
-	//char date[20];
-
-	////long dateLong = GetDateLong();
-	//GetDateString( date , dateLong );
-
-	//printf("time is %li\ndate is %s", dateLong , date);
-
-	//on clear les game de bv2
-	//sqlite3_exec(MasterDB,"Delete from Servers;",0,0,0);
-
 	//on indique la version courrante de bv2
 	sprintf(Version,"2.09");
 }
@@ -121,11 +111,28 @@ void cMasterServer::SendBanList( UINT4 fromID , char * filter )
 	}
 }
 
-int cMasterServer::IsBanned( char * IP , char * MAC )
+// The ID of a ban on this IP or MAC, -1 if none
+long long cMasterServer::FindBan( const char * IP , const char * MAC )
 {
 	SqlStatement ban(MasterDB, "Select ID From BanList where IP = ? or MAC = ?;");
 	ban.bindText(1, IP).bindText(2, MAC);
-	return ban.row() ? 1 : 0;
+	return ban.row() ? ban.integer(0) : -1;
+}
+
+int cMasterServer::IsBanned( char * IP , char * MAC )
+{
+	return FindBan( IP , MAC ) >= 0 ? 1 : 0;
+}
+
+// Writes a game to the web database's Games table (names and maps are bound: stored as sent)
+void cMasterServer::WriteWebGame( const stBV2row & game , bool insert )
+{
+	if( !m_webDB ) return;
+	SqlStatement(m_webDB, insert
+		? "Insert into Games(Map,MaxPlayers,Name,NbPlayers,Password,IP,Port) Values(?,?,?,?,?,?,?);"
+		: "Update Games Set Map = ?, MaxPlayers = ?, Name = ?, NbPlayers = ?, Password = ? Where IP = ? and Port = ?;")
+		.bindText(1, game.map).bindInt(2, game.maxPlayer).bindText(3, game.serverName).bindInt(4, game.nbPlayer)
+		.bindInt(5, game.password[0] != '\0' ? 1 : 0).bindText(6, game.ip).bindInt(7, game.port).run();
 }
 
 void cMasterServer::AddBan( char * NickName , char * IP , char * MAC , int Duration )
@@ -147,13 +154,7 @@ void cMasterServer::AddBan( char * NickName , char * IP , char * MAC , int Durat
 	time_t theTime;
 	theTime = time( NULL );
 
-	long long existing = -1;
-	{
-		SqlStatement find(MasterDB, "Select ID From BanList where IP = ? or MAC = ?;");
-		find.bindText(1, IP).bindText(2, MAC);
-		if (find.row())
-			existing = find.integer(0);
-	}
+	long long existing = FindBan( IP , MAC );
 
 	if( existing >= 0 )
 	{
@@ -358,23 +359,18 @@ int cMasterServer::UpdateGame(stBV2row *row,UINT4 fromID)
 	c->Timeout = 0;
 
 	// let's check if the database version is good, if not, we'll send the new version/url
-	unsigned short version = 0;
-	{
-		SqlStatement dbVersion(MasterDB, "Select Value From Settings Where Name = 'DBVersion';");
-		if (dbVersion.row())
-			version = (unsigned short)atoi(dbVersion.text(0).c_str());
-	}
+	unsigned short version = (unsigned short)atoi(SqlStatement::value(MasterDB, "Select Value From Settings Where Name = 'DBVersion';").c_str());
 
 	if( row->DBVersion != version )
 	{
 		// send url! (DB value is data, never a format string)
-		SqlStatement url(MasterDB, "Select Value From Settings Where Name = 'AccountURL';");
-		if (url.row())
+		std::string url = SqlStatement::value(MasterDB, "Select Value From Settings Where Name = 'AccountURL';");
+		if (!url.empty())
 		{
 			char *buf = new char[512];
 			memset(buf, 0, 512);
 			memcpy(buf,&version,2);
-			snprintf(buf + 2, 510, "%s", url.text(0).c_str());
+			snprintf(buf + 2, 510, "%s", url.c_str());
 			bb_serverSend( buf,512,ACCOUNT_URL,fromID);
 			delete [] buf;
 		}
@@ -408,12 +404,7 @@ int cMasterServer::CreateGame(cBV2game* newGame)
 					//la game existe deja on update,delete et on sort
 					memcpy(&(G->GameInfos),&(newGame->GameInfos),sizeof(stBV2row));
 
-					// update game in webdb if present (names and maps are bound: stored as sent)
-					if( m_webDB )
-						SqlStatement(m_webDB, "Update Games Set Map = ?, MaxPlayers = ?, Name = ?, NbPlayers = ?, Password = ? Where IP = ? and Port = ?;")
-							.bindText(1, G->GameInfos.map, sizeof(G->GameInfos.map)).bindInt(2, G->GameInfos.maxPlayer)
-							.bindText(3, G->GameInfos.serverName, sizeof(G->GameInfos.serverName)).bindInt(4, G->GameInfos.nbPlayer)
-							.bindInt(5, G->GameInfos.password[0] != '\0' ? 1 : 0).bindText(6, G->GameInfos.ip, sizeof(G->GameInfos.ip)).bindInt(7, G->GameInfos.port).run();
+					WriteWebGame(G->GameInfos, false);
 
 					delete newGame;
 					return 0;
@@ -433,12 +424,7 @@ int cMasterServer::CreateGame(cBV2game* newGame)
 				G->LastCheck = 0;
 				memcpy(&(G->GameInfos),&(newGame->GameInfos),sizeof(stBV2row));
 
-				// update game in webdb if present (names and maps are bound: stored as sent)
-				if( m_webDB )
-					SqlStatement(m_webDB, "Update Games Set Map = ?, MaxPlayers = ?, Name = ?, NbPlayers = ?, Password = ? Where IP = ? and Port = ?;")
-						.bindText(1, G->GameInfos.map, sizeof(G->GameInfos.map)).bindInt(2, G->GameInfos.maxPlayer)
-						.bindText(3, G->GameInfos.serverName, sizeof(G->GameInfos.serverName)).bindInt(4, G->GameInfos.nbPlayer)
-						.bindInt(5, G->GameInfos.password[0] != '\0' ? 1 : 0).bindText(6, G->GameInfos.ip, sizeof(G->GameInfos.ip)).bindInt(7, G->GameInfos.port).run();
+				WriteWebGame(G->GameInfos, false);
 
 				delete newGame;
 				return 0;
@@ -471,12 +457,7 @@ int cMasterServer::CreateGame(cBV2game* newGame)
 	//printf("CREATED Game with IP : %s port : %i\n",newGame->GameInfos.ip ,newGame->GameInfos.port);
 	//*exist = false;
 
-	// add game to web db (names and maps are bound: stored as sent)
-	if( m_webDB )
-		SqlStatement(m_webDB, "Insert into Games(IP,Map,MaxPlayers,Name,NbPlayers,Password,Port) Values(?,?,?,?,?,?,?);")
-			.bindText(1, newGame->GameInfos.ip, sizeof(newGame->GameInfos.ip)).bindText(2, newGame->GameInfos.map, sizeof(newGame->GameInfos.map))
-			.bindInt(3, newGame->GameInfos.maxPlayer).bindText(4, newGame->GameInfos.serverName, sizeof(newGame->GameInfos.serverName))
-			.bindInt(5, newGame->GameInfos.nbPlayer).bindInt(6, newGame->GameInfos.password[0] != '\0' ? 1 : 0).bindInt(7, newGame->GameInfos.port).run();
+	WriteWebGame(newGame->GameInfos, true);
 
 	NbGames++;
 

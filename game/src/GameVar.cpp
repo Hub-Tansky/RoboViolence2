@@ -36,16 +36,12 @@ void FetchDBInfos()
 	if (!db)
 		return;
 
-	{
-		SqlStatement version(db, "Select Value From LauncherSettings Where Name = 'DBVersion';");
-		if (version.row())
-			gameVar.db_version = atoi(version.text(0).c_str());
-	}
-	{
-		SqlStatement url(db, "Select Value From LauncherSettings Where Name = 'AccountURL';");
-		if (url.row())
-			gameVar.db_accountServer = CString("%s", url.text(0).c_str()); // data, not a format
-	}
+	std::string version = SqlStatement::value(db, "Select Value From LauncherSettings Where Name = 'DBVersion';");
+	if (!version.empty())
+		gameVar.db_version = atoi(version.c_str());
+	std::string url = SqlStatement::value(db, "Select Value From LauncherSettings Where Name = 'AccountURL';");
+	if (!url.empty())
+		gameVar.db_accountServer = CString("%s", url.c_str()); // data, not a format
 	if (gameVar.cl_accountURL.len() > 0)
 		gameVar.db_accountServer = gameVar.cl_accountURL; // the config wins over what the master told us earlier
 	sqlite3_close(db);

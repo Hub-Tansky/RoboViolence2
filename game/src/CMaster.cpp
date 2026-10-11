@@ -971,12 +971,10 @@ void CMaster::GetMasterInfos()
 		console->add("Could not open the user database");
 		return;
 	}
-	{
-		// get our current game version
-		SqlStatement version(db, "Select Value From LauncherSettings Where Name = 'Version';");
-		if (version.row())
-			snprintf(m_CurrentVersion, sizeof(m_CurrentVersion), "%s", version.text(0).c_str());
-	}
+	// get our current game version
+	std::string version = SqlStatement::value(db, "Select Value From LauncherSettings Where Name = 'Version';");
+	if (!version.empty())
+		snprintf(m_CurrentVersion, sizeof(m_CurrentVersion), "%s", version.c_str());
 	sqlite3_close( db );
 }
 

@@ -123,11 +123,9 @@ Scene::Scene()
 	int didSurvey = 1; // no database: do not ask
 	if (DB)
 	{
-		{
-			SqlStatement survey(DB, "Select Value From LauncherSettings where Name = 'DidSurvey';");
-			if (survey.row())
-				didSurvey = atoi(survey.text(0).c_str());
-		}
+		std::string survey = SqlStatement::value(DB, "Select Value From LauncherSettings where Name = 'DidSurvey';");
+		if (!survey.empty())
+			didSurvey = atoi(survey.c_str());
 		sqlite3_close( DB );
 	}
 	
