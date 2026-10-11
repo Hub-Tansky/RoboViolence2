@@ -711,7 +711,7 @@ void Projectile::update(float delay, Map* map)
 		float zookaRadius = 3.0;
 		if (gameVar.sv_zookaRemoteDet && gameVar.sv_serverType == 1)
 			zookaRadius = gameVar.sv_zookaRadius;
-		if ((gameVar.sv_serverType = 1)) // sic: an assignment (known defect, docs/analysis/KEY_QUESTIONS.md)
+		if (gameVar.sv_serverType == SERVER_TYPE_PRO) // R3: was an assignment that switched every game to Pro (ADR 0013)
 		{
 			gameVar.weapons[WEAPON_BAZOOKA]->damage = gameVar.sv_zookaDamage;
 		}

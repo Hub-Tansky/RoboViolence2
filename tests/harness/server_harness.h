@@ -19,6 +19,10 @@ namespace harness
 	void tick(int frames = 1);
 	// A new TCP client: the server creates a player for it on the next frame. Returns its babonetID.
 	UINT4 connect();
+	// A new client that has completed the join handshake (version accepted, player info "Tester"). Returns its babonetID.
+	UINT4 join();
+	// The player slot of a connected client, -1 if it has none
+	int slotOf(UINT4 id);
 	// The client's TCP connection closes: the server frees its player on the next frame.
 	void disconnect(UINT4 id);
 	// One message from a client, exactly `size` bytes, handled on the next frame.

@@ -45,6 +45,12 @@ if(TARGET bv2server_lib)
   add_test(NAME packet_hygiene COMMAND test_packet_hygiene)
   set_tests_properties(packet_hygiene PROPERTIES ENVIRONMENT "BV2_PREF_DIR=${BV2_TEST_SCRATCH}/hygiene-pref")
 
+  add_executable(test_crash_fixes test_crash_fixes.cpp)
+  target_link_libraries(test_crash_fixes PRIVATE bv2_server_harness)
+  bv2_target_defaults(test_crash_fixes)
+  add_test(NAME crash_fixes COMMAND test_crash_fixes)
+  set_tests_properties(crash_fixes PROPERTIES ENVIRONMENT "BV2_PREF_DIR=${BV2_TEST_SCRATCH}/crash-pref")
+
   # Corpus (tests/corpus/<type>/*.bin): gen_corpus writes valid.bin per type; replay runs every file except crash-*.
   add_executable(gen_corpus gen_corpus.cpp)
   target_include_directories(gen_corpus PRIVATE ${CMAKE_SOURCE_DIR}/game/src ${CMAKE_SOURCE_DIR}/engine/babonet/include)

@@ -6,6 +6,9 @@
 #include "CMaster.h"
 #include "GameVar.h"
 #include "Paths.h"
+#include "netPacket.h"
+
+#include <cstring>
 
 // Globals bv2dedicated's main.cpp defines
 Scene * scene = 0;
@@ -58,6 +61,24 @@ namespace harness
 		queueConnect(id);
 		tick();
 		return id;
+	}
+
+	UINT4 join()
+	{
+		UINT4 id = connect();
+		net_clsv_gameversion_accepted accepted = {};
+		deliver(id, NET_CLSV_GAMEVERSION_ACCEPTED, &accepted, sizeof(accepted));
+		net_clsv_svcl_player_info info = {};
+		strcpy(info.playerName, "Tester");
+		deliver(id, NET_CLSV_SVCL_PLAYER_INFO, &info, sizeof(info));
+		return id;
+	}
+
+	int slotOf(UINT4 id)
+	{
+		for (int i = 0; i < MAX_PLAYER; ++i)
+			if (scene->server->game->players[i] && scene->server->game->players[i]->babonetID == (INT4)id) return i;
+		return -1;
 	}
 
 	void deliver(UINT4 from, int typeID, const void * data, int size)
