@@ -761,7 +761,7 @@ int cClient::ReceiveStream(int nbytes,char *buf)
 			else
 			{
 				//on prend ce qu'on peut
-				memcpy(lastPacket.data,buf + nread,nbytes - nread);
+				memcpy(lastPacket.data + (lastPacket.Size - bytesRemaining),buf + nread,nbytes - nread); // R7: after what came before
                 bytesRemaining = bytesRemaining - (unsigned short)(nbytes - nread);
 				nread = nbytes;
 

@@ -103,6 +103,12 @@ if(TARGET zeven_client)
   add_test(NAME dks_missing_music COMMAND test_dks)
 endif()
 
+add_executable(test_babonet test_babonet.cpp)
+target_link_libraries(test_babonet PRIVATE babonet)
+bv2_target_defaults(test_babonet)
+add_test(NAME babonet_large_message COMMAND test_babonet)
+set_tests_properties(babonet_large_message PROPERTIES TIMEOUT 60)
+
 add_executable(test_fileio test_fileio.cpp ${CMAKE_SOURCE_DIR}/game/src/FileIO.cpp ${CMAKE_SOURCE_DIR}/game/src/MemIO.cpp)
 target_include_directories(test_fileio PRIVATE ${CMAKE_SOURCE_DIR}/game/src)
 target_link_libraries(test_fileio PRIVATE zeven_core)
