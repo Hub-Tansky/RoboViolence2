@@ -1,5 +1,6 @@
 // bv2master in-process on its port (10207) with a scratch master.db: register, list, heartbeat timeout, removal.
 //   test_master <dir with master.db and web.db> <scratch dir>
+#include "SqlStatement.h"
 #include "cNetManager.h"
 
 #include <chrono>
@@ -109,6 +110,50 @@ int main(int argc, char ** argv)
 	CHECK(list().empty());
 
 	bb_clientDisconnect(game);
-	if (failures == 0) std::printf("ok: master register, list, timeout, removal\n");
+	// 6.3 (Q-S3): quotes, comments, ';' and '%' in a game's name and map and in a ban's nick and MAC are stored as
+	// sent, and the tables stay intact
+	const char * name = "Robo'); DROP TABLE Games;--";
+	const char * map = "Map'%s;--";
+	game = connectClient();
+	stBV2row row = {};
+	strcpy(row.map, map);
+	strcpy(row.serverName, name);
+	strcpy(row.Version, "2.11");
+	row.port = 4444;
+	bb_clientSend(game, (char *)&row, sizeof(row), BV2_ROW);
+	pump({game});
+	{
+		sqlite3 * web = 0;
+		sqlite3_open("web.db", &web);
+		SqlStatement games(web, "Select Name, Map From Games Where Port = 4444;");
+		CHECK(games.row() && games.text(0) == name && games.text(1) == map);
+		sqlite3_close(web);
+	}
+	stCacheBan ban = {};
+	strcpy(ban.Nick, "Nick'--;%");
+	strcpy(ban.IP, "203.0.113.7");
+	strcpy(ban.MAC, "AA');DROP--%"); // fits MAC[20]
+	strcpy(ban.Pass, "roxbabo");
+	bb_clientSend(game, (char *)&ban, sizeof(ban), CACHE_BAN);
+	pump({game});
+	stCacheBanned query = {};
+	strcpy(query.MAC, ban.MAC); // matched by MAC alone
+	bb_clientSend(game, (char *)&query, sizeof(query), CACHE_BANNED);
+	pump({game});
+	int typeID;
+	bool answered = false;
+	while (char * buffer = bb_clientReceive(game, &typeID))
+		if (typeID == CACHE_ANSWER) answered = ((stCacheAnswer *)buffer)->Answer == 1;
+	CHECK(answered);
+	{
+		sqlite3 * db = 0;
+		sqlite3_open("master.db", &db);
+		SqlStatement bans(db, "Select Nick, MAC From BanList Where IP = '203.0.113.7';");
+		CHECK(bans.row() && bans.text(0) == ban.Nick && bans.text(1) == ban.MAC);
+		sqlite3_close(db);
+	}
+	bb_clientDisconnect(game);
+
+	if (failures == 0) std::printf("ok: master register, list, timeout, removal, SQL injection\n");
 	return failures ? 1 : 0;
 }
