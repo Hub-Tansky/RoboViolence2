@@ -1,6 +1,6 @@
 # Step 6: SQL prepared statements
 
-**Status:** TODO
+**Status:** IN PROGRESS
 
 **Depends on:** [Step 3](step3-test-harness.md). **Next:** [step7-medium-low-defects.md](step7-medium-low-defects.md). **Index:** [README.md](README.md)
 
@@ -11,7 +11,7 @@
 | Goal | Every SQL statement in the game and the master server uses `sqlite3_prepare_v2` with bound parameters |
 | In scope | Tasks 6.1–6.3 below |
 | Out of scope | Schema changes beyond what binding needs; removing MAC from identity (step 10); account storage and KDF (PNS-14) |
-| Allowed paths | `game/src/CMaster.cpp`, `game/src/GameVar.cpp`, `game/src/Paths.cpp`, `game/src/Scene.cpp`, `masterserver/src/**`, `content-seed/**`, `tests/**`, `docs/analysis/KEY_QUESTIONS.md`, `ARCHITECTURE.md`, `docs/roadmap/**` |
+| Allowed paths | `game/src/CMaster.cpp`, `game/src/GameVar.cpp`, `game/src/Paths.cpp`, `game/src/Scene.cpp`, `game/src/SqlStatement.h` (owner-approved 2026-10-11: the game's helper), `masterserver/src/**`, `content-seed/**`, `tests/**`, `docs/analysis/KEY_QUESTIONS.md`, `ARCHITECTURE.md`, `docs/roadmap/**` |
 | Inputs | `AGENTS.md`, `ARCHITECTURE.md`, earlier review records `reviews/step*.md`, `docs/analysis/KEY_QUESTIONS.md` Q-S3, step 3 master tests |
 | Deliverables | A small statement helper per program; all call sites converted; injection tests |
 | Definition of done | See "Acceptance checks". All must pass. `ARCHITECTURE.md` is updated |
