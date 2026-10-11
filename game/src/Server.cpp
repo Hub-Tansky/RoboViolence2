@@ -397,7 +397,7 @@ void Server::updateNet(float delay, bool send)
 		else
 		{
 			strcpy(game->players[playerID]->playerIP, IPDuGars);
-			validator.reset(*game->players[playerID]);
+			validator.join(*game->players[playerID]);
 		}
 		/*PlayerStats* ps = getStatsFromCache(game->players[playerID]->userID);
 		if (ps != 0)
@@ -498,6 +498,7 @@ void Server::update(float delay)
 {
 	if (game && isRunning)
 	{
+		validator.update(delay);
 	/*	if (infoSendDelay == 0)
 		{
 			infoSendDelay = 0;

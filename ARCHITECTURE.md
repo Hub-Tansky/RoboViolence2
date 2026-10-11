@@ -112,7 +112,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/test_replay.cpp` | Replays the corpus through the in-process server: no crash, expected replies; each `crash-*.bin` (none at present) is its own ctest under ASan |
 | `tests/fuzz_server.cpp` | Random-mutation fuzzer for one message type on the in-process server; writes the crashing input to `<out>/<type>/last.bin` (CI job `fuzz`) |
 | `tests/test_server_harness.cpp` | The in-process server starts on the placeholder CTF map, accepts a client and sends it the game state |
-| `tests/test_validator.cpp` | Step 8: the server kicks for a non-primary spawn weapon and for `sv_speedHackKick` (3) speed violations in a row, never a valid player |
+| `tests/test_validator.cpp` | Steps 8, 9: the step 8 kicks, `sv_antiCheat` levels, and each step 9 rule against a cheat and against normal (lagged) play |
 | `tests/test_master.cpp` | In-process master on port 10207 with a scratch `master.db`: register, list, heartbeat timeout (simulated 61 s), removal by `KILL_SERV`, SQL injection in names, maps, nicks, IPs and MACs, and the ban list with LIKE filters (Q-S3). Not run on Windows (R28) |
 | `tests/test_netpacket.cpp` | Byte-level layout of the packed wire structs |
 | `tools/check-content-case.py` | Fails when a literal `main/...` path differs from a real file name only by case |
@@ -201,6 +201,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/analysis/01_SYSTEM_OVERVIEW.md` | Code analysis: 01 SYSTEM OVERVIEW |
 | `docs/analysis/02_DATA_STRUCTURES.md` | Code analysis: 02 DATA STRUCTURES |
 | `docs/analysis/03_DATA_FLOW.md` | Code analysis: 03 DATA FLOW |
+| `docs/analysis/ANTI_CHEAT_TUNING.md` | Server anti-cheat levels, rules, limits and tuning (step 9) |
 | `docs/analysis/ALGORITHM_01-Networking.md` | Code analysis: ALGORITHM 01 Networking |
 | `docs/analysis/ALGORITHM_02-Movement-Collision-Interpolation.md` | Code analysis: ALGORITHM 02 Movement Collision Interpolation |
 | `docs/analysis/ALGORITHM_03-Weapons-Hitscan-Projectiles.md` | Code analysis: ALGORITHM 03 Weapons Hitscan Projectiles |
@@ -288,6 +289,8 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step7.md` | Fresh-context review record for step 7 |
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step8-report.md` | Raw reviewer report for step 8 |
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step8.md` | Fresh-context review record for step 8 |
+| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step9-report.md` | Raw reviewer report for step 9 |
+| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step9.md` | Fresh-context review record for step 9 |
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step5-report.md` | Raw reviewer report for step 5 |
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step5.md` | Fresh-context review record for step 5 |
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step4-report.md` | Raw reviewer report for step 4 |
@@ -637,7 +640,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/ServerClose.h` | Dialog shown when the server closes the connection |
 | `game/src/ServerRecv.cpp` | Server: handlers for every client-to-server packet, after the pre-dispatch check `Server::checkPacket` |
 | `game/src/ServerSnD.cpp` | Server: search-and-destroy rules |
-| `game/src/ServerValidator.cpp` | Server cheat checks: spawn weapon whitelist, per-player speed/frame violation score |
+| `game/src/ServerValidator.cpp` | Server cheat checks: spawn weapon whitelist, speed/frame kick, step 9 rules (weapon, movement, rate limits) with a decaying score |
 | `game/src/ServerValidator.h` | Server cheat checks (`Server::validator`), asked by the `ServerRecv.cpp` handlers |
 | `game/src/SqlStatement.h` | Prepared SQLite statement with bound parameters (the game's copy) |
 | `game/src/Weapon.cpp` | Weapon definitions and stats |
