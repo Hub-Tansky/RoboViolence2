@@ -65,6 +65,12 @@
 
 - R20: `dksPlayMusic` checks the file opens before `ma_sound_init_from_file`. The race didn't reproduce locally without the fix (3 ASan runs of `test_dks` on macOS), so there is no fix proof; the CI smoke job is the long-run check. The vcpkg miniaudio is 0.11.25: 0.11.23 fixed a leak and an assertion in the resource manager when opening a file fails, and 0.11.24 a possible double-uninit when a decoder fails to initialise and a possible resource-manager crash (upstream `CHANGES.md`).
 
+- 5.5: the smoke job (CI run 38119883269) reported two UBSan `bool` loads (`Console::SetDisplayEvents`, `CMaster::update`); both fixed. The `CUserLogin.cpp` NaN casts in the old Open items line no longer appear.
+- 5.6, server: 11 start/quit sequences of the ASan `bv2dedicated` (quit at once, `dedicate` before `set sv_*`, missing map or script, `disconnect`, `changemap` without a server, `kick`/`ban` of empty slots, `removemap` then `changemap`) are clean after one fix: typed console lines were a printf format (`main.cpp`); `smoke_server.py` now types one.
+- 5.6, client: the smoke job's teardown use-after-free (global menus deleting sounds after `dks`'s list was destroyed) is fixed. Quitting at each client scene and disconnecting mid-download weren't run: they need a GL window (owner play-test).
+- R26 (vote-request abort) didn't recur: the fuzz job on `main` ran `clsv_svcl_vote_request` 2 min clean. R28 (Windows babonet crash on disconnect) is still open; its cause isn't known, so the master test stays off on Windows.
+- Found while testing R18: R29 (`~_typLayer` deletes textures only when the ID is 0), outside this step's paths.
+
 ## Critical files
 
 - `game/src/Server.cpp`, `game/src/GameProjectile.cpp`, `game/src/Map.cpp`, `game/src/Scene*.cpp`, `game/src/CUserLogin.cpp`

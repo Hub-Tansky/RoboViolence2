@@ -29,7 +29,6 @@ Robo Violence 2: unofficial fork of BaboViolent 2, a top-down multiplayer shoote
 - **OGG music** needs `stb_vorbis.c` (vcpkg `stb`, found in CI builds); the placeholders have no music, and playback was never heard.
 - **HiDPI:** `dkwGetResolution()` is the pixel size; the UI math assumes nothing else. Untested on a Retina display.
 - **Dead code:** 16 old-menu `.cpp` files in `game/src` are not built (see [game/README.md](game/README.md)).
-- UBSan reports pre-existing defects (out-of-range `bool` loads, NaN casts in `CUserLogin.cpp`).
 - **Warnings:** every target except `glad` builds with `-Werror` / `/WX`. Cosmetic classes (unused names, signed compares, initialiser order) are off for `game` and `masterserver` (`bv2_target_legacy_strict`); about 4800 string-literal-to-`char*` warnings are suppressed.
 - **clang-tidy** runs in CI as a non-required job.
 

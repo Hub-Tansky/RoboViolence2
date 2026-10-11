@@ -44,7 +44,7 @@ Entry format: ID, where it was found, an extract of the source, why it matters, 
 - **Extract:** "UBSan reports pre-existing defects (out-of-range `bool` loads, NaN casts in `CUserLogin.cpp`)."
 - **Why:** Undefined behaviour in shipped code, not yet in the R1–R15 register.
 - **Suggested home:** §A.5; add them to `docs/analysis/KEY_QUESTIONS.md`.
-- **Status:** Accepted → Phase B [step 5](phase-b-security-infrastructure-anti-cheat/step5-crash-fixes.md)
+- **Status:** Done in Phase B step 5: the smoke job's two `bool` loads (`Console.cpp`, `CMaster.cpp`) fixed; the `CUserLogin.cpp` NaN casts no longer appear in the smoke job
 
 ### PNS-6: Lifecycle null-pointer crashes are a pattern
 
