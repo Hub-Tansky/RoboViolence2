@@ -16,6 +16,7 @@ Every claim carries a `[VERIFY: path:line]` tag relative to the repository root;
 | 7 | [ALGORITHM_04-GameModes-Spawning-Rounds.md](ALGORITHM_04-GameModes-Spawning-Rounds.md) | Round state machine, max-min spawn selection, CTF, auto-balance, map rotation, voting |
 | 8 | [KEY_QUESTIONS.md](KEY_QUESTIONS.md) | Design Q&A, security findings, ranked defect register, relaunch fix order |
 | 9 | [FORK_jmainguy-modern.md](FORK_jmainguy-modern.md) | Review of the Jmainguy `modern` fork: protocol impact, merge verdict, harvest list (implemented) |
+| 10 | [ANTI_CHEAT_TUNING.md](ANTI_CHEAT_TUNING.md) | Server anti-cheat levels, rules, limits and how to tune them (Phase B step 9) |
 
 `[VERIFY:]` line numbers describe the baseline commit `5eb7aad`. The harvest commits after it change the behaviour described in ALGORITHM_01 §6, ALGORITHM_02 §5 and 03_DATA_FLOW §1, which are updated. They also shift line numbers in the files they touch (see `git log 5eb7aad..`).
 

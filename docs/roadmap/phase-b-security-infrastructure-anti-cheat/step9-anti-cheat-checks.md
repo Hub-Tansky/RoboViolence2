@@ -43,6 +43,13 @@
 
 - Per-message-type budget per player (chat, votes, name changes, skin updates, pings). Excess is dropped and scored.
 
+## Notes
+
+- Rules, limits and tuning: [ANTI_CHEAT_TUNING.md](../../analysis/ANTI_CHEAT_TUNING.md). Tests: `validator`.
+- Each rule has a positive and a negative test. Fix proof: with each rule's report removed (or its budget, refill or respawn reset), its test fails.
+- Not caught: a speed up to about 4.25 units/s (path slack); a tighter speed limit is not caught by the honest-walk test (sampled positions cut the turns).
+- Map changes reset movement state by the map pointer; no test (the harness does not change maps).
+
 ## Critical files
 
 - `game/src/ServerValidator.cpp`, `game/src/ServerRecv.cpp`, `game/src/Map.h`
