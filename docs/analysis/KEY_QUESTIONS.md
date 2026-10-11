@@ -96,7 +96,7 @@ Fix: resolve the slot from `bbnetID` once at the top of `recvPacket` and ignore 
 `weaponID` likewise indexes `gameVar.weapons[20]` unchecked: [VERIFY: BaboViolent2/Code/ServerRecv.cpp:966] [VERIFY: BaboViolent2/Code/GameVar.h:312]
 The client-side mirror (`createNewPlayerCL`) *does* range-check, which shows the intended pattern: [VERIFY: BaboViolent2/Code/Game.cpp:1692-1695]
 
-### Q-S3. SQL injection? — **Yes (High on master, Medium on Pro server)**
+### Q-S3. SQL injection? — **Yes (High on master, Medium on Pro server)** — **Fixed in Phase B step 6 (868d140, e576137)**: every statement binds its data (`SqlStatement`); only constant DDL in `Paths.cpp` uses `sqlite3_exec`
 - Master server: player-supplied MAC (from `PLAYER_INFO`) is forwarded by the game server and interpolated into `SELECT … WHERE IP='%s' OR MAC='%s'`. Up to 19 attacker characters reach SQL. [VERIFY: BaboViolent2/Code/ServerRecv.cpp:500-509] [VERIFY: MasterServer/Source/src/cNetManager.cpp:245-251] [VERIFY: MasterServer/Source/src/cMasterServer.cpp:165]
 - Pro game server: player name interpolated into `INSERT INTO BadChecksum`. [VERIFY: BaboViolent2/Code/ServerRecv.cpp:1198]
 - Game/map names on the master are "escaped" by replacing `'` with a backtick only. [VERIFY: MasterServer/Source/src/cMasterServer.cpp:642-662]

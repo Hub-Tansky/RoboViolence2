@@ -308,6 +308,7 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Extract:** "`AGENTS.md:75` still lists the `sv_serverType = 1` assignment as a load-bearing known defect. `docs/analysis/README.md:27` and `ALGORITHM_03` W1 (`:230`) describe the bug as current … `AGENTS.md:57` says 'the non-Pro ruleset … removed'."
 - **Why it matters:** an agent reading them could undo ADR 0013.
 - **Suggested home:** the next step allowed to edit `AGENTS.md` and `docs/analysis/`; point each at ADR 0013.
+- **Also (step 6):** `masterserver/README.md` still says `cMasterServer.cpp` builds SQL with `sprintf`; it binds since Phase B step 6.
 - **Status:** Proposed
 
 ### PNS-37: One read primitive for `FileIO` and `MemIO`

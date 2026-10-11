@@ -35,6 +35,15 @@
 
 - The master tests send names, IPs and MAC fields containing `'`, `--`, `;` and `%`. The tables are unchanged and the rows are stored literally.
 
+## Notes
+
+- The ban queries read `Select *` results through fixed offsets (`BV2_BAN_*` = `CurrentRow*nColumn+6`…) that assumed a column order the seeded `BanList` table doesn't have; they now name their columns, and the offset macros are gone.
+- Names, maps, nicks and survey text were "escaped" by turning `'` into a backtick; bound, they are stored as sent.
+- The master NUL-terminates the text fields of the ban messages (`CACHE_BAN_LIST`, `CACHE_BAN`, `CACHE_BANNED`) before binding them; the rest of the master's packet checks is not in this step.
+- Commented-out SQL (`RegisterPlayer`, `RegisterServer`) was deleted rather than converted.
+- The ban messages are authorised by a password compared in the source (`cNetManager.cpp`); that is Q-S5 (step 10).
+- `masterserver/README.md` still describes `sprintf` SQL (outside this step's paths) → PNS-36.
+
 ## Critical files
 
 - `masterserver/src/cMasterServer.cpp`, `masterserver/src/cNetManager.cpp`, `game/src/CMaster.cpp`
