@@ -3,6 +3,7 @@
 
 #include "CMaster.h"
 #include "Console.h"
+#include "Game.h"
 #include "GameVar.h"
 #include "Map.h"
 #include "Paths.h"
@@ -148,6 +149,26 @@ static void r9()
 	server->game->map->flagState[0] = -2;
 }
 
+// R13: an SND spawn index equal to the number of spawn points is clamped, not used (ASan builds report it)
+static void r13()
+{
+	Game * game = scene->server->game;
+	UINT4 c = harness::spawned(WEAPON_SMG);
+	int slot = harness::slotOf(c);
+	int gameType = game->gameType;
+	std::vector<CVector3f> spawns = game->map->dm_spawns;
+	game->gameType = GAME_TYPE_SND;
+	game->map->dm_spawns.assign(10, CVector3f(5, 5, 0));
+	for (int i = 0; i < 60; ++i)
+	{
+		game->players[slot]->spawnSlot = 2; // 2*5 + rand(0, 5): index 10 is one past the end
+		game->spawnPlayer(slot);
+	}
+	CHECK(game->players[slot]->status == PLAYER_STATUS_ALIVE);
+	game->map->dm_spawns = spawns;
+	game->gameType = gameType;
+}
+
 int main(int, char ** argv)
 {
 	if (!harness::start(argv[0])) return 1;
@@ -157,6 +178,7 @@ int main(int, char ** argv)
 	r5();
 	r10();
 	r9();
+	r13();
 	r18(bv2::userFile("").c_str());
 	harness::stop();
 	if (harness::failures() == 0) std::printf("ok: crash fixes\n");

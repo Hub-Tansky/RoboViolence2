@@ -189,7 +189,7 @@ bool Game::spawnPlayer(int playerID)
 
                int spawnSize= 5;
                unsigned int spawnLocation = bestFound*spawnSize+ rand(0, spawnSize);
-               if (spawnLocation > map->dm_spawns.size())
+               if (spawnLocation >= map->dm_spawns.size()) // R13: was >, which let index == size through
                   spawnLocation = (int)map->dm_spawns.size()-1;
                
 					players[playerID]->spawn(CVector3f(map->dm_spawns[spawnLocation][0],map->dm_spawns[spawnLocation][1],.25f));
