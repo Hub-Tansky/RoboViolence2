@@ -131,7 +131,12 @@ int main(int argc, char ** argv)
 		mem.reset();
 		CHECK(mem.getLong() == 0x0201);
 	}
+	{
+		// R30: getNextToken on a single token doesn't read before the string (ASan builds report it)
+		CString one("%s", "1");
+		CHECK(one.getNextToken(' ') == "1");
+	}
 	if (failures == 0)
-		std::printf("ok: FileIO widths, bv2ReadBytes, fixed string, unterminated CString, long string, MemIO bounds\n");
+		std::printf("ok: FileIO widths, bv2ReadBytes, fixed string, unterminated CString, long string, MemIO bounds, single token\n");
 	return failures ? 1 : 0;
 }

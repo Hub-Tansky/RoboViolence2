@@ -160,6 +160,7 @@ No secret; the sequence is derivable from the public source. See `ALGORITHM_01` 
 | R27 | Medium | babonet `cPacket::~cPacket` freed its `new char[]` buffer with `delete` (undefined behaviour on every sent packet, client and server). Found by Linux ASan in the step 3 master test; fixed in step 3 | [VERIFY: engine/babonet/src/cPacket.cpp:213] |
 | R28 | High | On Windows, babonet intermittently crashes (access violation) when a TCP connection closes: a client's `bb_clientDisconnect` right after receiving, and the master dropping timed-out clients. macOS and Linux (ASan) are clean. Found by the step 3 master test: crashed in CI runs 38073594887 and 38074969674, passed in 38077124684; cause not found. The master test doesn't run on Windows until this is fixed (step 5) | [VERIFY: tests/test_master.cpp] [VERIFY: engine/babonet/src/cConnection.cpp] |
 | R29 | Low | `~_typLayer` calls `glDeleteTextures` when `textureID == 0`, the inverted condition: real textures are never freed (a leak), and a layer without a GL context calls GL. Found in Phase B step 5 while testing R18 | [VERIFY: engine/dko/src/ePTexture.h:61] |
+| R30 | Medium | `CString::getNextToken` read `s[-1]` (one byte before the heap buffer) when the string had no separator. Reached in play: a player over `sv_maxPing` is moved with `moveid`. Found by the step 5 crash-fix test under Linux ASan (CI); fixed in step 5 | [VERIFY: engine/zeven/src/CString.cpp:307] |
 
 ---
 
