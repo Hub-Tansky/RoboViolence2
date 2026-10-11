@@ -20,6 +20,7 @@
 
 
 #include "CSystemVariable.h"
+#include <iomanip>
 #include "dksvari.h"
 
 
@@ -90,7 +91,7 @@ void CSystemVariable::loadConfig(char * filename, bool transient)
 	while (!ficIn.eof())
 	{
 		char variable[256];
-		if (!(ficIn >> variable))
+		if (!(ficIn >> std::setw(sizeof(variable)) >> variable)) // R17: at most 255 characters
 			break; // end of file: the old name would be reloaded with a failed read (0 or "")
 		if ((variable[0] == '/') && (variable[1] == '/'))
 		{
@@ -131,7 +132,7 @@ void CSystemVariable::loadConfigSVOnly(char * filename)
 	while (!ficIn.eof())
 	{
 		char variable[256];
-		if (!(ficIn >> variable))
+		if (!(ficIn >> std::setw(sizeof(variable)) >> variable)) // R17: at most 255 characters
 			break; // end of file: the old name would be reloaded with a failed read (0 or "")
 		if ((variable[0] == '/') && (variable[1] == '/'))
 		{
