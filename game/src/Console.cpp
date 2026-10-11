@@ -75,7 +75,7 @@ Console::Console(): displayEvents(true), m_maxCmdHistorySize(20), m_maxMsgHistor
 #endif
 }
 
-Console::Console(CString outputFilename): m_maxCmdHistorySize(20), m_maxMsgHistorySize(300), m_historyMod(3)
+Console::Console(CString outputFilename): displayEvents(true), m_maxCmdHistorySize(20), m_maxMsgHistorySize(300), m_historyMod(3)
 {
 	m_outputFilename = outputFilename;
 	SetDisplayEvents(true);
@@ -891,6 +891,8 @@ void Console::sendCommand(CString commandLine, bool isAdmin, unsigned long bbnet
 
 		// On donne la job ?dksvar pour ?
 		CMD_RET cr = dksvarCommand(commandLine.s);
+		// The server checks fire rates too: apply the ruleset's weapon table here, as clients do on SV_CHANGE (ADR 0013)
+		if (command == "sv_serverType" && scene && scene->server && scene->server->game) scene->server->game->UpdateProSettings();
 		if (cr == CR_NOSUCHVAR)
 			add(CString("\x4> Unknown variable"));
 		else if (cr == CR_INVALIDARGS)

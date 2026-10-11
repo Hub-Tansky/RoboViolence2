@@ -709,7 +709,7 @@ void Projectile::update(float delay, Map* map)
 
 		// On check les collisions
 		float zookaRadius = 3.0;
-		if (gameVar.sv_zookaRemoteDet && gameVar.sv_serverType == 1)
+		if (gameVar.sv_zookaRemoteDet && gameVar.sv_serverType == SERVER_TYPE_PRO)
 			zookaRadius = gameVar.sv_zookaRadius;
 		if (gameVar.sv_serverType == SERVER_TYPE_PRO) // R3: was an assignment that switched every game to Pro (ADR 0013)
 		{
