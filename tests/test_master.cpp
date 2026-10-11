@@ -122,16 +122,16 @@ int main(int argc, char ** argv)
 	row.port = 4444;
 	bb_clientSend(game, (char *)&row, sizeof(row), BV2_ROW);
 	pump({game});
+	sqlite3 * web = 0;
+	sqlite3_open("web.db", &web);
 	{
-		sqlite3 * web = 0;
-		sqlite3_open("web.db", &web);
 		SqlStatement games(web, "Select Name, Map From Games Where Port = 4444;");
 		CHECK(games.row() && games.text(0) == name && games.text(1) == map);
-		sqlite3_close(web);
 	}
+	sqlite3_close(web);
 	stCacheBan ban = {};
 	strcpy(ban.Nick, "Nick'--;%");
-	strcpy(ban.IP, "203.0.113.7");
+	strcpy(ban.IP, "1';--%");
 	strcpy(ban.MAC, "AA');DROP--%"); // fits MAC[20]
 	strcpy(ban.Pass, "roxbabo");
 	bb_clientSend(game, (char *)&ban, sizeof(ban), CACHE_BAN);
@@ -145,12 +145,30 @@ int main(int argc, char ** argv)
 	while (char * buffer = bb_clientReceive(game, &typeID))
 		if (typeID == CACHE_ANSWER) answered = ((stCacheAnswer *)buffer)->Answer == 1;
 	CHECK(answered);
+	sqlite3 * db = 0;
+	sqlite3_open("master.db", &db);
 	{
-		sqlite3 * db = 0;
-		sqlite3_open("master.db", &db);
-		SqlStatement bans(db, "Select Nick, MAC From BanList Where IP = '203.0.113.7';");
-		CHECK(bans.row() && bans.text(0) == ban.Nick && bans.text(1) == ban.MAC);
-		sqlite3_close(db);
+		SqlStatement bans(db, "Select Nick, IP From BanList Where MAC = ?;");
+		bans.bindText(1, ban.MAC);
+		CHECK(bans.row() && bans.text(0) == ban.Nick && bans.text(1) == ban.IP);
+	}
+	sqlite3_close(db);
+
+	// The ban list: an empty filter lists the ban; a filter with a quote and '%' matches its nick literally (LIKE)
+	for (const char * filter : {"", "Nick'", "'--;%"})
+	{
+		stCacheList list = {};
+		strcpy(list.Filter, filter);
+		bb_clientSend(game, (char *)&list, sizeof(list), CACHE_BAN_LIST);
+		pump({game});
+		bool listed = false;
+		while (char * buffer = bb_clientReceive(game, &typeID))
+			if (typeID == CACHE_BAN)
+			{
+				const stCacheBan * b = (const stCacheBan *)buffer;
+				listed = listed || (std::string(b->Nick) == ban.Nick && std::string(b->MAC) == ban.MAC && std::string(b->IP) == ban.IP);
+			}
+		CHECK(listed || std::printf("  filter \"%s\"\n", filter) < 0);
 	}
 	bb_clientDisconnect(game);
 
