@@ -35,6 +35,9 @@ public:
 	// at sv_antiCheatWarn, a kick at sv_antiCheatKick) and a weapon or flood rule returns DROP. KICK: the player is
 	// gone, the handler returns.
 	Verdict violation(Player & player, Rule rule);
+	// 9.4: a message of a rate-limited type, named by its flood rule. Past the type's budget (a burst, refilled per
+	// second) it breaks the rule.
+	Verdict budget(Player & player, Rule flood);
 	// Every server frame: the score decays by 1 per 10 s and the tolerance windows restart every 3 s
 	void update(float delay);
 	float scoreOf(int slot) const { return cheatScore[slot]; }
@@ -46,6 +49,8 @@ private:
 	bool warned[MAX_PLAYER] = {};
 	float window = 0;
 	float time = 0;
+	static const int FLOODS = TELEPORT - FLOOD_CHAT;
+	float tokens[MAX_PLAYER][FLOODS] = {}; // message budgets left, FLOOD_CHAT first
 	// Movement rules: the last frame's position and time, the path walked in the step 8 window
 	struct Track
 	{

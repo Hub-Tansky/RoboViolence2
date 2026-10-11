@@ -12,6 +12,9 @@ namespace
 		"name flood", "skin flood", "pong flood", "team flood", "teleport", "path speed", "wall"};
 	// Breaks per 3 s window that don't score: lag bunches packets, and a pickup races shots in flight
 	const int tolerance[ServerValidator::RULE_COUNT] = {5, 2, 2, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1};
+	// Message budgets from FLOOD_CHAT on: burst, refill per second. The server pings once a second.
+	const float burst[] = {5, 3, 3, 3, 3, 3};
+	const float refill[] = {1, 0.2f, 0.1f, 0.1f, 2, 0.2f};
 }
 
 #include <cmath>
@@ -127,6 +130,18 @@ void ServerValidator::join(Player & player)
 	cheatScore[slot] = 0;
 	warned[slot] = false;
 	for (int & b : breaks[slot]) b = 0;
+	for (int i = 0; i < FLOODS; ++i) tokens[slot][i] = burst[i];
+}
+
+ServerValidator::Verdict ServerValidator::budget(Player & player, Rule flood)
+{
+	float & t = tokens[(int)player.playerID][flood - FLOOD_CHAT];
+	if (t >= 1)
+	{
+		t -= 1;
+		return ACCEPT;
+	}
+	return violation(player, flood);
 }
 
 ServerValidator::Verdict ServerValidator::violation(Player & player, Rule rule)
@@ -166,6 +181,7 @@ void ServerValidator::update(float delay)
 	}
 	for (int i = 0; i < MAX_PLAYER; ++i)
 	{
+		for (int f = 0; f < FLOODS; ++f) tokens[i][f] = fminf(burst[f], tokens[i][f] + refill[f] * delay);
 		cheatScore[i] = cheatScore[i] > delay / 10 ? cheatScore[i] - delay / 10 : 0;
 		if (cheatScore[i] < gameVar.sv_antiCheatWarn) warned[i] = false;
 	}

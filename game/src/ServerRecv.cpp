@@ -83,6 +83,8 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 	Player * sender = game->players[slot];
 	// Step 9: a broken anti-cheat rule. True: drop the message (sv_antiCheat 2, or the sender was kicked and is gone).
 	auto broke = [&](ServerValidator::Rule rule) { return validator.violation(*sender, rule) != ServerValidator::ACCEPT; };
+	// 9.4: a rate-limited message past its budget. True: drop it.
+	auto flood = [&](ServerValidator::Rule rule) { return validator.budget(*sender, rule) != ServerValidator::ACCEPT; };
 	char * buffer = checked.data();
 	switch (typeID)
 	{
@@ -111,6 +113,7 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 		};
 	case NET_CLSV_VOTE:
 		{
+			if (flood(ServerValidator::FLOOD_VOTE)) return;
 			if (!gameVar.sv_enableVote) return; // <- LÀ
 			net_clsv_vote vote;
 			memcpy(&vote, buffer, sizeof(net_clsv_vote));
@@ -146,6 +149,7 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 		};
 	case NET_CLSV_SVCL_VOTE_REQUEST:
 		{
+			if (flood(ServerValidator::FLOOD_VOTE)) return;
 			net_clsv_svcl_vote_request voteRequest;
 			memcpy(&voteRequest, buffer, sizeof(net_clsv_svcl_vote_request));
 			voteRequest.vote[79] = '\0';
@@ -547,6 +551,7 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 		}
 	case NET_CLSV_SVCL_CHAT:
 		{
+			if (flood(ServerValidator::FLOOD_CHAT)) return;
 			net_clsv_svcl_chat chat;
 			memcpy(&chat, buffer, sizeof(net_clsv_svcl_chat));			
 			chat.message[129] = '\0';
@@ -610,6 +615,7 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 		}
 	case NET_CLSV_SVCL_TEAM_REQUEST:
 		{
+			if (flood(ServerValidator::FLOOD_TEAM)) return;
 			net_clsv_svcl_team_request teamRequest;
 			memcpy(&teamRequest, buffer, sizeof(net_clsv_svcl_team_request));
 			if (teamRequest.teamRequested < PLAYER_TEAM_SPECTATOR || teamRequest.teamRequested > PLAYER_TEAM_AUTO_ASSIGN)
@@ -642,6 +648,7 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 		}
 	case NET_CLSV_PONG:
 		{
+			if (flood(ServerValidator::FLOOD_PONG)) return;
 			net_clsv_pong pong;
 			memcpy(&pong, buffer, sizeof(net_clsv_pong));
 			const int pid = (unsigned char)pong.playerID;
@@ -847,6 +854,7 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 		}
 	case NET_CLSV_SVCL_PLAYER_CHANGE_NAME:
 		{
+			if (flood(ServerValidator::FLOOD_NAME)) return;
 			net_clsv_svcl_player_change_name playerChangeName;
 			memcpy(&playerChangeName, buffer, sizeof(net_clsv_svcl_player_change_name));
 			if (game->players[playerChangeName.playerID])
@@ -1122,6 +1130,7 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 		}
 	case NET_CLSV_SVCL_PLAYER_UPDATE_SKIN:
 		{
+			if (flood(ServerValidator::FLOOD_SKIN)) return;
 			net_clsv_svcl_player_update_skin updateSkin;
 			memcpy(&updateSkin, buffer, sizeof(net_clsv_svcl_player_update_skin));
 			updateSkin.skin[6] = '\0';

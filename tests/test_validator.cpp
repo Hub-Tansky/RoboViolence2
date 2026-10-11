@@ -431,6 +431,70 @@ static void movementRules()
 	leave(c);
 }
 
+// `count` zeroed messages of a type in one server frame
+static void burstOf(UINT4 c, int typeID, int size, int count)
+{
+	std::vector<char> zero(size, 0);
+	for (int i = 0; i < count; ++i) harness::queueMessage(c, typeID, zero.data(), size);
+	harness::tick();
+}
+
+static int sentOfType(int typeID)
+{
+	int n = 0;
+	for (const harness::SentPacket & p : harness::sent()) n += p.typeID == typeID;
+	return n;
+}
+
+// 9.4 rate limits: a burst past each type's budget scores; chat at a sane rate does not; level 2 drops the excess
+static void rateLimits()
+{
+	struct { int typeID, size, burst; } types[] = {
+		{NET_CLSV_SVCL_CHAT, (int)sizeof(net_clsv_svcl_chat), 5},
+		{NET_CLSV_VOTE, (int)sizeof(net_clsv_vote), 3},
+		{NET_CLSV_SVCL_VOTE_REQUEST, (int)sizeof(net_clsv_svcl_vote_request), 3},
+		{NET_CLSV_SVCL_PLAYER_CHANGE_NAME, (int)sizeof(net_clsv_svcl_player_change_name), 3},
+		{NET_CLSV_SVCL_PLAYER_UPDATE_SKIN, (int)sizeof(net_clsv_svcl_player_update_skin), 3},
+		{NET_CLSV_PONG, (int)sizeof(net_clsv_pong), 3},
+		{NET_CLSV_SVCL_TEAM_REQUEST, (int)sizeof(net_clsv_svcl_team_request), 3},
+	};
+	for (const auto & t : types)
+	{
+		UINT4 c = harness::spawned(WEAPON_SMG);
+		live(c, 3); // budgets refilled
+		burstOf(c, t.typeID, t.size, t.burst - 1); // within the budget (live() used a pong)
+		CHECK(score(c) == 0);
+		burstOf(c, t.typeID, t.size, 3);
+		if (score(c) <= 0.5f) std::printf("FAIL rate limit for message %i\n", t.typeID), ++harness::failures();
+		leave(c);
+	}
+
+	UINT4 c = harness::spawned(WEAPON_SMG);
+	for (int i = 0; i < 10; ++i)
+	{
+		burstOf(c, NET_CLSV_SVCL_CHAT, sizeof(net_clsv_svcl_chat), 1);
+		live(c, 1); // a line a second
+	}
+	CHECK(score(c) == 0);
+	leave(c);
+
+	int relayed[3] = {};
+	for (int level = 1; level <= 2; ++level)
+	{
+		console->sendCommand(CString("set sv_antiCheat %i", level));
+		c = harness::spawned(WEAPON_SMG);
+		harness::sent().clear();
+		net_clsv_svcl_chat chat = {};
+		chat.teamID = -2; // everyone
+		for (int i = 0; i < 8; ++i) harness::queueMessage(c, NET_CLSV_SVCL_CHAT, &chat, sizeof(chat));
+		harness::tick();
+		relayed[level] = sentOfType(NET_CLSV_SVCL_CHAT);
+		leave(c);
+	}
+	console->sendCommand("set sv_antiCheat 1");
+	CHECK(relayed[1] == 8 && relayed[2] == 5);
+}
+
 int main(int, char ** argv)
 {
 	if (!harness::start(argv[0])) return 1;
@@ -444,6 +508,7 @@ int main(int, char ** argv)
 	antiCheatLevels();
 	weaponRules();
 	movementRules();
+	rateLimits();
 	harness::stop();
 	if (harness::failures() == 0) std::printf("ok: validator\n");
 	return harness::failures() ? 1 : 0;
