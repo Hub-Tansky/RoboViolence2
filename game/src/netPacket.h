@@ -70,7 +70,7 @@ struct net_clsv_player_shoot
 struct net_clsv_gameversion_accepted
 {
 	int8_t playerID;		// Le ID du joueur
-	char password[16];	// Password
+	uint8_t proof[32];	// HMAC of sv_password over the GAMEVERSION nonce (Credentials.h); ignored without a password
 };
 
 // On demande au server de pickuper un item par terre
@@ -290,6 +290,7 @@ struct net_svcl_play_sound
 struct net_svcl_gameversion
 {
 	uint32_t gameVersion;
+	uint8_t nonce[16]; // this connection's challenge for the join and admin passwords (step 10)
 };
 
 // Pour synchroniser le temps des horloges du jeu
@@ -579,7 +580,7 @@ struct net_svcl_broadcast_game_info
 static_assert(sizeof(net_clsv_pong) == 1, "net_clsv_pong wire size");
 static_assert(sizeof(net_clsv_spawn_request) == 19, "net_clsv_spawn_request wire size");
 static_assert(sizeof(net_clsv_player_shoot) == 15, "net_clsv_player_shoot wire size");
-static_assert(sizeof(net_clsv_gameversion_accepted) == 17, "net_clsv_gameversion_accepted wire size");
+static_assert(sizeof(net_clsv_gameversion_accepted) == 33, "net_clsv_gameversion_accepted wire size");
 static_assert(sizeof(net_clsv_pickup_request) == 1, "net_clsv_pickup_request wire size");
 static_assert(sizeof(net_clsv_admin_request) == 66, "net_clsv_admin_request wire size");
 static_assert(sizeof(net_clsv_vote) == 2, "net_clsv_vote wire size");
@@ -598,7 +599,7 @@ static_assert(sizeof(net_svcl_projectile_coord_frame) == 19, "net_svcl_projectil
 static_assert(sizeof(net_svcl_explosion) == 29, "net_svcl_explosion wire size");
 static_assert(sizeof(net_svcl_player_hit) == 10, "net_svcl_player_hit wire size");
 static_assert(sizeof(net_svcl_play_sound) == 6, "net_svcl_play_sound wire size");
-static_assert(sizeof(net_svcl_gameversion) == 4, "net_svcl_gameversion wire size");
+static_assert(sizeof(net_svcl_gameversion) == 20, "net_svcl_gameversion wire size");
 static_assert(sizeof(net_svcl_synchronize_timer) == 12, "net_svcl_synchronize_timer wire size");
 static_assert(sizeof(net_svcl_change_flag_state) == 3, "net_svcl_change_flag_state wire size");
 static_assert(sizeof(net_svcl_drop_flag) == 13, "net_svcl_drop_flag wire size");

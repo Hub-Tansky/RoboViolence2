@@ -398,6 +398,15 @@ void Server::updateNet(float delay, bool send)
 		{
 			strcpy(game->players[playerID]->playerIP, IPDuGars);
 			validator.join(*game->players[playerID]);
+
+			// The game version first, with a fresh password challenge
+			net_svcl_gameversion gameVersion;
+			gameVersion.gameVersion = GAME_VERSION_SV;
+			credentials::nonce(joinNonce[playerID]);
+			memcpy(gameVersion.nonce, joinNonce[playerID], sizeof(gameVersion.nonce));
+			bb_serverSend((char*)&gameVersion, sizeof(net_svcl_gameversion), NET_SVCL_GAMEVERSION, clientID);
+			if (gameVar.c_netlog)
+				console->add(CString("server> [net] slot %i for babonetID=%i: sent NEWPLAYER (all) + GAMEVERSION %i", playerID, (int)clientID, GAME_VERSION_SV), true);
 		}
 		/*PlayerStats* ps = getStatsFromCache(game->players[playerID]->userID);
 		if (ps != 0)

@@ -56,16 +56,15 @@ void Client::sendJoinHandshake()
 
 	bb_clientSend(uniqueClientID, (char*)&playerInfo, sizeof(net_clsv_svcl_player_info), NET_CLSV_SVCL_PLAYER_INFO);
 
+	sendVersionAccepted();
+}
+
+void Client::sendVersionAccepted()
+{
 	net_clsv_gameversion_accepted gameVersionAccepted;
 	gameVersionAccepted.playerID = game->thisPlayer->playerID;
-	if (scene->server) //--- We are also server, retreive password
-	{
-		strcpy(gameVersionAccepted.password, gameVar.sv_password.s);
-	}
-	else
-	{
-		strcpy(gameVersionAccepted.password, m_password.s);
-	}
+	//--- We are also server, retreive password
+	credentials::prove(scene->server ? gameVar.sv_password.s : m_password.s, "join", serverNonce, gameVersionAccepted.proof);
 	bb_clientSend(uniqueClientID, (char*)&gameVersionAccepted, sizeof(net_clsv_gameversion_accepted), NET_CLSV_GAMEVERSION_ACCEPTED);
 }
 
@@ -148,10 +147,7 @@ void Client::recvPacket(char * wire, int size, int typeID)
 					}
 					
 					// Re-query server in case state has changed
-					net_clsv_gameversion_accepted gameVersionAccepted;
-					gameVersionAccepted.playerID = game->thisPlayer->playerID;
-					strcpy(gameVersionAccepted.password, m_password.s);
-					bb_clientSend(uniqueClientID, (char*)&gameVersionAccepted, sizeof(net_clsv_gameversion_accepted), NET_CLSV_GAMEVERSION_ACCEPTED);
+					sendVersionAccepted();
 
 				}
 				else
@@ -292,6 +288,7 @@ void Client::recvPacket(char * wire, int size, int typeID)
 		{
 			net_svcl_gameversion gameVersion;
 			memcpy(&gameVersion, buffer, sizeof(net_svcl_gameversion));
+			memcpy(serverNonce, gameVersion.nonce, sizeof(serverNonce));
 			if (gameVersion.gameVersion == GAME_VERSION_CL && game->thisPlayer)
 			{
 				pendingVersionAccept = false;

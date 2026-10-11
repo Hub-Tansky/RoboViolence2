@@ -292,11 +292,12 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 		{
 			net_clsv_gameversion_accepted gameVersionAccepted;
 			memcpy(&gameVersionAccepted, buffer, sizeof(net_clsv_gameversion_accepted));
-			gameVersionAccepted.password[15] = '\0';
 
 			if (game->players[gameVersionAccepted.playerID])
 			{
-				if(gameVar.sv_password != "" && CString("%s", gameVersionAccepted.password) != gameVar.sv_password)
+				// Step 10: the client proves it knows sv_password with an HMAC over this connection's challenge
+				if (gameVar.sv_password != "" &&
+					!credentials::check(gameVar.sv_password.s, "join", joinNonce[slot], gameVersionAccepted.proof))
 				{
 					if (gameVar.c_netlog)
 						console->add(CString("server> [net] join password mismatch for slot %i, disconnecting", (int)gameVersionAccepted.playerID), true);

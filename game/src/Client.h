@@ -19,11 +19,12 @@
 #ifndef CLIENT_H
 #define CLIENT_H
 
-#define GAME_VERSION_CL 22000
+#define GAME_VERSION_CL 22100
 
 #define MIN_TIME_BETWEEN_QMSG 0.9f
 
 
+#include "Credentials.h"
 #include "Game.h"
 #include "ControlListener.h"
 #include "Button.h"
@@ -85,6 +86,9 @@ public:
 
 	// NET_SVCL_GAMEVERSION arrived before our NET_SVCL_NEWPLAYER slot; answer once the slot exists.
 	bool pendingVersionAccept;
+
+	// The server's password challenge from NET_SVCL_GAMEVERSION (step 10)
+	uint8_t serverNonce[credentials::NONCE_SIZE] = {};
 
 	// Si on montre le menu
 	bool showMenu;
@@ -177,6 +181,8 @@ public:
 
 	// Sends PLAYER_INFO + GAMEVERSION_ACCEPTED (needs game->thisPlayer)
 	void sendJoinHandshake();
+	// GAMEVERSION_ACCEPTED: the join password's proof over serverNonce
+	void sendVersionAccepted();
 
 	void MouseEnter(CControl * control);
 };
