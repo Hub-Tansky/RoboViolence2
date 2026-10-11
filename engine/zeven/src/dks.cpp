@@ -153,6 +153,15 @@ void			dksShutDown()
 		delete g_voices[i];
 	}
 	g_voices.clear();
+	// Free the sounds while the engine still exists: global menus delete theirs during static destruction, after this
+	// (dksDeleteSound then finds nothing to free)
+	for (size_t i = 0; i < g_sounds.size(); ++i)
+	{
+		if (g_sounds[i]->loaded)
+			ma_sound_uninit(&g_sounds[i]->master);
+		delete g_sounds[i];
+	}
+	g_sounds.clear();
 	ma_sound_group_uninit(&g_sfxGroup);
 	ma_engine_uninit(&g_engine);
 	g_ready = false;
