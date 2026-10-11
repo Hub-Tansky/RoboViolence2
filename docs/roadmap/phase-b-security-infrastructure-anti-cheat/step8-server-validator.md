@@ -1,6 +1,6 @@
 # Step 8: ServerValidator (refactor, no behaviour change)
 
-**Status:** TODO
+**Status:** IN PROGRESS
 
 **Depends on:** [Step 4](step4-packet-hygiene.md). **Next:** [step9-anti-cheat-checks.md](step9-anti-cheat-checks.md). **Index:** [README.md](README.md)
 
@@ -42,6 +42,13 @@
 ### 8.4 Configuration
 
 - Thresholds as `sv_*` variables registered in `game/src/GameVar.cpp`, with defaults equal to today's.
+
+## Notes
+
+- Tests: `validator` (`tests/test_validator.cpp`). Before the refactor they pass, and fail with the speed threshold at 4 or the weapon check off; after it they pass unchanged. `speedHackKickVar` fails with the threshold hard-coded.
+- Actions: the validator returns accept or kick; the handlers keep today's two kick paths (weapon: `sayall` + `Scene::kick`; speed: silent disconnect). Log and warn come with step 9's score actions; temp-ban → PNS-40.
+- The score is per slot, reset when a player takes the slot and while dead (as `speedHackCount` was).
+- `docs/analysis/02_DATA_STRUCTURES.md` still lists `speedHackCount`: it describes the upstream headers.
 
 ## Critical files
 
