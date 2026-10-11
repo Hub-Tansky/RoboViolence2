@@ -1343,8 +1343,9 @@ void Server::autoBalance()
 	}
 
 	// R8: move half the difference, a different player each time (one player moved again and again before), and
-	// broadcast the team the player actually got. carriedFlag: the enemy flag this team can be carrying.
-	auto balance = [this](std::vector<Player*> & from, int carriedFlag, char toTeam, int nbToSwitch)
+	// broadcast the team the player actually got (toTeam, or spectator if not approved). The carried flag's index
+	// equals toTeam.
+	auto balance = [this](std::vector<Player*> & from, int toTeam, int nbToSwitch)
 	{
 		while (nbToSwitch > 0 && !from.empty())
 		{
@@ -1352,32 +1353,28 @@ void Server::autoBalance()
 			int switchID = -1;
 			for (int i = (int)from.size() - 1; i >= 0; i--)
 			{
-				if (game->map->flagState[carriedFlag] == from[i]->playerID) continue; // never the flag carrier
+				if (game->map->flagState[toTeam] == from[i]->playerID) continue; // never the flag carrier
 				if (switchID == -1 || from[switchID]->timePlayedCurGame > from[i]->timePlayedCurGame)
 					switchID = i;
 			}
 			if (switchID == -1) return;
 			Player * player = from[switchID];
 			from.erase(from.begin() + switchID);
-			char oldTeam = player->teamID;
 			player->teamID = game->assignPlayerTeam(player->playerID, toTeam);
-			if (player->teamID != oldTeam)
-			{
-				//--- Switch him team: on l'envoit a tout le monde
-				net_clsv_svcl_team_request teamRequest;
-				teamRequest.playerID = player->playerID;
-				teamRequest.teamRequested = player->teamID;
-				bb_serverSend((char*)&teamRequest, sizeof(net_clsv_svcl_team_request), NET_CLSV_SVCL_TEAM_REQUEST, 0);
-			}
+			//--- Switch him team: on l'envoit a tout le monde
+			net_clsv_svcl_team_request teamRequest;
+			teamRequest.playerID = player->playerID;
+			teamRequest.teamRequested = player->teamID;
+			bb_serverSend((char*)&teamRequest, sizeof(net_clsv_svcl_team_request), NET_CLSV_SVCL_TEAM_REQUEST, 0);
 			nbToSwitch--;
 		}
 	};
 
 	//--- Check if they are uneven
 	if ((int)reds.size() < (int)blues.size() - 1)
-		balance(blues, 1, PLAYER_TEAM_RED, ((int)blues.size() - (int)reds.size()) / 2);
+		balance(blues, PLAYER_TEAM_RED, ((int)blues.size() - (int)reds.size()) / 2);
 	else if ((int)blues.size() < (int)reds.size() - 1)
-		balance(reds, 0, PLAYER_TEAM_BLUE, ((int)reds.size() - (int)blues.size()) / 2);
+		balance(reds, PLAYER_TEAM_BLUE, ((int)reds.size() - (int)blues.size()) / 2);
 }
 
 

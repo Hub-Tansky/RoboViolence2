@@ -2,6 +2,7 @@
 // reassembled in order. A loopback server and client in one process.
 #include "baboNet.h"
 
+#include <algorithm>
 #include <chrono>
 #include <cstdio>
 #include <thread>

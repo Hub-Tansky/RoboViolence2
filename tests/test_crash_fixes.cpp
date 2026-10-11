@@ -194,7 +194,7 @@ static void r8()
 	CHECK(moves == 2);
 }
 
-// R12: a dropped flag is returned (and taken) within 0.25 for both teams; the blue one used 0.5
+// R12: a dropped flag is returned within 0.25 for both teams; the blue one used 0.5
 static void r12()
 {
 	Game * game = scene->server->game;
