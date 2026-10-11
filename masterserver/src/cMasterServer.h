@@ -15,27 +15,6 @@
 #include "sqlite3.h"
 
 
-	//Macros for field indexing 
-	
-	#define BV2_SERVERID		CurrentRow*nColumn+12
-	#define BV2_VERSION			CurrentRow*nColumn+13
-	#define BV2_ID				CurrentRow*nColumn+14
-	#define BV2_FLAGS			CurrentRow*nColumn+15
-	#define BV2_GAMETYPE		CurrentRow*nColumn+16
-	#define BV2_IP				CurrentRow*nColumn+17
-	#define BV2_MAP				CurrentRow*nColumn+18
-	#define BV2_MAXPLAYERS		CurrentRow*nColumn+19
-	#define BV2_NBPLAYERS		CurrentRow*nColumn+20
-	#define BV2_PASSWORD		CurrentRow*nColumn+21
-	#define BV2_PORT			CurrentRow*nColumn+22
-	#define BV2_SERVERNAME		CurrentRow*nColumn+23
-
-	#define BV2_BAN_DATE		CurrentRow*nColumn+6
-	#define BV2_BAN_DURATION	CurrentRow*nColumn+7
-	#define BV2_BAN_ID			CurrentRow*nColumn+8
-	#define BV2_BAN_IP			CurrentRow*nColumn+9
-	#define BV2_BAN_MAC			CurrentRow*nColumn+10
-	#define BV2_BAN_NICK		CurrentRow*nColumn+11
 
 
 
