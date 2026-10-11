@@ -23,7 +23,7 @@
 //
 // Constructeur
 //
-MemIO::MemIO(unsigned int size): m_pos(0), m_size(size)
+MemIO::MemIO(unsigned int size): m_pos(0), m_size(size), m_end(0)
 {
 	m_data = new char[m_size];
 }
@@ -48,12 +48,12 @@ CString MemIO::getLine() { return ""; }
 
 
 
-// Copies the next n bytes; past the end of the buffer (a short or hostile map download) the rest reads as zero (R5)
+// Copies the next n bytes; past the end of the last write (a short or hostile map download) they read as zero (R5)
 void MemIO::read(void * dst, size_t n)
 {
-	size_t left = m_pos < m_size ? m_size - m_pos : 0;
+	size_t left = m_pos < m_end ? m_end - m_pos : 0;
 	size_t got = n < left ? n : left;
-	memcpy(dst, m_data + m_pos, got);
+	if (got) memcpy(dst, m_data + m_pos, got);
 	memset(static_cast<char *>(dst) + got, 0, n - got);
 	m_pos += (unsigned int)n;
 }
@@ -240,9 +240,10 @@ void MemIO::put(char data) {}
 
 void MemIO::put(char * data, int size)
 {
-	// Expand by 50% if limit reached
+	// Expand by 50% if limit reached (at least to fit this write)
 	if(m_pos + size > m_size) {
 		unsigned int newsize = m_size+m_size/2;
+		if (newsize < m_pos + size) newsize = m_pos + size;
 		char* tmp = new char[newsize];
 		memcpy(tmp, m_data, m_size);
 		delete[] m_data;
@@ -252,6 +253,7 @@ void MemIO::put(char * data, int size)
 	}
 	memcpy(m_data+m_pos,data,size);
 	m_pos += size;
+	m_end = m_pos; // writes are sequential: the last one ends the data
 }
 
 void MemIO::put(unsigned char data) {}

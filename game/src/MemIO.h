@@ -31,9 +31,10 @@ private:
 	// Buffer
 	char*			m_data;
 	unsigned int	m_pos,
-					m_size;
+					m_size,	// capacity
+					m_end;	// end of the last write: reads stop here
 
-	// Reads n bytes at m_pos, zero past the end of the buffer
+	// Reads n bytes at m_pos; past the end of the last write (a short or hostile map download) they read as zero
 	void read(void * dst, size_t n);
 
 
