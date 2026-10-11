@@ -1,6 +1,6 @@
 # Step 6: SQL prepared statements
 
-**Status:** IN PROGRESS
+**Status:** DONE (2026-10-11)
 
 **Depends on:** [Step 3](step3-test-harness.md). **Next:** [step7-medium-low-defects.md](step7-medium-low-defects.md). **Index:** [README.md](README.md)
 
@@ -42,6 +42,8 @@
 - The master NUL-terminates the text fields of the ban messages (`CACHE_BAN_LIST`, `CACHE_BAN`, `CACHE_BANNED`) before binding them; the rest of the master's packet checks is not in this step.
 - Commented-out SQL (`RegisterPlayer`, `RegisterServer`) was deleted rather than converted.
 - The ban messages are authorised by a password compared in the source (`cNetManager.cpp`); that is Q-S5 (step 10).
+- The ban list's filter is `Nick LIKE '%' || ? || '%'`: an empty filter no longer lists rows whose `Nick` is NULL (only hand-inserted rows can have one; `AddBan` always sets it).
+- `SqlStatement` logs a failed prepare (schema drift) to stderr; a ctest keeps the two copies identical.
 - `masterserver/README.md` still describes `sprintf` SQL (outside this step's paths) → PNS-36.
 
 ## Critical files
