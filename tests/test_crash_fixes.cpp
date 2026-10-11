@@ -210,6 +210,15 @@ static void r12()
 	CHECK(game->map->flagState[0] == -2); // returned
 }
 
+// R15: a steady ping of 10 averages 10 once the 60-sample window is full (it read 9: 590 / 60)
+static void r15()
+{
+	Player * p = scene->server->game->players[harness::slotOf(harness::join())];
+	p->ping = 10;
+	for (int i = 0; i < 2 * PING_LOG_SIZE; ++i) p->updatePing(p->pingLogInterval + 0.01f);
+	CHECK(p->avgPing == 10);
+}
+
 int main(int, char ** argv)
 {
 	if (!harness::start(argv[0])) return 1;
@@ -222,6 +231,7 @@ int main(int, char ** argv)
 	r13();
 	r8();
 	r12();
+	r15();
 	r18(bv2::userFile("").c_str());
 	harness::stop();
 	if (harness::failures() == 0) std::printf("ok: crash fixes\n");
