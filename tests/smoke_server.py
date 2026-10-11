@@ -2,6 +2,7 @@
 """Start bv2dedicated headless on the placeholder content, run a launch script, quit.
 
 Usage: smoke_server.py <bv2dedicated> <scratch pref dir> [--install-under <dir>]
+The typed `sayall` carries printf specifiers: console input is data, not a format (Phase B step 5).
 Fails if the server crashes, hangs, exits non-zero, doesn't create its server (the "Server Created on port" line
 comes after main/, the launch script and the map loaded) or doesn't save bv2.cfg in the pref dir.
 
@@ -29,7 +30,7 @@ if len(sys.argv) == 5 and sys.argv[3] == "--install-under":
     assert not os.path.exists(os.path.join(base, "main")) and not os.path.exists(os.path.join(base, "share"))
 os.makedirs(pref, exist_ok=True)
 try:
-    r = subprocess.run([exe], input=b"execute CTF\nquit\n", env=env, cwd=cwd,
+    r = subprocess.run([exe], input=b"execute CTF\nsayall smoke %s%n\nquit\n", env=env, cwd=cwd,
                        stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=30)
 except subprocess.TimeoutExpired:
     print("FAIL: server did not quit within 30 s")

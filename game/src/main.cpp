@@ -389,7 +389,7 @@ int main(int argc, const char* argv[])
 
 		mainLoopConsole.lock();
 		if(std::cin.gcount())
-			console->sendCommand(input);//CString("Execute CTF"));
+			console->sendCommand(CString("%s", input)); // typed text is data, not a format
 		mainLoopConsole.unlock();
 
 
