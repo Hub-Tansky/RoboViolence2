@@ -1,4 +1,5 @@
 #include "cNetManager.h"
+#include "SqlStatement.h"
 
 
 cNetManager::cNetManager()
@@ -206,6 +207,7 @@ void cNetManager::ReceiveServerPacket(char *data,int typeID,UINT4 fromID)
 		{
 			stCacheList cl;
 			memcpy(&cl,data,sizeof(stCacheList));
+			cl.Filter[sizeof(cl.Filter) - 1] = '\0'; // wire text becomes SQL parameters: terminate it
 
 			Server->SendBanList( fromID , cl.Filter );
 
@@ -216,6 +218,7 @@ void cNetManager::ReceiveServerPacket(char *data,int typeID,UINT4 fromID)
 		{
 			stCacheBan cb;
 			memcpy(&cb,data,sizeof(stCacheBan));
+			cb.Nick[sizeof(cb.Nick) - 1] = cb.IP[sizeof(cb.IP) - 1] = cb.MAC[sizeof(cb.MAC) - 1] = cb.Pass[sizeof(cb.Pass) - 1] = '\0';
 
 			//check validity of the password
 			if( strcmp(cb.Pass,"roxbabo"))
@@ -246,6 +249,7 @@ void cNetManager::ReceiveServerPacket(char *data,int typeID,UINT4 fromID)
 		{
 			stCacheBanned cb;
 			memcpy(&cb,data,sizeof(stCacheBanned));
+			cb.IP[sizeof(cb.IP) - 1] = cb.MAC[sizeof(cb.MAC) - 1] = '\0';
 
 			stCacheAnswer ca;
 			ca.Answer = Server->IsBanned( cb.IP , cb.MAC );
@@ -318,45 +322,16 @@ void cNetManager::ReceiveServerPacket(char *data,int typeID,UINT4 fromID)
 			survey.whatYouWouldLikeForBV3Other[79] = '\0';
 			survey.email[79] = '\0';
 
-			int i=0;
-			for( i=0; i<80; i++ )
-			{
-				if( survey.country[i] == '\'')
-				{
-					survey.country[i] = '`';
-				}
-				if( survey.specifiedGenre[i] == '\'')
-				{
-					survey.specifiedGenre[i] = '`';
-				}
-				if( survey.magazine[i] == '\'')
-				{
-					survey.magazine[i] = '`';
-				}
-				if( survey.howYouLearnAboutBabo[i] == '\'')
-				{
-					survey.howYouLearnAboutBabo[i] = '`';
-				}
-				if( survey.whatDoYouLikeOther[i] == '\'')
-				{
-					survey.whatDoYouLikeOther[i] = '`';
-				}
-				if( survey.whatYouWouldLikeForBV3Other[i] == '\'')
-				{
-					survey.whatYouWouldLikeForBV3Other[i] = '`';
-				}
-			}
-
-			char * SQL = new char[2048];
-
-			sprintf( SQL, "Insert Into SurveyEntries(gender,age,continent,country,gameGenre,specifiedGenre,hourPlayerGames,magazine,console,hourPlayingBV2,kindOfServer,howYouLearnAboutBabo,whoDoYouPlayWith,whatDoYouLike,whatDoYouLikeOther,whatYouWouldLikeForBV3,whatYouWouldLikeForBV3Other,adsAndFree,payNoAds,email) values (%i,%i,%i,'%s',%i,'%s',%i,'%s',%i,%i,%i,'%s',%i,%i,'%s',%i,'%s',%i,%i,'%s');",(int)survey.gender,(int)survey.age,(int)survey.continent,survey.country,(int)survey.gameGenre,survey.specifiedGenre,(int)survey.hourPlayerGames,survey.magazine,(int)survey.console,(int)survey.hourPlayingBV2,(int)survey.kindOfServer,survey.howYouLearnAboutBabo,(int)survey.whoDoYouPlayWith,(int)survey.whatDoYouLike,survey.whatDoYouLikeOther,(int)survey.whatYouWouldLikeForBV3,survey.whatYouWouldLikeForBV3Other,(int)survey.adsAndFree,(int)survey.payNoAds,survey.email);
-
+			// Text is bound: stored as sent (the old code swapped ' for `)
 			sqlite3 *DB=0;
 			sqlite3_open("survey.db",&DB);
-			sqlite3_exec(DB,SQL,0,0,0);
-
-			delete [] SQL;
-
+			SqlStatement(DB, "Insert Into SurveyEntries(gender,age,continent,country,gameGenre,specifiedGenre,hourPlayerGames,magazine,console,hourPlayingBV2,kindOfServer,howYouLearnAboutBabo,whoDoYouPlayWith,whatDoYouLike,whatDoYouLikeOther,whatYouWouldLikeForBV3,whatYouWouldLikeForBV3Other,adsAndFree,payNoAds,email) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);")
+				.bindInt(1, survey.gender).bindInt(2, survey.age).bindInt(3, survey.continent).bindText(4, survey.country)
+				.bindInt(5, survey.gameGenre).bindText(6, survey.specifiedGenre).bindInt(7, survey.hourPlayerGames).bindText(8, survey.magazine)
+				.bindInt(9, survey.console).bindInt(10, survey.hourPlayingBV2).bindInt(11, survey.kindOfServer).bindText(12, survey.howYouLearnAboutBabo)
+				.bindInt(13, survey.whoDoYouPlayWith).bindInt(14, survey.whatDoYouLike).bindText(15, survey.whatDoYouLikeOther)
+				.bindInt(16, survey.whatYouWouldLikeForBV3).bindText(17, survey.whatYouWouldLikeForBV3Other).bindInt(18, survey.adsAndFree)
+				.bindInt(19, survey.payNoAds).bindText(20, survey.email).run();
 			sqlite3_close(DB);
 
 			// send a reply back
@@ -367,12 +342,9 @@ void cNetManager::ReceiveServerPacket(char *data,int typeID,UINT4 fromID)
 		}
 		case SURVEY_NEVER:
 		{
-			char SQL[256];
-			sprintf( SQL, "Insert Into SurveyEntries(gender) values(-1);");
-
 			sqlite3 *DB=0;
 			sqlite3_open("survey.db",&DB);
-			sqlite3_exec(DB,SQL,0,0,0);
+			SqlStatement(DB, "Insert Into SurveyEntries(gender) values(-1);").run();
 
 			sqlite3_close(DB);
 
