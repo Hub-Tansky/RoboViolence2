@@ -6,6 +6,7 @@
 #include "GameVar.h"
 #include "Map.h"
 #include "Paths.h"
+#include "ePTexture.h"
 #include "Scene.h"
 #include "Server.h"
 
@@ -121,6 +122,29 @@ static void r5()
 	CHECK(!size.isValid);
 }
 
+// R18: a DKT texture whose dimensions ask for gigabytes is skipped, not allocated
+static void r18(const char * scratch)
+{
+	std::string path = std::string(scratch) + "/r18.dkt";
+	FILE * f = std::fopen(path.c_str(), "wb");
+	auto chunk = [f](uint16_t id) { uint16_t pad = 0; int32_t len = 0; std::fwrite(&id, 2, 1, f); std::fwrite(&pad, 2, 1, f); std::fwrite(&len, 4, 1, f); };
+	chunk(0x0000); // version
+	int16_t version = 1;
+	std::fwrite(&version, 2, 1, f);
+	chunk(0x1000); // map
+	chunk(0x1100); // map name
+	std::fwrite("basemap", 8, 1, f);
+	chunk(0x1200); // texture
+	chunk(0x1210); // dimension
+	int16_t dim[3] = {32767, 32767, 4};
+	std::fwrite(dim, 2, 3, f);
+	chunk(0x1230); // data
+	std::fclose(f);
+	ePTexture * texture = new ePTexture(); // not deleted: ~_typLayer calls GL, which the test has no context for
+	texture->loadIt((char *)path.c_str());
+	CHECK(texture->baseMap.textureID == 0);
+}
+
 int main(int, char ** argv)
 {
 	if (!harness::start(argv[0])) return 1;
@@ -128,6 +152,7 @@ int main(int, char ** argv)
 	r2();
 	r4();
 	r5();
+	r18(bv2::userFile("").c_str());
 	harness::stop();
 	if (failures == 0) std::printf("ok: crash fixes\n");
 	return failures ? 1 : 0;

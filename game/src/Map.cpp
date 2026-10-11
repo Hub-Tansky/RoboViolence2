@@ -1123,7 +1123,7 @@ void Map::regenTex()
 	{
 		texMapSize[1] = float(size[1]) / float(height);
 	}
-	unsigned char * textureData = new unsigned char [width*height*3];
+	unsigned char * textureData = new unsigned char [(size_t)width*height*3]; // R18: width, height <= 256 (saneMapSize)
 	memset(textureData, 0, width*height*3);
 	// On rempli le data dans la texture
 	for (j=0;j < height;++j)
@@ -1704,7 +1704,7 @@ bool GetMapData(CString name, unsigned int & texture, CVector2i & textureSize, C
 		{
 			textureSize[1] *= 2;
 		}
-		unsigned char * textureBytes = new unsigned char[textureSize[0] * textureSize[1] * 3];
+		unsigned char * textureBytes = new unsigned char[(size_t)textureSize[0] * textureSize[1] * 3]; // R18
 		memset(textureBytes, 0, textureSize[0] * textureSize[1] * 3);
 		for(int j = 0; j < size[1]; ++j)
 		{
