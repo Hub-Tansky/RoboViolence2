@@ -64,7 +64,7 @@ namespace corpus
 		case NET_CLSV_PLAYER_SHOOT: { net_clsv_player_shoot m = {}; m.p2[0] = 500; return bytes(m); }
 		case NET_CLSV_GAMEVERSION_ACCEPTED: { net_clsv_gameversion_accepted m = {}; return bytes(m); }
 		case NET_CLSV_PICKUP_REQUEST: { net_clsv_pickup_request m = {}; return bytes(m); }
-		case NET_CLSV_ADMIN_REQUEST: { net_clsv_admin_request m = {}; strcpy(m.login, "user"); strcpy(m.password, "pass"); return bytes(m); }
+		case NET_CLSV_ADMIN_REQUEST: { net_clsv_admin_request m = {}; memset(m.login, 1, sizeof(m.login)); return bytes(m); } // proofs (step 10)
 		case NET_CLSV_VOTE: { net_clsv_vote m = {}; m.value = true; return bytes(m); }
 		case NET_CLSV_MAP_LIST_REQUEST: { net_clsv_map_list_request m = {}; m.all = false; /* the server's map list */ return bytes(m); }
 		case NET_CLSV_SVCL_PLAYER_INFO: { net_clsv_svcl_player_info m = {}; strcpy(m.playerName, "Tester"); return bytes(m); }
@@ -100,7 +100,7 @@ namespace corpus
 		strcpy(chat.message, "%s%s%s%s%s%s%s%s%s%s"); // R21: chat text is a printf format
 		const char console[] = {'s', 't', 'a', 't'}; // R22: no '\0'; read as a format string
 		net_clsv_admin_request admin = {};
-		strcpy(admin.login, "%s%s%s%s%s%s%s%s%s%s"); // R23: login is a printf format
+		memcpy(admin.login, "%s%s%s%s%s%s%s%s%s%s", 20); // R23: the login was a printf format; now proof bytes
 		net_clsv_map_request map = {};
 		memset(map.mapName, 'A', sizeof(map.mapName)); // R24: mapName without '\0'
 		map.uniqueClientID = 0x41414141; // nor in the field after it

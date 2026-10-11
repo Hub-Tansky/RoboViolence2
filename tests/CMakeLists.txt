@@ -52,6 +52,12 @@ if(TARGET bv2server_lib)
   add_test(NAME crash_fixes COMMAND test_crash_fixes)
   set_tests_properties(crash_fixes PROPERTIES ENVIRONMENT "BV2_PREF_DIR=${BV2_TEST_SCRATCH}/crash-pref")
 
+  add_executable(test_admin_login test_admin_login.cpp)
+  target_link_libraries(test_admin_login PRIVATE bv2_server_harness)
+  bv2_target_defaults(test_admin_login)
+  add_test(NAME admin_login COMMAND test_admin_login)
+  set_tests_properties(admin_login PROPERTIES ENVIRONMENT "BV2_PREF_DIR=${BV2_TEST_SCRATCH}/admin-pref")
+
   add_executable(test_join_password test_join_password.cpp)
   target_link_libraries(test_join_password PRIVATE bv2_server_harness)
   bv2_target_defaults(test_join_password)

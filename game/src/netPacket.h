@@ -84,8 +84,8 @@ struct net_clsv_pickup_request
 #define NET_CLSV_ADMIN_REQUEST 6
 struct net_clsv_admin_request
 {
-	char login[33];		//md5
-	char password[33];	//md5
+	uint8_t login[32];		// HMAC of the user over the GAMEVERSION nonce, label "admin user" (Credentials.h)
+	uint8_t password[32];	// HMAC of the password, label "admin password"
 };
 
 // Vote
@@ -582,7 +582,7 @@ static_assert(sizeof(net_clsv_spawn_request) == 19, "net_clsv_spawn_request wire
 static_assert(sizeof(net_clsv_player_shoot) == 15, "net_clsv_player_shoot wire size");
 static_assert(sizeof(net_clsv_gameversion_accepted) == 33, "net_clsv_gameversion_accepted wire size");
 static_assert(sizeof(net_clsv_pickup_request) == 1, "net_clsv_pickup_request wire size");
-static_assert(sizeof(net_clsv_admin_request) == 66, "net_clsv_admin_request wire size");
+static_assert(sizeof(net_clsv_admin_request) == 64, "net_clsv_admin_request wire size");
 static_assert(sizeof(net_clsv_vote) == 2, "net_clsv_vote wire size");
 static_assert(sizeof(net_clsv_map_list_request) == 2, "net_clsv_map_list_request wire size");
 static_assert(sizeof(net_svcl_newplayer) == 5, "net_svcl_newplayer wire size");

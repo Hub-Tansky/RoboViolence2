@@ -30,7 +30,6 @@
 #include <string.h>
 extern Scene* scene;
 
-	#include "md5class.h"
 
 using std::min;
 
@@ -240,31 +239,13 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 		{
 			net_clsv_admin_request adminRequest;
 			memcpy(&adminRequest, buffer, sizeof(net_clsv_admin_request));
-			adminRequest.login[32] = '\0';
-			adminRequest.password[32] = '\0';
-			CString loginRecv("%s", adminRequest.login); // R23: data, not a format
-			CString pwdRecv("%s", adminRequest.password);
 
 			if (!gameVar.zsv_adminPass.isNull() &&
 				!gameVar.zsv_adminUser.isNull())
 			{
-				if (loginRecv.isNull() || pwdRecv.isNull())
-				{
-					sender->isAdmin = false;
-					break;
-				}
-				CMD5 login_(gameVar.zsv_adminUser.s);
-				CString login("%s", login_.getMD5Digest());
-
-				CMD5 pwd_(gameVar.zsv_adminPass.s);
-				CString pwd("%s", pwd_.getMD5Digest());
-
-				/*console->add(CString("\x9> L: %s", login.s));
-				console->add(CString("\x9> P: %s", loginRecv.s));
-				console->add(CString("\x9> L: %s", pwd.s));
-				console->add(CString("\x9> P: %s", pwdRecv.s));*/
-
-				if (loginRecv == login && pwdRecv == pwd)
+				// Step 10: proofs over this connection's challenge
+				if (credentials::check(gameVar.zsv_adminUser.s, "admin user", joinNonce[slot], adminRequest.login) &&
+					credentials::check(gameVar.zsv_adminPass.s, "admin password", joinNonce[slot], adminRequest.password))
 				{
 					//--- Admin accepted !!
 					bb_serverSend(0, 0, NET_SVCL_ADMIN_ACCEPTED, bbnetID);

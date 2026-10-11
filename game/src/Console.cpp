@@ -28,7 +28,6 @@
 #include <algorithm>
 #include <string>
 
-	#include "md5class.h"
 
 
 // Notre module principal
@@ -759,17 +758,10 @@ void Console::sendCommand(CString commandLine, bool isAdmin, unsigned long bbnet
 			CString pwd = tokenize.getFirstToken(' ');
 			if (login != "" && pwd != "")
 			{
+				// Step 10: proofs over the server's challenge, not the user and password themselves
 				net_clsv_admin_request adminRequest;
-				memset(&adminRequest, 0, sizeof(net_clsv_admin_request));
-				CMD5 login_(login.s);
-				memcpy(adminRequest.login, login_.getMD5Digest(), 32);
-
-				CMD5 pwd_(pwd.s);
-				memcpy(adminRequest.password, pwd_.getMD5Digest(), 32);
-
-				/*add(CString("\x9> L: %s", adminRequest.login));
-				add(CString("\x9> P: %s", adminRequest.password));*/
-
+				credentials::prove(login.s, "admin user", scene->client->serverNonce, adminRequest.login);
+				credentials::prove(pwd.s, "admin password", scene->client->serverNonce, adminRequest.password);
 				bb_clientSend(scene->client->uniqueClientID, (char*)(&adminRequest), sizeof(net_clsv_admin_request), NET_CLSV_ADMIN_REQUEST);
 			}
 			else
