@@ -194,6 +194,22 @@ static void r8()
 	CHECK(moves == 2);
 }
 
+// R12: a dropped flag is returned (and taken) within 0.25 for both teams; the blue one used 0.5
+static void r12()
+{
+	Game * game = scene->server->game;
+	UINT4 c = harness::spawned(WEAPON_SMG); // blue
+	Player * p = game->players[harness::slotOf(c)];
+	CHECK(game->gameType == GAME_TYPE_CTF && p->status == PLAYER_STATUS_ALIVE);
+	game->map->flagState[0] = -1; // the blue flag lies dropped 0.4 from a blue player
+	game->map->flagPos[0] = CVector3f(p->currentCF.position[0] + 0.4f, p->currentCF.position[1], 0);
+	scene->server->updateCTF(1 / 30.0f);
+	CHECK(game->map->flagState[0] == -1);
+	game->map->flagPos[0] = CVector3f(p->currentCF.position[0] + 0.2f, p->currentCF.position[1], 0);
+	scene->server->updateCTF(1 / 30.0f);
+	CHECK(game->map->flagState[0] == -2); // returned
+}
+
 int main(int, char ** argv)
 {
 	if (!harness::start(argv[0])) return 1;
@@ -205,6 +221,7 @@ int main(int, char ** argv)
 	r9();
 	r13();
 	r8();
+	r12();
 	r18(bv2::userFile("").c_str());
 	harness::stop();
 	if (harness::failures() == 0) std::printf("ok: crash fixes\n");
