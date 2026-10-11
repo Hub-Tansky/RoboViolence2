@@ -639,7 +639,8 @@ void Map::collisionClip(CoordFrame & CF, float radius)
 	int y = (int)CF.position[1];
 	
 	// Là c simple, on check les 8 cases autour, pis on clip (pour éviter de se faire pousser dans le mur
-	if (cells)
+	// R10: only from a cell whose four neighbours exist; the universe clamp below handles the border
+	if (cells && x >= 1 && x <= size[0]-2 && y >= 1 && y <= size[1]-2)
 	{
 		if (CF.position[0]+radius+COLLISION_EPSILON > (float)x+1 && !cells[(y)*size[0]+(x+1)].passable)
 		{
@@ -669,8 +670,8 @@ void Map::collisionClip(CoordFrame & CF, float radius)
 	if (y <= 0) CF.position[1] = 1 + radius + COLLISION_EPSILON;
 	if (y >= size[1]-1) CF.position[1] = size[1]-1 - radius - COLLISION_EPSILON;
 
-	// check if we are in a cell, move to the next allowed cells
-	if (!cells[y * size[0] + x].passable)
+	// check if we are in a cell, move to the next allowed cells (R10: same bounds as above)
+	if (cells && x >= 1 && x <= size[0]-2 && y >= 1 && y <= size[1]-2 && !cells[y * size[0] + x].passable)
 	{
 		bool possible[4] = {false,false,false,false};
 

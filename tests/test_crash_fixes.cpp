@@ -117,6 +117,20 @@ static void r18(const char * scratch)
 	CHECK(texture->baseMap.textureID == 0);
 }
 
+// R10: clipping a position at the map's edge doesn't read cells outside the map (ASan builds report it)
+static void r10()
+{
+	Map * map = scene->server->game->map;
+	for (float x : {0.1f, (float)map->size[0] - 0.1f})
+		for (float y : {0.1f, (float)map->size[1] - 0.1f})
+		{
+			CoordFrame cf;
+			cf.position.set(x, y, 0);
+			map->collisionClip(cf, .25f);
+			CHECK(cf.position[0] > 1 && cf.position[0] < map->size[0] - 1 && cf.position[1] > 1 && cf.position[1] < map->size[1] - 1);
+		}
+}
+
 int main(int, char ** argv)
 {
 	if (!harness::start(argv[0])) return 1;
@@ -124,6 +138,7 @@ int main(int, char ** argv)
 	r2();
 	r4();
 	r5();
+	r10();
 	r18(bv2::userFile("").c_str());
 	harness::stop();
 	if (harness::failures() == 0) std::printf("ok: crash fixes\n");
