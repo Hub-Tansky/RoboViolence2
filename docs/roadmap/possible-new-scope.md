@@ -326,3 +326,11 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Why it matters:** R28 can crash the Windows game and master when a player leaves; the master test is off on Windows until it is fixed. R29 leaks every DKT texture.
 - **Suggested home:** step 7 (R29 is in `engine/dko/src/ePTexture.h`); R28 needs a Windows debugging session (a crash dump from the owner's PC or a Windows CI run with a debugger).
 - **Status:** Proposed
+
+### PNS-39: Why did the dropped-flag radii differ?
+
+- **Found in:** Phase B step 7, R12 (2026-10-11).
+- **Extract:** owner: "0.25 but put it in possible new scope to check why there was a difference and maybe re-enable it". The blue dropped flag used 0.5 map units and the red one 0.25 (`game/src/ServerCTF.cpp`); step 7 set both to 0.25.
+- **Why it matters:** the difference may have been a deliberate balance for a map side, or a typo; players who knew the old behaviour may notice.
+- **Suggested home:** a gameplay review with the regulars (play-test both values); restoring a difference needs an ADR.
+- **Status:** Proposed

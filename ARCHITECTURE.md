@@ -70,7 +70,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `packaging/macos/Info.plist.in` | macOS bundle `Info.plist` template |
 | `packaging/windows/bv2.manifest` | Windows manifest for `bv2`, `bv2dedicated` and `bv2master`: PerMonitorV2 DPI, UTF-8 code page, Windows 10/11 |
 | `packaging/windows/bv2.rc.in` | Windows resource script template; CMake fills in the generated icon |
-| `tests/CMakeLists.txt` | ctest targets: netPacket, config, fileio, the two `SqlStatement.h` copies identical, crash fixes, missing music (client builds), dedicated-server smoke, in-process server harness (`bv2server_lib` + fake babonet), packet hygiene, corpus replay, crash-input tests for `crash-*.bin` under ASan (none at present), master server; on Windows also the non-ASCII install path smoke and the no-VC++-runtime-DLL check |
+| `tests/CMakeLists.txt` | ctest targets: netPacket, config, fileio, babonet large message, the two `SqlStatement.h` copies identical, crash fixes, missing music (client builds), dedicated-server smoke, in-process server harness (`bv2server_lib` + fake babonet), packet hygiene, corpus replay, crash-input tests for `crash-*.bin` under ASan (none at present), master server; on Windows also the non-ASCII install path smoke and the no-VC++-runtime-DLL check |
 | `tests/check_windows_deps.py` | Windows: fails if `bv2`, `bv2dedicated` or `bv2master` needs a Visual C++ runtime DLL |
 | `tests/corpus/clsv_admin_request/valid.bin` | Replay corpus: valid `clsv_admin_request` payload (`gen_corpus`) |
 | `tests/corpus/clsv_gameversion_accepted/valid.bin` | Replay corpus: valid `clsv_gameversion_accepted` payload (`gen_corpus`) |
@@ -103,8 +103,9 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/harness/server_harness.cpp` | In-process dedicated server for tests: start, connect, join, deliver, tick |
 | `tests/harness/server_harness.h` | Harness API |
 | `tests/smoke_server.py` | Starts `bv2dedicated` headless, runs the CTF script, types a `sayall` with printf specifiers, quits; checks exit code, server creation and `bv2.cfg`. `--install-under` runs it from a non-ASCII path (Windows UTF-8 code page) |
+| `tests/test_babonet.cpp` | R7: a 10000-byte message over a loopback babonet connection arrives over several reads and intact |
 | `tests/test_config.cpp` | dksvar config layering, transient values not saved, secrets masked |
-| `tests/test_crash_fixes.cpp` | Step 5: one check per fixed defect (KEY_QUESTIONS Part D) on the in-process server |
+| `tests/test_crash_fixes.cpp` | Steps 5 and 7: one check per fixed defect (KEY_QUESTIONS Part D) on the in-process server |
 | `tests/test_dks.cpp` | R20: `dksPlayMusic` on a missing file 200 times; a sound deleted after `dksShutDown` (teardown) (ASan) |
 | `tests/test_fileio.cpp` | `FileIO` byte widths for `.bvm` data and the widths the `.DKO` loader relies on; `bv2ReadBytes` zero-fills a short read; fixed-string length prefix round trip; unterminated `CString::loadFromFile` (overflows under ASan without its bound); `getString` keeps 255 characters (R16); `MemIO` reads past its end as zero; `getNextToken` on a single token (R30) |
 | `tests/test_packet_hygiene.cpp` | Step 4 checks: sender binding (Q-S1), index ranges with controls (Q-S2), map names (Q-S6), skin and sound relay (Q-S7), `SV_CHANGE` filter (Q-S4), the handshake gate, `checkPacket` per message type and size, the client's `checkServerMessage` on values the server sends |
@@ -282,6 +283,8 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step3.md` | Fresh-context review record for step 3 |
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step6-report.md` | Raw reviewer report for step 6 |
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step6.md` | Fresh-context review record for step 6 |
+| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step7-report.md` | Raw reviewer report for step 7 |
+| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step7.md` | Fresh-context review record for step 7 |
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step5-report.md` | Raw reviewer report for step 5 |
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step5.md` | Fresh-context review record for step 5 |
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step4-report.md` | Raw reviewer report for step 4 |

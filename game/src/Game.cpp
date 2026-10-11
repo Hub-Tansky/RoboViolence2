@@ -841,7 +841,7 @@ void Game::update(float delay)
 		projectile->projectileID = (short)i; // On l'update toujours
 		if (projectile->needToBeDeleted)
 		{
-			clientProjectiles.erase(projectiles.begin()+i);
+			clientProjectiles.erase(clientProjectiles.begin()+i); // R6: was projectiles' iterator
 			i--;
 			delete projectile;
 		}

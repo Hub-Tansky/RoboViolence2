@@ -3,6 +3,7 @@
 
 #include "CMaster.h"
 #include "Console.h"
+#include "Game.h"
 #include "GameVar.h"
 #include "Map.h"
 #include "Paths.h"
@@ -117,6 +118,111 @@ static void r18(const char * scratch)
 	CHECK(texture->baseMap.textureID == 0);
 }
 
+// R10: clipping a position at the map's edge doesn't read cells outside the map (ASan builds report it)
+static void r10()
+{
+	Map * map = scene->server->game->map;
+	for (float x : {0.1f, (float)map->size[0] - 0.1f})
+		for (float y : {0.1f, (float)map->size[1] - 0.1f})
+		{
+			CoordFrame cf;
+			cf.position.set(x, y, 0);
+			map->collisionClip(cf, .25f);
+			CHECK(cf.position[0] > 1 && cf.position[0] < map->size[0] - 1 && cf.position[1] > 1 && cf.position[1] < map->size[1] - 1);
+		}
+}
+
+// R9: choosing the next map doesn't reload the running map, and an empty rotation keeps the current map
+static void r9()
+{
+	Server * server = scene->server;
+	server->mapInfoList.clear(); // every map in mapList is new to the rotation
+	server->game->map->flagState[0] = 5; // state that a reload would reset to -2
+	CString next = server->queryNextMap();
+	CHECK(server->game->map->flagState[0] == 5);
+	CHECK(!next.isNull());
+	std::vector<CString> maps = server->mapList;
+	server->mapList.clear();
+	server->mapInfoList.clear();
+	CHECK(server->queryNextMap() == server->game->mapName);
+	server->mapList = maps;
+	server->game->map->flagState[0] = -2;
+}
+
+// R13: an SND spawn index equal to the number of spawn points is clamped, not used (ASan builds report it)
+static void r13()
+{
+	Game * game = scene->server->game;
+	UINT4 c = harness::spawned(WEAPON_SMG);
+	int slot = harness::slotOf(c);
+	int gameType = game->gameType;
+	std::vector<CVector3f> spawns = game->map->dm_spawns;
+	game->gameType = GAME_TYPE_SND;
+	game->map->dm_spawns.assign(10, CVector3f(5, 5, 0));
+	for (int i = 0; i < 60; ++i)
+	{
+		game->players[slot]->spawnSlot = 2; // 2*5 + rand(0, 5): index 10 is one past the end
+		game->spawnPlayer(slot);
+	}
+	CHECK(game->players[slot]->status == PLAYER_STATUS_ALIVE);
+	game->map->dm_spawns = spawns;
+	game->gameType = gameType;
+}
+
+// R8: auto-balance moves half the difference, a different player each time, and broadcasts the real team
+static void r8()
+{
+	Game * game = scene->server->game;
+	std::vector<int> slots;
+	for (int i = 0; i < 6; ++i) slots.push_back(harness::slotOf(harness::join()));
+	for (int i = 0; i < MAX_PLAYER; ++i)
+		if (game->players[i]) game->players[i]->teamID = PLAYER_TEAM_SPECTATOR;
+	for (size_t i = 0; i < slots.size(); ++i) game->players[slots[i]]->teamID = i == 0 ? PLAYER_TEAM_RED : PLAYER_TEAM_BLUE; // 1 red, 5 blue
+	harness::sent().clear();
+	scene->server->autoBalance();
+	int reds = 0, blues = 0;
+	for (int s : slots) (game->players[s]->teamID == PLAYER_TEAM_RED ? reds : blues)++;
+	CHECK(reds == 3 && blues == 3);
+	int moves = 0;
+	for (const harness::SentPacket & p : harness::sent())
+		if (p.typeID == NET_CLSV_SVCL_TEAM_REQUEST)
+		{
+			const net_clsv_svcl_team_request * t = (const net_clsv_svcl_team_request *)p.data.data();
+			CHECK(game->players[(int)t->playerID]->teamID == t->teamRequested);
+			++moves;
+		}
+	CHECK(moves == 2);
+}
+
+// R12: a dropped flag is returned within 0.25 for both teams; the blue one used 0.5
+static void r12()
+{
+	Game * game = scene->server->game;
+	UINT4 c = harness::spawned(WEAPON_SMG); // blue
+	Player * p = game->players[harness::slotOf(c)];
+	CHECK(game->gameType == GAME_TYPE_CTF && p->status == PLAYER_STATUS_ALIVE);
+	game->map->flagState[0] = -1; // the blue flag lies dropped 0.4 from a blue player
+	game->map->flagPos[0] = CVector3f(p->currentCF.position[0] + 0.4f, p->currentCF.position[1], 0);
+	scene->server->updateCTF(1 / 30.0f);
+	CHECK(game->map->flagState[0] == -1);
+	game->map->flagPos[0] = CVector3f(p->currentCF.position[0] + 0.2f, p->currentCF.position[1], 0);
+	scene->server->updateCTF(1 / 30.0f);
+	CHECK(game->map->flagState[0] == -2); // returned
+}
+
+// R15: a steady ping of 10 averages 10 once the 60-sample window is full (it read 9: 590 / 60)
+static void r15()
+{
+	Player * p = scene->server->game->players[harness::slotOf(harness::join())];
+	p->ping = 10;
+	for (int i = 0; i < 2 * PING_LOG_SIZE; ++i) p->updatePing(p->pingLogInterval + 0.01f);
+	CHECK(p->avgPing == 10);
+	p->reinit(); // every map change
+	p->ping = 10;
+	for (int i = 0; i < 2 * PING_LOG_SIZE; ++i) p->updatePing(p->pingLogInterval + 0.01f);
+	CHECK(p->avgPing == 10);
+}
+
 int main(int, char ** argv)
 {
 	if (!harness::start(argv[0])) return 1;
@@ -124,6 +230,12 @@ int main(int, char ** argv)
 	r2();
 	r4();
 	r5();
+	r10();
+	r9();
+	r13();
+	r8();
+	r12();
+	r15();
 	r18(bv2::userFile("").c_str());
 	harness::stop();
 	if (harness::failures() == 0) std::printf("ok: crash fixes\n");

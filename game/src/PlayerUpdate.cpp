@@ -33,12 +33,10 @@ void Player::updatePing(float delay)
 	{
 		if (pingLogID >= PING_LOG_SIZE)
 			pingLogID = 0;
+		// R15: the sum holds the whole window (it subtracted the next sample early and held 59 of 60)
+		pingSum -= pingLog[pingLogID];
 		pingLog[pingLogID] = ping;
 		pingSum += pingLog[pingLogID];
-		if (pingLogID + 1 < PING_LOG_SIZE)
-			pingSum -= pingLog[pingLogID+1];
-		else
-			pingSum -= pingLog[0];
 		avgPing = pingSum / PING_LOG_SIZE;
 		if(avgPing < 1)
 			avgPing = 1;

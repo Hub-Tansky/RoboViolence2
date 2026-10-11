@@ -57,58 +57,6 @@ CAStar::CAStar()
 
 
 //
-//--- Copy constructor 
-//
-CAStar::CAStar(const CAStar & in_aStar)
-{
-	m_maxPathSize = 4;
-	InitMembers();
-
-	//--- Call the copy operator
-	*this = in_aStar;
-}
-
-
-
-//
-//--- Copy operator
-//
-CAStar& CAStar::operator=(const CAStar & in_aStar)
-{
-	//--- Be sure it's not the same object.
-	if (this == &in_aStar) return *this;
-
-	//--- Start by cleaning ourself.
-	Clean();
-
-	//--- Copy our map data
-	if (m_mapArray)
-	{
-		m_sizeX = in_aStar.m_sizeX;
-		m_sizeY = in_aStar.m_sizeY;
-		m_maxPathSize = in_aStar.m_maxPathSize;
-		m_mapArray = new unsigned char [m_sizeX * m_sizeY];
-		memcpy(m_mapArray, in_aStar.m_mapArray, m_sizeX * m_sizeY);
-
-		//--- Copy the m_mapNodesRef
-		m_mapNodesRef = new CPathNode * [m_sizeX * m_sizeY];
-		memcpy(m_mapNodesRef, in_aStar.m_mapNodesRef, m_sizeX * m_sizeY);
-
-		//--- Copy the CPathNodes.
-		for (CPathNode *p = in_aStar.m_lstNodes[0]; p; p = p->next)
-		{
-			CPathNode *newNode = new CPathNode(*p);
-			ASTAR_PUSH_BACK(m_lstNodes, newNode);
-		}
-	}
-
-	//--- return a reference on us
-	return *this;
-}
-
-
-
-//
 //--- Destructor
 //
 CAStar::~CAStar()
@@ -191,9 +139,9 @@ int CAStar::Build(const unsigned char * in_mapArray,
 	if (!in_mapArray) return 0;
 	m_sizeX = in_sizeX;
 	m_sizeY = in_sizeY;
-	m_mapArray = new unsigned char [m_sizeX * m_sizeY];
-	memcpy(m_mapArray, in_mapArray, m_sizeX * m_sizeY);
-	m_mapNodesRef = new CPathNode *[m_sizeX * m_sizeY];
+	m_mapArray = new unsigned char [(size_t)m_sizeX * m_sizeY];
+	memcpy(m_mapArray, in_mapArray, (size_t)m_sizeX * m_sizeY);
+	m_mapNodesRef = new CPathNode *[(size_t)m_sizeX * m_sizeY];
 
 	//--- Alright, create the nodes recursively
 	int x,y;

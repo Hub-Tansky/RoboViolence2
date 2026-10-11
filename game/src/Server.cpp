@@ -296,25 +296,23 @@ CString Server::queryNextMap()
 	int lengthDif = mapList.size() - mapInfoList.size();
 	for(int i = (int)mapList.size() - lengthDif; i < (int)mapList.size(); i++)
 	{//because generating the map info requires creating the map and we dont want to do this midgame with the addmap command for fear of bugs, this is kept separately in map list
-		game->mapName = mapList[i];
-		game->createMap();//we just create and add any maps in maplist that arent also in the info list
+		// R9: measure a separate map; replacing the game's map reloaded the running one mid-game
+		Map map(mapList[i], game, 0);
 		int mapArea = 0;
-		for (int j = 1; j < game->map->size[0] - 1; j++)
-			for (int k = 1; k < game->map->size[1] - 1; k++)
-			{//get the total area
-				if(game->map->cells[k*game->map->size[0] + j].passable)
-				{
-					mapArea++;
+		if (map.isValid && map.cells)
+			for (int j = 1; j < map.size[0] - 1; j++)
+				for (int k = 1; k < map.size[1] - 1; k++)
+				{//get the total area
+					if(map.cells[k*map.size[0] + j].passable)
+					{
+						mapArea++;
+					}
 				}
-			}
-		mapInfo mInfo = {game->mapName, mapArea, 1000000000};
+		mapInfo mInfo = {mapList[i], mapArea, 1000000000};
 		mapInfoList.push_back(mInfo);
 	}
-	if (lengthDif > 0)
-	{
-		game->mapName = currentName;
-		game->createMap();//since we're done with the game's map and other functions might not be, we put it back the way we found it, who needs proper OOP when you've got manners anyways?
-	}
+	if (mapInfoList.empty()) // R9: no rotation: keep the current map
+		return currentName;
 	int indexOfMax = -1;
 	for (int i = 0; i < (int)mapInfoList.size(); ++i)
 	{
@@ -355,11 +353,6 @@ CString Server::queryNextMap()
 		mapInfoList[index].lastPlayed = 0;
 		return mapInfoList[index].mapName;
 	}
-	if (mapList.size() > 0)
-	{
-		return mapList[0];
-	} 
-	return "";
 }
 
 
@@ -1349,65 +1342,39 @@ void Server::autoBalance()
 		}
 	}
 
+	// R8: move half the difference, a different player each time (one player moved again and again before), and
+	// broadcast the team the player actually got (toTeam, or spectator if not approved). The carried flag's index
+	// equals toTeam.
+	auto balance = [this](std::vector<Player*> & from, int toTeam, int nbToSwitch)
+	{
+		while (nbToSwitch > 0 && !from.empty())
+		{
+			//--- Bon... comment on choisi les candidats, c'est simple, on switch les plus poche (le moins de temps joue)
+			int switchID = -1;
+			for (int i = (int)from.size() - 1; i >= 0; i--)
+			{
+				if (game->map->flagState[toTeam] == from[i]->playerID) continue; // never the flag carrier
+				if (switchID == -1 || from[switchID]->timePlayedCurGame > from[i]->timePlayedCurGame)
+					switchID = i;
+			}
+			if (switchID == -1) return;
+			Player * player = from[switchID];
+			from.erase(from.begin() + switchID);
+			player->teamID = game->assignPlayerTeam(player->playerID, toTeam);
+			//--- Switch him team: on l'envoit a tout le monde
+			net_clsv_svcl_team_request teamRequest;
+			teamRequest.playerID = player->playerID;
+			teamRequest.teamRequested = player->teamID;
+			bb_serverSend((char*)&teamRequest, sizeof(net_clsv_svcl_team_request), NET_CLSV_SVCL_TEAM_REQUEST, 0);
+			nbToSwitch--;
+		}
+	};
+
 	//--- Check if they are uneven
 	if ((int)reds.size() < (int)blues.size() - 1)
-	{
-		//--- On balance!
-		int nbToSwitch = (int)blues.size() - 1 - (int)reds.size();
-
-		//--- Bon... comment on choisi les candidats, c'est simple, 
-		//    on switch les 2 plus poche en bas de la liste ^^
-		while (nbToSwitch > 0)
-		{
-			int switchID = (int)blues.size() - 1;
-			if(game->map->flagState[1] == blues[switchID]->playerID)
-				switchID--;
-			for(int i = switchID - 1; i >= 0; i--)
-			{
-				if(blues[switchID]->timePlayedCurGame > blues[i]->timePlayedCurGame && game->map->flagState[1] != blues[i]->playerID)
-					switchID = i;
-			}
-			blues[switchID]->teamID = game->assignPlayerTeam(blues[switchID]->playerID, PLAYER_TEAM_RED);
-			//--- Switch him team
-			net_clsv_svcl_team_request teamRequest;
-			teamRequest.playerID = blues[switchID]->playerID;
-			teamRequest.teamRequested = PLAYER_TEAM_RED;
-			// On l'envoit �tout le monde, (si � chang�
-			bb_serverSend((char*)&teamRequest, sizeof(net_clsv_svcl_team_request), NET_CLSV_SVCL_TEAM_REQUEST, 0);
-			nbToSwitch--;
-		}
-	}
+		balance(blues, PLAYER_TEAM_RED, ((int)blues.size() - (int)reds.size()) / 2);
 	else if ((int)blues.size() < (int)reds.size() - 1)
-	{
-		//--- On balance
-		int nbToSwitch = (int)reds.size() - 1 - (int)blues.size();
-
-		//--- Bon... comment on choisi les candidats, c'est simple, 
-		//    on switch les 2 plus poche en bas de la liste ^^
-		while (nbToSwitch > 0)
-		{
-			int switchID = (int)reds.size() - 1;
-			if(game->map->flagState[0] == reds[switchID]->playerID)
-				switchID--;
-			for(int i = switchID - 1; i >= 0; i--)
-			{
-				if(reds[switchID]->timePlayedCurGame > reds[i]->timePlayedCurGame && game->map->flagState[0] != reds[i]->playerID)
-					switchID = i;
-			}
-			reds[switchID]->teamID = game->assignPlayerTeam(reds[switchID]->playerID, PLAYER_TEAM_BLUE);
-			//--- Switch him team
-			net_clsv_svcl_team_request teamRequest;
-			teamRequest.playerID = reds[switchID]->playerID;
-			teamRequest.teamRequested = PLAYER_TEAM_BLUE;
-			// On l'envoit �tout le monde, (si � chang�
-			bb_serverSend((char*)&teamRequest, sizeof(net_clsv_svcl_team_request), NET_CLSV_SVCL_TEAM_REQUEST, 0);
-			nbToSwitch--;
-		}
-	}
-	else
-	{
-		//--- Ha ok, les teams �aient balanc�
-	}
+		balance(reds, PLAYER_TEAM_BLUE, ((int)reds.size() - (int)blues.size()) / 2);
 }
 
 

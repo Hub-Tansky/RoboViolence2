@@ -96,7 +96,7 @@ void Server::updateCTF(float delay)
 				{
 					float dis = distanceSquared(game->map->flagPos[0], CVector3f(
 						game->players[i]->currentCF.position[0], game->players[i]->currentCF.position[1], 0));
-					if (dis <= .5f*.5f)
+					if (dis <= .25f*.25f) // R12: the same radius as the red flag (was .5f)
 					{
 						// Ce joueur pogne le flag !!!!!!
 						game->map->flagState[0] = (char)i;
@@ -119,7 +119,7 @@ void Server::updateCTF(float delay)
 				{
 					float dis = distanceSquared(game->map->flagPos[0], CVector3f(
 						game->players[i]->currentCF.position[0], game->players[i]->currentCF.position[1], 0));
-					if (dis <= .5f*.5f)
+					if (dis <= .25f*.25f) // R12: the same radius as the red flag (was .5f)
 					{
 						// Ce joueur retourne le flag !
 						game->map->flagState[0] = -2;
@@ -250,7 +250,7 @@ void Server::updateCTF(float delay)
 						bb_serverSend((char*)&flagState, sizeof(net_svcl_change_flag_state), NET_SVCL_CHANGE_FLAG_STATE, 0);
 
 						// On fait emet un sont dépendament du team :P
-						console->add(CString("\x3> %s returned the blue flag", game->players[i]->name.s));
+						console->add(CString("\x3> %s returned the red flag", game->players[i]->name.s)); // R12: said blue
 						game->players[i]->returns++; // Il gagne deux points pour avoir sauvé le flag !
 						//game->redScore += 2;
 						break;
