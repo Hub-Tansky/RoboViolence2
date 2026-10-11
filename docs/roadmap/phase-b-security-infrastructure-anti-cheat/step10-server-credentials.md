@@ -42,11 +42,13 @@
 
 ## Notes
 
-- Scheme: `GAMEVERSION` carries a 16-byte nonce per connection; the client answers `HMAC-SHA256(password, label + '\0' + nonce)` with label `join`, `admin user` or `admin password` (`game/src/Credentials.h`). The admin login reuses the join nonce. Version 22100.
-- Found and fixed: the server pushed `sv_password` in cleartext to every client (`GameVar::sendSVVar`, variable changes), and relayed each player's account username and MD5 password hash to all players with `PLAYER_INFO`.
+- Scheme: `NET_SVCL_JOIN_CHALLENGE` (134, sent just before `GAMEVERSION`) carries a 16-byte nonce per connection; the client answers `HMAC-SHA256(password, label + '\0' + nonce)` with label `join`, `admin user` or `admin password` (`game/src/Credentials.h`). The admin login reuses the join nonce. `GAMEVERSION` stays 4 bytes, so a mismatched build still reports "Wrong game version". Version 22100.
+- Found and fixed: `set sv_password` was broadcast in cleartext to every client (`Server::sendSVChange`); the master heartbeat and the LAN browser reply carried the password (now `*` when set: they only need the flag); `PLAYER_INFO` relayed each player's account username and MD5 password hash to all players. The join push (`GameVar::sendSVVar`) sent `***` (masked by `dksvarGetFormatedVar`); secrets now stay off the wire in `sendOne` and `sendSVChange` (`dksvarIsSecret`).
 - MAC: gone from `PLAYER_INFO`, the server's player cache (now matched by IP; the old code overwrote the wrong entry on a match), the master's ban and cache messages and `BanList` (the seed; an existing `master.db` keeps an unused `MAC` column). `bb_getMyMAC` stays in babonet, unused.
 - Tests: `credentials` (RFC 4231), `join_password`, `admin_login`; fix proofs: with the server's check skipped, the wrong-password and replay cases fail (`test_join_password.cpp:71,75`, `test_admin_login.cpp:60`); without the blanking, the relay check fails (`test_join_password.cpp:82`); with the push restored, the capture check fails.
-- Open: a sniffed proof allows offline guessing of a weak password, and admin attempts are not limited → PNS-42.
+- Not tested by the harness (it runs the server only): the client side (`Client::sendVersionAccepted`, the `admin` command) and the master heartbeat and LAN reply; the owner's join and admin test covers the client.
+- Master protocol: `stCacheBan`, `stCacheBanned` and `stCachePlayer` lose 20 bytes and the master has no protocol version; deploy master and game servers together. An existing `master.db` keeps an unused `MAC` column; bans that matched only by MAC stop applying.
+- Open: a sniffed proof allows offline guessing of a weak password, and admin attempts are not limited → PNS-42; pre-existing gaps → PNS-43.
 
 ## Critical files
 
