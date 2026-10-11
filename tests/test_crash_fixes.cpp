@@ -1,6 +1,7 @@
 // Phase B step 5: one check per fixed defect (KEY_QUESTIONS.md Part D) on the in-process server.
 #include "server_harness.h"
 
+#include "CMaster.h"
 #include "Console.h"
 #include "GameVar.h"
 #include "Scene.h"
@@ -83,11 +84,25 @@ static void r2()
 	CHECK(scene->server->game->projectiles.size() < rockets);
 }
 
+// R4: a ban answer from the master for a slot that is empty (or out of range) is ignored, not dereferenced
+static void r4()
+{
+	console->sendCommand("set sv_gamePublic true");
+	master->BannedAnswers[0].ID = 20; // no player in slot 20
+	master->BannedAnswers[0].Answer = 1;
+	master->BannedAnswers[1].ID = 100;
+	master->BannedAnswers[1].Answer = 1;
+	harness::tick(2);
+	CHECK(master->BannedAnswers[0].ID == -1 && master->BannedAnswers[1].ID == -1); // handled
+	console->sendCommand("set sv_gamePublic false");
+}
+
 int main(int, char ** argv)
 {
 	if (!harness::start(argv[0])) return 1;
 	r3();
 	r2();
+	r4();
 	harness::stop();
 	if (failures == 0) std::printf("ok: crash fixes\n");
 	return failures ? 1 : 0;

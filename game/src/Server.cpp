@@ -616,14 +616,15 @@ void Server::update(float delay)
 				if( master->BannedAnswers[i].ID != -1 )
 				{
 					//the guy is banned
-					if( master->BannedAnswers[i].Answer )
+					const int id = master->BannedAnswers[i].ID; // R4: from the master; the player may have left
+					if( master->BannedAnswers[i].Answer && id >= 0 && id < MAX_PLAYER && game->players[id] )
 					{
 						// kick
-						if( master ) master->RA_DisconnectedPlayer( textColorLess(game->players[master->BannedAnswers[i].ID]->name).s, game->players[master->BannedAnswers[i].ID]->playerIP, (long)game->players[master->BannedAnswers[i].ID]->playerID );
-						bb_serverDisconnectClient(game->players[master->BannedAnswers[i].ID]->babonetID);
-						ZEVEN_SAFE_DELETE(game->players[master->BannedAnswers[i].ID]);
+						if( master ) master->RA_DisconnectedPlayer( textColorLess(game->players[id]->name).s, game->players[id]->playerIP, (long)game->players[id]->playerID );
+						bb_serverDisconnectClient(game->players[id]->babonetID);
+						ZEVEN_SAFE_DELETE(game->players[id]);
 						net_svcl_player_disconnect playerDisconnect;
-						playerDisconnect.playerID = (char)master->BannedAnswers[i].ID;
+						playerDisconnect.playerID = (char)id;
 						bb_serverSend((char*)&playerDisconnect,sizeof(net_svcl_player_disconnect),NET_SVCL_PLAYER_DISCONNECT,0);
 					}
 					master->BannedAnswers[i].ID = -1;
