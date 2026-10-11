@@ -668,8 +668,7 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 				}
 				if (game->players[spawnRequest.playerID])
 				{
-					const char * which = nullptr;
-					if (validator.onSpawnRequest(spawnRequest, which) == ServerValidator::KICK)
+					if (const char * which = validator.badSpawnWeapon(spawnRequest))
 					{
 						//--- Kick him so HARD!
 						console->sendCommand(CString("sayall %s is trying to hack his %s weapon! Kicked him", game->players[spawnRequest.playerID]->name.s, which));
@@ -769,27 +768,15 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 					{
 						game->players[playerCoordFrame.playerID]->timeIdle = 0.0f;
 						//--- We compare the time between packet (important against cheating)
-						if (game->players[playerCoordFrame.playerID]->lastFrame == 0)
+						if (validator.onCoordFrame(*game->players[playerCoordFrame.playerID], playerCoordFrame) == ServerValidator::KICK)
 						{
-							game->players[playerCoordFrame.playerID]->lastFrame = playerCoordFrame.frameID;
-						}
-						game->players[playerCoordFrame.playerID]->currentFrame = playerCoordFrame.frameID;
-						if (game->players[playerCoordFrame.playerID]->frameSinceLast >= 90)
-						{
-							if (validator.onCoordFrame(playerCoordFrame.playerID, *game->players[playerCoordFrame.playerID], playerCoordFrame) == ServerValidator::KICK)
-							{
-								if( master ) master->RA_DisconnectedPlayer( textColorLess(game->players[playerCoordFrame.playerID]->name).s, game->players[playerCoordFrame.playerID]->playerIP, (long)game->players[playerCoordFrame.playerID]->playerID);
-								bb_serverDisconnectClient(game->players[playerCoordFrame.playerID]->babonetID);
-								ZEVEN_SAFE_DELETE(game->players[playerCoordFrame.playerID]);
-								net_svcl_player_disconnect playerDisconnect;
-								playerDisconnect.playerID = (char)playerCoordFrame.playerID;
-								bb_serverSend((char*)&playerDisconnect,sizeof(net_svcl_player_disconnect),NET_SVCL_PLAYER_DISCONNECT,0);
-								return;
-							}
-
-							game->players[playerCoordFrame.playerID]->frameSinceLast = 0;
-							game->players[playerCoordFrame.playerID]->lastFrame = 0;
-							game->players[playerCoordFrame.playerID]->currentFrame = 0;
+							if( master ) master->RA_DisconnectedPlayer( textColorLess(game->players[playerCoordFrame.playerID]->name).s, game->players[playerCoordFrame.playerID]->playerIP, (long)game->players[playerCoordFrame.playerID]->playerID);
+							bb_serverDisconnectClient(game->players[playerCoordFrame.playerID]->babonetID);
+							ZEVEN_SAFE_DELETE(game->players[playerCoordFrame.playerID]);
+							net_svcl_player_disconnect playerDisconnect;
+							playerDisconnect.playerID = (char)playerCoordFrame.playerID;
+							bb_serverSend((char*)&playerDisconnect,sizeof(net_svcl_player_disconnect),NET_SVCL_PLAYER_DISCONNECT,0);
+							return;
 						}
 						game->players[playerCoordFrame.playerID]->setCoordFrame(playerCoordFrame);
 
@@ -849,10 +836,7 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 				}
 				else
 				{
-					validator.reset(playerCoordFrame.playerID);
-					game->players[playerCoordFrame.playerID]->frameSinceLast = 0;
-					game->players[playerCoordFrame.playerID]->lastFrame = 0;
-					game->players[playerCoordFrame.playerID]->currentFrame = 0;
+					validator.reset(*game->players[playerCoordFrame.playerID]);
 				}
 			}
 			break;
