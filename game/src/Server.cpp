@@ -296,25 +296,23 @@ CString Server::queryNextMap()
 	int lengthDif = mapList.size() - mapInfoList.size();
 	for(int i = (int)mapList.size() - lengthDif; i < (int)mapList.size(); i++)
 	{//because generating the map info requires creating the map and we dont want to do this midgame with the addmap command for fear of bugs, this is kept separately in map list
-		game->mapName = mapList[i];
-		game->createMap();//we just create and add any maps in maplist that arent also in the info list
+		// R9: measure a separate map; replacing the game's map reloaded the running one mid-game
+		Map map(mapList[i], game, 0);
 		int mapArea = 0;
-		for (int j = 1; j < game->map->size[0] - 1; j++)
-			for (int k = 1; k < game->map->size[1] - 1; k++)
-			{//get the total area
-				if(game->map->cells[k*game->map->size[0] + j].passable)
-				{
-					mapArea++;
+		if (map.isValid && map.cells)
+			for (int j = 1; j < map.size[0] - 1; j++)
+				for (int k = 1; k < map.size[1] - 1; k++)
+				{//get the total area
+					if(map.cells[k*map.size[0] + j].passable)
+					{
+						mapArea++;
+					}
 				}
-			}
-		mapInfo mInfo = {game->mapName, mapArea, 1000000000};
+		mapInfo mInfo = {mapList[i], mapArea, 1000000000};
 		mapInfoList.push_back(mInfo);
 	}
-	if (lengthDif > 0)
-	{
-		game->mapName = currentName;
-		game->createMap();//since we're done with the game's map and other functions might not be, we put it back the way we found it, who needs proper OOP when you've got manners anyways?
-	}
+	if (mapInfoList.empty()) // R9: no rotation: keep the current map
+		return currentName;
 	int indexOfMax = -1;
 	for (int i = 0; i < (int)mapInfoList.size(); ++i)
 	{
@@ -355,11 +353,6 @@ CString Server::queryNextMap()
 		mapInfoList[index].lastPlayed = 0;
 		return mapInfoList[index].mapName;
 	}
-	if (mapList.size() > 0)
-	{
-		return mapList[0];
-	} 
-	return "";
 }
 
 

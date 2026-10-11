@@ -131,6 +131,23 @@ static void r10()
 		}
 }
 
+// R9: choosing the next map doesn't reload the running map, and an empty rotation keeps the current map
+static void r9()
+{
+	Server * server = scene->server;
+	server->mapInfoList.clear(); // every map in mapList is new to the rotation
+	server->game->map->flagState[0] = 5; // state that a reload would reset to -2
+	CString next = server->queryNextMap();
+	CHECK(server->game->map->flagState[0] == 5);
+	CHECK(!next.isNull());
+	std::vector<CString> maps = server->mapList;
+	server->mapList.clear();
+	server->mapInfoList.clear();
+	CHECK(server->queryNextMap() == server->game->mapName);
+	server->mapList = maps;
+	server->game->map->flagState[0] = -2;
+}
+
 int main(int, char ** argv)
 {
 	if (!harness::start(argv[0])) return 1;
@@ -139,6 +156,7 @@ int main(int, char ** argv)
 	r4();
 	r5();
 	r10();
+	r9();
 	r18(bv2::userFile("").c_str());
 	harness::stop();
 	if (harness::failures() == 0) std::printf("ok: crash fixes\n");
