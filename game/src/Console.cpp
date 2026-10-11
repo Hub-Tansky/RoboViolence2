@@ -2262,7 +2262,7 @@ void Console::sendCommand(CString commandLine, bool isAdmin, unsigned long bbnet
 			CString serverIP = tokenize.getFirstToken(' ');
 			CString serverPort = tokenize.getFirstToken(' ');
 			CString strFilter = tokenize.getFirstToken(' ');
-			add(CString("req from %i ", bbnetID));
+			add(CString("req from %lu ", bbnetID)); // R19: bbnetID is unsigned long
 			master->requestRemoteCacheList(strFilter, serverIP, serverPort, bbnetID);
 			return;
 		}
