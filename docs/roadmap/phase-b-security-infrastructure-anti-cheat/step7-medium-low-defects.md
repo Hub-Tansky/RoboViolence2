@@ -1,6 +1,6 @@
 # Step 7: Medium and low defects
 
-**Status:** TODO
+**Status:** IN PROGRESS
 
 **Depends on:** [Step 3](step3-test-harness.md). **Next:** [step8-server-validator.md](step8-server-validator.md). **Index:** [README.md](README.md)
 
@@ -44,6 +44,7 @@ Current locations (the `KEY_QUESTIONS.md` paths predate step 2):
 ### 7.3 Small fixes: R12, R15, R18 (rest), R19
 
 - R12 makes both flag radii equal; ask the owner which value (0.5 or 0.25) before changing it, since it is gameplay.
+- Owner, 2026-10-11: 0.25 for both; why they differed (and whether to restore it) → PNS-39.
 
 ## Critical files
 
