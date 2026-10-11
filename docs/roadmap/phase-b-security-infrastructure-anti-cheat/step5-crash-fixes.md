@@ -1,6 +1,6 @@
 # Step 5: Crash fixes R1–R5 and known undefined behaviour
 
-**Status:** IN PROGRESS
+**Status:** DONE (2026-10-11)
 
 **Depends on:** [Step 3](step3-test-harness.md). **Next:** [step6-sql-prepared-statements.md](step6-sql-prepared-statements.md). **Index:** [README.md](README.md)
 
@@ -69,6 +69,8 @@
 - 5.6, server: 11 start/quit sequences of the ASan `bv2dedicated` (quit at once, `dedicate` before `set sv_*`, missing map or script, `disconnect`, `changemap` without a server, `kick`/`ban` of empty slots, `removemap` then `changemap`) are clean after one fix: typed console lines were a printf format (`main.cpp`); `smoke_server.py` now types one.
 - 5.6, client: the smoke job's teardown use-after-free (global menus deleting sounds after `dks`'s list was destroyed) is fixed. Quitting at each client scene and disconnecting mid-download weren't run: they need a GL window (owner play-test).
 - R26 (vote-request abort) didn't recur: the fuzz job on `main` ran `clsv_svcl_vote_request` 2 min clean. R28 (Windows babonet crash on disconnect) is still open; its cause isn't known, so the master test stays off on Windows.
+- R5's map size limit 1..256: four times the editor's 64; every original map (81 files in the owner's data, versions 10011, 20201, 20202) is at most 63x48. A server whose rotation holds a rejected map stops, as for any invalid map.
+- R20 also initialises the stream with `MA_SOUND_FLAG_WAIT_INIT`, so a file that exists but fails to decode fails synchronously too.
 - Found while testing R18: R29 (`~_typLayer` deletes textures only when the ID is 0), outside this step's paths.
 
 ## Critical files
