@@ -4,6 +4,8 @@
 #include "CMaster.h"
 #include "Console.h"
 #include "GameVar.h"
+#include "Map.h"
+#include "Paths.h"
 #include "Scene.h"
 #include "Server.h"
 
@@ -97,12 +99,35 @@ static void r4()
 	console->sendCommand("set sv_gamePublic false");
 }
 
+// Writes a map file into the pref dir's maps/: a version, then two 16-bit sizes and nothing else
+static void writeMap(const char * name, uint32_t version, int16_t x, int16_t y)
+{
+	std::string path = bv2::mapFileForWrite(name);
+	FILE * f = std::fopen(path.c_str(), "wb");
+	std::fwrite(&version, 4, 1, f);
+	std::fwrite(&x, 2, 1, f);
+	std::fwrite(&y, 2, 1, f);
+	std::fclose(f);
+}
+
+// R5: a map file with an unknown version or an absurd size is invalid, not half-read
+static void r5()
+{
+	writeMap("R5-Version", 99999, 32, 32);
+	writeMap("R5-Size", 10010, 30000, -5);
+	Map version(CString("R5-Version"), scene->server->game, 0);
+	CHECK(!version.isValid);
+	Map size(CString("R5-Size"), scene->server->game, 0);
+	CHECK(!size.isValid);
+}
+
 int main(int, char ** argv)
 {
 	if (!harness::start(argv[0])) return 1;
 	r3();
 	r2();
 	r4();
+	r5();
 	harness::stop();
 	if (failures == 0) std::printf("ok: crash fixes\n");
 	return failures ? 1 : 0;

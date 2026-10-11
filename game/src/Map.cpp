@@ -49,6 +49,12 @@ extern Scene * scene;
 //
 // Constructeur
 //
+// R5: map sizes come from files (and from servers, for downloaded maps); the editor makes at most 64x64
+static bool saneMapSize(int x, int y)
+{
+	return x >= 1 && x <= 256 && y >= 1 && y <= 256;
+}
+
 Map::Map(CString mapFilename, Game * _game, unsigned int font, bool editor, int sizeX, int sizeY)
 #ifndef CONSOLE
 : groundMesh(0), shadowMesh(0), wallMesh(0)
@@ -231,6 +237,7 @@ Map::Map(CString mapFilename, Game * _game, unsigned int font, bool editor, int 
 #endif
 				size[0] = file.getInt();
 				size[1] = file.getInt();
+				if (!saneMapSize(size[0], size[1])) { isValid = false; return; } // R5
 				cells = new map_cell[size[0]*size[1]];
 				for (j=0;j<size[1];++j)
 				{
@@ -256,6 +263,7 @@ Map::Map(CString mapFilename, Game * _game, unsigned int font, bool editor, int 
 #endif
 				size[0] = file.getInt();
 				size[1] = file.getInt();
+				if (!saneMapSize(size[0], size[1])) { isValid = false; return; } // R5
 				cells = new map_cell[size[0]*size[1]];
 				for (j=0;j<size[1];++j)
 				{
@@ -311,6 +319,7 @@ Map::Map(CString mapFilename, Game * _game, unsigned int font, bool editor, int 
 #endif
 				size[0] = file.getInt();
 				size[1] = file.getInt();
+				if (!saneMapSize(size[0], size[1])) { isValid = false; return; } // R5
 				cells = new map_cell[size[0]*size[1]];
 				for (j=0;j<size[1];++j)
 				{
@@ -373,6 +382,7 @@ Map::Map(CString mapFilename, Game * _game, unsigned int font, bool editor, int 
 
 				size[0] = file.getInt();
 				size[1] = file.getInt();
+				if (!saneMapSize(size[0], size[1])) { isValid = false; return; } // R5
 				cells = new map_cell[size[0]*size[1]];
 				for (j=0;j<size[1];++j)
 				{
@@ -434,6 +444,10 @@ Map::Map(CString mapFilename, Game * _game, unsigned int font, bool editor, int 
 				}
 				break;
 			}
+		default: // R5: an unknown version leaves the map unread
+			console->add(CString("\x4> Unknown map version %lu", mapVersion));
+			isValid = false;
+			return;
 		}
 	}
 
@@ -1606,6 +1620,7 @@ bool GetMapData(CString name, unsigned int & texture, CVector2i & textureSize, C
 		case 10010:
 			size[0] = file.getInt();
 			size[1] = file.getInt();
+			if (!saneMapSize(size[0], size[1])) return false; // R5
 			cells = new map_cell[size[0] * size[1]];
 			for (int j = 0; j < size[1]; ++j)
 			{
@@ -1621,6 +1636,7 @@ bool GetMapData(CString name, unsigned int & texture, CVector2i & textureSize, C
 		case 10011:
 			size[0] = file.getInt();
 			size[1] = file.getInt();
+			if (!saneMapSize(size[0], size[1])) return false; // R5
 			cells = new map_cell[size[0] * size[1]];
 			for (int j = 0; j < size[1]; ++j)
 			{
@@ -1639,6 +1655,7 @@ bool GetMapData(CString name, unsigned int & texture, CVector2i & textureSize, C
 				int weather = file.getInt();
 				size[0] = file.getInt();
 				size[1] = file.getInt();
+				if (!saneMapSize(size[0], size[1])) return false; // R5
 				cells = new map_cell[size[0] * size[1]];
 				for (int j = 0; j < size[1]; ++j)
 				{
@@ -1662,6 +1679,7 @@ bool GetMapData(CString name, unsigned int & texture, CVector2i & textureSize, C
 				int weather = file.getInt();
 				size[0] = file.getInt();
 				size[1] = file.getInt();
+				if (!saneMapSize(size[0], size[1])) return false; // R5
 				cells = new map_cell[size[0] * size[1]];
 				for (int j = 0; j < size[1]; ++j)
 				{
