@@ -173,7 +173,7 @@ public:
 	void printMessage(CString message);
 
 	// On a reçu un message yéé !
-	void recvPacket(char * buffer, int typeID);
+	void recvPacket(char * buffer, int size, int typeID);
 
 	// Sends PLAYER_INFO + GAMEVERSION_ACCEPTED (needs game->thisPlayer)
 	void sendJoinHandshake();

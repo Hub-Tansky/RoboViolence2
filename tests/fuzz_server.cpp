@@ -70,18 +70,6 @@ int main(int argc, char ** argv)
 		int flips = 1 + (int)(rng() % 8);
 		for (int i = 0; i < flips && !input.empty(); ++i)
 			input[rng() % input.size()] = (char)(rng() % 3 == 0 ? (rng() % 256) : input[rng() % input.size()] ^ (1 << (rng() % 8)));
-		// Known defects stay out of the way until their fix step removes the mask: Q-S2 (playerID, weaponID out of range),
-		// R21/R22/R23 (client text used as a format string, console text without '\0'), R24 (mapName without '\0').
-		// R25 (shoot before spawning) is avoided by join(), which spawns.
-		if (t->playerID >= 0) input[t->playerID] &= 31;
-		if (t->id == NET_CLSV_PLAYER_SHOOT) input[offsetof(net_clsv_player_shoot, weaponID)] &= 7; // Q-S2 weaponID
-		if (t->id == NET_CLSV_SVCL_PLAYER_PROJECTILE) input[offsetof(net_clsv_svcl_player_projectile, weaponID)] &= 7;
-		if (t->id == NET_CLSV_SVCL_CHAT || t->id == NET_SVCL_CONSOLE || t->id == NET_CLSV_ADMIN_REQUEST)
-			for (char & c : input)
-				if (c == '%') c = '_';
-		if (t->id == NET_SVCL_CONSOLE) input.push_back('\0');
-		if (t->id == NET_CLSV_MAP_REQUEST) input[offsetof(net_clsv_map_request, mapName) + 15] = 0;
-
 		std::ofstream(last, std::ios::binary).write(input.data(), (std::streamsize)input.size());
 		std::ofstream(lastCount) << "seed " << argv[4] << ", input " << runs + 1 << "\n";
 		harness::deliver(client, t->id, input.data(), (int)input.size());

@@ -563,6 +563,16 @@ void Console::init()
 //
 void Console::svChange(CString command)
 {
+	// Q-S4: a server may only set sv_* variables ("set sv_name value")
+	CString tokens("%s", command.s);
+	CString verb = tokens.getFirstToken(' ');
+	CString name = tokens.getFirstToken(' ');
+	if (verb != "set" || strncmp(name.s, "sv_", 3) != 0)
+	{
+		add(CString("\x4> Server tried to change %s; ignored", name.s));
+		return;
+	}
+
 	// On donne la job ?dksvar pour ?
 	CMD_RET cr = dksvarCommand(command.s);
 	if (gameVar.c_debug) // We do not output that in non-debug

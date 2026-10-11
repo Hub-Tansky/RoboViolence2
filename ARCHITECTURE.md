@@ -71,7 +71,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `packaging/macos/Info.plist.in` | macOS bundle `Info.plist` template |
 | `packaging/windows/bv2.manifest` | Windows manifest for `bv2`, `bv2dedicated` and `bv2master`: PerMonitorV2 DPI, UTF-8 code page, Windows 10/11 |
 | `packaging/windows/bv2.rc.in` | Windows resource script template; CMake fills in the generated icon |
-| `tests/CMakeLists.txt` | ctest targets: netPacket, config, fileio, dedicated-server smoke, in-process server harness (`bv2server_lib` + fake babonet), corpus replay, known-crash inputs (ASan presets), master server; on Windows also the non-ASCII install path smoke and the no-VC++-runtime-DLL check |
+| `tests/CMakeLists.txt` | ctest targets: netPacket, config, fileio, dedicated-server smoke, in-process server harness (`bv2server_lib` + fake babonet), packet hygiene, corpus replay, crash-input tests for `crash-*.bin` under ASan (none at present), master server; on Windows also the non-ASCII install path smoke and the no-VC++-runtime-DLL check |
 | `tests/check_windows_deps.py` | Windows: fails if `bv2`, `bv2dedicated` or `bv2master` needs a Visual C++ runtime DLL |
 | `tests/corpus/clsv_admin_request/valid.bin` | Replay corpus: valid `clsv_admin_request` payload (`gen_corpus`) |
 | `tests/corpus/clsv_gameversion_accepted/valid.bin` | Replay corpus: valid `clsv_gameversion_accepted` payload (`gen_corpus`) |
@@ -88,25 +88,26 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/corpus/clsv_svcl_player_projectile/valid.bin` | Replay corpus: valid `clsv_svcl_player_projectile` payload (`gen_corpus`) |
 | `tests/corpus/clsv_svcl_player_shoot_melee/valid.bin` | Replay corpus: valid `clsv_svcl_player_shoot_melee` payload (`gen_corpus`) |
 | `tests/corpus/clsv_svcl_player_update_skin/valid.bin` | Replay corpus: valid `clsv_svcl_player_update_skin` payload (`gen_corpus`) |
-| `tests/corpus/clsv_svcl_team_request/crash-playerid-out-of-range.bin` | Known defect input (Q-S2: `playerID` 100); ASan must report it until its fix step |
 | `tests/corpus/clsv_svcl_team_request/valid.bin` | Replay corpus: valid `clsv_svcl_team_request` payload (`gen_corpus`) |
 | `tests/corpus/clsv_svcl_vote_request/valid.bin` | Replay corpus: valid `clsv_svcl_vote_request` payload (`gen_corpus`) |
 | `tests/corpus/clsv_vote/valid.bin` | Replay corpus: valid `clsv_vote` payload (`gen_corpus`) |
 | `tests/corpus/svcl_console/valid.bin` | Replay corpus: valid `svcl_console` payload (`gen_corpus`) |
 | `tests/corpus/svcl_play_sound/valid.bin` | Replay corpus: valid `svcl_play_sound` payload (`gen_corpus`) |
-| `tests/corpus/clsv_admin_request/crash-format-string.bin` | Known defect input (R23: admin login as a format string); ASan must report it until its fix step |
-| `tests/corpus/clsv_map_request/crash-unterminated.bin` | Known defect input (R24: map name without `\0`); ASan must report it until its fix step |
-| `tests/corpus/clsv_svcl_chat/crash-format-string.bin` | Known defect input (R21: chat text as a format string); ASan must report it until its fix step |
-| `tests/corpus/svcl_console/crash-unterminated.bin` | Known defect input (R22: console text without `\0`); ASan must report it until its fix step |
-| `tests/corpus_types.h` | Client-to-server message types, valid samples and known crash inputs for the corpus, replay and fuzz tests |
-| `tests/gen_corpus.cpp` | Writes `tests/corpus/<type>/valid.bin` and the known crash inputs from `netPacket.h` structs |
+| `tests/corpus/clsv_admin_request/fixed-format-string.bin` | Regression input (R23: admin login as a format string), fixed in step 4; replayed like `valid.bin` |
+| `tests/corpus/clsv_map_request/fixed-unterminated.bin` | Regression input (R24: map name without `\0`), fixed in step 4; replayed like `valid.bin` |
+| `tests/corpus/clsv_svcl_chat/fixed-format-string.bin` | Regression input (R21: chat text as a format string), fixed in step 4; replayed like `valid.bin` |
+| `tests/corpus/clsv_svcl_team_request/fixed-playerid-out-of-range.bin` | Regression input (Q-S2: `playerID` 100), fixed in step 4; replayed like `valid.bin` |
+| `tests/corpus/svcl_console/fixed-unterminated.bin` | Regression input (R22: console text without `\0`), fixed in step 4; replayed like `valid.bin` |
+| `tests/corpus_types.h` | Client-to-server message types, valid samples and known-defect inputs for the corpus, replay and fuzz tests |
+| `tests/gen_corpus.cpp` | Writes `tests/corpus/<type>/valid.bin` and the known-defect inputs from `netPacket.h` structs |
 | `tests/harness/fake_babonet.cpp` | Test `bb_*` API: queued connects and messages in, captured sends out, disconnects reported back; an object file, so it wins over babonet's `baboNet.cpp` |
 | `tests/harness/server_harness.cpp` | In-process dedicated server for tests: start, connect, deliver, tick |
 | `tests/harness/server_harness.h` | Harness API |
 | `tests/smoke_server.py` | Starts `bv2dedicated` headless, runs the CTF script, quits; checks exit code, server creation and `bv2.cfg`. `--install-under` runs it from a non-ASCII path (Windows UTF-8 code page) |
 | `tests/test_config.cpp` | dksvar config layering, transient values not saved, secrets masked |
 | `tests/test_fileio.cpp` | `FileIO` byte widths for `.bvm` data and the widths the `.DKO` loader relies on; `bv2ReadBytes` zero-fills a short read; fixed-string length prefix round trip; unterminated `CString::loadFromFile` (overflows under ASan without its bound) |
-| `tests/test_replay.cpp` | Replays the corpus through the in-process server: no crash, expected replies; one `crash-*.bin` per ctest under ASan |
+| `tests/test_packet_hygiene.cpp` | Step 4 checks: sender binding (Q-S1), index ranges with controls (Q-S2), map names (Q-S6), skin and sound relay (Q-S7), `SV_CHANGE` filter (Q-S4), the handshake gate, `checkPacket` per message type and size, the client's `checkServerMessage` on values the server sends |
+| `tests/test_replay.cpp` | Replays the corpus through the in-process server: no crash, expected replies; each `crash-*.bin` (none at present) is its own ctest under ASan |
 | `tests/fuzz_server.cpp` | Random-mutation fuzzer for one message type on the in-process server; writes the crashing input to `<out>/<type>/last.bin` (CI job `fuzz`) |
 | `tests/test_server_harness.cpp` | The in-process server starts on the placeholder CTF map, accepts a client and sends it the game state |
 | `tests/test_master.cpp` | In-process master on port 10207 with a scratch `master.db`: register, list, heartbeat timeout (simulated 61 s), removal by `KILL_SERV`. Not run on Windows (R28) |
@@ -277,6 +278,8 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step2b.md` | Fresh-context review record for step 2b |
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step3-report.md` | Raw reviewer report for step 3 |
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step3.md` | Fresh-context review record for step 3 |
+| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step4-report.md` | Raw reviewer report for step 4 |
+| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step4.md` | Fresh-context review record for step 4 |
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step2a-report.md` | Raw reviewer report for step 2a |
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step2a.md` | Fresh-context review record for step 2a |
 
@@ -542,7 +545,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/Choice.h` | Menu choice (drop-down/spinner) widget |
 | `game/src/Client.cpp` | Client: connection, join handshake, send/receive state |
 | `game/src/Client.h` | Client: connection, join handshake, send/receive state |
-| `game/src/ClientRecv.cpp` | Client: handlers for every server-to-client packet |
+| `game/src/ClientRecv.cpp` | Client: handlers for every server-to-client packet, after `packet::checkServerMessage` |
 | `game/src/ClientRender.cpp` | Client: in-game HUD and view rendering |
 | `game/src/ConfirmPass.cpp` | Password confirmation dialog |
 | `game/src/ConfirmPass.h` | Password confirmation dialog |
@@ -594,6 +597,8 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/Map.h` | Map data, .bvm loading and saving, collision, rendering resources |
 | `game/src/MapRender.cpp` | Map rendering (tiles, walls, dirt, optional 3D model map) |
 | `game/src/MemIO.cpp` | In-memory buffer reader/writer |
+| `game/src/PacketCheck.cpp` | What each side accepts from the wire: client message sizes and `playerID` offsets, server message sizes, index fields and string ends |
+| `game/src/PacketCheck.h` | Interface of `PacketCheck.cpp` (`packet::clientRule`, `knownWeapon`, `checkServerMessage`) |
 | `game/src/MemIO.h` | In-memory buffer reader/writer |
 | `game/src/Menu.h` | Menu system core (old menu) |
 | `game/src/MenuSetup.cpp` | Menu construction |
@@ -618,7 +623,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/Server.h` | Authoritative server: connections, joins, tick, map and mode control |
 | `game/src/ServerCTF.cpp` | Server: capture-the-flag rules |
 | `game/src/ServerClose.h` | Dialog shown when the server closes the connection |
-| `game/src/ServerRecv.cpp` | Server: handlers for every client-to-server packet |
+| `game/src/ServerRecv.cpp` | Server: handlers for every client-to-server packet, after the pre-dispatch check `Server::checkPacket` |
 | `game/src/ServerSnD.cpp` | Server: search-and-destroy rules |
 | `game/src/Weapon.cpp` | Weapon definitions and stats |
 | `game/src/Weapon.h` | Weapon definitions and stats |

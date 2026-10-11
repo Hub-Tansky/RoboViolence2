@@ -18,6 +18,9 @@
 
 #ifndef CONSOLE
 #include "Client.h"
+#include "PacketCheck.h"
+#include <set>
+#include <vector>
 #include "netPacket.h"
 #include "Console.h"
 #include "Scene.h"
@@ -66,11 +69,33 @@ void Client::sendJoinHandshake()
 	bb_clientSend(uniqueClientID, (char*)&gameVersionAccepted, sizeof(net_clsv_gameversion_accepted), NET_CLSV_GAMEVERSION_ACCEPTED);
 }
 
+// Weapon::shoot indexes the weapon's nuzzle and brass lists with nuzzleID; only the client build has them.
+static bool validNuzzle(Weapon * weapon, int nuzzleID)
+{
+	if (!weapon || nuzzleID < 0) return false;
+	if (weapon->weaponID != WEAPON_FLAME_THROWER && nuzzleID >= (int)weapon->nuzzleFlashes.size()) return false;
+	if (weapon->projectileType == PROJECTILE_DIRECT && weapon->weaponID != WEAPON_FLAME_THROWER &&
+		weapon->weaponID != WEAPON_PHOTON_RIFLE && nuzzleID >= (int)weapon->ejectingBrass.size()) return false;
+	return true;
+}
+
+// Runs before the recvPacket switch (packet::checkServerMessage); a dropped message is logged once per type.
+static bool checkServerPacket(const char * buffer, int size, int typeID, std::vector<char> & out)
+{
+	if (packet::checkServerMessage(buffer, size, typeID, out)) return true;
+	static std::set<int> logged; // once per message type, so a flood can't fill the log
+	if (logged.insert(typeID).second) console->add(CString("\x4> Dropped server message %i (size %i)", typeID, size));
+	return false;
+}
+
 //
 // On a reçu un message yéé !
 //
-void Client::recvPacket(char * buffer, int typeID)
+void Client::recvPacket(char * wire, int size, int typeID)
 {
+	std::vector<char> checked;
+	if (!checkServerPacket(wire, size, typeID, checked)) return;
+	char * buffer = checked.data();
    
 	// Answer heartbeats immediately, even while joining or in menus: a late pong
 	// got players kicked ("no respond since 3sec") right after team pick / spawn.
@@ -311,8 +336,8 @@ void Client::recvPacket(char * buffer, int typeID)
 			{
 				if ((chat.teamID < PLAYER_TEAM_SPECTATOR || chat.teamID == game->thisPlayer->teamID))
 				{
-					console->add(chat.message, false, false);
-					chatMessages.push_back(TimedMessage(chat.message));
+					console->add(CString("%s", chat.message), false, false); // data, not a format
+					chatMessages.push_back(TimedMessage(CString("%s", chat.message)));
 					dksPlaySound(m_sfxChat, -1, 200);
 				}
 			}
@@ -545,7 +570,7 @@ void Client::recvPacket(char * buffer, int typeID)
 		{
 			net_svcl_sv_change svChange;
 			memcpy(&svChange, buffer, sizeof(net_svcl_sv_change));
-			console->svChange(svChange.svChange);
+			console->svChange(CString("%s", svChange.svChange)); // data, not a format
 
 			CString sv = CString("%s", svChange.svChange);
 			sv.getFirstToken(' ');
@@ -697,7 +722,7 @@ void Client::recvPacket(char * buffer, int typeID)
 				}
 				
 				// Sinon on c'est un autre player, on spawn la trail et le feu de son gun
-				if (!itsMine) 
+				if (!itsMine && validNuzzle(game->players[playerShoot.playerID]->weapon, playerShoot.nuzzleID))
 				{
 					game->players[playerShoot.playerID]->firedShowDelay = 2;
 					game->players[playerShoot.playerID]->weapon->shoot(playerShoot, game->players[playerShoot.playerID]);
@@ -734,7 +759,8 @@ void Client::recvPacket(char * buffer, int typeID)
 					playerShoot.p1[0] = (short)(playerProjectile.position[0] * 100);
 					playerShoot.p1[1] = (short)(playerProjectile.position[1] * 100);
 					playerShoot.p1[2] = (short)(playerProjectile.position[2] * 100);
-					if (game->players[playerShoot.playerID]->weapon->weaponID == playerShoot.weaponID)
+					if (game->players[playerShoot.playerID]->weapon->weaponID == playerShoot.weaponID &&
+						validNuzzle(game->players[playerShoot.playerID]->weapon, playerShoot.nuzzleID))
 					{
 						game->players[playerShoot.playerID]->weapon->shoot(playerShoot, game->players[playerShoot.playerID]);
 					}
@@ -897,7 +923,7 @@ void Client::recvPacket(char * buffer, int typeID)
 	case NET_SVCL_CONSOLE:
 		{
 			//--- Pas plus compliqué que ça !
-			console->add(buffer);
+			console->add(CString("%s", buffer)); // data, not a format
 			break;
 		}
 	case NET_SVCL_SYNCHRONIZE_TIMER:
@@ -1163,7 +1189,7 @@ void Client::recvPacket(char * buffer, int typeID)
 		{
 			net_svcl_map_list mapl;
 			memcpy(&mapl, buffer, sizeof(net_svcl_map_list));
-			console->add(mapl.mapName);
+			console->add(CString("%s", mapl.mapName));
 			break;
 		}
 	case NET_CLSV_SVCL_PLAYER_UPDATE_SKIN:

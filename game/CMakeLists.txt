@@ -65,6 +65,7 @@ set(BV2_GAME_SOURCES
   src/Map.cpp
   src/MapRender.cpp
   src/MemIO.cpp
+  src/PacketCheck.cpp
   src/Paths.cpp
   src/MenuSetup.cpp
   src/MessageDialog.cpp
@@ -108,6 +109,7 @@ set(BV2_SERVER_SOURCES
   src/Map.cpp
   src/MapRender.cpp
   src/MemIO.cpp
+  src/PacketCheck.cpp
   src/Paths.cpp
   src/Minibot.cpp
   src/Player.cpp

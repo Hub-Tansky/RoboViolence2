@@ -27,6 +27,7 @@
 #ifndef BV2_PLATFORM_WINDOWS
 	#include "platform.h"
 #endif
+#include <set>
 #include <vector>
 
 #define GAME_VERSION_SV 22000 // bumped once for Phase A: fixed-width packed wire structs (step 4.2)
@@ -143,7 +144,11 @@ public:
 #endif
 
 	// On a re�u un message y�� !
-	void recvPacket(char * buffer, int typeID, unsigned long bbnetID);
+	void recvPacket(char * buffer, int size, int typeID, unsigned long bbnetID);
+	// recvPacket's pre-dispatch check (Phase B step 4); returns the sender's slot or -1
+	int checkPacket(const char * buffer, int size, int typeID, unsigned long bbnetID, std::vector<char> & out);
+	// Connections whose join handshake (and password) passed
+	std::set<unsigned long> joined;
 
 	// Pour modifier une variable remotly
 	void sendSVChange(CString varCom);

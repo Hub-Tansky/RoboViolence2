@@ -285,3 +285,19 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Why it matters:** every test build compiles the server twice, and the two targets can drift apart in flags.
 - **Suggested home:** a build-only change to `game/CMakeLists.txt` in any later step that touches it; check the harness still links its fake `bb_*` first.
 - **Status:** Proposed
+
+### PNS-34: Make `CString`'s format constructor explicit
+
+- **Found in:** Phase B step 4 fresh-context review (2026-10-11), finding 4.
+- **Extract:** "`console->svChange(svChange.svChange)` … `TimedMessage(chat.message)` … Neither is a visible `CString(` call … Making the format constructor `explicit` would close the whole class of bugs."
+- **Why it matters:** `CString(char* fmt, ...)` is implicit, so passing wire text anywhere a `CString` is expected runs it as a printf format (R16, R21–R23 and the two client cases). Step 4 fixed the sites it found; an `explicit` constructor would make the compiler find the rest.
+- **Suggested home:** step 7 (medium/low defects), or a step that touches `engine/zeven/include/CString.h`; expect many call-site changes.
+- **Status:** Proposed
+
+### PNS-35: Don't broadcast secrets to clients
+
+- **Found in:** Phase B step 4 fresh-context review (2026-10-11), finding 15.
+- **Extract:** "Every client receives `sv_password` … The `PLAYER_INFO` rebroadcast sends every joiner's account MD5 `password` and `macAddr` to all clients."
+- **Why it matters:** any player can read the server password and every other player's account hash and MAC address.
+- **Suggested home:** Phase B step 10 (server credentials, Q-S5): blank `password` and `macAddr` before the rebroadcast and stop pushing `sv_password`.
+- **Status:** Proposed

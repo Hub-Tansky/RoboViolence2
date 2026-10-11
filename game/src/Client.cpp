@@ -419,10 +419,11 @@ void Client::update(float delay)
 		// On recv les messages
 		char * buffer;
 		int messageID;
-		while ((buffer = bb_clientReceive(uniqueClientID, &messageID)))
+		int size;
+		while ((buffer = bb_clientReceive(uniqueClientID, &messageID, &size)))
 		{
 			// On gère les messages reçu
-			recvPacket(buffer, messageID);
+			recvPacket(buffer, size, messageID);
 		}
 
 		// Si on fait Esc, on spawn un menu

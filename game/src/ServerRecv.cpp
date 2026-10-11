@@ -18,7 +18,10 @@
 
 
 #include <algorithm>
+#include <cstddef>
+#include <set>
 #include "Server.h"
+#include "PacketCheck.h"
 #include "netPacket.h"
 #include "Console.h"
 #include "Scene.h"
@@ -32,18 +35,65 @@ extern Scene* scene;
 using std::min;
 
 
+namespace
+{
+	// Logs a rejected packet once per sender and message type, so a flood can't fill the log.
+	void logRejected(unsigned long bbnetID, int typeID, const char * why)
+	{
+		static std::set<std::pair<unsigned long, int>> logged;
+		if (logged.insert(std::make_pair(bbnetID, typeID)).second)
+			console->add(CString("\x9> Dropped message %i from client %lu: %s", typeID, bbnetID, why), true);
+	}
+}
+
+// Runs before the recvPacket switch: rejects unknown types, wrong sizes and senders without a player slot. On success,
+// `out` holds the payload with the sender's own slot as playerID (text is NUL-terminated) and the slot is returned.
+int Server::checkPacket(const char * buffer, int size, int typeID, unsigned long bbnetID, std::vector<char> & out)
+{
+	const packet::ClientRule * rule = packet::clientRule(typeID);
+	if (!rule) { logRejected(bbnetID, typeID, "unknown type"); return -1; }
+	if (rule->size ? size != rule->size : size < 1) { logRejected(bbnetID, typeID, "wrong size"); return -1; }
+
+	int slot = -1;
+	for (int i = 0; i < MAX_PLAYER; ++i)
+		if (game->players[i] && game->players[i]->babonetID == (INT4)bbnetID) slot = i;
+	if (slot < 0) { logRejected(bbnetID, typeID, "no player"); return -1; }
+	// Before the join handshake (and its password check) passes, only the handshake itself and pings
+	if (!joined.count(bbnetID) && typeID != NET_CLSV_GAMEVERSION_ACCEPTED && typeID != NET_CLSV_SVCL_PLAYER_INFO && typeID != NET_CLSV_PONG)
+	{
+		logRejected(bbnetID, typeID, "before the handshake");
+		return -1;
+	}
+
+	out.assign(buffer, buffer + size);
+	if (rule->size == 0) out.push_back('\0');
+	if (rule->playerID >= 0) out[rule->playerID] = (char)slot;
+	return slot;
+}
+
 //
 // On a re� un message y� !
 //
-void Server::recvPacket(char * buffer, int typeID, unsigned long bbnetID)
+void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID)
 {
     int i;
+	std::vector<char> checked;
+	int slot = checkPacket(wire, size, typeID, bbnetID, checked);
+	if (slot < 0) return;
+	Player * sender = game->players[slot];
+	char * buffer = checked.data();
 	switch (typeID)
 	{
 	case NET_CLSV_MAP_REQUEST:
 		{
 			net_clsv_map_request request;
 			memcpy(&request, buffer, sizeof(net_clsv_map_request));
+			request.mapName[15] = '\0';
+			if (!request.mapName[0] || strspn(request.mapName, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-") != strlen(request.mapName))
+			{
+				logRejected(bbnetID, typeID, "map name");
+				return; // Q-S6: a map name only, never a path
+			}
 
 			SMapTransfer mtrans;
             mtrans.chunkNum = 0;
@@ -62,6 +112,7 @@ void Server::recvPacket(char * buffer, int typeID, unsigned long bbnetID)
 			if (!gameVar.sv_enableVote) return; // <- LÀ
 			net_clsv_vote vote;
 			memcpy(&vote, buffer, sizeof(net_clsv_vote));
+			vote.value = buffer[offsetof(net_clsv_vote, value)] != 0; // any byte, not just a valid bool
 			if (game)
 			{
 				if (game->players[vote.playerID])
@@ -95,6 +146,7 @@ void Server::recvPacket(char * buffer, int typeID, unsigned long bbnetID)
 		{
 			net_clsv_svcl_vote_request voteRequest;
 			memcpy(&voteRequest, buffer, sizeof(net_clsv_svcl_vote_request));
+			voteRequest.vote[79] = '\0';
 			if (game)
 			{
 				if (game->players[voteRequest.playerID])
@@ -164,21 +216,15 @@ void Server::recvPacket(char * buffer, int typeID, unsigned long bbnetID)
 		{
 			if (game)
 			{
-				CString adminCommand = buffer;
-				for (int i=0;i<MAX_PLAYER;++i)
+				CString adminCommand("%s", buffer); // R22: data, not a format
+				if (sender->isAdmin)
 				{
-					if (game->players[i])
-					{
-						if (game->players[i]->babonetID == bbnetID && game->players[i]->isAdmin)
-						{
-							CString log = "Executing command from ";
-							log += game->players[i]->name;
-							log += ", IP: ";
-							log += game->players[i]->playerIP;
-							console->add(log);
-							console->sendCommand(adminCommand, true, bbnetID);
-						}
-					}
+					CString log = "Executing command from ";
+					log += sender->name;
+					log += ", IP: ";
+					log += sender->playerIP;
+					console->add(log);
+					console->sendCommand(adminCommand, true, bbnetID);
 				}
 			}
 			break;
@@ -187,25 +233,17 @@ void Server::recvPacket(char * buffer, int typeID, unsigned long bbnetID)
 		{
 			net_clsv_admin_request adminRequest;
 			memcpy(&adminRequest, buffer, sizeof(net_clsv_admin_request));
-			CString loginRecv(adminRequest.login);
-			CString pwdRecv(adminRequest.password);
+			adminRequest.login[32] = '\0';
+			adminRequest.password[32] = '\0';
+			CString loginRecv("%s", adminRequest.login); // R23: data, not a format
+			CString pwdRecv("%s", adminRequest.password);
 
 			if (!gameVar.zsv_adminPass.isNull() &&
 				!gameVar.zsv_adminUser.isNull())
 			{
 				if (loginRecv.isNull() || pwdRecv.isNull())
 				{
-					for (int i=0;i<MAX_PLAYER;++i)
-					{
-						if (game->players[i])
-						{
-							if (game->players[i]->babonetID == bbnetID)
-							{
-								game->players[i]->isAdmin = false;
-								break;
-							}
-						}
-					}
+					sender->isAdmin = false;
 					break;
 				}
 				CMD5 login_(gameVar.zsv_adminUser.s);
@@ -222,43 +260,23 @@ void Server::recvPacket(char * buffer, int typeID, unsigned long bbnetID)
 				if (loginRecv == login && pwdRecv == pwd)
 				{
 					//--- Admin accepted !!
-					for (int i=0;i<MAX_PLAYER;++i)
-					{
-						if (game->players[i])
-						{
-							if (game->players[i]->babonetID == bbnetID)
-							{
-								bb_serverSend(0, 0, NET_SVCL_ADMIN_ACCEPTED, bbnetID);
-								game->players[i]->isAdmin = true;
-								CString logInName = "Admin name: ";
-								CString logInIP = "Admin IP: ";
-								logInName += game->players[i]->name;
-								logInIP += game->players[i]->playerIP;
-								console->add(logInName);
-								console->add(logInIP);
-								break;
-							}
-						}
-					}
+					bb_serverSend(0, 0, NET_SVCL_ADMIN_ACCEPTED, bbnetID);
+					sender->isAdmin = true;
+					CString logInName = "Admin name: ";
+					CString logInIP = "Admin IP: ";
+					logInName += sender->name;
+					logInIP += sender->playerIP;
+					console->add(logInName);
+					console->add(logInIP);
 				}
 				else
 				{//Failed log in
-					for (int i=0;i<MAX_PLAYER;++i)
-					{
-						if (game->players[i])
-						{
-							if (game->players[i]->babonetID == bbnetID)
-							{
-								CString logInName = "Admin log-in attempt by: ";
-								CString logInIP = "Admin log-in attempt IP: ";
-								logInName += game->players[i]->name;
-								logInIP += game->players[i]->playerIP;
-								console->add(logInName);
-								console->add(logInIP);
-								break;
-							}
-						}
-					}
+					CString logInName = "Admin log-in attempt by: ";
+					CString logInIP = "Admin log-in attempt IP: ";
+					logInName += sender->name;
+					logInIP += sender->playerIP;
+					console->add(logInName);
+					console->add(logInIP);
 				}
 			}
 			break;
@@ -267,6 +285,7 @@ void Server::recvPacket(char * buffer, int typeID, unsigned long bbnetID)
 		{
 			net_clsv_gameversion_accepted gameVersionAccepted;
 			memcpy(&gameVersionAccepted, buffer, sizeof(net_clsv_gameversion_accepted));
+			gameVersionAccepted.password[15] = '\0';
 
 			if (game->players[gameVersionAccepted.playerID])
 			{
@@ -281,6 +300,7 @@ void Server::recvPacket(char * buffer, int typeID, unsigned long bbnetID)
 				if (gameVar.c_netlog)
 					console->add(CString("server> [net] handshake OK slot=%i -> SERVER_INFO map=\"%s\"", (int)gameVersionAccepted.playerID, game->mapName.s), true);
 				// Handshake done: restart the ping watchdog so pre-accept time doesn't count.
+				joined.insert(bbnetID); // checkPacket now accepts the client's other messages
 				game->players[gameVersionAccepted.playerID]->waitForPong = false;
 				game->players[gameVersionAccepted.playerID]->currentPingFrame = 0;
 
@@ -412,6 +432,8 @@ void Server::recvPacket(char * buffer, int typeID, unsigned long bbnetID)
 			if (game->players[playerInfo.playerID])
 			{
 				playerInfo.playerName[31] = '\0';
+				playerInfo.username[20] = '\0';
+				playerInfo.macAddr[19] = '\0';
 				game->players[playerInfo.playerID]->name = playerInfo.playerName;
 				memcpy(playerInfo.playerIP,game->players[playerInfo.playerID]->playerIP, 16);
 				bb_serverSend((char*)&playerInfo, sizeof(net_clsv_svcl_player_info), NET_CLSV_SVCL_PLAYER_INFO, 0);
@@ -421,7 +443,7 @@ void Server::recvPacket(char * buffer, int typeID, unsigned long bbnetID)
 				console->add(CString("server> %s joined the game id:%d", playerInfo.playerName, playerInfo.playerID), true);
 #endif
 				// broadcast the info at remote admins
-				if( master ) master->RA_NewPlayer( textColorLess(playerInfo.playerName).s, playerInfo.playerIP, (long)playerInfo.playerID );
+				if( master ) master->RA_NewPlayer( textColorLess(CString("%s", playerInfo.playerName)).s, playerInfo.playerIP, (long)playerInfo.playerID );
 
 				// Password is transfered sans null terminator, already MD5'd
 				char pw[33];
@@ -499,6 +521,15 @@ void Server::recvPacket(char * buffer, int typeID, unsigned long bbnetID)
 		}
 	case NET_SVCL_PLAY_SOUND:
 		{
+			// Q-S7: a known sound from a living sender, played where the sender is (clients only send their own position)
+			net_svcl_play_sound playSound;
+			memcpy(&playSound, buffer, sizeof(net_svcl_play_sound));
+			if (playSound.soundID < SOUND_GRENADE_REBOUND || playSound.soundID > SOUND_PHOTON_START || sender->status != PLAYER_STATUS_ALIVE)
+			{
+				logRejected(bbnetID, typeID, "sound");
+				return;
+			}
+			for (int k = 0; k < 3; ++k) playSound.position[k] = (unsigned char)sender->currentCF.position[k];
 			//--- On l'envoit �toute les autres player
 			for (int i=0;i<MAX_PLAYER;++i)
 			{
@@ -506,7 +537,7 @@ void Server::recvPacket(char * buffer, int typeID, unsigned long bbnetID)
 				{
 					if (game->players[i]->babonetID != bbnetID)
 					{
-						bb_serverSend(buffer, sizeof(net_svcl_play_sound), NET_SVCL_PLAY_SOUND, game->players[i]->babonetID);
+						bb_serverSend((char*)&playSound, sizeof(net_svcl_play_sound), NET_SVCL_PLAY_SOUND, game->players[i]->babonetID);
 					}
 				}
 			}
@@ -518,7 +549,7 @@ void Server::recvPacket(char * buffer, int typeID, unsigned long bbnetID)
 			memcpy(&chat, buffer, sizeof(net_clsv_svcl_chat));			
 			chat.message[129] = '\0';
 			// On print dans console
-			console->add(chat.message, false, false);
+			console->add(CString("%s", chat.message), false, false); // R21: data, not a format
 
 			// if everybody can see the messagem send it to everyone!
 			if( chat.teamID == -2 )
@@ -566,24 +597,11 @@ void Server::recvPacket(char * buffer, int typeID, unsigned long bbnetID)
 			}
 
 			// broadcast to potential remote admins
-			CString chatString = chat.message;
+			CString chatString("%s", chat.message); // R21: data, not a format
 			chatString = textColorLess( chatString );
 			if( master )
 			{
-				// find the player id from bbnet id
-				int playerid = -1;
-				for (int i=0;i<MAX_PLAYER;++i)
-				{
-					if (game->players[i])
-					{
-						if (game->players[i]->babonetID == bbnetID )
-						{
-							playerid = i;
-							break;
-						}
-					}
-				}
-				master->RA_Chat( chatString.s, playerid );
+				master->RA_Chat( chatString.s, slot );
 			}
 		
 			break;
@@ -592,6 +610,11 @@ void Server::recvPacket(char * buffer, int typeID, unsigned long bbnetID)
 		{
 			net_clsv_svcl_team_request teamRequest;
 			memcpy(&teamRequest, buffer, sizeof(net_clsv_svcl_team_request));
+			if (teamRequest.teamRequested < PLAYER_TEAM_SPECTATOR || teamRequest.teamRequested > PLAYER_TEAM_AUTO_ASSIGN)
+			{
+				logRejected(bbnetID, typeID, "team");
+				return;
+			}
 
 			// Est-ce que ce player existe
 			if (game->players[teamRequest.playerID])
@@ -637,6 +660,12 @@ void Server::recvPacket(char * buffer, int typeID, unsigned long bbnetID)
 			{
 				net_clsv_spawn_request spawnRequest;
 				memcpy(&spawnRequest, buffer, sizeof(net_clsv_spawn_request));
+				spawnRequest.skin[6] = '\0';
+				if (!packet::knownWeapon(spawnRequest.weaponID) || !packet::knownWeapon(spawnRequest.meleeID)) // Q-S2
+				{
+					logRejected(bbnetID, typeID, "weapon");
+					return;
+				}
 				if (game->players[spawnRequest.playerID])
 				{
 					//--- Validate weapons, if the validation var is set
@@ -748,6 +777,7 @@ void Server::recvPacket(char * buffer, int typeID, unsigned long bbnetID)
 				if (gameVar.sv_beGoodServer == false &&
 					(game->players[playerCoordFrame.playerID]->teamID == PLAYER_TEAM_RED ||
 					game->players[playerCoordFrame.playerID]->teamID == PLAYER_TEAM_BLUE) &&
+					game->players[playerCoordFrame.playerID]->weapon &&
 					game->players[playerCoordFrame.playerID]->weapon->weaponID != WEAPON_SNIPER &&
 					playerCoordFrame.camPosZ >= 9) // default z pos is 7
 				{
@@ -919,6 +949,12 @@ void Server::recvPacket(char * buffer, int typeID, unsigned long bbnetID)
 		{
 			net_clsv_player_shoot playerShoot;
 			memcpy(&playerShoot, buffer, sizeof(net_clsv_player_shoot));
+			// Q-S2, R25: a known weapon, from a player who holds one (not one who died just now). Clients bound nuzzleID.
+			if (!packet::knownWeapon(playerShoot.weaponID) || !sender->weapon)
+			{
+				logRejected(bbnetID, typeID, "weapon");
+				return;
+			}
 			if (game->players[playerShoot.playerID])
 			{
 				//--- Is he alive? Else we ignore it
@@ -998,6 +1034,13 @@ void Server::recvPacket(char * buffer, int typeID, unsigned long bbnetID)
 		{
 			net_clsv_svcl_player_projectile playerProjectile;
 			memcpy(&playerProjectile, buffer, sizeof(net_clsv_svcl_player_projectile));
+			// Q-S2, R25: a known weapon and projectile type, from a player who holds a weapon
+			if (!packet::knownWeapon(playerProjectile.weaponID) || !sender->weapon ||
+				playerProjectile.projectileType < PROJECTILE_DIRECT || playerProjectile.projectileType > PROJECTILE_PHOTON)
+			{
+				logRejected(bbnetID, typeID, "weapon or projectile type");
+				return;
+			}
 			if (game->players[playerProjectile.playerID])
 			{
 				//--- Is he alive? Else we ignore it
@@ -1129,6 +1172,7 @@ void Server::recvPacket(char * buffer, int typeID, unsigned long bbnetID)
 		{
 			net_clsv_map_list_request maplRequest;
 			memcpy(&maplRequest, buffer, sizeof(net_clsv_map_list_request));
+			maplRequest.all = buffer[offsetof(net_clsv_map_list_request, all)] != 0;
 			if (game->players[maplRequest.playerID])
 			{
 				std::vector<CString> maps = populateMapList(maplRequest.all);
@@ -1146,17 +1190,9 @@ void Server::recvPacket(char * buffer, int typeID, unsigned long bbnetID)
 		{
 			net_clsv_svcl_player_update_skin updateSkin;
 			memcpy(&updateSkin, buffer, sizeof(net_clsv_svcl_player_update_skin));
-
-			if (game)
-			{
-				for (int i=0;i<MAX_PLAYER;++i)
-				{
-					if (game->players[i])
-					{
-						bb_serverSend((char*)(&updateSkin), sizeof(net_clsv_svcl_player_update_skin), NET_CLSV_SVCL_PLAYER_UPDATE_SKIN);
-					}
-				}
-			}
+			updateSkin.skin[6] = '\0';
+			// Q-S7: one broadcast reaches everyone (it was sent once per connected player)
+			bb_serverSend((char*)(&updateSkin), sizeof(net_clsv_svcl_player_update_skin), NET_CLSV_SVCL_PLAYER_UPDATE_SKIN);
 			break;
 		}
 
