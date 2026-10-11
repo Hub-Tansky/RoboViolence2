@@ -81,6 +81,8 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 	int slot = checkPacket(wire, size, typeID, bbnetID, checked);
 	if (slot < 0) return;
 	Player * sender = game->players[slot];
+	// Step 9: a broken anti-cheat rule. True: drop the message (sv_antiCheat 2, or the sender was kicked and is gone).
+	auto broke = [&](ServerValidator::Rule rule) { return validator.violation(*sender, rule) != ServerValidator::ACCEPT; };
 	char * buffer = checked.data();
 	switch (typeID)
 	{
@@ -668,6 +670,8 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 				}
 				if (game->players[spawnRequest.playerID])
 				{
+					// The client asks once dead with its spawn timer run out; the server's timer starts earlier
+					if ((sender->status == PLAYER_STATUS_ALIVE || sender->timeToSpawn > 1.0f) && broke(ServerValidator::SPAWN_EARLY)) return;
 					if (const char * which = validator.badSpawnWeapon(spawnRequest))
 					{
 						//--- Kick him so HARD!
@@ -877,6 +881,7 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 			}
 			if (game->players[playerShoot.playerID])
 			{
+				if (playerShoot.weaponID != sender->weapon->weaponID && broke(ServerValidator::SHOT_WEAPON)) return;
 				//--- Is he alive? Else we ignore it
 				if (game->players[playerShoot.playerID]->status == PLAYER_STATUS_ALIVE || ( game->players[playerShoot.playerID]->status == PLAYER_STATUS_DEAD && game->players[playerShoot.playerID]->timeDead < 0.2f))
 				{
@@ -907,6 +912,7 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 							}
 							else
 							{
+								broke(ServerValidator::FIRE_RATE);
 								return;
 							}
 						}
@@ -939,6 +945,7 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 							//}
 							//else
 							//{
+								broke(ServerValidator::FIRE_RATE);
 								return;
 							//}
 						}
@@ -947,6 +954,8 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 						game->players[playerShoot.playerID]->firedShowDelay = 2;
 					}
 				}
+				else if (sender->status == PLAYER_STATUS_DEAD && sender->timeDead > 1.0f) // a lagged shot arrives within ~1 s
+					broke(ServerValidator::SHOT_DEAD);
 			}
 			break;
 		}
@@ -979,6 +988,7 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 						//no rocket launcher in hand, dont launch anything
 						if( ! (game->players[playerProjectile.playerID]->weapon->weaponID == WEAPON_BAZOOKA) )
 						{
+							broke(ServerValidator::ROCKET_WEAPON);
 							return;
 						}
 						if(gameVar.sv_zookaRemoteDet && gameVar.sv_serverType == 1)
@@ -1010,6 +1020,7 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 						}
 						else
 						{
+							broke(ServerValidator::FIRE_RATE);
 							return;
 						}
 						if(playerProjectile.projectileType == PROJECTILE_ROCKET)
@@ -1022,6 +1033,7 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 					{
 						if (!(game->spawnProjectile(playerProjectile, true)))
 						{
+							broke(ServerValidator::GRENADE_AMMO);
 							return;
 						}
 					}
@@ -1032,6 +1044,8 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 					bb_serverSend((char*)&playerProjectile, sizeof(net_clsv_svcl_player_projectile), NET_CLSV_SVCL_PLAYER_PROJECTILE, 0);
 
 				}
+				else if (sender->status == PLAYER_STATUS_DEAD && sender->timeDead > 1.0f)
+					broke(ServerValidator::SHOT_DEAD);
 			}
 			break;
 		}

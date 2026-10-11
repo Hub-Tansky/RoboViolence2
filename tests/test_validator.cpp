@@ -216,6 +216,116 @@ static void antiCheatLevels()
 	console->sendCommand("set sv_antiCheat 1");
 }
 
+static void shoot(UINT4 c, int weaponID, int count = 1)
+{
+	Player * p = player(c);
+	net_clsv_player_shoot shot = {};
+	shot.weaponID = (char)weaponID;
+	for (int k = 0; k < 2; ++k) shot.p1[k] = (short)(p->currentCF.position[k] * 100), shot.p2[k] = shot.p1[k] + 300;
+	for (int i = 0; i < count; ++i) harness::queueMessage(c, NET_CLSV_PLAYER_SHOOT, &shot, sizeof(shot)); // one frame
+	harness::tick();
+}
+
+static void throwProjectile(UINT4 c, int weaponID, int type, int count = 1)
+{
+	Player * p = player(c);
+	net_clsv_svcl_player_projectile projectile = {};
+	projectile.weaponID = (char)weaponID;
+	projectile.projectileType = (char)type;
+	for (int k = 0; k < 3; ++k) projectile.position[k] = (short)(p->currentCF.position[k] * 100);
+	projectile.vel[0] = 10;
+	for (int i = 0; i < count; ++i) harness::queueMessage(c, NET_CLSV_SVCL_PLAYER_PROJECTILE, &projectile, sizeof(projectile));
+	harness::tick();
+}
+
+static float score(UINT4 c) { return scene->server->validator.scoreOf(harness::slotOf(c)); }
+
+static void leave(UINT4 c)
+{
+	harness::disconnect(c);
+	harness::tick();
+}
+
+// 9.2 weapon rules: each cheat scores, normal play (with jitter) does not
+static void weaponRules()
+{
+	// Fire rate: ten SMG shots in one frame; honest shots 0.067-0.133 s apart (fireDelay 0.1)
+	UINT4 c = harness::spawned(WEAPON_SMG);
+	for (int i = 0; i < 30; ++i)
+	{
+		shoot(c, WEAPON_SMG);
+		harness::tick(i % 2 ? 1 : 3); // with shoot()'s own frame: 0.067 or 0.133 s apart
+	}
+	CHECK(score(c) == 0);
+	shoot(c, WEAPON_SMG, 10);
+	CHECK(score(c) > 3.5f); // 9 drops, 5 tolerated
+	leave(c);
+
+	// A shot with a weapon the player doesn't hold
+	c = harness::spawned(WEAPON_SMG);
+	harness::tick(30);
+	shoot(c, WEAPON_SNIPER, 3);
+	CHECK(score(c) > 0.5f);
+	leave(c);
+
+	// Shots long after death; one just after death is lag
+	c = harness::spawned(WEAPON_SMG);
+	player(c)->kill(true);
+	player(c)->timeDead = 0;
+	shoot(c, WEAPON_SMG, 3);
+	CHECK(score(c) == 0);
+	live(c, 2);
+	shoot(c, WEAPON_SMG, 3);
+	CHECK(score(c) > 0.5f);
+	leave(c);
+
+	// Grenades: the two a player starts with, then more
+	c = harness::spawned(WEAPON_SMG);
+	throwProjectile(c, WEAPON_GRENADE, PROJECTILE_GRENADE, 2);
+	CHECK(score(c) == 0);
+	throwProjectile(c, WEAPON_GRENADE, PROJECTILE_GRENADE, 2);
+	CHECK(score(c) > 0.5f);
+	leave(c);
+
+	// A rocket without a bazooka
+	c = harness::spawned(WEAPON_SMG);
+	throwProjectile(c, WEAPON_BAZOOKA, PROJECTILE_ROCKET, 2);
+	CHECK(score(c) > 0.5f);
+	leave(c);
+
+	// Spawn requests while alive; one once dead with the timer run out is fine
+	c = harness::spawned(WEAPON_SMG);
+	live(c, 3); // a new tolerance window (spawned() itself spawns early)
+	player(c)->kill(true);
+	player(c)->timeToSpawn = 0;
+	net_clsv_spawn_request spawn = {};
+	spawn.weaponID = WEAPON_SMG;
+	spawn.meleeID = WEAPON_KNIVES;
+	harness::deliver(c, NET_CLSV_SPAWN_REQUEST, spawn);
+	CHECK(player(c)->status == PLAYER_STATUS_ALIVE && score(c) == 0);
+	harness::queueMessage(c, NET_CLSV_SPAWN_REQUEST, &spawn, sizeof(spawn));
+	harness::queueMessage(c, NET_CLSV_SPAWN_REQUEST, &spawn, sizeof(spawn));
+	harness::tick();
+	CHECK(score(c) > 0.5f);
+	leave(c);
+
+	// sv_antiCheat 2 drops the message: of three shots with a weapon the player doesn't hold (in one frame), the one
+	// past the tolerance is not fired; at 1 all are
+	int fired[3] = {};
+	for (int level = 1; level <= 2; ++level)
+	{
+		console->sendCommand(CString("set sv_antiCheat %i", level));
+		c = harness::spawned(WEAPON_SMG);
+		harness::tick(90);
+		harness::sent().clear();
+		shoot(c, WEAPON_SNIPER, 3);
+		for (const harness::SentPacket & p : harness::sent()) fired[level] += p.typeID == NET_SVCL_PLAYER_SHOOT;
+		leave(c);
+	}
+	CHECK(fired[1] > 0 && fired[2] < fired[1]);
+	console->sendCommand("set sv_antiCheat 1");
+}
+
 int main(int, char ** argv)
 {
 	if (!harness::start(argv[0])) return 1;
@@ -227,6 +337,7 @@ int main(int, char ** argv)
 	resets();
 	speedHackKickVar();
 	antiCheatLevels();
+	weaponRules();
 	harness::stop();
 	if (harness::failures() == 0) std::printf("ok: validator\n");
 	return harness::failures() ? 1 : 0;
