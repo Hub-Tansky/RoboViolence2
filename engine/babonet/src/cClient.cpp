@@ -845,7 +845,10 @@ int cClient::Send(UINT4 &nbByte)
 	//on va envoyer les packets en attente dans la liste PacketsTCP
 
 	int	packed			=	0;
-	char	*buf		=	new char[3072];
+	// R31: sized for the queued messages (a fixed 3072 bytes overflowed on a message over ~2 KB)
+	unsigned int	bufSize	=	3072;
+	for(cPacket *p=PacketsToSend;p;p=p->Next) bufSize += sizeof(stHeader) + p->Size;
+	char	*buf		=	new char[bufSize];
 	char	NbPacket	=	0;
 
 

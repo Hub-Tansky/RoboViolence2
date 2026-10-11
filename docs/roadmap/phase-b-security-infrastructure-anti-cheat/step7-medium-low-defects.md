@@ -50,6 +50,7 @@ Current locations (the `KEY_QUESTIONS.md` paths predate step 2):
 
 - Tests: `babonet_large_message` (R7), `crash_fixes` checks `r10`, `r9`, `r13`, `r8`, `r12`, `r15`.
 - Fix proof (fix reverted): R7 `FAIL: received 1, intact 0`; R8 `reds == 3 && blues == 3`, `moves == 2`; R12 `flagState[0] == -1`; R15 `avgPing == 10`; under ASan, R10 heap-buffer-overflow in `collisionClip`, R9 in `queryNextMap`, R13 in `spawnPlayer`.
+- R31 (new, found by the R7 test under ASan): `cClient::Send` overflowed its fixed 3072-byte buffer on the 10000-byte message; fix proof is that ASan report (`heap-buffer-overflow` in `cClient::Send`).
 - No test: R6 (client-only code, the harness runs the server); R18 rest (sizes widened, CodeQL closes the alerts; `CAStar` copy is deleted, so nothing can call it); R19 (format string).
 
 ## Critical files
