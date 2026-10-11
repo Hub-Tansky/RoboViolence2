@@ -8,6 +8,7 @@ namespace credentials
 {
 	const int NONCE_SIZE = 16, MAC_SIZE = 32;
 
+	// Plain HMAC-SHA256 (public for the RFC 4231 test)
 	void hmac(const char * key, const void * data, size_t size, uint8_t out[MAC_SIZE]);
 	void nonce(uint8_t out[NONCE_SIZE]);
 	// The proof for one use of a password: "join", "admin user" or "admin password"

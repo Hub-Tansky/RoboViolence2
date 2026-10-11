@@ -28,6 +28,13 @@ static const net_svcl_gameversion * versionFor(UINT4 id)
 	return nullptr;
 }
 
+static const uint8_t * nonceFor(UINT4 id)
+{
+	for (const harness::SentPacket & p : harness::sent())
+		if (p.typeID == NET_SVCL_JOIN_CHALLENGE && p.destination == (INT4)id) return ((const net_svcl_join_challenge *)p.data.data())->nonce;
+	return nullptr;
+}
+
 static bool welcomed(UINT4 id)
 {
 	for (const harness::SentPacket & p : harness::sent())
@@ -61,7 +68,7 @@ int main(int, char ** argv)
 	UINT4 a = harness::connect();
 	const net_svcl_gameversion * version = versionFor(a);
 	CHECK(version && version->gameVersion == GAME_VERSION_SV);
-	credentials::prove("hunter2", "join", version->nonce, proof);
+	credentials::prove("hunter2", "join", nonceFor(a), proof);
 	answer(a, proof);
 	CHECK(welcomed(a) && harness::slotOf(a) >= 0);
 
@@ -83,11 +90,11 @@ int main(int, char ** argv)
 
 	// A replay of that proof on another connection (another challenge), and a wrong password, are disconnected
 	UINT4 b = harness::connect();
-	CHECK(versionFor(b) && memcmp(versionFor(b)->nonce, version->nonce, credentials::NONCE_SIZE) != 0);
+	CHECK(nonceFor(b) && memcmp(nonceFor(b), nonceFor(a), credentials::NONCE_SIZE) != 0);
 	answer(b, proof);
 	CHECK(!welcomed(b) && harness::slotOf(b) == -1);
 	UINT4 c = harness::connect();
-	credentials::prove("hunter3", "join", versionFor(c)->nonce, proof);
+	credentials::prove("hunter3", "join", nonceFor(c), proof);
 	answer(c, proof);
 	CHECK(!welcomed(c) && harness::slotOf(c) == -1);
 

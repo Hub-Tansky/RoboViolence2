@@ -22,6 +22,7 @@
 
 
 #include "cMSstruct.h"
+#include "Credentials.h"
 #include <stdint.h>
 
 // Wire format: fixed-width fields, no padding, little endian (asserted below). Changing a layout needs a GAME_VERSION bump.
@@ -70,7 +71,7 @@ struct net_clsv_player_shoot
 struct net_clsv_gameversion_accepted
 {
 	int8_t playerID;		// Le ID du joueur
-	uint8_t proof[32];	// HMAC of sv_password over the GAMEVERSION nonce (Credentials.h); ignored without a password
+	uint8_t proof[32];	// HMAC of sv_password over the JOIN_CHALLENGE nonce (Credentials.h); ignored without a password
 };
 
 // On demande au server de pickuper un item par terre
@@ -84,7 +85,7 @@ struct net_clsv_pickup_request
 #define NET_CLSV_ADMIN_REQUEST 6
 struct net_clsv_admin_request
 {
-	uint8_t login[32];		// HMAC of the user over the GAMEVERSION nonce, label "admin user" (Credentials.h)
+	uint8_t login[32];		// HMAC of the user over the JOIN_CHALLENGE nonce, label "admin user" (Credentials.h)
 	uint8_t password[32];	// HMAC of the password, label "admin password"
 };
 
@@ -289,8 +290,14 @@ struct net_svcl_play_sound
 #define NET_SVCL_GAMEVERSION 116
 struct net_svcl_gameversion
 {
-	uint32_t gameVersion;
-	uint8_t nonce[16]; // this connection's challenge for the join and admin passwords (step 10)
+	uint32_t gameVersion; // 4 bytes for good: any build can read another's version
+};
+
+// This connection's challenge for the join and admin passwords, sent just before GAMEVERSION (step 10)
+#define NET_SVCL_JOIN_CHALLENGE 134
+struct net_svcl_join_challenge
+{
+	uint8_t nonce[16];
 };
 
 // Pour synchroniser le temps des horloges du jeu
@@ -598,7 +605,12 @@ static_assert(sizeof(net_svcl_projectile_coord_frame) == 19, "net_svcl_projectil
 static_assert(sizeof(net_svcl_explosion) == 29, "net_svcl_explosion wire size");
 static_assert(sizeof(net_svcl_player_hit) == 10, "net_svcl_player_hit wire size");
 static_assert(sizeof(net_svcl_play_sound) == 6, "net_svcl_play_sound wire size");
-static_assert(sizeof(net_svcl_gameversion) == 20, "net_svcl_gameversion wire size");
+static_assert(sizeof(net_svcl_gameversion) == 4, "net_svcl_gameversion wire size");
+static_assert(sizeof(net_svcl_join_challenge) == 16, "net_svcl_join_challenge wire size");
+static_assert(sizeof(net_svcl_join_challenge::nonce) == credentials::NONCE_SIZE, "challenge size");
+static_assert(sizeof(net_clsv_gameversion_accepted::proof) == credentials::MAC_SIZE &&
+	sizeof(net_clsv_admin_request::login) == credentials::MAC_SIZE &&
+	sizeof(net_clsv_admin_request::password) == credentials::MAC_SIZE, "proof size");
 static_assert(sizeof(net_svcl_synchronize_timer) == 12, "net_svcl_synchronize_timer wire size");
 static_assert(sizeof(net_svcl_change_flag_state) == 3, "net_svcl_change_flag_state wire size");
 static_assert(sizeof(net_svcl_drop_flag) == 13, "net_svcl_drop_flag wire size");

@@ -92,6 +92,7 @@ namespace packet
 			{NET_SVCL_ADMIN_ACCEPTED, 0, {}, {}},
 			{NET_SVCL_NEWPLAYER, sizeof(net_svcl_newplayer), {F(net_svcl_newplayer, newPlayerID, Slot)}, {}},
 			{NET_SVCL_GAMEVERSION, sizeof(net_svcl_gameversion), {}, {}},
+			{NET_SVCL_JOIN_CHALLENGE, sizeof(net_svcl_join_challenge), {}, {}},
 			{NET_CLSV_SVCL_PLAYER_INFO, sizeof(net_clsv_svcl_player_info), {F(net_clsv_svcl_player_info, playerID, Slot)},
 				{END(net_clsv_svcl_player_info, playerIP), END(net_clsv_svcl_player_info, playerName), END(net_clsv_svcl_player_info, username)}},
 			{NET_CLSV_SVCL_CHAT, sizeof(net_clsv_svcl_chat), {}, {END(net_clsv_svcl_chat, message)}},

@@ -398,11 +398,13 @@ void Server::updateNet(float delay, bool send)
 			strcpy(game->players[playerID]->playerIP, IPDuGars);
 			validator.join(*game->players[playerID]);
 
-			// The game version first, with a fresh password challenge
+			// A fresh password challenge, then the game version
+			net_svcl_join_challenge challenge;
+			credentials::nonce(joinNonce[playerID]);
+			memcpy(challenge.nonce, joinNonce[playerID], sizeof(challenge.nonce));
+			bb_serverSend((char*)&challenge, sizeof(net_svcl_join_challenge), NET_SVCL_JOIN_CHALLENGE, clientID);
 			net_svcl_gameversion gameVersion;
 			gameVersion.gameVersion = GAME_VERSION_SV;
-			credentials::nonce(joinNonce[playerID]);
-			memcpy(gameVersion.nonce, joinNonce[playerID], sizeof(gameVersion.nonce));
 			bb_serverSend((char*)&gameVersion, sizeof(net_svcl_gameversion), NET_SVCL_GAMEVERSION, clientID);
 			if (gameVar.c_netlog)
 				console->add(CString("server> [net] slot %i for babonetID=%i: sent NEWPLAYER (all) + GAMEVERSION %i", playerID, (int)clientID, GAME_VERSION_SV), true);
@@ -1400,6 +1402,8 @@ void Server::sendSVChange(CString varCom)
 	{
 		gameVar.weapons[WEAPON_NUCLEAR]->fireDelay = gameVar.sv_nukeReload;
 	}
+	char name[64];
+	if (sscanf(varCom.s, "set %63s", name) == 1 && dksvarIsSecret(name)) return; // passwords never go to clients (Q-S5)
 	if (varCom.len() > 79) varCom.resize(79); // svChange holds 79 characters and the '\0'
 	net_svcl_sv_change svChange;
 	memcpy(svChange.svChange, varCom.s, varCom.len()+1);

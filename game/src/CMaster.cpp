@@ -359,7 +359,7 @@ void CMaster::ReceivePeersPacket()
 					char srvName[63];
 					sprintf( srvName , "{ LAN } %s", gameVar.sv_gameName.s );
 					strncpy(gameInfos.GameInfo.serverName, srvName, 63);
-					strncpy(gameInfos.GameInfo.password, gameVar.sv_password.s, 15);
+					strcpy(gameInfos.GameInfo.password, gameVar.sv_password != "" ? "*" : ""); // a flag: never the password (Q-S5)
 					sprintf( gameInfos.GameInfo.ip , "%s", bb_getMyIP() );
 					gameInfos.GameInfo.port = (unsigned short)gameVar.sv_port;
 					int nbPlayer = 0;
@@ -893,7 +893,7 @@ void CMaster::sendGameInfo(Server* server)
 
 		strncpy(bv2Row.map, server->game->mapName.s, 16);
 		strncpy(bv2Row.serverName, gameVar.sv_gameName.s, 63);
-		strncpy(bv2Row.password, gameVar.sv_password.s, 15);
+		strcpy(bv2Row.password, gameVar.sv_password != "" ? "*" : ""); // a flag: never the password (Q-S5)
 		bv2Row.ip[0] = '\0';
 		bv2Row.port = (unsigned short)gameVar.sv_port;
 		int nbPlayer = 0;

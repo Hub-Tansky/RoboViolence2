@@ -845,7 +845,7 @@ void Console::sendCommand(CString commandLine, bool isAdmin, unsigned long bbnet
 					val.resize(15);
 					commandLine = "set sv_password ";
 					commandLine += val;
-					console->add(CString("Max password length is 15 characters, password changed to '%s'", val.s), true);
+					console->add("Max password length is 15 characters, password truncated", true); // never echo a secret
 				}
 
 				// Il faut envoyer le changement de variable sur le r?eau
@@ -853,7 +853,6 @@ void Console::sendCommand(CString commandLine, bool isAdmin, unsigned long bbnet
 				// A launch script sets sv_* variables before `dedicate` creates the server.
 				if (scene && scene->server)
 #endif
-				if (svar != "sv_password") // Q-S5: clients never get the password (step 10)
 				scene->server->sendSVChange(commandLine);
 
 				if (command == "set sv_port")

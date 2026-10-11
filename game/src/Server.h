@@ -55,8 +55,8 @@ public:
 	// Cheat checks on received messages (step 8)
 	ServerValidator validator;
 
-	// Per slot: the challenge sent in its GAMEVERSION, for the join and admin passwords (step 10)
-	uint8_t joinNonce[MAX_PLAYER][credentials::NONCE_SIZE];
+	// Per slot: the challenge sent in its JOIN_CHALLENGE, for the join and admin passwords (step 10)
+	uint8_t joinNonce[MAX_PLAYER][credentials::NONCE_SIZE] = {};
 
 #ifndef CONSOLE
 	// La font

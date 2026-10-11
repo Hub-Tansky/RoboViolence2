@@ -87,7 +87,7 @@ public:
 	// NET_SVCL_GAMEVERSION arrived before our NET_SVCL_NEWPLAYER slot; answer once the slot exists.
 	bool pendingVersionAccept;
 
-	// The server's password challenge from NET_SVCL_GAMEVERSION (step 10)
+	// The server's password challenge from NET_SVCL_JOIN_CHALLENGE (step 10)
 	uint8_t serverNonce[credentials::NONCE_SIZE] = {};
 
 	// Si on montre le menu

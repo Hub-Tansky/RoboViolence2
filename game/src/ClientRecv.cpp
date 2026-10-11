@@ -58,7 +58,7 @@ void Client::sendVersionAccepted()
 {
 	net_clsv_gameversion_accepted gameVersionAccepted;
 	gameVersionAccepted.playerID = game->thisPlayer->playerID;
-	//--- We are also server, retreive password
+	//--- A listen server's own client proves sv_password
 	credentials::prove(scene->server ? gameVar.sv_password.s : m_password.s, "join", serverNonce, gameVersionAccepted.proof);
 	bb_clientSend(uniqueClientID, (char*)&gameVersionAccepted, sizeof(net_clsv_gameversion_accepted), NET_CLSV_GAMEVERSION_ACCEPTED);
 }
@@ -108,7 +108,7 @@ void Client::recvPacket(char * wire, int size, int typeID)
 	if (!gotGameState || !isConnected)
 	{
 		if (typeID != NET_SVCL_NEWPLAYER &&
-			typeID != NET_SVCL_GAMEVERSION &&
+			typeID != NET_SVCL_GAMEVERSION && typeID != NET_SVCL_JOIN_CHALLENGE &&
 			typeID != NET_SVCL_SERVER_INFO &&
 			typeID != NET_SVCL_PING &&
 			typeID != NET_SVCL_MAP_CHUNK)
@@ -279,11 +279,15 @@ void Client::recvPacket(char * wire, int size, int typeID)
 			}
 			break;
 		}
+	case NET_SVCL_JOIN_CHALLENGE:
+		{
+			memcpy(serverNonce, buffer, sizeof(serverNonce));
+			break;
+		}
 	case NET_SVCL_GAMEVERSION:
 		{
 			net_svcl_gameversion gameVersion;
 			memcpy(&gameVersion, buffer, sizeof(net_svcl_gameversion));
-			memcpy(serverNonce, gameVersion.nonce, sizeof(serverNonce));
 			if (gameVersion.gameVersion == GAME_VERSION_CL && game->thisPlayer)
 			{
 				pendingVersionAccept = false;

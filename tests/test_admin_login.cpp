@@ -23,7 +23,7 @@ static std::vector<std::vector<char>> delivered;
 static const uint8_t * nonceFor(UINT4 id)
 {
 	for (const harness::SentPacket & p : harness::sent())
-		if (p.typeID == NET_SVCL_GAMEVERSION && p.destination == (INT4)id) return ((const net_svcl_gameversion *)p.data.data())->nonce;
+		if (p.typeID == NET_SVCL_JOIN_CHALLENGE && p.destination == (INT4)id) return ((const net_svcl_join_challenge *)p.data.data())->nonce;
 	return nullptr;
 }
 

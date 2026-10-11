@@ -49,14 +49,14 @@ int main()
 	pong.playerID = 31;
 	CHECK(sizeof(pong) == 1);
 
-	// Step 10: the version carries a 16-byte challenge after the version; the answer is the slot and a 32-byte proof
+	// Step 10: the version stays 4 bytes (any build reads another's); the challenge is its own 16-byte message; the
+	// answer is the slot and a 32-byte proof
 	net_svcl_gameversion version;
 	version.gameVersion = 22100;
-	for (int i = 0; i < 16; ++i) version.nonce[i] = (uint8_t)(i + 1);
 	unsigned char versionWire[sizeof(version)];
 	std::memcpy(versionWire, &version, sizeof(version));
-	CHECK(sizeof(version) == 4 + 16 && versionWire[0] == (22100 & 0xFF) && versionWire[1] == (22100 >> 8));
-	CHECK(versionWire[4] == 1 && versionWire[19] == 16);
+	CHECK(sizeof(version) == 4 && versionWire[0] == (22100 & 0xFF) && versionWire[1] == (22100 >> 8));
+	CHECK(sizeof(net_svcl_join_challenge) == 16);
 	net_clsv_gameversion_accepted accepted;
 	accepted.playerID = 3;
 	std::memset(accepted.proof, 0xAB, sizeof(accepted.proof));
