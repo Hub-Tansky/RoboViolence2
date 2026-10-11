@@ -257,7 +257,7 @@ void			dksPlayMusic(char* filename, int channel, int volume)
 		return;
 	}
 	fclose(f);
-	if (ma_sound_init_from_file(&g_engine, filename, MA_SOUND_FLAG_STREAM | MA_SOUND_FLAG_NO_SPATIALIZATION, 0, 0, &g_music) != MA_SUCCESS)
+	if (ma_sound_init_from_file(&g_engine, filename, MA_SOUND_FLAG_STREAM | MA_SOUND_FLAG_WAIT_INIT | MA_SOUND_FLAG_NO_SPATIALIZATION, 0, 0, &g_music) != MA_SUCCESS)
 	{
 		fprintf(stderr, "dks: cannot play music %s\n", filename);
 		return;
