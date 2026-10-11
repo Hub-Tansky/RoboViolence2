@@ -823,7 +823,6 @@ void GameVar::sendSVVar(UINT4 babonetID)
 	sendOne("sv_port", babonetID);
 	sendOne("sv_maxPlayer", babonetID);
    sendOne("sv_maxPlayerInGame", babonetID);
-	sendOne("sv_password", babonetID);
 	sendOne("sv_enableSMG", babonetID);
 	sendOne("sv_enableShotgun", babonetID);
 	sendOne("sv_enableSniper", babonetID);
@@ -899,7 +898,6 @@ void GameVar::sendSVVar(INT4 peerId)
 	sendOne("sv_port", peerId);
 	sendOne("sv_maxPlayer", peerId);
    sendOne("sv_maxPlayerInGame", peerId);
-	sendOne("sv_password", peerId);
 	sendOne("sv_enableSMG", peerId);
 	sendOne("sv_enableShotgun", peerId);
 	sendOne("sv_enableSniper", peerId);

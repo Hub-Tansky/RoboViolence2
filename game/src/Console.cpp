@@ -861,6 +861,7 @@ void Console::sendCommand(CString commandLine, bool isAdmin, unsigned long bbnet
 				// A launch script sets sv_* variables before `dedicate` creates the server.
 				if (scene && scene->server)
 #endif
+				if (svar != "sv_password") // Q-S5: clients never get the password (step 10)
 				scene->server->sendSVChange(commandLine);
 
 				if (command == "set sv_port")
