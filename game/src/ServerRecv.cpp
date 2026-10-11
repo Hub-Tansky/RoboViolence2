@@ -668,35 +668,13 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 				}
 				if (game->players[spawnRequest.playerID])
 				{
-					//--- Validate weapons, if the validation var is set
-					if( gameVar.sv_validateWeapons )
+					const char * which = nullptr;
+					if (validator.onSpawnRequest(spawnRequest, which) == ServerValidator::KICK)
 					{
-						if (!(spawnRequest.weaponID == WEAPON_SMG ||
-							spawnRequest.weaponID == WEAPON_SHOTGUN ||
-							spawnRequest.weaponID == WEAPON_SNIPER ||
-							spawnRequest.weaponID == WEAPON_DUAL_MACHINE_GUN ||
-							spawnRequest.weaponID == WEAPON_CHAIN_GUN ||
-							spawnRequest.weaponID == WEAPON_BAZOOKA ||
-							spawnRequest.weaponID == WEAPON_PHOTON_RIFLE ||
-							spawnRequest.weaponID == WEAPON_FLAME_THROWER))
-						{
-							//--- Kick him so HARD!
-							console->sendCommand(CString("sayall %s is trying to hack his primary weapon! Kicked him", game->players[spawnRequest.playerID]->name.s));
-							scene->kick(spawnRequest.playerID);
-							return;
-						}
-
-						if (!(spawnRequest.meleeID == WEAPON_KNIVES ||
-							spawnRequest.meleeID == WEAPON_NUCLEAR ||
-							spawnRequest.meleeID == WEAPON_SHIELD
-								|| spawnRequest.meleeID == WEAPON_MINIBOT
-							))
-						{
-							//--- Kick him so HARD!
-							console->sendCommand(CString("sayall %s is trying to hack his secondary weapon! Kicked him", game->players[spawnRequest.playerID]->name.s));
-							scene->kick(spawnRequest.playerID);
-							return;
-						}
+						//--- Kick him so HARD!
+						console->sendCommand(CString("sayall %s is trying to hack his %s weapon! Kicked him", game->players[spawnRequest.playerID]->name.s, which));
+						scene->kick(spawnRequest.playerID);
+						return;
 					}
 
 					// *** small checkup to make sure people can't choose minibot if sv_enableMinibot is false
@@ -798,57 +776,15 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 						game->players[playerCoordFrame.playerID]->currentFrame = playerCoordFrame.frameID;
 						if (game->players[playerCoordFrame.playerID]->frameSinceLast >= 90)
 						{
-							// Check for acceleration hack
-							CVector3f vel;
-							vel[0] = (float)playerCoordFrame.vel[0] / 10.0f;
-							vel[1] = (float)playerCoordFrame.vel[1] / 10.0f;
-							vel[2] = (float)playerCoordFrame.vel[2] / 10.0f;
-
-							//console->add( CString( "vel : %f  %f  %f" , vel[0] , vel[1] , vel[2] ), true );
-
-							// Frame check: client frames elapsed vs server ticks in the same window.
-							// Allow 5 frames + 10% for packet jitter and the client's catch-up ticks
-							// after a stall; a real speed hack still drifts far beyond that.
-							Player * shp = game->players[playerCoordFrame.playerID];
-							long clientFrames = shp->currentFrame - shp->lastFrame;
-							bool frameHack = clientFrames > shp->frameSinceLast + 5 + shp->frameSinceLast / 10;
-
-							// Speed check: horizontal speed vs the client clamp (3.25) plus the
-							// char*10 quantisation margin. Knockback from a hit legitimately
-							// exceeds the clamp, so skip it for 2 s after the server registers one.
-							float hSpeed = sqrtf(vel[0] * vel[0] + vel[1] * vel[1]);
-							bool speedHack = shp->framesSinceKnockback > 60 && hSpeed > 3.25f + 0.15f;
-
-							if (frameHack || speedHack)
+							if (validator.onCoordFrame(playerCoordFrame.playerID, *game->players[playerCoordFrame.playerID], playerCoordFrame) == ServerValidator::KICK)
 							{
-								//--- Hey, on a 10 frame de plus que le server.. hacking???
-								game->players[playerCoordFrame.playerID]->speedHackCount++;
-
-								//printf("hackcount++\n");
-
-								//--- Apres 3 shot (9sec) BOUM ON LE KICK L'ENFANT DE PUTE
-								if (game->players[playerCoordFrame.playerID]->speedHackCount >= 3)
-								{
-									// ?????? Save stats to cache
-									//cacheStats(game->players[playerCoordFrame.playerID]);
-
-									//printf("anti hack count = 3\n");
-									//--- On envoit �tout le monde (y compris lui) quil essaye de speedhacking
-									//sayall(CString("Disconnecting %s (%s): Speed Hack Detected", game->players[playerCoordFrame.playerID]->name.s, game->players[playerCoordFrame.playerID]->playerIP));
-									if( master ) master->RA_DisconnectedPlayer( textColorLess(game->players[playerCoordFrame.playerID]->name).s, game->players[playerCoordFrame.playerID]->playerIP, (long)game->players[playerCoordFrame.playerID]->playerID);
-									bb_serverDisconnectClient(game->players[playerCoordFrame.playerID]->babonetID);
-									//console->add(CString("\x3server> POSSIBLE HACKER: %s (%s), Speed Hack", game->players[playerCoordFrame.playerID]->name.s, game->players[playerCoordFrame.playerID]->playerIP), true);
-									ZEVEN_SAFE_DELETE(game->players[playerCoordFrame.playerID]);
-									net_svcl_player_disconnect playerDisconnect;
-									playerDisconnect.playerID = (char)playerCoordFrame.playerID;
-									bb_serverSend((char*)&playerDisconnect,sizeof(net_svcl_player_disconnect),NET_SVCL_PLAYER_DISCONNECT,0);
-									return;
-								}
-							}
-							else
-							{
-								//--- Reset hacking count
-								game->players[playerCoordFrame.playerID]->speedHackCount = 0;
+								if( master ) master->RA_DisconnectedPlayer( textColorLess(game->players[playerCoordFrame.playerID]->name).s, game->players[playerCoordFrame.playerID]->playerIP, (long)game->players[playerCoordFrame.playerID]->playerID);
+								bb_serverDisconnectClient(game->players[playerCoordFrame.playerID]->babonetID);
+								ZEVEN_SAFE_DELETE(game->players[playerCoordFrame.playerID]);
+								net_svcl_player_disconnect playerDisconnect;
+								playerDisconnect.playerID = (char)playerCoordFrame.playerID;
+								bb_serverSend((char*)&playerDisconnect,sizeof(net_svcl_player_disconnect),NET_SVCL_PLAYER_DISCONNECT,0);
+								return;
 							}
 
 							game->players[playerCoordFrame.playerID]->frameSinceLast = 0;
@@ -913,7 +849,7 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 				}
 				else
 				{
-					game->players[playerCoordFrame.playerID]->speedHackCount = 0;
+					validator.reset(playerCoordFrame.playerID);
 					game->players[playerCoordFrame.playerID]->frameSinceLast = 0;
 					game->players[playerCoordFrame.playerID]->lastFrame = 0;
 					game->players[playerCoordFrame.playerID]->currentFrame = 0;

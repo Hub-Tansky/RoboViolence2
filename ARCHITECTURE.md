@@ -635,6 +635,8 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/ServerClose.h` | Dialog shown when the server closes the connection |
 | `game/src/ServerRecv.cpp` | Server: handlers for every client-to-server packet, after the pre-dispatch check `Server::checkPacket` |
 | `game/src/ServerSnD.cpp` | Server: search-and-destroy rules |
+| `game/src/ServerValidator.cpp` | Server cheat checks: spawn weapon whitelist, per-player speed/frame violation score |
+| `game/src/ServerValidator.h` | Server cheat checks (`Server::validator`), asked by the `ServerRecv.cpp` handlers |
 | `game/src/SqlStatement.h` | Prepared SQLite statement with bound parameters (the game's copy) |
 | `game/src/Weapon.cpp` | Weapon definitions and stats |
 | `game/src/Weapon.h` | Weapon definitions and stats |

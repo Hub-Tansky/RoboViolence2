@@ -388,6 +388,7 @@ void Server::updateNet(float delay, bool send)
 
 		// On le cr�A
 		playerID = game->createNewPlayerSV(clientID);
+		if (playerID != -1) validator.reset(playerID);
 		if (playerID == -1)
 		{
 			// Oups!! Y a pus de place, on le canne

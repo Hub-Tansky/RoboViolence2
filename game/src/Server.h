@@ -21,6 +21,7 @@
 
 
 #include "Game.h"
+#include "ServerValidator.h"
 #include <map>
 #include <string>
 
@@ -50,6 +51,9 @@ class Server
 public:
 	// Le jeu controll�
 	Game * game;
+
+	// Cheat checks on received messages (step 8)
+	ServerValidator validator;
 
 #ifndef CONSOLE
 	// La font

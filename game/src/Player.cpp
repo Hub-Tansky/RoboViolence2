@@ -95,7 +95,6 @@ Player::Player(char pPlayerID, Map * pMap, Game * pGame): pingLogInterval(0.05f)
 	frameSinceLast = 0;
 	lastFrame = 0;
 	currentFrame = 0;
-	speedHackCount = 0;
 	framesSinceKnockback = 1000;
 	shotsPerSecond = 0;
 	shotCount = 0;
