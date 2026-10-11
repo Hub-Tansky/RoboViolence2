@@ -90,7 +90,7 @@ Most client→server messages carry a `playerID` that the server uses directly a
 Contrast with the coord-frame check: [VERIFY: BaboViolent2/Code/ServerRecv.cpp:798]
 Fix: resolve the slot from `bbnetID` once at the top of `recvPacket` and ignore the packet's `playerID`.
 
-### Q-S2. Can a malformed packet crash the server? — **Yes (Critical)** — **Fixed in Phase B step 4 (ecf939b)**: exact payload size per message type, `playerID` bound to the sender, `weaponID`, projectile type and team range-checked; the client checks server messages the same way (`checkServerPacket`)
+### Q-S2. Can a malformed packet crash the server? — **Yes (Critical)** — **Fixed in Phase B step 4 (ecf939b)**: exact payload size per message type, `playerID` bound to the sender, `weaponID`, projectile type and team range-checked. The client checks every server message's size, index fields and strings (`packet::checkServerMessage`, `game/src/PacketCheck.cpp`)
 `playerID` is a signed `char` (−128..127) indexing a 32-element array, never range-checked. A value ≥ 32 or < 0 reads outside `players[]`, and a non-null garbage pointer is then dereferenced.
 [VERIFY: BaboViolent2/Code/netPacket.h:40] [VERIFY: BaboViolent2/Code/Game.h:34] [VERIFY: BaboViolent2/Code/ServerRecv.cpp:674]
 `weaponID` likewise indexes `gameVar.weapons[20]` unchecked: [VERIFY: BaboViolent2/Code/ServerRecv.cpp:966] [VERIFY: BaboViolent2/Code/GameVar.h:312]
@@ -117,7 +117,7 @@ Fix: on the client, reject `SV_CHANGE` unless the variable name starts with `sv_
 The client-supplied `mapName` (16 bytes, not guaranteed NUL-terminated) is formatted into `main/maps/%s.bvm` and opened. `../` sequences let a client read other `.bvm`-suffixed files outside `main/maps`; the missing terminator can read past the struct.
 [VERIFY: BaboViolent2/Code/ServerRecv.cpp:47-56] [VERIFY: BaboViolent2/Code/Server.cpp:1357-1359]
 
-### Q-S7. Amplification — **Medium** — **Fixed in Phase B step 4 (ecf939b)**: one `UPDATE_SKIN` broadcast; `PLAY_SOUND` relayed only for a known sound inside the map, from a sender with a player slot
+### Q-S7. Amplification — **Medium** — **Fixed in Phase B step 4 (ecf939b)**: one `UPDATE_SKIN` broadcast; `PLAY_SOUND` relayed only for a known sound from a living sender, at the sender's own position
 - `UPDATE_SKIN` (Pro): the server broadcasts it once *per connected player* (the loop sends to everyone each iteration): N² messages per request. [VERIFY: BaboViolent2/Code/ServerRecv.cpp:1218-1227]
 - `PLAY_SOUND`: any client packet is relayed verbatim to every other client without validation. [VERIFY: BaboViolent2/Code/ServerRecv.cpp:537-551]
 
@@ -131,7 +131,7 @@ No secret; the sequence is derivable from the public source. See `ALGORITHM_01` 
 
 | ID | Sev | Defect | Evidence |
 |---|---|---|---|
-| R1 | High | `fclose(fic)` outside `if (fic)` in map upload loop → `fclose(NULL)` if a requested map file doesn't exist | [VERIFY: BaboViolent2/Code/Server.cpp:1359-1383] | **Fixed in step 4**: a request for a missing map reached it once map names were checked (Linux CI, replay).
+| R1 | High | `fclose(fic)` outside `if (fic)` in map upload loop → `fclose(NULL)` if a requested map file doesn't exist | [VERIFY: BaboViolent2/Code/Server.cpp:1359-1383] | **Fixed in step 4 (ee6e0f0)**: a request for a missing map reached it once map names were checked (Linux CI, replay).
 | R2 | High | Rocket owner dereferenced without null check (owner disconnected mid-flight) | [VERIFY: BaboViolent2/Code/GameProjectile.cpp:733] [VERIFY: BaboViolent2/Code/GameProjectile.cpp:756] |
 | R3 | High | `if (gameVar.sv_serverType = 1)` assignment flips servers to Pro rules | [VERIFY: BaboViolent2/Code/GameProjectile.cpp:718] |
 | R4 | High | Master ban answer kicks `players[ID]` without null check | [VERIFY: BaboViolent2/Code/Server.cpp:684-693] |

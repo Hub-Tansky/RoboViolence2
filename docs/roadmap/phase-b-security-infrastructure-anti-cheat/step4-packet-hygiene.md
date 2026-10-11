@@ -57,9 +57,10 @@
 
 ## Notes
 
-- 4.1: `Server::checkPacket` and `checkServerPacket` (client) also NUL-terminate text payloads and every `char[]` field the client reads; the server terminates its fields in the handlers.
+- 4.1: the tables and the client check live in `game/src/PacketCheck.{h,cpp}` (GL-free, so tests check the client side too). `Server::checkPacket` also gates every message but the handshake and pings until the join handshake (and its password) passes. Text payloads and every `char[]` the client reads are NUL-terminated; the server terminates its fields in the handlers.
 - 4.2: the server can't bound `nuzzleID` (nuzzle lists exist only in the client build), so the client checks it against the shooter's weapon before `Weapon::shoot` (`validNuzzle`). No test: the client needs a GL window.
-- 4.3: wire text also reached `CString(char* fmt, ...)` as a format in places the plan didn't list (R21–R23, the client's chat, map list and console text, `textColorLess(playerName)`); all now use `"%s"`.
+- 4.3: wire text also reached `CString(char* fmt, ...)` as a format in places the plan didn't list (R21–R23; on the client chat, `TimedMessage`, map list, console and `SV_CHANGE` text; `textColorLess(playerName)`); all now use `"%s"`. Making the constructor `explicit` is PNS-34.
+- 4.4: `PLAY_SOUND` is relayed only from a living sender and at the sender's own position (what clients send anyway).
 - R25 (shots from a player without a weapon) is fixed here, not in step 5: the fuzz acceptance check needs it.
 - Owner, 2026-10-11: R1 and R25 stay in step 4.
 - R1 (`fclose(NULL)` in the map upload loop) is fixed here too: the `fixed-unterminated.bin` input requests a missing map, which crashed the Linux replay (glibc) once R24 no longer stopped it earlier.
