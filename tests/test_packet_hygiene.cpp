@@ -13,17 +13,6 @@
 
 extern Scene * scene;
 
-static int failures = 0;
-
-#define CHECK(cond)                                                    \
-	do                                                                 \
-	{                                                                  \
-		if (!(cond))                                                   \
-		{                                                              \
-			std::printf("FAIL %s:%d: %s\n", __FILE__, __LINE__, #cond); \
-			++failures;                                                \
-		}                                                              \
-	} while (0)
 
 static Game * game() { return scene->server->game; }
 
@@ -35,10 +24,12 @@ static int sentOfType(int typeID)
 	return n;
 }
 
+
+// Delivers one message after clearing what the server sent so far, so sentOfType sees only the reply to it
 template <typename T> static void deliver(UINT4 from, int typeID, const T & m)
 {
 	harness::sent().clear();
-	harness::deliver(from, typeID, &m, sizeof(m));
+	harness::deliver(from, typeID, m);
 }
 
 int main(int, char ** argv)
@@ -185,6 +176,6 @@ int main(int, char ** argv)
 	CHECK(!packet::checkServerMessage((char *)&list, sizeof(list), 9999, out));
 
 	harness::stop();
-	if (failures == 0) std::printf("ok: packet hygiene\n");
-	return failures ? 1 : 0;
+	if (harness::failures() == 0) std::printf("ok: packet hygiene\n");
+	return harness::failures() ? 1 : 0;
 }

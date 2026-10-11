@@ -124,8 +124,12 @@ int main(int argc, char ** argv)
 		CHECK(in.getUByte() == 7);
 	}
 	{
-		// R5: reading past the end of a MemIO buffer (a short map download) gives zeros, not the heap beyond it
-		MemIO mem(2);
+		// R5: reading past the end of the data written to a MemIO (a short map download) gives zeros, not the rest of
+		// its capacity or the heap beyond it; a write larger than half the buffer still fits
+		MemIO mem(8);
+		char big[12] = {9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9};
+		mem.put(big, 12); // a longer earlier download
+		mem.reset();
 		char bytes[2] = {1, 2};
 		mem.put(bytes, 2);
 		mem.reset();

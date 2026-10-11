@@ -15,76 +15,48 @@
 
 extern Scene * scene;
 
-static int failures = 0;
 
-#define CHECK(cond)                                                    \
-	do                                                                 \
-	{                                                                  \
-		if (!(cond))                                                   \
-		{                                                              \
-			std::printf("FAIL %s:%d: %s\n", __FILE__, __LINE__, #cond); \
-			++failures;                                                \
-		}                                                              \
-	} while (0)
 
-template <typename T> static void deliver(UINT4 from, int typeID, const T & m)
+// Fires a rocket from the client's position with x velocity vel (in tenths)
+static void fireRocket(UINT4 c, int vel)
 {
-	harness::deliver(from, typeID, &m, sizeof(m));
-}
-
-// A joined client that has spawned with `weaponID`; returns its babonetID
-static UINT4 spawned(int weaponID)
-{
-	UINT4 c = harness::join();
-	net_clsv_svcl_team_request team = {};
-	team.teamRequested = PLAYER_TEAM_BLUE;
-	deliver(c, NET_CLSV_SVCL_TEAM_REQUEST, team);
-	net_clsv_spawn_request spawn = {};
-	spawn.weaponID = (int8_t)weaponID;
-	spawn.meleeID = WEAPON_KNIVES;
-	deliver(c, NET_CLSV_SPAWN_REQUEST, spawn);
-	harness::tick(60); // past the fire delay
-	return c;
-}
-
-// R3 (ADR 0013): a rocket in flight no longer switches a Normal server to the Pro rules
-static void r3()
-{
-	console->sendCommand("set sv_serverType 0");
-	UINT4 c = spawned(WEAPON_BAZOOKA);
 	Player * p = scene->server->game->players[harness::slotOf(c)];
-	CHECK(p && p->status == PLAYER_STATUS_ALIVE);
 	net_clsv_svcl_player_projectile rocket = {};
 	rocket.weaponID = WEAPON_BAZOOKA;
 	rocket.projectileType = PROJECTILE_ROCKET;
-	rocket.position[0] = (short)(p->currentCF.position[0] * 100);
-	rocket.position[1] = (short)(p->currentCF.position[1] * 100);
-	rocket.position[2] = (short)(p->currentCF.position[2] * 100);
-	rocket.vel[0] = 10;
-	deliver(c, NET_CLSV_SVCL_PLAYER_PROJECTILE, rocket);
+	for (int k = 0; k < 3; ++k) rocket.position[k] = (short)(p->currentCF.position[k] * 100);
+	rocket.vel[0] = (char)vel;
+	harness::deliver(c, NET_CLSV_SVCL_PLAYER_PROJECTILE, rocket);
+}
+
+// R3 (ADR 0013): a rocket in flight no longer switches a Normal server to the Pro rules, and switching the ruleset
+// reapplies the weapon table on the server too
+static void r3()
+{
+	console->sendCommand("set sv_serverType 0");
+	UINT4 c = harness::spawned(WEAPON_BAZOOKA);
+	CHECK(scene->server->game->players[harness::slotOf(c)]->status == PLAYER_STATUS_ALIVE);
+	fireRocket(c, 10);
 	CHECK(!scene->server->game->projectiles.empty());
 	harness::tick(10);
 	CHECK(gameVar.sv_serverType == 0);
+	console->sendCommand("set sv_serverType 1");
+	CHECK(gameVar.weapons[WEAPON_SHIELD]->fireDelay == 2.5f);
+	console->sendCommand("set sv_serverType 0");
+	CHECK(gameVar.weapons[WEAPON_SHIELD]->fireDelay == 3.0f);
 }
 
 // R2: a rocket whose shooter disconnects while it flies doesn't dereference the missing shooter
 static void r2()
 {
-	UINT4 c = spawned(WEAPON_BAZOOKA);
-	Player * p = scene->server->game->players[harness::slotOf(c)];
-	net_clsv_svcl_player_projectile rocket = {};
-	rocket.weaponID = WEAPON_BAZOOKA;
-	rocket.projectileType = PROJECTILE_ROCKET;
-	rocket.position[0] = (short)(p->currentCF.position[0] * 100);
-	rocket.position[1] = (short)(p->currentCF.position[1] * 100);
-	rocket.position[2] = (short)(p->currentCF.position[2] * 100);
-	rocket.vel[0] = 1; // slow, so it is still flying after the disconnect
-	deliver(c, NET_CLSV_SVCL_PLAYER_PROJECTILE, rocket);
-	size_t rockets = scene->server->game->projectiles.size();
-	CHECK(rockets > 0);
+	harness::tick(400); // r3's rocket is gone
+	size_t before = scene->server->game->projectiles.size();
+	UINT4 c = harness::spawned(WEAPON_BAZOOKA);
+	fireRocket(c, 1); // slow, so it is still flying after the disconnect
+	CHECK(scene->server->game->projectiles.size() == before + 1);
 	harness::disconnect(c);
-	harness::tick(300); // the rocket hits a wall without its shooter
-	CHECK(scene->server->game->projectiles.size() < rockets);
+	harness::tick(400); // the rocket ends (wall or lifetime) without its shooter: ASan or a crash without the R2 checks
+	CHECK(scene->server->game->projectiles.size() == before);
 }
 
 // R4: a ban answer from the master for a slot that is empty (or out of range) is ignored, not dereferenced
@@ -154,6 +126,6 @@ int main(int, char ** argv)
 	r5();
 	r18(bv2::userFile("").c_str());
 	harness::stop();
-	if (failures == 0) std::printf("ok: crash fixes\n");
-	return failures ? 1 : 0;
+	if (harness::failures() == 0) std::printf("ok: crash fixes\n");
+	return harness::failures() ? 1 : 0;
 }

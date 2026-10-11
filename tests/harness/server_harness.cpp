@@ -74,6 +74,20 @@ namespace harness
 		return id;
 	}
 
+	UINT4 spawned(int weaponID)
+	{
+		UINT4 c = join();
+		net_clsv_svcl_team_request team = {};
+		team.teamRequested = 0; // blue
+		deliver(c, NET_CLSV_SVCL_TEAM_REQUEST, team);
+		net_clsv_spawn_request spawn = {};
+		spawn.weaponID = (int8_t)weaponID;
+		spawn.meleeID = 10; // knives
+		deliver(c, NET_CLSV_SPAWN_REQUEST, spawn);
+		tick(60);
+		return c;
+	}
+
 	int slotOf(UINT4 id)
 	{
 		for (int i = 0; i < MAX_PLAYER; ++i)

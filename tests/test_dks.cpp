@@ -29,6 +29,11 @@ int main()
 	for (uint32_t i = 0; i < samples; ++i) { int16_t zero = 0; std::fwrite(&zero, 2, 1, f); }
 	std::fclose(f);
 	DksSound * sound = dksCreateSoundFromFile((char *)"dks-test.wav", false);
+	if (!sound)
+	{
+		std::printf("FAIL: no audio engine or the WAV didn't load, so nothing was tested\n");
+		return 1;
+	}
 	dksShutDown();
 	dksDeleteSound(sound); // what the global menus do at exit
 	std::remove("dks-test.wav");
