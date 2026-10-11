@@ -797,10 +797,9 @@ void CMaster::recvPacket(const char * buffer, int typeID)
 			stCacheBan cb;
 			memcpy(&cb,buffer,sizeof(stCacheBan));
 
-			console->add(CString("[%02i] %s - IP:%s  MAC:%s  Date:%s  Duration:%i", cb.ID,
+			console->add(CString("[%02i] %s - IP:%s  Date:%s  Duration:%i", cb.ID,
 						cb.Nick,
 						cb.IP,
-						cb.MAC,
 						cb.Date,
 						cb.Duration), true);
 
@@ -812,7 +811,7 @@ void CMaster::recvPacket(const char * buffer, int typeID)
 			memcpy(&cp,buffer,sizeof(stCachePlayer));
 
 			if (cachePlayerRemoteServer(cp))
-				console->add(CString("[%02i] %s \x8- %s  %s", cp.ID, cp.NickName, cp.IP, cp.macAddr), true);
+				console->add(CString("[%02i] %s \x8- %s", cp.ID, cp.NickName, cp.IP), true);
 
 			break;
 		}
@@ -1007,7 +1006,6 @@ bool CMaster::cachePlayerRemoteServer(const stCachePlayer& player)
 
 	CachedPlayersRemote[player.ID].Valid = true;
 	sprintf( CachedPlayersRemote[player.ID].IP , "%s", player.IP );
-	sprintf( CachedPlayersRemote[player.ID].macAddr , "%s", player.macAddr );
 	sprintf( CachedPlayersRemote[player.ID].NickName , "%s", player.NickName );
 	return true;
 }
@@ -1017,7 +1015,6 @@ void CMaster::clearRemoteCacheList()
 	for( int i = 0; i < 50; i++ )
 	{
 		CachedPlayersRemote[i].Valid = false;
-		CachedPlayersRemote[i].macAddr[0] = '\0';
 		CachedPlayersRemote[i].NickName[0] = '\0';
 		CachedPlayersRemote[i].IP[0] = '\0';
 	}
@@ -1058,7 +1055,6 @@ void CMaster::sendCacheListToMaster(const stCacheListRemote& info)
 					cp.FromID = info.FromID;
 					cp.ID = i;
 					memcpy(cp.IP, RunningServer->CachedPlayers[i].IP, 16);
-					memcpy(cp.macAddr, RunningServer->CachedPlayers[i].macAddr, 20);
 					memcpy(cp.NickName, RunningServer->CachedPlayers[i].NickName, 32);
 					cp.ReqNum = info.ReqNum;
 					sendPacket( (char*)&cp , sizeof(stCachePlayer) , CACHE_LIST_PLAYER);

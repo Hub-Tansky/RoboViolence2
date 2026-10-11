@@ -92,7 +92,7 @@ cMasterServer::cMasterServer()
 void cMasterServer::SendBanList( UINT4 fromID , char * filter )
 {
 	// The filter matches nicks containing it; it is bound, so '%' or '_' in it only widen the match
-	SqlStatement bans(MasterDB, "Select Date, Duration, ID, IP, MAC, Nick From BanList Where Nick LIKE '%' || ? || '%' order by ID;");
+	SqlStatement bans(MasterDB, "Select Date, Duration, ID, IP, Nick From BanList Where Nick LIKE '%' || ? || '%' order by ID;");
 	bans.bindText(1, filter);
 	while (bans.row())
 	{
@@ -105,23 +105,22 @@ void cMasterServer::SendBanList( UINT4 fromID , char * filter )
 		ban.Duration	= (char)bans.integer(1);
 		ban.ID			= (short)bans.integer(2);
 		snprintf( ban.IP , sizeof(ban.IP) , "%s" , bans.text(3).c_str() );
-		snprintf( ban.MAC, sizeof(ban.MAC), "%s" , bans.text(4).c_str() );
-		snprintf( ban.Nick, sizeof(ban.Nick), "%s" , bans.text(5).c_str() );
+		snprintf( ban.Nick, sizeof(ban.Nick), "%s" , bans.text(4).c_str() );
 		bb_serverSend( (char*)&ban, sizeof(stCacheBan) , CACHE_BAN , fromID );
 	}
 }
 
-// The ID of a ban on this IP or MAC, -1 if none
-long long cMasterServer::FindBan( const char * IP , const char * MAC )
+// The ID of a ban on this IP, -1 if none (bans are by IP until accounts exist, PNS-14)
+long long cMasterServer::FindBan( const char * IP )
 {
-	SqlStatement ban(MasterDB, "Select ID From BanList where IP = ? or MAC = ?;");
-	ban.bindText(1, IP).bindText(2, MAC);
+	SqlStatement ban(MasterDB, "Select ID From BanList where IP = ?;");
+	ban.bindText(1, IP);
 	return ban.row() ? ban.integer(0) : -1;
 }
 
-int cMasterServer::IsBanned( char * IP , char * MAC )
+int cMasterServer::IsBanned( char * IP )
 {
-	return FindBan( IP , MAC ) >= 0 ? 1 : 0;
+	return FindBan( IP ) >= 0 ? 1 : 0;
 }
 
 // Writes a game to the web database's Games table (names and maps are bound: stored as sent)
@@ -135,7 +134,7 @@ void cMasterServer::WriteWebGame( const stBV2row & game , bool insert )
 		.bindInt(5, game.password[0] != '\0' ? 1 : 0).bindText(6, game.ip).bindInt(7, game.port).run();
 }
 
-void cMasterServer::AddBan( char * NickName , char * IP , char * MAC , int Duration )
+void cMasterServer::AddBan( char * NickName , char * IP , int Duration )
 {
 	//filter ip adress
 	if( strstr( "192.168", IP ))
@@ -154,21 +153,21 @@ void cMasterServer::AddBan( char * NickName , char * IP , char * MAC , int Durat
 	time_t theTime;
 	theTime = time( NULL );
 
-	long long existing = FindBan( IP , MAC );
+	long long existing = FindBan( IP );
 
 	if( existing >= 0 )
 	{
 		// just update current row
-		SqlStatement(MasterDB, "Update BanList Set Date = ?, Nick = ?, IP = ?, MAC = ?, Duration = ? Where ID = ?;")
-			.bindInt(1, (long long)theTime).bindText(2, NickName).bindText(3, IP).bindText(4, MAC).bindInt(5, Duration).bindInt(6, existing).run();
+		SqlStatement(MasterDB, "Update BanList Set Date = ?, Nick = ?, IP = ?, Duration = ? Where ID = ?;")
+			.bindInt(1, (long long)theTime).bindText(2, NickName).bindText(3, IP).bindInt(4, Duration).bindInt(5, existing).run();
 		printf("Updated ban with ID %lli\n", existing);
 	}
 	else
 	{
 		// add new ban
-		SqlStatement(MasterDB, "Insert into BanList ( Date , Duration , IP , MAC , Nick ) values( ?, ?, ?, ?, ? );")
-			.bindInt(1, (long long)theTime).bindInt(2, Duration).bindText(3, IP).bindText(4, MAC).bindText(5, NickName).run();
-		printf("Added ban : IP=%s  MAC=%s  NickName=%s\n",IP,MAC,NickName);
+		SqlStatement(MasterDB, "Insert into BanList ( Date , Duration , IP , Nick ) values( ?, ?, ?, ? );")
+			.bindInt(1, (long long)theTime).bindInt(2, Duration).bindText(3, IP).bindText(4, NickName).run();
+		printf("Added ban : IP=%s  NickName=%s\n",IP,NickName);
 	}
 }
 

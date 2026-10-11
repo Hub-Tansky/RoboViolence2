@@ -110,7 +110,7 @@ int main(int argc, char ** argv)
 	CHECK(list().empty());
 
 	bb_clientDisconnect(game);
-	// 6.3 (Q-S3): quotes, comments, ';' and '%' in a game's name and map and in a ban's nick and MAC are stored as
+	// 6.3 (Q-S3): quotes, comments, ';' and '%' in a game's name and map and in a ban's nick and IP are stored as
 	// sent, and the tables stay intact
 	const char * name = "Robo'); DROP TABLE Games;--";
 	const char * map = "Map'%s;--";
@@ -132,12 +132,11 @@ int main(int argc, char ** argv)
 	stCacheBan ban = {};
 	strcpy(ban.Nick, "Nick'--;%");
 	strcpy(ban.IP, "1';--%");
-	strcpy(ban.MAC, "AA');DROP--%"); // fits MAC[20]
 	strcpy(ban.Pass, "roxbabo");
 	bb_clientSend(game, (char *)&ban, sizeof(ban), CACHE_BAN);
 	pump({game});
 	stCacheBanned query = {};
-	strcpy(query.MAC, ban.MAC); // matched by MAC alone
+	strcpy(query.IP, ban.IP); // bans are by IP (step 10)
 	bb_clientSend(game, (char *)&query, sizeof(query), CACHE_BANNED);
 	pump({game});
 	int typeID;
@@ -148,8 +147,8 @@ int main(int argc, char ** argv)
 	sqlite3 * db = 0;
 	sqlite3_open("master.db", &db);
 	{
-		SqlStatement bans(db, "Select Nick, IP From BanList Where MAC = ?;");
-		bans.bindText(1, ban.MAC);
+		SqlStatement bans(db, "Select Nick, IP From BanList Where IP = ?;");
+		bans.bindText(1, ban.IP);
 		CHECK(bans.row() && bans.text(0) == ban.Nick && bans.text(1) == ban.IP);
 	}
 	sqlite3_close(db);
@@ -166,7 +165,7 @@ int main(int argc, char ** argv)
 			if (typeID == CACHE_BAN)
 			{
 				const stCacheBan * b = (const stCacheBan *)buffer;
-				listed = listed || (std::string(b->Nick) == ban.Nick && std::string(b->MAC) == ban.MAC && std::string(b->IP) == ban.IP);
+				listed = listed || (std::string(b->Nick) == ban.Nick && std::string(b->IP) == ban.IP);
 			}
 		CHECK(listed || std::printf("  filter \"%s\"\n", filter) < 0);
 	}

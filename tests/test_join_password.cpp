@@ -1,5 +1,6 @@
 // Phase B step 10: with sv_password set, a client joins only with an HMAC of the password over its own connection's
-// challenge, and neither direction of the handshake carries the password or its MD5.
+// challenge, and neither direction of the handshake carries the password or its MD5. The server relays a player's
+// info without the account login.
 #include "server_harness.h"
 
 #include "Console.h"
@@ -63,6 +64,22 @@ int main(int, char ** argv)
 	credentials::prove("hunter2", "join", version->nonce, proof);
 	answer(a, proof);
 	CHECK(welcomed(a) && harness::slotOf(a) >= 0);
+
+	// The player info relayed to everyone carries no account login (its username and MD5 password)
+	net_clsv_svcl_player_info info = {};
+	strcpy(info.playerName, "Tester");
+	strcpy(info.username, "acct");
+	memset(info.password, 'f', sizeof(info.password));
+	harness::deliver(a, NET_CLSV_SVCL_PLAYER_INFO, info);
+	bool relayed = false, blank = true;
+	for (const harness::SentPacket & p : harness::sent())
+		if (p.typeID == NET_CLSV_SVCL_PLAYER_INFO)
+		{
+			const net_clsv_svcl_player_info * r = (const net_clsv_svcl_player_info *)p.data.data();
+			relayed = true;
+			blank &= r->username[0] == 0 && r->password[0] == 0 && r->password[31] == 0;
+		}
+	CHECK(relayed && blank);
 
 	// A replay of that proof on another connection (another challenge), and a wrong password, are disconnected
 	UINT4 b = harness::connect();

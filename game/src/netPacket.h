@@ -425,8 +425,7 @@ struct net_clsv_svcl_player_info
 	char playerIP[16];
 	char playerName[31+1]; // Le nom du joueur, 31 + \0 caract�res
 	char username[21];		// Account username
-	char password[32];		// Account password (MD5)
-	char macAddr[20]; // player's mac adress, mouhouha
+	char password[32];		// Account password (MD5); the server blanks it, and the username, before relaying
 };
 
 // Le client �cris un message, l'envoit au server
@@ -613,7 +612,7 @@ static_assert(sizeof(net_svcl_update_vote) == 2, "net_svcl_update_vote wire size
 static_assert(sizeof(net_svcl_vote_result) == 1, "net_svcl_vote_result wire size");
 static_assert(sizeof(net_svcl_msg) == 132, "net_svcl_msg wire size");
 static_assert(sizeof(net_svcl_player_update_stats) == 15, "net_svcl_player_update_stats wire size");
-static_assert(sizeof(net_clsv_svcl_player_info) == 122, "net_clsv_svcl_player_info wire size");
+static_assert(sizeof(net_clsv_svcl_player_info) == 102, "net_clsv_svcl_player_info wire size");
 static_assert(sizeof(net_clsv_svcl_chat) == 131, "net_clsv_svcl_chat wire size");
 static_assert(sizeof(net_clsv_svcl_team_request) == 2, "net_clsv_svcl_team_request wire size");
 static_assert(sizeof(net_clsv_svcl_player_coord_frame) == 28, "net_clsv_svcl_player_coord_frame wire size");

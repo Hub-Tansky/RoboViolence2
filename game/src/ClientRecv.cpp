@@ -39,11 +39,6 @@ void Client::sendJoinHandshake()
 
 	net_clsv_svcl_player_info playerInfo;
 
-	// on pogne notre mac adress
-	unsigned char mac[8];		// unsigned here is very important
-	bb_getMyMAC( mac );
-	sprintf( playerInfo.macAddr , "%.2x-%.2x-%.2x-%.2x-%.2x-%.2x" , (int)mac[0], (int)mac[1],(int)mac[2],(int)mac[3],(int)mac[4],(int)mac[5] );
-	
 	// On send le playerInfo
 	playerInfo.playerID = game->thisPlayer->playerID;
 	memcpy(playerInfo.playerName, game->thisPlayer->name.s, game->thisPlayer->name.len() + 1);

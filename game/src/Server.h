@@ -44,7 +44,6 @@ struct cachedPlayer
 	bool Valid;
 	char NickName[32];
 	char IP[16];
-	char macAddr[20];
 };
 
 class Server

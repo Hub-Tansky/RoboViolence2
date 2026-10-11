@@ -2118,27 +2118,24 @@ void Console::sendCommand(CString commandLine, bool isAdmin, unsigned long bbnet
 
 						if( strstr( name.s , tokenize.s ) )
 						{
-							add(CString("[%02i] %s \x8- %s  %s", i,
+							add(CString("[%02i] %s \x8- %s", i,
 								scene->server->CachedPlayers[i].NickName,
-								scene->server->CachedPlayers[i].IP,
-								scene->server->CachedPlayers[i].macAddr),
+								scene->server->CachedPlayers[i].IP),
 								true);
 						}
 						else if( strstr( scene->server->CachedPlayers[i].IP , tokenize.s ) )
 						{
-							add(CString("[%02i] %s \x8- %s  %s", i,
+							add(CString("[%02i] %s \x8- %s", i,
 								scene->server->CachedPlayers[i].NickName,
-								scene->server->CachedPlayers[i].IP,
-								scene->server->CachedPlayers[i].macAddr),
+								scene->server->CachedPlayers[i].IP),
 								true);
 						}
 					}
 					else
 					{
-						add(CString("[%02i] %s \x8- %s  %s", i,
+						add(CString("[%02i] %s \x8- %s", i,
 							scene->server->CachedPlayers[i].NickName,
-							scene->server->CachedPlayers[i].IP,
-							scene->server->CachedPlayers[i].macAddr),
+							scene->server->CachedPlayers[i].IP),
 							true);
 					}
 				}
@@ -2183,7 +2180,6 @@ void Console::sendCommand(CString commandLine, bool isAdmin, unsigned long bbnet
 			cb.Duration		=	duration;
 			cb.ID			=	ID;
 			sprintf( cb.IP , "%s", scene->server->CachedPlayers[ID].IP );
-			sprintf( cb.MAC , "%s", scene->server->CachedPlayers[ID].macAddr );
 			sprintf( cb.Nick , "%s", scene->server->CachedPlayers[ID].NickName );
 			memcpy( cb.Pass, strPass.s, 7 );
 			cb.Pass[7] = '\0';
@@ -2294,7 +2290,6 @@ void Console::sendCommand(CString commandLine, bool isAdmin, unsigned long bbnet
 			cb.Duration		=	duration;
 			cb.ID			=	ID;
 			sprintf( cb.IP , "%s", master->CachedPlayersRemote[ID].IP );
-			sprintf( cb.MAC , "%s", master->CachedPlayersRemote[ID].macAddr );
 			sprintf( cb.Nick , "%s", master->CachedPlayersRemote[ID].NickName );
 			memcpy( cb.Pass, strPass.s, 7 );
 			cb.Pass[7] = '\0';

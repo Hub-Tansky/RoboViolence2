@@ -218,7 +218,7 @@ void cNetManager::ReceiveServerPacket(char *data,int typeID,UINT4 fromID)
 		{
 			stCacheBan cb;
 			memcpy(&cb,data,sizeof(stCacheBan));
-			cb.Nick[sizeof(cb.Nick) - 1] = cb.IP[sizeof(cb.IP) - 1] = cb.MAC[sizeof(cb.MAC) - 1] = cb.Pass[sizeof(cb.Pass) - 1] = '\0';
+			cb.Nick[sizeof(cb.Nick) - 1] = cb.IP[sizeof(cb.IP) - 1] = cb.Pass[sizeof(cb.Pass) - 1] = '\0';
 
 			//check validity of the password
 			if( strcmp(cb.Pass,"roxbabo"))
@@ -226,7 +226,7 @@ void cNetManager::ReceiveServerPacket(char *data,int typeID,UINT4 fromID)
 				return;
 			}
 
-			Server->AddBan( cb.Nick , cb.IP , cb.MAC , cb.Duration );
+			Server->AddBan( cb.Nick , cb.IP , cb.Duration );
 			return;
 		}
 
@@ -249,10 +249,10 @@ void cNetManager::ReceiveServerPacket(char *data,int typeID,UINT4 fromID)
 		{
 			stCacheBanned cb;
 			memcpy(&cb,data,sizeof(stCacheBanned));
-			cb.IP[sizeof(cb.IP) - 1] = cb.MAC[sizeof(cb.MAC) - 1] = '\0';
+			cb.IP[sizeof(cb.IP) - 1] = '\0';
 
 			stCacheAnswer ca;
-			ca.Answer = Server->IsBanned( cb.IP , cb.MAC );
+			ca.Answer = Server->IsBanned( cb.IP );
 			ca.ID = cb.ID;
 			
 			bb_serverSend( (char*)&ca, sizeof(stCacheAnswer) , CACHE_ANSWER , fromID );

@@ -93,7 +93,7 @@ namespace packet
 			{NET_SVCL_NEWPLAYER, sizeof(net_svcl_newplayer), {F(net_svcl_newplayer, newPlayerID, Slot)}, {}},
 			{NET_SVCL_GAMEVERSION, sizeof(net_svcl_gameversion), {}, {}},
 			{NET_CLSV_SVCL_PLAYER_INFO, sizeof(net_clsv_svcl_player_info), {F(net_clsv_svcl_player_info, playerID, Slot)},
-				{END(net_clsv_svcl_player_info, playerIP), END(net_clsv_svcl_player_info, playerName), END(net_clsv_svcl_player_info, username), END(net_clsv_svcl_player_info, macAddr)}},
+				{END(net_clsv_svcl_player_info, playerIP), END(net_clsv_svcl_player_info, playerName), END(net_clsv_svcl_player_info, username)}},
 			{NET_CLSV_SVCL_CHAT, sizeof(net_clsv_svcl_chat), {}, {END(net_clsv_svcl_chat, message)}},
 			{NET_SVCL_PLAYER_DISCONNECT, sizeof(net_svcl_player_disconnect), {F(net_svcl_player_disconnect, playerID, Slot)}, {}},
 			{NET_SVCL_SERVER_INFO, sizeof(net_svcl_server_info), {}, {END(net_svcl_server_info, mapName)}},

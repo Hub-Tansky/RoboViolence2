@@ -57,7 +57,6 @@ Server::Server(Game * pGame): maxTimeOverMaxPing(5.0f)//, maxIdleTime(180.0f)
 	for( int i = 0; i < 50; i++ )
 	{
 		CachedPlayers[i].Valid = false;
-		CachedPlayers[i].macAddr[0] = '\0';
 		CachedPlayers[i].NickName[0] = '\0';
 		CachedPlayers[i].IP[0] = '\0';
 	}

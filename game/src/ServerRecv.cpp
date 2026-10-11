@@ -422,10 +422,12 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 			{
 				playerInfo.playerName[31] = '\0';
 				playerInfo.username[20] = '\0';
-				playerInfo.macAddr[19] = '\0';
 				game->players[playerInfo.playerID]->name = playerInfo.playerName;
 				memcpy(playerInfo.playerIP,game->players[playerInfo.playerID]->playerIP, 16);
-				bb_serverSend((char*)&playerInfo, sizeof(net_clsv_svcl_player_info), NET_CLSV_SVCL_PLAYER_INFO, 0);
+				net_clsv_svcl_player_info relayed = playerInfo; // step 10: the account login stays with the server
+				memset(relayed.username, 0, sizeof(relayed.username));
+				memset(relayed.password, 0, sizeof(relayed.password));
+				bb_serverSend((char*)&relayed, sizeof(net_clsv_svcl_player_info), NET_CLSV_SVCL_PLAYER_INFO, 0);
 #ifndef CONSOLE
 				console->add(CString("\x3server> %s joined the game", playerInfo.playerName), true);
 #else
@@ -474,7 +476,6 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 						stCacheBanned banned;
 						banned.ID	=	playerInfo.playerID;
 						sprintf( banned.IP , "%s" , playerInfo.playerIP );
-						sprintf( banned.MAC , "%s", playerInfo.macAddr );
 	
 	
 						if ( master )
@@ -486,20 +487,17 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 
 
 				//let's cache the player
-				//see if his mac adress is already in the  list first, if so, overwrite
+				//see if his IP is already in the list first, if so, overwrite (step 10: no MAC; bans are by IP)
 				for( int i = 0; i < 50; i++)
 				{
-					if( !stricmp( CachedPlayers[i].macAddr , playerInfo.macAddr ) && CachedPlayers[i].Valid )
+					if( !strcmp( CachedPlayers[i].IP , playerInfo.playerIP ) && CachedPlayers[i].Valid )
 					{
-						memcpy( CachedPlayers[CachedIndex].IP , playerInfo.playerIP , 16 );
-						memcpy( CachedPlayers[CachedIndex].NickName , playerInfo.playerName , 32 );
-						memcpy( CachedPlayers[CachedIndex].macAddr , playerInfo.macAddr , 20 );
+						memcpy( CachedPlayers[i].NickName , playerInfo.playerName , 32 );
 						return;
 					}
 				}
 				memcpy( CachedPlayers[CachedIndex].IP , playerInfo.playerIP , 16 );
 				memcpy( CachedPlayers[CachedIndex].NickName , playerInfo.playerName , 32 );
-				memcpy( CachedPlayers[CachedIndex].macAddr , playerInfo.macAddr , 20 );
 				CachedPlayers[CachedIndex].Valid = true;
 				CachedIndex++;
 
