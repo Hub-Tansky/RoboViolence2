@@ -11,14 +11,16 @@
 #include <cstdio>
 #include <fstream>
 #include <sstream>
+#include <algorithm>
 #include <string>
+#include <vector>
 
 extern Scene * scene;
 
 static const int PORT = 10209;
 
-// One request; the server runs frames until it answers
-static std::string request(const std::string & method, const std::string & path, const std::string & token,
+// Opens a connection and sends one request, without waiting
+static int start(const std::string & method, const std::string & path, const std::string & token,
 	const std::string & body = "")
 {
 	int s = socket(AF_INET, SOCK_STREAM, 0);
@@ -29,24 +31,39 @@ static std::string request(const std::string & method, const std::string & path,
 	if (connect(s, (sockaddr *)&at, sizeof(at)) != 0)
 	{
 		close(s);
-		return "";
+		return -1;
 	}
 	std::string text = method + " " + path + " HTTP/1.1\r\nHost: test\r\n";
 	if (!token.empty()) text += "Authorization: Bearer " + token + "\r\n";
 	text += "Content-Length: " + std::to_string(body.size()) + "\r\n\r\n" + body;
 	send(s, text.data(), text.size(), 0);
 	fcntl(s, F_SETFL, fcntl(s, F_GETFL, 0) | O_NONBLOCK);
-	std::string response;
+	return s;
+}
+
+// The server runs frames until every connection is answered and closed
+static std::vector<std::string> finish(std::vector<int> sockets)
+{
+	std::vector<std::string> responses(sockets.size());
+	std::vector<bool> done(sockets.size(), false);
 	char chunk[1024];
-	for (int frame = 0; frame < 60; ++frame)
+	for (int frame = 0; frame < 90 && std::count(done.begin(), done.end(), false); ++frame)
 	{
 		harness::tick();
-		int got;
-		while ((got = (int)recv(s, chunk, sizeof(chunk), 0)) > 0) response.append(chunk, got);
-		if (got == 0) break;
+		for (size_t i = 0; i < sockets.size(); ++i)
+		{
+			int got;
+			while (!done[i] && (got = (int)recv(sockets[i], chunk, sizeof(chunk), 0)) > 0) responses[i].append(chunk, got);
+			if (!done[i] && got == 0) done[i] = true, close(sockets[i]);
+		}
 	}
-	close(s);
-	return response;
+	return responses;
+}
+
+static std::string request(const std::string & method, const std::string & path, const std::string & token,
+	const std::string & body = "")
+{
+	return finish({start(method, path, token, body)})[0];
 }
 
 static int code(const std::string & response) { return response.size() > 12 ? std::atoi(response.c_str() + 9) : 0; }
@@ -68,10 +85,12 @@ int main(int, char ** argv)
 	CHECK(code(request("POST", "/command", "s3cret", "set sv_password hunter2")) == 200);
 	CHECK(gameVar.sv_password == "hunter2");
 
-	// A burst: the budget is 5 requests, refilled by 1 a second
+	// A burst of 8 at once: the budget is 5 requests, refilled by 1 a second
 	harness::tick(150);
+	std::vector<int> burst;
+	for (int i = 0; i < 8; ++i) burst.push_back(start("GET", "/status", "s3cret"));
 	int limited = 0;
-	for (int i = 0; i < 8; ++i) limited += code(request("GET", "/status", "s3cret")) == 429;
+	for (const std::string & r : finish(burst)) limited += code(r) == 429;
 	CHECK(limited >= 2);
 
 	// Every request is audited; the password set above is masked
