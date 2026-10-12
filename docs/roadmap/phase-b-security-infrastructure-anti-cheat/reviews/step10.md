@@ -35,5 +35,5 @@ Pre-existing items from "Not checked": PNS-43 (`PLAYER_INFO` before the handshak
 
 ## Not done / unsure
 
-- Acceptance: the owner joins a password-protected server and logs in as admin on one OS; the step stays IN PROGRESS until then.
+- Acceptance: the owner joined a password-protected server (a wrong password was dropped) and logged in as admin on macOS (2026-10-12).
 - `macos-universal` (triplet `universal-osx`) builds libsodium with autotools for two architectures; CI on this PR shows whether it builds.
