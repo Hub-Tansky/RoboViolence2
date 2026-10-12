@@ -72,15 +72,21 @@ jobs:
           echo "listed: $listed"
           [ "$listed" = "(1,)" ]
       # Step 12: the admin API through the TLS proxy (Caddy's own CA for localhost, hence -k)
-      - name: Remote status over TLS
+      - name: Remote status and a command over TLS
         run: |
           set -euo pipefail
           token=$(sed -n 's/^BV2_ADMIN_PASS=//p' "$RUNNER_TEMP/ci.env")
-          code=$(curl -sk -o /dev/null -w '%{http_code}' -H 'Authorization: Bearer wrong' https://localhost:8443/status)
+          for i in $(seq 1 30); do # Caddy issues its local certificate on first start
+            code=$(curl -sk -o /dev/null -w '%{http_code}' -H 'Authorization: Bearer wrong' https://localhost:8443/status || true)
+            [ "$code" != 000 ] && break
+            sleep 2
+          done
           echo "wrong token: $code"
           [ "$code" = 401 ]
           curl -skf -H "Authorization: Bearer $token" https://localhost:8443/status | tee status.txt
           grep -q '^map ' status.txt
+          curl -skf -H "Authorization: Bearer $token" --data 'info' https://localhost:8443/command | tee info.txt
+          grep -q 'Server Info' info.txt
       - name: Logs and the master's game list
         if: always()
         run: |

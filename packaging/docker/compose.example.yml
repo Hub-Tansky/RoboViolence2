@@ -24,6 +24,7 @@ services:
       BV2_ADMIN_PASS: "${BV2_ADMIN_PASS:-}"   # empty: no admin login, and the admin API refuses everything
       BV2_ADMIN_API_PORT: "8080"              # the admin API, on the compose network only: never publish it
       BV2_ADMIN_API_BIND: "0.0.0.0"
+      BV2_ADMIN_API_PROXY: "admin-proxy"      # only its X-Forwarded-For is believed
     ports: ["3333:3333/tcp"]
     volumes: ["server-data:/var/lib/bv2"]
     stdin_open: true # `docker attach` reaches the server console

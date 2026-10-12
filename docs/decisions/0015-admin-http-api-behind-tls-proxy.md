@@ -10,7 +10,7 @@
 - The servers ship as containers with a compose example (step 11).
 
 ## Decision
-`bv2dedicated` serves a small HTTP/1.1 admin API (`POST /command`, `GET /status`) on `sv_adminApiPort` (0 = off), bound to the compose network only; a Caddy container terminates TLS in front of it. Requests carry the admin password as a bearer token, checked in constant time; the legacy `RA_*` login is refused.
+`bv2dedicated` serves a small HTTP/1.1 admin API (`POST /command`, `GET /status`) on `zsv_adminApiPort` (0 = off), bound to the compose network only; a Caddy container terminates TLS in front of it. Requests carry the admin password as a bearer token, checked in constant time; the legacy `RA_*` login is refused.
 
 ## Consequences
 - No TLS or certificate code in the game; Caddy handles certificates. The API port must never be published; only Caddy's is.

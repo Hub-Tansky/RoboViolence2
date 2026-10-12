@@ -385,3 +385,13 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Why it matters:** a broken image can merge unnoticed unless the check is required.
 - **Suggested home:** the next step that may edit AGENTS.md; the owner decides on branch protection.
 - **Status:** Proposed
+
+### PNS-46: Remote admin leftovers
+
+- **Found in:** Phase B step 12 review (2026-10-12).
+- **Extract:**
+  - With `RA_LOGIN` refused, the rest of the legacy UDP remote admin is unreachable but still compiled: the `RA_*` cases in `game/src/CMaster.cpp` (one writes files), the peers' `remoteAdmin` state, and the `RA_ConsoleBroadcast`, `RA_NewPlayer` and `RA_PositionBroadcast` calls on every console line.
+  - `BV2_ADMIN_API_PORT`, `BV2_ADMIN_API_BIND` and `BV2_ADMIN_API_PROXY` are not in the environment lists of AGENTS.md and config/README.md.
+- **Why it matters:** dead network code, and operators reading the config docs miss the admin API.
+- **Suggested home:** a cleanup step that may edit `game/src/CMaster.*`, AGENTS.md and config/README.md.
+- **Status:** Proposed

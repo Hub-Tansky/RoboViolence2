@@ -56,10 +56,11 @@ The game server's admin API ([ADR 0015](../decisions/0015-admin-http-api-behind-
 |---|---|
 | Status | `curl -k -H "Authorization: Bearer $BV2_ADMIN_PASS" https://localhost:8443/status` |
 | A console command | `curl -k -H "Authorization: Bearer $BV2_ADMIN_PASS" --data 'kick Tester' https://localhost:8443/command` |
-| Audit log | `docker compose -f packaging/docker/compose.example.yml exec server tail admin-audit.log` |
+| Audit log | `docker compose -f packaging/docker/compose.example.yml exec server tail /var/lib/bv2/admin-audit.log` |
 
-- The reply to a command is the console lines it printed. Each source may send 5 requests at once, then 1 a second (429 beyond).
-- `admin-audit.log` (in the server volume): one line per request with UTC time, source, result and command; secrets are masked.
+- The reply to a command is the console lines it printed. `restart`, `disconnect`, `host` and `connect` are refused (they rebuild the server). Each source may send 5 requests at once, then 1 a second (429 beyond).
+- `admin-audit.log` (in the server volume): one line per request (also refused, limited, too large and timed-out ones) with UTC time, source, result and command; secrets are masked. A command is logged before it runs.
+- The source is the client address Caddy reports; the server believes `X-Forwarded-For` only from `BV2_ADMIN_API_PROXY` (`admin-proxy`).
 - The old UDP remote admin (`RA_LOGIN`) is refused.
 
 ## Master address limitation
