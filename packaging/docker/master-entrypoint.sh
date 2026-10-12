@@ -4,4 +4,4 @@ set -e
 for db in master.db web.db; do
 	[ -f "$db" ] || cp "/opt/bv2/seed/$db" .
 done
-exec /opt/bv2/bv2master
+exec stdbuf -oL /opt/bv2/bv2master # line-buffered: its printf log reaches docker logs at once

@@ -65,9 +65,13 @@ jobs:
           done
           echo "listed: $listed"
           [ "$listed" = "(1,)" ]
-      - name: Logs
+      - name: Logs and the master's game list
         if: always()
-        run: docker compose -f packaging/docker/compose.example.yml logs --no-color | tail -60
+        run: |
+          compose="docker compose -f packaging/docker/compose.example.yml"
+          $compose logs --no-color master | tail -40
+          $compose logs --no-color server | tail -40
+          $compose cp master:/var/lib/bv2/web.db web.db && python3 -c "import sqlite3; c=sqlite3.connect('web.db'); print([r for r in c.execute('select * from Games')])" || true
   push:
     needs: images
     if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'schedule')
