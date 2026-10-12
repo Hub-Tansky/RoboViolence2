@@ -11,7 +11,7 @@
 | Goal | CI builds Linux container images for `bv2dedicated` and `bv2master` that run with secrets injected from the environment, and a runbook explains how to host them |
 | In scope | Tasks 11.1–11.4 below |
 | Out of scope | Choosing or provisioning a host; real hostnames or IPs (never committed); the admin channel (step 12); account services (PNS-15) |
-| Allowed paths | `packaging/docker/**`, `.github/workflows/**`, `docs/ops/**`, `.dockerignore`, `ARCHITECTURE.md`, `docs/roadmap/**`. Owner, 2026-10-12: `content/LaunchScript/CTF.cfg` (drop its empty secret `set` lines), `.github/dependabot.yml` (docker) |
+| Allowed paths | `packaging/docker/**`, `.github/workflows/**`, `docs/ops/**`, `.dockerignore`, `ARCHITECTURE.md`, `docs/roadmap/**`. Owner, 2026-10-12: `content/LaunchScript/CTF.cfg` (drop its empty secret `set` lines), `.github/dependabot.yml` (docker), `masterserver/src/cMSstruct.h` and `engine/babonet/include/cMSstruct.h` (packing fix) |
 | Inputs | `AGENTS.md`, `ARCHITECTURE.md`, earlier review records `reviews/step*.md`, `config/README.md`, [ADR 0007](../../decisions/0007-data-root-pref-dir-config-layers.md), step 1 Linux package |
 | Deliverables | Two Dockerfiles; CI image build (and push to GHCR on `main`); `docs/ops/runbook.md` |
 | Definition of done | See "Acceptance checks". All must pass. `ARCHITECTURE.md` is updated |
@@ -46,6 +46,7 @@
 - Verification (owner, 2026-10-12, no Docker on the Mac): CI builds both images, checks `id -u`, runs the compose example to healthy and waits for the server in the master's `web.db`; the owner runs the compose example on a Linux machine and joins from a client.
 - The server keeps reading stdin: `stdin_open` and `tty` let `docker attach` reach its console and detach. Without stdin (`docker run` without `-i`) its console loop spins with a 1 ms sleep, so run it with `-i`.
 - Healthchecks look for the listening socket in `/proc/net/tcp`: a TCP connect would join the game as a player.
+- Found: the master's copy of the protocol structs (`masterserver/src/cMSstruct.h`) was not packed (and had a `long`), unlike the game's since step 4: the master read every server's port one byte off (3333 became 13), so its lists were unusable. Both copies now pack to 1 byte and assert the same sizes and `stBV2row::port` at offset 113; CI's listing check matches the port.
 - Found: `CTF.cfg` set `sv_password`, `zsv_adminUser` and `zsv_adminPass` to `""` after the environment layer, wiping `BV2_SV_PASSWORD` and `BV2_ADMIN_PASS` (packages too). CI now sets a password and checks the master lists the game as passworded.
 - The master lists a server at its connection's address (in compose, the container's): PNS-44.
 
