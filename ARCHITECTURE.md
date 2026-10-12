@@ -151,6 +151,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `.github/workflows/hygiene.yml` | CI: ARCHITECTURE.md inventory, repository hygiene, content case; `review` (`tools/review.sh`) on PRs |
 | `.github/workflows/codeql.yml` | CodeQL: `c-cpp` (manual linux-x64 build of the three executables) and `actions`; push, PR, weekly; alerts under `build/` (vcpkg headers) filtered out |
 | `.github/workflows/dependency-graph.yml` | Submits resolved vcpkg ports to the dependency graph on push to `main` |
+| `.github/workflows/containers.yml` | CI: builds both server images, checks non-root, runs the compose example (healthy, server listed by the master), pushes to GHCR from `main` |
 
 ### `config`
 

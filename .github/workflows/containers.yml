@@ -1,0 +1,73 @@
+name: containers
+# Server images (Phase B step 11): build both on every push and PR, run the compose example, push to GHCR from main.
+on:
+  push:
+  pull_request:
+concurrency:
+  group: containers-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+jobs:
+  images:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: write # GHCR push, main only
+    env:
+      SERVER_IMAGE: ghcr.io/hub-tansky/roboviolence2-server
+      MASTER_IMAGE: ghcr.io/hub-tansky/roboviolence2-master
+    steps:
+      - uses: actions/checkout@v7
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      # One build stage, two targets: the second build reuses the first's cached layers
+      - name: Build the server image
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          file: packaging/docker/Dockerfile
+          target: server
+          load: true
+          tags: ${{ env.SERVER_IMAGE }}:latest
+          cache-from: type=gha,scope=servers
+          cache-to: type=gha,scope=servers,mode=max
+      - name: Build the master image
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          file: packaging/docker/Dockerfile
+          target: master
+          load: true
+          tags: ${{ env.MASTER_IMAGE }}:latest
+          cache-from: type=gha,scope=servers
+      - name: Both run as a non-root user
+        run: |
+          for image in "$SERVER_IMAGE" "$MASTER_IMAGE"; do
+            uid=$(docker run --rm --entrypoint id "$image:latest" -u)
+            echo "$image: uid $uid"
+            [ "$uid" != 0 ]
+          done
+      - name: The compose example comes up healthy; the server is listed by the master
+        run: |
+          set -euo pipefail
+          compose="docker compose -f packaging/docker/compose.example.yml"
+          $compose up -d --no-build --wait --wait-timeout 120
+          $compose ps
+          (exec 3<>/dev/tcp/127.0.0.1/3333) && (exec 3<>/dev/tcp/127.0.0.1/10207) # published ports answer
+          listed=0
+          for i in $(seq 1 30); do
+            $compose cp master:/var/lib/bv2/web.db web.db 2>/dev/null || true
+            if [ -f web.db ] && python3 -c "import sqlite3,sys; sys.exit(0 if sqlite3.connect('web.db').execute('select count(*) from Games where Port = 3333').fetchone()[0] else 1)"; then listed=1; break; fi
+            sleep 5
+          done
+          $compose logs --no-color | tail -40
+          [ "$listed" = 1 ]
+      - name: Push to GHCR (main)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+          for image in "$SERVER_IMAGE" "$MASTER_IMAGE"; do
+            docker tag "$image:latest" "$image:${{ github.sha }}"
+            docker push "$image:latest"
+            docker push "$image:${{ github.sha }}"
+          done
