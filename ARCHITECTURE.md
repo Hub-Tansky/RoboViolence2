@@ -16,7 +16,7 @@ Robo Violence 2: unofficial fork of BaboViolent 2, a top-down multiplayer shoote
 | Network | TCP, raw structs `memcpy`'d from `game/src/netPacket.h`. The server is authoritative for hits, damage, spawns, projectiles and flags; clients for their own movement. `playerID` (slot) differs from `babonetID` (connection). Protocol `GAME_VERSION_SV/CL` = 22100 (`game/src/Server.h:35`). Join and admin passwords are HMAC proofs over a per-connection challenge (`game/src/Credentials.h`, ADR 0014). |
 | Variants | `CONSOLE` = headless server (explicit file list in `game/CMakeLists.txt`). Direct3D, non-Pro and VLD code were removed in Step 1. |
 | Config and secrets | Tracked: `config/*.example.cfg` with empty secrets, `content-seed/*.sql` for generated DBs. Real values stay local; gitleaks, hooks and CI enforce it ([config/README.md](config/README.md)). |
-| Assets | The original assets are removed and blocked by hash (`tools/check-original-assets.py`). Only `content/languages/en.lang` and `content/LaunchScript/` remain; the build generates placeholders (`tools/gen-placeholder-content.py`). |
+| Assets | The original assets are removed and blocked by hash (`tools/check-original-assets.py`). Only `content/languages/` (English strings, template, guide) and `content/LaunchScript/` remain; the build generates placeholders (`tools/gen-placeholder-content.py`). |
 | Encoding | UTF-8 without BOM, LF; `tools/check-encoding.py`. Some comments hold U+FFFD where upstream lost accents. |
 | Supply chain | Dependency graph fed by vcpkg (`dependency-graph.yml`, on push to `main`); Dependabot alerts and security updates on; Dependabot version updates for GitHub Actions (`.github/dependabot.yml`); CodeQL `c-cpp` and `actions` (`codeql.yml`, not required). Dependabot and OSV can't check vcpkg ports (no C/C++ advisory ecosystem; OSV filters `pkg:vcpkg` purls), so bump the vcpkg baseline monthly, or sooner for a published CVE. |
 | Known defects | [docs/analysis/KEY_QUESTIONS.md](docs/analysis/KEY_QUESTIONS.md). |
@@ -110,6 +110,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/test_crash_fixes.cpp` | Steps 5 and 7: one check per fixed defect (KEY_QUESTIONS Part D) on the in-process server |
 | `tests/test_dks.cpp` | R20: `dksPlayMusic` on a missing file 200 times; a sound deleted after `dksShutDown` (teardown) (ASan) |
 | `tests/test_fileio.cpp` | `FileIO` byte widths for `.bvm` data and the widths the `.DKO` loader relies on; `bv2ReadBytes` zero-fills a short read; fixed-string length prefix round trip; unterminated `CString::loadFromFile` (overflows under ASan without its bound); `getString` keeps 255 characters (R16); `MemIO` reads past its end as zero; `getNextToken` on a single token (R30) |
+| `tests/test_lang.cpp` | Step 13: PO parser, English fallback per key, OS locale matching (`ll_CC`, `ll`, `.po` before `.lang`), PO without glyphs skipped |
 | `tests/test_join_password.cpp` | Step 10: a client joins a passworded server only with the HMAC over its own challenge; no password or MD5 of it on the wire |
 | `tests/test_packet_hygiene.cpp` | Step 4 checks: sender binding (Q-S1), index ranges with controls (Q-S2), map names (Q-S6), skin and sound relay (Q-S7), `SV_CHANGE` filter (Q-S4), the handshake gate, `checkPacket` per message type and size, the client's `checkServerMessage` on values the server sends |
 | `tests/test_replay.cpp` | Replays the corpus through the in-process server: no crash, expected replies; each `crash-*.bin` (none at present) is its own ctest under ASan |
@@ -181,7 +182,9 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 
 | path | purpose |
 |---|---|
-| `content/languages/en.lang` | English strings (default and only language) |
+| `content/languages/README.md` | Translator guide: add a language from `en.pot`, how the game picks one, the glyph limit |
+| `content/languages/en.lang` | English strings: the source and per-key fallback for every language |
+| `content/languages/en.pot` | Translation template generated from `en.lang` (`tools/lang-to-pot.py`) |
 
 ### `docs`
 
@@ -615,6 +618,8 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/KeyManager.h` | Key bindings manager |
 | `game/src/Label.cpp` | Menu label widget |
 | `game/src/Label.h` | Menu label widget |
+| `game/src/Lang.cpp` | Reads `.lang` and PO language files into the font's encoding; picks the file for the OS locales (ADR 0011) |
+| `game/src/Lang.h` | Language file API: `readLang`, `parsePo`, `pickFile`, `load` (English, then the chosen file) |
 | `game/src/MainMenu.h` | Main menu screen |
 | `game/src/Map.cpp` | Map data, .bvm loading and saving, collision, rendering resources |
 | `game/src/Map.h` | Map data, .bvm loading and saving, collision, rendering resources |
@@ -707,7 +712,9 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tools/placeholder-manifest.tsv` | Files the game loads at startup and their formats, for the placeholder generator |
 | `tools/gen-placeholder-content.py` | Writes placeholder maps, textures, a readable font atlas, sounds and models for dev and CI |
 | `tools/gen-placeholder-icon.py` | Writes the placeholder Windows application icon at build time |
-| `tools/check-hygiene.py` | Fails on spaces in paths, tracked ignored files, files over 5 MB, bad encoding |
+| `tools/check-hygiene.py` | Fails on spaces in paths, tracked ignored files, files over 5 MB, bad encoding, failed translation check |
+| `tools/lang-check.py` | Fails when `en.pot` is stale, a `.po` is invalid or has unknown keys; lists untranslated keys |
+| `tools/lang-to-pot.py` | Generates `content/languages/en.pot` from `en.lang` |
 | `tools/seed_db.cpp` | Creates a SQLite DB from SQL files (build helper) |
 | `tools/review.sh` | Review gate (REVIEW.md section 1): all checks, scope against the step's Allowed paths, anti-gaming, DONE gate; `--full` builds and tests |
 | `tools/setup-dev.ps1` | Activates hooks, checks tools (Windows) |

@@ -1,6 +1,6 @@
 # Step 13: Localisation foundations
 
-**Status:** TODO
+**Status:** IN PROGRESS
 
 **Depends on:** [Step 2](step2-cross-os-playtest.md). **Next:** none (last Phase B step). **Index:** [README.md](README.md)
 
@@ -11,7 +11,7 @@
 | Goal | The client picks the OS language when no `languageFile` is set, loads gettext PO files with `.lang` fallback, and contributors can add a language from a template and a guide |
 | In scope | Tasks 13.1–13.4 below |
 | Out of scope | An in-game language picker, moving hard-coded strings, non-ASCII rendering (all PNS-21); new fonts (PNS-20); shipping translations other than English |
-| Allowed paths | `game/src/GameVar.{h,cpp}`, `game/src/main.cpp`, `game/src/Lang*.{h,cpp}` (new), `game/CMakeLists.txt`, `content/languages/**`, `tools/lang-*`, `tools/check-hygiene.py`, `tests/**`, `ARCHITECTURE.md`, `docs/roadmap/**` |
+| Allowed paths | `game/src/GameVar.{h,cpp}`, `game/src/main.cpp`, `game/src/Lang*.{h,cpp}` (new), `game/CMakeLists.txt`, `content/languages/**`, `tools/lang-*`, `tools/check-hygiene.py`, `tests/**`, `config/bv2.example.cfg` (owner approved 2026-10-12: its `languageFile` default), `ARCHITECTURE.md`, `docs/roadmap/**` |
 | Inputs | `AGENTS.md`, `ARCHITECTURE.md`, earlier review records `reviews/step*.md`, [ADR 0011](../../decisions/0011-gettext-po-translations.md), [ADR 0010](../../decisions/0010-bv2-asset-compat-and-gui-freeze.md), PNS-2 |
 | Deliverables | Locale detection; PO loader; `en.pot` generator; translation checker in `hygiene`; `content/languages/README.md` |
 | Definition of done | See "Acceptance checks". All must pass. `ARCHITECTURE.md` is updated |
@@ -36,7 +36,7 @@
 ### 13.3 Template and checker
 
 - `tools/lang-to-pot.py` generates `content/languages/en.pot` from `en.lang`.
-- `tools/check-translations.py`, run by the `hygiene` job: valid PO, no unknown keys, `en.pot` in sync, missing keys reported per language.
+- `tools/lang-check.py` (named to fit Allowed paths), run by the `hygiene` job: valid PO, no unknown keys, `en.pot` in sync, missing keys reported per language.
 
 ### 13.4 Translator guide
 
