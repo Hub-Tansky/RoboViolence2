@@ -1,6 +1,6 @@
 # Step 12: Remote admin
 
-**Status:** TODO
+**Status:** IN PROGRESS
 
 **Depends on:** [Step 10](step10-server-credentials.md), [Step 11](step11-server-containers.md). **Next:** [step13-localisation.md](step13-localisation.md). **Index:** [README.md](README.md)
 
@@ -26,6 +26,7 @@
 ### 12.1 ADR: transport
 
 - Compare: an HTTP API on localhost behind a TLS reverse proxy (Caddy) in the compose stack; RCON over TLS inside the binary (mbedtls); SSH to the container console. Recommend one, and the owner confirms.
+- Owner, 2026-10-12: the HTTP API behind Caddy ([ADR 0015](../../decisions/0015-admin-http-api-behind-tls-proxy.md)).
 
 ### 12.2 Channel
 
