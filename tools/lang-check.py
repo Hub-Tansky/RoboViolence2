@@ -4,6 +4,7 @@
 Fails when en.pot is out of date, a content/languages/*.po file is not valid PO as the game parses it
 (game/src/Lang.cpp), has a key en.lang doesn't have, or changes a key's printf conversions. Warns about characters
 the font lacks; reports untranslated keys per language.
+Usage: tools/lang-check.py [languages dir]   (default content/languages)
 Python 3, stdlib only.
 """
 import glob
@@ -56,45 +57,47 @@ def read_po(path):
                 raise ValueError(f"{path}:{n}: {keyword} twice in one entry")
             field = keyword or field
             m = QUOTED.match(rest)
-            if not m or field is None or ESCAPES.sub("", m.group(1)).count("\\"):
+            if not m or field is None or ESCAPES.sub("", m.group(1)).count("\\") or re.search(r"[\x00-\x1f]", m.group(1)):
                 raise ValueError(f"{path}:{n}: bad string")
             cur[field] = cur.get(field, "") + m.group(1)
     flush()
     return entries
 
 
-def main():
+def check_po(name, entries, english):
+    """Prints the problems of one translation; returns how many fail the check."""
     bad = 0
-    pot = os.path.join(LANG_DIR, "en.pot")
-    with open(pot, encoding="utf-8") as f:
-        if f.read() != lang_to_pot.pot_text():
-            print("content/languages/en.pot is out of date: run tools/lang-to-pot.py")
+    for k in sorted(entries):
+        if k not in english:
+            print(f"{name}: unknown key {k}")
             bad += 1
-    english = dict(lang_to_pot.read_lang(os.path.join(LANG_DIR, "en.lang")))
-    keys = list(english)
-    for path in sorted(glob.glob(os.path.join(LANG_DIR, "*.po"))):
-        name = os.path.basename(path)
+            continue
+        if specs(entries[k]) != specs(english[k]):
+            print(f"{name}: {k} changes the conversions {specs(english[k])} to {specs(entries[k])}")
+            bad += 1
+        odd = sorted({c for c in entries[k] if ord(c) > 127 and c not in LATIN1})
+        if odd:
+            print(f"{name}: warning: {k} uses {''.join(odd)}, which the font lacks: the OS default skips this file")
+    missing = [k for k in english if k not in entries]
+    if missing:
+        print(f"{name}: {len(missing)} of {len(english)} keys untranslated (English shown): {', '.join(missing[:5])}"
+              + (", ..." if len(missing) > 5 else ""))
+    return bad
+
+
+def main(lang_dir=LANG_DIR):
+    bad = 0
+    with open(os.path.join(lang_dir, "en.pot"), encoding="utf-8") as f:
+        if f.read() != lang_to_pot.pot_text(lang_dir):
+            print("en.pot is out of date: run tools/lang-to-pot.py")
+            bad += 1
+    english = dict(lang_to_pot.read_lang(os.path.join(lang_dir, "en.lang")))
+    for path in sorted(glob.glob(os.path.join(lang_dir, "*.po"))):
         try:
-            entries = read_po(path)
+            bad += check_po(os.path.basename(path), read_po(path), english)
         except ValueError as e:
             print(e)
             bad += 1
-            continue
-        unknown = sorted(set(entries) - set(keys))
-        for k in unknown:
-            print(f"{name}: unknown key {k}")
-        bad += bool(unknown)
-        for k in sorted(set(entries) & set(keys)):
-            if specs(entries[k]) != specs(english[k]):
-                print(f"{name}: {k} changes the conversions {specs(english[k])} to {specs(entries[k])}")
-                bad += 1
-            odd = sorted({c for c in entries[k] if ord(c) > 127 and c not in LATIN1})
-            if odd:
-                print(f"{name}: warning: {k} uses {''.join(odd)}, which the font lacks: the OS default skips this file")
-        missing = [k for k in keys if k not in entries]
-        if missing:
-            print(f"{name}: {len(missing)} of {len(keys)} keys untranslated (English shown): {', '.join(missing[:5])}"
-                  + (", ..." if len(missing) > 5 else ""))
     if bad:
         return 1
     print("ok: translations")
@@ -102,4 +105,4 @@ def main():
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(main(*sys.argv[1:2]))

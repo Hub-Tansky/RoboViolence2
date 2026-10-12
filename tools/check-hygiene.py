@@ -5,7 +5,7 @@
 2. No tracked file matches .gitignore (secrets, binaries, OS junk).
 3. No file over 5 MB outside content/ and assets-src/.
 4. Encoding: tools/check-encoding.py (UTF-8, no BOM, LF).
-5. Translations: tools/lang-check.py (en.pot in sync, valid PO, no unknown keys).
+5. Translations: tools/lang-check.py.
 Python 3, stdlib only.
 """
 import os

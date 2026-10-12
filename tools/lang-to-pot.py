@@ -32,9 +32,9 @@ def read_lang(path):
     raise ValueError(f"{path}: no END line")
 
 
-def pot_text():
+def pot_text(lang_dir=LANG_DIR):
     out = [HEADER]
-    for key, text in read_lang(os.path.join(LANG_DIR, "en.lang")):
+    for key, text in read_lang(os.path.join(lang_dir, "en.lang")):
         out.append(f'\nmsgctxt "{key}"\nmsgid "{text.replace(chr(34), chr(92) + chr(34))}"\nmsgstr ""\n')
     return "".join(out)
 
