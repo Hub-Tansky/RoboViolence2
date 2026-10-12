@@ -82,3 +82,85 @@ I compared `lang::readLang` (game/src/Lang.cpp:84-130) with the removed `GameVar
 
 ## Verdict
 The move is behaviour-preserving for `.lang` files, including the `%` and CString formatting. The PO parser, the locale picking and the glyph skip are correct and tested. The design is small and sits in the right layer. One finding should be fixed before close: finding 1, placeholder validation, because translated text now reaches printf-style formatting from outside contributors. Findings 2-9 are low. Fix the cheap ones (2, 4, 8) and record the rest as rejected or deferred with a reason.
+
+## Round 2
+
+SKILL: Launching skill: thermo-nuclear-code-quality-review
+
+## Round 2 review: step 13 fix commits (`git diff e89b9dc..HEAD`: fa1e951, 2b70477, 8651e22, bb3d697)
+
+Read-only review in the worktree `/Users/piotr/Dev/BaboViolent_2_relaunch/RoboViolence2-step13`. Nothing was edited.
+
+### Verification of the round 1 fixes
+
+- **1 (printf conversions): mostly fixed, with one gap (finding A below).**
+  - C++ `formatSpecs` (`game/src/Lang.cpp:73-87`) and Python `SPECS`/`specs()` (`tools/lang-check.py:25,30-31`) agree. I compiled `formatSpecs` on its own and fuzzed it against the Python regex with 20,000 random strings over the alphabet `%`, digits, `d s . l h 0 - + # z q t a X * é`: 0 mismatches.
+  - The two read different forms of the text: C++ reads unescaped bytes, Python reads the escaped PO text. This doesn't change the result, because `\n`/`\xN`/`\"`/`\\` never contain `%` or flag characters.
+  - Proof by scratch run: a copy of the checker with a `pl.po` that maps `lang_joinedTheGame` to `%i` fails with "changes the conversions ['%s'] to ['%i']", rc=1.
+  - C++ test: `tests/test_lang.cpp:37-44` covers a changed type, an extra conversion, `%n`, a lone `%`, and keeps `%02i` and `%%`. That is good fix proof.
+- **2 (`\t` escape): fixed in both parsers** (`Lang.cpp:63-65`, `lang-check.py:21`). Test at `test_lang.cpp:35`. A literal TAB byte still gets through (finding B).
+- **3 (glyph warning): fixed.**
+  - `LATIN1` in Python matches the C++ `LATIN1[32]` code points in the same order (checked by `ord()`).
+  - Scratch run with `ż` prints the warning.
+  - It misses control characters (finding B).
+- **4 (repeated keyword): fixed, and both parsers agree.** C++ `seen[k]` at `Lang.cpp:186-187`, Python `keyword in cur` at `lang-check.py:56-57`. Both start a new entry when `msgctxt`/`msgid` follows a `msgstr`. Scratch run: "msgstr twice in one entry", rc=1. C++ test at `test_lang.cpp:34`.
+- **5 (parsePo restructure): fixed.**
+  - The `field[3]`/`seen[3]`/`flush` lambda is clearly simpler than the old `next`/`haveStr`/pointer state machine.
+  - End of input is now a plain `flush()` after the loop. The header entry (no `msgctxt`) is still skipped.
+- **6 (double parse): documented** at `Lang.h:19-21`. Accepted.
+- **7 / 9 / 10:** noted as intended. The guide note is `content/languages/README.md:21`.
+- **8 (docs):** the ARCHITECTURE rows for `Lang.h`, `test_lang.cpp`, `lang-check.py` and `step13-report.md` are updated, and the step context is fixed. Leaving the ADR 0011 line reference as it was is consistent with ADRs recording the context at decision time.
+- **Checks run:**
+  - `python3 tools/lang-check.py` on the real tree: "ok: translations".
+  - Sizes: `Lang.cpp` 240 lines, `lang-check.py` 105.
+
+### Findings
+
+1. **Medium.** `game/src/Lang.cpp:158` (the `formatSpecs(field[1]) == formatSpecs(field[2])` check in `flush`). C++ compares the translation's conversions with the PO's own `msgid`, not with the English text the game formats with.
+   - The game passes the text to `CString(fmt, ...)` with the argument types of the English key from `en.lang`.
+   - `msgid` comes from the same file the translator controls. A `.po` with `msgid "%i joined"` / `msgstr "%i joined"` for `lang_joinedTheGame` (English `%s`) passes the C++ check, and the game formats an `int` as `%s`.
+   - `lang-check.py:88` compares with `en.lang` and catches it, but only for committed files. A hand-set `languageFile` or an auto-picked `.po` dropped into `main/languages/` gets no protection. That protection was the stated reason for the C++ half of fix 1.
+   - Neither tool checks `msgid` against `en.lang`. My scratch `.po` used `msgid "x"` and nothing flagged it.
+   - **Fix (also a simplification):** `load()` already reads `en.lang` into `out` first. In `flush`, compare with what is already there: `auto en = out.find(field[0]); if (en != out.end() && formatSpecs(en->second) == formatSpecs(field[2])) …`. Drop `msgid` from the decision (keep it as a parsed field only), so C++ and Python use the same reference.
+   - Update the `Lang.h:14-15` comment and the test. The test would seed `f` with the English values first, which the `load` contract already guarantees.
+   - Optionally, `lang-check.py` could fail when `msgid` differs from `en.lang`. That flags a stale `.po`, but it isn't needed once the comparison is against `en.lang`.
+
+2. **Low.** `game/src/Lang.cpp:55-67` (`unquote`), `Lang.cpp:20` (`fontByte`), and `tools/lang-check.py:24,92`. A literal TAB byte inside a quoted PO string still becomes byte 9, the colour code `\x9`.
+   - Round 1 finding 2 was about this effect. The fix closed only the `\t` escape.
+   - Python `QUOTED` accepts a raw tab. The glyph warning only looks at `ord(c) > 127`, so it doesn't flag it.
+   - Scratch proof: `msgstr "%i joined<TAB>ż"` produced no complaint about the tab.
+   - The same gap applies to raw bytes 1-8 and other control characters. `fontByte` accepts 1-9, and Python never flags characters below 32.
+   - The new test message "\\t rejected (byte 9 is a colour code)" (`tests/test_lang.cpp:35`) suggests this is fully covered, which it isn't.
+   - **Fix:**
+     - In `unquote`, return false for any `c < 32` before the escape handling (`if ((unsigned char)c < 32) return false;`).
+     - In Python, add `or re.search(r'[\x00-\x1f]', m.group(1))` to the "bad string" check.
+     - Add one raw-tab case next to `test_lang.cpp:35`.
+
+3. **Low (tests, REVIEW.md §2: "New behaviour has a test").** `tools/lang-check.py:56-57,87-93`: the checker's new behaviour has no automated test.
+   - The new behaviour: failing on changed conversions, a repeated keyword and `\t`, and the glyph warning.
+   - Nothing in `tests/` or CI runs `lang-check.py` on a bad `.po`. It runs only on the real tree, which has no `.po`, so every new branch is dead code in CI.
+   - The C++ side has tests. The Python fix proof exists only if the record shows a manual scratch run; I reproduced one above.
+   - **Fix:** either
+     - add a small ctest that runs `lang-check.py` against a scratch `content/languages` directory with three bad `.po` files (a `LANG_DIR` override via env or argv, a few lines), or
+     - record the scratch-run output as fix proof in `reviews/step13.md`.
+
+4. **Low (docs).** `tools/check-hygiene.py:8`: the docstring still says "Translations: tools/lang-check.py (en.pot in sync, valid PO, no unknown keys)". It now also fails on changed conversions and warns about glyphs.
+   - **Fix:** shorten it to "Translations: tools/lang-check.py", since the details already live in that file's docstring.
+
+5. **Info (structure).** `tools/lang-check.py:85-93`: `main()` now holds the unknown-key, conversion, glyph and untranslated checks inline in one loop. At 105 lines this is still fine, so no action is needed now. If finding 2 or another check is added, a `check_po(name, entries, english) -> bad` function would keep `main` as orchestration only.
+
+6. **Info (repeat check).** None of the findings above repeats a finding that an earlier phase B record rejected or deferred. Findings 1 and 2 are incomplete fixes of round 1 findings 1 and 2, not new issues.
+
+Commit hygiene (REVIEW §2):
+- The fix commits keep the C++ changes (fa1e951) and Python changes (2b70477) separate, with no mechanical rewrites mixed in.
+- ARCHITECTURE and the README are updated.
+- No ADR is needed: rejecting a translation whose conversions differ from the English is covered by ADR 0011's per-key fallback.
+
+### Verdict
+
+**Not yet closable:**
+- Fixes 2-8 are correct, and the C++ and Python conversion extraction agree (fuzz-verified).
+- Fix 1's runtime guard compares with the wrong reference (`msgid` instead of `en.lang`), so a hand-supplied `.po` can still crash the game.
+- Fix 2 leaves raw control bytes open.
+
+Fixing finding 1 (comparing with `out`) makes the code smaller, not larger. Findings 2 and 3 are small. Findings 4-5 are optional.
