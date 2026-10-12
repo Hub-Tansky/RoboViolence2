@@ -63,6 +63,7 @@ set(BV2_GAME_SOURCES
   src/Key.cpp
   src/KeyManager.cpp
   src/Label.cpp
+  src/Lang.cpp
   src/Map.cpp
   src/MapRender.cpp
   src/MemIO.cpp

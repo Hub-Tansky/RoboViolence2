@@ -562,9 +562,8 @@ public:
 	void sendOne(char * varName, INT4 peerId);
 #ifndef CONSOLE
 	bool languageLoaded;
-	// Pour loader les lang_ var
-	bool loadLanguage(char * filename);
-	// Load languageFile (relative to the data root) and refresh the weapon names; call after pathsInit()
+	// Load languageFile (relative to the data root; empty: the OS language) over en.lang and refresh the weapon names;
+	// call after pathsInit()
 	bool reloadLanguage();
 	bool isLanguageLoaded();
 #endif
