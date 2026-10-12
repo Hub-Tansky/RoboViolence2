@@ -49,6 +49,21 @@ int main()
 	pong.playerID = 31;
 	CHECK(sizeof(pong) == 1);
 
+	// Step 10: the version stays 4 bytes (any build reads another's); the challenge is its own 16-byte message; the
+	// answer is the slot and a 32-byte proof
+	net_svcl_gameversion version;
+	version.gameVersion = 22100;
+	unsigned char versionWire[sizeof(version)];
+	std::memcpy(versionWire, &version, sizeof(version));
+	CHECK(sizeof(version) == 4 && versionWire[0] == (22100 & 0xFF) && versionWire[1] == (22100 >> 8));
+	CHECK(sizeof(net_svcl_join_challenge) == 16);
+	net_clsv_gameversion_accepted accepted;
+	accepted.playerID = 3;
+	std::memset(accepted.proof, 0xAB, sizeof(accepted.proof));
+	unsigned char acceptedWire[sizeof(accepted)];
+	std::memcpy(acceptedWire, &accepted, sizeof(accepted));
+	CHECK(sizeof(accepted) == 1 + 32 && acceptedWire[0] == 3 && acceptedWire[1] == 0xAB && acceptedWire[32] == 0xAB);
+
 	if (failures == 0)
 		std::printf("ok: netPacket layout\n");
 	return failures ? 1 : 0;

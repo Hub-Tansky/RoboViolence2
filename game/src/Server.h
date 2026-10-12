@@ -21,6 +21,7 @@
 
 
 #include "Game.h"
+#include "Credentials.h"
 #include "ServerValidator.h"
 #include <map>
 #include <string>
@@ -31,7 +32,7 @@
 #include <set>
 #include <vector>
 
-#define GAME_VERSION_SV 22000 // bumped once for Phase A: fixed-width packed wire structs (step 4.2)
+#define GAME_VERSION_SV 22100 // Phase A: fixed-width packed wire structs (step 4.2); Phase B step 10: password challenge
 
 #define GAME_UPDATE_DELAY 20
 
@@ -43,7 +44,6 @@ struct cachedPlayer
 	bool Valid;
 	char NickName[32];
 	char IP[16];
-	char macAddr[20];
 };
 
 class Server
@@ -54,6 +54,9 @@ public:
 
 	// Cheat checks on received messages (step 8)
 	ServerValidator validator;
+
+	// Per slot: the challenge sent in its JOIN_CHALLENGE, for the join and admin passwords (step 10)
+	uint8_t joinNonce[MAX_PLAYER][credentials::NONCE_SIZE] = {};
 
 #ifndef CONSOLE
 	// La font

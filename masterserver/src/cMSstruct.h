@@ -44,7 +44,6 @@
 		short	ID;
 		char	Nick[32];
 		char	IP[16];
-		char	MAC[20];
 		char	Duration;
 		char	Date[9];
 		char	Pass[8];
@@ -78,7 +77,6 @@
 	{
 		short	ID;			// player ID, only used for the server
 		char	IP[16];
-		char	MAC[20];
 	};
 
 	//CACHE_ANSWER		1014
@@ -95,7 +93,6 @@
 		short ID;
 		char NickName[32];
 		char IP[16];
-		char macAddr[20];
 	};
 
 	//CACHE_LIST_PLAYER_END

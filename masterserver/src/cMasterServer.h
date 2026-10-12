@@ -76,11 +76,11 @@ public:
 	float		TimeSinceBanCheck;
 
 	void		CheckBans();												// to see if a ban must stop
-	void		AddBan( char * NickName , char * IP , char * MAC , int Duration );					// to add or update a ban
+	void		AddBan( char * NickName , char * IP , int Duration );					// to add or update a ban
 	void		Unban( int ID );											// unban someone by ID
 	void		SendBanList( UINT4 fromID , char * filter );							//function to send a ban list to a client	
-	int		IsBanned( char * IP , char * MAC );									// return 0 if the guy is not banned, return 1 if he is
-	long long	FindBan( const char * IP , const char * MAC );								// the ban's ID, -1 if none
+	int		IsBanned( char * IP );									// return 0 if the guy is not banned, return 1 if he is
+	long long	FindBan( const char * IP );								// the ban's ID, -1 if none
 	void		WriteWebGame( const stBV2row & game , bool insert );						// a game's row in the web database
 
 	int		RegisterServer(const stServerRegister & reg,char *ip);							//authentification of a server, return 0 on failure, return the ServerID on success

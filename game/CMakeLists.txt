@@ -44,6 +44,7 @@ set(BV2_GAME_SOURCES
   src/ClientRender.cpp
   src/ConfirmPass.cpp
   src/Console.cpp
+  src/Credentials.cpp
   src/Control.cpp
   src/ControlListener.cpp
   src/Dialog.cpp
@@ -101,6 +102,7 @@ set(BV2_SERVER_SOURCES
   src/CPing.cpp
   src/CStatus.cpp
   src/Console.cpp
+  src/Credentials.cpp
   src/FileIO.cpp
   src/Game.cpp
   src/GameProjectile.cpp
@@ -132,7 +134,7 @@ set(BV2_SERVER_SOURCES
 
 function(bv2_game_target target)
   target_include_directories(${target} PRIVATE src)
-  target_link_libraries(${target} PRIVATE babonet dko zeven_core ${BV2_SQLITE_TARGET} Threads::Threads)
+  target_link_libraries(${target} PRIVATE babonet dko zeven_core ${BV2_SQLITE_TARGET} unofficial-sodium::sodium Threads::Threads)
   if(BV2_WITH_HTTP)
     target_sources(${target} PRIVATE src/CCurl.cpp)
     target_compile_definitions(${target} PRIVATE BV2_WITH_HTTP)
@@ -168,7 +170,7 @@ if(BV2_BUILD_SERVER AND BV2_BUILD_TESTS)
   target_compile_definitions(bv2server_lib PUBLIC CONSOLE)
   bv2_game_target(bv2server_lib)
   target_include_directories(bv2server_lib PUBLIC src)
-  target_link_libraries(bv2server_lib PUBLIC babonet dko zeven_core zeven_console ${BV2_SQLITE_TARGET})  # CMaster.h includes sqlite3.h
+  target_link_libraries(bv2server_lib PUBLIC babonet dko zeven_core zeven_console ${BV2_SQLITE_TARGET} unofficial-sodium::sodium)  # CMaster.h includes sqlite3.h
 endif()
 
 if(BV2_BUILD_CLIENT)

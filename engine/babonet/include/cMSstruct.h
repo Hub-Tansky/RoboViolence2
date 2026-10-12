@@ -75,7 +75,6 @@
 		int16_t	ID;
 		char	Nick[32];
 		char	IP[16];
-		char	MAC[20];
 		int8_t	Duration;
 		char	Date[9];
 		char	Pass[8];
@@ -109,7 +108,6 @@
 	{
 		int16_t	ID;			// player ID, only used for the server
 		char	IP[16];
-		char	MAC[20];
 	};
 
 	//CACHE_ANSWER		1014
@@ -126,7 +124,6 @@
 		int16_t ID;
 		char NickName[32];
 		char IP[16];
-		char macAddr[20];
 	} stCachePlayer;
 
 	//CACHE_LIST_PLAYER_END
@@ -447,10 +444,10 @@
 
 
 
-static_assert(sizeof(stCacheBan) == 88, "stCacheBan wire size");
+static_assert(sizeof(stCacheBan) == 68, "stCacheBan wire size");
 static_assert(sizeof(stCacheList) == 32, "stCacheList wire size");
 static_assert(sizeof(stCacheUnban) == 12, "stCacheUnban wire size");
-static_assert(sizeof(stCacheBanned) == 38, "stCacheBanned wire size");
+static_assert(sizeof(stCacheBanned) == 18, "stCacheBanned wire size");
 static_assert(sizeof(stCacheAnswer) == 3, "stCacheAnswer wire size");
 static_assert(sizeof(stCacheListEnd) == 4, "stCacheListEnd wire size");
 static_assert(sizeof(stBV2list) == 5, "stBV2list wire size");
@@ -463,7 +460,7 @@ static_assert(sizeof(stRegisterResult) == 5, "stRegisterResult wire size");
 static_assert(sizeof(stKillServ) == 2, "stKillServ wire size");
 static_assert(sizeof(SSurvey) == 573, "SSurvey wire size");
 static_assert(sizeof(stCacheListRemote) == 60, "stCacheListRemote wire size");
-static_assert(sizeof(stCachePlayer) == 76, "stCachePlayer wire size");
+static_assert(sizeof(stCachePlayer) == 56, "stCachePlayer wire size");
 static_assert(sizeof(stHashSeed) == 8, "stHashSeed wire size");
 static_assert(sizeof(stAccount) == 132, "stAccount wire size");
 static_assert(sizeof(stDeleteAccount) == 21, "stDeleteAccount wire size");

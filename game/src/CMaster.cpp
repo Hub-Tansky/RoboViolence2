@@ -359,7 +359,7 @@ void CMaster::ReceivePeersPacket()
 					char srvName[63];
 					sprintf( srvName , "{ LAN } %s", gameVar.sv_gameName.s );
 					strncpy(gameInfos.GameInfo.serverName, srvName, 63);
-					strncpy(gameInfos.GameInfo.password, gameVar.sv_password.s, 15);
+					strcpy(gameInfos.GameInfo.password, gameVar.sv_password != "" ? "*" : ""); // a flag: never the password (Q-S5)
 					sprintf( gameInfos.GameInfo.ip , "%s", bb_getMyIP() );
 					gameInfos.GameInfo.port = (unsigned short)gameVar.sv_port;
 					int nbPlayer = 0;
@@ -797,10 +797,9 @@ void CMaster::recvPacket(const char * buffer, int typeID)
 			stCacheBan cb;
 			memcpy(&cb,buffer,sizeof(stCacheBan));
 
-			console->add(CString("[%02i] %s - IP:%s  MAC:%s  Date:%s  Duration:%i", cb.ID,
+			console->add(CString("[%02i] %s - IP:%s  Date:%s  Duration:%i", cb.ID,
 						cb.Nick,
 						cb.IP,
-						cb.MAC,
 						cb.Date,
 						cb.Duration), true);
 
@@ -812,7 +811,7 @@ void CMaster::recvPacket(const char * buffer, int typeID)
 			memcpy(&cp,buffer,sizeof(stCachePlayer));
 
 			if (cachePlayerRemoteServer(cp))
-				console->add(CString("[%02i] %s \x8- %s  %s", cp.ID, cp.NickName, cp.IP, cp.macAddr), true);
+				console->add(CString("[%02i] %s \x8- %s", cp.ID, cp.NickName, cp.IP), true);
 
 			break;
 		}
@@ -894,7 +893,7 @@ void CMaster::sendGameInfo(Server* server)
 
 		strncpy(bv2Row.map, server->game->mapName.s, 16);
 		strncpy(bv2Row.serverName, gameVar.sv_gameName.s, 63);
-		strncpy(bv2Row.password, gameVar.sv_password.s, 15);
+		strcpy(bv2Row.password, gameVar.sv_password != "" ? "*" : ""); // a flag: never the password (Q-S5)
 		bv2Row.ip[0] = '\0';
 		bv2Row.port = (unsigned short)gameVar.sv_port;
 		int nbPlayer = 0;
@@ -1007,7 +1006,6 @@ bool CMaster::cachePlayerRemoteServer(const stCachePlayer& player)
 
 	CachedPlayersRemote[player.ID].Valid = true;
 	sprintf( CachedPlayersRemote[player.ID].IP , "%s", player.IP );
-	sprintf( CachedPlayersRemote[player.ID].macAddr , "%s", player.macAddr );
 	sprintf( CachedPlayersRemote[player.ID].NickName , "%s", player.NickName );
 	return true;
 }
@@ -1017,7 +1015,6 @@ void CMaster::clearRemoteCacheList()
 	for( int i = 0; i < 50; i++ )
 	{
 		CachedPlayersRemote[i].Valid = false;
-		CachedPlayersRemote[i].macAddr[0] = '\0';
 		CachedPlayersRemote[i].NickName[0] = '\0';
 		CachedPlayersRemote[i].IP[0] = '\0';
 	}
@@ -1058,7 +1055,6 @@ void CMaster::sendCacheListToMaster(const stCacheListRemote& info)
 					cp.FromID = info.FromID;
 					cp.ID = i;
 					memcpy(cp.IP, RunningServer->CachedPlayers[i].IP, 16);
-					memcpy(cp.macAddr, RunningServer->CachedPlayers[i].macAddr, 20);
 					memcpy(cp.NickName, RunningServer->CachedPlayers[i].NickName, 32);
 					cp.ReqNum = info.ReqNum;
 					sendPacket( (char*)&cp , sizeof(stCachePlayer) , CACHE_LIST_PLAYER);

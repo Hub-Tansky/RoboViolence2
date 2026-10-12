@@ -39,11 +39,6 @@ void Client::sendJoinHandshake()
 
 	net_clsv_svcl_player_info playerInfo;
 
-	// on pogne notre mac adress
-	unsigned char mac[8];		// unsigned here is very important
-	bb_getMyMAC( mac );
-	sprintf( playerInfo.macAddr , "%.2x-%.2x-%.2x-%.2x-%.2x-%.2x" , (int)mac[0], (int)mac[1],(int)mac[2],(int)mac[3],(int)mac[4],(int)mac[5] );
-	
 	// On send le playerInfo
 	playerInfo.playerID = game->thisPlayer->playerID;
 	memcpy(playerInfo.playerName, game->thisPlayer->name.s, game->thisPlayer->name.len() + 1);
@@ -56,16 +51,15 @@ void Client::sendJoinHandshake()
 
 	bb_clientSend(uniqueClientID, (char*)&playerInfo, sizeof(net_clsv_svcl_player_info), NET_CLSV_SVCL_PLAYER_INFO);
 
+	sendVersionAccepted();
+}
+
+void Client::sendVersionAccepted()
+{
 	net_clsv_gameversion_accepted gameVersionAccepted;
 	gameVersionAccepted.playerID = game->thisPlayer->playerID;
-	if (scene->server) //--- We are also server, retreive password
-	{
-		strcpy(gameVersionAccepted.password, gameVar.sv_password.s);
-	}
-	else
-	{
-		strcpy(gameVersionAccepted.password, m_password.s);
-	}
+	//--- A listen server's own client proves sv_password
+	credentials::prove(scene->server ? gameVar.sv_password.s : m_password.s, "join", serverNonce, gameVersionAccepted.proof);
 	bb_clientSend(uniqueClientID, (char*)&gameVersionAccepted, sizeof(net_clsv_gameversion_accepted), NET_CLSV_GAMEVERSION_ACCEPTED);
 }
 
@@ -114,7 +108,7 @@ void Client::recvPacket(char * wire, int size, int typeID)
 	if (!gotGameState || !isConnected)
 	{
 		if (typeID != NET_SVCL_NEWPLAYER &&
-			typeID != NET_SVCL_GAMEVERSION &&
+			typeID != NET_SVCL_GAMEVERSION && typeID != NET_SVCL_JOIN_CHALLENGE &&
 			typeID != NET_SVCL_SERVER_INFO &&
 			typeID != NET_SVCL_PING &&
 			typeID != NET_SVCL_MAP_CHUNK)
@@ -148,10 +142,7 @@ void Client::recvPacket(char * wire, int size, int typeID)
 					}
 					
 					// Re-query server in case state has changed
-					net_clsv_gameversion_accepted gameVersionAccepted;
-					gameVersionAccepted.playerID = game->thisPlayer->playerID;
-					strcpy(gameVersionAccepted.password, m_password.s);
-					bb_clientSend(uniqueClientID, (char*)&gameVersionAccepted, sizeof(net_clsv_gameversion_accepted), NET_CLSV_GAMEVERSION_ACCEPTED);
+					sendVersionAccepted();
 
 				}
 				else
@@ -286,6 +277,11 @@ void Client::recvPacket(char * wire, int size, int typeID)
 				pendingVersionAccept = false;
 				sendJoinHandshake();
 			}
+			break;
+		}
+	case NET_SVCL_JOIN_CHALLENGE:
+		{
+			memcpy(serverNonce, buffer, sizeof(serverNonce));
 			break;
 		}
 	case NET_SVCL_GAMEVERSION:

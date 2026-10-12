@@ -1634,12 +1634,7 @@ int Game::createNewPlayerSV(int babonetID)
 			newPlayer.baboNetID = babonetID;
 			bb_serverSend((char*)&newPlayer, sizeof(net_svcl_newplayer), NET_SVCL_NEWPLAYER, 0);
 
-			// On lui envoi premièrement la version du jeu
-			net_svcl_gameversion gameVersion;
-			gameVersion.gameVersion = GAME_VERSION_SV;
-			bb_serverSend((char*)&gameVersion, sizeof(net_svcl_gameversion), NET_SVCL_GAMEVERSION, babonetID);
-			if (gameVar.c_netlog)
-				console->add(CString("server> [net] slot %i for babonetID=%i: sent NEWPLAYER (all) + GAMEVERSION %i", i, babonetID, GAME_VERSION_SV), true);
+			// The server sends GAMEVERSION next, with the slot's password challenge (Server::updateNet)
 
 			//--- Est-ce que c'est le seul joueur? ou il y a 2 joueur? On restart le server.
 

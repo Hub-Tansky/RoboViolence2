@@ -350,3 +350,22 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Why it matters:** a player on a link that stalls every few seconds can be kicked as a speed hacker. The rule is unchanged since upstream.
 - **Suggested home:** tune it from the step 9 play-test log (time the window by the client frames, or count only the drift beyond a stall).
 - **Status:** Proposed
+
+### PNS-42: Admin login attempts and weak passwords
+
+- **Found in:** Phase B step 10 (2026-10-12).
+- **Extract:** the join and admin proofs are HMACs keyed by the password over a public nonce (ADR 0014). Someone who records one can test password guesses offline; the server accepts unlimited `ADMIN_REQUEST`s (no budget in step 9's rate limits).
+- **Why it matters:** a short `zsv_adminPass` or `sv_password` can be found from one captured login.
+- **Suggested home:** step 12 (remote admin): an attempt budget per connection, a minimum password length for `zsv_adminPass`; a PAKE or TLS if passwords must survive capture.
+- **Status:** Proposed
+
+### PNS-43: Join-time identity gaps left after step 10
+
+- **Found in:** Phase B step 10 review (2026-10-12).
+- **Extract:**
+  - The server accepts `PLAYER_INFO` before the password handshake (`Server::checkPacket`): on a passworded server an unauthenticated connection triggers the name broadcast, the account request and the master ban query.
+  - Every relayed `PLAYER_INFO` carries each player's IP to all clients.
+  - The master's ban and unban messages are authorised by a hard-coded password (`roxbabo`) sent in cleartext.
+- **Why it matters:** privacy (IPs), and anyone can add master bans.
+- **Suggested home:** step 12 (remote admin) for the ban password; a protocol step for the join order and IPs.
+- **Status:** Proposed

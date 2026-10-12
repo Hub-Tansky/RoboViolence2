@@ -958,6 +958,7 @@ void GameVar::sendSVVar(INT4 peerId)
 
 void GameVar::sendOne(char * varName, INT4 peerId)
 {
+	if (dksvarIsSecret(varName)) return; // passwords never go on the wire (Q-S5)
 	CString varCom;
 	dksvarGetFormatedVar(varName, &varCom);
 	//varCom.insert("set ", 0);
@@ -970,6 +971,7 @@ void GameVar::sendOne(char * varName, INT4 peerId)
 
 void GameVar::sendOne(char * varName, UINT4 babonetID)
 {
+	if (dksvarIsSecret(varName)) return; // passwords never go to clients (Q-S5)
 	CString varCom;
 	dksvarGetFormatedVar(varName, &varCom);
 	varCom.insert("set ", 0);

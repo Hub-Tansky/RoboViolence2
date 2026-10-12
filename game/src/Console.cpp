@@ -28,7 +28,6 @@
 #include <algorithm>
 #include <string>
 
-	#include "md5class.h"
 
 
 // Notre module principal
@@ -759,17 +758,10 @@ void Console::sendCommand(CString commandLine, bool isAdmin, unsigned long bbnet
 			CString pwd = tokenize.getFirstToken(' ');
 			if (login != "" && pwd != "")
 			{
+				// Step 10: proofs over the server's challenge, not the user and password themselves
 				net_clsv_admin_request adminRequest;
-				memset(&adminRequest, 0, sizeof(net_clsv_admin_request));
-				CMD5 login_(login.s);
-				memcpy(adminRequest.login, login_.getMD5Digest(), 32);
-
-				CMD5 pwd_(pwd.s);
-				memcpy(adminRequest.password, pwd_.getMD5Digest(), 32);
-
-				/*add(CString("\x9> L: %s", adminRequest.login));
-				add(CString("\x9> P: %s", adminRequest.password));*/
-
+				credentials::prove(login.s, "admin user", scene->client->serverNonce, adminRequest.login);
+				credentials::prove(pwd.s, "admin password", scene->client->serverNonce, adminRequest.password);
 				bb_clientSend(scene->client->uniqueClientID, (char*)(&adminRequest), sizeof(net_clsv_admin_request), NET_CLSV_ADMIN_REQUEST);
 			}
 			else
@@ -853,7 +845,7 @@ void Console::sendCommand(CString commandLine, bool isAdmin, unsigned long bbnet
 					val.resize(15);
 					commandLine = "set sv_password ";
 					commandLine += val;
-					console->add(CString("Max password length is 15 characters, password changed to '%s'", val.s), true);
+					console->add("Max password length is 15 characters, password truncated", true); // never echo a secret
 				}
 
 				// Il faut envoyer le changement de variable sur le r?eau
@@ -2125,27 +2117,24 @@ void Console::sendCommand(CString commandLine, bool isAdmin, unsigned long bbnet
 
 						if( strstr( name.s , tokenize.s ) )
 						{
-							add(CString("[%02i] %s \x8- %s  %s", i,
+							add(CString("[%02i] %s \x8- %s", i,
 								scene->server->CachedPlayers[i].NickName,
-								scene->server->CachedPlayers[i].IP,
-								scene->server->CachedPlayers[i].macAddr),
+								scene->server->CachedPlayers[i].IP),
 								true);
 						}
 						else if( strstr( scene->server->CachedPlayers[i].IP , tokenize.s ) )
 						{
-							add(CString("[%02i] %s \x8- %s  %s", i,
+							add(CString("[%02i] %s \x8- %s", i,
 								scene->server->CachedPlayers[i].NickName,
-								scene->server->CachedPlayers[i].IP,
-								scene->server->CachedPlayers[i].macAddr),
+								scene->server->CachedPlayers[i].IP),
 								true);
 						}
 					}
 					else
 					{
-						add(CString("[%02i] %s \x8- %s  %s", i,
+						add(CString("[%02i] %s \x8- %s", i,
 							scene->server->CachedPlayers[i].NickName,
-							scene->server->CachedPlayers[i].IP,
-							scene->server->CachedPlayers[i].macAddr),
+							scene->server->CachedPlayers[i].IP),
 							true);
 					}
 				}
@@ -2190,7 +2179,6 @@ void Console::sendCommand(CString commandLine, bool isAdmin, unsigned long bbnet
 			cb.Duration		=	duration;
 			cb.ID			=	ID;
 			sprintf( cb.IP , "%s", scene->server->CachedPlayers[ID].IP );
-			sprintf( cb.MAC , "%s", scene->server->CachedPlayers[ID].macAddr );
 			sprintf( cb.Nick , "%s", scene->server->CachedPlayers[ID].NickName );
 			memcpy( cb.Pass, strPass.s, 7 );
 			cb.Pass[7] = '\0';
@@ -2301,7 +2289,6 @@ void Console::sendCommand(CString commandLine, bool isAdmin, unsigned long bbnet
 			cb.Duration		=	duration;
 			cb.ID			=	ID;
 			sprintf( cb.IP , "%s", master->CachedPlayersRemote[ID].IP );
-			sprintf( cb.MAC , "%s", master->CachedPlayersRemote[ID].macAddr );
 			sprintf( cb.Nick , "%s", master->CachedPlayersRemote[ID].NickName );
 			memcpy( cb.Pass, strPass.s, 7 );
 			cb.Pass[7] = '\0';

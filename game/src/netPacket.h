@@ -22,6 +22,7 @@
 
 
 #include "cMSstruct.h"
+#include "Credentials.h"
 #include <stdint.h>
 
 // Wire format: fixed-width fields, no padding, little endian (asserted below). Changing a layout needs a GAME_VERSION bump.
@@ -70,7 +71,7 @@ struct net_clsv_player_shoot
 struct net_clsv_gameversion_accepted
 {
 	int8_t playerID;		// Le ID du joueur
-	char password[16];	// Password
+	uint8_t proof[32];	// HMAC of sv_password over the JOIN_CHALLENGE nonce (Credentials.h); ignored without a password
 };
 
 // On demande au server de pickuper un item par terre
@@ -84,8 +85,8 @@ struct net_clsv_pickup_request
 #define NET_CLSV_ADMIN_REQUEST 6
 struct net_clsv_admin_request
 {
-	char login[33];		//md5
-	char password[33];	//md5
+	uint8_t login[32];		// HMAC of the user over the JOIN_CHALLENGE nonce, label "admin user" (Credentials.h)
+	uint8_t password[32];	// HMAC of the password, label "admin password"
 };
 
 // Vote
@@ -289,7 +290,14 @@ struct net_svcl_play_sound
 #define NET_SVCL_GAMEVERSION 116
 struct net_svcl_gameversion
 {
-	uint32_t gameVersion;
+	uint32_t gameVersion; // 4 bytes for good: any build can read another's version
+};
+
+// This connection's challenge for the join and admin passwords, sent just before GAMEVERSION (step 10)
+#define NET_SVCL_JOIN_CHALLENGE 134
+struct net_svcl_join_challenge
+{
+	uint8_t nonce[16];
 };
 
 // Pour synchroniser le temps des horloges du jeu
@@ -424,8 +432,7 @@ struct net_clsv_svcl_player_info
 	char playerIP[16];
 	char playerName[31+1]; // Le nom du joueur, 31 + \0 caract�res
 	char username[21];		// Account username
-	char password[32];		// Account password (MD5)
-	char macAddr[20]; // player's mac adress, mouhouha
+	char password[32];		// Account password (MD5); the server blanks it, and the username, before relaying
 };
 
 // Le client �cris un message, l'envoit au server
@@ -579,9 +586,9 @@ struct net_svcl_broadcast_game_info
 static_assert(sizeof(net_clsv_pong) == 1, "net_clsv_pong wire size");
 static_assert(sizeof(net_clsv_spawn_request) == 19, "net_clsv_spawn_request wire size");
 static_assert(sizeof(net_clsv_player_shoot) == 15, "net_clsv_player_shoot wire size");
-static_assert(sizeof(net_clsv_gameversion_accepted) == 17, "net_clsv_gameversion_accepted wire size");
+static_assert(sizeof(net_clsv_gameversion_accepted) == 33, "net_clsv_gameversion_accepted wire size");
 static_assert(sizeof(net_clsv_pickup_request) == 1, "net_clsv_pickup_request wire size");
-static_assert(sizeof(net_clsv_admin_request) == 66, "net_clsv_admin_request wire size");
+static_assert(sizeof(net_clsv_admin_request) == 64, "net_clsv_admin_request wire size");
 static_assert(sizeof(net_clsv_vote) == 2, "net_clsv_vote wire size");
 static_assert(sizeof(net_clsv_map_list_request) == 2, "net_clsv_map_list_request wire size");
 static_assert(sizeof(net_svcl_newplayer) == 5, "net_svcl_newplayer wire size");
@@ -599,6 +606,11 @@ static_assert(sizeof(net_svcl_explosion) == 29, "net_svcl_explosion wire size");
 static_assert(sizeof(net_svcl_player_hit) == 10, "net_svcl_player_hit wire size");
 static_assert(sizeof(net_svcl_play_sound) == 6, "net_svcl_play_sound wire size");
 static_assert(sizeof(net_svcl_gameversion) == 4, "net_svcl_gameversion wire size");
+static_assert(sizeof(net_svcl_join_challenge) == 16, "net_svcl_join_challenge wire size");
+static_assert(sizeof(net_svcl_join_challenge::nonce) == credentials::NONCE_SIZE, "challenge size");
+static_assert(sizeof(net_clsv_gameversion_accepted::proof) == credentials::MAC_SIZE &&
+	sizeof(net_clsv_admin_request::login) == credentials::MAC_SIZE &&
+	sizeof(net_clsv_admin_request::password) == credentials::MAC_SIZE, "proof size");
 static_assert(sizeof(net_svcl_synchronize_timer) == 12, "net_svcl_synchronize_timer wire size");
 static_assert(sizeof(net_svcl_change_flag_state) == 3, "net_svcl_change_flag_state wire size");
 static_assert(sizeof(net_svcl_drop_flag) == 13, "net_svcl_drop_flag wire size");
@@ -612,7 +624,7 @@ static_assert(sizeof(net_svcl_update_vote) == 2, "net_svcl_update_vote wire size
 static_assert(sizeof(net_svcl_vote_result) == 1, "net_svcl_vote_result wire size");
 static_assert(sizeof(net_svcl_msg) == 132, "net_svcl_msg wire size");
 static_assert(sizeof(net_svcl_player_update_stats) == 15, "net_svcl_player_update_stats wire size");
-static_assert(sizeof(net_clsv_svcl_player_info) == 122, "net_clsv_svcl_player_info wire size");
+static_assert(sizeof(net_clsv_svcl_player_info) == 102, "net_clsv_svcl_player_info wire size");
 static_assert(sizeof(net_clsv_svcl_chat) == 131, "net_clsv_svcl_chat wire size");
 static_assert(sizeof(net_clsv_svcl_team_request) == 2, "net_clsv_svcl_team_request wire size");
 static_assert(sizeof(net_clsv_svcl_player_coord_frame) == 28, "net_clsv_svcl_player_coord_frame wire size");

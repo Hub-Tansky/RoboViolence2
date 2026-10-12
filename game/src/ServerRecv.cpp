@@ -30,7 +30,6 @@
 #include <string.h>
 extern Scene* scene;
 
-	#include "md5class.h"
 
 using std::min;
 
@@ -240,31 +239,13 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 		{
 			net_clsv_admin_request adminRequest;
 			memcpy(&adminRequest, buffer, sizeof(net_clsv_admin_request));
-			adminRequest.login[32] = '\0';
-			adminRequest.password[32] = '\0';
-			CString loginRecv("%s", adminRequest.login); // R23: data, not a format
-			CString pwdRecv("%s", adminRequest.password);
 
 			if (!gameVar.zsv_adminPass.isNull() &&
 				!gameVar.zsv_adminUser.isNull())
 			{
-				if (loginRecv.isNull() || pwdRecv.isNull())
-				{
-					sender->isAdmin = false;
-					break;
-				}
-				CMD5 login_(gameVar.zsv_adminUser.s);
-				CString login("%s", login_.getMD5Digest());
-
-				CMD5 pwd_(gameVar.zsv_adminPass.s);
-				CString pwd("%s", pwd_.getMD5Digest());
-
-				/*console->add(CString("\x9> L: %s", login.s));
-				console->add(CString("\x9> P: %s", loginRecv.s));
-				console->add(CString("\x9> L: %s", pwd.s));
-				console->add(CString("\x9> P: %s", pwdRecv.s));*/
-
-				if (loginRecv == login && pwdRecv == pwd)
+				// Step 10: proofs over this connection's challenge
+				if (credentials::check(gameVar.zsv_adminUser.s, "admin user", joinNonce[slot], adminRequest.login) &&
+					credentials::check(gameVar.zsv_adminPass.s, "admin password", joinNonce[slot], adminRequest.password))
 				{
 					//--- Admin accepted !!
 					bb_serverSend(0, 0, NET_SVCL_ADMIN_ACCEPTED, bbnetID);
@@ -292,11 +273,12 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 		{
 			net_clsv_gameversion_accepted gameVersionAccepted;
 			memcpy(&gameVersionAccepted, buffer, sizeof(net_clsv_gameversion_accepted));
-			gameVersionAccepted.password[15] = '\0';
 
 			if (game->players[gameVersionAccepted.playerID])
 			{
-				if(gameVar.sv_password != "" && CString("%s", gameVersionAccepted.password) != gameVar.sv_password)
+				// Step 10: the client proves it knows sv_password with an HMAC over this connection's challenge
+				if (gameVar.sv_password != "" &&
+					!credentials::check(gameVar.sv_password.s, "join", joinNonce[slot], gameVersionAccepted.proof))
 				{
 					if (gameVar.c_netlog)
 						console->add(CString("server> [net] join password mismatch for slot %i, disconnecting", (int)gameVersionAccepted.playerID), true);
@@ -440,10 +422,12 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 			{
 				playerInfo.playerName[31] = '\0';
 				playerInfo.username[20] = '\0';
-				playerInfo.macAddr[19] = '\0';
 				game->players[playerInfo.playerID]->name = playerInfo.playerName;
 				memcpy(playerInfo.playerIP,game->players[playerInfo.playerID]->playerIP, 16);
-				bb_serverSend((char*)&playerInfo, sizeof(net_clsv_svcl_player_info), NET_CLSV_SVCL_PLAYER_INFO, 0);
+				net_clsv_svcl_player_info relayed = playerInfo; // step 10: the account login stays with the server
+				memset(relayed.username, 0, sizeof(relayed.username));
+				memset(relayed.password, 0, sizeof(relayed.password));
+				bb_serverSend((char*)&relayed, sizeof(net_clsv_svcl_player_info), NET_CLSV_SVCL_PLAYER_INFO, 0);
 #ifndef CONSOLE
 				console->add(CString("\x3server> %s joined the game", playerInfo.playerName), true);
 #else
@@ -492,7 +476,6 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 						stCacheBanned banned;
 						banned.ID	=	playerInfo.playerID;
 						sprintf( banned.IP , "%s" , playerInfo.playerIP );
-						sprintf( banned.MAC , "%s", playerInfo.macAddr );
 	
 	
 						if ( master )
@@ -504,20 +487,17 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 
 
 				//let's cache the player
-				//see if his mac adress is already in the  list first, if so, overwrite
+				//see if his IP is already in the list first, if so, overwrite (step 10: no MAC; bans are by IP)
 				for( int i = 0; i < 50; i++)
 				{
-					if( !stricmp( CachedPlayers[i].macAddr , playerInfo.macAddr ) && CachedPlayers[i].Valid )
+					if( !strcmp( CachedPlayers[i].IP , playerInfo.playerIP ) && CachedPlayers[i].Valid )
 					{
-						memcpy( CachedPlayers[CachedIndex].IP , playerInfo.playerIP , 16 );
-						memcpy( CachedPlayers[CachedIndex].NickName , playerInfo.playerName , 32 );
-						memcpy( CachedPlayers[CachedIndex].macAddr , playerInfo.macAddr , 20 );
+						memcpy( CachedPlayers[i].NickName , playerInfo.playerName , 32 );
 						return;
 					}
 				}
 				memcpy( CachedPlayers[CachedIndex].IP , playerInfo.playerIP , 16 );
 				memcpy( CachedPlayers[CachedIndex].NickName , playerInfo.playerName , 32 );
-				memcpy( CachedPlayers[CachedIndex].macAddr , playerInfo.macAddr , 20 );
 				CachedPlayers[CachedIndex].Valid = true;
 				CachedIndex++;
 
