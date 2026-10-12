@@ -20,6 +20,7 @@ CASES = [
     ("repeated keyword", ENTRY.format(key="lang_quit", text="a") + 'msgstr "b"\n', True, "twice in one entry"),
     ("tab escape", ENTRY.format(key="lang_quit", text="a\\tb"), True, "bad string"),
     ("raw tab", ENTRY.format(key="lang_quit", text="a\tb"), True, "bad string"),
+    ("raw colour byte", ENTRY.format(key="lang_quit", text="a\x02b"), True, "bad string"),
     ("glyph", ENTRY.format(key="lang_quit", text="Wyjdź"), False, "which the font lacks"),
 ]
 

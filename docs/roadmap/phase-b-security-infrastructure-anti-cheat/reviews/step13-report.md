@@ -164,3 +164,71 @@ Commit hygiene (REVIEW §2):
 - Fix 2 leaves raw control bytes open.
 
 Fixing finding 1 (comparing with `out`) makes the code smaller, not larger. Findings 2 and 3 are small. Findings 4-5 are optional.
+
+## Round 3
+
+SKILL: Launching skill: thermo-nuclear-code-quality-review
+
+## Round 3 review: step 13 round 2 fixes (`git diff bb3d697..HEAD`: f5c5c0a, 185c23e, 4126f19)
+
+This was a read-only review in `/Users/piotr/Dev/BaboViolent_2_relaunch/RoboViolence2-step13`. I edited nothing; scratch files are under `/private/tmp/claude-501/r3`.
+
+### Verification of the round 2 fixes
+
+- **1. Conversions now checked against the English text: fixed.**
+  - `game/src/Lang.cpp:162-164`: `flush` looks up `out.find(field[0])` and compares `formatSpecs(en->second)` with the msgstr. `msgid` no longer decides anything.
+  - Keys that English lacks are skipped.
+  - `pickFile` seeds English before its glyph check (`Lang.cpp:227`).
+  - Fix proof: I put back the old `formatSpecs(field[1])` comparison, rebuilt `test_lang`, and it fails with "FAIL a msgid that agrees with a bad msgstr doesn't count".
+  - The `Lang.h:14-16` comment and `tests/test_lang.cpp` (seeded `Texts`, untranslated entry keeps English, unknown key skipped) are updated.
+  - The change is smaller than the old logic, as round 2 predicted.
+  - Side effect, an improvement: the `pickFile` glyph test now counts only entries that are actually applied.
+- **2. Raw control bytes: fixed in both parsers.**
+  - C++: `Lang.cpp:56-57`.
+  - Python: `tools/lang-check.py:60`, `[\x00-\x1f]`.
+  - Fix proof (C++): with the C++ check removed, the tests "raw tab rejected" and "raw colour byte rejected" fail.
+  - Fix proof (Python): with the Python check removed, `test_lang_check.py` fails with "FAIL raw tab: exit 0".
+  - A manual run with a raw `\x02` in a `.po` gives "bad string", rc=1.
+- **3. Checker test: fixed.**
+  - New `tests/test_lang_check.py` (54 lines), registered as ctest `lang_check` (`tests/CMakeLists.txt:146-147`).
+  - It covers a good file, a changed conversion, an unknown key, a repeated keyword, a `\t` escape, a raw tab, the glyph warning (rc 0 plus the warning text) and a stale `en.pot`.
+  - `lang-check.py` and `lang-to-pot.pot_text` take a languages dir, a default-argument change of a few lines.
+  - It passes locally: "ok: lang_check".
+- **4. check-hygiene docstring: fixed** (`tools/check-hygiene.py:8`).
+- **5. `check_po` extracted: done.** `main()` (`tools/lang-check.py:88-104`) now only orchestrates. File is 108 lines.
+- **Checks run:**
+  - Locally built `test_lang` (`c++ -std=c++17 -Wall -Wextra`): "ok: lang", no warnings.
+  - `tools/lang-check.py`: "ok: translations".
+  - `tools/check-hygiene.py`: "ok: hygiene".
+  - `tools/check-architecture.sh`: "ok".
+  - Sizes: `Lang.cpp` 245 lines, `lang-check.py` 108, both far from 1k.
+
+### Findings
+
+1. **Low (structure).** `game/src/Lang.cpp:225-227`: `pickFile` re-reads and re-parses `en.lang` once per candidate name inside the nested loop: up to two reads per locale.
+   - **Fix:** read it once before the loops (`Texts english; readLang(dir + "en.lang", english);`), then use `Texts texts = english;` per candidate. That is one line moved and one line changed.
+2. **Low (legibility).** `game/src/Lang.h:14-16`: the rewrapped comment has a 151-column line 15 followed by a short line 16. The wrap is clearly broken; `.clang-format` has `ColumnLimit: 0`, so no tool will fix it.
+   - **Fix:** rewrap to about 120 columns like the surrounding comments.
+3. **Low (test coverage).** `tests/test_lang_check.py:17-25`: the Python test covers a raw tab but not a raw colour byte 1-8.
+   - The C++ test covers both. I checked `\x02` against the Python checker by hand, and it is rejected.
+   - **Fix (optional):** add `("raw colour byte", ENTRY.format(key="lang_quit", text="a\x02b"), True, "bad string")`.
+4. **Info (build).** `tests/CMakeLists.txt:146`: the new unconditional `find_package(Python3 REQUIRED COMPONENTS Interpreter)` makes the later conditional `find_package(Python3 …)` calls in the same file redundant. This is harmless.
+   - **Fix (optional):** move the one `find_package` to the top of `tests/CMakeLists.txt` and drop the repeats.
+5. **Info (docs).** `ARCHITECTURE.md:113`: the `tests/test_lang.cpp` row still lists only "an entry that changes the printf conversions is skipped". It now also covers keys English lacks, conversions compared with English rather than msgid, and raw control bytes.
+   - **Fix (optional):** append "keys English lacks and raw control bytes rejected/skipped".
+6. **Process (REVIEW.md §5, not a code defect).**
+   - `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step13.md` doesn't exist yet.
+   - The step's **Status** is still `IN PROGRESS` (`step13-localisation.md:3`).
+   - Both are needed to close the step, along with the `possible-new-scope.md` entry if there is anything to add. The fix proofs above (mutation runs) can go in its "Fix proof" section.
+7. **Info (repeat check).** None of the findings above repeats a finding that an earlier phase B record rejected or deferred. Rounds 1 and 2 findings 1-5 are all resolved; none reopened.
+
+REVIEW.md §2:
+- New behaviour has tests, with fix proof shown by mutation.
+- Each commit keeps C++ and Python fixes separate (f5c5c0a is C++ plus its test; 185c23e is Python plus its test and harness), and none mixes in mechanical rewrites.
+- ARCHITECTURE lists the new file.
+- No new non-obvious decision: ADR 0011's per-key English fallback covers rejecting translations that don't match English.
+- There is no asset or **[GUI]** impact.
+
+### Verdict
+
+**Closable.** Every round 2 finding is fixed and has fix proof. No structural regression, spaghetti growth or file-size problem remains. Findings 1-2 are small cleanups worth doing before the PR; 3-5 are optional. Closing still needs the `reviews/step13.md` record and the DONE status (finding 6).
