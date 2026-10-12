@@ -1,0 +1,7 @@
+# Docker build context (packaging/docker/Dockerfile): sources only
+.git
+build/
+out/
+.vcpkg-bin/
+docs/
+*.md

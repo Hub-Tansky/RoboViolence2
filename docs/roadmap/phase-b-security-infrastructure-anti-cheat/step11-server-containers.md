@@ -1,6 +1,6 @@
 # Step 11: Server container images
 
-**Status:** TODO
+**Status:** IN PROGRESS
 
 **Depends on:** [Step 1](step1-playtest-builds-and-build-guides.md). **Next:** [step12-remote-admin.md](step12-remote-admin.md). **Index:** [README.md](README.md)
 
@@ -39,6 +39,13 @@
 ### 11.4 Runbook
 
 - `docs/ops/runbook.md`: start, stop, upgrade, logs, backups of the pref dir, secret injection, ports to open.
+
+## Notes
+
+- One Dockerfile with two targets (`server`, `master`) instead of two files: the C++ build runs once for both images.
+- Verification (owner, 2026-10-12, no Docker on the Mac): CI builds both images, checks `id -u`, runs the compose example to healthy and waits for the server in the master's `web.db`; the owner runs the compose example on a Linux machine and joins from a client.
+- The server keeps reading stdin: `stdin_open` lets `docker attach` reach its console; at EOF it idles.
+- The master lists a server at its connection's address (in compose, the container's): PNS-44.
 
 ## Critical files
 
