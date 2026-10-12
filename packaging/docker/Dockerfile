@@ -1,5 +1,6 @@
 # syntax=docker/dockerfile:1
-# Robo Violence 2 servers (Phase B step 11): one build, two linux/amd64 images. Build from the repository root:
+# Robo Violence 2 servers (Phase B step 11): one build, two images for the build machine's architecture (amd64 or
+# arm64). Build from the repository root:
 #   docker build -f packaging/docker/Dockerfile --target server -t roboviolence2-server .
 #   docker build -f packaging/docker/Dockerfile --target master -t roboviolence2-master .
 # Running them: docs/ops/runbook.md.
@@ -12,20 +13,23 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         autoconf autoconf-archive automake libtool libltdl-dev python3 libgl1-mesa-dev libglu1-mesa-dev \
     && rm -rf /var/lib/apt/lists/*
 WORKDIR /src
-# Dependencies first, in their own layer: it changes only with vcpkg.json (vcpkg at the manifest's pinned baseline)
+# Dependencies first, in their own layer: it changes only with vcpkg.json (vcpkg at the manifest's pinned baseline).
+# On arm64 vcpkg needs the system CMake, Ninja and Git.
+ENV VCPKG_ROOT=/opt/vcpkg VCPKG_FORCE_SYSTEM_BINARIES=1
 COPY vcpkg.json ./
 RUN baseline=$(sed -n 's/.*"builtin-baseline": *"\([0-9a-f]*\)".*/\1/p' vcpkg.json) \
     && git init --quiet /opt/vcpkg \
     && git -C /opt/vcpkg fetch --quiet --depth 1 https://github.com/microsoft/vcpkg "$baseline" \
     && git -C /opt/vcpkg checkout --quiet FETCH_HEAD \
     && /opt/vcpkg/bootstrap-vcpkg.sh -disableMetrics
-ENV VCPKG_ROOT=/opt/vcpkg
+# The triplet follows the build machine's architecture
+RUN case "$(uname -m)" in aarch64|arm64) echo arm64-linux ;; *) echo x64-linux ;; esac > /opt/triplet
 RUN --mount=type=cache,target=/root/.cache/vcpkg \
-    /opt/vcpkg/vcpkg install --triplet=x64-linux --x-no-default-features --x-install-root=/opt/vcpkg_installed
+    /opt/vcpkg/vcpkg install --triplet="$(cat /opt/triplet)" --x-no-default-features --x-install-root=/opt/vcpkg_installed
 COPY . .
 # Release servers only; main/ gets the placeholder data (the original assets are never in the image)
 RUN cmake --preset linux-x64-release -DBV2_BUILD_CLIENT=OFF -DBV2_BUILD_TESTS=OFF \
-        -DVCPKG_MANIFEST_INSTALL=OFF -DVCPKG_INSTALLED_DIR=/opt/vcpkg_installed \
+        -DVCPKG_MANIFEST_INSTALL=OFF -DVCPKG_INSTALLED_DIR=/opt/vcpkg_installed -DVCPKG_TARGET_TRIPLET="$(cat /opt/triplet)" \
     && cmake --build --preset linux-x64-release --target bv2dedicated bv2master \
     && runtime=build/linux-x64-release/runtime && mkdir -p /out/seed \
     && cp "$runtime/bv2dedicated" "$runtime/bv2master" /out/ \

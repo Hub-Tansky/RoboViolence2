@@ -42,7 +42,7 @@
 
 ## Notes
 
-- One Dockerfile with two targets (`server`, `master`) instead of two files: the C++ build runs once for both images. It builds the `linux-x64-release` preset (the packages' Release build) and declares no `BV2_DATA_DIR` volume: the runbook mounts one when you have the original data. Images are linux/amd64 (`x64-linux`).
+- One Dockerfile with two targets (`server`, `master`) instead of two files: the C++ build runs once for both images. It builds the `linux-x64-release` preset (the packages' Release build) and declares no `BV2_DATA_DIR` volume: the runbook mounts one when you have the original data. A local build follows the host's architecture (`x64-linux` or `arm64-linux` triplet); CI publishes linux/amd64. The owner's first build on an ARM host failed at `vcpkg install` with the hard-coded `x64-linux` triplet.
 - Verification (owner, 2026-10-12, no Docker on the Mac): CI builds both images, checks `id -u`, runs the compose example to healthy and waits for the server in the master's `web.db`; the owner runs the compose example on a Linux machine and joins from a client.
 - The server keeps reading stdin: `stdin_open` and `tty` let `docker attach` reach its console and detach. Without stdin (`docker run` without `-i`) its console loop spins with a 1 ms sleep, so run it with `-i`.
 - Healthchecks look for the listening socket in `/proc/net/tcp`: a TCP connect would join the game as a player.

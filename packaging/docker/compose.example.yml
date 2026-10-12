@@ -1,4 +1,4 @@
-# A master and a game server on one host (linux/amd64). Placeholder values only: real secrets come from an env file
+# A master and a game server on one host (built for the host: amd64 or arm64). Placeholder values only: real secrets come from an env file
 # outside the repository (docs/ops/runbook.md). Start from the repository root:
 #   docker compose -f packaging/docker/compose.example.yml --env-file ~/bv2-secrets.env up -d
 name: roboviolence2
