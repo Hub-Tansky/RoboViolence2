@@ -232,3 +232,46 @@ REVIEW.md §2:
 ### Verdict
 
 **Closable.** Every round 2 finding is fixed and has fix proof. No structural regression, spaghetti growth or file-size problem remains. Findings 1-2 are small cleanups worth doing before the PR; 3-5 are optional. Closing still needs the `reviews/step13.md` record and the DONE status (finding 6).
+
+## Round 4
+
+SKILL: Launching skill: thermo-nuclear-code-quality-review
+
+## Round 4 review: step 13 round 3 cleanups (`git diff 4126f19..HEAD`: 38dad0d, 85ff776)
+
+This was a read-only review in the step13 worktree. Scratch files are under `/private/tmp/claude-501/r4`.
+
+### Verification
+- **R3-1 (pickFile re-reads en.lang): fixed.**
+  - `game/src/Lang.cpp:217-218`: `en.lang` is now read once before the loops. Each candidate gets `Texts texts = english;` (`Lang.cpp:227`).
+  - Behaviour is unchanged. Each candidate still starts from a fresh English copy, so one failed `.po` can't leak entries into the next. A missing `en.lang` still gives an empty base, as before.
+- **R3-2 (Lang.h comment wrap): fixed.** `game/src/Lang.h:14-16` is rewrapped to about 118 columns, matching the surrounding comments.
+- **R3-3 (raw colour byte in the Python test): fixed.** `tests/test_lang_check.py:23` adds a `\x02` case that expects "bad string".
+- **R3-5 (ARCHITECTURE test_lang row): fixed.** `ARCHITECTURE.md:113` now lists keys English lacks, conversions compared with English, and raw control bytes.
+- **R3-4 (repeated `find_package` calls in `tests/CMakeLists.txt`): left undone on purpose.** It was only informational, so I don't raise it again.
+- **Checks run:**
+  - `test_lang` built with `c++ -std=c++17 -Wall -Wextra`: no warnings, "ok: lang".
+  - `test_lang_check.py`: "ok: lang_check".
+  - `check-architecture.sh`: ok.
+  - `check-hygiene.py`: ok.
+  - `Lang.cpp` is 246 lines.
+
+### Findings
+1. **Info (docs).** `ARCHITECTURE.md:114`: the `tests/test_lang_check.py` row says "tabs". It now also covers a raw colour byte.
+   - **Fix (optional):** change "tabs" to "tabs and raw control bytes".
+2. **Process (REVIEW.md §5, carried from R3-6).** The step can't close until these are done:
+   - `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step13.md` doesn't exist yet.
+   - `step13-localisation.md:3` still says `IN PROGRESS`.
+   - Add a `possible-new-scope.md` entry if there is anything to note.
+3. **None of the above repeats a finding that an earlier record rejected or deferred.**
+4. **Structural review of the diff:** nothing to flag. The diff is net smaller code (one read moved out of the loop) with no new branches. No file grows meaningfully.
+
+REVIEW.md §2:
+- The new test case follows the existing table pattern.
+- Commits are separated as before: C++ and header in 38dad0d; test, docs and report in 85ff776.
+- Neither commit mixes in mechanical rewrites.
+- No new decision needs an ADR.
+- There is no asset or [GUI] impact.
+
+### Verdict
+**Closable** once the `reviews/step13.md` record and the DONE status are in place (finding 2). Finding 1 is optional.
