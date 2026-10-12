@@ -369,3 +369,19 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Why it matters:** privacy (IPs), and anyone can add master bans.
 - **Suggested home:** step 12 (remote admin) for the ban password; a protocol step for the join order and IPs.
 - **Status:** Proposed
+
+### PNS-44: The master lists a server at its connection's address
+
+- **Found in:** Phase B step 11 (2026-10-12).
+- **Extract:** `bv2Row.ip` is left empty (`game/src/CMaster.cpp`, `sendGameInfo`); the master records the address the heartbeat came from. In the compose example that is the server container's internal address.
+- **Why it matters:** remote clients can't join a co-located server from the browser; they must `connect` by hand.
+- **Suggested home:** an advertised address (`sv_publicAddress` or `BV2_PUBLIC_ADDRESS`) sent in the heartbeat and trusted by the master only when it matches a configured server.
+- **Status:** Proposed
+
+### PNS-45: AGENTS.md and the CI list miss the containers workflow
+
+- **Found in:** Phase B step 11 review (2026-10-12).
+- **Extract:** AGENTS.md lists the required CI checks; `containers` (step 11) is not there, and whether it should be required is undecided.
+- **Why it matters:** a broken image can merge unnoticed unless the check is required.
+- **Suggested home:** the next step that may edit AGENTS.md; the owner decides on branch protection.
+- **Status:** Proposed

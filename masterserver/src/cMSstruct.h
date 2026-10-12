@@ -1,6 +1,12 @@
 #ifndef _MASTER_STRUCT_H
 #define	_MASTER_STRUCT_H
 
+#include <cstddef>
+#include <cstdint>
+
+// Packed exactly like the game's copy (engine/babonet/include/cMSstruct.h): the structs are memcpy'd on the wire
+#pragma pack(push, 1)
+
 
 
 //type ID des message
@@ -239,7 +245,7 @@
 	struct stRegisterResult
 	{
 		char	Result;
-		long	ID;			
+		int32_t	ID;
 	};
 
 
@@ -283,5 +289,26 @@
 	};
 
 
+
+static_assert(sizeof(stCacheBan) == 68, "stCacheBan wire size (as engine/babonet/include/cMSstruct.h)");
+static_assert(sizeof(stCacheList) == 32, "stCacheList wire size (as engine/babonet/include/cMSstruct.h)");
+static_assert(sizeof(stCacheListRemote) == 60, "stCacheListRemote wire size (as engine/babonet/include/cMSstruct.h)");
+static_assert(sizeof(stCacheUnban) == 12, "stCacheUnban wire size (as engine/babonet/include/cMSstruct.h)");
+static_assert(sizeof(stCacheBanned) == 18, "stCacheBanned wire size (as engine/babonet/include/cMSstruct.h)");
+static_assert(sizeof(stCacheAnswer) == 3, "stCacheAnswer wire size (as engine/babonet/include/cMSstruct.h)");
+static_assert(sizeof(stCachePlayer) == 56, "stCachePlayer wire size (as engine/babonet/include/cMSstruct.h)");
+static_assert(sizeof(stCacheListEnd) == 4, "stCacheListEnd wire size (as engine/babonet/include/cMSstruct.h)");
+static_assert(sizeof(stBV2list) == 5, "stBV2list wire size (as engine/babonet/include/cMSstruct.h)");
+static_assert(sizeof(stMasterInfo) == 2, "stMasterInfo wire size (as engine/babonet/include/cMSstruct.h)");
+static_assert(sizeof(stBV2row) == 132, "stBV2row wire size (as engine/babonet/include/cMSstruct.h)");
+static_assert(sizeof(stPlayerResult) == 38, "stPlayerResult wire size (as engine/babonet/include/cMSstruct.h)");
+static_assert(sizeof(stPlayerRegister) == 33, "stPlayerRegister wire size (as engine/babonet/include/cMSstruct.h)");
+static_assert(sizeof(stServerRegister) == 32, "stServerRegister wire size (as engine/babonet/include/cMSstruct.h)");
+static_assert(sizeof(stRegisterResult) == 5, "stRegisterResult wire size (as engine/babonet/include/cMSstruct.h)");
+static_assert(sizeof(stKillServ) == 2, "stKillServ wire size (as engine/babonet/include/cMSstruct.h)");
+static_assert(sizeof(SSurvey) == 573, "SSurvey wire size (as engine/babonet/include/cMSstruct.h)");
+static_assert(offsetof(stBV2row, port) == 113, "stBV2row port offset");
+
+#pragma pack(pop)
 
 #endif

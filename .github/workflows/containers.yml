@@ -1,0 +1,114 @@
+name: containers
+# Server images (Phase B step 11): build both and run the compose example on every push and PR; push to GHCR from main,
+# also weekly so base-image security fixes land without a code change.
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: "0 6 * * 1"
+concurrency:
+  group: containers-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+env:
+  SERVER_IMAGE: ghcr.io/hub-tansky/roboviolence2-server
+  MASTER_IMAGE: ghcr.io/hub-tansky/roboviolence2-master
+jobs:
+  images:
+    name: images (${{ matrix.runner }})
+    # Native builds: amd64 is published; arm64 checks the build for ARM hosts (Docker Desktop on Apple silicon)
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      # One build stage, two targets: the second build reuses the first's cached layers
+      - name: Build the server image
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          file: packaging/docker/Dockerfile
+          target: server
+          load: true
+          tags: ${{ env.SERVER_IMAGE }}:latest
+          cache-from: type=gha,scope=servers-${{ matrix.runner }}
+          cache-to: type=gha,scope=servers-${{ matrix.runner }},mode=max
+      - name: Build the master image
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          file: packaging/docker/Dockerfile
+          target: master
+          load: true
+          tags: ${{ env.MASTER_IMAGE }}:latest
+          cache-from: type=gha,scope=servers-${{ matrix.runner }}
+      - name: Both run as a non-root user
+        run: |
+          for image in "$SERVER_IMAGE" "$MASTER_IMAGE"; do
+            uid=$(docker run --rm --entrypoint id "$image:latest" -u)
+            echo "$image: uid $uid"
+            [ "$uid" != 0 ]
+          done
+      # The join password comes from the environment and survives the launch script: the master lists the game as
+      # passworded. The value is a throwaway for this run.
+      - name: The compose example comes up healthy; the master lists the passworded server
+        run: |
+          set -euo pipefail
+          printf 'BV2_SV_PASSWORD=ci-throwaway\n' > "$RUNNER_TEMP/ci.env"
+          compose="docker compose -f packaging/docker/compose.example.yml --env-file $RUNNER_TEMP/ci.env"
+          $compose up -d --no-build --wait --wait-timeout 120
+          $compose ps
+          listed=""
+          for i in $(seq 1 30); do
+            $compose cp master:/var/lib/bv2/web.db web.db 2>/dev/null || true
+            listed=$(python3 -c "import sqlite3; print(sqlite3.connect('web.db').execute('select Password from Games where Port = 3333').fetchone() or '')" 2>/dev/null || true)
+            [ -n "$listed" ] && break
+            sleep 5
+          done
+          echo "listed: $listed"
+          [ "$listed" = "(1,)" ]
+      - name: Logs and the master's game list
+        if: always()
+        run: |
+          compose="docker compose -f packaging/docker/compose.example.yml"
+          $compose logs --no-color master | tail -40
+          $compose logs --no-color server | tail -40
+          $compose cp master:/var/lib/bv2/web.db web.db && python3 -c "import sqlite3; c=sqlite3.connect('web.db'); print([r for r in c.execute('select * from Games')])" || true
+  push:
+    needs: images
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'schedule')
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      # Rebuilt from the amd64 images job's cache: no compile
+      - name: Push the server image
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          file: packaging/docker/Dockerfile
+          target: server
+          push: true
+          tags: ${{ env.SERVER_IMAGE }}:latest,${{ env.SERVER_IMAGE }}:${{ github.sha }}
+          cache-from: type=gha,scope=servers-ubuntu-24.04
+      - name: Push the master image
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          file: packaging/docker/Dockerfile
+          target: master
+          push: true
+          tags: ${{ env.MASTER_IMAGE }}:latest,${{ env.MASTER_IMAGE }}:${{ github.sha }}
+          cache-from: type=gha,scope=servers-ubuntu-24.04

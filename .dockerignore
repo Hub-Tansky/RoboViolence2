@@ -1,0 +1,35 @@
+# Docker build context (packaging/docker/Dockerfile): the sources the build needs, nothing local or secret
+.git
+.github/
+build/
+out/
+.vcpkg-bin/
+vcpkg_installed/
+docs/
+tests/
+**/*.md
+CMakeUserPresets.json
+# Secrets and local config (as in .gitignore)
+.env
+.env.*
+**/*.local.*
+config/local/
+secrets/
+**/*.pem
+**/*.key
+**/*.p12
+**/*.pfx
+**/id_rsa*
+**/id_ed25519*
+**/server.cfg
+**/bv2.cfg
+**/*.db
+**/*.sqlite*
+# Original assets (never in an image)
+original-assets/
+content/maps/
+content/models/
+content/skins/
+content/textures/
+content/fonts/
+content/sounds/

@@ -7,3 +7,7 @@ updates:
       - /.github/actions/*
     schedule:
       interval: weekly
+  - package-ecosystem: docker
+    directory: /packaging/docker
+    schedule:
+      interval: weekly
