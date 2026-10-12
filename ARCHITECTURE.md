@@ -70,6 +70,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `packaging/scripts/run-server.sh` | Package script: starts the dedicated server, default launch script CTF (Unix) |
 | `packaging/macos/Info.plist.in` | macOS bundle `Info.plist` template |
 | `packaging/docker/Dockerfile` | Server images: one Ubuntu 24.04 build, targets `server` (`bv2dedicated`) and `master` (`bv2master`), non-root, pref dir volume (step 11) |
+| `packaging/docker/compose.example.yml` | Compose example: master and game server on one host, secrets from an env file outside the repo |
 | `packaging/windows/bv2.manifest` | Windows manifest for `bv2`, `bv2dedicated` and `bv2master`: PerMonitorV2 DPI, UTF-8 code page, Windows 10/11 |
 | `packaging/windows/bv2.rc.in` | Windows resource script template; CMake fills in the generated icon |
 | `tests/CMakeLists.txt` | ctest targets: netPacket, config, fileio, credentials, join password, admin login, babonet large message, the two `SqlStatement.h` copies identical, crash fixes, validator, missing music (client builds), dedicated-server smoke, in-process server harness (`bv2server_lib` + fake babonet), packet hygiene, corpus replay, crash-input tests for `crash-*.bin` under ASan (none at present), master server; on Windows also the non-ASCII install path smoke and the no-VC++-runtime-DLL check |

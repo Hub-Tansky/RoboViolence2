@@ -1,0 +1,26 @@
+# A master and a game server on one host. Placeholder values only: real secrets come from an env file outside the
+# repository (docs/ops/runbook.md). Start from the repository root:
+#   docker compose -f packaging/docker/compose.example.yml --env-file ~/bv2-secrets.env up -d
+name: roboviolence2
+services:
+  master:
+    image: ghcr.io/hub-tansky/roboviolence2-master:latest
+    build: { context: ../.., dockerfile: packaging/docker/Dockerfile, target: master }
+    ports: ["10207:10207/tcp"]
+    volumes: ["master-data:/var/lib/bv2"]
+    restart: unless-stopped
+  server:
+    image: ghcr.io/hub-tansky/roboviolence2-server:latest
+    build: { context: ../.., dockerfile: packaging/docker/Dockerfile, target: server }
+    depends_on: { master: { condition: service_healthy } }
+    environment:
+      BV2_MASTER_SERVERS: "master:10207"
+      BV2_SV_PASSWORD: "${BV2_SV_PASSWORD:-}" # empty: no join password
+      BV2_ADMIN_PASS: "${BV2_ADMIN_PASS:-}"   # empty: no admin login
+    ports: ["3333:3333/tcp"]
+    volumes: ["server-data:/var/lib/bv2"]
+    stdin_open: true # `docker attach` reaches the server console
+    restart: unless-stopped
+volumes:
+  master-data: {}
+  server-data: {}
