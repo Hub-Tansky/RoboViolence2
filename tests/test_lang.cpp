@@ -17,33 +17,42 @@ int main(int argc, char ** argv)
 	if (argc < 2) { std::printf("usage: test_lang <scratch dir>\n"); return 2; }
 	std::string dir = std::string(argv[1]) + "/lang-";
 
-	// PO parser: header, comments, escapes, multi-line strings, untranslated entries, entries without msgctxt
-	lang::Texts t;
+	// PO parser over English texts: header, comments, escapes, multi-line strings, untranslated entries, entries
+	// without msgctxt, keys English lacks
+	lang::Texts t = {{"lang_a", "A %s"}, {"lang_b", "B"}, {"lang_e", "E"}};
 	bool glyphs = false;
 	check(lang::parsePo("msgid \"\"\nmsgstr \"Content-Type: text/plain; charset=UTF-8\\n\"\n\n"
 		"# comment\nmsgctxt \"lang_a\"\nmsgid \"A %s\"\nmsgstr \"\\x4Zw\\\"x\\\\y\\n\"\n\"%s cd\"\n\n"
 		"msgctxt \"lang_b\"\nmsgid \"B\"\nmsgstr \"\"\n\nmsgid \"C\"\nmsgstr \"c\"\n"
+		"msgctxt \"lang_x\"\nmsgid \"X\"\nmsgstr \"x\"\n"
 		"msgctxt \"lang_e\"\r\nmsgid \"E\"\r\nmsgstr \"\xc3\xa9t\xc3\xa9\"\r\n", t, &glyphs), "PO parses");
 	check(t["lang_a"] == "\x04Zw\"x\\y\n%s cd", "escapes and continuation lines");
-	check(!t.count("lang_b"), "untranslated entry skipped");
-	check(t.size() == 2 && t["lang_e"] == "\x82t\x82", "no msgctxt skipped; CRLF; UTF-8 e-acute is font byte 130");
+	check(t["lang_b"] == "B", "untranslated entry keeps English");
+	check(t.size() == 3 && t["lang_e"] == "\x82t\x82", "no msgctxt and unknown key skipped; CRLF; e-acute is font byte 130");
 	check(glyphs, "Latin-1 letters have glyphs");
 	check(!lang::parsePo("msgctxt \"a\"\nmsgid \"A\"\nmsgstr \"unterminated\n", t, 0), "bad quote rejected");
 	check(!lang::parsePo("msgctxt \"a\"\nmsgstr[0] \"x\"\n", t, 0), "unknown keyword rejected");
 	check(!lang::parsePo("\"orphan\"\n", t, 0), "continuation without a keyword rejected");
 	check(!lang::parsePo("msgctxt \"a\"\nmsgid \"A\"\nmsgstr \"x\"\nmsgstr \"y\"\n", t, 0), "repeated keyword rejected");
-	check(!lang::parsePo("msgctxt \"a\"\nmsgid \"A\"\nmsgstr \"x\\ty\"\n", t, 0), "\\t rejected (byte 9 is a colour code)");
+	check(!lang::parsePo("msgctxt \"a\"\nmsgid \"A\"\nmsgstr \"x\\ty\"\n", t, 0), "\\t escape rejected (byte 9 is a colour code)");
+	check(!lang::parsePo("msgctxt \"a\"\nmsgid \"A\"\nmsgstr \"x\ty\"\n", t, 0), "raw tab rejected");
+	check(!lang::parsePo("msgctxt \"a\"\nmsgid \"A\"\nmsgstr \"x\x02y\"\n", t, 0), "raw colour byte rejected");
 
-	// printf conversions: a translation must keep msgid's, or the English text stays
-	lang::Texts f;
+	// printf conversions: a translation must keep the English text's (not its own msgid's), or English stays
+	lang::Texts f = {{"ok", "Spawn in %i:%02i, 100%%"}, {"type", "%s joined"}, {"extra", "%s joined"},
+		{"n", "Quit"}, {"lone", "Quit"}, {"msgid", "%s joined"}};
 	check(lang::parsePo("msgctxt \"ok\"\nmsgid \"Spawn in %i:%02i, 100%%\"\nmsgstr \"Za %i:%02i, 100%%\"\n"
 		"msgctxt \"type\"\nmsgid \"%s joined\"\nmsgstr \"%i dolaczyl\"\n"
 		"msgctxt \"extra\"\nmsgid \"%s joined\"\nmsgstr \"%s %s dolaczyl\"\n"
 		"msgctxt \"n\"\nmsgid \"Quit\"\nmsgstr \"%n\"\n"
-		"msgctxt \"lone\"\nmsgid \"Quit\"\nmsgstr \"Wyjdz %\"\n", f, 0), "PO with bad conversions parses");
-	check(f.size() == 1 && f["ok"] == "Za %i:%02i, 100%%", "only the entry with the same conversions is kept");
+		"msgctxt \"lone\"\nmsgid \"Quit\"\nmsgstr \"Wyjdz %\"\n"
+		"msgctxt \"msgid\"\nmsgid \"%i joined\"\nmsgstr \"%i dolaczyl\"\n", f, 0), "PO with bad conversions parses");
+	check(f["ok"] == "Za %i:%02i, 100%%", "same conversions: translated");
+	check(f["type"] == "%s joined" && f["extra"] == "%s joined" && f["n"] == "Quit" && f["lone"] == "Quit",
+		"changed, extra, %n or lone % conversions: English stays");
+	check(f["msgid"] == "%s joined", "a msgid that agrees with a bad msgstr doesn't count");
 
-	lang::Texts pl;
+	lang::Texts pl = {{"lang_a", "A"}};
 	check(lang::parsePo("msgctxt \"lang_a\"\nmsgid \"A\"\nmsgstr \"\xc5\x81\xc3\xb3" "d\xc5\xba \xc3\xa9\"\n", pl, &glyphs) && !glyphs
 		&& pl["lang_a"] == "??d? \x82", "letters without glyphs (Polish, o-acute) become '?'");
 

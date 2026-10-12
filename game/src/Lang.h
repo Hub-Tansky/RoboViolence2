@@ -11,8 +11,8 @@ namespace lang
 
 	// .lang: "key<TAB>text" lines up to an "END" line; Latin-1 accented letters map to the font's 128-159
 	bool readLang(const std::string & path, Texts & out);
-	// PO: msgctxt is the key, msgstr the UTF-8 text. Untranslated entries and those whose printf conversions differ
-	// from msgid's are skipped. allGlyphs (optional) is set to false when a translation uses a character the font
+	// PO: msgctxt is the key, msgstr the UTF-8 text, applied over out (English). Untranslated entries, keys out lacks
+	// and texts whose printf conversions differ from out's are skipped. allGlyphs (optional) is set to false when a translation uses a character the font
 	// lacks, which shows as '?'
 	bool parsePo(const std::string & text, Texts & out, bool * allGlyphs);
 	bool readPo(const std::string & path, Texts & out, bool * allGlyphs);

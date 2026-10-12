@@ -53,6 +53,8 @@ namespace lang
 			for (size_t i = 1; i + 1 < s.size(); ++i)
 			{
 				char c = s[i];
+				if ((unsigned char)c < 32)
+					return false; // raw control bytes: 1-9 are colour codes
 				if (c == '"')
 					return false;
 				if (c == '\\')
@@ -155,9 +157,11 @@ namespace lang
 		bool ok = true;
 		auto flush = [&]()
 		{
-			// A translation that changes the printf conversions would break the game's formatting: English stays
-			if (!field[0].empty() && !field[2].empty() && formatSpecs(field[1]) == formatSpecs(field[2]))
-				out[field[0]] = utf8ToFont(field[2], ok);
+			// Only keys out already has (English), and only with the same printf conversions: the game formats the
+			// text with the English arguments
+			Texts::iterator en = out.find(field[0]);
+			if (en != out.end() && !field[2].empty() && formatSpecs(en->second) == formatSpecs(field[2]))
+				en->second = utf8ToFont(field[2], ok);
 			for (int k = 0; k < 3; ++k)
 			{
 				field[k].clear();
@@ -220,6 +224,7 @@ namespace lang
 			{
 				Texts texts;
 				bool glyphs = false;
+				readLang(dir + "en.lang", texts);
 				if (readPo(dir + names[n] + ".po", texts, &glyphs) && glyphs)
 					return dir + names[n] + ".po";
 				if (exists(dir + names[n] + ".lang"))
