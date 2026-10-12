@@ -60,5 +60,5 @@ Skill evidence: every round `SKILL: Launching skill: thermo-nuclear-code-quality
 
 ## Not done / unsure
 
-- Owner checks from the step's acceptance list: with `LANG=pl_PL.UTF-8` and an ASCII test `pl.po`, the Linux client shows Polish (without the PO, English); with original BV2 data, `en.lang` loads and the menus look unchanged. Locally the macOS client started with a test `pl.po` and `-AppleLanguages '(pl-PL)'` without a language error; no screenshot was taken (screen access declined).
+- Owner checks from the step's acceptance list: with `LANG=pl_PL.UTF-8` and an ASCII test `pl.po`, the Linux client shows Polish (without the PO, English); with original BV2 data, `en.lang` loads and the menus look unchanged. On macOS (2026-10-12) the client with `-AppleLanguages '(pl-PL)'` showed the test `pl.po` title "Robo Przemoc PL" with the untranslated menu in English, and "Babo Violent 2" without the PO; the Linux run is still open.
 - Windows and Linux builds of `Lang.cpp` are checked only by CI.
