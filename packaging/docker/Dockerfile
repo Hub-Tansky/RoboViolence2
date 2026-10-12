@@ -13,9 +13,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         autoconf autoconf-archive automake libtool libltdl-dev python3 libgl1-mesa-dev libglu1-mesa-dev \
     && rm -rf /var/lib/apt/lists/*
 WORKDIR /src
-# Dependencies first, in their own layer: it changes only with vcpkg.json (vcpkg at the manifest's pinned baseline).
-# On arm64 vcpkg needs the system CMake, Ninja and Git.
-ENV VCPKG_ROOT=/opt/vcpkg VCPKG_FORCE_SYSTEM_BINARIES=1
+# Dependencies first, in their own layer: it changes only with vcpkg.json (vcpkg at the manifest's pinned baseline)
+ENV VCPKG_ROOT=/opt/vcpkg
 COPY vcpkg.json ./
 RUN baseline=$(sed -n 's/.*"builtin-baseline": *"\([0-9a-f]*\)".*/\1/p' vcpkg.json) \
     && git init --quiet /opt/vcpkg \
