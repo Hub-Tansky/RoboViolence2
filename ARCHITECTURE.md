@@ -75,7 +75,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `packaging/docker/compose.example.yml` | Compose example: master and game server on one host, secrets from an env file outside the repo |
 | `packaging/windows/bv2.manifest` | Windows manifest for `bv2`, `bv2dedicated` and `bv2master`: PerMonitorV2 DPI, UTF-8 code page, Windows 10/11 |
 | `packaging/windows/bv2.rc.in` | Windows resource script template; CMake fills in the generated icon |
-| `tests/CMakeLists.txt` | ctest targets: netPacket, config, fileio, credentials, join password, admin login, babonet large message, the two `SqlStatement.h` copies identical, crash fixes, validator, missing music (client builds), dedicated-server smoke, in-process server harness (`bv2server_lib` + fake babonet), packet hygiene, corpus replay, crash-input tests for `crash-*.bin` under ASan (none at present), master server; on Windows also the non-ASCII install path smoke and the no-VC++-runtime-DLL check |
+| `tests/CMakeLists.txt` | ctest targets: netPacket, config, fileio, credentials, join password, admin login, admin API, babonet large message, the two `SqlStatement.h` copies identical, crash fixes, validator, missing music (client builds), dedicated-server smoke, in-process server harness (`bv2server_lib` + fake babonet), packet hygiene, corpus replay, crash-input tests for `crash-*.bin` under ASan (none at present), master server; on Windows also the non-ASCII install path smoke and the no-VC++-runtime-DLL check |
 | `tests/check_windows_deps.py` | Windows: fails if `bv2`, `bv2dedicated` or `bv2master` needs a Visual C++ runtime DLL |
 | `tests/corpus/clsv_admin_request/valid.bin` | Replay corpus: valid `clsv_admin_request` payload (`gen_corpus`) |
 | `tests/corpus/clsv_gameversion_accepted/valid.bin` | Replay corpus: valid `clsv_gameversion_accepted` payload (`gen_corpus`) |
@@ -108,6 +108,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/harness/server_harness.cpp` | In-process dedicated server for tests: start, connect, join, deliver, tick |
 | `tests/harness/server_harness.h` | Harness API |
 | `tests/smoke_server.py` | Starts `bv2dedicated` headless, runs the CTF script, types a `sayall` with printf specifiers, quits; checks exit code, server creation and `bv2.cfg`. `--install-under` runs it from a non-ASCII path (Windows UTF-8 code page) |
+| `tests/test_admin_api.cpp` | Step 12: the admin API refuses a wrong token, limits a burst, runs a command, returns the status, audits with secrets masked (not on Windows) |
 | `tests/test_admin_login.cpp` | Step 10: admin login only with HMACs over the connection's challenge; no user, password or MD5 on the wire |
 | `tests/test_babonet.cpp` | R7: a 10000-byte message over a loopback babonet connection arrives over several reads and intact |
 | `tests/test_config.cpp` | dksvar config layering, transient values not saved, secrets masked |
@@ -503,6 +504,8 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 |---|---|
 | `game/src/AccountManager.cpp` | Account create/login/clan/friend requests over the master connection |
 | `game/src/AccountManager.h` | Account create/login/clan/friend requests over the master connection |
+| `game/src/AdminApi.cpp` | Admin HTTP API: non-blocking listener on the game thread, bearer token, per-source budget, audit log with secrets masked (step 12) |
+| `game/src/AdminApi.h` | Admin HTTP API (`POST /command`, `GET /status`) behind a TLS proxy, ADR 0015 |
 | `game/src/Button.cpp` | Menu button widget |
 | `game/src/Button.h` | Menu button widget |
 | `game/src/CAStar.cpp` | A* path finding grid |

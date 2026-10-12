@@ -11,7 +11,7 @@
 | Goal | A server operator can run console commands on `bv2dedicated` remotely over an authenticated, encrypted, rate-limited and audited channel |
 | In scope | Tasks 12.1–12.4 below |
 | Out of scope | A graphical admin tool; the C.12 report review tool (PNS-13); plaintext UDP admin authorised by IP:port (never) |
-| Allowed paths | `game/src/**` (admin channel and console glue), `engine/**` (only if the ADR needs it), `vcpkg.json`, `packaging/docker/**`, `docs/ops/**`, `docs/decisions/**`, `tests/**`, `ARCHITECTURE.md`, `docs/roadmap/**` |
+| Allowed paths | `game/src/**` (admin channel and console glue), `engine/**` (only if the ADR needs it), `vcpkg.json`, `packaging/docker/**`, `docs/ops/**`, `docs/decisions/**`, `tests/**`, `ARCHITECTURE.md`, `docs/roadmap/**` Owner, 2026-10-12: `game/CMakeLists.txt` (AdminApi.cpp). |
 | Inputs | `AGENTS.md`, `ARCHITECTURE.md`, earlier review records `reviews/step*.md`, [ADR 0002](../../decisions/0002-compile-out-libcurl.md), step 10 ADR, step 11 runbook |
 | Deliverables | Admin channel in `bv2dedicated`; ADR on transport and TLS; audit log; runbook section |
 | Definition of done | See "Acceptance checks". All must pass. `ARCHITECTURE.md` is updated |
@@ -39,6 +39,14 @@
 ### 12.4 Ops
 
 - Compose example and runbook updated. Tests for auth failure, rate limiting and the audit line.
+
+## Notes
+
+- `game/src/AdminApi.{h,cpp}`: `POST /command` (body: one console command; the reply is the lines it added) and `GET /status`. Off unless `zsv_adminApiPort` (env `BV2_ADMIN_API_PORT`) is set; binds `zsv_adminApiBind` (`BV2_ADMIN_API_BIND`, default `127.0.0.1`). Token: `Authorization: Bearer <zsv_adminPass>`, compared in constant time.
+- Limits: 5 requests per source, refilled 1 a second (429). Behind the proxy the source is `X-Forwarded-For`; the port is reachable from the proxy network only.
+- Audit: `admin-audit.log` in the pref dir, one line per request: UTC time, source, result (`ok`, `denied`, `limited`, `not found`, `too large`), command with a secret's value masked.
+- Legacy `RA_LOGIN` (UDP, cleartext password, then trusted by IP:port) is refused (owner, 2026-10-12).
+- Tests: `admin_api` (not on Windows: POSIX sockets in the test). Fix proof: with the token check, the budget or the masking off, its checks fail.
 
 ## Critical files
 

@@ -266,6 +266,8 @@ namespace bv2
 		applyEnv("BV2_ACCOUNT_URL", "cl_accountURL");
 		applyEnv("BV2_SV_PASSWORD", "sv_password");
 		applyEnv("BV2_ADMIN_PASS", "zsv_adminPass");
+		applyEnv("BV2_ADMIN_API_PORT", "zsv_adminApiPort");
+		applyEnv("BV2_ADMIN_API_BIND", "zsv_adminApiBind");
 		return cfg;
 	}
 

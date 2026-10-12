@@ -171,6 +171,8 @@ public:
 	//--- For remote control
 	CString zsv_adminUser;
 	CString zsv_adminPass;
+	int zsv_adminApiPort;
+	CString zsv_adminApiBind;
 
 	CString db_accountServer;
 	CString cl_masterServers; // host:port list (BV2_MASTER_SERVERS); empty = no master

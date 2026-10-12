@@ -389,49 +389,11 @@ void CMaster::ReceivePeersPacket()
 			// the same place... or else it will become a mess...more than it already is
 			case RA_LOGIN:
 			{
-				// extract data
-				net_ra_login loginInfos;
-				memcpy( &loginInfos , buf , sizeof(net_ra_login));
-
-				// check if we can login
+				// check if we can login: never (step 12, ADR 0015). The password came in cleartext and the peer was then
+				// trusted by IP:port; remote admin is the admin HTTP API now.
 				net_ra_login_reply reply;
 				reply.result = 0;
-				if( RunningServer && gameVar.zsv_adminUser.len() > 0 )
-				{
-					// check with variables
-					CString user = CString("%s",loginInfos.login);
-					CString pass = CString("%s",loginInfos.pass);
-
-					if( gameVar.zsv_adminUser == user && pass == gameVar.zsv_adminPass )
-					{
-						reply.result = 1;
-						char ip[16];
-						unsigned short port;
-						bb_peerGetIPport( peerID, ip, &port);
-
-						CString log = CString("Remote admin logged in from IP %s",ip);
-						console->add( log );
-						
-						for( unsigned int z=0; z<m_peers.size(); z++ )
-						{
-							if( m_peers[z].peerId == peerID)
-							{
-								m_peers[z].remoteAdmin = true;
-								m_peers[z].timeout = 20.0f;
-								break;
-							}
-						}
-					}
-					else
-					{
-						char ip[16];
-						unsigned short port;
-						bb_peerGetIPport( peerID, ip, &port);
-
-						CString log = CString("Remote admin login attempt from IP %s",ip);
-						console->add( log );
-					}
-				}
+				console->add("Remote admin login refused: use the admin HTTP API (docs/ops/runbook.md)");
 				// reply back
 				bb_peerSend( peerID, (char*)&reply, RA_LOGIN_REPLY, sizeof(net_ra_login_reply), true );
 				return;
