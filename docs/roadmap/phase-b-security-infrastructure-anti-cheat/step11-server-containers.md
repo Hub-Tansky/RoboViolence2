@@ -1,6 +1,6 @@
 # Step 11: Server container images
 
-**Status:** IN PROGRESS
+**Status:** DONE (2026-10-12)
 
 **Depends on:** [Step 1](step1-playtest-builds-and-build-guides.md). **Next:** [step12-remote-admin.md](step12-remote-admin.md). **Index:** [README.md](README.md)
 
@@ -45,6 +45,7 @@
 - One Dockerfile with two targets (`server`, `master`) instead of two files: the C++ build runs once for both images. It builds the `linux-x64-release` preset (the packages' Release build) and declares no `BV2_DATA_DIR` volume: the runbook mounts one when you have the original data. A local build follows the host's architecture (`x64-linux` or `arm64-linux` triplet); CI publishes linux/amd64. The owner's first build on an ARM host failed at `vcpkg install` with the hard-coded `x64-linux` triplet.
 - Verification (owner, 2026-10-12, no Docker on the Mac): CI builds both images, checks `id -u`, runs the compose example to healthy and waits for the server in the master's `web.db`; the owner runs the compose example on a Linux machine and joins from a client.
 - The server keeps reading stdin: `stdin_open` and `tty` let `docker attach` reach its console and detach. Without stdin (`docker run` without `-i`) its console loop spins with a 1 ms sleep, so run it with `-i`.
+- Owner test (2026-10-12, macOS, Docker Desktop on arm64, compose example built locally from 30b9158): both services healthy; the client package of the same build joined with `connect 127.0.0.1 3333`. An older client package hung at "connecting" (pre-review step 10 protocol), as expected. CI checks the master listing on amd64 and arm64.
 - Healthchecks look for the listening socket in `/proc/net/tcp`: a TCP connect would join the game as a player.
 - Found: the master's copy of the protocol structs (`masterserver/src/cMSstruct.h`) was not packed (and had a `long`), unlike the game's since step 4: the master read every server's port one byte off (3333 became 13), so its lists were unusable. Both copies now pack to 1 byte and assert the same sizes and `stBV2row::port` at offset 113; CI's listing check matches the port.
 - Found: `CTF.cfg` set `sv_password`, `zsv_adminUser` and `zsv_adminPass` to `""` after the environment layer, wiping `BV2_SV_PASSWORD` and `BV2_ADMIN_PASS` (packages too). CI now sets a password and checks the master lists the game as passworded.

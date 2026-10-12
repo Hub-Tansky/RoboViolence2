@@ -38,5 +38,5 @@ CI then found a pre-existing bug: the master's struct copy wasn't packed, so it 
 
 ## Not done / unsure
 
-- Acceptance: the owner runs the compose example on Linux and joins from a client (owner decision: CI plus the Linux machine). The step stays IN PROGRESS until then.
-- Not tried: arm64 images; GHCR push (main only).
+- Acceptance: the owner ran the compose example on macOS (Docker Desktop, arm64) and joined from a client of the same build (2026-10-12). The first local build failed at `vcpkg install` on arm64; fixed in 9537210 and 30b9158, and CI now builds on arm64 too.
+- Not tried: GHCR push (main only).
