@@ -12,13 +12,13 @@ The game's strings. Format and fallback: [ADR 0011](../../docs/decisions/0011-ge
 
 1. Copy `en.pot` to `<ll>.po` (ISO 639-1, e.g. `pl.po`), or `<ll>_<CC>.po` for a regional variant (`pt_BR.po`).
 2. Translate in [Poedit](https://poedit.net/) or Weblate: fill each `msgstr`. Leave `msgctxt` (the key) and `msgid` (the English) unchanged. An empty `msgstr` shows the English text.
-3. Keep `%s`, `%i` and similar placeholders, `\n` line breaks and the colour codes `\x1`–`\x9` (one digit; `\x8` resets the colour).
-4. Run `python3 tools/lang-check.py`: it rejects invalid PO and unknown keys, and lists untranslated keys.
+3. Keep the placeholders (`%s`, `%i`, `%02i`, …) in the same order: the game skips a translation that changes them, and the check fails. Keep `\n` line breaks and the colour codes `\x1`–`\x9` (one digit; `\x8` resets the colour).
+4. Run `python3 tools/lang-check.py`: it rejects invalid PO, unknown keys and changed placeholders, warns about characters the font lacks, and lists untranslated keys.
 
 ## How the game picks a language
 
 - `languageFile ""` (the default): the OS languages in preference order; for each, `<ll>_<CC>` then `<ll>`, `.po` before `.lang`; English if none matches.
-- `languageFile "main/languages/<file>"` in the config always wins (`.po` or an original BV2 `.lang`).
+- `languageFile "main/languages/<file>"` in the config always wins (`.po` or an original BV2 `.lang`). Builds before step 13 saved `languageFile "main/languages/en.lang"` in the user's `bv2.cfg`; set it to `""` to follow the OS.
 - Every key missing from the chosen file shows in English.
 
 ## Glyph limit

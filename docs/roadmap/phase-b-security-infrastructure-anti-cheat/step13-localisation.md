@@ -18,7 +18,7 @@
 
 ## Context
 
-- `languageFile` defaults to `main/languages/en.lang` (`game/src/GameVar.cpp:271`) and is set only through config; `GameVar::loadLanguage` (`GameVar.cpp:1223`) reads `key<TAB>text`. There is no in-game picker (`game/src/OptionMenu.h` is a leftover header).
+- Before this step (the loader is now `game/src/Lang.cpp`): `languageFile` defaulted to `main/languages/en.lang` (`game/src/GameVar.cpp:271`) and was set only through config; `GameVar::loadLanguage` (`GameVar.cpp:1223`) read `key<TAB>text`. There is no in-game picker (`game/src/OptionMenu.h` is a leftover header).
 - `CFont` maps single bytes 33–159 (`engine/zeven/src/CFont.cpp:156`, PNS-2). Languages needing other glyphs can't render until PNS-20/21.
 - ADR 0011: PO with `msgctxt` = key, `msgid` = English, `msgstr` = translation; `<ll>[_<CC>].po`; per-key English fallback. Original `.lang` files keep loading (ADR 0010).
 
