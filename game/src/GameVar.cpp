@@ -257,7 +257,7 @@ GameVar::GameVar()
 	langs.push_back(SLangText("lang_incorrectName", &lang_incorrectName));
 #endif
 
-	languageFile = "main/languages/en.lang";
+	languageFile = ""; // the OS language
 	dksvarRegister(CString("languageFile [string : \"\"]"), &languageFile, true);
 
 #ifndef CONSOLE
