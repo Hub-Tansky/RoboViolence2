@@ -1,0 +1,5 @@
+# TLS in front of the game server's admin API (Phase B step 12, ADR 0015). BV2_ADMIN_HOST: the public name, for which
+# Caddy fetches a certificate (ACME needs ports 80 and 443 reachable); the default, localhost, uses Caddy's own CA.
+{$BV2_ADMIN_HOST:localhost} {
+	reverse_proxy server:8080
+}

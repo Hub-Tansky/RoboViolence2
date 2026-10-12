@@ -43,7 +43,24 @@ From the repository root (or the folder holding the compose file):
 
 ## Ports
 
-Open inbound TCP 3333 (game) and TCP 10207 (master) on the host firewall; nothing else. All game traffic is TCP.
+Open inbound TCP 3333 (game) and TCP 10207 (master) on the host firewall; TCP 8443 only for remote admins (or 443 and 80 for a public certificate). All game traffic is TCP. Never publish the admin API port (8080).
+
+## Remote admin
+
+The game server's admin API ([ADR 0015](../decisions/0015-admin-http-api-behind-tls-proxy.md)) is reachable only through the `admin-proxy` service (Caddy), which terminates TLS on port 8443.
+
+- Token: the admin password, `BV2_ADMIN_PASS` in the env file. Empty refuses every request.
+- Certificate: for `localhost`, Caddy's own CA (`curl -k`, or trust the root in the `caddy-data` volume). For a public name, set `BV2_ADMIN_HOST` in the env file, publish 443 and 80 instead of 8443, and Caddy fetches a certificate.
+
+| Task | Command |
+|---|---|
+| Status | `curl -k -H "Authorization: Bearer $BV2_ADMIN_PASS" https://localhost:8443/status` |
+| A console command | `curl -k -H "Authorization: Bearer $BV2_ADMIN_PASS" --data 'kick Tester' https://localhost:8443/command` |
+| Audit log | `docker compose -f packaging/docker/compose.example.yml exec server tail admin-audit.log` |
+
+- The reply to a command is the console lines it printed. Each source may send 5 requests at once, then 1 a second (429 beyond).
+- `admin-audit.log` (in the server volume): one line per request with UTC time, source, result and command; secrets are masked.
+- The old UDP remote admin (`RA_LOGIN`) is refused.
 
 ## Master address limitation
 

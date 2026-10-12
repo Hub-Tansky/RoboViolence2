@@ -54,11 +54,11 @@ jobs:
             [ "$uid" != 0 ]
           done
       # The join password comes from the environment and survives the launch script: the master lists the game as
-      # passworded. The value is a throwaway for this run.
+      # passworded. Both values are random throwaways for this run.
       - name: The compose example comes up healthy; the master lists the passworded server
         run: |
           set -euo pipefail
-          printf 'BV2_SV_PASSWORD=ci-throwaway\n' > "$RUNNER_TEMP/ci.env"
+          printf 'BV2_SV_PASSWORD=%s\nBV2_ADMIN_PASS=%s\n' "$(openssl rand -hex 8)" "$(openssl rand -hex 16)" > "$RUNNER_TEMP/ci.env"
           compose="docker compose -f packaging/docker/compose.example.yml --env-file $RUNNER_TEMP/ci.env"
           $compose up -d --no-build --wait --wait-timeout 120
           $compose ps
@@ -71,6 +71,16 @@ jobs:
           done
           echo "listed: $listed"
           [ "$listed" = "(1,)" ]
+      # Step 12: the admin API through the TLS proxy (Caddy's own CA for localhost, hence -k)
+      - name: Remote status over TLS
+        run: |
+          set -euo pipefail
+          token=$(sed -n 's/^BV2_ADMIN_PASS=//p' "$RUNNER_TEMP/ci.env")
+          code=$(curl -sk -o /dev/null -w '%{http_code}' -H 'Authorization: Bearer wrong' https://localhost:8443/status)
+          echo "wrong token: $code"
+          [ "$code" = 401 ]
+          curl -skf -H "Authorization: Bearer $token" https://localhost:8443/status | tee status.txt
+          grep -q '^map ' status.txt
       - name: Logs and the master's game list
         if: always()
         run: |
