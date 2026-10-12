@@ -1,15 +1,20 @@
-# A master and a game server on one host. Placeholder values only: real secrets come from an env file outside the
-# repository (docs/ops/runbook.md). Start from the repository root:
+# A master and a game server on one host (linux/amd64). Placeholder values only: real secrets come from an env file
+# outside the repository (docs/ops/runbook.md). Start from the repository root:
 #   docker compose -f packaging/docker/compose.example.yml --env-file ~/bv2-secrets.env up -d
 name: roboviolence2
+x-common: &common
+  init: true # forwards stop signals: the servers install no handlers of their own
+  restart: unless-stopped
+  logging: { driver: json-file, options: { max-size: "10m", max-file: "3" } }
 services:
   master:
+    <<: *common
     image: ghcr.io/hub-tansky/roboviolence2-master:latest
     build: { context: ../.., dockerfile: packaging/docker/Dockerfile, target: master }
     ports: ["10207:10207/tcp"]
     volumes: ["master-data:/var/lib/bv2"]
-    restart: unless-stopped
   server:
+    <<: *common
     image: ghcr.io/hub-tansky/roboviolence2-server:latest
     build: { context: ../.., dockerfile: packaging/docker/Dockerfile, target: server }
     depends_on: { master: { condition: service_healthy } }
@@ -20,7 +25,7 @@ services:
     ports: ["3333:3333/tcp"]
     volumes: ["server-data:/var/lib/bv2"]
     stdin_open: true # `docker attach` reaches the server console
-    restart: unless-stopped
+    tty: true        # and Ctrl-P Ctrl-Q detaches
 volumes:
   master-data: {}
   server-data: {}
