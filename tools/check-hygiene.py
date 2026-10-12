@@ -5,6 +5,7 @@
 2. No tracked file matches .gitignore (secrets, binaries, OS junk).
 3. No file over 5 MB outside content/ and assets-src/.
 4. Encoding: tools/check-encoding.py (UTF-8, no BOM, LF).
+5. Translations: tools/lang-check.py (en.pot in sync, valid PO, no unknown keys).
 Python 3, stdlib only.
 """
 import os
@@ -39,9 +40,9 @@ def main():
         if size > MAX_BYTES:
             print(f"over 5 MB outside content/ and assets-src/: {p} ({size} bytes)")
             bad += 1
-    r = subprocess.run([sys.executable, os.path.join(ROOT, "tools", "check-encoding.py")], cwd=ROOT)
-    if r.returncode != 0:
-        bad += 1
+    for check in ("check-encoding.py", "lang-check.py"):
+        if subprocess.run([sys.executable, os.path.join(ROOT, "tools", check)], cwd=ROOT).returncode != 0:
+            bad += 1
     if bad:
         return 1
     print("ok: hygiene")

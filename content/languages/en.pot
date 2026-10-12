@@ -1,0 +1,633 @@
+# Robo Violence 2 strings: copy to <ll>.po or <ll>_<CC>.po (content/languages/README.md).
+# Generated from en.lang by tools/lang-to-pot.py; don't edit.
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+
+msgctxt "lang_gameName"
+msgid "Babo Violent 2"
+msgstr ""
+
+msgctxt "lang_dualMachineGun"
+msgid "Dual Machine Gun"
+msgstr ""
+
+msgctxt "lang_subMachineGun"
+msgid "Sub Machine Gun"
+msgstr ""
+
+msgctxt "lang_changGun"
+msgid "Chain Gun"
+msgstr ""
+
+msgctxt "lang_shotgun"
+msgid "Shotgun"
+msgstr ""
+
+msgctxt "lang_sniper"
+msgid "Sniper Rifle"
+msgstr ""
+
+msgctxt "lang_bazooka"
+msgid "Bazooka"
+msgstr ""
+
+msgctxt "lang_grenade"
+msgid "Grenade"
+msgstr ""
+
+msgctxt "lang_flame"
+msgid "Flame"
+msgstr ""
+
+msgctxt "lang_autoAssignTeam"
+msgid "Auto-assign Team"
+msgstr ""
+
+msgctxt "lang_joinBlueTeam"
+msgid "Join Blue Team"
+msgstr ""
+
+msgctxt "lang_joinRedTeam"
+msgid "Join Red Team"
+msgstr ""
+
+msgctxt "lang_spectator"
+msgid "Spectator"
+msgstr ""
+
+msgctxt "lang_mainMenu"
+msgid "Main Menu"
+msgstr ""
+
+msgctxt "lang_disconnect"
+msgid "Disconnect"
+msgstr ""
+
+msgctxt "lang_serverDisconnected"
+msgid "Server disconnected"
+msgstr ""
+
+msgctxt "lang_dead"
+msgid "Dead"
+msgstr ""
+
+msgctxt "lang_team"
+msgid "Team"
+msgstr ""
+
+msgctxt "lang_joinedTheGame"
+msgid "%s\x8 joined the game"
+msgstr ""
+
+msgctxt "lang_playerDisconnected"
+msgid "%s\x8 disconnected"
+msgstr ""
+
+msgctxt "lang_player"
+msgid "Player"
+msgstr ""
+
+msgctxt "lang_playerChangedHisNameFor"
+msgid "Player %s\x8 changed his name for %s"
+msgstr ""
+
+msgctxt "lang_returnBlueFlag"
+msgid "\x1%s\x8 returned the blue flag"
+msgstr ""
+
+msgctxt "lang_returnRedFlag"
+msgid "\x4%s\x8 returned the red flag"
+msgstr ""
+
+msgctxt "lang_tookBlueFlag"
+msgid "\x4%s\x8 took the blue flag"
+msgstr ""
+
+msgctxt "lang_tookRedFlag"
+msgid "\x1%s\x8 took the red flag"
+msgstr ""
+
+msgctxt "lang_redScore"
+msgid "Red team scores!"
+msgstr ""
+
+msgctxt "lang_blueScore"
+msgid "Blue team scores!"
+msgstr ""
+
+msgctxt "lang_reloading"
+msgid "Reloading"
+msgstr ""
+
+msgctxt "lang_spawnIn"
+msgid "Spawn in %i:%02i"
+msgstr ""
+
+msgctxt "lang_pressToRespawn"
+msgid "Press use key [%s] to respawn"
+msgstr ""
+
+msgctxt "lang_blueTeamWin"
+msgid "BLUE TEAM WINS"
+msgstr ""
+
+msgctxt "lang_redTeamWin"
+msgid "RED TEAM WINS"
+msgstr ""
+
+msgctxt "lang_roundDraw"
+msgid "ROUND DRAW"
+msgstr ""
+
+msgctxt "lang_changingMap"
+msgid "CHANGING MAP"
+msgstr ""
+
+msgctxt "lang_deathmatchC"
+msgid "DEATHMATCH"
+msgstr ""
+
+msgctxt "lang_deathmatchD"
+msgid "The player with the highest scores wins!"
+msgstr ""
+
+msgctxt "lang_teamDeathmatchC"
+msgid "TEAM DEATHMATCH"
+msgstr ""
+
+msgctxt "lang_teamDeathmatchD"
+msgid "The team with the highest scores wins!"
+msgstr ""
+
+msgctxt "lang_captureTheFlagC"
+msgid "CAPTURE THE FLAG"
+msgstr ""
+
+msgctxt "lang_captureTheFlagD"
+msgid "Capture the enemy's flag and return it to yours!"
+msgstr ""
+
+msgctxt "lang_counterBaboristC"
+msgid "COUNTER BABORIST"
+msgstr ""
+
+msgctxt "lang_counterBaboristD"
+msgid "Red : plank the explosive on the bomb site. Blue : defend the bomb site"
+msgstr ""
+
+msgctxt "lang_connectingC"
+msgid "CONNECTING"
+msgstr ""
+
+msgctxt "lang_pressF10ToCancel"
+msgid "Press F10 to cancel"
+msgstr ""
+
+msgctxt "lang_goesSpectator"
+msgid "%s\x8 goes spectator"
+msgstr ""
+
+msgctxt "lang_joinBlueTeamP"
+msgid "%s\x1 joins blue team"
+msgstr ""
+
+msgctxt "lang_joinRedTeamP"
+msgid "%s\x4 joins red team"
+msgstr ""
+
+msgctxt "lang_blueTeamC"
+msgid "BLUE TEAM"
+msgstr ""
+
+msgctxt "lang_redTeamC"
+msgid "RED TEAM"
+msgstr ""
+
+msgctxt "lang_freeForAllC"
+msgid "FREE FOR ALL %i"
+msgstr ""
+
+msgctxt "lang_spectatorC"
+msgid "SPECTATORS"
+msgstr ""
+
+msgctxt "lang_playerNameC"
+msgid "PLAYER NAME"
+msgstr ""
+
+msgctxt "lang_scoreC"
+msgid "SCORE"
+msgstr ""
+
+msgctxt "lang_pingC"
+msgid "PING"
+msgstr ""
+
+msgctxt "lang_laggerC"
+msgid "*LAGGER*"
+msgstr ""
+
+msgctxt "lang_friendlyFire"
+msgid "Friendly Fire"
+msgstr ""
+
+msgctxt "lang_serverVersion"
+msgid "server version %01i.%02i.%02i"
+msgstr ""
+
+msgctxt "lang_clientVersion"
+msgid "client version %01i.%02i.%02i"
+msgstr ""
+
+msgctxt "lang_connectionFailed"
+msgid "\x4 Connection Failed! \x8 Check IP Address"
+msgstr ""
+
+msgctxt "lang_back"
+msgid "<- Back"
+msgstr ""
+
+msgctxt "lang_launch"
+msgid "Launch !"
+msgstr ""
+
+msgctxt "lang_dedicate"
+msgid "Dedicate"
+msgstr ""
+
+msgctxt "lang_generalGameOption"
+msgid "General Game Options"
+msgstr ""
+
+msgctxt "lang_gameNameS"
+msgid "Game Name"
+msgstr ""
+
+msgctxt "lang_gameType"
+msgid "Game Type"
+msgstr ""
+
+msgctxt "lang_freeForAll"
+msgid "Free for All"
+msgstr ""
+
+msgctxt "lang_teamDeathmatch"
+msgid "Team Deathmatch"
+msgstr ""
+
+msgctxt "lang_captureTheFlag"
+msgid "Capture the Flag"
+msgstr ""
+
+msgctxt "lang_TCPnUDPport"
+msgid "TCP & UDP Port"
+msgstr ""
+
+msgctxt "lang_gameLimits"
+msgid "Game Limits"
+msgstr ""
+
+msgctxt "lang_scoreLimit"
+msgid "Score Limit (0 = Unlimited)"
+msgstr ""
+
+msgctxt "lang_teamWinLimit"
+msgid "Team Win Limit (0 = Unlimited)"
+msgstr ""
+
+msgctxt "lang_timeLimit"
+msgid "Time Limit in Second (0 = Unlimited)"
+msgstr ""
+
+msgctxt "lang_maxPlayer"
+msgid "Max player (1 to 32)"
+msgstr ""
+
+msgctxt "lang_spawning"
+msgid "Spawning"
+msgstr ""
+
+msgctxt "lang_timeToSpawn"
+msgid "Time To Spawn in Second"
+msgstr ""
+
+msgctxt "lang_forceRespawn"
+msgid "Force Respawn"
+msgstr ""
+
+msgctxt "lang_no"
+msgid "\x4No"
+msgstr ""
+
+msgctxt "lang_yes"
+msgid "\x2Yes"
+msgstr ""
+
+msgctxt "lang_reflectDamage"
+msgid "Reflect Damage"
+msgstr ""
+
+msgctxt "lang_maps"
+msgid "Maps"
+msgstr ""
+
+msgctxt "lang_includedMaps"
+msgid "Included Maps"
+msgstr ""
+
+msgctxt "lang_RndLabsTeam"
+msgid "RndLabs Team"
+msgstr ""
+
+msgctxt "lang_gameDesigner"
+msgid "Game Designer"
+msgstr ""
+
+msgctxt "lang_programmers"
+msgid "Programmers"
+msgstr ""
+
+msgctxt "lang_soundDesigners"
+msgid "Sound Designers"
+msgstr ""
+
+msgctxt "lang_musics"
+msgid "Musics"
+msgstr ""
+
+msgctxt "lang_thanksTo"
+msgid "Thanks to"
+msgstr ""
+
+msgctxt "lang_betaTesters"
+msgid "Beta Testers"
+msgstr ""
+
+msgctxt "lang_buyAlbum"
+msgid "Check out their new album \"Sacrament\""
+msgstr ""
+
+msgctxt "lang_internet"
+msgid "Internet"
+msgstr ""
+
+msgctxt "lang_localNetwork"
+msgid "Local Network"
+msgstr ""
+
+msgctxt "lang_refreshList"
+msgid "Refresh List"
+msgstr ""
+
+msgctxt "lang_players"
+msgid "Players"
+msgstr ""
+
+msgctxt "lang_mapName"
+msgid "Map Name"
+msgstr ""
+
+msgctxt "lang_join"
+msgid "Join !"
+msgstr ""
+
+msgctxt "lang_IPAdress"
+msgid "IP Adress"
+msgstr ""
+
+msgctxt "lang_canRefreshIn"
+msgid "Can refresh in %i sec"
+msgstr ""
+
+msgctxt "lang_nbGamesRefreshed"
+msgid "%i of %i"
+msgstr ""
+
+msgctxt "lang_noGameFound"
+msgid "No games found. Try to refresh again."
+msgstr ""
+
+msgctxt "lang_problemConnectingToMaster"
+msgid "Problem connecting to master."
+msgstr ""
+
+msgctxt "lang_resumeCurrentGame"
+msgid "Resume current game"
+msgstr ""
+
+msgctxt "lang_joinGame"
+msgid "Join game"
+msgstr ""
+
+msgctxt "lang_createServer"
+msgid "Create server"
+msgstr ""
+
+msgctxt "lang_options"
+msgid "Options"
+msgstr ""
+
+msgctxt "lang_credits"
+msgid "Credits"
+msgstr ""
+
+msgctxt "lang_quit"
+msgid "Quit"
+msgstr ""
+
+msgctxt "lang_noGameRunning"
+msgid "There is no game currently running"
+msgstr ""
+
+msgctxt "lang_selectAtLeastOneMap"
+msgid "You have to select at least one map"
+msgstr ""
+
+msgctxt "lang_apply"
+msgid "<- Apply"
+msgstr ""
+
+msgctxt "lang_cancel"
+msgid "Cancel"
+msgstr ""
+
+msgctxt "lang_someOptionRequireRestart"
+msgid "Some options require the game to be restarted"
+msgstr ""
+
+msgctxt "lang_clientOptions"
+msgid "Client Options"
+msgstr ""
+
+msgctxt "lang_playerName"
+msgid "Player Name"
+msgstr ""
+
+msgctxt "lang_inGameMusic"
+msgid "In Game Music"
+msgstr ""
+
+msgctxt "lang_renderingOptions"
+msgid "Rendering Options"
+msgstr ""
+
+msgctxt "lang_showStats"
+msgid "Show FPS/Particle Count"
+msgstr ""
+
+msgctxt "lang_fullscreen"
+msgid "Fullscreen"
+msgstr ""
+
+msgctxt "lang_screenResolution"
+msgid "Screen Resolution"
+msgstr ""
+
+msgctxt "lang_colorDepth"
+msgid "Color Depth"
+msgstr ""
+
+msgctxt "lang_bits"
+msgid "bits"
+msgstr ""
+
+msgctxt "lang_wallShadowQuality"
+msgid "Wall Shadow Quality"
+msgstr ""
+
+msgctxt "lang_noShadows"
+msgid "No Shadows"
+msgstr ""
+
+msgctxt "lang_hardEdges"
+msgid "Hard Edges"
+msgstr ""
+
+msgctxt "lang_softEdges"
+msgid "Soft Edges"
+msgstr ""
+
+msgctxt "lang_baboShadow"
+msgid "Babo Shadow"
+msgstr ""
+
+msgctxt "lang_projectileShadow"
+msgid "Projectile Shadow"
+msgstr ""
+
+msgctxt "lang_particleLighting"
+msgid "Particle Lighting"
+msgstr ""
+
+msgctxt "lang_particleSorting"
+msgid "Particle Sorting"
+msgstr ""
+
+msgctxt "lang_terrainSplatter"
+msgid "Terrain Splatering"
+msgstr ""
+
+msgctxt "lang_showCasing"
+msgid "Show Casing"
+msgstr ""
+
+msgctxt "lang_groundMarkNBlood"
+msgid "Ground Mark & Blood"
+msgstr ""
+
+msgctxt "lang_soundOptions"
+msgid "Sound Options"
+msgstr ""
+
+msgctxt "lang_mixRate"
+msgid "Mix Rate"
+msgstr ""
+
+msgctxt "lang_hertz"
+msgid "Hz"
+msgstr ""
+
+msgctxt "lang_maxSoftwareChannels"
+msgid "Max Software Channels"
+msgstr ""
+
+msgctxt "lang_masterVolume"
+msgid "Master Volume"
+msgstr ""
+
+msgctxt "lang_keyOptions"
+msgid "Key Options"
+msgstr ""
+
+msgctxt "lang_moveUp"
+msgid "Move Up"
+msgstr ""
+
+msgctxt "lang_moveDown"
+msgid "Move Down"
+msgstr ""
+
+msgctxt "lang_moveRight"
+msgid "Move Right"
+msgstr ""
+
+msgctxt "lang_moveLeft"
+msgid "Move Left"
+msgstr ""
+
+msgctxt "lang_shoot"
+msgid "Shoot"
+msgstr ""
+
+msgctxt "lang_throwGrenade"
+msgid "Throw Grenade"
+msgstr ""
+
+msgctxt "lang_throwCocktailMolotov"
+msgid "Throw Cocktail Molotov"
+msgstr ""
+
+msgctxt "lang_use"
+msgid "Use"
+msgstr ""
+
+msgctxt "lang_chatToAll"
+msgid "Chat to All"
+msgstr ""
+
+msgctxt "lang_chatToTeam"
+msgid "Chat to Team"
+msgstr ""
+
+msgctxt "lang_showScoreBoard"
+msgid "Show Score Board"
+msgstr ""
+
+msgctxt "lang_toggleMenu"
+msgid "Toggle Menu"
+msgstr ""
+
+msgctxt "lang_areYouSureYouWantToQuit"
+msgid "Are you sure you want to quit?"
+msgstr ""
+
+msgctxt "lang_yesQ"
+msgid "Yes"
+msgstr ""
+
+msgctxt "lang_noQ"
+msgid "No"
+msgstr ""
+
+msgctxt "lang_serverHasClosedTheConnection"
+msgid "The server has closed the connection"
+msgstr ""
+
+msgctxt "lang_language"
+msgid "Language"
+msgstr ""
+
+msgctxt "lang_incorrectName"
+msgid "Your player name must contain at least 2 characters\nand should not be \"Unnamed Babo\".\nPlease change it now."
+msgstr ""
