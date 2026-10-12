@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-# Robo Violence 2 servers (Phase B step 11): one build, two images. Build from the repository root:
+# Robo Violence 2 servers (Phase B step 11): one build, two linux/amd64 images. Build from the repository root:
 #   docker build -f packaging/docker/Dockerfile --target server -t roboviolence2-server .
 #   docker build -f packaging/docker/Dockerfile --target master -t roboviolence2-master .
 # Running them: docs/ops/runbook.md.
@@ -12,39 +12,44 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         autoconf autoconf-archive automake libtool libltdl-dev python3 libgl1-mesa-dev libglu1-mesa-dev \
     && rm -rf /var/lib/apt/lists/*
 WORKDIR /src
+# Dependencies first, in their own layer: it changes only with vcpkg.json (vcpkg at the manifest's pinned baseline)
 COPY vcpkg.json ./
-# vcpkg at the manifest's pinned baseline
 RUN baseline=$(sed -n 's/.*"builtin-baseline": *"\([0-9a-f]*\)".*/\1/p' vcpkg.json) \
-    && git clone --quiet --filter=blob:none https://github.com/microsoft/vcpkg /opt/vcpkg \
-    && git -C /opt/vcpkg checkout --quiet "$baseline" \
+    && git init --quiet /opt/vcpkg \
+    && git -C /opt/vcpkg fetch --quiet --depth 1 https://github.com/microsoft/vcpkg "$baseline" \
+    && git -C /opt/vcpkg checkout --quiet FETCH_HEAD \
     && /opt/vcpkg/bootstrap-vcpkg.sh -disableMetrics
 ENV VCPKG_ROOT=/opt/vcpkg
+RUN --mount=type=cache,target=/root/.cache/vcpkg \
+    /opt/vcpkg/vcpkg install --triplet=x64-linux --x-no-default-features --x-install-root=/opt/vcpkg_installed
 COPY . .
 # Release servers only; main/ gets the placeholder data (the original assets are never in the image)
-RUN --mount=type=cache,target=/root/.cache/vcpkg \
-    cmake --preset linux-x64-release -DBV2_BUILD_CLIENT=OFF -DBV2_BUILD_TESTS=OFF \
+RUN cmake --preset linux-x64-release -DBV2_BUILD_CLIENT=OFF -DBV2_BUILD_TESTS=OFF \
+        -DVCPKG_MANIFEST_INSTALL=OFF -DVCPKG_INSTALLED_DIR=/opt/vcpkg_installed \
     && cmake --build --preset linux-x64-release --target bv2dedicated bv2master \
     && runtime=build/linux-x64-release/runtime && mkdir -p /out/seed \
     && cp "$runtime/bv2dedicated" "$runtime/bv2master" /out/ \
     && cp -rL "$runtime/main" /out/main \
     && cp "$runtime/master.db" "$runtime/web.db" /out/seed/
 
-# Runtime: GL and GLU are still linked by the headless server (PNS-3). The servers run as uid 10001.
+# Runtime: both servers run as uid 10001 with their state in the /var/lib/bv2 volume
 FROM ubuntu:24.04 AS runtime
-RUN apt-get update && apt-get install -y --no-install-recommends libgl1 libglu1-mesa \
-    && rm -rf /var/lib/apt/lists/* \
-    && useradd --system --uid 10001 --create-home --home-dir /var/lib/bv2 bv2
+LABEL org.opencontainers.image.source=https://github.com/Hub-Tansky/RoboViolence2
+RUN useradd --system --uid 10001 --create-home --home-dir /var/lib/bv2 bv2
 # Saved config, bv2.db, logs and downloaded maps (ADR 0007); the master's databases
 ENV BV2_PREF_DIR=/var/lib/bv2
 VOLUME /var/lib/bv2
 WORKDIR /opt/bv2
 
 FROM runtime AS server
+# The headless server still links GL and GLU (PNS-3)
+RUN apt-get update && apt-get install -y --no-install-recommends libgl1 libglu1-mesa && rm -rf /var/lib/apt/lists/*
 COPY --from=build /out/bv2dedicated /opt/bv2/
 COPY --from=build /out/main /opt/bv2/main
 USER bv2
 EXPOSE 3333/tcp
-HEALTHCHECK --interval=10s --timeout=3s --start-period=10s CMD bash -c '</dev/tcp/127.0.0.1/3333' || exit 1
+# A listening socket, not a connection: a connection would join the game as a player
+HEALTHCHECK --interval=10s --timeout=3s --start-period=10s CMD grep -q ':0D05 00000000:0000 0A' /proc/net/tcp
 # Arguments: a launch script in main/LaunchScript (default CTF); with --config <file>, name the script too
 ENTRYPOINT ["/opt/bv2/bv2dedicated"]
 CMD ["CTF"]
@@ -52,9 +57,9 @@ CMD ["CTF"]
 FROM runtime AS master
 COPY --from=build /out/bv2master /opt/bv2/
 COPY --from=build /out/seed /opt/bv2/seed
+COPY packaging/docker/master-entrypoint.sh /opt/bv2/
 USER bv2
 EXPOSE 10207/tcp
-HEALTHCHECK --interval=10s --timeout=3s --start-period=10s CMD bash -c '</dev/tcp/127.0.0.1/10207' || exit 1
-# The master reads master.db and web.db from its working directory: the volume, seeded on first start
+HEALTHCHECK --interval=10s --timeout=3s --start-period=10s CMD grep -q ':27DF 00000000:0000 0A' /proc/net/tcp
 WORKDIR /var/lib/bv2
-ENTRYPOINT ["sh", "-c", "for db in master.db web.db; do [ -f \"$db\" ] || cp /opt/bv2/seed/\"$db\" .; done; exec /opt/bv2/bv2master"]
+ENTRYPOINT ["/opt/bv2/master-entrypoint.sh"]

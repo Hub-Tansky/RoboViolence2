@@ -71,6 +71,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `packaging/scripts/run-server.sh` | Package script: starts the dedicated server, default launch script CTF (Unix) |
 | `packaging/macos/Info.plist.in` | macOS bundle `Info.plist` template |
 | `packaging/docker/Dockerfile` | Server images: one Ubuntu 24.04 build, targets `server` (`bv2dedicated`) and `master` (`bv2master`), non-root, pref dir volume (step 11) |
+| `packaging/docker/master-entrypoint.sh` | Master image entrypoint: seeds `master.db` and `web.db` into the volume, then runs `bv2master` |
 | `packaging/docker/compose.example.yml` | Compose example: master and game server on one host, secrets from an env file outside the repo |
 | `packaging/windows/bv2.manifest` | Windows manifest for `bv2`, `bv2dedicated` and `bv2master`: PerMonitorV2 DPI, UTF-8 code page, Windows 10/11 |
 | `packaging/windows/bv2.rc.in` | Windows resource script template; CMake fills in the generated icon |
@@ -136,7 +137,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 
 | path | purpose |
 |---|---|
-| `.github/dependabot.yml` | Dependabot version updates: GitHub Actions, weekly |
+| `.github/dependabot.yml` | Dependabot version updates: GitHub Actions and the server images' Docker base, weekly |
 
 ### `.github/actions/setup-vcpkg`
 
@@ -153,7 +154,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `.github/workflows/hygiene.yml` | CI: ARCHITECTURE.md inventory, repository hygiene, content case; `review` (`tools/review.sh`) on PRs |
 | `.github/workflows/codeql.yml` | CodeQL: `c-cpp` (manual linux-x64 build of the three executables) and `actions`; push, PR, weekly; alerts under `build/` (vcpkg headers) filtered out |
 | `.github/workflows/dependency-graph.yml` | Submits resolved vcpkg ports to the dependency graph on push to `main` |
-| `.github/workflows/containers.yml` | CI: builds both server images, checks non-root, runs the compose example (healthy, server listed by the master), pushes to GHCR from `main` |
+| `.github/workflows/containers.yml` | CI: builds both server images, checks non-root, runs the compose example (healthy, passworded server listed by the master), pushes to GHCR from `main` and weekly |
 
 ### `config`
 
@@ -192,7 +193,6 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 
 | path | purpose |
 |---|---|
-| `docs/ops/runbook.md` | Hosting the server images: secrets, start, stop, upgrade, logs, console, ports, backups |
 
 ### `docs/build`
 
@@ -237,6 +237,12 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/decisions/0013-r3-restore-normal-and-pro-rulesets.md` | ADR: `sv_serverType` 0 plays the Normal rules again (R3) |
 | `docs/decisions/0014-libsodium-hmac-for-credentials.md` | ADR: libsodium for the credential HMAC and nonces (step 10) |
 | `docs/decisions/README.md` | ADR format and index |
+
+### `docs/ops`
+
+| path | purpose |
+|---|---|
+| `docs/ops/runbook.md` | Hosting the server images: secrets, start, stop, upgrade, logs, console, ports, backups |
 
 ### `docs/roadmap`
 
