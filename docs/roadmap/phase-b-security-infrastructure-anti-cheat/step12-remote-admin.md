@@ -43,11 +43,13 @@
 ## Notes
 
 - `game/src/AdminApi.{h,cpp}`: `POST /command` (body: one console command; the reply is the lines it added) and `GET /status`. Off unless `zsv_adminApiPort` (env `BV2_ADMIN_API_PORT`) is set; binds `zsv_adminApiBind` (`BV2_ADMIN_API_BIND`, default `127.0.0.1`). Token: `Authorization: Bearer <zsv_adminPass>`, compared in constant time.
-- Limits: 5 requests per source, refilled 1 a second (429). Behind the proxy the source is `X-Forwarded-For`; the port is reachable from the proxy network only.
+- Limits: 5 requests per source, refilled 1 a second (429); at most 8 open connections, 1 s each; 4 KB per request (Caddy also caps the body and its read times). The source is the TCP peer, or the rightmost `X-Forwarded-For` address when the peer is `zsv_adminApiProxy` (`BV2_ADMIN_API_PROXY`, `admin-proxy` in compose).
+- Refused over the API: `restart`, `disconnect`, `host`, `connect`; they rebuild the server under the request (the review reproduced a use-after-free). A command is audited before it runs.
 - Audit: `admin-audit.log` in the pref dir, one line per request: UTC time, source, result (`ok`, `denied`, `limited`, `not found`, `too large`), command with a secret's value masked.
 - Legacy `RA_LOGIN` (UDP, cleartext password, then trusted by IP:port) is refused (owner, 2026-10-12).
 - 12.4: `packaging/docker/Caddyfile` and an `admin-proxy` service (Caddy 2.11.7) on 8443; the server's API on 8080 of the compose network only. CI calls `/status` over TLS with a wrong token (401) and the right one.
-- Tests: `admin_api` (not on Windows: POSIX sockets in the test). Fix proof: with the token check, the budget or the masking off, its checks fail.
+- Tests: `admin_api` (not on Windows: POSIX sockets in the test; port 10209). Fix proof: with the token check, the budget, the masking, the `X-Forwarded-For` check, the control-character cleaning or the timeout audit off, its checks fail; without the refusal, `restart` is a heap-use-after-free under ASan.
+- Not done: the legacy `RA_*` code behind the refused login, and the new variables in AGENTS.md and config/README.md → PNS-46. Caddy runs as root and is pinned by tag.
 
 ## Critical files
 

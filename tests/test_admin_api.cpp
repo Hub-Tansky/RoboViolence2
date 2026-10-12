@@ -1,5 +1,6 @@
 // Phase B step 12: the admin HTTP API refuses a wrong token, limits a burst, runs a command and returns its output,
-// returns the status, and logs every request with secrets masked. Real TCP to the in-process server (POSIX).
+// returns the status, refuses commands that rebuild the server, handles split, oversized and silent requests, trusts
+// X-Forwarded-For only from the proxy, and logs every request with secrets masked. Real TCP to the in-process server.
 #include "server_harness.h"
 
 #include "Console.h"
@@ -19,9 +20,8 @@ extern Scene * scene;
 
 static const int PORT = 10209;
 
-// Opens a connection and sends one request, without waiting
-static int start(const std::string & method, const std::string & path, const std::string & token,
-	const std::string & body = "")
+// Opens a connection and sends raw bytes, without waiting
+static int send(const std::string & text)
 {
 	int s = socket(AF_INET, SOCK_STREAM, 0);
 	sockaddr_in at = {};
@@ -33,12 +33,24 @@ static int start(const std::string & method, const std::string & path, const std
 		close(s);
 		return -1;
 	}
-	std::string text = method + " " + path + " HTTP/1.1\r\nHost: test\r\n";
-	if (!token.empty()) text += "Authorization: Bearer " + token + "\r\n";
-	text += "Content-Length: " + std::to_string(body.size()) + "\r\n\r\n" + body;
-	send(s, text.data(), text.size(), 0);
+	::send(s, text.data(), text.size(), 0);
 	fcntl(s, F_SETFL, fcntl(s, F_GETFL, 0) | O_NONBLOCK);
 	return s;
+}
+
+static std::string text(const std::string & method, const std::string & path, const std::string & token,
+	const std::string & body = "", const std::string & extra = "")
+{
+	std::string t = method + " " + path + " HTTP/1.1\r\nHost: test\r\n" + extra;
+	if (!token.empty()) t += "Authorization: Bearer " + token + "\r\n";
+	return t + "Content-Length: " + std::to_string(body.size()) + "\r\n\r\n" + body;
+}
+
+// Opens a connection and sends one request, without waiting
+static int start(const std::string & method, const std::string & path, const std::string & token,
+	const std::string & body = "")
+{
+	return send(text(method, path, token, body));
 }
 
 // The server runs frames until every connection is answered and closed
@@ -93,6 +105,32 @@ int main(int, char ** argv)
 	for (const std::string & r : finish(burst)) limited += code(r) == 429;
 	CHECK(limited >= 2);
 
+	// Refused: commands that rebuild the server (they used to free it under the request). The server goes on.
+	harness::tick(150);
+	CHECK(code(request("POST", "/command", "s3cret", "restart")) == 403);
+	CHECK(code(request("POST", "/command", "s3cret", "disconnect")) == 403);
+	CHECK(code(request("GET", "/status", "s3cret")) == 200);
+	CHECK(code(request("GET", "/nope", "s3cret")) == 404);
+	CHECK(code(finish({send(text("POST", "/command", "s3cret", std::string(5000, 'x')))})[0]) == 413);
+
+	// A request split over frames is served once complete; a silent one times out
+	harness::tick(150);
+	const std::string whole = text("POST", "/command", "s3cret", "info");
+	int split = send(whole.substr(0, 20));
+	harness::tick(3);
+	::send(split, whole.data() + 20, whole.size() - 20, 0);
+	CHECK(code(finish({split})[0]) == 200);
+	CHECK(finish({send("GET /status HTTP/1.1\r\n")})[0].empty());
+
+	// X-Forwarded-For counts only from the proxy (its rightmost address); a newline can't forge an audit line
+	harness::tick(150);
+	request("GET", "/status", "s3cret", "");
+	finish({send(text("GET", "/status", "s3cret", "", "X-Forwarded-For: 203.0.113.9\r\n"))});
+	console->sendCommand("set zsv_adminApiProxy 127.0.0.1");
+	finish({send(text("GET", "/status", "s3cret", "", "X-Forwarded-For: 198.51.100.1, 203.0.113.7\r\n"))});
+	finish({send("GET /x\n2099-01-01T00:00:00Z 192.0.2.1 ok forged HTTP/1.1\r\nContent-Length: 0\r\n\r\n")});
+	finish({send(text("GET", "/status", "s3cret", "", "X-Forwarded-For: 203.0.113.8\n2099-01-01T00:00:00Z forged\r\n"))});
+
 	// Every request is audited; the password set above is masked
 	std::ifstream file(bv2::userFile("admin-audit.log"));
 	std::stringstream log;
@@ -102,6 +140,10 @@ int main(int, char ** argv)
 	CHECK(audit.find(" ok info") != std::string::npos);
 	CHECK(audit.find(" ok set sv_password ***") != std::string::npos && audit.find("hunter2") == std::string::npos);
 	CHECK(audit.find(" limited GET /status") != std::string::npos);
+	CHECK(audit.find(" refused restart") != std::string::npos && audit.find(" too large") != std::string::npos);
+	CHECK(audit.find(" timeout") != std::string::npos && audit.find(" not found GET /nope") != std::string::npos);
+	CHECK(audit.find("203.0.113.9") == std::string::npos && audit.find(" 203.0.113.7 ok GET /status") != std::string::npos);
+	CHECK(audit.find("\n2099-") == std::string::npos && audit.find("203.0.113.8?2099") != std::string::npos);
 
 	harness::stop();
 	if (harness::failures() == 0) std::printf("ok: admin API\n");

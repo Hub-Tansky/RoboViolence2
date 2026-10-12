@@ -268,6 +268,7 @@ namespace bv2
 		applyEnv("BV2_ADMIN_PASS", "zsv_adminPass");
 		applyEnv("BV2_ADMIN_API_PORT", "zsv_adminApiPort");
 		applyEnv("BV2_ADMIN_API_BIND", "zsv_adminApiBind");
+		applyEnv("BV2_ADMIN_API_PROXY", "zsv_adminApiProxy");
 		return cfg;
 	}
 
