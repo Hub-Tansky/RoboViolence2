@@ -395,3 +395,11 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Why it matters:** dead network code, and operators reading the config docs miss the admin API.
 - **Suggested home:** a cleanup step that may edit `game/src/CMaster.*`, AGENTS.md and config/README.md.
 - **Status:** Proposed
+
+### PNS-47: Old saved `languageFile` pins English
+
+- **Found in:** Phase B step 13 Linux check (2026-10-13).
+- **Extract:** builds before step 13 saved `languageFile "main/languages/en.lang"` in the user's `bv2.cfg`; a saved value wins over the OS language (`game/src/GameVar.cpp` `reloadLanguage`), so upgraded players never get the OS default. `content/languages/README.md` only documents the workaround.
+- **Why it matters:** translations stay invisible to existing players until they edit their config.
+- **Suggested home:** PNS-21 or the next step touching `GameVar.cpp`: treat the old default value as empty once, on load.
+- **Status:** Proposed
