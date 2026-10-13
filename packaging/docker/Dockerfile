@@ -5,7 +5,7 @@
 #   docker build -f packaging/docker/Dockerfile --target master -t roboviolence2-master .
 # Running them: docs/ops/runbook.md.
 
-FROM ubuntu:24.04 AS build
+FROM ubuntu:26.04 AS build
 ARG DEBIAN_FRONTEND=noninteractive
 # The server-only build: compiler, Ninja, CMake, autotools (vcpkg ports), Python (placeholder data), GL and GLU headers
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -36,7 +36,7 @@ RUN cmake --preset linux-x64-release -DBV2_BUILD_CLIENT=OFF -DBV2_BUILD_TESTS=OF
     && cp "$runtime/master.db" "$runtime/web.db" /out/seed/
 
 # Runtime: both servers run as uid 10001 with their state in the /var/lib/bv2 volume
-FROM ubuntu:24.04 AS runtime
+FROM ubuntu:26.04 AS runtime
 LABEL org.opencontainers.image.source=https://github.com/Hub-Tansky/RoboViolence2
 RUN useradd --system --uid 10001 --create-home --home-dir /var/lib/bv2 bv2
 # Saved config, bv2.db, logs and downloaded maps (ADR 0007); the master's databases
