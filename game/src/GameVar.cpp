@@ -23,6 +23,9 @@
 #include "RemoteAdminPackets.h"
 #ifndef CONSOLE
 #include "KeyManager.h"
+#include "Lang.h"
+#include <SDL3/SDL_locale.h>
+#include <SDL3/SDL_stdinc.h>
 #endif
 #include "sqlite3.h"
 
@@ -254,7 +257,7 @@ GameVar::GameVar()
 	langs.push_back(SLangText("lang_incorrectName", &lang_incorrectName));
 #endif
 
-	languageFile = "main/languages/en.lang";
+	languageFile = ""; // the OS language
 	dksvarRegister(CString("languageFile [string : \"\"]"), &languageFile, true);
 
 #ifndef CONSOLE
@@ -1225,122 +1228,31 @@ void GameVar::deleteModels()
 
 
 #ifndef CONSOLE
-// Pour loader les lang_ var
-bool GameVar::loadLanguage(char * filename)
+// The OS languages, most preferred first, as "ll_CC" or "ll"
+static std::vector<std::string> osLocales()
 {
-  int i;
-	FILE * fic = fopen(filename, "r");
-	
-	if (!fic) return false;
-	languageLoaded = false;
-
-	char varName[256];
-	char varValue[512];
-	while (true)
-	{
-		if (fscanf(fic, "%255s", varName) != 1) { fclose(fic); return false; } // no END line
-		if (strcmp(varName, "END") == 0)
-		{
-			fclose(fic);
-			languageLoaded = true;
-			return true;
-		}
-		for (i=0;;)
-		{
-			int character = fgetc(fic);
-			if (character == 199) {character = 128;}
-			if (character == 252) {character = 129;}
-			if (character == 233) {character = 130;}
-			if (character == 226) {character = 131;}
-			if (character == 228) {character = 132;}
-			if (character == 224) {character = 133;}
-			if (character == 229) {character = 134;}
-			if (character == 231) {character = 135;}
-			if (character == 234) {character = 136;}
-			if (character == 235) {character = 137;}
-			if (character == 232) {character = 138;}
-			if (character == 239) {character = 139;}
-			if (character == 238) {character = 140;}
-			if (character == 236) {character = 141;}
-			if (character == 196) {character = 142;}
-			if (character == 197) {character = 143;}
-			if (character == 201) {character = 144;}
-			if (character == 230) {character = 145;}
-			if (character == 198) {character = 146;}
-			if (character == 244) {character = 147;}
-			if (character == 246) {character = 148;}
-			if (character == 242) {character = 149;}
-			if (character == 251) {character = 150;}
-			if (character == 249) {character = 151;}
-			if (character == 255) {character = 152;}
-			if (character == 214) {character = 153;}
-			if (character == 220) {character = 154;}
-			if (character == 248) {character = 155;}
-			if (character == 163) {character = 156;}
-			if (character == 216) {character = 157;}
-			if (character == 215) {character = 158;}
-			if (character == 170) {character = 159;}
-			if (character == '\t')
-			{
-				continue;
-			}
-			if (character == '\n' || character == EOF || i >= 510) // end of line, end of file or buffer full
-			{
-				varValue[i] = '\0';
-				break;
-			}
-			if (character == '%')
-			{
-				varValue[i] = character;
-				++i;
-			}
-			if (character == '\\')
-			{
-				character = fgetc(fic);
-				switch (character)
-				{
-				case 'x':
-					character = fgetc(fic);
-					switch (character)
-					{
-					case '1': character = '\x1';break;
-					case '2': character = '\x2';break;
-					case '3': character = '\x3';break;
-					case '4': character = '\x4';break;
-					case '5': character = '\x5';break;
-					case '6': character = '\x6';break;
-					case '7': character = '\x7';break;
-					case '8': character = '\x8';break;
-					case '9': character = '\x9';break;
-					}
-					break;
-				case 'n':
-					character = '\n';
-					break;
-				case '\\':
-					character = '\\';
-					break;
-				}
-			}
-			varValue[i] = character;
-			++i;
-		}
-		CString value = varValue;
-		for (i=0;i<(int)langs.size();++i)
-		{
-			if (langs[i].varName == varName)
-			{
-				*(langs[i].varPtr) = value;
-			}
-		}
-	}
-	languageLoaded = true;
-	return true;
+	std::vector<std::string> out;
+	int count = 0;
+	SDL_Locale ** locales = SDL_GetPreferredLocales(&count);
+	for (int i = 0; i < count; ++i)
+		out.push_back(std::string(locales[i]->language) + (locales[i]->country ? std::string("_") + locales[i]->country : ""));
+	SDL_free(locales);
+	return out;
 }
 
 bool GameVar::reloadLanguage()
 {
-	if (!loadLanguage(languageFile.s)) return false;
+	// An empty languageFile follows the OS language (ADR 0011)
+	std::string file = languageFile.s;
+	if (file.empty()) file = lang::pickFile("main/languages/", osLocales());
+	lang::Texts texts;
+	languageLoaded = lang::load("main/languages/", file, texts);
+	if (!languageLoaded) return false;
+	for (int i=0;i<(int)langs.size();++i)
+	{
+		lang::Texts::const_iterator it = texts.find(langs[i].varName.s);
+		if (it != texts.end()) *(langs[i].varPtr) = CString("%s", it->second.c_str());
+	}
 	weapons[WEAPON_DUAL_MACHINE_GUN]->weaponName = lang_dualMachineGun;
 	weapons[WEAPON_SMG]->weaponName = lang_subMachineGun;
 	weapons[WEAPON_CHAIN_GUN]->weaponName = lang_changGun;

@@ -1,6 +1,6 @@
 # Step 13: Localisation foundations
 
-**Status:** TODO
+**Status:** IN PROGRESS
 
 **Depends on:** [Step 2](step2-cross-os-playtest.md). **Next:** none (last Phase B step). **Index:** [README.md](README.md)
 
@@ -11,14 +11,14 @@
 | Goal | The client picks the OS language when no `languageFile` is set, loads gettext PO files with `.lang` fallback, and contributors can add a language from a template and a guide |
 | In scope | Tasks 13.1–13.4 below |
 | Out of scope | An in-game language picker, moving hard-coded strings, non-ASCII rendering (all PNS-21); new fonts (PNS-20); shipping translations other than English |
-| Allowed paths | `game/src/GameVar.{h,cpp}`, `game/src/main.cpp`, `game/src/Lang*.{h,cpp}` (new), `game/CMakeLists.txt`, `content/languages/**`, `tools/lang-*`, `tools/check-hygiene.py`, `tests/**`, `ARCHITECTURE.md`, `docs/roadmap/**` |
+| Allowed paths | `game/src/GameVar.{h,cpp}`, `game/src/main.cpp`, `game/src/Lang*.{h,cpp}` (new), `game/CMakeLists.txt`, `content/languages/**`, `tools/lang-*`, `tools/check-hygiene.py`, `tests/**`, `config/bv2.example.cfg` (owner approved 2026-10-12: its `languageFile` default), `ARCHITECTURE.md`, `docs/roadmap/**` |
 | Inputs | `AGENTS.md`, `ARCHITECTURE.md`, earlier review records `reviews/step*.md`, [ADR 0011](../../decisions/0011-gettext-po-translations.md), [ADR 0010](../../decisions/0010-bv2-asset-compat-and-gui-freeze.md), PNS-2 |
 | Deliverables | Locale detection; PO loader; `en.pot` generator; translation checker in `hygiene`; `content/languages/README.md` |
 | Definition of done | See "Acceptance checks". All must pass. `ARCHITECTURE.md` is updated |
 
 ## Context
 
-- `languageFile` defaults to `main/languages/en.lang` (`game/src/GameVar.cpp:271`) and is set only through config; `GameVar::loadLanguage` (`GameVar.cpp:1223`) reads `key<TAB>text`. There is no in-game picker (`game/src/OptionMenu.h` is a leftover header).
+- Before this step (the loader is now `game/src/Lang.cpp`): `languageFile` defaulted to `main/languages/en.lang` (`game/src/GameVar.cpp:271`) and was set only through config; `GameVar::loadLanguage` (`GameVar.cpp:1223`) read `key<TAB>text`. There is no in-game picker (`game/src/OptionMenu.h` is a leftover header).
 - `CFont` maps single bytes 33–159 (`engine/zeven/src/CFont.cpp:156`, PNS-2). Languages needing other glyphs can't render until PNS-20/21.
 - ADR 0011: PO with `msgctxt` = key, `msgid` = English, `msgstr` = translation; `<ll>[_<CC>].po`; per-key English fallback. Original `.lang` files keep loading (ADR 0010).
 
@@ -36,7 +36,7 @@
 ### 13.3 Template and checker
 
 - `tools/lang-to-pot.py` generates `content/languages/en.pot` from `en.lang`.
-- `tools/check-translations.py`, run by the `hygiene` job: valid PO, no unknown keys, `en.pot` in sync, missing keys reported per language.
+- `tools/lang-check.py` (named to fit Allowed paths), run by the `hygiene` job: valid PO, no unknown keys, `en.pot` in sync, missing keys reported per language.
 
 ### 13.4 Translator guide
 
