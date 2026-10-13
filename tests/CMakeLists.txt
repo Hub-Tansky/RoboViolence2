@@ -52,6 +52,14 @@ if(TARGET bv2server_lib)
   add_test(NAME crash_fixes COMMAND test_crash_fixes)
   set_tests_properties(crash_fixes PROPERTIES ENVIRONMENT "BV2_PREF_DIR=${BV2_TEST_SCRATCH}/crash-pref")
 
+  if(NOT WIN32) # POSIX sockets in the test
+    add_executable(test_admin_api test_admin_api.cpp)
+    target_link_libraries(test_admin_api PRIVATE bv2_server_harness)
+    bv2_target_defaults(test_admin_api)
+    add_test(NAME admin_api COMMAND test_admin_api)
+    set_tests_properties(admin_api PROPERTIES ENVIRONMENT "BV2_PREF_DIR=${BV2_TEST_SCRATCH}/admin-api-pref")
+  endif()
+
   add_executable(test_admin_login test_admin_login.cpp)
   target_link_libraries(test_admin_login PRIVATE bv2_server_harness)
   bv2_target_defaults(test_admin_login)
