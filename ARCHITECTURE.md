@@ -300,6 +300,8 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step10.md` | Fresh-context review record for step 10 |
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step11-report.md` | Raw reviewer report for step 11 |
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step11.md` | Fresh-context review record for step 11 |
+| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step12-report.md` | Raw reviewer report for step 12 |
+| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step12.md` | Fresh-context review record for step 12 |
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step2-report.md` | Raw reviewer report for step 2 |
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step2.md` | Fresh-context review record for step 2 |
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step2b-report.md` | Raw reviewer report for step 2b |
@@ -505,7 +507,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 |---|---|
 | `game/src/AccountManager.cpp` | Account create/login/clan/friend requests over the master connection |
 | `game/src/AccountManager.h` | Account create/login/clan/friend requests over the master connection |
-| `game/src/AdminApi.cpp` | Admin HTTP API: non-blocking listener on the game thread, bearer token, per-source budget, audit log with secrets masked (step 12) |
+| `game/src/AdminApi.cpp` | Admin HTTP API: non-blocking listener on the game thread, bearer token, per-source budget, connection cap, refused scene-rebuilding commands, audit log with secrets masked (step 12) |
 | `game/src/AdminApi.h` | Admin HTTP API (`POST /command`, `GET /status`) behind a TLS proxy, ADR 0015 |
 | `game/src/Button.cpp` | Menu button widget |
 | `game/src/Button.h` | Menu button widget |

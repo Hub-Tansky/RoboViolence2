@@ -1,6 +1,6 @@
 # Step 12: Remote admin
 
-**Status:** IN PROGRESS
+**Status:** DONE (2026-10-12)
 
 **Depends on:** [Step 10](step10-server-credentials.md), [Step 11](step11-server-containers.md). **Next:** [step13-localisation.md](step13-localisation.md). **Index:** [README.md](README.md)
 
