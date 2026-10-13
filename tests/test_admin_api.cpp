@@ -53,7 +53,8 @@ static int start(const std::string & method, const std::string & path, const std
 	return send(text(method, path, token, body));
 }
 
-// The server runs frames until every connection is answered and closed
+// The server runs frames until every connection is answered and closed. Each frame waits 2 ms: back-to-back frames
+// reach the server's 30-frame timeout before a loaded machine delivers the request.
 static std::vector<std::string> finish(std::vector<int> sockets)
 {
 	std::vector<std::string> responses(sockets.size());
@@ -61,6 +62,7 @@ static std::vector<std::string> finish(std::vector<int> sockets)
 	char chunk[1024];
 	for (int frame = 0; frame < 90 && std::count(done.begin(), done.end(), false); ++frame)
 	{
+		usleep(2000);
 		harness::tick();
 		for (size_t i = 0; i < sockets.size(); ++i)
 		{
