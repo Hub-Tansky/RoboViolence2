@@ -20,6 +20,7 @@ The game's strings. Format and fallback: [ADR 0011](../../docs/decisions/0011-ge
 - `languageFile ""` (the default): the OS languages in preference order; for each, `<ll>_<CC>` then `<ll>`, `.po` before `.lang`; English if none matches.
 - `languageFile "main/languages/<file>"` in the config always wins (`.po` or an original BV2 `.lang`). Builds before step 13 saved `languageFile "main/languages/en.lang"` in the user's `bv2.cfg`; set it to `""` to follow the OS.
 - Every key missing from the chosen file shows in English.
+- The files are read from the data root's `main/languages/`: with `BV2_DATA_DIR` set, put translations there, not in the package folder.
 
 ## Glyph limit
 

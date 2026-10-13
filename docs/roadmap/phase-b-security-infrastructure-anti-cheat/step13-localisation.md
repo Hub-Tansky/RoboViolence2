@@ -1,6 +1,6 @@
 # Step 13: Localisation foundations
 
-**Status:** IN PROGRESS
+**Status:** DONE (2026-10-13)
 
 **Depends on:** [Step 2](step2-cross-os-playtest.md). **Next:** none (last Phase B step). **Index:** [README.md](README.md)
 
