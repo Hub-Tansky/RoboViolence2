@@ -2,6 +2,7 @@
 
 set(BV2_GAME_SOURCES
   src/AccountManager.cpp
+  src/AdminApi.cpp
   src/Button.cpp
   src/CAStar.cpp
   src/CAStar_FindPath.cpp
@@ -95,6 +96,7 @@ set(BV2_GAME_SOURCES
 # Files that are empty under CONSOLE (menus, editor, client, rendering) are left out.
 set(BV2_SERVER_SOURCES
   src/AccountManager.cpp
+  src/AdminApi.cpp
   src/CAStar.cpp
   src/CAStar_FindPath.cpp
   src/CUrlData.cpp

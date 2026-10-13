@@ -46,3 +46,4 @@ What we do, in one or two sentences.
 | [0012](0012-windows-10-22h2-minimum.md) | Support Windows 10 22H2 and later as the minimum Windows target | Accepted |
 | [0013](0013-r3-restore-normal-and-pro-rulesets.md) | Restore the Normal and Pro rulesets (fix R3) | Accepted |
 | [0014](0014-libsodium-hmac-for-credentials.md) | Use libsodium for the credential HMAC and nonces | Accepted |
+| [0015](0015-admin-http-api-behind-tls-proxy.md) | Remote admin is an HTTP API behind a TLS reverse proxy | Accepted |

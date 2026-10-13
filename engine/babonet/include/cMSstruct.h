@@ -2,6 +2,7 @@
 #define	_MASTER_STRUCT_H
 
 // Wire format: fixed-width fields, no padding, little endian (asserted below). Changing a layout needs a GAME_VERSION bump.
+#include <cstddef>
 #pragma pack(push, 1)
 
 
@@ -453,6 +454,7 @@ static_assert(sizeof(stCacheListEnd) == 4, "stCacheListEnd wire size");
 static_assert(sizeof(stBV2list) == 5, "stBV2list wire size");
 static_assert(sizeof(stMasterInfo) == 2, "stMasterInfo wire size");
 static_assert(sizeof(stBV2row) == 132, "stBV2row wire size");
+static_assert(offsetof(stBV2row, port) == 113, "stBV2row port offset (masterserver/src/cMSstruct.h must agree)");
 static_assert(sizeof(stPlayerResult) == 38, "stPlayerResult wire size");
 static_assert(sizeof(stPlayerRegister) == 33, "stPlayerRegister wire size");
 static_assert(sizeof(stServerRegister) == 32, "stServerRegister wire size");

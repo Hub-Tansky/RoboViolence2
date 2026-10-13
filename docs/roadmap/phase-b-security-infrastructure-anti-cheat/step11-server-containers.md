@@ -1,6 +1,6 @@
 # Step 11: Server container images
 
-**Status:** TODO
+**Status:** DONE (2026-10-12)
 
 **Depends on:** [Step 1](step1-playtest-builds-and-build-guides.md). **Next:** [step12-remote-admin.md](step12-remote-admin.md). **Index:** [README.md](README.md)
 
@@ -11,7 +11,7 @@
 | Goal | CI builds Linux container images for `bv2dedicated` and `bv2master` that run with secrets injected from the environment, and a runbook explains how to host them |
 | In scope | Tasks 11.1–11.4 below |
 | Out of scope | Choosing or provisioning a host; real hostnames or IPs (never committed); the admin channel (step 12); account services (PNS-15) |
-| Allowed paths | `packaging/docker/**`, `.github/workflows/**`, `docs/ops/**`, `.dockerignore`, `ARCHITECTURE.md`, `docs/roadmap/**` |
+| Allowed paths | `packaging/docker/**`, `.github/workflows/**`, `docs/ops/**`, `.dockerignore`, `ARCHITECTURE.md`, `docs/roadmap/**`. Owner, 2026-10-12: `content/LaunchScript/CTF.cfg` (drop its empty secret `set` lines), `.github/dependabot.yml` (docker), `masterserver/src/cMSstruct.h` and `engine/babonet/include/cMSstruct.h` (packing fix) |
 | Inputs | `AGENTS.md`, `ARCHITECTURE.md`, earlier review records `reviews/step*.md`, `config/README.md`, [ADR 0007](../../decisions/0007-data-root-pref-dir-config-layers.md), step 1 Linux package |
 | Deliverables | Two Dockerfiles; CI image build (and push to GHCR on `main`); `docs/ops/runbook.md` |
 | Definition of done | See "Acceptance checks". All must pass. `ARCHITECTURE.md` is updated |
@@ -40,6 +40,17 @@
 
 - `docs/ops/runbook.md`: start, stop, upgrade, logs, backups of the pref dir, secret injection, ports to open.
 
+## Notes
+
+- One Dockerfile with two targets (`server`, `master`) instead of two files: the C++ build runs once for both images. It builds the `linux-x64-release` preset (the packages' Release build) and declares no `BV2_DATA_DIR` volume: the runbook mounts one when you have the original data. A local build follows the host's architecture (`x64-linux` or `arm64-linux` triplet); CI publishes linux/amd64. The owner's first build on an ARM host failed at `vcpkg install` with the hard-coded `x64-linux` triplet.
+- Verification (owner, 2026-10-12, no Docker on the Mac): CI builds both images, checks `id -u`, runs the compose example to healthy and waits for the server in the master's `web.db`; the owner runs the compose example on a Linux machine and joins from a client.
+- The server keeps reading stdin: `stdin_open` and `tty` let `docker attach` reach its console and detach. Without stdin (`docker run` without `-i`) its console loop spins with a 1 ms sleep, so run it with `-i`.
+- Owner test (2026-10-12, macOS, Docker Desktop on arm64, compose example built locally from 30b9158): both services healthy; the client package of the same build joined with `connect 127.0.0.1 3333`. An older client package hung at "connecting" (pre-review step 10 protocol), as expected. CI checks the master listing on amd64 and arm64.
+- Healthchecks look for the listening socket in `/proc/net/tcp`: a TCP connect would join the game as a player.
+- Found: the master's copy of the protocol structs (`masterserver/src/cMSstruct.h`) was not packed (and had a `long`), unlike the game's since step 4: the master read every server's port one byte off (3333 became 13), so its lists were unusable. Both copies now pack to 1 byte and assert the same sizes and `stBV2row::port` at offset 113; CI's listing check matches the port.
+- Found: `CTF.cfg` set `sv_password`, `zsv_adminUser` and `zsv_adminPass` to `""` after the environment layer, wiping `BV2_SV_PASSWORD` and `BV2_ADMIN_PASS` (packages too). CI now sets a password and checks the master lists the game as passworded.
+- The master lists a server at its connection's address (in compose, the container's): PNS-44.
+
 ## Critical files
 
 - `CMakePresets.json`, `tools/setup-dev.sh --linux-packages` (package list)
@@ -51,7 +62,7 @@ docker compose -f packaging/docker/compose.example.yml up -d && docker compose p
 ```
 
 - Both services are healthy. A local client connects to the containerised server, which appears in the containerised master's list.
-- `docker run --rm <image> id -u` is not 0.
+- `docker run --rm --entrypoint id <image> -u` is not 0.
 - gitleaks and `.gitleaks.toml` host rules find nothing in `packaging/docker/` or `docs/ops/`.
 - `tools/review.sh --full <preset>` passes, and the fresh-context review record `reviews/step11.md` and the raw reviewer report `reviews/step11-report.md` (with the skill's load line) exist ([REVIEW.md](../../../REVIEW.md) section 5).
 - `ARCHITECTURE.md` lists every file added, moved or removed in this step.

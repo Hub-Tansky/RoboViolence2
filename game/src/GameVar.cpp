@@ -408,6 +408,12 @@ GameVar::GameVar()
 	dksvarRegister(CString("zsv_adminUser [string : \"\""), &zsv_adminUser, true);
 	zsv_adminPass = "";
 	dksvarRegister(CString("zsv_adminPass [string : \"\""), &zsv_adminPass, true);
+	zsv_adminApiPort = 0;
+	dksvarRegister(CString("zsv_adminApiPort [int : admin HTTP API port behind a TLS proxy, 0 off (default 0)]"), &zsv_adminApiPort, 0, 65535, LIMIT_MIN | LIMIT_MAX, true);
+	zsv_adminApiBind = "127.0.0.1";
+	dksvarRegister(CString("zsv_adminApiBind [string : admin API address (default 127.0.0.1)]"), &zsv_adminApiBind, true);
+	zsv_adminApiProxy = "";
+	dksvarRegister(CString("zsv_adminApiProxy [string : host of the TLS proxy whose X-Forwarded-For names the client (default none)]"), &zsv_adminApiProxy, true);
 	sv_enableSecondary = true;
 	dksvarRegister(CString("sv_enableSecondary [bool : true | false (default true)]"), &sv_enableSecondary, true);
 	sv_enableKnives = true;
