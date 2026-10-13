@@ -16,6 +16,7 @@ import sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LANG_DIR = os.path.join(ROOT, "content", "languages")
 sys.dont_write_bytecode = True  # no tools/__pycache__ in the checkout (review.sh scope)
+sys.stdout.reconfigure(encoding="utf-8")  # warnings quote non-ASCII text; Windows consoles default to cp1252
 _spec = importlib.util.spec_from_file_location("lang_to_pot", os.path.join(ROOT, "tools", "lang-to-pot.py"))
 lang_to_pot = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(lang_to_pot)

@@ -35,14 +35,14 @@ def main():
     for case, po, should_fail, expect in CASES:
         with open(os.path.join(lang_dir, "pl.po"), "w", encoding="utf-8", newline="\n") as f:
             f.write(po)
-        r = subprocess.run([sys.executable, CHECK, lang_dir], capture_output=True, text=True)
+        r = subprocess.run([sys.executable, CHECK, lang_dir], capture_output=True, encoding="utf-8")
         if (r.returncode != 0) != should_fail or expect not in r.stdout:
             print(f"FAIL {case}: exit {r.returncode}\n{r.stdout}")
             failures += 1
     with open(os.path.join(lang_dir, "en.pot"), "a", encoding="utf-8") as f:
         f.write("\n")
     os.remove(os.path.join(lang_dir, "pl.po"))
-    r = subprocess.run([sys.executable, CHECK, lang_dir], capture_output=True, text=True)
+    r = subprocess.run([sys.executable, CHECK, lang_dir], capture_output=True, encoding="utf-8")
     if r.returncode == 0 or "en.pot is out of date" not in r.stdout:
         print(f"FAIL stale en.pot: exit {r.returncode}\n{r.stdout}")
         failures += 1
