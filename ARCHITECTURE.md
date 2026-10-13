@@ -72,10 +72,11 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `packaging/macos/Info.plist.in` | macOS bundle `Info.plist` template |
 | `packaging/docker/Dockerfile` | Server images: one Ubuntu 24.04 build, targets `server` (`bv2dedicated`) and `master` (`bv2master`), non-root, pref dir volume (step 11) |
 | `packaging/docker/master-entrypoint.sh` | Master image entrypoint: seeds `master.db` and `web.db` into the volume, then runs `bv2master` |
-| `packaging/docker/compose.example.yml` | Compose example: master and game server on one host, secrets from an env file outside the repo |
+| `packaging/docker/Caddyfile` | Caddy site: TLS for the game server's admin API (`BV2_ADMIN_HOST`, default localhost) (step 12) |
+| `packaging/docker/compose.example.yml` | Compose example: master, game server and the admin TLS proxy on one host, secrets from an env file outside the repo |
 | `packaging/windows/bv2.manifest` | Windows manifest for `bv2`, `bv2dedicated` and `bv2master`: PerMonitorV2 DPI, UTF-8 code page, Windows 10/11 |
 | `packaging/windows/bv2.rc.in` | Windows resource script template; CMake fills in the generated icon |
-| `tests/CMakeLists.txt` | ctest targets: netPacket, config, fileio, credentials, join password, admin login, babonet large message, the two `SqlStatement.h` copies identical, crash fixes, validator, missing music (client builds), dedicated-server smoke, in-process server harness (`bv2server_lib` + fake babonet), packet hygiene, corpus replay, crash-input tests for `crash-*.bin` under ASan (none at present), master server; on Windows also the non-ASCII install path smoke and the no-VC++-runtime-DLL check |
+| `tests/CMakeLists.txt` | ctest targets: netPacket, config, fileio, credentials, join password, admin login, admin API, babonet large message, the two `SqlStatement.h` copies identical, crash fixes, validator, missing music (client builds), dedicated-server smoke, in-process server harness (`bv2server_lib` + fake babonet), packet hygiene, corpus replay, crash-input tests for `crash-*.bin` under ASan (none at present), master server; on Windows also the non-ASCII install path smoke and the no-VC++-runtime-DLL check |
 | `tests/check_windows_deps.py` | Windows: fails if `bv2`, `bv2dedicated` or `bv2master` needs a Visual C++ runtime DLL |
 | `tests/corpus/clsv_admin_request/valid.bin` | Replay corpus: valid `clsv_admin_request` payload (`gen_corpus`) |
 | `tests/corpus/clsv_gameversion_accepted/valid.bin` | Replay corpus: valid `clsv_gameversion_accepted` payload (`gen_corpus`) |
@@ -108,6 +109,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/harness/server_harness.cpp` | In-process dedicated server for tests: start, connect, join, deliver, tick |
 | `tests/harness/server_harness.h` | Harness API |
 | `tests/smoke_server.py` | Starts `bv2dedicated` headless, runs the CTF script, types a `sayall` with printf specifiers, quits; checks exit code, server creation and `bv2.cfg`. `--install-under` runs it from a non-ASCII path (Windows UTF-8 code page) |
+| `tests/test_admin_api.cpp` | Step 12: the admin API refuses a wrong token, limits a burst, runs a command, returns the status, audits with secrets masked (not on Windows) |
 | `tests/test_admin_login.cpp` | Step 10: admin login only with HMACs over the connection's challenge; no user, password or MD5 on the wire |
 | `tests/test_babonet.cpp` | R7: a 10000-byte message over a loopback babonet connection arrives over several reads and intact |
 | `tests/test_config.cpp` | dksvar config layering, transient values not saved, secrets masked |
@@ -154,7 +156,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `.github/workflows/hygiene.yml` | CI: ARCHITECTURE.md inventory, repository hygiene, content case; `review` (`tools/review.sh`) on PRs |
 | `.github/workflows/codeql.yml` | CodeQL: `c-cpp` (manual linux-x64 build of the three executables) and `actions`; push, PR, weekly; alerts under `build/` (vcpkg headers) filtered out |
 | `.github/workflows/dependency-graph.yml` | Submits resolved vcpkg ports to the dependency graph on push to `main` |
-| `.github/workflows/containers.yml` | CI: builds both server images, checks non-root, runs the compose example (healthy, passworded server listed by the master), pushes to GHCR from `main` and weekly |
+| `.github/workflows/containers.yml` | CI: builds both server images, checks non-root, runs the compose example (healthy, passworded server listed by the master), checks a remote `status` over TLS, pushes to GHCR from `main` and weekly |
 
 ### `config`
 
@@ -236,6 +238,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/decisions/0012-windows-10-22h2-minimum.md` | ADR 0012 |
 | `docs/decisions/0013-r3-restore-normal-and-pro-rulesets.md` | ADR: `sv_serverType` 0 plays the Normal rules again (R3) |
 | `docs/decisions/0014-libsodium-hmac-for-credentials.md` | ADR: libsodium for the credential HMAC and nonces (step 10) |
+| `docs/decisions/0015-admin-http-api-behind-tls-proxy.md` | ADR: remote admin over an HTTP API behind Caddy TLS; legacy UDP remote admin refused (step 12) |
 | `docs/decisions/README.md` | ADR format and index |
 
 ### `docs/ops`
@@ -297,6 +300,8 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step10.md` | Fresh-context review record for step 10 |
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step11-report.md` | Raw reviewer report for step 11 |
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step11.md` | Fresh-context review record for step 11 |
+| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step12-report.md` | Raw reviewer report for step 12 |
+| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step12.md` | Fresh-context review record for step 12 |
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step2-report.md` | Raw reviewer report for step 2 |
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step2.md` | Fresh-context review record for step 2 |
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step2b-report.md` | Raw reviewer report for step 2b |
@@ -502,6 +507,8 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 |---|---|
 | `game/src/AccountManager.cpp` | Account create/login/clan/friend requests over the master connection |
 | `game/src/AccountManager.h` | Account create/login/clan/friend requests over the master connection |
+| `game/src/AdminApi.cpp` | Admin HTTP API: non-blocking listener on the game thread, bearer token, per-source budget, connection cap, refused scene-rebuilding commands, audit log with secrets masked (step 12) |
+| `game/src/AdminApi.h` | Admin HTTP API (`POST /command`, `GET /status`) behind a TLS proxy, ADR 0015 |
 | `game/src/Button.cpp` | Menu button widget |
 | `game/src/Button.h` | Menu button widget |
 | `game/src/CAStar.cpp` | A* path finding grid |

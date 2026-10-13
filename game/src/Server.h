@@ -21,6 +21,7 @@
 
 
 #include "Game.h"
+#include "AdminApi.h"
 #include "Credentials.h"
 #include "ServerValidator.h"
 #include <map>
@@ -54,6 +55,9 @@ public:
 
 	// Cheat checks on received messages (step 8)
 	ServerValidator validator;
+
+	// Remote admin over HTTP behind a TLS proxy (step 12)
+	AdminApi adminApi;
 
 	// Per slot: the challenge sent in its JOIN_CHALLENGE, for the join and admin passwords (step 10)
 	uint8_t joinNonce[MAX_PLAYER][credentials::NONCE_SIZE] = {};

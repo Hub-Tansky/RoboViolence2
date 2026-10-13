@@ -101,6 +101,8 @@ public:
 
 	// Pour ajouter une ligne
 	void add(CString message, bool fromServer=false, bool isEvent=true);
+	// The event lines so far (trimmed only in update): the admin API returns what a command added
+	const std::vector<CString> & events() const { return m_eventMessages; }
     
 	// Pour outputer dans un fichier (log meton)
 	void output(CString filename);

@@ -509,6 +509,7 @@ void Server::update(float delay)
 	if (game && isRunning)
 	{
 		validator.update(delay);
+		adminApi.update(delay);
 	/*	if (infoSendDelay == 0)
 		{
 			infoSendDelay = 0;
