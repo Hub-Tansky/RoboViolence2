@@ -36,6 +36,6 @@ None required: every fix is to code added in this step, not to a defect in merge
 
 ## Not done / unsure
 
-- The bind-mounted `/deployed`, `BV2_IMAGE_TAG` pinning and multi-arch images can only run end to end after this PR merges (no `main` commit has them yet). CI checks `/deployed` on the PR.
+- After merge (2026-10-14): `containers` on `907d94b` pushed both architectures and the multi-arch manifest (`imagetools inspect`: linux/amd64, linux/arm64 for server and master). On the owner's Mac (native arm64, `deploy.sh` from `main`): deploy `907d94b`, update to `d35743d` (`/deployed` matched each time), manual rollback `--sha 907d94b`, and with the env-file password changed under a running server the run stopped at `wait-empty` (infra, no attempt, no deploy) and deployed after the password was restored. Stack torn down afterwards.
 - Acceptance checks that need a host (deploy within 30 minutes, `staging-connect`) wait for the owner's host choice. The step stays IN PROGRESS until then.
-- Rollback after a failed `up` was not exercised live.
+- Automatic rollback after a failed `up` or verify was not exercised live (manual rollback was).
