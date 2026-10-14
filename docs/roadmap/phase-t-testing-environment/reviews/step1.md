@@ -45,5 +45,5 @@ None required: every fix is to code added in this step, not to a defect in merge
 
 ## Not done / unsure
 
-- Acceptance check "after the owner installs the LaunchAgent, the next `main` build is reported within 20 minutes" needs the owner: installing a LaunchAgent is persistent configuration on their Mac. Whether `gh` can read the keychain under `launchd` is only known after that. The step stays IN PROGRESS until then.
+- Owner check done: the LaunchAgent (installed by the owner) passed preflight under `launchd` and reported `main` build `c2e5f28` (`local-smoke` pass, 2026-10-14T17:22:34Z; build run finished 2026-10-14T16:08:38Z).
 - ntfy notifications not exercised (no topic configured).

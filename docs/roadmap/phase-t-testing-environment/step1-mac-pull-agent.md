@@ -1,6 +1,6 @@
 # Step 1: Mac pull agent
 
-**Status:** IN PROGRESS
+**Status:** DONE (2026-10-14)
 
 **Depends on:** Phase B step 2b (release packages), step 12 (admin API). **Next:** T8 staging (candidate). **Index:** [README.md](README.md)
 
