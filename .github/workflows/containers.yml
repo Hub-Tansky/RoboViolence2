@@ -87,6 +87,14 @@ jobs:
           grep -q '^map ' status.txt
           curl -skf -H "Authorization: Bearer $token" --data 'info' https://localhost:8443/command | tee info.txt
           grep -q 'Server Info' info.txt
+      # Phase T step 2: the staging deploy agent publishes the running commit at /deployed
+      - name: /deployed serves the published commit
+        run: |
+          set -euo pipefail
+          echo "$GITHUB_SHA ci" > deployed
+          docker compose -f packaging/docker/compose.example.yml cp deployed admin-proxy:/srv/deployed
+          curl -skf https://localhost:8443/deployed | tee deployed.txt
+          grep -q "^$GITHUB_SHA " deployed.txt
       - name: Logs and the master's game list
         if: always()
         run: |
@@ -95,9 +103,15 @@ jobs:
           $compose logs --no-color server | tail -40
           $compose cp master:/var/lib/bv2/web.db web.db && python3 -c "import sqlite3; c=sqlite3.connect('web.db'); print([r for r in c.execute('select * from Games')])" || true
   push:
+    name: push (${{ matrix.arch }})
     needs: images
     if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'schedule')
-    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        include:
+          - { runner: ubuntu-24.04, arch: amd64 }
+          - { runner: ubuntu-24.04-arm, arch: arm64 }
+    runs-on: ${{ matrix.runner }}
     permissions:
       contents: read
       packages: write
@@ -109,7 +123,7 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      # Rebuilt from the amd64 images job's cache: no compile
+      # Rebuilt from the images job's cache for this runner: no compile. One tag per architecture; `manifest` joins them
       - name: Push the server image
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
@@ -117,8 +131,8 @@ jobs:
           file: packaging/docker/Dockerfile
           target: server
           push: true
-          tags: ${{ env.SERVER_IMAGE }}:latest,${{ env.SERVER_IMAGE }}:${{ github.sha }}
-          cache-from: type=gha,scope=servers-ubuntu-24.04
+          tags: ${{ env.SERVER_IMAGE }}:${{ github.sha }}-${{ matrix.arch }}
+          cache-from: type=gha,scope=servers-${{ matrix.runner }}
       - name: Push the master image
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
@@ -126,5 +140,26 @@ jobs:
           file: packaging/docker/Dockerfile
           target: master
           push: true
-          tags: ${{ env.MASTER_IMAGE }}:latest,${{ env.MASTER_IMAGE }}:${{ github.sha }}
-          cache-from: type=gha,scope=servers-ubuntu-24.04
+          tags: ${{ env.MASTER_IMAGE }}:${{ github.sha }}-${{ matrix.arch }}
+          cache-from: type=gha,scope=servers-${{ matrix.runner }}
+  # Multi-arch :<sha> and :latest (Phase T step 2): the staging host may be amd64 or arm64
+  manifest:
+    needs: push
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Join the architectures into one tag per commit, and latest
+        run: |
+          set -euo pipefail
+          for image in "$SERVER_IMAGE" "$MASTER_IMAGE"; do
+            docker buildx imagetools create -t "$image:$GITHUB_SHA" -t "$image:latest" "$image:$GITHUB_SHA-amd64" "$image:$GITHUB_SHA-arm64"
+            docker buildx imagetools inspect "$image:$GITHUB_SHA"
+          done

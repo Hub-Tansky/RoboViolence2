@@ -13,5 +13,12 @@
 	request_body {
 		max_size 4KB
 	}
-	reverse_proxy server:8080
+	# The deployed commit, written by tools/staging/deploy.sh (no secret, no auth); 404 when none
+	handle /deployed {
+		root * /srv
+		file_server
+	}
+	handle {
+		reverse_proxy server:8080
+	}
 }

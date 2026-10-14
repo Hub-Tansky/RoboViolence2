@@ -1,6 +1,7 @@
 # A master, a game server and a TLS proxy for its admin API on one host (built for the host: amd64 or arm64). Placeholder values only: real secrets come from an env file
 # outside the repository (docs/ops/runbook.md). Start from the repository root:
 #   docker compose -f packaging/docker/compose.example.yml --env-file ~/bv2-secrets.env up -d
+# BV2_IMAGE_TAG pins both images to one commit (default latest); the staging deploy agent sets it (tools/staging/).
 name: roboviolence2
 x-common: &common
   init: true # forwards stop signals: the servers install no handlers of their own
@@ -9,13 +10,13 @@ x-common: &common
 services:
   master:
     <<: *common
-    image: ghcr.io/hub-tansky/roboviolence2-master:latest
+    image: ghcr.io/hub-tansky/roboviolence2-master:${BV2_IMAGE_TAG:-latest}
     build: { context: ../.., dockerfile: packaging/docker/Dockerfile, target: master }
     ports: ["10207:10207/tcp"]
     volumes: ["master-data:/var/lib/bv2"]
   server:
     <<: *common
-    image: ghcr.io/hub-tansky/roboviolence2-server:latest
+    image: ghcr.io/hub-tansky/roboviolence2-server:${BV2_IMAGE_TAG:-latest}
     build: { context: ../.., dockerfile: packaging/docker/Dockerfile, target: server }
     depends_on: { master: { condition: service_healthy } }
     environment:
