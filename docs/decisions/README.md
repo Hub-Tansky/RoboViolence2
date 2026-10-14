@@ -47,3 +47,4 @@ What we do, in one or two sentences.
 | [0013](0013-r3-restore-normal-and-pro-rulesets.md) | Restore the Normal and Pro rulesets (fix R3) | Accepted |
 | [0014](0014-libsodium-hmac-for-credentials.md) | Use libsodium for the credential HMAC and nonces | Accepted |
 | [0015](0015-admin-http-api-behind-tls-proxy.md) | Remote admin is an HTTP API behind a TLS reverse proxy | Accepted |
+| [0016](0016-playtest-pull-agent.md) | Test main builds on the owner's Mac with a pull agent | Accepted |
