@@ -176,7 +176,7 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Extract:** OSV-Scanner on `build/macos-arm64/vcpkg_installed`: "Filtered 6 local/unscannable package/s from the scan." vcpkg's SPDX gives `pkg:vcpkg/sqlite3@3.53.4?port_version=2&...`.
 - **Why it matters:** Neither Dependabot (no C/C++ ecosystem in the GitHub Advisory Database) nor OSV checks sqlite3, SDL3, miniaudio or stb. The only defence is the manual monthly baseline bump.
 - **Suggested home:** re-check when OSV or GitHub adds a vcpkg ecosystem, or generate an SBOM that maps ports to upstream `pkg:github/...` purls with versions OSV can match (OSS-Fuzz entries for sqlite and SDL exist). Any phase; small.
-- **Status:** Accepted → [Phase C](phase-c-installers-and-fixes/README.md)
+- **Status:** Done in Phase C [step 4](phase-c-installers-and-fixes/step4-housekeeping.md)
 
 ### PNS-23: ADR for the play-test package format
 
@@ -192,7 +192,7 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Extract:** "the build still generates `runtime/bv2.db` (`tools/CMakeLists.txt:11-25` …). The game never reads it: `openClientDb` uses the pref dir (`game/src/Paths.cpp:275`)."
 - **Why it matters:** Dead build output that the docs have to explain, and a second copy of client-database seed data.
 - **Suggested home:** any step touching `tools/CMakeLists.txt`; check first that nothing seeds the pref-dir `bv2.db` from it.
-- **Status:** Accepted → [Phase C](phase-c-installers-and-fixes/README.md)
+- **Status:** Done in Phase C [step 4](phase-c-installers-and-fixes/step4-housekeeping.md)
 
 ### PNS-25: Hide the "Color depth" option
 
@@ -260,7 +260,7 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Extract:** "The whole server is compiled twice: `bv2dedicated` and `bv2server_lib` share the same `BV2_SERVER_SOURCES` minus main.cpp … The bigger simplification is `bv2dedicated = main.cpp + bv2server_lib`."
 - **Why it matters:** every test build compiles the server twice, and the two targets can drift apart in flags.
 - **Suggested home:** a build-only change to `game/CMakeLists.txt` in any later step that touches it; check the harness still links its fake `bb_*` first.
-- **Status:** Accepted → [Phase C](phase-c-installers-and-fixes/README.md)
+- **Status:** Done in Phase C [step 4](phase-c-installers-and-fixes/step4-housekeeping.md)
 
 ### PNS-34: Make `CString`'s format constructor explicit
 
@@ -277,7 +277,7 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Why it matters:** an agent reading them could undo ADR 0013.
 - **Suggested home:** the next step allowed to edit `AGENTS.md` and `docs/analysis/`; point each at ADR 0013.
 - **Also (step 6):** `masterserver/README.md` still says `cMasterServer.cpp` builds SQL with `sprintf`; it binds since Phase B step 6.
-- **Status:** Accepted → [Phase C](phase-c-installers-and-fixes/README.md)
+- **Status:** Done in Phase C [step 4](phase-c-installers-and-fixes/step4-housekeeping.md)
 
 ### PNS-37: One read primitive for `FileIO` and `MemIO`
 
@@ -352,7 +352,7 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Extract:** AGENTS.md lists the required CI checks; `containers` (step 11) is not there, and whether it should be required is undecided.
 - **Why it matters:** a broken image can merge unnoticed unless the check is required.
 - **Suggested home:** the next step that may edit AGENTS.md; the owner decides on branch protection.
-- **Status:** Accepted → [Phase C](phase-c-installers-and-fixes/README.md)
+- **Status:** Done in Phase C [step 4](phase-c-installers-and-fixes/step4-housekeeping.md)
 
 ### PNS-46: Remote admin leftovers
 
@@ -449,3 +449,19 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Depends on:** PNS-51, otherwise the player's original `en.lang` overrides the name.
 - **Suggested home:** Phase C, before the first release; an ADR amending 0008 and 0010.
 - **Status:** Accepted → [Phase C](phase-c-installers-and-fixes/README.md)
+
+### PNS-54: miniaudio 0.11.25 has CVE-2026-32837
+
+- **Found in:** Phase C step 4 (2026-10-14), first run of `tools/osv-vcpkg.py`.
+- **Extract:** OSV: "heap out-of-bounds read … in the WAV BEXT metadata parser … crafted WAV files"; fixed upstream in miniaudio commit `1df46ae`; CVSS 4.0 `AV:L … VA:L`.
+- **Why it matters:** the client decodes `.wav` sounds from the player's data with miniaudio. Exposure is local files only (sounds are not downloaded from servers), so a crash at worst.
+- **Suggested home:** the next vcpkg baseline bump once the `miniaudio` port ships the fix (check `osv-vcpkg`), or an overlay port; any step allowed to edit `vcpkg.json`.
+- **Status:** Proposed
+
+### PNS-55: Two copies of the client database schema
+
+- **Found in:** Phase C step 4 review (2026-10-14), finding 1.
+- **Extract:** "`content-seed/bv2.sql` and `game/src/Paths.cpp` (openClientDb) are now two copies of the same client schema. Nothing consumes bv2.sql any more."
+- **Why it matters:** the two will drift; step 2 already has to edit both (the `DidSurvey` row, PNS-53).
+- **Suggested home:** step 2 (PNS-53 touches both): delete `content-seed/bv2.sql` and make `openClientDb` the schema, or embed the file and run it.
+- **Status:** Proposed

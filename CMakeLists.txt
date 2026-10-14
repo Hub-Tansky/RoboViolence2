@@ -98,7 +98,7 @@ function(bv2_target_legacy_strict target)
   bv2_target_strict(${target})
 endfunction()
 
-# Runtime layout: <build>/runtime/{bin, main -> content, bv2.db, master.db}
+# Runtime layout: <build>/runtime/{bin, main -> content, master.db, web.db}
 set(BV2_RUNTIME_DIR "${CMAKE_BINARY_DIR}/runtime")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${BV2_RUNTIME_DIR}")
 foreach(cfg DEBUG RELEASE RELWITHDEBINFO MINSIZEREL)

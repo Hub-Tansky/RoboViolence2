@@ -1,5 +1,5 @@
 // Creates a SQLite database from a SQL file: seed_db <out.db> <in.sql> [<in.sql>...]
-// Used by the build to generate bv2.db and master.db from content-seed/*.sql.
+// Used by the build to generate master.db and web.db from content-seed/*.sql.
 #include <sqlite3.h>
 
 #include <cstdio>
