@@ -1,6 +1,6 @@
 # Step 1: Player data outside the package
 
-**Status:** IN PROGRESS
+**Status:** DONE (2026-10-14)
 
 **Depends on:** Phase B steps. **Next:** step 2 (in-game name and credits). **Index:** [README.md](README.md)
 

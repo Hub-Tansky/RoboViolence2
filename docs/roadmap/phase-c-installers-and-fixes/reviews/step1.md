@@ -41,7 +41,11 @@ Skill evidence: both rounds `SKILL: Launching skill: thermo-nuclear-code-quality
 | 7 | `game/README.md` lines read as contradictory | fixed in 218f9e1 |
 | 8 | Saved `en.lang` loaded twice | rejected: harmless, as the reviewer says |
 
+## Owner check (macOS, 2026-10-14, fresh clone of the step branch)
+
+- Dialog shown; choosing the BV2 folder starts the game with original assets; the next start doesn't ask; "Use placeholders" starts with placeholders. The window opens normally after the dialog (round 1 #13).
+- Starts with original data took about a minute (black window). Cause: the data folder was in iCloud-synced `~/Documents`; a cold read of the 144 KB of `.DKO` files took 11.2 s, a warm one 0.02 s, and `sample` shows the time in `read()` inside `dkoLoadFile`. Not caused by this step; troubleshooting row added to `docs/build/macos.md`.
+
 ## Not done / unsure
 
-- Owner check with original data on macOS: the dialog shows; the chosen folder is saved and the next start doesn't ask; "Use placeholders" starts with placeholders; the game window opens normally after the dialog (round 1 #13).
 - Windows run of the dialog: not tested (no Windows machine in this session).

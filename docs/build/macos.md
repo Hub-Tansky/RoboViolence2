@@ -102,4 +102,5 @@ cd build/macos-arm64/runtime && ./bv2dedicated CTF
 | `Could not find toolchain file` / vcpkg errors at configure | `VCPKG_ROOT` is unset or wrong in this shell |
 | Black window or immediate exit | Start the binary from Terminal and read the log |
 | Placeholder graphics | "Use placeholders" was chosen: restart to be asked again. To pick another folder, delete `data-dir.txt` in the pref dir; a set `BV2_DATA_DIR` must contain `main/` |
+| Start takes a minute with a black window | The data folder is in iCloud-synced `Documents` or `Desktop`, so every file is fetched on first read: move it elsewhere (e.g. `~/Games/bv2-data`) and delete `data-dir.txt` in the pref dir to choose it again |
 | "app is damaged" on a downloaded zip | Run the `xattr` command above |
