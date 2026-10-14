@@ -36,8 +36,9 @@ services:
     depends_on: { server: { condition: service_healthy } }
     environment:
       BV2_ADMIN_HOST: "${BV2_ADMIN_HOST:-localhost}"
-    ports: ["8443:443/tcp"] # the admin API over TLS (docs/ops/runbook.md)
-    volumes: ["./Caddyfile:/etc/caddy/Caddyfile:ro", "caddy-data:/data"]
+    ports: ["${BV2_ADMIN_PORT:-8443}:443/tcp"] # the admin API over TLS; 443 for a public name (docs/ops/runbook.md)
+    # ./srv/deployed: the staging commit, served at /deployed (tools/staging/); an empty folder elsewhere
+    volumes: ["./Caddyfile:/etc/caddy/Caddyfile:ro", "./srv:/srv:ro", "caddy-data:/data"]
 volumes:
   master-data: {}
   server-data: {}

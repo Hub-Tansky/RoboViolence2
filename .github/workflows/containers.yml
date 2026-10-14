@@ -17,7 +17,7 @@ env:
 jobs:
   images:
     name: images (${{ matrix.runner }})
-    # Native builds: amd64 is published; arm64 checks the build for ARM hosts (Docker Desktop on Apple silicon)
+    # Native builds for both architectures; `push` and `manifest` publish them as one multi-arch tag
     strategy:
       fail-fast: false
       matrix:
@@ -91,8 +91,7 @@ jobs:
       - name: /deployed serves the published commit
         run: |
           set -euo pipefail
-          echo "$GITHUB_SHA ci" > deployed
-          docker compose -f packaging/docker/compose.example.yml cp deployed admin-proxy:/srv/deployed
+          echo "$GITHUB_SHA ci" | sudo tee packaging/docker/srv/deployed >/dev/null # the bind mount Docker created
           curl -skf https://localhost:8443/deployed | tee deployed.txt
           grep -q "^$GITHUB_SHA " deployed.txt
       - name: Logs and the master's game list

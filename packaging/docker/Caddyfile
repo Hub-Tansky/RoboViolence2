@@ -13,7 +13,7 @@
 	request_body {
 		max_size 4KB
 	}
-	# The deployed commit, written by tools/staging/deploy.sh (no secret, no auth); 404 when none
+	# The deployed commit: ./srv/deployed beside the compose file, written by tools/staging/deploy.sh (no secret, no auth); 404 when none
 	handle /deployed {
 		root * /srv
 		file_server
