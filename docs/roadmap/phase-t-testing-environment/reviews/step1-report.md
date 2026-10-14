@@ -504,3 +504,46 @@ None.
 Open items carried over from round 4 (not code):
 - Commit the `ARCHITECTURE.md` reviews rows and `reviews/`.
 - The owner's on-Mac acceptance run. Since 39 is fixed, starting it with `bash …/agent.sh` is now safe.
+
+## Round 6
+
+SKILL: Launching skill: thermo-nuclear-code-quality-review
+
+## Round 6: phase T step 1 (c8c33a2..refactor/phase-t-step1-mac-pull-agent, step's own files only)
+
+Scope reviewed: 015abbe (`--placeholders`), the ADR renumbering 0016 to 0017 from the merge resolution, the review-record commits (eec4cb3, 261885b), and the step's rows in `ARCHITECTURE.md`, `docs/decisions/README.md` and the step file. I did not review Phase C's own files (ADR 0016, Paths, DataDirPicker, osv-vcpkg and their inventory rows).
+
+### Checks
+
+1. **`--placeholders` only when a player name is given: correct.**
+   - The only callers that pass a name are the automated tests: local-smoke at `tools/playtest/agent.sh:337` and staging-connect at `:349`. Both are unattended, and `has_player` waits 30 s, so a modal first-run dialog would make them fail. The `--play` callers at `:361` and `:364` pass no name. They get the dialog, which saves into `$ROOT/play-pref`. That is the correct interactive behaviour.
+   - On the branch, the client skips the flag when building the console command (`game/src/main.cpp:579`), and `chooseDataDir` returns before the saved, detected or dialog lookup (`game/src/DataDirPicker.cpp:80`). `run-client.sh` passes `"$@"` through unchanged, so the flag reaches the binary.
+   - Linking "name given" to "automated" through `cfg` merges two concepts into one variable. With exactly two caller shapes, the updated header comment ("a name marks an automated test") makes the rule explicit. A separate mode flag would add a parameter without removing a branch, so I don't ask for one.
+2. **`${cfg:+--placeholders --config "$cfg"}` is safe.** I checked it on the target shell (`/bin/bash` 3.2.57):
+   - With `cfg="/a b/*c.cfg"` it gives exactly three words: `--placeholders`, `--config`, `/a b/*c.cfg`. The quoted path is not split or globbed.
+   - With an empty `cfg` it gives nothing.
+   - The `ROOT` default `$HOME/RV2-playtest` has no spaces, but a custom `RV2_PLAYTEST_ROOT` with spaces is also safe.
+3. **ADR numbering is consistent.**
+   - Every reference to the playtest agent's ADR now says 0017: `agent.sh:2`, `tools/playtest/README.md:3`, step file Deliverables and §1.5, `ARCHITECTURE.md:252` and `:786`, and `docs/decisions/README.md:51`. The 0017 file is a pure rename plus its title line.
+   - The remaining 0016 references in `ARCHITECTURE.md` (`:24`, `:63`, `:251`, `:650`) and `agent.sh:230` correctly mean Phase C's player-data ADR.
+   - No stale `0016-playtest-pull-agent` link remains outside the historical raw report.
+4. **Step file deviation row (`step1-mac-pull-agent.md:63`).** The row is accurate and states the reason. One gap is finding 41 below.
+
+### New findings
+
+**41: Low.** `docs/roadmap/phase-t-testing-environment/step1-mac-pull-agent.md:63`
+- Problem: the row says builds before `67fd59f` "don't know the flag" but not what happens. On those builds, `main.cpp` (as at c8c33a2) joins every argument into one console command. The client therefore runs `--placeholders connect 127.0.0.1`, never connects, and `has_player` fails.
+- Impact: `agent.sh --sha <pre-67fd59f>` or `--test staging-connect --sha <old>` records a build failure and uses up an attempt, but the build itself is not broken. The newest `main` already contains `67fd59f`, so scheduled runs are not affected.
+- Proposed change: end the row with "...don't know the flag: `--sha` on them fails at the join check". No code change; a version guard would be defensive code for a rare manual case.
+
+**42: Low (note).** `tools/playtest/agent.sh:231`
+- Problem: `chooseDataDir` checks `BV2_DATA_DIR` before `--placeholders` (`DataDirPicker.cpp:78-82`). A manual `agent.sh` run from a shell that exports `BV2_DATA_DIR` therefore tests on the original assets, while the LaunchAgent run tests on placeholders. That contradicts the new comment at `:230` ("run windowed on placeholder content").
+- Proposed change: either soften the comment to "...on placeholder content unless `BV2_DATA_DIR` is set", or start the automated client with `env -u BV2_DATA_DIR`. The comment fix is enough under the MVP rule.
+
+Review-record commits: `reviews/step1.md` correctly maps findings 1-40 to their fixes and rejections, and both new files have inventory rows. The record still covers the review only up to c8c33a2. When it is updated, it should add this round (015abbe and the renumbering) and its review.sh run. That is an expected bookkeeping step, not a finding.
+
+No structural regressions: the code change is one argument added to an existing call, plus comments. There are no new branches, no file-size change and no layer leaks.
+
+### Verdict
+
+**APPROVED.** Findings 41 and 42 are optional Low wording fixes and do not block. The step stays IN PROGRESS only for the owner-dependent LaunchAgent acceptance check already listed in `reviews/step1.md`.

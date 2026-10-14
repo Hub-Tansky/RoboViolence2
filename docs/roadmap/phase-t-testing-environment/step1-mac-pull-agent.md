@@ -60,7 +60,7 @@
 | Every failure counts as an attempt | Only failures from `verify` on count; GitHub, download, busy port and no console session notify once | Environment problems must not use up a build's attempts (review finding 5) |
 | `versions/<date>-<sha7>` | `versions/<sha7>`, reused when the same build is tested again; unzip beside, then swap | Re-testing never deletes the live package (review finding 6) |
 | — | A run stopped by SIGTERM/SIGINT (logout, `bootout`) records nothing | Not a build failure (review finding 13) |
-| — | Automated client runs pass `--placeholders` | Phase C step 1 (ADR 0016) added a first-run data-folder dialog that would block the unattended client; builds before `67fd59f` don't know the flag |
+| — | Automated client runs pass `--placeholders` | Phase C step 1 (ADR 0016) added a first-run data-folder dialog that would block the unattended client; builds before `67fd59f` don't know the flag: `--sha` on them fails at the join check |
 
 ## Critical files
 

@@ -1,7 +1,7 @@
 # Step 1 review
 
-Reviewer: fresh-context subagent, /thermo-nuclear-code-quality-review, 2026-10-14 (5 rounds)
-Diff: d13985822019269bdb7d37e9e50a07da5ef5e2cf..c8c33a2 (plus this record, the raw report and their `ARCHITECTURE.md` rows)
+Reviewer: fresh-context subagent, /thermo-nuclear-code-quality-review, 2026-10-14 (6 rounds)
+Diff: d13985822019269bdb7d37e9e50a07da5ef5e2cf..c8c33a2 (rounds 1–5), c8c33a2..015abbe (round 6: merge of `main` with the ADR renumbered 0016 → 0017, `--placeholders`), plus this record, the raw report and their `ARCHITECTURE.md` rows
 
 ## review.sh
 
@@ -34,8 +34,10 @@ Raw report: [step1-report.md](step1-report.md).
 | 37 | Reused install records the new run id | rejected: same commit, same package |
 | 39 | Tighter lock pattern missed `bash agent.sh` | fixed in c8c33a2 |
 | 40 | Infra predicate written twice | fixed in c8c33a2 |
+| 41 | Deviation row doesn't say what `--sha` on a pre-`67fd59f` build does | fixed (wording) |
+| 42 | `BV2_DATA_DIR` overrides `--placeholders` in a manual run | fixed (comment) |
 
-Round 5 verdict: approved, no new findings.
+Round 5 verdict: approved, no new findings. Round 6 verdict: approved.
 
 ## Fix proof
 
