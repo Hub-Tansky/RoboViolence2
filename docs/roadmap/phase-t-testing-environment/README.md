@@ -12,7 +12,7 @@ Every successful `main` build is installed and tested on the owner's Mac without
 
 | # | Step | Plan item | Status |
 |---|---|---|---|
-| 1 | [Mac pull agent](step1-mac-pull-agent.md) | T1 | DONE (2026-10-14) |
+| 1 | [Mac pull agent](step1-mac-pull-agent.md) | T1 | IN PROGRESS |
 | – | Staging host and deploy agent | T8 | candidate |
 | – | CI client smoke, autotest mode, E2E bots, Windows VM, workstation, screenshots | T2–T7 | candidate |
 
