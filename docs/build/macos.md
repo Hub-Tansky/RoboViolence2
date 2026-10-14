@@ -20,6 +20,12 @@ ls "$BV2_DATA_DIR/main/maps"
 
 Terminal tabs and the run scripts now use your data. Starting the app by double-click or `open bv2.app` doesn't read `~/.zshrc`: run `launchctl setenv BV2_DATA_DIR "$BV2_DATA_DIR"` once per login for that.
 
+## Install from a release
+
+1. Download `roboviolence2-macos-arm64.dmg` from the [releases](https://github.com/Hub-Tansky/RoboViolence2/releases), open it and drag `bv2.app` to Applications.
+2. It is unsigned, so the first start is blocked: open System Settings → Privacy & Security and click **Open Anyway** (or run `xattr -dr com.apple.quarantine /Applications/bv2.app`).
+3. The game asks for your BaboViolent 2 folder on first start. The servers are in the disk image beside `bv2.app`.
+
 ## Use a downloaded package
 
 1. Unzip `roboviolence2-macos-arm64.zip`.

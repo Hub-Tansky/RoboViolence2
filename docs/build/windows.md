@@ -2,7 +2,7 @@
 
 Common steps (game data, ports, playing a local game): [README.md](README.md).
 
-Minimum: Windows 10 22H2 ([ADR 0012](../decisions/0012-windows-10-22h2-minimum.md)). Servers verified by a person on Windows 10 22H2 (Phase B step 2a); the client not yet, for lack of an OpenGL 2.1 GPU (see below); CI builds and tests on `windows-latest` (Windows Server 2025, the Windows 11 24H2 generation), so Windows 10 runtime behaviour is covered only by that person's runs. Report anything that differs.
+Minimum: Windows 10 22H2 ([ADR 0012](../decisions/0012-windows-10-22h2-minimum.md)). Servers verified by a person on Windows 10 22H2 (Phase B step 2a); the client not yet, for lack of an OpenGL 2.1 GPU (see below); CI builds and tests on `windows-2025` (Windows Server 2025, the Windows 11 24H2 generation), so Windows 10 runtime behaviour is covered only by that person's runs. Report anything that differs.
 
 The client needs a GPU driver with OpenGL 2.1. GPUs without a vendor Windows 10 driver (e.g. Intel G41/GMA X4500, which Windows runs on its basic WDDM 1.1 driver) fall back to OpenGL 1.1: the client starts but draws garbled text and ignores clicks. The servers don't need a GPU.
 
@@ -23,6 +23,10 @@ dir "$env:BV2_DATA_DIR\main\maps"
 ```
 
 `setx` applies to new windows and to programs started from Explorer, including the `.cmd` scripts.
+
+## Install from a release
+
+Download `roboviolence2-win-x64-msvc-setup.exe` from the [releases](https://github.com/Hub-Tansky/RoboViolence2/releases) and run it. It is unsigned: on the SmartScreen warning choose **More info → Run anyway**. It installs for your user only (no admin) and adds a Start-menu entry; the game asks for your BaboViolent 2 folder on first start.
 
 ## Use a downloaded package
 

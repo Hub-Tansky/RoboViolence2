@@ -21,7 +21,7 @@ Robo Violence 2: unofficial fork of BaboViolent 2, a top-down multiplayer shoote
 | Supply chain | Dependency graph fed by vcpkg (`dependency-graph.yml`, on push to `main`); Dependabot alerts and security updates on; Dependabot version updates for GitHub Actions (`.github/dependabot.yml`); CodeQL `c-cpp` and `actions` (`codeql.yml`, not required). Dependabot and OSV can't read vcpkg purls; `osv-vcpkg.yml` (weekly) queries OSV by each port's upstream commit (`tools/osv-vcpkg.py`). Bump the vcpkg baseline monthly, or sooner when it reports a port. |
 | Hosting | Server images from `packaging/docker/Dockerfile` (GHCR on `main`), runbook [docs/ops/runbook.md](docs/ops/runbook.md). |
 | Known defects | [docs/analysis/KEY_QUESTIONS.md](docs/analysis/KEY_QUESTIONS.md). |
-| Decisions | [docs/decisions/README.md](docs/decisions/README.md): 0001 Ninja, 0002 libcurl compiled out, 0003 OpenGL 2.1 kept, 0004 project name (superseded by 0008), 0005 `main/` data root, 0006 platform layer, 0007 data root, pref dir and config layers, 0008 display name "Robo Violence 2", 0009 internal renaming, 0010 BV2 asset compatibility and GUI freeze, 0011 gettext PO translations, 0012 Windows 10 22H2 minimum, 0013 rulesets, 0014 libsodium HMAC, 0015 admin HTTP API, 0016 player data lookup and package content, 0017 in-game name and fork credits. |
+| Decisions | [docs/decisions/README.md](docs/decisions/README.md): 0001 Ninja, 0002 libcurl compiled out, 0003 OpenGL 2.1 kept, 0004 project name (superseded by 0008), 0005 `main/` data root, 0006 platform layer, 0007 data root, pref dir and config layers, 0008 display name "Robo Violence 2", 0009 internal renaming, 0010 BV2 asset compatibility and GUI freeze, 0011 gettext PO translations, 0012 Windows 10 22H2 minimum, 0013 rulesets, 0014 libsodium HMAC, 0015 admin HTTP API, 0016 player data lookup and package content, 0017 in-game name and fork credits, 0018 package and release format. |
 
 ### Open items
 
@@ -54,7 +54,8 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `AGENTS.md` | Canonical agent and contributor instructions |
 | `ARCHITECTURE.md` | This file: summary and file inventory |
 | `CMakeLists.txt` | Root CMake project: options, runtime layout, placeholder content, subdirectories |
-| `CMakePresets.json` | Presets: linux-x64, macos-arm64, win-x64-msvc (Debug), -asan and -release variants (Ninja) |
+| `CMakePresets.json` | Presets: linux-x64, macos-arm64, win-x64-msvc (Debug), -asan and -release variants (Ninja); macOS uses the overlay triplet in `triplets/` |
+| `triplets/arm64-osx.cmake` | vcpkg overlay triplet: macOS arm64 ports built for macOS 12 (PNS-26) |
 | `LICENSE.txt` | GPLv3 text (code only) |
 | `README.md` | Project overview, fork and asset-removal statement |
 | `REVIEW.md` | Definition of done: `tools/review.sh` checks, reviewer checklist, defined terms, forbidden shortcuts, fresh-context step review and its record |
@@ -63,7 +64,8 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/Paths.cpp` | Package and data roots (`contentFile` for the package's own content), saved and detected BV2 data folder, per-user pref dir, layered config loading, map and DB path helpers (ADR 0016) |
 | `game/src/Paths.h` | Interface of `Paths.cpp` (namespace `bv2`) |
 | `packaging/linux/roboviolence2.desktop` | Linux desktop entry |
-| `packaging/make-package.py` | Builds the per-OS play-test package from a Release `runtime/` (links resolved, macOS bundle re-signed) |
+| `packaging/make-package.py` | Builds the per-OS package from a Release `runtime/` (links resolved, macOS bundle re-signed, licences), plus the Windows installer or macOS `.dmg` (ADR 0018) |
+| `packaging/windows/roboviolence2.iss` | Inno Setup script for the Windows installer (per-user, unsigned) |
 | `packaging/scripts/run-client.cmd` | Package script: starts the client (Windows) |
 | `packaging/scripts/run-client.sh` | Package script: starts the client (macOS bundle or Linux binary) |
 | `packaging/scripts/run-master.cmd` | Package script: starts the master server (Windows) |
@@ -249,6 +251,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/decisions/0015-admin-http-api-behind-tls-proxy.md` | ADR: remote admin over an HTTP API behind Caddy TLS; legacy UDP remote admin refused (step 12) |
 | `docs/decisions/0016-player-data-lookup-and-package-content.md` | ADR: client finds or asks for the player's BV2 data; launch scripts, languages and default config come from the package (Phase C step 1) |
 | `docs/decisions/0017-in-game-name-and-fork-credits.md` | ADR: in-game name, fork credits, "LOADING" splash, survey removed (Phase C step 2) |
+| `docs/decisions/0018-package-and-release-format.md` | ADR: package, installer, `.dmg` and release format; engine-only public releases (Phase C step 3) |
 | `docs/decisions/README.md` | ADR format and index |
 
 ### `docs/ops`
@@ -307,6 +310,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/roadmap/phase-c-installers-and-fixes/README.md` | Phase C scope: accepted PNS entries, order, done-when, risks |
 | `docs/roadmap/phase-c-installers-and-fixes/step1-player-data-dir.md` | Scope file for step1 |
 | `docs/roadmap/phase-c-installers-and-fixes/step2-name-and-credits.md` | Scope file for step2 |
+| `docs/roadmap/phase-c-installers-and-fixes/step3-unsigned-installers.md` | Scope file for step3 |
 | `docs/roadmap/phase-c-installers-and-fixes/step4-housekeeping.md` | Scope file for step4 |
 
 ### `docs/roadmap/phase-c-installers-and-fixes/reviews`

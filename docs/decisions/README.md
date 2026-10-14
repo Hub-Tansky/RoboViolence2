@@ -49,3 +49,4 @@ What we do, in one or two sentences.
 | [0015](0015-admin-http-api-behind-tls-proxy.md) | Remote admin is an HTTP API behind a TLS reverse proxy | Accepted |
 | [0016](0016-player-data-lookup-and-package-content.md) | The client finds the player's BV2 data; the package supplies its own content | Accepted |
 | [0017](0017-in-game-name-and-fork-credits.md) | The game shows its own name and credits the original as an unofficial fork | Accepted |
+| [0018](0018-package-and-release-format.md) | Package and release format; engine-only public releases | Accepted |
