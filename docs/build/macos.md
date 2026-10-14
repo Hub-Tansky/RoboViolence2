@@ -24,7 +24,7 @@ Terminal tabs and the run scripts now use your data. Starting the app by double-
 
 1. Download `roboviolence2-macos-arm64.dmg` from the [releases](https://github.com/Hub-Tansky/RoboViolence2/releases), open it and drag `bv2.app` to Applications.
 2. It is unsigned, so the first start is blocked: open System Settings → Privacy & Security and click **Open Anyway** (or run `xattr -dr com.apple.quarantine /Applications/bv2.app`).
-3. The game asks for your BaboViolent 2 folder on first start. The servers are in the disk image beside `bv2.app`.
+3. The game asks for your BaboViolent 2 folder on first start. To run the servers, copy the disk image's folder to your disk first: the image is read-only and the master writes `master.db`.
 
 ## Use a downloaded package
 

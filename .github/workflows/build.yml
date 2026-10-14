@@ -43,7 +43,19 @@ jobs:
       # The archive on every OS, plus the installer (Windows) or disk image (macOS); ADR 0018
       - name: Package
         shell: bash
-        run: ${{ runner.os == 'Windows' && 'python' || 'python3' }} packaging/make-package.py build/${{ matrix.preset }}-release/runtime ${{ matrix.preset }} out ${{ github.ref_type == 'tag' && github.ref_name || '0.0.0-dev' }}
+        env:
+          VERSION: ${{ github.ref_type == 'tag' && github.ref_name || '0.0.0-dev' }}
+        run: ${{ runner.os == 'Windows' && 'python' || 'python3' }} packaging/make-package.py build/${{ matrix.preset }}-release/runtime ${{ matrix.preset }} out "$VERSION"
+      - name: The installer installs and uninstalls silently
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          dir="$(cygpath -u "$RUNNER_TEMP")/rv2-install"
+          ./out/roboviolence2-${{ matrix.preset }}-setup.exe //VERYSILENT //SUPPRESSMSGBOXES //NORESTART "//DIR=$(cygpath -w "$dir")"
+          test -f "$dir/bv2.exe" && test -f "$dir/licenses/sqlite3.txt" && test -f "$dir/master.db"
+          "$dir/unins000.exe" //VERYSILENT //SUPPRESSMSGBOXES //NORESTART
+          for i in $(seq 1 30); do [ -f "$dir/bv2.exe" ] || break; sleep 1; done
+          test ! -f "$dir/bv2.exe"
       # archive: false uploads each file as-is (no zip around the zip); the artifact takes the file's name.
       - uses: actions/upload-artifact@v7
         with:
@@ -100,6 +112,7 @@ jobs:
           tar -xzf roboviolence2-linux-x64.tar.gz
           cd roboviolence2-linux-x64
           if ldd bv2 bv2dedicated bv2master | grep "not found"; then exit 1; fi
+          test -f LICENSE.txt && test -f licenses/sqlite3.txt && test -f licenses/glad.txt
           export BV2_PREF_DIR="$RUNNER_TEMP/pref"
           printf 'quit\n' | ./run-server.sh > server.log 2>&1   # pipefail: the server's exit code counts
           grep "Server Created on port 3333" server.log           # printed after data root, launch script, map and network init

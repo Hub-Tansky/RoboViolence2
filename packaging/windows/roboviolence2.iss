@@ -9,14 +9,14 @@ AppVersion={#AppVersion}
 AppPublisher=Robo Violence 2 contributors
 DefaultDirName={autopf}\Robo Violence 2
 DefaultGroupName=Robo Violence 2
-; Per-user install by default, no admin prompt; the game writes only to its pref dir (ADR 0007)
+; Per-user install, no admin prompt: the folder stays writable for the servers' databases
 PrivilegesRequired=lowest
-PrivilegesRequiredOverridesAllowed=dialog
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 ; Windows 10 22H2 (ADR 0012)
 MinVersion=10.0.19045
-LicenseFile={#SourceDir}\LICENSE.txt
+; GPLv3 needs no acceptance to run the program (section 9): shown, not agreed to
+InfoBeforeFile={#SourceDir}\LICENSE.txt
 OutputDir={#OutputDir}
 OutputBaseFilename={#OutputName}
 UninstallDisplayIcon={app}\bv2.exe
@@ -28,7 +28,10 @@ WizardStyle=modern
 Name: desktopicon; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "{#SourceDir}\*"; DestDir: "{app}"; Flags: recursesubdirs ignoreversion
+Source: "{#SourceDir}\*"; DestDir: "{app}"; Excludes: "master.db,web.db"; Flags: recursesubdirs ignoreversion
+; The master's databases hold bans and accounts: never overwritten by an upgrade or removed on uninstall
+Source: "{#SourceDir}\master.db"; DestDir: "{app}"; Flags: onlyifdoesntexist uninsneveruninstall
+Source: "{#SourceDir}\web.db"; DestDir: "{app}"; Flags: onlyifdoesntexist uninsneveruninstall
 
 [Icons]
 Name: "{group}\Robo Violence 2"; Filename: "{app}\bv2.exe"; WorkingDir: "{app}"
