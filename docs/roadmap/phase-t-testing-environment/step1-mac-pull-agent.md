@@ -56,6 +56,10 @@
 | Preflight via `launchctl kickstart` and a flag | Every run starts with the preflight checks (stage `preflight`); `--preflight` runs them alone | The first LaunchAgent run is the preflight; no extra flag. Infrastructure failures notify once per distinct stage |
 | Keep 5 report sets | Keep 30 reports; 5 versions, prefs and run dirs | Reports are small and are the history |
 | — | While `--play` is running, scheduled runs skip without counting an attempt | Manual play holds the fixed ports |
+| Server ready when the log says `Server Created` | Server ready when its game port listens | The server's stdout is block-buffered in a file (review finding 1) |
+| Every failure counts as an attempt | Only failures from `verify` on count; GitHub, download, busy port and no console session notify once | Environment problems must not use up a build's attempts (review finding 5) |
+| `versions/<date>-<sha7>` | `versions/<sha7>`, reused when the same build is tested again; unzip beside, then swap | Re-testing never deletes the live package (review finding 6) |
+| — | A run stopped by SIGTERM/SIGINT (logout, `bootout`) records nothing | Not a build failure (review finding 13) |
 
 ## Critical files
 

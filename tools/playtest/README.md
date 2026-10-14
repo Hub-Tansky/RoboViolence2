@@ -42,7 +42,7 @@ The agent runs at load, then every 10 minutes. Its first run is the preflight un
 
 | Command | Does |
 |---|---|
-| `agent.sh` | `local-smoke` on the newest successful `main` build not yet passed or failed 3 times (what `launchd` runs) |
+| `agent.sh` | `local-smoke` on the newest successful `main` build not yet passed or failed 3 times (what `launchd` runs). Failures before the build is tested (GitHub, download, busy port, no console session) notify once and don't count |
 | `agent.sh --sha <sha>` | `local-smoke` on that `main` build, ignoring the attempt limit |
 | `agent.sh --play local` | master, server and client from the last passing build, for manual play; stays up |
 | `agent.sh --play staging` | client from the last passing build, joined to `RV2_STAGING_HOST` |
@@ -50,7 +50,7 @@ The agent runs at load, then every 10 minutes. Its first run is the preflight un
 | `agent.sh --test staging-connect [--sha <sha>]` | client joins staging; checks its `/status` |
 | `agent.sh --preflight` | env file, tools and GitHub access only |
 
-Files under `~/RV2-playtest/`: `versions/` (packages), `pref/` (client config per build), `run/` (disposable servers: databases, logs), `reports/<sha7>.txt`, `state.tsv`, `current` (last passing build), `agent.log`.
+Files under `~/RV2-playtest/`: `versions/<sha7>/` (packages, reused if the same build is tested again), `pref/` (client config per build), `run/` (disposable servers: databases, logs), `reports/<sha7>.txt`, `state.tsv`, `current` (last passing build), `agent.log`.
 
 Fixed ports: 3333 (game), 10207 (master), 18080 (admin API, plain HTTP on 127.0.0.1). The packaged master and server listen on all interfaces while a test runs.
 

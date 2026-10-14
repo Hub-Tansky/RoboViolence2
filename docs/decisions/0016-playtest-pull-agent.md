@@ -6,11 +6,11 @@
 
 ## Context
 - The repo is public. A self-hosted GitHub runner on the owner's Mac would let a fork pull request run code there.
-- CI already uploads a verified-digest macOS package per build (`.github/workflows/build.yml`, `archive: false`); it holds client, server, master and databases.
+- CI uploads a macOS package per build with a SHA-256 digest in the Actions API (`.github/workflows/build.yml`, `archive: false`); it holds client, server, master and databases.
 - The admin API is meant for the compose network behind Caddy TLS ([ADR 0015](0015-admin-http-api-behind-tls-proxy.md)); the binary has no TLS.
 
 ## Decision
-A `launchd` agent (`tools/playtest/agent.sh`) pulls only successful `push` builds of `main` from this repo, checks the artifact's SHA-256 digest, and tests the packaged client against a disposable local master and server from the same package. Staging is a separate, on-demand target that the agent only reads (`GET /status`).
+A `launchd` agent (`tools/playtest/agent.sh`) pulls only successful `push` builds of `main` from this repo, checks the artifact's SHA-256 digest (transfer integrity; the trust anchor is the main-only run filter), and tests the packaged client against a disposable local master and server from the same package. Staging is a separate, on-demand target that the agent only reads (`GET /status`).
 
 ## Consequences
 - No inbound access to the Mac and no PR code on it. A PR build is never tested there; that would need its own isolated, approved flow.
