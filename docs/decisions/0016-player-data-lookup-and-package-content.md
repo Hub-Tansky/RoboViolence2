@@ -9,11 +9,13 @@
 - With `BV2_DATA_DIR` set, the single data root hid the package's launch scripts, language files and `bv2.example.cfg`, so repo changes to them (translations, the step 2 rebrand) never reached players.
 
 ## Decision
-- Two roots: the **data root** (the player's BV2 data; the process `chdir`s into it, assets load as `main/...`) and the **package root** (the folder with the executable's own `main/`). `bv2::contentFile` reads launch scripts and `bv2.example.cfg` from the package when present; languages are picked from the package first, then the data root.
+- Two roots: the **data root** (the player's BV2 data; the process `chdir`s into it, assets load as `main/...`) and the **package root** (the folder with the executable's own `main/`). `bv2::contentFile` reads launch scripts, `bv2.example.cfg` and a saved `languageFile` from the package when present; languages are picked from the package first, then the data root. `config/local/*.cfg` is read beside the package, then beside the data root.
+- One rule finds a data folder under a path: the path, its parent when it is `main/`, `Content`, `BaboViolent2/Content` (the upstream repository). `BV2_DATA_DIR` needs `main/` there; the other sources need `main/textures/`.
 - The client looks for data in this order: `BV2_DATA_DIR`, the saved folder (`<prefDir>/data-dir.txt`), the upstream repository unzipped in `Downloads`, `Desktop` or `Documents` (and `BaboViolent 2` in Program Files on Windows), then a first-run native message box and OS folder dialog (owner-approved **[GUI]**). A found or chosen folder is saved. `--placeholders` skips the lookup (CI smoke run).
 - The dedicated server reads only `BV2_DATA_DIR`; a saved or detected folder must not change test or container behaviour.
 
 ## Consequences
 - An original `fr.lang` in the player's data still loads; for the same file name the package wins.
 - The dialog text is English only until PNS-21.
+- "Use placeholders" is not remembered: a player without data is asked on every start, as approved for PNS-51.
 - Rejected: copying the assets into the pref dir (PNS-51 option F), a known pref-dir folder (A), an installer page (E): see PNS-51.

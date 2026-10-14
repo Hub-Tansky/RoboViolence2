@@ -13,7 +13,7 @@ Pick your OS: [macOS](macos.md), [Linux](linux.md), [Windows](windows.md). Each 
 - The client finds it in this order ([ADR 0016](../decisions/0016-player-data-lookup-and-package-content.md)):
   1. `BV2_DATA_DIR` (the folder or its `main/`).
   2. The folder saved on an earlier start (`data-dir.txt` in the pref dir).
-  3. `BaboViolent2-master` or `BaboViolent2` (the upstream repository, unzipped) in `Downloads`, `Desktop` or `Documents`; on Windows also `BaboViolent 2` in Program Files.
+  3. `BaboViolent2-master` or `BaboViolent2` (the upstream repository, unzipped) in `Downloads`, `Desktop` or `Documents`; on Windows also `BaboViolent 2` or `BaboViolent2` in Program Files.
   4. On first start, a dialog asks for the folder and saves it. "Use placeholders" (or `--placeholders`) skips it.
 - The game server reads only `BV2_DATA_DIR`: it loads its maps from there and sends missing maps to clients.
 - Launch scripts, language files and `bv2.example.cfg` always come from the package's own `main/`.

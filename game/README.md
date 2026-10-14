@@ -13,5 +13,6 @@ The game: client, listen server, dedicated server and map editor from one codeba
 
 - Sixteen old-menu `.cpp` files (`MainMenu.cpp`, `Menu.cpp`, `CreateGame.cpp`, ...) were not in the Visual Studio project and are not built. Treat them as dead.
 - Run from a runtime dir containing `main/` ([ADR 0005](../docs/decisions/0005-runtime-main-data-root.md)); the build creates `build/<preset>/runtime/`.
+- The client finds the player's BV2 data (`BV2_DATA_DIR`, saved folder, auto-detect, first-run dialog in `DataDirPicker.cpp`); launch scripts, languages and `bv2.example.cfg` come from the package via `bv2::contentFile` ([ADR 0016](../docs/decisions/0016-player-data-lookup-and-package-content.md)). `--placeholders` skips the dialog.
 - UBSan on the dedicated server reports member calls on a null `Server` (`Console.cpp:833`, `Server.cpp:1476`); Step 4 fixes them.
 - Analysis: [../docs/analysis/README.md](../docs/analysis/README.md), defects: [../docs/analysis/KEY_QUESTIONS.md](../docs/analysis/KEY_QUESTIONS.md).

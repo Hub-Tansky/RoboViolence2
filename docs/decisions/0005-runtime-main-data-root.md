@@ -1,6 +1,6 @@
 # 0005: Keep the `main/` data root; the runtime dir assembles it
 
-- Status: Accepted
+- Status: Accepted; amended by [0016](0016-player-data-lookup-and-package-content.md)
 - Date: 2026-10-03
 - Affects: [step 2 §2.0, §2.6](../roadmap/phase-a-modern-portable-build/step2-cmake-build.md)
 
