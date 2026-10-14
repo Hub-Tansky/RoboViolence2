@@ -7,7 +7,6 @@
 #include <SDL3/SDL.h>
 
 #include <atomic>
-#include <cstdlib>
 #include <cstring>
 #include <string>
 
@@ -75,16 +74,19 @@ namespace bv2
 {
 	void chooseDataDir(int argc, char ** argv)
 	{
-		const char * env = std::getenv("BV2_DATA_DIR");
-		if (env && env[0])
+		if (dataRoot() != packageRoot()) // BV2_DATA_DIR held data (pathsInit)
 			return;
 		for (int i = 1; i < argc; ++i)
 			if (std::strcmp(argv[i], "--placeholders") == 0)
 				return;
 
 		std::string dir = savedDataDir();
-		if (dir.empty())
-			dir = detectDataDir();
+		if (!dir.empty())
+		{
+			setDataRoot(dir);
+			return;
+		}
+		dir = detectDataDir();
 		if (dir.empty() && SDL_Init(SDL_INIT_VIDEO))
 		{
 			dir = askDataDir();

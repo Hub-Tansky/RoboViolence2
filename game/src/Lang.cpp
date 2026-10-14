@@ -214,8 +214,6 @@ namespace lang
 
 	std::string pickFile(const std::vector<std::string> & dirs, const std::vector<std::string> & locales)
 	{
-		if (dirs.empty())
-			return "";
 		Texts english;
 		readLang(dirs[0] + "en.lang", english);
 		for (size_t i = 0; i < locales.size(); ++i)

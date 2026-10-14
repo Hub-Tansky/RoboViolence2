@@ -3,7 +3,7 @@
 
 namespace bv2
 {
-	// Unless BV2_DATA_DIR is set or argv has --placeholders: the saved folder, else a detected one, else the OS
+	// Unless BV2_DATA_DIR held data or argv has --placeholders: the saved folder, else a detected one, else the OS
 	// folder dialog. A folder found or chosen becomes the data root and is saved. Call after pathsInit().
 	void chooseDataDir(int argc, char ** argv);
 }

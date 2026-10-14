@@ -86,6 +86,29 @@ namespace
 		return !dir.empty() && fs::is_directory(dir / "main", ec);
 	}
 
+	// The first folder holding sub (e.g. "main/textures") among dir, its parent when dir is main/, dir/Content and
+	// dir/BaboViolent2/Content (the upstream repository); "" when none
+	fs::path firstRootWith(const std::string & dir, const char * sub)
+	{
+		if (dir.empty())
+			return fs::path();
+		fs::path p(dir);
+		if (p.filename().empty())
+			p = p.parent_path(); // trailing slash
+		std::vector<fs::path> tries(1, p);
+		if (p.filename() == "main")
+			tries.push_back(p.parent_path());
+		tries.push_back(p / "Content");
+		tries.push_back(p / "BaboViolent2" / "Content");
+		for (size_t i = 0; i < tries.size(); ++i)
+		{
+			std::error_code ec;
+			if (fs::is_directory(tries[i] / sub, ec))
+				return tries[i];
+		}
+		return fs::path();
+	}
+
 	// Canonical form with a trailing '/'
 	std::string rootString(const fs::path & dir)
 	{
@@ -168,18 +191,9 @@ namespace bv2
 			if (hasMain(candidates[i]))
 				g_packageRoot = rootString(candidates[i]);
 
-		std::string envDir = getEnv("BV2_DATA_DIR");
-		if (!envDir.empty())
-		{
-			fs::path p(envDir);
-			// Accept the directory that holds main/, or main/ itself
-			if (p.filename().empty())
-				p = p.parent_path(); // trailing slash
-			if (p.filename() == "main" && !hasMain(p))
-				p = p.parent_path();
-			if (hasMain(p))
-				return setDataRoot(p.generic_string());
-		}
+		fs::path envRoot = firstRootWith(getEnv("BV2_DATA_DIR"), "main");
+		if (!envRoot.empty())
+			return setDataRoot(envRoot.generic_string());
 		if (!g_packageRoot.empty())
 			return setDataRoot(g_packageRoot);
 		g_dataRoot.clear();
@@ -204,21 +218,8 @@ namespace bv2
 
 	std::string findDataIn(const std::string & dir)
 	{
-		if (dir.empty())
-			return "";
-		fs::path p(dir);
-		if (p.filename().empty())
-			p = p.parent_path(); // trailing slash
-		const fs::path tries[4] = { p, p.parent_path(), p / "Content", p / "BaboViolent2" / "Content" };
-		for (int i = 0; i < 4; ++i)
-		{
-			if (i == 1 && p.filename() != "main")
-				continue;
-			std::error_code ec;
-			if (fs::is_directory(tries[i] / "main" / "textures", ec))
-				return rootString(tries[i]);
-		}
-		return "";
+		fs::path root = firstRootWith(dir, "main/textures");
+		return root.empty() ? std::string() : rootString(root);
 	}
 
 	std::string savedDataDir()
@@ -334,10 +335,12 @@ namespace bv2
 			dksvarSaveConfig((char *)cfg.c_str());
 		applyFile(cfg, false);
 
-		// 3. local overrides: config/local/*.cfg (next to the content and in the launch directory), then --config files
+		// 3. local overrides: config/local/*.cfg beside the package's main/ and, when it differs, the data root's
+		// (ADR 0016), then --config files
 		std::vector<std::string> dirs;
-		dirs.push_back(g_dataRoot + "config/local");
-		dirs.push_back("config/local");
+		dirs.push_back(g_packageRoot + "config/local");
+		if (g_dataRoot != g_packageRoot)
+			dirs.push_back(g_dataRoot + "config/local");
 		for (size_t d = 0; d < dirs.size(); ++d)
 		{
 			std::vector<std::string> files;
