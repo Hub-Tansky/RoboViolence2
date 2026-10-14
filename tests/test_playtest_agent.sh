@@ -40,17 +40,30 @@ expect "different digest rejected" no "$(digest_ok "$scratch/pkg.zip" "${hex%?}0
 expect "missing digest rejected" no "$(digest_ok "$scratch/pkg.zip" "" && echo yes || echo no)"
 
 mkdir -p "$ROOT"
-line() { printf 'cccc03\t3\tlocal-smoke\tlocal\t%s\t%s\t%s\t2026-10-14T00:00:00Z\n' "$@" >>"$ROOT/state.tsv"; }
+record() { record_state cccc03 3 local-smoke local "$@"; }
 expect "new SHA is due" yes "$(due cccc03 local-smoke && echo yes || echo no)"
-line fail download 1
-line fail download 2
+expect "first failure is attempt 1" 1 "$(record fail client-join)"
+expect "second failure is attempt 2" 2 "$(record fail server-port)"
+expect "state line columns" "cccc03 3 local-smoke local fail server-port 2" "$(last_state cccc03 local-smoke | cut -f1-7 | tr '\t' ' ')"
 expect "due after 2 failed attempts" yes "$(due cccc03 local-smoke && echo yes || echo no)"
-line fail download 3
+record fail verify >/dev/null
 expect "not due after 3 failed attempts" no "$(due cccc03 local-smoke && echo yes || echo no)"
 expect "other test of the same SHA still due" yes "$(due cccc03 staging-connect && echo yes || echo no)"
 : >"$ROOT/state.tsv"
-line pass - 1
+expect "a pass records stage -" "pass -" "$(record pass client-join >/dev/null; last_state cccc03 local-smoke | cut -f5,6 | tr '\t' ' ')"
 expect "not due after a pass" no "$(due cccc03 local-smoke && echo yes || echo no)"
+
+expect "download failure is infrastructure" yes "$(is_infra download && echo yes || echo no)"
+expect "busy port is infrastructure" yes "$(is_infra ports-busy && echo yes || echo no)"
+expect "failed join is a build failure" no "$(is_infra client-join && echo yes || echo no)"
+expect "digest mismatch is a build failure" no "$(is_infra verify && echo yes || echo no)"
+
+mkdir -p "$ROOT/versions"
+n=0
+for v in a b c d; do n=$((n + 1)); mkdir "$ROOT/versions/$v"; touch -t "20260101000$n" "$ROOT/versions/$v"; done # a oldest
+ln -sfn "$ROOT/versions/a" "$ROOT/current"
+prune "$ROOT/versions" 2
+expect "prune keeps the newest and the current one" "a c d" "$(ls "$ROOT/versions" | tr '\n' ' ' | sed 's/ $//')"
 
 printf 'BV2_ADMIN_PASS=test-only-value\n' >"$RV2_PLAYTEST_ENV"
 chmod 644 "$RV2_PLAYTEST_ENV"
