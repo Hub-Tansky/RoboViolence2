@@ -473,3 +473,19 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Why it matters:** players can't tell near servers from far ones; the browser sorts by ping.
 - **Suggested home:** Phase C step 6 (server and master) or a client fix after the manual test.
 - **Status:** Proposed
+
+### PNS-57: Packaged master and server listen on all interfaces
+
+- **Found in:** Phase T step 1 prototype (2026-10-14).
+- **Extract:** `lsof` on the packaged `bv2master` during a local test: `TCP *:10207 (LISTEN)`; the game server likewise on 3333.
+- **Why it matters:** the playtest agent's disposable local server is reachable from the LAN for the test's duration (ADR 0017), and a first run of an unsigned build may trigger the macOS firewall prompt. A bind-address option (like `zsv_adminApiBind`) would keep local tests on loopback.
+- **Suggested home:** Phase C step 6 (server and master) or a later networking step.
+- **Status:** Proposed
+
+### PNS-58: Copied helpers in the playtest and staging agents
+
+- **Found in:** Phase T step 2 review (2026-10-14), structure note.
+- **Extract:** "`deploy.sh` copies about 8 helpers from `tools/playtest/agent.sh` … a fix to one copy (e.g. step 1's lock fixes #24, #32, #39) must be ported by hand to the other."
+- **Why it matters:** the main-only run filter and the lock are security-relevant; the copies can drift. A shared lib was rejected in step 1 (#23) because each agent is installed as one file.
+- **Suggested home:** the next Phase T step that changes either agent: a shared `tools/lib/agent-common.sh` with a one-line install for both, or a test that checks the two `pick_run` filters are identical.
+- **Status:** Proposed

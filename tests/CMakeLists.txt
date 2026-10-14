@@ -177,3 +177,11 @@ if(WIN32 AND TARGET bv2 AND TARGET bv2dedicated AND TARGET bv2master)
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/check_windows_deps.py
       $<TARGET_FILE:bv2> $<TARGET_FILE:bv2dedicated> $<TARGET_FILE:bv2master>)
 endif()
+
+# The playtest agent's helpers (tools/playtest/agent.sh); the agent itself runs on macOS
+find_program(BV2_JQ jq)
+if(UNIX AND BV2_JQ)
+  add_test(NAME playtest_agent COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/test_playtest_agent.sh "${BV2_TEST_SCRATCH}/playtest-agent")
+elseif(UNIX)
+  message(STATUS "jq not found: test playtest_agent not added")
+endif()

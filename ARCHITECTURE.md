@@ -21,7 +21,7 @@ Robo Violence 2: unofficial fork of BaboViolent 2, a top-down multiplayer shoote
 | Supply chain | Dependency graph fed by vcpkg (`dependency-graph.yml`, on push to `main`); Dependabot alerts and security updates on; Dependabot version updates for GitHub Actions (`.github/dependabot.yml`); CodeQL `c-cpp` and `actions` (`codeql.yml`, not required). Dependabot and OSV can't read vcpkg purls; `osv-vcpkg.yml` (weekly) queries OSV by each port's upstream commit (`tools/osv-vcpkg.py`). Bump the vcpkg baseline monthly, or sooner when it reports a port. |
 | Hosting | Server images from `packaging/docker/Dockerfile` (GHCR on `main`), runbook [docs/ops/runbook.md](docs/ops/runbook.md). |
 | Known defects | [docs/analysis/KEY_QUESTIONS.md](docs/analysis/KEY_QUESTIONS.md). |
-| Decisions | [docs/decisions/README.md](docs/decisions/README.md): 0001 Ninja, 0002 libcurl compiled out, 0003 OpenGL 2.1 kept, 0004 project name (superseded by 0008), 0005 `main/` data root, 0006 platform layer, 0007 data root, pref dir and config layers, 0008 display name "Robo Violence 2", 0009 internal renaming, 0010 BV2 asset compatibility and GUI freeze, 0011 gettext PO translations, 0012 Windows 10 22H2 minimum, 0013 rulesets, 0014 libsodium HMAC, 0015 admin HTTP API, 0016 player data lookup and package content. |
+| Decisions | [docs/decisions/README.md](docs/decisions/README.md): 0001 Ninja, 0002 libcurl compiled out, 0003 OpenGL 2.1 kept, 0004 project name (superseded by 0008), 0005 `main/` data root, 0006 platform layer, 0007 data root, pref dir and config layers, 0008 display name "Robo Violence 2", 0009 internal renaming, 0010 BV2 asset compatibility and GUI freeze, 0011 gettext PO translations, 0012 Windows 10 22H2 minimum, 0013 rulesets, 0014 libsodium HMAC, 0015 admin HTTP API, 0016 player data lookup and package content, 0017 playtest pull agent. |
 
 ### Open items
 
@@ -131,6 +131,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/test_validator.cpp` | Steps 8, 9: the step 8 kicks, `sv_antiCheat` levels, and each step 9 rule against a cheat and against normal (lagged) play |
 | `tests/test_master.cpp` | In-process master on port 10207 with a scratch `master.db`: register, list, heartbeat timeout (simulated 61 s), removal by `KILL_SERV`, SQL injection in names, maps, nicks and IPs, and the ban list with LIKE filters (Q-S3). Not run on Windows (R28) |
 | `tests/test_netpacket.cpp` | Byte-level layout of the packed wire structs |
+| `tests/test_playtest_agent.sh` | Phase T step 1: playtest agent helpers: main-only run selection (fork PR from `main` rejected), artifact digest, attempt limit, env-file mode and no export (ctest `playtest_agent`, Unix with `jq`) |
 | `tools/check-content-case.py` | Fails when a literal `main/...` path differs from a real file name only by case |
 | `vcpkg.json` | vcpkg manifest (sqlite3, curl; Step 3 completes it) |
 
@@ -249,6 +250,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/decisions/0014-libsodium-hmac-for-credentials.md` | ADR: libsodium for the credential HMAC and nonces (step 10) |
 | `docs/decisions/0015-admin-http-api-behind-tls-proxy.md` | ADR: remote admin over an HTTP API behind Caddy TLS; legacy UDP remote admin refused (step 12) |
 | `docs/decisions/0016-player-data-lookup-and-package-content.md` | ADR: client finds or asks for the player's BV2 data; launch scripts, languages and default config come from the package (Phase C step 1) |
+| `docs/decisions/0017-playtest-pull-agent.md` | ADR: main builds tested on the owner's Mac by a pull agent against a disposable local server; no self-hosted runner (phase T step 1) |
 | `docs/decisions/README.md` | ADR format and index |
 
 ### `docs/ops`
@@ -317,6 +319,20 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/roadmap/phase-c-installers-and-fixes/reviews/step1.md` | Step 1 review record |
 | `docs/roadmap/phase-c-installers-and-fixes/reviews/step4-report.md` | Raw fresh-context reviewer reports for step 4 |
 | `docs/roadmap/phase-c-installers-and-fixes/reviews/step4.md` | Step 4 review record |
+
+### `docs/roadmap/phase-t-testing-environment`
+
+| path | purpose |
+|---|---|
+| `docs/roadmap/phase-t-testing-environment/README.md` | Phase T (testing environment, alongside Phase C): goal, steps, interaction with Phase C |
+| `docs/roadmap/phase-t-testing-environment/step1-mac-pull-agent.md` | Scope file for step1 |
+
+### `docs/roadmap/phase-t-testing-environment/reviews`
+
+| path | purpose |
+|---|---|
+| `docs/roadmap/phase-t-testing-environment/reviews/step1-report.md` | Raw reviewer report for step 1 |
+| `docs/roadmap/phase-t-testing-environment/reviews/step1.md` | Fresh-context review record for step 1 |
 
 ### `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews`
 
@@ -767,6 +783,9 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tools/lang-check.py` | Fails when `en.pot` is stale, a `.po` is invalid, has unknown keys or changes printf conversions; warns about missing glyphs; lists untranslated keys |
 | `tools/lang-to-pot.py` | Generates `content/languages/en.pot` from `en.lang` |
 | `tools/seed_db.cpp` | Creates a SQLite DB from SQL files (build helper) |
+| `tools/playtest/README.md` | Playtest agent: install, env file, commands, files, uninstall |
+| `tools/playtest/agent.sh` | Playtest pull agent (macOS): fetches and verifies successful `main` packages, tests the client against a disposable local server or staging, reports and notifies (ADR 0017) |
+| `tools/playtest/com.roboviolence2.playtest.plist` | LaunchAgent template for the playtest agent (every 10 min) |
 | `tools/review.sh` | Review gate (REVIEW.md section 1): all checks, scope against the step's Allowed paths, anti-gaming, DONE gate; `--full` builds and tests |
 | `tools/setup-dev.ps1` | Activates hooks, checks tools (Windows) |
 | `tools/setup-dev.sh` | Activates hooks, checks tools (Unix); prints the apt line for building and the package names for running a package |
