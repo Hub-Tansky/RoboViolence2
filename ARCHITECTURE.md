@@ -250,8 +250,8 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/decisions/0014-libsodium-hmac-for-credentials.md` | ADR: libsodium for the credential HMAC and nonces (step 10) |
 | `docs/decisions/0015-admin-http-api-behind-tls-proxy.md` | ADR: remote admin over an HTTP API behind Caddy TLS; legacy UDP remote admin refused (step 12) |
 | `docs/decisions/0016-player-data-lookup-and-package-content.md` | ADR: client finds or asks for the player's BV2 data; launch scripts, languages and default config come from the package (Phase C step 1) |
-| `docs/decisions/0018-staging-pull-deploy.md` | ADR: staging host deploys the newest main images by pull, pinned to a commit, only with no players; `/deployed`; multi-arch images (phase T step 2) |
 | `docs/decisions/0017-playtest-pull-agent.md` | ADR: main builds tested on the owner's Mac by a pull agent against a disposable local server; no self-hosted runner (phase T step 1) |
+| `docs/decisions/0018-staging-pull-deploy.md` | ADR: staging host deploys the newest main images by pull, pinned to a commit, only with no players; `/deployed`; multi-arch images (phase T step 2) |
 | `docs/decisions/README.md` | ADR format and index |
 
 ### `docs/ops`
