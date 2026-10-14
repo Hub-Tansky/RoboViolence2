@@ -451,7 +451,6 @@ public:
 	CString lang_maps;
 	CString lang_includedMaps;
 
-	CString lang_RndLabsTeam;
 	CString lang_gameDesigner;
 	CString lang_programmers;
 	CString lang_soundDesigners;

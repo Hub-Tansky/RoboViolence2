@@ -298,7 +298,7 @@ int main(int argc, const char* argv[])
 	// lil print out so that people now know that its working
 
 	printf("***************************************\n");
-	printf("*   Babo Violent 2 Dedicated Server   *\n");
+	printf("*  Robo Violence 2 Dedicated Server   *\n");
 	printf("*   Version 2.11d                     *\n");
 	printf("*                                     *\n");
 	printf("* check the /main/LaunchScript files  *\n");
