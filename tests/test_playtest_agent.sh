@@ -55,6 +55,7 @@ expect "not due after a pass" no "$(due cccc03 local-smoke && echo yes || echo n
 
 expect "download failure is infrastructure" yes "$(is_infra download && echo yes || echo no)"
 expect "busy port is infrastructure" yes "$(is_infra ports-busy && echo yes || echo no)"
+expect "no console session is infrastructure" yes "$(is_infra gui-session && echo yes || echo no)"
 expect "failed join is a build failure" no "$(is_infra client-join && echo yes || echo no)"
 expect "digest mismatch is a build failure" no "$(is_infra verify && echo yes || echo no)"
 

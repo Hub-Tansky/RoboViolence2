@@ -16,7 +16,7 @@ readonly ENV_FILE=${RV2_PLAYTEST_ENV:-$HOME/.config/rv2-playtest.env}
 readonly GAME_PORT=3333 MASTER_PORT=10207 ADMIN_PORT=18080
 readonly MAX_ATTEMPTS=3 KEEP=5 KEEP_REPORTS=30
 # Failures in these stages say nothing about the build: they notify once and don't use up an attempt
-readonly INFRA_STAGES=" preflight select artifact download ports-busy no-gui-session "
+readonly INFRA_STAGES=" preflight select artifact download ports-busy gui-session "
 
 # --- Helpers (tests/test_playtest_agent.sh) ---
 
@@ -80,7 +80,7 @@ load_env() { # sourced, not exported: each secret is passed only to the process 
 # --- Run state ---
 
 MODE=smoke TEST=local-smoke TARGET=local WANT_SHA=""
-SHA="" RUN_ID="" NAME="" STAGE="" RESULT="" REPORT="" LOCKED="" PLAY="" KEEP_RUNNING=""
+SHA="" RUN_ID="" NAME="" STAGE="" RESULT="" REPORT="" LOCKED="" KEEP_RUNNING=""
 PKG="" RUN_DIR="" CPREF="" CLIENT_PID="" SERVER_PID="" PIDS="" FIFO=""
 
 say() { printf '%s %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$*" | tee -a "${REPORT:-/dev/null}"; }
@@ -121,8 +121,9 @@ ours() { ps -p "$1" -o comm= 2>/dev/null | grep -qE 'bv2|sleep'; } # pid is one 
 
 lock() {
 	mkdir -p "$ROOT" && chmod 700 "$ROOT"
-	# No run takes 30 minutes: an older lock is stale even if its pid now belongs to another process
-	[ -n "$(find "$ROOT/lock" -mmin +30 2>/dev/null)" ] && rm -f "$ROOT/lock"
+	local p; p=$(cat "$ROOT/lock" 2>/dev/null)
+	# macOS shlock never takes over a dead pid's lock: drop it when its pid is not a running agent
+	if [ -n "$p" ] && ! ps -p "$p" -o command= 2>/dev/null | grep -q agent.sh; then rm -f "$ROOT/lock"; fi
 	shlock -p $$ -f "$ROOT/lock" || { say "locked by pid $(cat "$ROOT/lock" 2>/dev/null); skipped"; exit 0; }
 	LOCKED=1
 }
@@ -157,9 +158,10 @@ select_run() {
 }
 
 fetch_install() { # sets PKG; reuses an installed copy of the same build
-	local vdir="$ROOT/versions/${SHA:0:7}" json info id hex dl
+	local vdir="$ROOT/versions/${SHA:0:7}" json info id hex dl installed=""
 	PKG="$vdir/$PKG_NAME"
-	if [ "$(cat "$vdir/BUILD" 2>/dev/null)" = "$SHA $RUN_ID" ]; then
+	read -r installed _ <"$vdir/BUILD" 2>/dev/null
+	if [ "$installed" = "$SHA" ]; then # any successful main run of a commit has the same package
 		say "already installed: $vdir"
 		return
 	fi
@@ -176,10 +178,12 @@ fetch_install() { # sets PKG; reuses an installed copy of the same build
 	stage install # unzip beside, then swap: a failed unzip never leaves a half-installed version
 	if ! ditto -x -k "$dl/pkg.zip" "$dl/new"; then rm -rf "$dl"; fail "unzip"; fi
 	xattr -dr com.apple.quarantine "$dl/new" 2>/dev/null
-	printf '%s %s\n' "$SHA" "$RUN_ID" >"$dl/new/BUILD"
+	if ! [ -x "$dl/new/$PKG_NAME/bv2dedicated" ] || ! [ -x "$dl/new/$PKG_NAME/bv2master" ] || ! [ -x "$dl/new/$PKG_NAME/run-client.sh" ]; then
+		rm -rf "$dl"; fail "unexpected package layout"
+	fi
+	printf '%s %s\n' "$SHA" "$RUN_ID" >"$dl/new/BUILD" # written last: BUILD means a complete package
 	mkdir -p "$ROOT/versions" && rm -rf "$vdir" && mv "$dl/new" "$vdir"
 	rm -rf "$dl"
-	[ -x "$PKG/bv2dedicated" ] && [ -x "$PKG/bv2master" ] && [ -x "$PKG/run-client.sh" ] || fail "unexpected package layout"
 }
 
 use_current() { # sets PKG, SHA, RUN_ID from the last version that passed local-smoke
@@ -215,7 +219,7 @@ start_local() { # start_local <run dir>: master and server from PKG, on fixed po
 start_client() { # start_client <pref dir> <host> [player name]: packaged client; a name also sets windowed mode
 	local cfg=""
 	stage gui-session
-	[ "$(stat -f %Su /dev/console)" = "$(id -un)" ] || { STAGE=no-gui-session; fail "user not logged in at the console"; }
+	[ "$(stat -f %Su /dev/console)" = "$(id -un)" ] || fail "user not logged in at the console"
 	stage client-start
 	CPREF=$1
 	mkdir -p "$CPREF"
@@ -252,6 +256,7 @@ stop_all() { # client, then `quit` to the server, then TERM, then KILL
 
 finish() {
 	trap - EXIT
+	trap '' TERM INT # a second signal must not cut the cleanup short
 	[ -n "$KEEP_RUNNING" ] || stop_all
 	[ -n "$REPORT" ] && [ -z "$RESULT" ] && RESULT=fail # an unexpected exit while testing a build
 	if [ "$RESULT" = interrupted ]; then
@@ -269,12 +274,13 @@ finish() {
 		else
 			notify "RV2 ${SHA:0:7} FAILED at $STAGE" "$TEST, attempt $attempt. Report: $REPORT"
 		fi
-		rm -f "$ROOT/infra-failure"
 		prune "$ROOT/versions" $KEEP; prune "$ROOT/pref" $KEEP; prune "$ROOT/run" $KEEP; prune "$ROOT/reports" $KEEP_REPORTS
-	elif [ "$RESULT" = fail ] && [ -z "$PLAY" ] && [ "$(cat "$ROOT/infra-failure" 2>/dev/null)" != "$STAGE" ]; then
+	elif [ "$RESULT" = fail ] && [ "$MODE" = smoke ] && [ "$(cat "$ROOT/infra-failure" 2>/dev/null)" != "$STAGE" ]; then
 		echo "$STAGE" >"$ROOT/infra-failure" # once per distinct failure, not every 10 minutes
 		notify "RV2 agent FAILED at $STAGE" "No attempt counted. Log: $ROOT/agent.log"
 	fi
+	# The unattended marker: cleared by any scheduled run that didn't fail, so the next incident notifies again
+	[ "$MODE" = smoke ] && [ "$RESULT" != fail ] && rm -f "$ROOT/infra-failure"
 	[ -n "$LOCKED" ] && rm -f "$ROOT/lock"
 }
 
@@ -345,7 +351,6 @@ case $MODE in
 		fi
 		RESULT=pass ;;
 	play) # manual: no report, no pass/fail
-		PLAY=1
 		play_running && { echo "already running; agent.sh --stop first" >&2; exit 1; }
 		use_current
 		if [ "$TARGET" = local ]; then
