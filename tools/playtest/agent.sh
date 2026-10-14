@@ -344,11 +344,11 @@ case $MODE in
 		fi
 		if [ -n "$WANT_SHA" ]; then select_run; begin_report; fetch_install; else use_current; begin_report; fi
 		stage staging-version
-		deployed=$(curl -fsS --max-time 5 "https://$RV2_STAGING_HOST:8443/deployed" 2>/dev/null | cut -d' ' -f1)
+		deployed=$(curl -fsS --max-time 5 "https://$RV2_STAGING_HOST:${RV2_STAGING_ADMIN_PORT:-8443}/deployed" 2>/dev/null | cut -d' ' -f1)
 		say "staging runs ${deployed:-an unknown build (no /deployed)}"
 		start_client "$ROOT/pref/${SHA:0:7}-staging" "$RV2_STAGING_HOST" "$NAME"
 		stage staging-join
-		if ! wait_for 30 has_player "https://$RV2_STAGING_HOST:8443" "$RV2_STAGING_ADMIN_PASS" "$NAME"; then
+		if ! wait_for 30 has_player "https://$RV2_STAGING_HOST:${RV2_STAGING_ADMIN_PORT:-8443}" "$RV2_STAGING_ADMIN_PASS" "$NAME"; then
 			[ -n "$deployed" ] && [ "$deployed" != "$SHA" ] && STAGE=staging-version-mismatch
 			fail "staging /status does not list $NAME within 30 s"
 		fi

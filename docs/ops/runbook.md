@@ -37,6 +37,8 @@ From the repository root (or the folder holding the compose file):
 | Server console | `docker attach roboviolence2-server-1`; detach with Ctrl-P Ctrl-Q; `quit` stops the server |
 | Stop | `docker compose -f packaging/docker/compose.example.yml stop` (`init: true` forwards the signal) |
 | Upgrade | `docker compose -f packaging/docker/compose.example.yml pull`, then Start again |
+| One commit | `BV2_IMAGE_TAG=<sha>` before any command above pins both images to that `main` commit (multi-arch); default `latest` |
+| Deployed commit | `curl -k https://localhost:8443/deployed` (written by the staging deploy agent, [tools/staging/](../../tools/staging/README.md); 404 otherwise) |
 
 - A client connects with `connect <host> 3333 <password>`. The server browser needs the client's `BV2_MASTER_SERVERS=<host>:10207`.
 - Upgrades across a protocol version (`GAME_VERSION_SV/CL`) need new clients too. Master and game servers share the master protocol, which has no version: upgrade them together.
