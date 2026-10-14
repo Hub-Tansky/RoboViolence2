@@ -1,5 +1,5 @@
 # TLS in front of the game server's admin API (Phase B step 12, ADR 0015). BV2_ADMIN_HOST: the public name, for which
-# Caddy fetches a certificate (ACME needs ports 80 and 443 reachable); the default, localhost, uses Caddy's own CA.
+# Caddy fetches a certificate (ACME needs 443 reachable: BV2_ADMIN_PORT=443); the default, localhost, uses Caddy's own CA.
 {
 	servers {
 		timeouts {
@@ -13,5 +13,12 @@
 	request_body {
 		max_size 4KB
 	}
-	reverse_proxy server:8080
+	# The deployed commit: ./srv/deployed beside the compose file, written by tools/staging/deploy.sh (no secret, no auth); 404 when none
+	handle /deployed {
+		root * /srv
+		file_server
+	}
+	handle {
+		reverse_proxy server:8080
+	}
 }

@@ -39,7 +39,7 @@ CCredit::CCredit(CControl * in_parent, CControl * in_alignTo)
 	label1->textSize = 64;
 	label1->textAlign = CONTROL_TEXTALIGN_MIDDLECENTER;
 
-	//--- The fork (PNS-53, ADR 0017)
+	//--- The fork (PNS-53, ADR 0019)
 	label1 = new CControl(instance, CVector2i(10,10), CVector2i(700,25),"Unofficial fork of BaboViolent 2 by bitHeads / RndLabs; not endorsed by them.", this, "LABEL", label1, CONTROL_SNAP_BOTTOM);
 	label1->textAlign = CONTROL_TEXTALIGN_MIDDLECENTER;
 	label1 = new CControl(instance, CVector2i(10,10), CVector2i(700,25),"Thanks to everyone for this game!", this, "LABEL", label1, CONTROL_SNAP_BOTTOM);

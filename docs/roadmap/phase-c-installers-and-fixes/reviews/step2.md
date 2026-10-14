@@ -16,11 +16,11 @@ Skill evidence: `SKILL: Launching skill: thermo-nuclear-code-quality-review` (ra
 | 2 | Credits frame may overflow | owner checked on screen (2026-10-14): works; thank-you line reworded by the owner |
 | 3 | Acceptance grep hits the ID-gap comments | fixed (comments reworded) |
 | 4 | Dead comments in the intro-to-menu switch | fixed |
-| 5 | Three copies of the "LOADING" frame | fixed for Scene and IntroScreen (`IntroScreen::renderLoading`); `Map.cpp` deferred: PNS-56 |
+| 5 | Three copies of the "LOADING" frame | fixed for Scene and IntroScreen (`IntroScreen::renderLoading`); `Map.cpp` deferred: PNS-59 |
 | 6 | Splash shows "LOADING" after loading ends | rejected: owner-approved design (PNS-53); removing the splash is the owner's call |
 | 7 | Stale system overview line | fixed |
 | 8 | ARCHITECTURE row order and `IntroScreen.h` row | fixed |
-| 9 | Placeholder `HeadGames.tga`/`RnDLabs.tga` no longer loaded | deferred: PNS-56 |
+| 9 | Placeholder `HeadGames.tga`/`RnDLabs.tga` no longer loaded | deferred: PNS-59 |
 | 10 | No automated test for rendering | accepted: owner's on-screen check below; `lang_check` covers `en.lang`/`en.pot` |
 | 11 | Leftover blank lines; `explicit` constructor | fixed |
 

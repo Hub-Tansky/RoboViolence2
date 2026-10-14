@@ -33,7 +33,7 @@
 
 #define		ACCOUNT_URL	1015	// tell the accountUrl
 
-// 1016-1018: removed in Phase C step 2 (ADR 0017); don't reuse
+// 1016-1018: removed in Phase C step 2 (ADR 0019); don't reuse
 
 #define		CACHE_LIST_REMOTE	1019	// tell the master we want the list of cached list of remote server
 #define		CACHE_LIST_PLAYER	1021	// received along with data of cached players
