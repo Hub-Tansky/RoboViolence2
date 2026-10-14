@@ -29,20 +29,12 @@ public:
 	// Le delay qui reste à l'afficher
 	float showDelay;
 
-	// Notre logo
-	unsigned int tex_rndLogo;
-	unsigned int tex_hgLogo;
-//	unsigned int tex_glowLogo;
-
-	// Le super son mistic du logo
-	DksSound * sfx_intro;
+	// The menu font (owned by Scene)
+	unsigned int font;
 
 public:
 	// Constructeur
-	IntroScreen();
-
-	// Destructeur
-	virtual ~IntroScreen();
+	IntroScreen(unsigned int in_font);
 
 	// Update
 	void update(float delay);

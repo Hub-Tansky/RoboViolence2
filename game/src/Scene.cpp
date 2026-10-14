@@ -87,7 +87,7 @@ Scene::Scene()
 #endif
 	gameVar.loadModels();
 #ifndef CONSOLE
-	introScreen = new IntroScreen();
+	introScreen = new IntroScreen(font);
 #endif
 	serverInfoDelay = GAME_UPDATE_DELAY;
 	masterReady = true;
