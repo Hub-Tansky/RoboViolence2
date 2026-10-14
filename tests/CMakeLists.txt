@@ -45,6 +45,11 @@ if(TARGET bv2server_lib)
   add_test(NAME packet_hygiene COMMAND test_packet_hygiene)
   set_tests_properties(packet_hygiene PROPERTIES ENVIRONMENT "BV2_PREF_DIR=${BV2_TEST_SCRATCH}/hygiene-pref")
 
+  add_executable(test_browsable_game test_browsable_game.cpp)
+  target_link_libraries(test_browsable_game PRIVATE bv2server_lib)
+  bv2_target_defaults(test_browsable_game)
+  add_test(NAME browsable_game COMMAND test_browsable_game)
+
   add_executable(test_crash_fixes test_crash_fixes.cpp)
   target_link_libraries(test_crash_fixes PRIVATE bv2_server_harness)
   target_include_directories(test_crash_fixes PRIVATE ${CMAKE_SOURCE_DIR}/engine/dko/src)  # ePTexture (R18)

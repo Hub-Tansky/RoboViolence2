@@ -465,3 +465,11 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Why it matters:** the two will drift; step 2 already has to edit both (the `DidSurvey` row, PNS-53).
 - **Suggested home:** step 2 (PNS-53 touches both): delete `content-seed/bv2.sql` and make `openClientDb` the schema, or embed the file and run it.
 - **Status:** Proposed
+
+### PNS-56: Server browser ping is always `???`
+
+- **Found in:** Phase B manual test, macOS (2026-10-14).
+- **Extract:** with master, server and client on one Mac, the browser lists the server with ping `???` (1000 ms or more). `CMaster::update` pings each row over a babonet UDP peer (`game/src/CPing.cpp`, `bb_peerSend` to the game port); no answer arrives.
+- **Why it matters:** players can't tell near servers from far ones; the browser sorts by ping.
+- **Suggested home:** Phase C step 6 (server and master) or a client fix after the manual test.
+- **Status:** Proposed
