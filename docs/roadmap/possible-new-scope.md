@@ -440,7 +440,7 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
   - `game/src/IntroScreen.cpp:31`: RndLabs logo splash at start-up (from the player's data).
 - **Change (owner-approved [GUI], 2026-10-14):**
   - Game name Robo Violence 2 in the window title, server name and dedicated-server banner.
-  - Credits, in order: title "Robo Violence 2"; "Unofficial fork of BaboViolent 2 by bitHeads / RndLabs; not endorsed by them."; "Thank all of you for the game!"; header "Original credits below"; the original team list unchanged.
+  - Credits, in order: title "Robo Violence 2"; "Unofficial fork of BaboViolent 2 by bitHeads / RndLabs; not endorsed by them."; "Thanks to everyone for this game!"; header "Original credits below"; the original team list unchanged.
   - Remove the forum sentence from the login note.
   - Replace the RndLabs logo splash with a new splash showing "Loading" in a big font.
   - Remove dead code: the survey (`game/src/CSurvey.*`, its `Scene` and `CMaster` hooks, the `DidSurvey` seed row in `content-seed/bv2.sql`, the master's `SURVEY_*` handling in `masterserver/src/cNetManager.cpp`; message IDs stay as gaps) and the unused `lang_RndLabsTeam` (`GameVar.*`, `en.lang`).

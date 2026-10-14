@@ -42,7 +42,7 @@ CCredit::CCredit(CControl * in_parent, CControl * in_alignTo)
 	//--- The fork (PNS-53, ADR 0017)
 	label1 = new CControl(instance, CVector2i(10,10), CVector2i(700,25),"Unofficial fork of BaboViolent 2 by bitHeads / RndLabs; not endorsed by them.", this, "LABEL", label1, CONTROL_SNAP_BOTTOM);
 	label1->textAlign = CONTROL_TEXTALIGN_MIDDLECENTER;
-	label1 = new CControl(instance, CVector2i(10,10), CVector2i(700,25),"Thank all of you for the game!", this, "LABEL", label1, CONTROL_SNAP_BOTTOM);
+	label1 = new CControl(instance, CVector2i(10,10), CVector2i(700,25),"Thanks to everyone for this game!", this, "LABEL", label1, CONTROL_SNAP_BOTTOM);
 	label1->textAlign = CONTROL_TEXTALIGN_MIDDLECENTER;
 	label1 = new CControl(instance, CVector2i(10,10), CVector2i(700,25),"Original credits below", this, "LABEL", label1, CONTROL_SNAP_BOTTOM, 30);
 	label1->foreColor.set(1,.5f,.25f);

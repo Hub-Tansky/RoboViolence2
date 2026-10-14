@@ -28,7 +28,7 @@ PNS-53 lists every visible place: `content/languages/en.lang:1` (window title), 
 
 ### 2.2 Credits and login note
 
-- Credits, in order: title "Robo Violence 2"; "Unofficial fork of BaboViolent 2 by bitHeads / RndLabs; not endorsed by them."; "Thank all of you for the game!"; header "Original credits below"; the original list unchanged.
+- Credits, in order: title "Robo Violence 2"; "Unofficial fork of BaboViolent 2 by bitHeads / RndLabs; not endorsed by them."; "Thanks to everyone for this game!"; header "Original credits below"; the original list unchanged.
 - Login note: drop the sentence about the official forum.
 
 ### 2.3 Splash
