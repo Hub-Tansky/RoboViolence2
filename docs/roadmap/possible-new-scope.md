@@ -473,3 +473,11 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Why it matters:** dead placeholder output, and a third copy of the loading frame.
 - **Suggested home:** the next step that touches `tools/` or `Map.cpp`; keep the `tools/original-assets.sha256` entries.
 - **Status:** Proposed
+
+### PNS-57: The vcpkg cache key ignores the overlay triplets
+
+- **Found in:** Phase C step 3 review (2026-10-14), finding 10.
+- **Extract:** `.github/actions/setup-vcpkg/action.yml` keys `actions/cache` on `hashFiles('vcpkg.json')` only; `triplets/arm64-osx.cmake` changes every macOS port's ABI, so the old cache is restored, all ports rebuild, and an exact key hit skips saving the new binaries.
+- **Why it matters:** macOS CI rebuilds SDL3 and the other ports on every run until `vcpkg.json` changes.
+- **Suggested home:** the next step allowed to edit `.github/actions/`: add `triplets/**` to `hashFiles`. A baseline bump (PNS-54) also refreshes the key.
+- **Status:** Proposed
