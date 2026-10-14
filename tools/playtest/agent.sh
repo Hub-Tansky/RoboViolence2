@@ -216,7 +216,7 @@ start_local() { # start_local <run dir>: master and server from PKG, on fixed po
 	wait_for 10 port_busy $MASTER_PORT || fail "master not listening on $MASTER_PORT within 10 s"
 }
 
-start_client() { # start_client <pref dir> <host> [player name]: packaged client; a name also sets windowed mode
+start_client() { # start_client <pref dir> <host> [player name]: packaged client; a name marks an automated test
 	local cfg=""
 	stage gui-session
 	[ "$(stat -f %Su /dev/console)" = "$(id -un)" ] || fail "user not logged in at the console"
@@ -227,7 +227,8 @@ start_client() { # start_client <pref dir> <host> [player name]: packaged client
 		cfg="$CPREF/playtest.cfg" # absolute: run-client.sh changes to the package dir
 		printf 'r_fullScreen false\ncl_playerName "%s"\n' "$3" >"$cfg"
 	fi
-	(cd "$PKG" && BV2_PREF_DIR="$CPREF" exec ./run-client.sh ${cfg:+--config "$cfg"} connect "$2" </dev/null >"$CPREF/client.log" 2>&1) &
+	# Automated tests run windowed on placeholder content: no first-run data-folder dialog (ADR 0016) to block them
+	(cd "$PKG" && BV2_PREF_DIR="$CPREF" exec ./run-client.sh ${cfg:+--placeholders --config "$cfg"} connect "$2" </dev/null >"$CPREF/client.log" 2>&1) &
 	CLIENT_PID=$!
 	sleep 10
 	alive "$CLIENT_PID" || fail "client exited within 10 s"
