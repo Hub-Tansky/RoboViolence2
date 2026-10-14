@@ -1,6 +1,6 @@
 # Step 4: Build, CI and docs housekeeping
 
-**Status:** IN PROGRESS
+**Status:** DONE (2026-10-14)
 
 **Depends on:** Phase B steps. **Next:** step 5 (after PNS-31). **Index:** [README.md](README.md)
 
@@ -19,7 +19,7 @@
 ## Context
 
 - Dependabot and OSV can't read vcpkg purls (PNS-22). Each port's `vcpkg_installed/<triplet>/share/<port>/vcpkg.spdx.json` names the upstream repository and tag (e.g. `git+https://github.com/libsdl-org/SDL@release-3.4.16`); OSV matches a commit against its `GIT` ranges.
-- `tools/CMakeLists.txt:10` generates `runtime/bv2.db`; nothing reads it: `openClientDb` creates the pref-dir copy itself (`game/src/Paths.cpp`, PNS-24).
+- `tools/CMakeLists.txt:10` had a rule for `runtime/bv2.db` (built only through the `bv2_seed_db` target, which nothing depended on); nothing reads it: `openClientDb` creates the pref-dir copy itself (`game/src/Paths.cpp`, PNS-24).
 - `bv2server_lib` (tests only) and `bv2dedicated` compile the same `BV2_SERVER_SOURCES` (`game/CMakeLists.txt`, PNS-33).
 - `AGENTS.md`, `docs/analysis/README.md` and `ALGORITHM_03` W1 describe R3 as current; `masterserver/README.md` says the master builds SQL with `sprintf` (PNS-36). `containers` is missing from the CI list in `AGENTS.md` (PNS-45).
 
@@ -49,7 +49,7 @@
 ## Acceptance checks
 
 - `python3 tools/osv-vcpkg.py build/<preset>/vcpkg_installed` lists every port with a commit and an OSV result.
-- `ctest --test-dir build/<preset> --output-on-failure` passes, including `smoke_server` and `server_harness`; `build/<preset>/runtime/bv2.db` is not created by a clean build.
+- `ctest --test-dir build/<preset> --output-on-failure` passes, including `smoke_server` and `server_harness`; no build rule for `runtime/bv2.db` remains.
 - `tools/review.sh --full <preset>` passes, and the fresh-context review record `reviews/step4.md` and the raw reviewer report `reviews/step4-report.md` (with the skill's load line) exist (`REVIEW.md` section 5).
 - `ARCHITECTURE.md` lists every file added, moved or removed in this step.
 - The secret scan (`gitleaks git --staged` / CI) is clean.
