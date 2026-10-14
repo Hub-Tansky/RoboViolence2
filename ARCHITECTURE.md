@@ -21,7 +21,7 @@ Robo Violence 2: unofficial fork of BaboViolent 2, a top-down multiplayer shoote
 | Supply chain | Dependency graph fed by vcpkg (`dependency-graph.yml`, on push to `main`); Dependabot alerts and security updates on; Dependabot version updates for GitHub Actions (`.github/dependabot.yml`); CodeQL `c-cpp` and `actions` (`codeql.yml`, not required). Dependabot and OSV can't read vcpkg purls; `osv-vcpkg.yml` (weekly) queries OSV by each port's upstream commit (`tools/osv-vcpkg.py`). Bump the vcpkg baseline monthly, or sooner when it reports a port. |
 | Hosting | Server images from `packaging/docker/Dockerfile` (GHCR on `main`), runbook [docs/ops/runbook.md](docs/ops/runbook.md). |
 | Known defects | [docs/analysis/KEY_QUESTIONS.md](docs/analysis/KEY_QUESTIONS.md). |
-| Decisions | [docs/decisions/README.md](docs/decisions/README.md): 0001 Ninja, 0002 libcurl compiled out, 0003 OpenGL 2.1 kept, 0004 project name (superseded by 0008), 0005 `main/` data root, 0006 platform layer, 0007 data root, pref dir and config layers, 0008 display name "Robo Violence 2", 0009 internal renaming, 0010 BV2 asset compatibility and GUI freeze, 0011 gettext PO translations, 0012 Windows 10 22H2 minimum, 0013 rulesets, 0014 libsodium HMAC, 0015 admin HTTP API, 0016 player data lookup and package content, 0017 in-game name and fork credits, 0018 package and release format. |
+| Decisions | [docs/decisions/README.md](docs/decisions/README.md): 0001 Ninja, 0002 libcurl compiled out, 0003 OpenGL 2.1 kept, 0004 project name (superseded by 0008), 0005 `main/` data root, 0006 platform layer, 0007 data root, pref dir and config layers, 0008 display name "Robo Violence 2", 0009 internal renaming, 0010 BV2 asset compatibility and GUI freeze, 0011 gettext PO translations, 0012 Windows 10 22H2 minimum, 0013 rulesets, 0014 libsodium HMAC, 0015 admin HTTP API, 0016 player data lookup and package content, 0017 playtest pull agent, 0018 staging pull deploy, 0019 in-game name and fork credits, 0020 package and release format. |
 
 ### Open items
 
@@ -64,7 +64,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/Paths.cpp` | Package and data roots (`contentFile` for the package's own content), saved and detected BV2 data folder, per-user pref dir, layered config loading, map and DB path helpers (ADR 0016) |
 | `game/src/Paths.h` | Interface of `Paths.cpp` (namespace `bv2`) |
 | `packaging/linux/roboviolence2.desktop` | Linux desktop entry |
-| `packaging/make-package.py` | Builds the per-OS package from a Release `runtime/` (links resolved, macOS bundle re-signed, licences), plus the Windows installer or macOS `.dmg` (ADR 0018) |
+| `packaging/make-package.py` | Builds the per-OS package from a Release `runtime/` (links resolved, macOS bundle re-signed, licences), plus the Windows installer or macOS `.dmg` (ADR 0020) |
 | `packaging/windows/roboviolence2.iss` | Inno Setup script for the Windows installer (per-user, unsigned) |
 | `packaging/scripts/run-client.cmd` | Package script: starts the client (Windows) |
 | `packaging/scripts/run-client.sh` | Package script: starts the client (macOS bundle or Linux binary) |
@@ -75,8 +75,8 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `packaging/macos/Info.plist.in` | macOS bundle `Info.plist` template |
 | `packaging/docker/Dockerfile` | Server images: one Ubuntu 24.04 build, targets `server` (`bv2dedicated`) and `master` (`bv2master`), non-root, pref dir volume (step 11) |
 | `packaging/docker/master-entrypoint.sh` | Master image entrypoint: seeds `master.db` and `web.db` into the volume, then runs `bv2master` |
-| `packaging/docker/Caddyfile` | Caddy site: TLS for the game server's admin API (`BV2_ADMIN_HOST`, default localhost) (step 12) |
-| `packaging/docker/compose.example.yml` | Compose example: master, game server and the admin TLS proxy on one host, secrets from an env file outside the repo |
+| `packaging/docker/Caddyfile` | Caddy site: TLS for the game server's admin API (`BV2_ADMIN_HOST`, default localhost) (step 12); `/deployed` serves the staging commit (phase T step 2) |
+| `packaging/docker/compose.example.yml` | Compose example: master, game server and the admin TLS proxy on one host, secrets from an env file outside the repo; `BV2_IMAGE_TAG` pins both images to a commit |
 | `packaging/windows/bv2.manifest` | Windows manifest for `bv2`, `bv2dedicated` and `bv2master`: PerMonitorV2 DPI, UTF-8 code page, Windows 10/11 |
 | `packaging/windows/bv2.rc.in` | Windows resource script template; CMake fills in the generated icon |
 | `tests/CMakeLists.txt` | ctest targets: netPacket, config, fileio, credentials, join password, admin login, admin API, babonet large message, the two `SqlStatement.h` copies identical, crash fixes, validator, missing music (client builds), dedicated-server smoke, in-process server harness (`bv2server_lib` + fake babonet), packet hygiene, corpus replay, crash-input tests for `crash-*.bin` under ASan (none at present), master server; on Windows also the non-ASCII install path smoke and the no-VC++-runtime-DLL check |
@@ -115,6 +115,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/test_admin_api.cpp` | Step 12: the admin API refuses a wrong token, limits a burst, runs a command, returns the status, audits with secrets masked (not on Windows) |
 | `tests/test_admin_login.cpp` | Step 10: admin login only with HMACs over the connection's challenge; no user, password or MD5 on the wire |
 | `tests/test_babonet.cpp` | R7: a 10000-byte message over a loopback babonet connection arrives over several reads and intact |
+| `tests/test_browsable_game.cpp` | A server browser row owns a copy of its lobby game's row (the lobby frees its own) |
 | `tests/test_config.cpp` | dksvar config layering, transient values not saved, secrets masked |
 | `tests/test_credentials.cpp` | Step 10: the credential HMAC against RFC 4231; proofs check only with their own password, label and nonce |
 | `tests/test_crash_fixes.cpp` | Steps 5 and 7: one check per fixed defect (KEY_QUESTIONS Part D) on the in-process server |
@@ -132,6 +133,8 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/test_validator.cpp` | Steps 8, 9: the step 8 kicks, `sv_antiCheat` levels, and each step 9 rule against a cheat and against normal (lagged) play |
 | `tests/test_master.cpp` | In-process master on port 10207 with a scratch `master.db`: register, list, heartbeat timeout (simulated 61 s), removal by `KILL_SERV`, SQL injection in names, maps, nicks and IPs, and the ban list with LIKE filters (Q-S3). Not run on Windows (R28) |
 | `tests/test_netpacket.cpp` | Byte-level layout of the packed wire structs |
+| `tests/test_staging_deploy.sh` | Phase T step 2: staging deploy helpers: main-only run selection, `/status` player count, failures per commit, infrastructure stages, env-file mode and readonly repository (ctest `staging_deploy`) |
+| `tests/test_playtest_agent.sh` | Phase T step 1: playtest agent helpers: main-only run selection (fork PR from `main` rejected), artifact digest, attempt limit, env-file mode and no export (ctest `playtest_agent`, Unix with `jq`) |
 | `tools/check-content-case.py` | Fails when a literal `main/...` path differs from a real file name only by case |
 | `vcpkg.json` | vcpkg manifest (sqlite3, curl; Step 3 completes it) |
 
@@ -164,7 +167,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `.github/workflows/codeql.yml` | CodeQL: `c-cpp` (manual linux-x64 build of the three executables) and `actions`; push, PR, weekly; alerts under `build/` (vcpkg headers) filtered out |
 | `.github/workflows/dependency-graph.yml` | Submits resolved vcpkg ports to the dependency graph on push to `main` |
 | `.github/workflows/osv-vcpkg.yml` | Weekly OSV check of the vcpkg ports by upstream commit (`tools/osv-vcpkg.py`); not required |
-| `.github/workflows/containers.yml` | CI: builds both server images, checks non-root, runs the compose example (healthy, passworded server listed by the master), checks a remote `status` over TLS, pushes to GHCR from `main` and weekly |
+| `.github/workflows/containers.yml` | CI: builds both server images, checks non-root, runs the compose example (healthy, passworded server listed by the master), checks a remote `status` over TLS and `/deployed`, pushes multi-arch `:<sha>` and `:latest` to GHCR from `main` and weekly |
 
 ### `config`
 
@@ -250,8 +253,10 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/decisions/0014-libsodium-hmac-for-credentials.md` | ADR: libsodium for the credential HMAC and nonces (step 10) |
 | `docs/decisions/0015-admin-http-api-behind-tls-proxy.md` | ADR: remote admin over an HTTP API behind Caddy TLS; legacy UDP remote admin refused (step 12) |
 | `docs/decisions/0016-player-data-lookup-and-package-content.md` | ADR: client finds or asks for the player's BV2 data; launch scripts, languages and default config come from the package (Phase C step 1) |
-| `docs/decisions/0017-in-game-name-and-fork-credits.md` | ADR: in-game name, fork credits, "LOADING" splash, survey removed (Phase C step 2) |
-| `docs/decisions/0018-package-and-release-format.md` | ADR: package, installer, `.dmg` and release format; engine-only public releases (Phase C step 3) |
+| `docs/decisions/0017-playtest-pull-agent.md` | ADR: main builds tested on the owner's Mac by a pull agent against a disposable local server; no self-hosted runner (phase T step 1) |
+| `docs/decisions/0018-staging-pull-deploy.md` | ADR: staging host deploys the newest main images by pull, pinned to a commit, only with no players; `/deployed`; multi-arch images (phase T step 2) |
+| `docs/decisions/0019-in-game-name-and-fork-credits.md` | ADR: in-game name, fork credits, "LOADING" splash, survey removed (Phase C step 2) |
+| `docs/decisions/0020-package-and-release-format.md` | ADR: package, installer, `.dmg` and release format; engine-only public releases (Phase C step 3) |
 | `docs/decisions/README.md` | ADR format and index |
 
 ### `docs/ops`
@@ -324,6 +329,23 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/roadmap/phase-c-installers-and-fixes/reviews/step2.md` | Step 2 review record |
 | `docs/roadmap/phase-c-installers-and-fixes/reviews/step4-report.md` | Raw fresh-context reviewer reports for step 4 |
 | `docs/roadmap/phase-c-installers-and-fixes/reviews/step4.md` | Step 4 review record |
+
+### `docs/roadmap/phase-t-testing-environment`
+
+| path | purpose |
+|---|---|
+| `docs/roadmap/phase-t-testing-environment/README.md` | Phase T (testing environment, alongside Phase C): goal, steps, interaction with Phase C |
+| `docs/roadmap/phase-t-testing-environment/step1-mac-pull-agent.md` | Scope file for step1 |
+| `docs/roadmap/phase-t-testing-environment/step2-staging-deploy.md` | Scope file for step2 |
+
+### `docs/roadmap/phase-t-testing-environment/reviews`
+
+| path | purpose |
+|---|---|
+| `docs/roadmap/phase-t-testing-environment/reviews/step1-report.md` | Raw reviewer report for step 1 |
+| `docs/roadmap/phase-t-testing-environment/reviews/step1.md` | Fresh-context review record for step 1 |
+| `docs/roadmap/phase-t-testing-environment/reviews/step2-report.md` | Raw reviewer report for step 2 |
+| `docs/roadmap/phase-t-testing-environment/reviews/step2.md` | Fresh-context review record for step 2 |
 
 ### `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews`
 
@@ -559,7 +581,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/CClans.h` | Clans UI tab |
 | `game/src/CControl.cpp` | Generic UI control (button, label, list, text box) of the newer menu |
 | `game/src/CControl.h` | Generic UI control (button, label, list, text box) of the newer menu |
-| `game/src/CCredit.cpp` | Credits tab: Robo Violence 2 fork notice, then the original credits (ADR 0017) |
+| `game/src/CCredit.cpp` | Credits tab: Robo Violence 2 fork notice, then the original credits (ADR 0019) |
 | `game/src/CCredit.h` | Credits tab |
 | `game/src/CCurl.cpp` | HTTP requests through libcurl (compiled out in Phase A) |
 | `game/src/CCurl.h` | HTTP requests through libcurl (compiled out in Phase A) |
@@ -664,7 +686,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/Host.h` | Host-game settings struct |
 | `game/src/IncorrectName.h` | Dialog: invalid player name |
 | `game/src/IncorrectPassword.h` | Dialog: wrong server password |
-| `game/src/IntroScreen.cpp` | "LOADING" splash after start-up (ADR 0017) |
+| `game/src/IntroScreen.cpp` | "LOADING" splash after start-up (ADR 0019) |
 | `game/src/IntroScreen.h` | Interface of `IntroScreen.cpp`; `renderLoading` also draws Scene's loading frame |
 | `game/src/JoinGame.h` | Join-game screen |
 | `game/src/Key.cpp` | Key binding entry |
@@ -772,6 +794,11 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tools/lang-check.py` | Fails when `en.pot` is stale, a `.po` is invalid, has unknown keys or changes printf conversions; warns about missing glyphs; lists untranslated keys |
 | `tools/lang-to-pot.py` | Generates `content/languages/en.pot` from `en.lang` |
 | `tools/seed_db.cpp` | Creates a SQLite DB from SQL files (build helper) |
+| `tools/playtest/README.md` | Playtest agent: install, env file, commands, files, uninstall |
+| `tools/playtest/agent.sh` | Playtest pull agent (macOS): fetches and verifies successful `main` packages, tests the client against a disposable local server or staging, reports and notifies (ADR 0017) |
+| `tools/playtest/com.roboviolence2.playtest.plist` | LaunchAgent template for the playtest agent (every 10 min) |
+| `tools/staging/README.md` | Staging deploy agent: host needs, install, env file, cron, commands, files |
+| `tools/staging/deploy.sh` | Staging deploy agent (Linux, cron): newest successful main `containers` build, pinned to its commit, deployed only with no players, rollback, `/deployed` (ADR 0018) |
 | `tools/review.sh` | Review gate (REVIEW.md section 1): all checks, scope against the step's Allowed paths, anti-gaming, DONE gate; `--full` builds and tests |
 | `tools/setup-dev.ps1` | Activates hooks, checks tools (Windows) |
 | `tools/setup-dev.sh` | Activates hooks, checks tools (Unix); prints the apt line for building and the package names for running a package |

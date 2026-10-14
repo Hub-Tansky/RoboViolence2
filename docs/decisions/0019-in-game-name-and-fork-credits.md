@@ -1,4 +1,4 @@
-# 0017: The game shows its own name and credits the original as an unofficial fork
+# 0019: The game shows its own name and credits the original as an unofficial fork
 
 - Status: Accepted
 - Date: 2026-10-14

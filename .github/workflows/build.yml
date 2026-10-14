@@ -40,13 +40,13 @@ jobs:
           cmake --preset ${{ matrix.preset }}-release
           cmake --build --preset ${{ matrix.preset }}-release -- -k 0
           ctest --test-dir build/${{ matrix.preset }}-release --output-on-failure
-      # The archive on every OS, plus the installer (Windows) or disk image (macOS); ADR 0018
+      # The archive on every OS, plus the installer (Windows) or disk image (macOS); ADR 0020
       - name: Package
         shell: bash
         env:
           VERSION: ${{ github.ref_type == 'tag' && github.ref_name || '0.0.0-dev' }}
         run: ${{ runner.os == 'Windows' && 'python' || 'python3' }} packaging/make-package.py build/${{ matrix.preset }}-release/runtime ${{ matrix.preset }} out "$VERSION"
-      # Install, upgrade over it (the master's databases stay), uninstall (they stay too); ADR 0018
+      # Install, upgrade over it (the master's databases stay), uninstall (they stay too); ADR 0020
       - name: The installer installs, upgrades and uninstalls silently
         if: runner.os == 'Windows'
         shell: bash
@@ -74,7 +74,7 @@ jobs:
         with:
           path: out/roboviolence2-${{ matrix.preset }}${{ runner.os == 'Windows' && '-setup.exe' || '.dmg' }}
           archive: false
-  # A v* tag publishes the installers, the Linux package and the source as a GitHub release (ADR 0018)
+  # A v* tag publishes the installers, the Linux package and the source as a GitHub release (ADR 0020)
   release:
     if: github.ref_type == 'tag' && startsWith(github.ref_name, 'v')
     needs: build

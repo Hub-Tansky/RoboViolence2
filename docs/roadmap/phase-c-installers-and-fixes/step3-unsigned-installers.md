@@ -13,7 +13,7 @@
 | Out of scope | Signing and notarisation (PNS-49); Flatpak (PNS-52); stores (PNS-50); renaming `bv2.app` or the binaries (PNS-20); creating the first release tag (owner) |
 | Allowed paths | `packaging/**`, `triplets/**` (new), `CMakePresets.json`, `.github/workflows/build.yml`, `docs/build/**`, `docs/decisions/**`, `README.md`, `AGENTS.md`, `ARCHITECTURE.md`, `docs/roadmap/**` |
 | Inputs | `AGENTS.md`, `ARCHITECTURE.md`, PNS-16, PNS-23, PNS-26, PNS-27, PNS-20 (engine-only release decision), [ADR 0012](../../decisions/0012-windows-10-22h2-minimum.md), [ADR 0016](../../decisions/0016-player-data-lookup-and-package-content.md) |
-| Deliverables | Inno Setup script; `.dmg` creation; licence notices in every package; release job; overlay triplet; ADR 0018; install guides |
+| Deliverables | Inno Setup script; `.dmg` creation; licence notices in every package; release job; overlay triplet; ADR 0020; install guides |
 | Definition of done | See "Acceptance checks". All must pass. `ARCHITECTURE.md` is updated |
 
 ## Context
@@ -45,7 +45,7 @@
 
 ### 3.5 Docs and ADR
 
-- ADR 0018: package and release format (PNS-23) and engine-only releases (PNS-20 decision).
+- ADR 0020: package and release format (PNS-23) and engine-only releases (PNS-20 decision).
 - `docs/build/`: install from a release per OS, with the SmartScreen and Gatekeeper steps.
 
 ## Critical files

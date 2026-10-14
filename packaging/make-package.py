@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Builds the package for one preset from build/<preset>/runtime/ (ADR 0018).
+"""Builds the package for one preset from build/<preset>/runtime/ (ADR 0020).
 
 Usage: make-package.py <runtime dir> <preset> <out dir> <version>
 

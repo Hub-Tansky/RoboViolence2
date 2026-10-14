@@ -1,4 +1,4 @@
-; Windows installer (Inno Setup 6), built by packaging/make-package.py (ADR 0018). Unsigned (PNS-49).
+; Windows installer (Inno Setup 6), built by packaging/make-package.py (ADR 0020). Unsigned (PNS-49).
 ; ISCC /DSourceDir=<package folder> /DOutputDir=<dir> /DOutputName=<file name> /DAppVersion=<version> roboviolence2.iss
 
 [Setup]

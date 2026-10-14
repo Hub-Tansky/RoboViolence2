@@ -48,5 +48,7 @@ What we do, in one or two sentences.
 | [0014](0014-libsodium-hmac-for-credentials.md) | Use libsodium for the credential HMAC and nonces | Accepted |
 | [0015](0015-admin-http-api-behind-tls-proxy.md) | Remote admin is an HTTP API behind a TLS reverse proxy | Accepted |
 | [0016](0016-player-data-lookup-and-package-content.md) | The client finds the player's BV2 data; the package supplies its own content | Accepted |
-| [0017](0017-in-game-name-and-fork-credits.md) | The game shows its own name and credits the original as an unofficial fork | Accepted |
-| [0018](0018-package-and-release-format.md) | Package and release format; engine-only public releases | Accepted |
+| [0017](0017-playtest-pull-agent.md) | Test main builds on the owner's Mac with a pull agent | Accepted |
+| [0018](0018-staging-pull-deploy.md) | Staging deploys itself by pull, pinned to a commit, only when empty | Accepted |
+| [0019](0019-in-game-name-and-fork-credits.md) | The game shows its own name and credits the original as an unofficial fork | Accepted |
+| [0020](0020-package-and-release-format.md) | Package and release format; engine-only public releases | Accepted |

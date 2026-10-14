@@ -13,7 +13,7 @@
 | Out of scope | Binaries, `BV2_*`, the `BaboViolent2` pref path, master game ID and the rest of the rebrand (PNS-20); in-game terms ("Babo", "Counter Baborist"); the duplicate client schema (PNS-55); translating the new strings |
 | Allowed paths | `game/src/CCredit.cpp`, `game/src/IntroScreen.{h,cpp}`, `game/src/Scene.{h,cpp}`, `game/src/MenuSetup.cpp`, `game/src/CSurvey.{h,cpp}` (removed), `game/src/CMaster.{h,cpp}`, `game/src/CUserLogin.cpp`, `game/src/GameVar.{h,cpp}`, `game/src/main.cpp`, `game/src/Paths.cpp`, `game/CMakeLists.txt`, `content/languages/en.lang`, `content/languages/en.pot`, `config/bv2.example.cfg`, `content-seed/bv2.sql`, `engine/babonet/include/cMSstruct.h`, `masterserver/src/**`, `masterserver/README.md`, `tests/**`, `docs/decisions/**`, `docs/analysis/**`, `ARCHITECTURE.md`, `docs/roadmap/**` |
 | Inputs | `AGENTS.md`, `ARCHITECTURE.md`, PNS-53, [ADR 0008](../../decisions/0008-display-name-robo-violence-2.md), [ADR 0010](../../decisions/0010-bv2-asset-compat-and-gui-freeze.md), [ADR 0016](../../decisions/0016-player-data-lookup-and-package-content.md) |
-| Deliverables | Renamed strings; new credits header; "Loading" splash; survey removed; ADR 0017 |
+| Deliverables | Renamed strings; new credits header; "Loading" splash; survey removed; ADR 0019 |
 | Definition of done | See "Acceptance checks". All must pass. `ARCHITECTURE.md` is updated |
 
 ## Context
