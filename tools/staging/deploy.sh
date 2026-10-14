@@ -9,11 +9,13 @@ set -u
 # readonly: a line in the env file can't change them (the main-only filter depends on REPO)
 readonly REPO=Hub-Tansky/RoboViolence2
 readonly IMAGES="ghcr.io/hub-tansky/roboviolence2-server ghcr.io/hub-tansky/roboviolence2-master"
+readonly PROJECT=roboviolence2 # `name:` in compose.example.yml
 readonly ROOT=${RV2_STAGING_ROOT:-/var/lib/rv2-staging}
 readonly ENV_FILE=${RV2_STAGING_ENV:-/etc/rv2-staging.env}
 readonly MAX_ATTEMPTS=3 WAIT_NOTIFY_SECONDS=21600 KEEP=5
-# Failures in these stages say nothing about the build: they notify once and don't use up an attempt
-readonly INFRA_STAGES=" env select fetch pull "
+# Failures in these stages say nothing about the build: they notify once and don't use up an attempt.
+# wait-empty fails only when the server runs but /status doesn't answer: never deploy over a game we can't see.
+readonly INFRA_STAGES=" env select fetch pull wait-empty "
 
 # --- Helpers (tests/test_staging_deploy.sh) ---
 
@@ -32,6 +34,27 @@ failures_of() { # failures_of <sha>: failed deploys recorded for it
 }
 
 is_infra() { case $INFRA_STAGES in *" $1 "*) return 0 ;; esac; return 1; } # is_infra <stage>
+
+waiting_update() { # waiting_update <now>: records that players hold back a deploy; true once, after WAIT_NOTIFY_SECONDS
+	local since="" told=""
+	read -r since told 2>/dev/null <"$ROOT/waiting" # "<since epoch> <notified 0|1>"; kept across new commits
+	[ -n "$since" ] || { since=$1 told=0; }
+	if [ $(($1 - since)) -ge $WAIT_NOTIFY_SECONDS ] && [ "$told" = 0 ]; then
+		echo "$since 1" >"$ROOT/waiting"
+		return 0
+	fi
+	echo "$since $told" >"$ROOT/waiting"
+	return 1
+}
+
+prune_releases() { # prune_releases <keep>: delete the oldest release dirs beyond KEEP; prints the full SHA of each
+	local d sha
+	ls -1t "$ROOT/releases" 2>/dev/null | tail -n +$((KEEP + 1)) | while read -r d; do
+		[ "$d" = "$1" ] && continue
+		read -r sha 2>/dev/null <"$ROOT/releases/$d/SHA" && echo "$sha"
+		rm -rf "${ROOT:?}/releases/$d"
+	done
+}
 
 file_mode() { stat -c %a "$1" 2>/dev/null || stat -f %Lp "$1"; } # octal permission bits, GNU or BSD stat
 
@@ -66,8 +89,10 @@ compose() { # compose <sha> <args...>: that commit's compose file, images pinned
 	BV2_IMAGE_TAG=$sha docker compose -f "$ROOT/releases/${sha:0:7}/compose.example.yml" --env-file "$ENV_FILE" "$@"
 }
 
+server_running() { [ -n "$(docker ps -q -f "label=com.docker.compose.project=$PROJECT" -f label=com.docker.compose.service=server -f status=running)" ]; }
+
 admin_status() { # the running server's /status through its own proxy; -k: loopback to our own Caddy
-	local host=${BV2_ADMIN_HOST:-localhost} port=${RV2_STAGING_ADMIN_PORT:-8443}
+	local host=${BV2_ADMIN_HOST:-localhost} port=${BV2_ADMIN_PORT:-8443}
 	printf 'Authorization: Bearer %s\n' "$BV2_ADMIN_PASS" |
 		curl -fsS -k --max-time 5 -H @- --resolve "$host:$port:127.0.0.1" "https://$host:$port/status"
 }
@@ -81,7 +106,7 @@ wait_for() { # wait_for <seconds> <command...>: true once the command succeeds
 }
 
 lock() { # one run at a time; a lock whose pid is not a running deploy.sh is stale
-	mkdir -p "$ROOT" && chmod 700 "$ROOT"
+	{ mkdir -p "$ROOT" && chmod 700 "$ROOT" && [ -w "$ROOT" ]; } || { say "FAIL: $ROOT is not writable by $(id -un)"; exit 1; }
 	local p; p=$(cat "$ROOT/lock" 2>/dev/null)
 	ps -p "$p" -o command= 2>/dev/null | grep -qE 'bash ([^ ]*/)?deploy\.sh( |$)' || rm -f "$ROOT/lock"
 	(set -C; echo $$ >"$ROOT/lock") 2>/dev/null || { say "locked by pid $(cat "$ROOT/lock" 2>/dev/null); skipped"; exit 0; }
@@ -126,54 +151,55 @@ lock
 trap finish EXIT
 read -r PREV _ 2>/dev/null <"$ROOT/deployed"
 
-stage env
+stage env # without the env file there is no ntfy topic: this failure is in deploy.log only
 load_env || fail "env file"
 for t in curl jq docker; do command -v "$t" >/dev/null || fail "missing tool: $t"; done
 
 stage select
-runs=$(curl -fsS --max-time 20 "https://api.github.com/repos/$REPO/actions/workflows/containers.yml/runs?branch=main&event=push&status=success&per_page=30") ||
-	fail "runs query"
+query="branch=main&event=push&status=success&per_page=30"
+[ ${#WANT_SHA} = 40 ] && query="$query&head_sha=$WANT_SHA" # a full SHA is found however old it is
+runs=$(curl -fsS --max-time 20 "https://api.github.com/repos/$REPO/actions/workflows/containers.yml/runs?$query") || fail "runs query"
 pick=$(printf '%s' "$runs" | pick_run "$WANT_SHA")
 [ -n "$pick" ] || fail "no successful main push run of containers${WANT_SHA:+ for $WANT_SHA}"
 SHA=${pick#* }
-[ "$SHA" = "$PREV" ] && { rm -f "$ROOT/infra-failure" "$ROOT/waiting"; exit 0; } # already running
+# Already running. The weekly rebuild re-tags the same commit; it reaches staging with the next commit (ADR 0018).
+[ "$SHA" = "$PREV" ] && { rm -f "$ROOT/infra-failure" "$ROOT/waiting"; exit 0; }
 if [ -z "$WANT_SHA" ] && [ "$(failures_of "$SHA")" -ge $MAX_ATTEMPTS ]; then exit 0; fi
 
 stage fetch # this commit's compose file and Caddyfile, so files and images match
 rel="$ROOT/releases/${SHA:0:7}"
-mkdir -p "$rel" || fail "release dir"
+mkdir -p "$rel/srv" || fail "release dir"
 for f in compose.example.yml Caddyfile; do
 	curl -fsS --max-time 20 "https://raw.githubusercontent.com/$REPO/$SHA/packaging/docker/$f" -o "$rel/$f" || fail "$f"
 done
+grep -q 'BV2_IMAGE_TAG' "$rel/compose.example.yml" || fail "commit predates BV2_IMAGE_TAG: it would run :latest"
+echo "$SHA" >"$rel/SHA"
 
 stage pull
 for image in $IMAGES; do docker pull -q "$image:$SHA" >/dev/null || fail "$image:$SHA"; done
 
-stage wait-empty
-if [ -z "$FORCE" ] && status=$(admin_status 2>/dev/null); then # no answer: nothing running, nothing to protect
+stage wait-empty # decided by the container, not the API: an unreadable /status must not look like an empty server
+if [ -z "$FORCE" ] && server_running; then
+	status=$(admin_status) || fail "server runs but /status doesn't answer (password changed? proxy down?); --force to deploy"
 	players=$(printf '%s\n' "$status" | players_in)
 	if [ "${players:-0}" -gt 0 ]; then
-		wsha="" since="" told="" # waiting: "<sha> <since epoch> <notified 0|1>"
-		read -r wsha since told 2>/dev/null <"$ROOT/waiting"
-		[ "$wsha" = "$SHA" ] || { since=$(date +%s) told=0; echo "$SHA $since 0" >"$ROOT/waiting"; }
 		say "$players players connected; ${SHA:0:7} waits"
-		if [ $(($(date +%s) - since)) -ge $WAIT_NOTIFY_SECONDS ] && [ "$told" = 0 ]; then
-			echo "$SHA $since 1" >"$ROOT/waiting"
-			notify "RV2 staging deploy waiting" "${SHA:0:7} waits for $players players to leave; deploy.sh --force to override"
-		fi
+		waiting_update "$(date +%s)" &&
+			notify "RV2 staging deploy waiting" "Players held deploys back for 6 h; newest ${SHA:0:7}; deploy.sh --force to override"
 		exit 0
 	fi
 fi
+rm -f "$ROOT/waiting"
 
 stage deploy
 compose "$SHA" up -d --no-build --wait --wait-timeout 120 || fail "compose up"
 
 stage verify
 wait_for 60 admin_status || fail "/status did not answer within 60 s"
-printf '%s %s\n' "$SHA" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" >"$ROOT/deployed"
-compose "$SHA" cp "$ROOT/deployed" admin-proxy:/srv/deployed || say "warning: /deployed not published" # the deploy itself worked
+printf '%s %s\n' "$SHA" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" | tee "$ROOT/deployed" >"$rel/srv/deployed" # served at /deployed
 printf '%s\tpass\t-\t%s\n' "$SHA" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" >>"$ROOT/state.tsv"
-rm -f "$ROOT/waiting"
 RESULT=pass
 notify "RV2 staging now on ${SHA:0:7}" "Deployed${PREV:+ (was ${PREV:0:7})}"
-ls -1t "$ROOT/releases" | tail -n +$((KEEP + 1)) | while read -r d; do [ "$d" = "${SHA:0:7}" ] || rm -rf "${ROOT:?}/releases/$d"; done
+for old in $(prune_releases "${SHA:0:7}"); do # the images of dropped releases; the rollback target stays
+	for image in $IMAGES; do docker rmi "$image:$old" >/dev/null 2>&1; done
+done
