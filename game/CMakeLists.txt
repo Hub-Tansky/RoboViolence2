@@ -150,10 +150,20 @@ function(bv2_game_target target)
 endfunction()
 
 if(BV2_BUILD_SERVER)
-  add_executable(bv2dedicated ${BV2_SERVER_SOURCES})
-  target_compile_definitions(bv2dedicated PRIVATE CONSOLE)
-  bv2_game_target(bv2dedicated)
-  target_link_libraries(bv2dedicated PRIVATE zeven_console)
+  # The dedicated server minus main.cpp. Tests link it too (tests/harness): its fake bb_* object file wins over
+  # babonet's archive, so baboNet.cpp is never pulled in and the server talks to a fake network.
+  set(BV2_SERVER_LIB_SOURCES ${BV2_SERVER_SOURCES})
+  list(REMOVE_ITEM BV2_SERVER_LIB_SOURCES src/main.cpp)
+  add_library(bv2server_lib STATIC ${BV2_SERVER_LIB_SOURCES})
+  target_compile_definitions(bv2server_lib PUBLIC CONSOLE)
+  bv2_game_target(bv2server_lib)
+  target_include_directories(bv2server_lib PUBLIC src)
+  target_link_libraries(bv2server_lib PUBLIC babonet dko zeven_core zeven_console ${BV2_SQLITE_TARGET} unofficial-sodium::sodium)  # CMaster.h includes sqlite3.h
+
+  add_executable(bv2dedicated src/main.cpp)
+  target_link_libraries(bv2dedicated PRIVATE bv2server_lib Threads::Threads)
+  bv2_target_defaults(bv2dedicated)
+  bv2_target_legacy_strict(bv2dedicated)
   if(WIN32)
     set_target_properties(bv2dedicated PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${BV2_RUNTIME_DIR}")
     # UTF-8 code page for the narrow paths in Paths.cpp (ADR 0012); the DPI entries don't affect console programs
@@ -162,18 +172,6 @@ if(BV2_BUILD_SERVER)
   if(TARGET bv2_placeholder_content)
     add_dependencies(bv2dedicated bv2_placeholder_content)
   endif()
-endif()
-
-# Test hook (tests/harness): the dedicated server without main.cpp. The harness's fake bb_* object file wins over
-# babonet's archive, so baboNet.cpp is never pulled in and the server talks to a fake network.
-if(BV2_BUILD_SERVER AND BV2_BUILD_TESTS)
-  set(BV2_SERVER_LIB_SOURCES ${BV2_SERVER_SOURCES})
-  list(REMOVE_ITEM BV2_SERVER_LIB_SOURCES src/main.cpp)
-  add_library(bv2server_lib STATIC ${BV2_SERVER_LIB_SOURCES})
-  target_compile_definitions(bv2server_lib PUBLIC CONSOLE)
-  bv2_game_target(bv2server_lib)
-  target_include_directories(bv2server_lib PUBLIC src)
-  target_link_libraries(bv2server_lib PUBLIC babonet dko zeven_core zeven_console ${BV2_SQLITE_TARGET} unofficial-sodium::sodium)  # CMaster.h includes sqlite3.h
 endif()
 
 if(BV2_BUILD_CLIENT)
