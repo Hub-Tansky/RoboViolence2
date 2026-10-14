@@ -6,9 +6,11 @@ Minimum: Windows 10 22H2 ([ADR 0012](../decisions/0012-windows-10-22h2-minimum.m
 
 The client needs a GPU driver with OpenGL 2.1. GPUs without a vendor Windows 10 driver (e.g. Intel G41/GMA X4500, which Windows runs on its basic WDDM 1.1 driver) fall back to OpenGL 1.1: the client starts but draws garbled text and ignores clicks. The servers don't need a GPU.
 
-## Point the game at your original data (required, once)
+## Point the game at your original data (servers, or to skip the dialog)
 
-In PowerShell, with the folder that contains your BaboViolent 2 `main\` (replace the path):
+The client asks for the folder on first start and remembers it ([README](README.md#game-data-required)). Set `BV2_DATA_DIR` for the game server, or to use another folder:
+
+In PowerShell, with the folder that contains `main\` (replace the path):
 
 ```powershell
 setx BV2_DATA_DIR "C:\Games\bv2-data"
@@ -86,4 +88,4 @@ build\win-x64-msvc\runtime\bv2.exe
 | "Windows protected your PC" | SmartScreen: **More info → Run anyway** |
 | "running scripts is disabled on this system" | Windows blocks `.ps1` files by default: use the `-ExecutionPolicy Bypass -File` form above |
 | Garbled text, flicker, window ignores clicks | No OpenGL 2.1 driver: install the GPU vendor's driver (see the requirement above) |
-| "Can not load language file", or placeholder graphics | `BV2_DATA_DIR` is unset in this window or doesn't contain `main\`: open a new window, check with `dir "$env:BV2_DATA_DIR\main\maps"` |
+| Placeholder graphics | "Use placeholders" was chosen: restart to be asked again. To pick another folder, delete `data-dir.txt` in the pref dir; a set `BV2_DATA_DIR` must contain `main\` |

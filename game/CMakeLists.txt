@@ -69,6 +69,7 @@ set(BV2_GAME_SOURCES
   src/MapRender.cpp
   src/MemIO.cpp
   src/PacketCheck.cpp
+  src/DataDirPicker.cpp
   src/Paths.cpp
   src/MenuSetup.cpp
   src/MessageDialog.cpp
@@ -135,9 +136,11 @@ set(BV2_SERVER_SOURCES
   src/tinyxmlparser.cpp
 )
 
-function(bv2_game_target target)
-  target_include_directories(${target} PRIVATE src)
-  target_link_libraries(${target} PRIVATE babonet dko zeven_core ${BV2_SQLITE_TARGET} unofficial-sodium::sodium Threads::Threads)
+# visibility: PRIVATE for executables, PUBLIC for bv2server_lib, whose dependents (bv2dedicated, tests) need the same
+# includes and libraries
+function(bv2_game_target target visibility)
+  target_include_directories(${target} ${visibility} src)
+  target_link_libraries(${target} ${visibility} babonet dko zeven_core ${BV2_SQLITE_TARGET} unofficial-sodium::sodium Threads::Threads)
   if(BV2_WITH_HTTP)
     target_sources(${target} PRIVATE src/CCurl.cpp)
     target_compile_definitions(${target} PRIVATE BV2_WITH_HTTP)
@@ -150,10 +153,19 @@ function(bv2_game_target target)
 endfunction()
 
 if(BV2_BUILD_SERVER)
-  add_executable(bv2dedicated ${BV2_SERVER_SOURCES})
-  target_compile_definitions(bv2dedicated PRIVATE CONSOLE)
-  bv2_game_target(bv2dedicated)
-  target_link_libraries(bv2dedicated PRIVATE zeven_console)
+  # The dedicated server minus main.cpp. Tests link it too (tests/harness): its fake bb_* object file wins over
+  # babonet's archive, so baboNet.cpp is never pulled in and the server talks to a fake network.
+  set(BV2_SERVER_LIB_SOURCES ${BV2_SERVER_SOURCES})
+  list(REMOVE_ITEM BV2_SERVER_LIB_SOURCES src/main.cpp)
+  add_library(bv2server_lib STATIC ${BV2_SERVER_LIB_SOURCES})
+  target_compile_definitions(bv2server_lib PUBLIC CONSOLE)
+  bv2_game_target(bv2server_lib PUBLIC)
+  target_link_libraries(bv2server_lib PUBLIC zeven_console)
+
+  add_executable(bv2dedicated src/main.cpp)
+  target_link_libraries(bv2dedicated PRIVATE bv2server_lib)
+  bv2_target_defaults(bv2dedicated)
+  bv2_target_legacy_strict(bv2dedicated)
   if(WIN32)
     set_target_properties(bv2dedicated PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${BV2_RUNTIME_DIR}")
     # UTF-8 code page for the narrow paths in Paths.cpp (ADR 0012); the DPI entries don't affect console programs
@@ -164,21 +176,9 @@ if(BV2_BUILD_SERVER)
   endif()
 endif()
 
-# Test hook (tests/harness): the dedicated server without main.cpp. The harness's fake bb_* object file wins over
-# babonet's archive, so baboNet.cpp is never pulled in and the server talks to a fake network.
-if(BV2_BUILD_SERVER AND BV2_BUILD_TESTS)
-  set(BV2_SERVER_LIB_SOURCES ${BV2_SERVER_SOURCES})
-  list(REMOVE_ITEM BV2_SERVER_LIB_SOURCES src/main.cpp)
-  add_library(bv2server_lib STATIC ${BV2_SERVER_LIB_SOURCES})
-  target_compile_definitions(bv2server_lib PUBLIC CONSOLE)
-  bv2_game_target(bv2server_lib)
-  target_include_directories(bv2server_lib PUBLIC src)
-  target_link_libraries(bv2server_lib PUBLIC babonet dko zeven_core zeven_console ${BV2_SQLITE_TARGET} unofficial-sodium::sodium)  # CMaster.h includes sqlite3.h
-endif()
-
 if(BV2_BUILD_CLIENT)
   add_executable(bv2 ${BV2_GAME_SOURCES})
-  bv2_game_target(bv2)
+  bv2_game_target(bv2 PRIVATE)
   target_link_libraries(bv2 PRIVATE zeven_client)
   if(WIN32)
     # Placeholder icon, generated so no icon binary is committed (the original is not redistributable)

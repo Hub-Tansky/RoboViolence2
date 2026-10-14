@@ -10,6 +10,6 @@ Lobby registry (`bv2master`): game servers register, clients fetch the list; ban
 ## Gotchas
 
 - **`MasterClient` was reconstructed.** The source release lacks the master's client class (it contained a copy of babonet's `cClient` under that name). `src/MasterClient.*` rebuilds it from how `cMasterServer.cpp` uses it. The drop timeout (`MASTER_SERVER_TIMEOUT`, 60 s without a game update) is an assumption.
-- `cMasterServer.cpp` builds SQL with `sprintf` (injection risk, Q-S3 in KEY_QUESTIONS); fixing it is out of scope for Phase A.
+- `cMasterServer.cpp` binds every SQL parameter (Phase B step 6; Q-S3 in KEY_QUESTIONS).
 - `src/cMSstruct.h` is an older subset of `engine/babonet/include/cMSstruct.h`; reconcile later.
 - Dead files removed in Step 2: `cPlayer.*` (never compiled), `CServer.cpp`/`cServer.h` (referenced a class that does not exist).

@@ -674,7 +674,8 @@ void Console::sendCommand(CString commandLine, bool isAdmin, unsigned long bbnet
 	if (command == "execute")
 	{
 		int i;
-		FileIO file(CString("main/LaunchScript/%s.cfg", tokenize.s), "r");
+		std::string script = bv2::contentFile(std::string("main/LaunchScript/") + tokenize.s + ".cfg");
+		FileIO file(CString("%s", script.c_str()), "r");
 		if (file.isValid())
 		{
 			// Clear previous vote settings

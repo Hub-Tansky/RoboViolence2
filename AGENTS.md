@@ -19,16 +19,16 @@ cmake --build --preset <preset> --target bv2dedicated bv2master
 ```
 
 - Needs `VCPKG_ROOT`, CMake 3.25+, Ninja, Python 3. `-asan` presets add ASan + UBSan. Per-OS setup and running: [docs/build/](docs/build/README.md).
-- Output: `build/<preset>/runtime/` (executables, `main/`, `master.db`, `web.db`; also a `bv2.db` the game doesn't read, PNS-24). Run the server from there ([ADR 0005](docs/decisions/0005-runtime-main-data-root.md)). CI packages it per OS with `packaging/make-package.py`.
+- Output: `build/<preset>/runtime/` (executables, `main/`, `master.db`, `web.db`). Run the server from there ([ADR 0005](docs/decisions/0005-runtime-main-data-root.md)). CI packages it per OS with `packaging/make-package.py`.
 - `bv2` (client) needs the vcpkg `client` feature (SDL3, miniaudio, stb); `-DBV2_BUILD_CLIENT=OFF` builds the servers only. `-DBV2_WITH_HTTP=ON` adds libcurl (off by default, ADR 0002).
 - Tests: `ctest --test-dir build/<preset> --output-on-failure` (`tests/`: netPacket layout, config layering and secret mask, dedicated-server smoke).
-- CI (`.github/workflows/`), all required: `build` (Windows, macOS, Linux; Debug and `-release` presets; uploads the Release `roboviolence2-<preset>` packages), `smoke` (Linux ASan: ctest and a 10 s client run under xvfb), `secret-scan`, `architecture`, `hygiene` (paths, ignored files, size, encoding, content case), `review` (`tools/review.sh` on PRs: scope, anti-gaming, DONE gate). Not required: `codeql`, `clang-tidy`, `package-check` (Linux package in a clean `ubuntu:24.04`); `dependency-graph` runs on `main`. vcpkg ports get no vulnerability alerts: bump the baseline monthly. Run them locally with `tools/review.sh` (`--full <preset>` adds build and ctest).
+- CI (`.github/workflows/`), all required: `build` (Windows, macOS, Linux; Debug and `-release` presets; uploads the Release `roboviolence2-<preset>` packages), `smoke` (Linux ASan: ctest and a 10 s client run under xvfb), `secret-scan`, `architecture`, `hygiene` (paths, ignored files, size, encoding, content case), `review` (`tools/review.sh` on PRs: scope, anti-gaming, DONE gate). Not required: `codeql`, `clang-tidy`, `package-check` (Linux package in a clean `ubuntu:24.04`), `containers` (server images and the compose example; pushes to GHCR from `main`). On `main`: `dependency-graph`. Weekly: `osv-vcpkg` (OSV check of the vcpkg ports, `tools/osv-vcpkg.py`). Bump the vcpkg baseline monthly, or when `osv-vcpkg` reports a port. Run them locally with `tools/review.sh` (`--full <preset>` adds build and ctest).
 - Warnings are errors (`bv2_target_strict`) on `babonet`, `dko`, `zeven_core`; add a target once it is clean. Format only touched lines with `git clang-format`; never mass-reformat.
 
 ## Assets
 
 - The original assets are removed. Never re-add them; `tools/check-original-assets.py` rejects them by hash.
-- With your own copy of the original data, keep it outside the repo and set `BV2_DATA_DIR`. Without it, CI and contributors use generated placeholders (step 2 §2.6).
+- With your own copy of the original data, keep it outside the repo; the client asks for it on first start, or set `BV2_DATA_DIR` ([ADR 0016](docs/decisions/0016-player-data-lookup-and-package-content.md)). Without it, CI and contributors use generated placeholders (`--placeholders` skips the dialog).
 
 ## Config and secrets
 
@@ -54,7 +54,7 @@ cmake --build --preset <preset> --target bv2dedicated bv2master
 ## Compile-time variants
 
 - `CONSOLE`: headless dedicated server (no rendering, client, editor or menus). Guard client-only code with `#ifndef CONSOLE`.
-- The Direct3D path (`_DX_`), the non-Pro ruleset (`_PRO_` is now always on, version 21100) and Visual Leak Detector were removed in Step 1.
+- The Direct3D path (`_DX_`), the compile-time `_PRO_` switch and Visual Leak Detector were removed in Step 1. The runtime ruleset `sv_serverType` (0 Normal, 1 Pro) stays ([ADR 0013](docs/decisions/0013-r3-restore-normal-and-pro-rulesets.md)).
 
 ## Git identity
 
@@ -72,7 +72,7 @@ cmake --build --preset <preset> --target bv2dedicated bv2master
 - The server is authoritative for hits, damage, spawns, projectiles and flags. Clients are authoritative for their own movement.
 - Server variables (`sv_*`) are registered in `game/src/GameVar.cpp` via `dksvarRegister` and pushed to clients.
 - Decisions are ADRs in `docs/decisions/` (format and index in its README). Read them before reversing a choice; write one for any non-obvious new choice.
-- Known defects (unchecked `playerID` from packets, `sv_serverType = 1` assignment, etc.) are listed in `docs/analysis/KEY_QUESTIONS.md`. Check there before "fixing" odd behaviour, since some of it is load-bearing.
+- Known defects (open and fixed, with the fixing step) are listed in `docs/analysis/KEY_QUESTIONS.md`. Check there before "fixing" odd behaviour, since some of it is load-bearing.
 
 ## Writing documentation
 

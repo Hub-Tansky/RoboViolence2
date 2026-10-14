@@ -9,9 +9,15 @@ Pick your OS: [macOS](macos.md), [Linux](linux.md), [Windows](windows.md). Each 
 
 ## Game data (required)
 
-- Playing needs your own copy of the original BaboViolent 2 data; it is never in this repository or the packages. Find the folder that contains `main/` (with `maps/`, `textures/`, `sounds/`, `fonts/`) and set `BV2_DATA_DIR` to it permanently, as each OS guide shows, before the first game. Pointing it at `main/` itself also works. Building and the tests work without it.
-- The client and the game server both read `BV2_DATA_DIR`: the server loads its maps and launch scripts from there and sends missing maps to clients.
-- Without it the game falls back to generated placeholder maps, textures and sounds. That is only for CI and development: it looks rough, has no music, and doesn't match other players' maps.
+- Playing needs your own copy of the original BaboViolent 2 data: the folder that contains `main/` (with `maps/`, `textures/`, `sounds/`, `fonts/`). It is never in this repository or the packages. Building and the tests work without it.
+- The client finds it in this order ([ADR 0016](../decisions/0016-player-data-lookup-and-package-content.md)):
+  1. `BV2_DATA_DIR` (the folder or its `main/`).
+  2. The folder saved on an earlier start (`data-dir.txt` in the pref dir).
+  3. `BaboViolent2-master` or `BaboViolent2` (the upstream repository, unzipped) in `Downloads`, `Desktop` or `Documents`; on Windows also `BaboViolent 2` or `BaboViolent2` in Program Files.
+  4. On first start, a dialog asks for the folder and saves it. "Use placeholders" (or `--placeholders`) skips it.
+- The game server reads only `BV2_DATA_DIR`: it loads its maps from there and sends missing maps to clients.
+- Launch scripts, language files and `bv2.example.cfg` always come from the package's own `main/`.
+- Without data the game uses generated placeholder maps, textures and sounds. That is only for CI and development: it looks rough, has no music, and doesn't match other players' maps.
 - Saved settings, `bv2.db`, logs and downloaded maps go to the per-user pref dir ([ADR 0007](../decisions/0007-data-root-pref-dir-config-layers.md)); `BV2_PREF_DIR` overrides it:
 
   | OS | Pref dir |
