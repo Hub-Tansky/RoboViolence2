@@ -33,14 +33,15 @@ struct sqlite3;
 namespace bv2
 {
 	// Finds packageRoot (the app bundle, <exe>/../share/bv2, next to the exe, the working directory, in that order;
-	// the first with a main/ folder wins) and dataRoot (BV2_DATA_DIR when a main/ is found there as findDataIn
-	// looks, else packageRoot),
+	// the first with a main/ folder wins) and dataRoot (the folder findDataIn finds in BV2_DATA_DIR, else packageRoot),
 	// creates prefDir and changes into dataRoot.
 	// Returns false when no main/ folder exists anywhere (the game can still run servers without content).
 	bool pathsInit(const char * argv0);
 
 	const std::string & dataRoot();
 	const std::string & packageRoot();
+	// True when BV2_DATA_DIR supplied the data root
+	bool dataFromEnv();
 
 	// Makes dir (a folder holding main/) the data root and changes into it
 	bool setDataRoot(const std::string & dir);
@@ -50,7 +51,7 @@ namespace bv2
 	std::string contentFile(const std::string & rel);
 
 	// The folder holding BV2 data (main/textures/) at dir, at its parent when dir is main/, at dir/Content or at
-	// dir/BaboViolent2/Content (the upstream repository); "" when none. BV2_DATA_DIR is searched the same way.
+	// dir/BaboViolent2/Content (the upstream repository); "" when none
 	std::string findDataIn(const std::string & dir);
 
 	// The player's data folder saved in prefDir()/data-dir.txt; "" when unset or it no longer holds data

@@ -74,7 +74,7 @@ namespace bv2
 {
 	void chooseDataDir(int argc, char ** argv)
 	{
-		if (dataRoot() != packageRoot()) // BV2_DATA_DIR held data (pathsInit)
+		if (dataFromEnv())
 			return;
 		for (int i = 1; i < argc; ++i)
 			if (std::strcmp(argv[i], "--placeholders") == 0)

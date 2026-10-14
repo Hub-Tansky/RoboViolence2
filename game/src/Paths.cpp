@@ -86,9 +86,11 @@ namespace
 		return !dir.empty() && fs::is_directory(dir / "main", ec);
 	}
 
-	// The first folder holding sub (e.g. "main/textures") among dir, its parent when dir is main/, dir/Content and
+	bool g_dataFromEnv = false;
+
+	// The first folder holding main/textures/ among dir, its parent when dir is main/, dir/Content and
 	// dir/BaboViolent2/Content (the upstream repository); "" when none
-	fs::path firstRootWith(const std::string & dir, const char * sub)
+	fs::path findRoot(const std::string & dir)
 	{
 		if (dir.empty())
 			return fs::path();
@@ -103,7 +105,7 @@ namespace
 		for (size_t i = 0; i < tries.size(); ++i)
 		{
 			std::error_code ec;
-			if (fs::is_directory(tries[i] / sub, ec))
+			if (fs::is_directory(tries[i] / "main" / "textures", ec))
 				return tries[i];
 		}
 		return fs::path();
@@ -191,8 +193,9 @@ namespace bv2
 			if (hasMain(candidates[i]))
 				g_packageRoot = rootString(candidates[i]);
 
-		fs::path envRoot = firstRootWith(getEnv("BV2_DATA_DIR"), "main");
-		if (!envRoot.empty())
+		fs::path envRoot = findRoot(getEnv("BV2_DATA_DIR"));
+		g_dataFromEnv = !envRoot.empty();
+		if (g_dataFromEnv)
 			return setDataRoot(envRoot.generic_string());
 		if (!g_packageRoot.empty())
 			return setDataRoot(g_packageRoot);
@@ -218,7 +221,7 @@ namespace bv2
 
 	std::string findDataIn(const std::string & dir)
 	{
-		fs::path root = firstRootWith(dir, "main/textures");
+		fs::path root = findRoot(dir);
 		return root.empty() ? std::string() : rootString(root);
 	}
 
@@ -273,6 +276,7 @@ namespace bv2
 
 	const std::string & dataRoot() { return g_dataRoot; }
 	const std::string & packageRoot() { return g_packageRoot; }
+	bool dataFromEnv() { return g_dataFromEnv; }
 	const std::string & prefDir() { return g_prefDir; }
 
 	std::string userFile(const std::string & name)
@@ -335,12 +339,8 @@ namespace bv2
 			dksvarSaveConfig((char *)cfg.c_str());
 		applyFile(cfg, false);
 
-		// 3. local overrides: config/local/*.cfg beside the package's main/ and, when it differs, the data root's
-		// (ADR 0016), then --config files
-		std::vector<std::string> dirs;
-		dirs.push_back(g_packageRoot + "config/local");
-		if (g_dataRoot != g_packageRoot)
-			dirs.push_back(g_dataRoot + "config/local");
+		// 3. local overrides: config/local/*.cfg beside the package's main/ (ADR 0016), then --config files
+		std::vector<std::string> dirs(1, g_packageRoot + "config/local");
 		for (size_t d = 0; d < dirs.size(); ++d)
 		{
 			std::vector<std::string> files;
