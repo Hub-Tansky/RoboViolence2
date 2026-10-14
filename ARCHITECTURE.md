@@ -295,6 +295,12 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/step12-remote-admin.md` | Scope file for step12 |
 | `docs/roadmap/phase-b-security-infrastructure-anti-cheat/step13-localisation.md` | Scope file for step13 |
 
+### `docs/roadmap/phase-c-installers-and-fixes`
+
+| path | purpose |
+|---|---|
+| `docs/roadmap/phase-c-installers-and-fixes/README.md` | Phase C scope: accepted PNS entries, order, done-when, risks |
+
 ### `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews`
 
 | path | purpose |

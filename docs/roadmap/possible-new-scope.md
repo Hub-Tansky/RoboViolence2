@@ -30,14 +30,6 @@ Entry format: ID, where it was found, an extract of the source, why it matters, 
 - **Suggested home:** §C.1 (split `dko` geometry loading from GL upload) or §F.1 (replace GLU).
 - **Status:** Merged into PNS-12; Phase B step 11 ships GLU in the server image meanwhile
 
-### PNS-4: Master server client class is reconstructed
-
-- **Found in:** PR #2, `masterserver/README.md`.
-- **Extract:** "The master's client class is missing from the source release; `MasterClient` is reconstructed from its usage and its 60 s timeout is an assumption."
-- **Why:** Unverified protocol behaviour in a network-facing service; it should be covered before §A.3 (SQL) and §D (hosting).
-- **Suggested home:** §A (tests for master register and list), §D.
-- **Status:** Accepted → Phase B [step 3](phase-b-security-infrastructure-anti-cheat/step3-test-harness.md)
-
 ### PNS-5: Pre-existing UBSan defects
 
 - **Found in:** `ARCHITECTURE.md` Open items, PR #2, PR #5.
@@ -86,14 +78,6 @@ Entry format: ID, where it was found, an extract of the source, why it matters, 
 - **Suggested home:** §H.4 (run exporter output through these tests).
 - **Status:** Merged into PNS-20
 
-### PNS-11: Stale facts in `ARCHITECTURE.md`
-
-- **Found in:** closing Phase A (2026-10-06).
-- **Extract:** "State after Step 3"; "Protocol `GAME_VERSION_SV/CL` = 21100"; "Linux and Windows are untested". The code has `GAME_VERSION_SV 22000` (`game/src/Server.h:32`), and CI builds all three OSes.
-- **Why:** Agents treat `ARCHITECTURE.md` as the source of truth.
-- **Suggested home:** next PR that touches `ARCHITECTURE.md`.
-- **Status:** Accepted → Phase B [step 0](phase-b-security-infrastructure-anti-cheat/step0-supply-chain-security.md)
-
 ## Deferred from Phase B planning (2026-10-07)
 
 Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a [Phase B step](phase-b-security-infrastructure-anti-cheat/README.md). Extracts quote that plan.
@@ -104,7 +88,7 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Extract:** "Extract the game rules with no rendering, audio, UI or networking: `Game`, `Player` physics, `Map` collision and ray march, `Weapon`, `Projectile`, game modes, spawning." "A `PlayerCommand` struct: tick number, move vector, aim direction, fire …" "Replace global `rand()` with a per-`Game` seeded RNG."
 - **Why deferred:** Owner decision (2026-10-07). Large refactor of every `#ifndef CONSOLE` block; needed only for replays, server-authoritative movement and information hiding (PNS-13). Phase B's `ServerValidator` (step 8) is the layer these plug into later.
 - **Suggested home:** first steps of the phase after B; needs the Phase B manual test as a baseline.
-- **Status:** Proposed
+- **Status:** Accepted → Phase D (not yet planned)
 
 ### PNS-13: Advanced anti-cheat
 
@@ -130,13 +114,15 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Suggested home:** decide before the phase that takes PNS-13 and PNS-14.
 - **Status:** Proposed
 
-### PNS-16: Signed distribution
+### PNS-16: Unsigned installers
 
-- **Source:** former §D distribution.
+- **Source:** former §D distribution; split by the owner (2026-10-14) into this entry, PNS-49 (signing), PNS-50 (stores) and PNS-52 (Flatpak).
 - **Extract:** "Windows 11: signed installer or zip; macOS: codesign + notarisation, DMG; Linux: AppImage and/or Flatpak (+ `.deb`); optionally Steam or itch.io."
-- **Why deferred:** Needs certificates, developer accounts and costs. Phase B step 1 ships unsigned test packages.
-- **Suggested home:** before any public release (after PNS-20 H.1).
-- **Status:** Proposed
+- **Scope (owner, 2026-10-14):** Windows 10 and 11: `.exe` installer; macOS: `.dmg`; a source tarball. None signed (macOS keeps the ad-hoc signature, `packaging/make-package.py`). Built by CI and attached to GitHub releases. Linux keeps the CI `.tar.gz` package until Flatpak (PNS-52). AppImage and `.deb` dropped: Flatpak covers distro package managers (e.g. Mint's).
+- **Original assets:** not shipped. Packages already carry generated placeholders and read the player's data through `BV2_DATA_DIR` (`game/src/Paths.cpp:144`); PNS-51 removes the env var and keeps packaged content loading.
+- **Why it matters:** friends install without building or unpacking archives.
+- **Suggested home:** after PNS-51; the PNS-23 ADR with it.
+- **Status:** Accepted → [Phase C](phase-c-installers-and-fixes/README.md)
 
 ### PNS-17: Networking rework
 
@@ -144,7 +130,7 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Extract:** "Move coord frames and, later, C.2 commands to UDP … only **after** auditing babonet's UDP / `cPeer2Peer` path" "Replace raw `memcpy` structs with explicit, versioned serialisation" "Tick-stamped snapshots and delta compression"
 - **Why deferred:** Big protocol change; prerequisite of server-authoritative movement and information hiding (PNS-13). Phase B hardens the current TCP protocol instead (steps 4, 10).
 - **Suggested home:** with PNS-12.
-- **Status:** Proposed
+- **Status:** Accepted → Phase D (not yet planned)
 
 ### PNS-18: Renderer isolation and replacement
 
@@ -170,8 +156,9 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Extract:** "**Minimum playable set:** every `required` row. Textures, skins, fonts, models …, effects and one map per game mode. Use CC0/CC-BY or original work only." "**Toolchain:** … Write a Blender exporter, or convert from glTF in `tools/`" "**Fonts:** the replacement font covers Latin Extended at least" "**Rebrand** **[GUI]**: window title, menus, credits, binary names (`bv2*`), `BV2_*` env vars, config/pref-path names, master-server game ID. Keep a 'based on BaboViolent 2 by bitHeads / RndLabs' credit."
 - **Also covers:** H.2 record every replacement (author, licence, source) and keep the hash blocklist on; H.3 recreate maps with the editor under new names; H.5 new effects and music; H.8 record any rights the original authors grant (re-adding a granted original needs an ADR).
 - **Why deferred:** A separate art and asset track; ADR 0010 keeps BV2 compatibility until H.1 ships. Rebranding is **[GUI]**.
-- **Suggested home:** its own phase, in parallel from now on; nothing ships publicly before H.1.
-- **Status:** Proposed
+- **Suggested home:** its own phase, in parallel from now on.
+- **Owner decision (2026-10-14):** engine-only releases (code, generated placeholders, the player supplies the BV2 data) may ship publicly before H.1 (Phase C, PNS-16). Flathub (PNS-52), Steam and itch.io (PNS-50) wait for H.1.
+- **Status:** Proposed (owner-deferred, 2026-10-14)
 
 ### PNS-21: Localisation beyond the foundations
 
@@ -189,7 +176,7 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Extract:** OSV-Scanner on `build/macos-arm64/vcpkg_installed`: "Filtered 6 local/unscannable package/s from the scan." vcpkg's SPDX gives `pkg:vcpkg/sqlite3@3.53.4?port_version=2&...`.
 - **Why it matters:** Neither Dependabot (no C/C++ ecosystem in the GitHub Advisory Database) nor OSV checks sqlite3, SDL3, miniaudio or stb. The only defence is the manual monthly baseline bump.
 - **Suggested home:** re-check when OSV or GitHub adds a vcpkg ecosystem, or generate an SBOM that maps ports to upstream `pkg:github/...` purls with versions OSV can match (OSS-Fuzz entries for sqlite and SDL exist). Any phase; small.
-- **Status:** Proposed
+- **Status:** Accepted → [Phase C](phase-c-installers-and-fixes/README.md)
 
 ### PNS-23: ADR for the play-test package format
 
@@ -197,7 +184,7 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Extract:** "Step task 1.2 asks for `.sh` and `.ps1` run scripts; `.cmd` was delivered … The new distribution format (archive layout, unarchived artifact upload, duplicate bundle `main/`, ad-hoc re-sign) has no ADR either."
 - **Why it matters:** A later agent might "fix" `.cmd` back to `.ps1`, drop the second macOS `main/`, or re-zip the artifacts without knowing why they are as they are (`packaging/make-package.py`, step 1 task 1.2).
 - **Suggested home:** a short ADR in the next PR that touches packaging, or with PNS-16 (signed distribution). The owner asked to check it further before writing one.
-- **Status:** Proposed
+- **Status:** Accepted → [Phase C](phase-c-installers-and-fixes/README.md)
 
 ### PNS-24: Remove the unused runtime `bv2.db`
 
@@ -205,7 +192,7 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Extract:** "the build still generates `runtime/bv2.db` (`tools/CMakeLists.txt:11-25` …). The game never reads it: `openClientDb` uses the pref dir (`game/src/Paths.cpp:275`)."
 - **Why it matters:** Dead build output that the docs have to explain, and a second copy of client-database seed data.
 - **Suggested home:** any step touching `tools/CMakeLists.txt`; check first that nothing seeds the pref-dir `bv2.db` from it.
-- **Status:** Proposed
+- **Status:** Accepted → [Phase C](phase-c-installers-and-fixes/README.md)
 
 ### PNS-25: Hide the "Color depth" option
 
@@ -221,7 +208,7 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Extract:** `ld: warning: object file (…/vcpkg_installed/arm64-osx/debug/lib/libSDL3.a[248](SDL_dummysensor.c.o)) was built for newer 'macOS' version (27.0) than being linked (12.0)`.
 - **Why it matters:** `CMakePresets.json:58` sets `CMAKE_OSX_DEPLOYMENT_TARGET` 12.0 for our code, but the `arm64-osx` triplet builds SDL3 and the other ports for the build machine's macOS. The CI package (built on `macos-14`) therefore likely needs macOS 14+, while the docs promise 12+. Friends on older Macs may not be able to start it.
 - **Suggested home:** an overlay triplet setting `VCPKG_OSX_DEPLOYMENT_TARGET 12.0` for the macOS presets (touches `CMakePresets.json` and a new `triplets/`), or change the documented minimum. Before the PNS-31 cross-OS game if a tester has macOS < 14.
-- **Status:** Proposed
+- **Status:** Accepted → [Phase C](phase-c-installers-and-fixes/README.md)
 
 ### PNS-27: Pin the Windows CI runner image
 
@@ -229,15 +216,7 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Extract:** "The CI log of run 38002113508 shows `Operating System: Microsoft Windows Server 2025`, `Image: windows-2025-vs2026` … Optionally pin `windows-2025` instead of `windows-latest` so the fact can't drift silently."
 - **Why it matters:** The docs and ADR 0012 name the Windows version CI tests on; `windows-latest` can change under them. `.github/workflows/` is outside step 2a's Allowed paths.
 - **Suggested home:** the next step that touches `.github/workflows/build.yml` (step 3 adds a fuzz job there).
-- **Status:** Proposed
-
-### PNS-28: Start in fullscreen on every OS
-
-- **Found in:** owner request after the Windows 10 play-test (2026-10-10).
-- **Extract:** "on all systems game starts in fullscreen mode."
-- **Why it matters:** the packages start windowed because they are Debug builds: `r_fullScreen` defaults to false only under `_DEBUG` (`game/src/GameVar.cpp:642–646`), true otherwise (step 2a review round 2, finding 2).
-- **Suggested home:** owner-approved (2026-10-10). Release packages give fullscreen without a code change.
-- **Status:** Accepted → Phase B [step 2b](phase-b-security-infrastructure-anti-cheat/step2b-release-packages.md)
+- **Status:** Accepted → [Phase C](phase-c-installers-and-fixes/README.md)
 
 ### PNS-29: Shareable debug-capable Windows packages
 
@@ -252,11 +231,8 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Found in:** owner play-test on macOS and Linux, Phase B step 2 (2026-10-10).
 - **Extract:** Options → "High detail menus" (`r_highDetailMenu`, default `true`, `game/src/GameVar.cpp:677`) drives `renderMenuQuad` (`game/src/Helper.cpp:248`), upstream code. Off (`game/src/Helper.cpp:342`): one smooth translucent vertical gradient. On (`game/src/Helper.cpp:296`): a two-part gradient with a hard step at mid-height, and four full-size black quads at alpha 0.25 meant as a 1 px shadow, which darken the whole panel by about 68%.
 - **Why it matters:** the default setting gives the worse-looking, less translucent menus.
-- **Proposed changes:**
-  - Change the default to `false` (one line).
-  - When on, draw the shadow as a 1 px border only and remove the mid-height step, so "on" is a refined version of "off".
-- **Suggested home:** a **[GUI]** change (owner approval), with menu work or the rebrand (PNS-20).
-- **Status:** Proposed
+- **Change (owner-approved [GUI], 2026-10-14):** default `r_highDetailMenu` to `false` (one line). The drawing fix is PNS-48.
+- **Status:** Accepted → [Phase C](phase-c-installers-and-fixes/README.md)
 
 ### PNS-31: Finish the step 2 play-test checks
 
@@ -284,7 +260,7 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Extract:** "The whole server is compiled twice: `bv2dedicated` and `bv2server_lib` share the same `BV2_SERVER_SOURCES` minus main.cpp … The bigger simplification is `bv2dedicated = main.cpp + bv2server_lib`."
 - **Why it matters:** every test build compiles the server twice, and the two targets can drift apart in flags.
 - **Suggested home:** a build-only change to `game/CMakeLists.txt` in any later step that touches it; check the harness still links its fake `bb_*` first.
-- **Status:** Proposed
+- **Status:** Accepted → [Phase C](phase-c-installers-and-fixes/README.md)
 
 ### PNS-34: Make `CString`'s format constructor explicit
 
@@ -292,15 +268,7 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Extract:** "`console->svChange(svChange.svChange)` … `TimedMessage(chat.message)` … Neither is a visible `CString(` call … Making the format constructor `explicit` would close the whole class of bugs."
 - **Why it matters:** `CString(char* fmt, ...)` is implicit, so passing wire text anywhere a `CString` is expected runs it as a printf format (R16, R21–R23 and the two client cases). Step 4 fixed the sites it found; an `explicit` constructor would make the compiler find the rest.
 - **Suggested home:** step 7 (medium/low defects), or a step that touches `engine/zeven/include/CString.h`; expect many call-site changes.
-- **Status:** Proposed
-
-### PNS-35: Don't broadcast secrets to clients
-
-- **Found in:** Phase B step 4 fresh-context review (2026-10-11), finding 15.
-- **Extract:** "Every client receives `sv_password` … The `PLAYER_INFO` rebroadcast sends every joiner's account MD5 `password` and `macAddr` to all clients."
-- **Why it matters:** any player can read the server password and every other player's account hash and MAC address.
-- **Suggested home:** Phase B step 10 (server credentials, Q-S5): blank `password` and `macAddr` before the rebroadcast and stop pushing `sv_password`.
-- **Status:** Proposed
+- **Status:** Accepted → [Phase C](phase-c-installers-and-fixes/README.md)
 
 ### PNS-36: Update docs that still describe R3 as current
 
@@ -309,7 +277,7 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Why it matters:** an agent reading them could undo ADR 0013.
 - **Suggested home:** the next step allowed to edit `AGENTS.md` and `docs/analysis/`; point each at ADR 0013.
 - **Also (step 6):** `masterserver/README.md` still says `cMasterServer.cpp` builds SQL with `sprintf`; it binds since Phase B step 6.
-- **Status:** Proposed
+- **Status:** Accepted → [Phase C](phase-c-installers-and-fixes/README.md)
 
 ### PNS-37: One read primitive for `FileIO` and `MemIO`
 
@@ -325,7 +293,7 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Extract:** KEY_QUESTIONS R28 "On Windows, babonet intermittently crashes … when a TCP connection closes"; R29 "`~_typLayer` calls `glDeleteTextures` when `textureID == 0` … `loadTexture` dereferences a null `ptrLayer`".
 - **Why it matters:** R28 can crash the Windows game and master when a player leaves; the master test is off on Windows until it is fixed. R29 leaks every DKT texture.
 - **Suggested home:** step 7 (R29 is in `engine/dko/src/ePTexture.h`); R28 needs a Windows debugging session (a crash dump from the owner's PC or a Windows CI run with a debugger).
-- **Status:** Proposed
+- **Status:** Accepted → [Phase C](phase-c-installers-and-fixes/README.md)
 
 ### PNS-39: Why did the dropped-flag radii differ?
 
@@ -349,7 +317,7 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Extract:** coord frames held back more than about 0.5 s across a 3 s window's start give `clientFrames > serverFrames + 5 + 10%` (`ServerValidator::onCoordFrame`); three such windows in a row kick (`sv_speedHackKick`).
 - **Why it matters:** a player on a link that stalls every few seconds can be kicked as a speed hacker. The rule is unchanged since upstream.
 - **Suggested home:** tune it from the step 9 play-test log (time the window by the client frames, or count only the drift beyond a stall).
-- **Status:** Proposed
+- **Status:** Accepted → Phase D (not yet planned)
 
 ### PNS-42: Admin login attempts and weak passwords
 
@@ -357,7 +325,7 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Extract:** the join and admin proofs are HMACs keyed by the password over a public nonce (ADR 0014). Someone who records one can test password guesses offline; the server accepts unlimited `ADMIN_REQUEST`s (no budget in step 9's rate limits).
 - **Why it matters:** a short `zsv_adminPass` or `sv_password` can be found from one captured login.
 - **Suggested home:** step 12 (remote admin): an attempt budget per connection, a minimum password length for `zsv_adminPass`; a PAKE or TLS if passwords must survive capture.
-- **Status:** Proposed
+- **Status:** Accepted → [Phase C](phase-c-installers-and-fixes/README.md)
 
 ### PNS-43: Join-time identity gaps left after step 10
 
@@ -368,7 +336,7 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
   - The master's ban and unban messages are authorised by a hard-coded password (`roxbabo`) sent in cleartext.
 - **Why it matters:** privacy (IPs), and anyone can add master bans.
 - **Suggested home:** step 12 (remote admin) for the ban password; a protocol step for the join order and IPs.
-- **Status:** Proposed
+- **Status:** Accepted → [Phase C](phase-c-installers-and-fixes/README.md) (master ban password); join order and relayed IPs → Phase D with PNS-17
 
 ### PNS-44: The master lists a server at its connection's address
 
@@ -376,7 +344,7 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Extract:** `bv2Row.ip` is left empty (`game/src/CMaster.cpp`, `sendGameInfo`); the master records the address the heartbeat came from. In the compose example that is the server container's internal address.
 - **Why it matters:** remote clients can't join a co-located server from the browser; they must `connect` by hand.
 - **Suggested home:** an advertised address (`sv_publicAddress` or `BV2_PUBLIC_ADDRESS`) sent in the heartbeat and trusted by the master only when it matches a configured server.
-- **Status:** Proposed
+- **Status:** Accepted → [Phase C](phase-c-installers-and-fixes/README.md)
 
 ### PNS-45: AGENTS.md and the CI list miss the containers workflow
 
@@ -384,7 +352,7 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Extract:** AGENTS.md lists the required CI checks; `containers` (step 11) is not there, and whether it should be required is undecided.
 - **Why it matters:** a broken image can merge unnoticed unless the check is required.
 - **Suggested home:** the next step that may edit AGENTS.md; the owner decides on branch protection.
-- **Status:** Proposed
+- **Status:** Accepted → [Phase C](phase-c-installers-and-fixes/README.md)
 
 ### PNS-46: Remote admin leftovers
 
@@ -394,7 +362,7 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
   - `BV2_ADMIN_API_PORT`, `BV2_ADMIN_API_BIND` and `BV2_ADMIN_API_PROXY` are not in the environment lists of AGENTS.md and config/README.md.
 - **Why it matters:** dead network code, and operators reading the config docs miss the admin API.
 - **Suggested home:** a cleanup step that may edit `game/src/CMaster.*`, AGENTS.md and config/README.md.
-- **Status:** Proposed
+- **Status:** Accepted → [Phase C](phase-c-installers-and-fixes/README.md)
 
 ### PNS-47: Old saved `languageFile` pins English
 
@@ -402,4 +370,82 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Extract:** builds before step 13 saved `languageFile "main/languages/en.lang"` in the user's `bv2.cfg`; a saved value wins over the OS language (`game/src/GameVar.cpp` `reloadLanguage`), so upgraded players never get the OS default. `content/languages/README.md` only documents the workaround.
 - **Why it matters:** translations stay invisible to existing players until they edit their config.
 - **Suggested home:** PNS-21 or the next step touching `GameVar.cpp`: treat the old default value as empty once, on load.
+- **Status:** Accepted → [Phase C](phase-c-installers-and-fixes/README.md)
+
+### PNS-48: Fix the "High detail menus" drawing
+
+- **Found in:** split from PNS-30 (owner, 2026-10-14).
+- **Extract:** On (`game/src/Helper.cpp:296`): a two-part gradient with a hard step at mid-height, and four full-size black quads at alpha 0.25 meant as a 1 px shadow.
+- **Why it matters:** players who turn the option on get darker menus with a visible step.
+- **Proposed change:** draw the shadow as a 1 px border only and remove the mid-height step, so "on" is a refined version of "off".
+- **Suggested home:** a **[GUI]** change (owner approval), with menu work or the rebrand (PNS-20).
 - **Status:** Proposed
+
+### PNS-49: Code signing and notarisation
+
+- **Found in:** split from PNS-16 (owner, 2026-10-14).
+- **Extract:** "Windows 11: signed installer …; macOS: codesign + notarisation".
+- **Why it matters:** removes SmartScreen and Gatekeeper warnings. Needs an Apple Developer account, a Windows code-signing certificate and CI secrets.
+- **Suggested home:** before a wider public release (after PNS-20 H.1).
+- **Status:** Proposed
+
+### PNS-50: Steam and itch.io
+
+- **Found in:** split from PNS-16 (owner, 2026-10-14).
+- **Extract:** "optionally Steam or itch.io."
+- **Why it matters:** store reach. Stores need the game to ship its own assets, so it waits for PNS-20 H.1 and the rebrand.
+- **Suggested home:** after PNS-20 and PNS-49.
+- **Status:** Proposed (owner-deferred)
+
+### PNS-51: Installed game finds the player's BV2 data
+
+- **Found in:** Phase C planning (2026-10-14), checking PNS-16 against `game/src/Paths.cpp`.
+- **Extract:** `pathsInit` picks one data root: `BV2_DATA_DIR`, else the folder beside the executable (`game/src/Paths.cpp:139–180`). With `BV2_DATA_DIR` set, the package's own `main/` is ignored, so its launch scripts and translations don't load (`content/languages/README.md:23`).
+- **Why it matters:** setting a permanent environment variable is hard for players (and impossible inside a Flatpak, PNS-52), and translations shipped in the package stay invisible.
+- **Proposed change:** layer two roots: the player's BV2 data for assets, the package's `main/` for content the repo owns (launch scripts, language files). Then locate the player's data without an env var.
+- **Options for locating the data** (owner decides; ADR):
+
+  | Option | How the player does it | Notes |
+  |---|---|---|
+  | A. Known folder | Copies BV2's `main/` into a fixed folder in the pref dir | No UI; the folder is hidden on macOS and Windows, so it needs written instructions |
+  | B. Saved path | Sets a path once (config line or `--data-dir`); the game remembers it | No UI; editing a config file is as hard as an env var |
+  | C. Auto-detect | Nothing, if BV2 is installed in a usual place (e.g. `C:\Program Files\BaboViolent 2`) | Works only for installed copies; a first try before D |
+  | D. First-run picker **[GUI]** | When no data is found, a native message box explains what is needed, then the OS folder dialog (`SDL_ShowOpenFolderDialog`); the choice is validated and saved (as B) | Native OS dialogs, not BV2 menus; English-only text at first |
+  | E. Installer page | The Windows installer asks for the folder | Windows only; the `.dmg` and the Linux package can't ask |
+  | F. Import | After D, copy the assets into the pref dir | The original folder can move; costs disk space |
+
+- **Decision (owner, 2026-10-14; D is owner-approved [GUI]):** lookup order `BV2_DATA_DIR` → saved path (B) → auto-detect (C) → first-run picker (D) that saves to B. Cancelling D starts with placeholders and says so. A, E and F dropped.
+- **Suggested home:** Phase C, before PNS-16.
+- **Status:** Accepted → [Phase C](phase-c-installers-and-fixes/README.md)
+
+### PNS-52: Flatpak on Flathub
+
+- **Found in:** split from PNS-16 (owner, 2026-10-14).
+- **Extract:** "Linux: AppImage and/or Flatpak (+ `.deb`)".
+- **Scope:** delivered through Flathub, so it shows in distro software managers (e.g. Linux Mint's). Choose the permanent app ID in an ADR; the sandbox must reach the player's data (PNS-51) or ship its own.
+- **Why it matters:** the standard way to install on any Linux distro.
+- **Blocked by:** PNS-20 (owner, 2026-10-14).
+- **Suggested home:** Phase D.
+- **Status:** Accepted → Phase D (not yet planned)
+
+### PNS-53: In-game name and credits
+
+- **Found in:** owner review of Phase C (2026-10-14).
+- **Extract:** [ADR 0008](../decisions/0008-display-name-robo-violence-2.md): "§H must rebrand `en.lang` (`lang_gameName`), credits and window titles before any public release"; never imply endorsement by the original authors.
+- **Visible today:**
+  - `content/languages/en.lang:1` `lang_gameName` "Babo Violent 2": the window title (`game/src/main.cpp:460`).
+  - `game/src/CCredit.cpp:38` title "BaboViolent 2 | Team"; no mention of the fork.
+  - `game/src/GameVar.cpp:372` and `config/bv2.example.cfg:38` `sv_gameName` "Babo Violent 2 - Server": the name in server browsers; `game/src/main.cpp:300` dedicated-server banner.
+  - `game/src/CUserLogin.cpp:52`: "register on the official forum www.rndlabs.ca" (dead site, implies an official channel).
+  - `game/src/IntroScreen.cpp:31`: RndLabs logo splash at start-up (from the player's data).
+- **Change (owner-approved [GUI], 2026-10-14):**
+  - Game name Robo Violence 2 in the window title, server name and dedicated-server banner.
+  - Credits, in order: title "Robo Violence 2"; "Unofficial fork of BaboViolent 2 by bitHeads / RndLabs; not endorsed by them."; "Thank all of you for the game!"; header "Original credits below"; the original team list unchanged.
+  - Remove the forum sentence from the login note.
+  - Replace the RndLabs logo splash with a new splash showing "Loading" in a big font.
+  - Remove dead code: the survey (`game/src/CSurvey.*`, its `Scene` and `CMaster` hooks, the `DidSurvey` seed row in `content-seed/bv2.sql`, the master's `SURVEY_*` handling in `masterserver/src/cNetManager.cpp`; message IDs stay as gaps) and the unused `lang_RndLabsTeam` (`GameVar.*`, `en.lang`).
+  - Regenerate `en.pot`.
+- **Unchanged:** source copyright notices; in-game terms ("Babo", "Unnamed Babo", "Counter Baborist"); binaries, `BV2_*`, pref path `BaboViolent2`, master game ID (PNS-20).
+- **Depends on:** PNS-51, otherwise the player's original `en.lang` overrides the name.
+- **Suggested home:** Phase C, before the first release; an ADR amending 0008 and 0010.
+- **Status:** Accepted → [Phase C](phase-c-installers-and-fixes/README.md)
