@@ -212,10 +212,12 @@ namespace lang
 		return parsePo(text.str(), out, allGlyphs);
 	}
 
-	std::string pickFile(const std::string & dir, const std::vector<std::string> & locales)
+	std::string pickFile(const std::vector<std::string> & dirs, const std::vector<std::string> & locales)
 	{
+		if (dirs.empty())
+			return "";
 		Texts english;
-		readLang(dir + "en.lang", english);
+		readLang(dirs[0] + "en.lang", english);
 		for (size_t i = 0; i < locales.size(); ++i)
 		{
 			std::vector<std::string> names(1, locales[i]);
@@ -223,14 +225,15 @@ namespace lang
 			if (us != std::string::npos)
 				names.push_back(locales[i].substr(0, us));
 			for (size_t n = 0; n < names.size(); ++n)
-			{
-				Texts texts = english;
-				bool glyphs = false;
-				if (readPo(dir + names[n] + ".po", texts, &glyphs) && glyphs)
-					return dir + names[n] + ".po";
-				if (exists(dir + names[n] + ".lang"))
-					return dir + names[n] + ".lang";
-			}
+				for (size_t d = 0; d < dirs.size(); ++d)
+				{
+					Texts texts = english;
+					bool glyphs = false;
+					if (readPo(dirs[d] + names[n] + ".po", texts, &glyphs) && glyphs)
+						return dirs[d] + names[n] + ".po";
+					if (exists(dirs[d] + names[n] + ".lang"))
+						return dirs[d] + names[n] + ".lang";
+				}
 		}
 		return "";
 	}

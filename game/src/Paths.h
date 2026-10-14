@@ -28,15 +28,37 @@ struct sqlite3;
 //
 //   content (read-only)  <dataRoot>/main/...   found by bv2PathsInit(); the process then chdir()s to dataRoot,
 //                                              so the code's "main/..." paths keep working
+//   package content      <packageRoot>/main/...  launch scripts, languages, bv2.example.cfg; see contentFile() (ADR 0016)
 //   user data (writable) <prefDir>/...         bv2.cfg, bv2.db, banlist, console.log, screenshots, saved maps
 namespace bv2
 {
-	// Finds dataRoot (BV2_DATA_DIR, the app bundle, <exe>/../share/bv2, next to the exe, the working directory,
-	// in that order; the first with a main/ folder wins), creates prefDir and changes into dataRoot.
+	// Finds packageRoot (the app bundle, <exe>/../share/bv2, next to the exe, the working directory, in that order;
+	// the first with a main/ folder wins) and dataRoot (BV2_DATA_DIR when it holds main/, else packageRoot),
+	// creates prefDir and changes into dataRoot.
 	// Returns false when no main/ folder exists anywhere (the game can still run servers without content).
 	bool pathsInit(const char * argv0);
 
 	const std::string & dataRoot();
+	const std::string & packageRoot();
+
+	// Makes dir (a folder holding main/) the data root and changes into it
+	bool setDataRoot(const std::string & dir);
+
+	// Path of content the package owns ("main/LaunchScript/CTF.cfg"): packageRoot() + rel when it exists there,
+	// else rel (relative to the data root)
+	std::string contentFile(const std::string & rel);
+
+	// The folder holding BV2 data (main/textures/) at dir, at its parent when dir is main/, at dir/Content or at
+	// dir/BaboViolent2/Content (the upstream repository); "" when none
+	std::string findDataIn(const std::string & dir);
+
+	// The player's data folder saved in prefDir()/data-dir.txt; "" when unset or it no longer holds data
+	std::string savedDataDir();
+	void saveDataDir(const std::string & dir);
+
+	// BV2 data in usual places: BaboViolent2-master or BaboViolent2 in ~/Downloads, ~/Desktop, ~/Documents;
+	// on Windows also "BaboViolent 2" or BaboViolent2 in Program Files; "" when none
+	std::string detectDataDir();
 
 	// Writable per-user directory, always ends with '/'. BV2_PREF_DIR overrides it (read-only installs, tests).
 	const std::string & prefDir();

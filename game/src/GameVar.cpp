@@ -1243,10 +1243,12 @@ static std::vector<std::string> osLocales()
 bool GameVar::reloadLanguage()
 {
 	// An empty languageFile follows the OS language (ADR 0011)
+	// The package's languages first, then the player's BV2 data (ADR 0016)
 	std::string file = languageFile.s;
-	if (file.empty()) file = lang::pickFile("main/languages/", osLocales());
+	const std::string dir = bv2::contentFile("main/languages/");
+	if (file.empty()) file = lang::pickFile({dir, "main/languages/"}, osLocales());
 	lang::Texts texts;
-	languageLoaded = lang::load("main/languages/", file, texts);
+	languageLoaded = lang::load(dir, file, texts);
 	if (!languageLoaded) return false;
 	for (int i=0;i<(int)langs.size();++i)
 	{

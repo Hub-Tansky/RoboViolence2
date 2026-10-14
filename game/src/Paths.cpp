@@ -44,6 +44,7 @@ namespace fs = std::filesystem;
 namespace
 {
 	std::string g_dataRoot;
+	std::string g_packageRoot;
 	std::string g_prefDir;
 
 	std::string getEnv(const char * name)
@@ -83,6 +84,16 @@ namespace
 	{
 		std::error_code ec;
 		return !dir.empty() && fs::is_directory(dir / "main", ec);
+	}
+
+	// Canonical form with a trailing '/'
+	std::string rootString(const fs::path & dir)
+	{
+		std::error_code ec;
+		std::string s = fs::weakly_canonical(dir, ec).generic_string();
+		if (!s.empty() && s.back() != '/')
+			s += '/';
+		return s;
 	}
 
 	std::string computePrefDir()
@@ -141,17 +152,6 @@ namespace bv2
 		g_prefDir = computePrefDir();
 
 		std::vector<fs::path> candidates;
-		std::string envDir = getEnv("BV2_DATA_DIR");
-		if (!envDir.empty())
-		{
-			fs::path p(envDir);
-			// Accept the directory that holds main/, or main/ itself
-			if (p.filename().empty())
-				p = p.parent_path(); // trailing slash
-			candidates.push_back(p);
-			if (p.filename() == "main")
-				candidates.push_back(p.parent_path());
-		}
 		std::string exe = exeDir(argv0);
 		if (!exe.empty())
 		{
@@ -163,24 +163,115 @@ namespace bv2
 			candidates.push_back(e);
 		}
 		candidates.push_back(fs::current_path());
-
-		for (size_t i = 0; i < candidates.size(); ++i)
-		{
+		g_packageRoot.clear();
+		for (size_t i = 0; i < candidates.size() && g_packageRoot.empty(); ++i)
 			if (hasMain(candidates[i]))
-			{
-				std::error_code ec;
-				g_dataRoot = fs::weakly_canonical(candidates[i], ec).generic_string();
-				if (!g_dataRoot.empty() && g_dataRoot.back() != '/')
-					g_dataRoot += '/';
-				fs::current_path(candidates[i], ec);
-				return !ec;
-			}
+				g_packageRoot = rootString(candidates[i]);
+
+		std::string envDir = getEnv("BV2_DATA_DIR");
+		if (!envDir.empty())
+		{
+			fs::path p(envDir);
+			// Accept the directory that holds main/, or main/ itself
+			if (p.filename().empty())
+				p = p.parent_path(); // trailing slash
+			if (p.filename() == "main" && !hasMain(p))
+				p = p.parent_path();
+			if (hasMain(p))
+				return setDataRoot(p.generic_string());
 		}
+		if (!g_packageRoot.empty())
+			return setDataRoot(g_packageRoot);
 		g_dataRoot.clear();
 		return false;
 	}
 
+	bool setDataRoot(const std::string & dir)
+	{
+		std::error_code ec;
+		g_dataRoot = rootString(dir);
+		fs::current_path(dir, ec);
+		return !ec;
+	}
+
+	std::string contentFile(const std::string & rel)
+	{
+		std::error_code ec;
+		if (!g_packageRoot.empty() && fs::exists(g_packageRoot + rel, ec))
+			return g_packageRoot + rel;
+		return rel;
+	}
+
+	std::string findDataIn(const std::string & dir)
+	{
+		if (dir.empty())
+			return "";
+		fs::path p(dir);
+		if (p.filename().empty())
+			p = p.parent_path(); // trailing slash
+		const fs::path tries[4] = { p, p.parent_path(), p / "Content", p / "BaboViolent2" / "Content" };
+		for (int i = 0; i < 4; ++i)
+		{
+			if (i == 1 && p.filename() != "main")
+				continue;
+			std::error_code ec;
+			if (fs::is_directory(tries[i] / "main" / "textures", ec))
+				return rootString(tries[i]);
+		}
+		return "";
+	}
+
+	std::string savedDataDir()
+	{
+		std::ifstream in(fs::path(g_prefDir) / "data-dir.txt");
+		std::string line;
+		std::getline(in, line);
+		return findDataIn(line);
+	}
+
+	void saveDataDir(const std::string & dir)
+	{
+		std::ofstream out(fs::path(userFile("data-dir.txt")), std::ios::trunc);
+		out << dir << "\n";
+	}
+
+	std::string detectDataDir()
+	{
+		std::vector<fs::path> places;
+		std::string home = getEnv("HOME");
+#ifdef BV2_PLATFORM_WINDOWS
+		if (home.empty())
+			home = getEnv("USERPROFILE");
+		const char * programDirs[2] = { "ProgramFiles", "ProgramFiles(x86)" };
+		for (int i = 0; i < 2; ++i)
+		{
+			std::string pf = getEnv(programDirs[i]);
+			if (!pf.empty())
+			{
+				places.push_back(fs::path(pf) / "BaboViolent 2");
+				places.push_back(fs::path(pf) / "BaboViolent2");
+			}
+		}
+#endif
+		if (!home.empty())
+		{
+			const char * folders[3] = { "Downloads", "Desktop", "Documents" };
+			const char * names[2] = { "BaboViolent2-master", "BaboViolent2" };
+			for (int f = 0; f < 3; ++f)
+				for (int n = 0; n < 2; ++n)
+					places.push_back(fs::path(home) / folders[f] / names[n]);
+		}
+		for (size_t i = 0; i < places.size(); ++i)
+		{
+			std::string found = findDataIn(places[i].generic_string());
+			if (!found.empty())
+				return found;
+		}
+		return "";
+	}
+
 	const std::string & dataRoot() { return g_dataRoot; }
+	const std::string & packageRoot() { return g_packageRoot; }
 	const std::string & prefDir() { return g_prefDir; }
 
 	std::string userFile(const std::string & name)
@@ -234,7 +325,7 @@ namespace bv2
 	std::string loadConfigLayers(int argc, const char * const * argv)
 	{
 		// 1. defaults shipped with the game
-		applyFile("main/bv2.example.cfg", false);
+		applyFile(contentFile("main/bv2.example.cfg"), false);
 
 		// 2. the user's saved settings; the first run writes them out from the defaults
 		std::string cfg = configFile();
