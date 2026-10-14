@@ -28,7 +28,7 @@ cmake --build --preset <preset> --target bv2dedicated bv2master
 ## Assets
 
 - The original assets are removed. Never re-add them; `tools/check-original-assets.py` rejects them by hash.
-- With your own copy of the original data, keep it outside the repo and set `BV2_DATA_DIR`. Without it, CI and contributors use generated placeholders (step 2 §2.6).
+- With your own copy of the original data, keep it outside the repo; the client asks for it on first start, or set `BV2_DATA_DIR` ([ADR 0016](docs/decisions/0016-player-data-lookup-and-package-content.md)). Without it, CI and contributors use generated placeholders (`--placeholders` skips the dialog).
 
 ## Config and secrets
 

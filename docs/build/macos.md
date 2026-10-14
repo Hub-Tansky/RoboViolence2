@@ -2,9 +2,11 @@
 
 Common steps (game data, ports, playing a local game): [README.md](README.md).
 
-## Point the game at your original data (required, once)
+## Point the game at your original data (servers, or to skip the dialog)
 
-Find your BaboViolent 2 data folder: the one that contains `main/` with `maps/`, `textures/` and `sounds/` inside. Add it to `~/.zshrc` (replace the path with yours), then open a new Terminal tab:
+The client asks for the folder on first start and remembers it ([README](README.md#game-data-required)). Set `BV2_DATA_DIR` for the game server, or to use another folder:
+
+Add the folder that contains `main/` (with `maps/`, `textures/` and `sounds/`) to `~/.zshrc` (replace the path with yours), then open a new Terminal tab:
 
 ```bash
 echo 'export BV2_DATA_DIR="$HOME/Games/bv2-data"' >> ~/.zshrc
@@ -29,7 +31,7 @@ Terminal tabs and the run scripts now use your data. Starting the app by double-
 
 3. In that folder, run each in its own Terminal tab: `./run-server.sh`, then `./run-client.sh connect 127.0.0.1`. Add `./run-master.sh` only for the server browser ([README](README.md#playing-a-local-game)).
 
-The package's own `main/` copies (one in `bv2.app/Contents/Resources/` for the client, one in the folder for the servers) hold placeholders; `BV2_DATA_DIR` takes priority over both.
+The package's own `main/` copies (one in `bv2.app/Contents/Resources/` for the client, one in the folder for the servers) hold placeholders, launch scripts and languages; your data replaces the placeholders.
 
 ## Build from source
 
@@ -99,5 +101,6 @@ cd build/macos-arm64/runtime && ./bv2dedicated CTF
 |---|---|
 | `Could not find toolchain file` / vcpkg errors at configure | `VCPKG_ROOT` is unset or wrong in this shell |
 | Black window or immediate exit | Start the binary from Terminal and read the log |
-| "Can not load language file", or placeholder graphics | `BV2_DATA_DIR` is unset in this tab or doesn't contain `main/`: open a new tab, check with `ls "$BV2_DATA_DIR/main/maps"` |
+| Placeholder graphics | "Use placeholders" was chosen: restart to be asked again. To pick another folder, delete `data-dir.txt` in the pref dir; a set `BV2_DATA_DIR` must contain `main/` |
+| Start takes a minute with a black window | The data folder is in iCloud-synced `Documents` or `Desktop`, so every file is fetched on first read: move it elsewhere (e.g. `~/Games/bv2-data`) and delete `data-dir.txt` in the pref dir to choose it again |
 | "app is damaged" on a downloaded zip | Run the `xattr` command above |

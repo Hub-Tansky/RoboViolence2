@@ -416,7 +416,7 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 
 - **Decision (owner, 2026-10-14; D is owner-approved [GUI]):** lookup order `BV2_DATA_DIR` → saved path (B) → auto-detect (C) → first-run picker (D) that saves to B. Cancelling D starts with placeholders and says so. A, E and F dropped.
 - **Suggested home:** Phase C, before PNS-16.
-- **Status:** Accepted → [Phase C](phase-c-installers-and-fixes/README.md)
+- **Status:** Done in Phase C [step 1](phase-c-installers-and-fixes/step1-player-data-dir.md)
 
 ### PNS-52: Flatpak on Flathub
 

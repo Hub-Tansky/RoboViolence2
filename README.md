@@ -18,11 +18,11 @@ Upstream history still contains the originals; this fork's `main` does not.
 The game needs a data directory `main/` next to the executable.
 
 - If you own the original game, keep its data **outside** the repo (for example
-  `~/Games/bv2-data/main/`) and point the game at it with `BV2_DATA_DIR`
-  (implemented in step 4 §4.4; until then, symlink `main/` into the run dir).
+  `~/Games/bv2-data/main/`). The client asks for the folder on first start; the
+  server reads `BV2_DATA_DIR` ([docs/build/](docs/build/README.md#game-data-required)).
   Never commit it; `.gitignore` blocks the original asset folders.
 - Without the original data (CI, contributors), generated placeholder content is
-  used (step 2 §2.6; not yet available).
+  used.
 
 Only `languages/en.lang` and `LaunchScript/` remain in `content/`.
 

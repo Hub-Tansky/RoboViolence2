@@ -103,7 +103,7 @@ jobs:
           BV2_PREF_DIR: ${{ runner.temp }}/bv2-pref
         run: |
           set +e
-          xvfb-run -a -s "-screen 0 1280x720x24" timeout 10 ./bv2
+          xvfb-run -a -s "-screen 0 1280x720x24" timeout 10 ./bv2 --placeholders
           rc=$?
           # 124 = still running when the timeout fired: it did not crash.
           [ "$rc" = 124 ] || { echo "client exited early with $rc"; exit 1; }

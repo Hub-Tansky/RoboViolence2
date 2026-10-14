@@ -17,9 +17,10 @@ namespace lang
 	bool parsePo(const std::string & text, Texts & out, bool * allGlyphs);
 	bool readPo(const std::string & path, Texts & out, bool * allGlyphs);
 	// The file for the OS locales ("ll_CC" or "ll", most preferred first): <dir>ll_CC, then <dir>ll, .po before .lang,
-	// skipping a PO the font can't render (parsed here and again by load: one small file, once per start); "" (English)
-	// when none exists
-	std::string pickFile(const std::string & dir, const std::vector<std::string> & locales);
+	// each name in every dir in order (the package's, then the player's data), skipping a PO the font can't render
+	// (parsed here and again by load: one small file, once per start); "" (English) when none exists.
+	// dirs[0] holds en.lang.
+	std::string pickFile(const std::vector<std::string> & dirs, const std::vector<std::string> & locales);
 	// <dir>en.lang, then file ("" for none) on top of it, so a key the file lacks stays English
 	bool load(const std::string & dir, const std::string & file, Texts & out);
 }

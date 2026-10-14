@@ -1,6 +1,6 @@
 # 0007: Data root, per-user pref dir and layered config
 
-- Status: Accepted
+- Status: Accepted; amended by [0016](0016-player-data-lookup-and-package-content.md)
 - Date: 2026-10-03
 - Affects: [step 4 §4.4, §4.5](../roadmap/phase-a-modern-portable-build/step4-64bit-and-cross-platform.md); refines [ADR 0005](0005-runtime-main-data-root.md)
 

@@ -2,6 +2,7 @@
 #include "Lang.h"
 
 #include <cstdio>
+#include <filesystem>
 #include <fstream>
 #include <string>
 
@@ -77,11 +78,20 @@ int main(int argc, char ** argv)
 
 	// Locale matching: exact ll_CC, then ll, in preference order; PO before .lang; a PO without glyphs is skipped
 	writeFile(dir + "pl_PL.lang", "lang_a\tPL\nEND\n");
-	check(lang::pickFile(dir, {"pl_PL", "de"}) == dir + "pl_PL.lang", "exact ll_CC first");
-	check(lang::pickFile(dir, {"de_AT"}) == dir + "de.po", "ll when ll_CC is missing");
-	check(lang::pickFile(dir, {"ja_JP", "fr_CA"}) == dir + "fr.lang", "PO without glyphs skipped");
-	check(lang::pickFile(dir, {"en_US", "de"}) == dir + "en.lang", "English preferred stays English");
-	check(lang::pickFile(dir, {"xx"}).empty() && lang::pickFile(dir, {}).empty(), "unknown locale: English");
+	check(lang::pickFile({dir}, {"pl_PL", "de"}) == dir + "pl_PL.lang", "exact ll_CC first");
+	check(lang::pickFile({dir}, {"de_AT"}) == dir + "de.po", "ll when ll_CC is missing");
+	check(lang::pickFile({dir}, {"ja_JP", "fr_CA"}) == dir + "fr.lang", "PO without glyphs skipped");
+	check(lang::pickFile({dir}, {"en_US", "de"}) == dir + "en.lang", "English preferred stays English");
+	check(lang::pickFile({dir}, {"xx"}).empty() && lang::pickFile({dir}, {}).empty(), "unknown locale: English");
+
+	// Several folders (package, then player's data): a name in an earlier folder wins, a later folder fills gaps
+	const std::string data = dir + "data/";
+	std::filesystem::create_directories(data);
+	writeFile(data + "nl.lang", "lang_a\tAppel\nEND\n");
+	writeFile(data + "de.lang", "lang_a\tApfel\nEND\n");
+	check(lang::pickFile({dir, data}, {"nl_NL"}) == data + "nl.lang", "player's data fills a missing language");
+	check(lang::pickFile({dir, data}, {"de"}) == dir + "de.po", "package wins over the player's data");
+	check(lang::pickFile({dir, data}, {"nl", "de"}) == data + "nl.lang", "locale order beats folder order");
 
 	if (!failures) std::printf("ok: lang\n");
 	return failures ? 1 : 0;
