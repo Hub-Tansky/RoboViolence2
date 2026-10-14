@@ -4,9 +4,11 @@ Common steps (game data, ports, playing a local game): [README.md](README.md).
 
 # HOW TO INSTALL
 
-## Point the game at your original assets data for BaboViolent 2 (required, once)
+## Point the game at your original assets data for BaboViolent 2 (servers, or to skip the dialog)
 
-Add the folder that contains your BaboViolent 2 `main/` to `~/.profile` (replace the path)
+The client asks for the folder on first start and remembers it ([README](README.md#game-data-required)). Set `BV2_DATA_DIR` for the game server, or to use another folder:
+
+Add the folder that contains `main/` to `~/.profile` (replace the path):
 
 ```bash
 echo 'export BV2_DATA_DIR="$HOME/Games/bv2-data"' >> ~/.profile
@@ -100,4 +102,4 @@ SDL3 picks Wayland or X11 automatically; force one with `SDL_VIDEODRIVER=x11` or
 | `error while loading shared libraries: libGLU.so.1` | Install the runtime packages above |
 | vcpkg port fails to build (autoconf, libtool) | Install the full `--linux-packages` line |
 | No window under Wayland | Try `SDL_VIDEODRIVER=x11` |
-| "Can not load language file", or placeholder graphics | `BV2_DATA_DIR` is unset or doesn't contain `main/`: check with `ls "$BV2_DATA_DIR/main/maps"` |
+| Placeholder graphics | "Use placeholders" was chosen: restart to be asked again. To pick another folder, delete `data-dir.txt` in the pref dir; a set `BV2_DATA_DIR` must contain `main/` |

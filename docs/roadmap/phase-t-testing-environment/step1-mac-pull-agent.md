@@ -13,7 +13,7 @@
 | Out of scope | Staging host and deploy agent (T8); CI client smoke on Windows/macOS (T2); client autotest mode (T3); E2E bots (T4); any game, packaging or CI change (Phase C) |
 | Allowed paths | `tools/playtest/**`, `tests/test_playtest_agent.sh`, `tests/CMakeLists.txt`, `docs/roadmap/**`, `docs/decisions/**`, `ARCHITECTURE.md` |
 | Inputs | `AGENTS.md`, `ARCHITECTURE.md`, the plan, `packaging/make-package.py`, `packaging/scripts/`, `game/src/AdminApi.cpp`, [ADR 0015](../../decisions/0015-admin-http-api-behind-tls-proxy.md) |
-| Deliverables | `tools/playtest/agent.sh`, `tools/playtest/com.roboviolence2.playtest.plist`, `tools/playtest/README.md`, `tests/test_playtest_agent.sh`, ADR 0016 |
+| Deliverables | `tools/playtest/agent.sh`, `tools/playtest/com.roboviolence2.playtest.plist`, `tools/playtest/README.md`, `tests/test_playtest_agent.sh`, ADR 0017 |
 | Definition of done | See "Acceptance checks". All must pass. `ARCHITECTURE.md` is updated |
 
 ## Context
@@ -44,7 +44,7 @@
 
 ### 1.5 ADR and inventory
 
-- ADR 0016: pull agent, main-only, disposable local server, staging read-only, plaintext admin API on loopback.
+- ADR 0017: pull agent, main-only, disposable local server, staging read-only, plaintext admin API on loopback.
 - `ARCHITECTURE.md`, `docs/decisions/README.md`.
 
 ## Deviations from the plan

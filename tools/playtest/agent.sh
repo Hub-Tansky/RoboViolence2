@@ -1,5 +1,5 @@
 #!/bin/bash
-# Playtest pull agent: installs successful main builds on this Mac and tests them (ADR 0016).
+# Playtest pull agent: installs successful main builds on this Mac and tests them (ADR 0017).
 # Scope: docs/roadmap/phase-t-testing-environment/step1-mac-pull-agent.md. Setup: tools/playtest/README.md.
 # Usage: agent.sh                       local-smoke on the newest successful main build (the LaunchAgent runs this)
 #        agent.sh --sha <sha>           local-smoke on that main build, also after 3 failed attempts

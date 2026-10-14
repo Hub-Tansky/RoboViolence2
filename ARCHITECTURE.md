@@ -18,10 +18,10 @@ Robo Violence 2: unofficial fork of BaboViolent 2, a top-down multiplayer shoote
 | Config and secrets | Tracked: `config/*.example.cfg` with empty secrets, `content-seed/*.sql` for generated DBs. Real values stay local; gitleaks, hooks and CI enforce it ([config/README.md](config/README.md)). |
 | Assets | The original assets are removed and blocked by hash (`tools/check-original-assets.py`). Only `content/languages/` (English strings, template, guide) and `content/LaunchScript/` remain; the build generates placeholders (`tools/gen-placeholder-content.py`). |
 | Encoding | UTF-8 without BOM, LF; `tools/check-encoding.py`. Some comments hold U+FFFD where upstream lost accents. |
-| Supply chain | Dependency graph fed by vcpkg (`dependency-graph.yml`, on push to `main`); Dependabot alerts and security updates on; Dependabot version updates for GitHub Actions (`.github/dependabot.yml`); CodeQL `c-cpp` and `actions` (`codeql.yml`, not required). Dependabot and OSV can't check vcpkg ports (no C/C++ advisory ecosystem; OSV filters `pkg:vcpkg` purls), so bump the vcpkg baseline monthly, or sooner for a published CVE. |
+| Supply chain | Dependency graph fed by vcpkg (`dependency-graph.yml`, on push to `main`); Dependabot alerts and security updates on; Dependabot version updates for GitHub Actions (`.github/dependabot.yml`); CodeQL `c-cpp` and `actions` (`codeql.yml`, not required). Dependabot and OSV can't read vcpkg purls; `osv-vcpkg.yml` (weekly) queries OSV by each port's upstream commit (`tools/osv-vcpkg.py`). Bump the vcpkg baseline monthly, or sooner when it reports a port. |
 | Hosting | Server images from `packaging/docker/Dockerfile` (GHCR on `main`), runbook [docs/ops/runbook.md](docs/ops/runbook.md). |
 | Known defects | [docs/analysis/KEY_QUESTIONS.md](docs/analysis/KEY_QUESTIONS.md). |
-| Decisions | [docs/decisions/README.md](docs/decisions/README.md): 0001 Ninja, 0002 libcurl compiled out, 0003 OpenGL 2.1 kept, 0004 project name (superseded by 0008), 0005 `main/` data root, 0006 platform layer, 0007 data root, pref dir and config layers, 0008 display name "Robo Violence 2", 0009 internal renaming, 0010 BV2 asset compatibility and GUI freeze, 0011 gettext PO translations, 0012 Windows 10 22H2 minimum. |
+| Decisions | [docs/decisions/README.md](docs/decisions/README.md): 0001 Ninja, 0002 libcurl compiled out, 0003 OpenGL 2.1 kept, 0004 project name (superseded by 0008), 0005 `main/` data root, 0006 platform layer, 0007 data root, pref dir and config layers, 0008 display name "Robo Violence 2", 0009 internal renaming, 0010 BV2 asset compatibility and GUI freeze, 0011 gettext PO translations, 0012 Windows 10 22H2 minimum, 0013 rulesets, 0014 libsodium HMAC, 0015 admin HTTP API, 0016 player data lookup and package content, 0017 playtest pull agent. |
 
 ### Open items
 
@@ -60,7 +60,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `REVIEW.md` | Definition of done: `tools/review.sh` checks, reviewer checklist, defined terms, forbidden shortcuts, fresh-context step review and its record |
 | `SECURITY.md` | Security policy: supported versions, private vulnerability reporting, response timeline |
 | `docs/decisions/0007-data-root-pref-dir-config-layers.md` | ADR 0007 |
-| `game/src/Paths.cpp` | Data root search, per-user pref dir, layered config loading, map and DB path helpers |
+| `game/src/Paths.cpp` | Package and data roots (`contentFile` for the package's own content), saved and detected BV2 data folder, per-user pref dir, layered config loading, map and DB path helpers (ADR 0016) |
 | `game/src/Paths.h` | Interface of `Paths.cpp` (namespace `bv2`) |
 | `packaging/linux/roboviolence2.desktop` | Linux desktop entry |
 | `packaging/make-package.py` | Builds the per-OS play-test package from a Release `runtime/` (links resolved, macOS bundle re-signed) |
@@ -121,6 +121,8 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/test_lang.cpp` | Step 13: PO parser (entries that change the English printf conversions or whose key English lacks are skipped; raw control bytes rejected), English fallback per key, OS locale matching (`ll_CC`, `ll`, `.po` before `.lang`), PO without glyphs skipped |
 | `tests/test_lang_check.py` | Step 13: `tools/lang-check.py` fails on changed conversions, unknown keys, repeated keywords, tabs and a stale `en.pot`; warns about missing glyphs |
 | `tests/test_join_password.cpp` | Step 10: a client joins a passworded server only with the HMAC over its own challenge; no password or MD5 of it on the wire |
+| `tests/test_paths.cpp` | Phase C step 1: package vs data root, `contentFile`, `findDataIn` (upstream layout, `main/` itself), saved folder, auto-detect, `BV2_DATA_DIR` |
+| `tests/test_osv_vcpkg.py` | Phase C step 4: `tools/osv-vcpkg.py` maps SPDX download locations to upstream repository and tag (offline) |
 | `tests/test_packet_hygiene.cpp` | Step 4 checks: sender binding (Q-S1), index ranges with controls (Q-S2), map names (Q-S6), skin and sound relay (Q-S7), `SV_CHANGE` filter (Q-S4), the handshake gate, `checkPacket` per message type and size, the client's `checkServerMessage` on values the server sends |
 | `tests/test_replay.cpp` | Replays the corpus through the in-process server: no crash, expected replies; each `crash-*.bin` (none at present) is its own ctest under ASan |
 | `tests/fuzz_server.cpp` | Random-mutation fuzzer for one message type on the in-process server; writes the crashing input to `<out>/<type>/last.bin` (CI job `fuzz`) |
@@ -160,6 +162,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `.github/workflows/hygiene.yml` | CI: ARCHITECTURE.md inventory, repository hygiene, content case; `review` (`tools/review.sh`) on PRs |
 | `.github/workflows/codeql.yml` | CodeQL: `c-cpp` (manual linux-x64 build of the three executables) and `actions`; push, PR, weekly; alerts under `build/` (vcpkg headers) filtered out |
 | `.github/workflows/dependency-graph.yml` | Submits resolved vcpkg ports to the dependency graph on push to `main` |
+| `.github/workflows/osv-vcpkg.yml` | Weekly OSV check of the vcpkg ports by upstream commit (`tools/osv-vcpkg.py`); not required |
 | `.github/workflows/containers.yml` | CI: builds both server images, checks non-root, runs the compose example (healthy, passworded server listed by the master), checks a remote `status` over TLS, pushes to GHCR from `main` and weekly |
 
 ### `config`
@@ -245,7 +248,8 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/decisions/0013-r3-restore-normal-and-pro-rulesets.md` | ADR: `sv_serverType` 0 plays the Normal rules again (R3) |
 | `docs/decisions/0014-libsodium-hmac-for-credentials.md` | ADR: libsodium for the credential HMAC and nonces (step 10) |
 | `docs/decisions/0015-admin-http-api-behind-tls-proxy.md` | ADR: remote admin over an HTTP API behind Caddy TLS; legacy UDP remote admin refused (step 12) |
-| `docs/decisions/0016-playtest-pull-agent.md` | ADR: main builds tested on the owner's Mac by a pull agent against a disposable local server; no self-hosted runner (phase T step 1) |
+| `docs/decisions/0016-player-data-lookup-and-package-content.md` | ADR: client finds or asks for the player's BV2 data; launch scripts, languages and default config come from the package (Phase C step 1) |
+| `docs/decisions/0017-playtest-pull-agent.md` | ADR: main builds tested on the owner's Mac by a pull agent against a disposable local server; no self-hosted runner (phase T step 1) |
 | `docs/decisions/README.md` | ADR format and index |
 
 ### `docs/ops`
@@ -303,6 +307,17 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | path | purpose |
 |---|---|
 | `docs/roadmap/phase-c-installers-and-fixes/README.md` | Phase C scope: accepted PNS entries, order, done-when, risks |
+| `docs/roadmap/phase-c-installers-and-fixes/step1-player-data-dir.md` | Scope file for step1 |
+| `docs/roadmap/phase-c-installers-and-fixes/step4-housekeeping.md` | Scope file for step4 |
+
+### `docs/roadmap/phase-c-installers-and-fixes/reviews`
+
+| path | purpose |
+|---|---|
+| `docs/roadmap/phase-c-installers-and-fixes/reviews/step1-report.md` | Raw fresh-context reviewer reports for step 1 |
+| `docs/roadmap/phase-c-installers-and-fixes/reviews/step1.md` | Step 1 review record |
+| `docs/roadmap/phase-c-installers-and-fixes/reviews/step4-report.md` | Raw fresh-context reviewer reports for step 4 |
+| `docs/roadmap/phase-c-installers-and-fixes/reviews/step4.md` | Step 4 review record |
 
 ### `docs/roadmap/phase-t-testing-environment`
 
@@ -528,7 +543,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 
 | path | purpose |
 |---|---|
-| `game/CMakeLists.txt` | Targets bv2dedicated (explicit CONSOLE file list), bv2 (client) and, for tests, `bv2server_lib` (the server without `main.cpp`) |
+| `game/CMakeLists.txt` | Targets `bv2server_lib` (the CONSOLE file list without `main.cpp`; also linked by the tests), bv2dedicated (`main.cpp` + `bv2server_lib`) and bv2 (client) |
 | `game/README.md` | Module README: game |
 
 ### `game/src`
@@ -632,6 +647,8 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/ControlListener.h` | Menu control listener interface |
 | `game/src/CreateGame.h` | Create-game screen |
 | `game/src/Credits.h` | Credits screen |
+| `game/src/DataDirPicker.cpp` | Client start-up: saved or detected BV2 data folder, else a first-run message box and OS folder dialog (ADR 0016) |
+| `game/src/DataDirPicker.h` | Interface of `DataDirPicker.cpp` |
 | `game/src/Dialog.cpp` | Menu dialog base |
 | `game/src/Dialog.h` | Menu dialog base |
 | `game/src/Editor.cpp` | Map editor core |
@@ -749,7 +766,8 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 
 | path | purpose |
 |---|---|
-| `tools/CMakeLists.txt` | Database seeding (bv2_seed_db_tool, bv2.db, master.db, web.db) |
+| `tools/CMakeLists.txt` | Database seeding (bv2_seed_db_tool, master.db, web.db) |
+| `tools/osv-vcpkg.py` | Checks the installed vcpkg ports against OSV by upstream commit (PNS-22) |
 | `tools/FORK_BASE` | First commit after upstream; secret scans start here |
 | `tools/check-architecture.ps1` | Fails if ARCHITECTURE.md and the tracked files disagree (Windows) |
 | `tools/check-architecture.sh` | Fails if ARCHITECTURE.md and the tracked files disagree (Unix) |
@@ -765,7 +783,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tools/lang-to-pot.py` | Generates `content/languages/en.pot` from `en.lang` |
 | `tools/seed_db.cpp` | Creates a SQLite DB from SQL files (build helper) |
 | `tools/playtest/README.md` | Playtest agent: install, env file, commands, files, uninstall |
-| `tools/playtest/agent.sh` | Playtest pull agent (macOS): fetches and verifies successful `main` packages, tests the client against a disposable local server or staging, reports and notifies (ADR 0016) |
+| `tools/playtest/agent.sh` | Playtest pull agent (macOS): fetches and verifies successful `main` packages, tests the client against a disposable local server or staging, reports and notifies (ADR 0017) |
 | `tools/playtest/com.roboviolence2.playtest.plist` | LaunchAgent template for the playtest agent (every 10 min) |
 | `tools/review.sh` | Review gate (REVIEW.md section 1): all checks, scope against the step's Allowed paths, anti-gaming, DONE gate; `--full` builds and tests |
 | `tools/setup-dev.ps1` | Activates hooks, checks tools (Windows) |

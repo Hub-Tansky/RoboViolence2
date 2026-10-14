@@ -1,4 +1,4 @@
-# 0016: Test main builds on the owner's Mac with a pull agent
+# 0017: Test main builds on the owner's Mac with a pull agent
 
 - Status: Accepted
 - Date: 2026-10-14

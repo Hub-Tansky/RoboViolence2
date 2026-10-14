@@ -25,7 +25,7 @@ Every claim carries a `[VERIFY: path:line]` tag relative to the repository root;
 1. **All traffic is TCP.** The server is created with `UDPenabled=false`, so packets tagged `NET_UDP` go over the reliable stream too (`03_DATA_FLOW` §5).
 2. **Movement is client-authoritative**; the server checks only one reported velocity per 3 s window (`ALGORITHM_02` §5).
 3. **Packets aren't bound to their sender.** Most handlers trust the `playerID` field, which is also never range-checked: impersonation and remote crash (`KEY_QUESTIONS` Q-S1, Q-S2).
-4. **`if (gameVar.sv_serverType = 1)`** in projectile update silently forces Pro rules (`ALGORITHM_03` §5, W1).
+4. **`if (gameVar.sv_serverType = 1)`** in projectile update silently forced Pro rules (`ALGORITHM_03` §5, W1). Fixed in Phase B step 5 ([ADR 0013](../decisions/0013-r3-restore-normal-and-pro-rulesets.md)).
 5. **SQL injection** on the master server through the client-reported MAC address (`KEY_QUESTIONS` Q-S3).
 
 ## Analysis plan & coverage (Phase 1.5)
