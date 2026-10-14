@@ -15,10 +15,6 @@ import subprocess
 import sys
 import urllib.request
 
-# vcpkg's own helper ports carry no upstream code
-SKIP = {"vcpkg-cmake", "vcpkg-cmake-config", "vcpkg-cmake-get-vars", "vcpkg-make"}
-
-
 def upstream(spdx):
     """(repo URL, ref) of the port's source, or None"""
     for pkg in spdx["packages"]:
@@ -36,7 +32,7 @@ def commit(repo, ref):
     if re.fullmatch(r"[0-9a-f]{40}", ref):
         return ref
     out = subprocess.run(["git", "ls-remote", repo, "refs/tags/" + ref, "refs/tags/" + ref + "^{}"],
-                         capture_output=True, text=True, check=True).stdout.split()
+                         capture_output=True, text=True).stdout.split()
     # An annotated tag lists the tag object, then ^{} with the commit: take the last hash
     hashes = [w for w in out if re.fullmatch(r"[0-9a-f]{40}", w)]
     return hashes[-1] if hashes else None
@@ -57,15 +53,21 @@ def main():
     for f in glob.glob(os.path.join(sys.argv[1], "*", "share", "*", "vcpkg.spdx.json")):
         ports.setdefault(os.path.basename(os.path.dirname(f)), f)  # one triplet is enough
     for port in sorted(ports):
-        if port in SKIP:
+        if port.startswith("vcpkg-"):  # vcpkg's own helper ports carry no upstream code
             continue
-        src = upstream(json.load(open(ports[port], encoding="utf-8")))
+        with open(ports[port], encoding="utf-8") as fh:
+            src = upstream(json.load(fh))
         sha = commit(*src) if src else None
-        if not sha:
+        try:
+            vulns = osv(sha) if sha else None
+        except OSError as e:  # URLError and HTTPError are OSErrors
+            print("%-12s NOT CHECKED (OSV: %s)" % (port, e))
+            unchecked = True
+            continue
+        if vulns is None:
             print("%-12s NOT CHECKED (no upstream commit: %s)" % (port, src))
             unchecked = True
             continue
-        vulns = osv(sha)
         print("%-12s %s@%s %s %s" % (port, src[0], src[1], sha[:12], ", ".join(vulns) if vulns else "ok"))
         found = found or bool(vulns)
     sys.exit(1 if found else 2 if unchecked else 0)

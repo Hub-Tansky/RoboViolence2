@@ -153,6 +153,7 @@ bv2_target_defaults(test_lang)
 add_test(NAME lang COMMAND test_lang "${BV2_TEST_SCRATCH}")
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
 add_test(NAME lang_check COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test_lang_check.py "${BV2_TEST_SCRATCH}")
+add_test(NAME osv_vcpkg COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test_osv_vcpkg.py)
 
 if(WIN32 AND TARGET bv2 AND TARGET bv2dedicated AND TARGET bv2master)
   find_package(Python3 REQUIRED COMPONENTS Interpreter)

@@ -235,5 +235,5 @@ Photon Pro curves, with `a = sv_photonVerticalShift`, `c = sv_photonDamageCoeffi
 | W6 | Projectile spawn position is client-controlled | [VERIFY: BaboViolent2/Code/GameSpawn.cpp:464-472] |
 | W7 | Non-Pro builds accept the client-computed ray endpoint (client decides spread) | [VERIFY: BaboViolent2/Code/Game.cpp:1122-1126] [VERIFY: BaboViolent2/Code/Game.cpp:1392-1418] |
 
-W1 (now fixed) was the most consequential: `sv_serverType` becomes 1 as soon as any projectile is updated (on server and clients alike), which activates every `sv_serverType == 1` branch in `hitSV` (per-weapon `sv_*Damage` overrides, photon/flame distance curves) and the Pro rocket remote-detonation path. An admin who sets `sv_serverType 0` will see it flip back to 1 at the next grenade or rocket. Fix: `==`.
+W1 was the most consequential: `sv_serverType` became 1 as soon as any projectile was updated (on server and clients alike), which activated every `sv_serverType == 1` branch in `hitSV` (per-weapon `sv_*Damage` overrides, photon/flame distance curves) and the Pro rocket remote-detonation path. An admin who set `sv_serverType 0` saw it flip back to 1 at the next grenade or rocket. Fixed in Phase B step 5 ([ADR 0013](../decisions/0013-r3-restore-normal-and-pro-rulesets.md)).
 [VERIFY: BaboViolent2/Code/Player.cpp:1116] [VERIFY: BaboViolent2/Code/ServerRecv.cpp:1049]

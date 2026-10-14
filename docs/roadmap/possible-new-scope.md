@@ -457,3 +457,11 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Why it matters:** the client decodes `.wav` sounds from the player's data with miniaudio. Exposure is local files only (sounds are not downloaded from servers), so a crash at worst.
 - **Suggested home:** the next vcpkg baseline bump once the `miniaudio` port ships the fix (check `osv-vcpkg`), or an overlay port; any step allowed to edit `vcpkg.json`.
 - **Status:** Proposed
+
+### PNS-55: Two copies of the client database schema
+
+- **Found in:** Phase C step 4 review (2026-10-14), finding 1.
+- **Extract:** "`content-seed/bv2.sql` and `game/src/Paths.cpp` (openClientDb) are now two copies of the same client schema. Nothing consumes bv2.sql any more."
+- **Why it matters:** the two will drift; step 2 already has to edit both (the `DidSurvey` row, PNS-53).
+- **Suggested home:** step 2 (PNS-53 touches both): delete `content-seed/bv2.sql` and make `openClientDb` the schema, or embed the file and run it.
+- **Status:** Proposed
