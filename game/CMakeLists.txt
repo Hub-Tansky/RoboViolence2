@@ -69,6 +69,7 @@ set(BV2_GAME_SOURCES
   src/MapRender.cpp
   src/MemIO.cpp
   src/PacketCheck.cpp
+  src/DataDirPicker.cpp
   src/Paths.cpp
   src/MenuSetup.cpp
   src/MessageDialog.cpp

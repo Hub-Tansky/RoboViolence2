@@ -27,6 +27,7 @@
 #include <cstring>
 #include "CMaster.h"
 #include "Paths.h"
+#include "DataDirPicker.h"
 #include <string>
 
 // After main/bv2.cfg is loaded: BV2_NETLOG=1 forces c_netlog on, BV2_NETLOG=0 off.
@@ -438,6 +439,7 @@ int main(int argc, char* argv[])
 {
 	// PREMIERE CHOSE A FAIRE, on load les config
 	bv2::pathsInit(argv[0]);
+	bv2::chooseDataDir(argc, argv);
 	dksvarInit(&stringInterface);
 	std::string configPath = bv2::loadConfigLayers(argc, (const char* const*)argv);
 	bv2ApplyNetlogFromEnv();
@@ -574,6 +576,8 @@ int main(int argc, char* argv[])
 			++i; // handled by the config layers
 			continue;
 		}
+		if (std::strcmp(argv[i], "--placeholders") == 0)
+			continue; // handled by chooseDataDir
 		if (str.len() > 0) str += " ";
 		str += argv[i];
 	}
