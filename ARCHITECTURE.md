@@ -311,6 +311,13 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/roadmap/phase-t-testing-environment/README.md` | Phase T (testing environment, alongside Phase C): goal, steps, interaction with Phase C |
 | `docs/roadmap/phase-t-testing-environment/step1-mac-pull-agent.md` | Scope file for step1 |
 
+### `docs/roadmap/phase-t-testing-environment/reviews`
+
+| path | purpose |
+|---|---|
+| `docs/roadmap/phase-t-testing-environment/reviews/step1-report.md` | Raw reviewer report for step 1 |
+| `docs/roadmap/phase-t-testing-environment/reviews/step1.md` | Fresh-context review record for step 1 |
+
 ### `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews`
 
 | path | purpose |
