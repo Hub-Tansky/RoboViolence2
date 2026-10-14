@@ -123,7 +123,7 @@ lock() {
 	mkdir -p "$ROOT" && chmod 700 "$ROOT"
 	local p; p=$(cat "$ROOT/lock" 2>/dev/null)
 	# macOS shlock never takes over a dead pid's lock: drop it when its pid is not a running agent
-	ps -p "$p" -o command= 2>/dev/null | grep -q '/bin/bash .*/agent\.sh' || rm -f "$ROOT/lock" # also an empty or missing file
+	ps -p "$p" -o command= 2>/dev/null | grep -qE 'bash ([^ ]*/)?agent\.sh( |$)' || rm -f "$ROOT/lock" # also an empty or missing file
 	shlock -p $$ -f "$ROOT/lock" || { say "locked by pid $(cat "$ROOT/lock" 2>/dev/null); skipped"; exit 0; }
 	LOCKED=1
 }
@@ -259,9 +259,11 @@ finish() {
 	trap '' TERM INT # a second signal must not cut the cleanup short
 	[ -n "$KEEP_RUNNING" ] || stop_all
 	[ -n "$REPORT" ] && [ -z "$RESULT" ] && RESULT=fail # an unexpected exit while testing a build
+	local infra="" # this run failed before testing the build
+	[ "$RESULT" = fail ] && is_infra "$STAGE" && infra=1
 	if [ "$RESULT" = interrupted ]; then
 		say "interrupted (logout, shutdown or bootout); nothing recorded"
-	elif [ -n "$REPORT" ] && ! { [ "$RESULT" = fail ] && is_infra "$STAGE"; }; then
+	elif [ -n "$REPORT" ] && [ -z "$infra" ]; then
 		local attempt f
 		attempt=$(record_state "$SHA" "$RUN_ID" "$TEST" "$TARGET" "$RESULT" "$STAGE")
 		for f in "$RUN_DIR/server.log" "$RUN_DIR/master.log" "$CPREF/client.log" "$CPREF/console.log"; do
@@ -275,12 +277,12 @@ finish() {
 			notify "RV2 ${SHA:0:7} FAILED at $STAGE" "$TEST, attempt $attempt. Report: $REPORT"
 		fi
 		prune "$ROOT/versions" $KEEP; prune "$ROOT/pref" $KEEP; prune "$ROOT/run" $KEEP; prune "$ROOT/reports" $KEEP_REPORTS
-	elif [ "$RESULT" = fail ] && [ "$MODE" = smoke ] && [ "$(cat "$ROOT/infra-failure" 2>/dev/null)" != "$STAGE" ]; then
+	elif [ -n "$infra" ] && [ "$MODE" = smoke ] && [ "$(cat "$ROOT/infra-failure" 2>/dev/null)" != "$STAGE" ]; then
 		echo "$STAGE" >"$ROOT/infra-failure" # once per distinct failure, not every 10 minutes
 		notify "RV2 agent FAILED at $STAGE" "No attempt counted. Log: $ROOT/agent.log"
 	fi
 	# The unattended marker: cleared by any scheduled run that got past the infrastructure, so the next incident notifies again
-	[ "$MODE" = smoke ] && ! { [ "$RESULT" = fail ] && is_infra "$STAGE"; } && rm -f "$ROOT/infra-failure"
+	[ "$MODE" = smoke ] && [ -z "$infra" ] && rm -f "$ROOT/infra-failure"
 	[ -n "$LOCKED" ] && rm -f "$ROOT/lock"
 }
 
