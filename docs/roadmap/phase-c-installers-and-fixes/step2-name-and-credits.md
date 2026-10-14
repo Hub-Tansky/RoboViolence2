@@ -1,6 +1,6 @@
 # Step 2: In-game name and credits
 
-**Status:** IN PROGRESS
+**Status:** DONE (2026-10-14)
 
 **Depends on:** [step 1](step1-player-data-dir.md) (language files load from the package). **Next:** step 3 (unsigned installers). **Index:** [README.md](README.md)
 

@@ -448,7 +448,7 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Unchanged:** source copyright notices; in-game terms ("Babo", "Unnamed Babo", "Counter Baborist"); binaries, `BV2_*`, pref path `BaboViolent2`, master game ID (PNS-20).
 - **Depends on:** PNS-51, otherwise the player's original `en.lang` overrides the name.
 - **Suggested home:** Phase C, before the first release; an ADR amending 0008 and 0010.
-- **Status:** Accepted → [Phase C](phase-c-installers-and-fixes/README.md)
+- **Status:** Done in Phase C [step 2](phase-c-installers-and-fixes/step2-name-and-credits.md)
 
 ### PNS-54: miniaudio 0.11.25 has CVE-2026-32837
 
