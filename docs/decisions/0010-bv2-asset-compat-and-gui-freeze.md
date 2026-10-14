@@ -1,6 +1,6 @@
 # 0010: Keep BV2 asset compatibility and the BV2 interface until replacement assets ship
 
-- Status: Accepted
+- Status: Accepted; amended by [0017](0017-in-game-name-and-fork-credits.md)
 - Date: 2026-10-06
 - Affects: [roadmap ground rules](../roadmap/README.md#ground-rules-every-phase) 1–2, [PNS-18](../roadmap/possible-new-scope.md#pns-18-renderer-isolation-and-replacement), [PNS-20](../roadmap/possible-new-scope.md#pns-20-replacement-assets-and-rebrand) H.1
 

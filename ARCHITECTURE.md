@@ -21,7 +21,7 @@ Robo Violence 2: unofficial fork of BaboViolent 2, a top-down multiplayer shoote
 | Supply chain | Dependency graph fed by vcpkg (`dependency-graph.yml`, on push to `main`); Dependabot alerts and security updates on; Dependabot version updates for GitHub Actions (`.github/dependabot.yml`); CodeQL `c-cpp` and `actions` (`codeql.yml`, not required). Dependabot and OSV can't read vcpkg purls; `osv-vcpkg.yml` (weekly) queries OSV by each port's upstream commit (`tools/osv-vcpkg.py`). Bump the vcpkg baseline monthly, or sooner when it reports a port. |
 | Hosting | Server images from `packaging/docker/Dockerfile` (GHCR on `main`), runbook [docs/ops/runbook.md](docs/ops/runbook.md). |
 | Known defects | [docs/analysis/KEY_QUESTIONS.md](docs/analysis/KEY_QUESTIONS.md). |
-| Decisions | [docs/decisions/README.md](docs/decisions/README.md): 0001 Ninja, 0002 libcurl compiled out, 0003 OpenGL 2.1 kept, 0004 project name (superseded by 0008), 0005 `main/` data root, 0006 platform layer, 0007 data root, pref dir and config layers, 0008 display name "Robo Violence 2", 0009 internal renaming, 0010 BV2 asset compatibility and GUI freeze, 0011 gettext PO translations, 0012 Windows 10 22H2 minimum, 0013 rulesets, 0014 libsodium HMAC, 0015 admin HTTP API, 0016 player data lookup and package content. |
+| Decisions | [docs/decisions/README.md](docs/decisions/README.md): 0001 Ninja, 0002 libcurl compiled out, 0003 OpenGL 2.1 kept, 0004 project name (superseded by 0008), 0005 `main/` data root, 0006 platform layer, 0007 data root, pref dir and config layers, 0008 display name "Robo Violence 2", 0009 internal renaming, 0010 BV2 asset compatibility and GUI freeze, 0011 gettext PO translations, 0012 Windows 10 22H2 minimum, 0013 rulesets, 0014 libsodium HMAC, 0015 admin HTTP API, 0016 player data lookup and package content, 0017 in-game name and fork credits. |
 
 ### Open items
 
@@ -247,6 +247,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/decisions/0013-r3-restore-normal-and-pro-rulesets.md` | ADR: `sv_serverType` 0 plays the Normal rules again (R3) |
 | `docs/decisions/0014-libsodium-hmac-for-credentials.md` | ADR: libsodium for the credential HMAC and nonces (step 10) |
 | `docs/decisions/0015-admin-http-api-behind-tls-proxy.md` | ADR: remote admin over an HTTP API behind Caddy TLS; legacy UDP remote admin refused (step 12) |
+| `docs/decisions/0017-in-game-name-and-fork-credits.md` | ADR: in-game name, fork credits, "LOADING" splash, survey removed (Phase C step 2) |
 | `docs/decisions/0016-player-data-lookup-and-package-content.md` | ADR: client finds or asks for the player's BV2 data; launch scripts, languages and default config come from the package (Phase C step 1) |
 | `docs/decisions/README.md` | ADR format and index |
 
@@ -305,6 +306,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 |---|---|
 | `docs/roadmap/phase-c-installers-and-fixes/README.md` | Phase C scope: accepted PNS entries, order, done-when, risks |
 | `docs/roadmap/phase-c-installers-and-fixes/step1-player-data-dir.md` | Scope file for step1 |
+| `docs/roadmap/phase-c-installers-and-fixes/step2-name-and-credits.md` | Scope file for step2 |
 | `docs/roadmap/phase-c-installers-and-fixes/step4-housekeeping.md` | Scope file for step4 |
 
 ### `docs/roadmap/phase-c-installers-and-fixes/reviews`
@@ -550,7 +552,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/CClans.h` | Clans UI tab |
 | `game/src/CControl.cpp` | Generic UI control (button, label, list, text box) of the newer menu |
 | `game/src/CControl.h` | Generic UI control (button, label, list, text box) of the newer menu |
-| `game/src/CCredit.cpp` | Credits tab |
+| `game/src/CCredit.cpp` | Credits tab: Robo Violence 2 fork notice, then the original credits (ADR 0017) |
 | `game/src/CCredit.h` | Credits tab |
 | `game/src/CCurl.cpp` | HTTP requests through libcurl (compiled out in Phase A) |
 | `game/src/CCurl.h` | HTTP requests through libcurl (compiled out in Phase A) |
@@ -602,8 +604,6 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/CStats.h` | Player statistics UI |
 | `game/src/CStatus.cpp` | Online status reporting |
 | `game/src/CStatus.h` | Online status reporting |
-| `game/src/CSurvey.cpp` | Survey dialog |
-| `game/src/CSurvey.h` | Survey dialog |
 | `game/src/CUrlData.cpp` | URL-encoded request bodies (MD5/base64 fields), shared by both CCurl builds |
 | `game/src/CUserLogin.cpp` | Account login UI |
 | `game/src/CUserLogin.h` | Account login UI |
@@ -657,7 +657,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/Host.h` | Host-game settings struct |
 | `game/src/IncorrectName.h` | Dialog: invalid player name |
 | `game/src/IncorrectPassword.h` | Dialog: wrong server password |
-| `game/src/IntroScreen.cpp` | Intro screen |
+| `game/src/IntroScreen.cpp` | "LOADING" splash after start-up (ADR 0017) |
 | `game/src/IntroScreen.h` | Intro screen |
 | `game/src/JoinGame.h` | Join-game screen |
 | `game/src/Key.cpp` | Key binding entry |
