@@ -304,6 +304,13 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/roadmap/phase-c-installers-and-fixes/README.md` | Phase C scope: accepted PNS entries, order, done-when, risks |
 | `docs/roadmap/phase-c-installers-and-fixes/step1-player-data-dir.md` | Scope file for step1 |
 
+### `docs/roadmap/phase-c-installers-and-fixes/reviews`
+
+| path | purpose |
+|---|---|
+| `docs/roadmap/phase-c-installers-and-fixes/reviews/step1-report.md` | Raw fresh-context reviewer reports for step 1 |
+| `docs/roadmap/phase-c-installers-and-fixes/reviews/step1.md` | Step 1 review record |
+
 ### `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews`
 
 | path | purpose |
