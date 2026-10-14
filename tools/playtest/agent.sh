@@ -8,15 +8,17 @@
 #        agent.sh --preflight           check env file, tools and GitHub access only
 set -u
 
-REPO=Hub-Tansky/RoboViolence2
-ARTIFACT=roboviolence2-macos-arm64.zip
-PKG_NAME=roboviolence2-macos-arm64
-ROOT=${RV2_PLAYTEST_ROOT:-$HOME/RV2-playtest}
-ENV_FILE=${RV2_PLAYTEST_ENV:-$HOME/.config/rv2-playtest.env}
-GAME_PORT=3333 MASTER_PORT=10207 ADMIN_PORT=18080
-MAX_ATTEMPTS=3 KEEP=5 KEEP_REPORTS=30
+# readonly: a line in the env file can't change them (the main-only filter depends on REPO)
+readonly REPO=Hub-Tansky/RoboViolence2
+readonly ARTIFACT=roboviolence2-macos-arm64.zip PKG_NAME=roboviolence2-macos-arm64
+readonly ROOT=${RV2_PLAYTEST_ROOT:-$HOME/RV2-playtest}
+readonly ENV_FILE=${RV2_PLAYTEST_ENV:-$HOME/.config/rv2-playtest.env}
+readonly GAME_PORT=3333 MASTER_PORT=10207 ADMIN_PORT=18080
+readonly MAX_ATTEMPTS=3 KEEP=5 KEEP_REPORTS=30
+# Failures in these stages say nothing about the build: they notify once and don't use up an attempt
+readonly INFRA_STAGES=" preflight select artifact download ports-busy no-gui-session "
 
-# --- Helpers without side effects (tests/test_playtest_agent.sh) ---
+# --- Helpers (tests/test_playtest_agent.sh) ---
 
 # pick_run [sha prefix]: workflow-runs JSON on stdin -> "<run id> <sha>" of the newest successful push to main of REPO.
 # head_repository excludes fork pull requests whose branch is also named main.
@@ -32,7 +34,8 @@ artifact_info() {
 		| "\(.id) \(.digest // "" | sub("^sha256:"; ""))"'
 }
 
-digest_ok() { [ -n "$2" ] && [ "$(shasum -a 256 "$1" | cut -d' ' -f1)" = "$2" ]; } # digest_ok <file> <hex>
+# digest_ok <file> <hex>: integrity of the transfer; the trust anchor is pick_run's main-only filter
+digest_ok() { [ -n "$2" ] && [ "$(shasum -a 256 "$1" | cut -d' ' -f1)" = "$2" ]; }
 
 file_mode() { stat -c %a "$1" 2>/dev/null || stat -f %Lp "$1"; } # octal permission bits, GNU or BSD stat
 
@@ -44,6 +47,24 @@ attempts_of() { local a; a=$(last_state "$1" "$2" | cut -f7); echo "${a:-0}"; }
 
 due() { # due <sha> <test>: true unless that SHA passed or failed MAX_ATTEMPTS times
 	[ "$(last_state "$1" "$2" | cut -f5)" != pass ] && [ "$(attempts_of "$1" "$2")" -lt "$MAX_ATTEMPTS" ]
+}
+
+record_state() { # record_state <sha> <run> <test> <target> <result> <stage>: appends a state.tsv line, prints the attempt
+	local n stage=$6
+	n=$(($(attempts_of "$1" "$3") + 1))
+	[ "$5" = pass ] && stage=-
+	printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' "$1" "$2" "$3" "$4" "$5" "$stage" "$n" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" >>"$ROOT/state.tsv"
+	echo "$n"
+}
+
+is_infra() { case $INFRA_STAGES in *" $1 "*) return 0 ;; esac; return 1; } # is_infra <stage>
+
+prune() { # prune <dir> <keep>: delete the oldest entries, never the one `current` points to
+	local keep_target d
+	keep_target=$(readlink "$ROOT/current" 2>/dev/null)
+	ls -1t "$1" 2>/dev/null | tail -n +$(($2 + 1)) | while read -r d; do
+		[ "$1/$d" = "$keep_target" ] || rm -rf "${1:?}/$d"
+	done
 }
 
 load_env() { # sourced, not exported: each secret is passed only to the process that needs it
@@ -58,17 +79,23 @@ load_env() { # sourced, not exported: each secret is passed only to the process 
 
 # --- Run state ---
 
-MODE=smoke TEST=local-smoke TARGET=local WANT_SHA="" PLAY=""
-SHA="" RUN_ID="" STAGE="" RESULT="" REPORT="" LOCKED=""
+MODE=smoke TEST=local-smoke TARGET=local WANT_SHA=""
+SHA="" RUN_ID="" NAME="" STAGE="" RESULT="" REPORT="" LOCKED="" PLAY="" KEEP_RUNNING=""
 PKG="" RUN_DIR="" CPREF="" CLIENT_PID="" SERVER_PID="" PIDS="" FIFO=""
 
 say() { printf '%s %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$*" | tee -a "${REPORT:-/dev/null}"; }
 stage() { STAGE=$1; say "stage $1"; }
 fail() { say "FAIL $STAGE: $*"; RESULT=fail; exit 1; }
 
-notify() { # notify <title> <message>
-	osascript -e "display notification \"$2\" with title \"$1\"" >/dev/null 2>&1
-	[ -n "${NTFY_TOPIC:-}" ] && curl -fsS --max-time 10 -H "Title: $1" -d "$2" "https://ntfy.sh/$NTFY_TOPIC" >/dev/null 2>&1
+notify() { # notify <title> <message>: text goes in as arguments, never as AppleScript source or argv URL
+	osascript - "$1" "$2" >/dev/null 2>&1 <<-'EOF'
+		on run argv
+			display notification (item 2 of argv) with title (item 1 of argv)
+		end run
+	EOF
+	if [ -n "${NTFY_TOPIC:-}" ]; then # the topic is a secret: it goes to curl as config on stdin
+		printf 'url = "https://ntfy.sh/%s"\n' "$NTFY_TOPIC" | curl -fsS --max-time 10 -K - -H "Title: $1" -d "$2" >/dev/null 2>&1
+	fi
 	return 0
 }
 
@@ -90,27 +117,29 @@ port_busy() { nc -z 127.0.0.1 "$1" >/dev/null 2>&1; }
 
 alive() { [ -n "$1" ] && kill -0 "$1" 2>/dev/null; }
 
+ours() { ps -p "$1" -o comm= 2>/dev/null | grep -qE 'bv2|sleep'; } # pid is one of our processes, not a reused one
+
 lock() {
 	mkdir -p "$ROOT" && chmod 700 "$ROOT"
-	if ! mkdir "$ROOT/lock" 2>/dev/null; then
-		alive "$(cat "$ROOT/lock/pid" 2>/dev/null)" && exit 0
-		rm -rf "$ROOT/lock"
-		mkdir "$ROOT/lock" || exit 1
-	fi
-	echo $$ >"$ROOT/lock/pid"
+	# No run takes 30 minutes: an older lock is stale even if its pid now belongs to another process
+	[ -n "$(find "$ROOT/lock" -mmin +30 2>/dev/null)" ] && rm -f "$ROOT/lock"
+	shlock -p $$ -f "$ROOT/lock" || { say "locked by pid $(cat "$ROOT/lock" 2>/dev/null); skipped"; exit 0; }
 	LOCKED=1
 }
 
-prune() { # prune <dir> <keep>: delete the oldest entries, never the one `current` points to
-	local keep_target; keep_target=$(readlink "$ROOT/current" 2>/dev/null)
-	ls -1t "$1" 2>/dev/null | tail -n +$(($2 + 1)) | while read -r d; do
-		[ "$1/$d" = "$keep_target" ] || rm -rf "${1:?}/$d"
-	done
+play_pids() { local p; for p in $(cat "$ROOT/play.pids" 2>/dev/null); do ours "$p" && echo "$p"; done; }
+
+play_running() { # true while a --play session has live processes; forgets a stale pid file
+	[ -n "$(play_pids)" ] && return 0
+	rm -f "$ROOT/play.pids"
+	return 1
 }
 
 preflight() { # tools and GitHub access; prints problems, true when there are none
 	local bad=0 t
-	for t in gh jq curl ditto shasum nc osascript; do command -v "$t" >/dev/null || { echo "missing tool: $t"; bad=1; }; done
+	for t in gh jq curl ditto shasum nc osascript shlock mkfifo xattr; do
+		command -v "$t" >/dev/null || { echo "missing tool: $t"; bad=1; }
+	done
 	gh auth token --user Hub-Tansky >/dev/null 2>&1 || { echo "gh has no token for Hub-Tansky (keychain locked?)"; bad=1; }
 	gh_api "repos/$REPO/actions/workflows/build.yml/runs?per_page=1" >/dev/null 2>&1 || { echo "GitHub API not reachable"; bad=1; }
 	return $bad
@@ -127,25 +156,30 @@ select_run() {
 	RUN_ID=${pick% *} SHA=${pick#* }
 }
 
-fetch_install() { # sets PKG
-	local info id hex dl vdir
+fetch_install() { # sets PKG; reuses an installed copy of the same build
+	local vdir="$ROOT/versions/${SHA:0:7}" json info id hex dl
+	PKG="$vdir/$PKG_NAME"
+	if [ "$(cat "$vdir/BUILD" 2>/dev/null)" = "$SHA $RUN_ID" ]; then
+		say "already installed: $vdir"
+		return
+	fi
 	stage artifact
-	info=$(gh_api "repos/$REPO/actions/runs/$RUN_ID/artifacts" | artifact_info)
+	json=$(gh_api "repos/$REPO/actions/runs/$RUN_ID/artifacts?per_page=100") || fail "artifacts query"
+	info=$(printf '%s' "$json" | artifact_info)
 	[ -n "$info" ] || fail "run $RUN_ID has no $ARTIFACT"
 	id=${info% *} hex=${info#* }
 	stage download
 	dl=$(mktemp -d "$ROOT/download.XXXXXX") || fail "temp dir"
-	gh_api "repos/$REPO/actions/artifacts/$id/zip" >"$dl/pkg.zip" || { rm -rf "$dl"; fail "artifact $id"; }
+	if ! gh_api "repos/$REPO/actions/artifacts/$id/zip" >"$dl/pkg.zip"; then rm -rf "$dl"; fail "artifact $id"; fi
 	stage verify
-	digest_ok "$dl/pkg.zip" "$hex" || { rm -rf "$dl"; fail "sha256 differs from the artifact digest ${hex:-(none)}"; }
-	stage install
-	vdir="$ROOT/versions/$(date +%Y%m%d)-${SHA:0:7}"
-	rm -rf "$vdir" && mkdir -p "$vdir" && ditto -x -k "$dl/pkg.zip" "$vdir" || { rm -rf "$dl"; fail "unzip"; }
+	if ! digest_ok "$dl/pkg.zip" "$hex"; then rm -rf "$dl"; fail "sha256 differs from the artifact digest ${hex:-(none)}"; fi
+	stage install # unzip beside, then swap: a failed unzip never leaves a half-installed version
+	if ! ditto -x -k "$dl/pkg.zip" "$dl/new"; then rm -rf "$dl"; fail "unzip"; fi
+	xattr -dr com.apple.quarantine "$dl/new" 2>/dev/null
+	printf '%s %s\n' "$SHA" "$RUN_ID" >"$dl/new/BUILD"
+	mkdir -p "$ROOT/versions" && rm -rf "$vdir" && mv "$dl/new" "$vdir"
 	rm -rf "$dl"
-	xattr -dr com.apple.quarantine "$vdir" 2>/dev/null
-	PKG="$vdir/$PKG_NAME"
 	[ -x "$PKG/bv2dedicated" ] && [ -x "$PKG/bv2master" ] && [ -x "$PKG/run-client.sh" ] || fail "unexpected package layout"
-	printf '%s %s\n' "$SHA" "$RUN_ID" >"$vdir/BUILD"
 }
 
 use_current() { # sets PKG, SHA, RUN_ID from the last version that passed local-smoke
@@ -166,25 +200,30 @@ start_local() { # start_local <run dir>: master and server from PKG, on fixed po
 	PIDS="$PIDS $!"
 	FIFO="$RUN_DIR/server.in"
 	mkfifo "$FIFO" || fail "fifo"
-	sleep 2147483647 </dev/null >"$FIFO" 2>/dev/null & # holds the server's stdin open; `quit` is written beside it
+	sleep 2147483647 >"$FIFO" 2>/dev/null & # holds the server's stdin open; `quit` is written beside it
 	PIDS="$PIDS $!"
 	(cd "$PKG" && BV2_PREF_DIR="$RUN_DIR/pref" BV2_MASTER_SERVERS="127.0.0.1:$MASTER_PORT" BV2_ADMIN_API_PORT=$ADMIN_PORT \
 		BV2_ADMIN_PASS="$BV2_ADMIN_PASS" exec ./bv2dedicated CTF <"$FIFO" >"$RUN_DIR/server.log" 2>&1) &
 	SERVER_PID=$!
 	PIDS="$PIDS $!"
-	stage server-start
-	wait_for 30 grep -q "Server Created on port $GAME_PORT" "$RUN_DIR/server.log" || fail "no 'Server Created' within 30 s"
+	stage server-port # the port, not the log: the server's stdout is block-buffered in a file
+	wait_for 30 port_busy $GAME_PORT || fail "server not listening on $GAME_PORT within 30 s"
 	stage master-port
 	wait_for 10 port_busy $MASTER_PORT || fail "master not listening on $MASTER_PORT within 10 s"
 }
 
-start_client() { # start_client <pref dir> <host> [cfg]: packaged client, its console log in the pref dir
+start_client() { # start_client <pref dir> <host> [player name]: packaged client; a name also sets windowed mode
+	local cfg=""
 	stage gui-session
 	[ "$(stat -f %Su /dev/console)" = "$(id -un)" ] || { STAGE=no-gui-session; fail "user not logged in at the console"; }
 	stage client-start
 	CPREF=$1
 	mkdir -p "$CPREF"
-	(cd "$PKG" && BV2_PREF_DIR="$CPREF" exec ./run-client.sh ${3:+--config "$3"} connect "$2" </dev/null >"$CPREF/client.log" 2>&1) &
+	if [ -n "${3:-}" ]; then
+		cfg="$CPREF/playtest.cfg" # absolute: run-client.sh changes to the package dir
+		printf 'r_fullScreen false\ncl_playerName "%s"\n' "$3" >"$cfg"
+	fi
+	(cd "$PKG" && BV2_PREF_DIR="$CPREF" exec ./run-client.sh ${cfg:+--config "$cfg"} connect "$2" </dev/null >"$CPREF/client.log" 2>&1) &
 	CLIENT_PID=$!
 	sleep 10
 	alive "$CLIENT_PID" || fail "client exited within 10 s"
@@ -203,7 +242,7 @@ wait_gone() { # wait_gone <seconds> <pid...>: true once none is running
 stop_all() { # client, then `quit` to the server, then TERM, then KILL
 	local p
 	alive "$CLIENT_PID" && kill "$CLIENT_PID" 2>/dev/null
-	alive "$SERVER_PID" && echo quit >"$FIFO" # a FIFO without a reader would block the write
+	[ -p "$FIFO" ] && echo quit 1<>"$FIFO" # read-write open never blocks, even without a reader
 	wait_gone 10 $SERVER_PID $CLIENT_PID
 	for p in $PIDS; do alive "$p" && kill "$p" 2>/dev/null; done
 	wait_gone 5 $PIDS || for p in $PIDS $CLIENT_PID; do alive "$p" && kill -9 "$p" 2>/dev/null; done
@@ -213,86 +252,84 @@ stop_all() { # client, then `quit` to the server, then TERM, then KILL
 
 finish() {
 	trap - EXIT
-	[ -z "$PLAY" ] || [ "$RESULT" != pass ] && stop_all
-	if [ -n "$SHA" ] && [ -n "$REPORT" ]; then
-		[ "$RESULT" = pass ] || RESULT=fail
-		local attempts=$(($(attempts_of "$SHA" "$TEST") + 1)) f
-		printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' "$SHA" "$RUN_ID" "$TEST" "$TARGET" "$RESULT" \
-			"$([ "$RESULT" = pass ] && echo - || echo "$STAGE")" "$attempts" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" >>"$ROOT/state.tsv"
+	[ -n "$KEEP_RUNNING" ] || stop_all
+	[ -n "$REPORT" ] && [ -z "$RESULT" ] && RESULT=fail # an unexpected exit while testing a build
+	if [ "$RESULT" = interrupted ]; then
+		say "interrupted (logout, shutdown or bootout); nothing recorded"
+	elif [ -n "$REPORT" ] && ! { [ "$RESULT" = fail ] && is_infra "$STAGE"; }; then
+		local attempt f
+		attempt=$(record_state "$SHA" "$RUN_ID" "$TEST" "$TARGET" "$RESULT" "$STAGE")
 		for f in "$RUN_DIR/server.log" "$RUN_DIR/master.log" "$CPREF/client.log" "$CPREF/console.log"; do
 			[ -n "$f" ] && [ -f "$f" ] && { printf -- '--- last 50 lines of %s\n' "$f"; tail -50 "$f"; } >>"$REPORT"
 		done
-		say "result $RESULT (attempt $attempts)"
+		say "result $RESULT (attempt $attempt)"
 		if [ "$RESULT" = pass ]; then
 			[ "$TEST" = local-smoke ] && ln -sfn "$(dirname "$PKG")" "$ROOT/current"
 			notify "RV2 ${SHA:0:7} READY TO TEST" "$TEST passed. Play: agent.sh --play local. Report: $REPORT"
 		else
-			notify "RV2 ${SHA:0:7} FAILED at $STAGE" "$TEST, attempt $attempts. Report: $REPORT"
+			notify "RV2 ${SHA:0:7} FAILED at $STAGE" "$TEST, attempt $attempt. Report: $REPORT"
 		fi
 		rm -f "$ROOT/infra-failure"
 		prune "$ROOT/versions" $KEEP; prune "$ROOT/pref" $KEEP; prune "$ROOT/run" $KEEP; prune "$ROOT/reports" $KEEP_REPORTS
-	elif [ "$RESULT" = fail ] && [ "$(cat "$ROOT/infra-failure" 2>/dev/null)" != "$STAGE" ]; then
-		echo "$STAGE" >"$ROOT/infra-failure" # notify once per distinct failure, not every 10 minutes
-		notify "RV2 agent FAILED at $STAGE" "No build tested. Log: $ROOT/agent.log"
+	elif [ "$RESULT" = fail ] && [ -z "$PLAY" ] && [ "$(cat "$ROOT/infra-failure" 2>/dev/null)" != "$STAGE" ]; then
+		echo "$STAGE" >"$ROOT/infra-failure" # once per distinct failure, not every 10 minutes
+		notify "RV2 agent FAILED at $STAGE" "No attempt counted. Log: $ROOT/agent.log"
 	fi
-	[ -n "$LOCKED" ] && rm -rf "$ROOT/lock"
+	[ -n "$LOCKED" ] && rm -f "$ROOT/lock"
 }
 
 begin_report() {
 	mkdir -p "$ROOT/reports"
 	REPORT="$ROOT/reports/${SHA:0:7}.txt"
+	NAME="rv2-agent-${SHA:0:7}"
 	say "=== $TEST on $TARGET: $SHA, run https://github.com/$REPO/actions/runs/$RUN_ID"
 }
 
-play_running() { local p; for p in $(cat "$ROOT/play.pids" 2>/dev/null); do alive "$p" && return 0; done; return 1; }
+usage() { sed -n '4,8p' "$0" >&2; exit 2; }
 
 # --- Modes ---
 
 while [ $# -gt 0 ]; do
 	case "$1" in
-		--sha) WANT_SHA=$2; shift 2 ;;
-		--test) MODE=test TEST=$2; shift 2 ;;
-		--play) MODE=play TARGET=$2; shift 2 ;;
+		--sha) [ -n "${2:-}" ] || usage; WANT_SHA=$2; shift 2 ;;
+		--test) [ "${2:-}" = staging-connect ] || usage; MODE=test TEST=$2 TARGET=staging; shift 2 ;;
+		--play) case "${2:-}" in local | staging) ;; *) usage ;; esac; MODE=play TARGET=$2; shift 2 ;;
 		--stop) MODE=stop; shift ;;
 		--preflight) MODE=preflight; shift ;;
-		*) sed -n '4,9p' "$0" >&2; exit 2 ;;
+		*) usage ;;
 	esac
 done
+[ "$MODE" = play ] && [ -n "$WANT_SHA" ] && usage # play always uses `current`
 
 case $MODE in
 	preflight)
 		if out=$({ load_env && preflight; } 2>&1); then notify "RV2 agent preflight passed" "Ready for unattended runs"; echo ok; exit 0; fi
 		echo "$out"; notify "RV2 agent preflight FAILED" "$(echo "$out" | head -1)"; exit 1 ;;
 	stop)
-		for p in $(cat "$ROOT/play.pids" 2>/dev/null); do alive "$p" && kill "$p" 2>/dev/null; done
+		for p in $(play_pids); do kill "$p" 2>/dev/null; done
 		rm -f "$ROOT/play.pids"; exit 0 ;;
 esac
 
 lock
 trap finish EXIT
+trap 'RESULT=interrupted; exit 143' TERM INT
 stage preflight
-out=$(load_env 2>&1) || fail "$out"
-load_env
+load_env || fail "env file"
 out=$(preflight 2>&1) || fail "$out"
 
 case $MODE in
 	smoke)
 		play_running && { say "manual play running; skipped"; exit 0; }
 		select_run
-		if [ -z "$WANT_SHA" ] && ! due "$SHA" "$TEST"; then SHA=""; exit 0; fi
+		due "$SHA" "$TEST" || [ -n "$WANT_SHA" ] || exit 0
 		begin_report
 		fetch_install
 		start_local "$ROOT/run/${SHA:0:7}-local-$(date +%Y%m%d%H%M%S)"
-		CFG_DIR="$ROOT/pref/${SHA:0:7}"
-		rm -rf "$CFG_DIR" && mkdir -p "$CFG_DIR"
-		printf 'r_fullScreen false\ncl_playerName "rv2-agent-%s"\n' "${SHA:0:7}" >"$CFG_DIR/playtest.cfg"
-		start_client "$CFG_DIR" 127.0.0.1 "$CFG_DIR/playtest.cfg"
+		start_client "$ROOT/pref/${SHA:0:7}" 127.0.0.1 "$NAME"
 		stage client-join
-		wait_for 30 has_player "http://127.0.0.1:$ADMIN_PORT" "$BV2_ADMIN_PASS" "rv2-agent-${SHA:0:7}" || fail "/status does not list rv2-agent-${SHA:0:7} within 30 s"
+		wait_for 30 has_player "http://127.0.0.1:$ADMIN_PORT" "$BV2_ADMIN_PASS" "$NAME" || fail "/status does not list $NAME within 30 s"
 		RESULT=pass ;;
 	test)
-		[ "$TEST" = staging-connect ] || { echo "unknown test: $TEST" >&2; exit 2; }
-		TARGET=staging
 		if [ -z "${RV2_STAGING_HOST:-}" ] || [ -z "${RV2_STAGING_ADMIN_PASS:-}" ]; then
 			notify "RV2 staging-connect not-configured" "Set RV2_STAGING_HOST and RV2_STAGING_ADMIN_PASS in $ENV_FILE"; exit 0
 		fi
@@ -300,31 +337,25 @@ case $MODE in
 		stage staging-version
 		deployed=$(curl -fsS --max-time 5 "https://$RV2_STAGING_HOST:8443/deployed" 2>/dev/null | cut -d' ' -f1)
 		say "staging runs ${deployed:-an unknown build (no /deployed)}"
-		CFG_DIR="$ROOT/pref/${SHA:0:7}-staging"
-		rm -rf "$CFG_DIR" && mkdir -p "$CFG_DIR"
-		printf 'r_fullScreen false\ncl_playerName "rv2-agent-%s"\n' "${SHA:0:7}" >"$CFG_DIR/playtest.cfg"
-		start_client "$CFG_DIR" "$RV2_STAGING_HOST" "$CFG_DIR/playtest.cfg"
+		start_client "$ROOT/pref/${SHA:0:7}-staging" "$RV2_STAGING_HOST" "$NAME"
 		stage staging-join
-		if ! wait_for 30 has_player "https://$RV2_STAGING_HOST:8443" "$RV2_STAGING_ADMIN_PASS" "rv2-agent-${SHA:0:7}"; then
+		if ! wait_for 30 has_player "https://$RV2_STAGING_HOST:8443" "$RV2_STAGING_ADMIN_PASS" "$NAME"; then
 			[ -n "$deployed" ] && [ "$deployed" != "$SHA" ] && STAGE=staging-version-mismatch
-			fail "staging /status does not list rv2-agent-${SHA:0:7} within 30 s"
+			fail "staging /status does not list $NAME within 30 s"
 		fi
 		RESULT=pass ;;
-	play)
+	play) # manual: no report, no pass/fail
 		PLAY=1
 		play_running && { echo "already running; agent.sh --stop first" >&2; exit 1; }
 		use_current
-		SHA="" # manual play writes no pass/fail
-		case $TARGET in
-			local)
-				start_local "$ROOT/run/play-$(date +%Y%m%d%H%M%S)"
-				start_client "$ROOT/play-pref" 127.0.0.1 ;;
-			staging)
-				[ -n "${RV2_STAGING_HOST:-}" ] || fail "RV2_STAGING_HOST is not set"
-				start_client "$ROOT/play-pref" "$RV2_STAGING_HOST" ;;
-			*) echo "unknown target: $TARGET" >&2; exit 2 ;;
-		esac
+		if [ "$TARGET" = local ]; then
+			start_local "$ROOT/run/play-$(date +%Y%m%d%H%M%S)"
+			start_client "$ROOT/play-pref" 127.0.0.1
+		else
+			[ -n "${RV2_STAGING_HOST:-}" ] || fail "RV2_STAGING_HOST is not set"
+			start_client "$ROOT/play-pref" "$RV2_STAGING_HOST"
+		fi
 		echo "$PIDS $CLIENT_PID" >"$ROOT/play.pids"
-		RESULT=pass
+		KEEP_RUNNING=1
 		echo "playing $TARGET; stop with: agent.sh --stop" ;;
 esac
