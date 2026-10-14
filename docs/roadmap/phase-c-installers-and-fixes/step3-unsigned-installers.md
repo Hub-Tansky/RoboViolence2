@@ -1,6 +1,6 @@
 # Step 3: Unsigned installers
 
-**Status:** IN PROGRESS
+**Status:** DONE (2026-10-15)
 
 **Depends on:** [step 1](step1-player-data-dir.md), [step 2](step2-name-and-credits.md). **Next:** step 5 (after PNS-31). **Index:** [README.md](README.md)
 
