@@ -227,7 +227,7 @@ Photon Pro curves, with `a = sv_photonVerticalShift`, `c = sv_photonDamageCoeffi
 
 | # | Defect | Evidence |
 |---|---|---|
-| W1 | `if (gameVar.sv_serverType = 1)` is an **assignment**: every projectile update forces pro mode and overwrites bazooka damage with `sv_zookaDamage` | [VERIFY: BaboViolent2/Code/GameProjectile.cpp:718-725] |
+| W1 | **Fixed in Phase B step 5 ([ADR 0013](../decisions/0013-r3-restore-normal-and-pro-rulesets.md)).** `if (gameVar.sv_serverType = 1)` was an **assignment**: every projectile update forces pro mode and overwrites bazooka damage with `sv_zookaDamage` | [VERIFY: BaboViolent2/Code/GameProjectile.cpp:718-725] |
 | W2 | Rocket hit paths dereference `scene->server->game->players[fromID]` without a null check → server crash if the shooter disconnects while the rocket flies | [VERIFY: BaboViolent2/Code/GameProjectile.cpp:733] [VERIFY: BaboViolent2/Code/GameProjectile.cpp:756-759] |
 | W3 | `map && A \|\| B \|\| C \|\| D` precedence: for pickup types the `map` null-guard does not apply | [VERIFY: BaboViolent2/Code/GameProjectile.cpp:612] |
 | W4 | Client-side projectile list erases with an iterator from the **other** vector: `clientProjectiles.erase(projectiles.begin()+i)` (UB) | [VERIFY: BaboViolent2/Code/Game.cpp:851] |
@@ -235,5 +235,5 @@ Photon Pro curves, with `a = sv_photonVerticalShift`, `c = sv_photonDamageCoeffi
 | W6 | Projectile spawn position is client-controlled | [VERIFY: BaboViolent2/Code/GameSpawn.cpp:464-472] |
 | W7 | Non-Pro builds accept the client-computed ray endpoint (client decides spread) | [VERIFY: BaboViolent2/Code/Game.cpp:1122-1126] [VERIFY: BaboViolent2/Code/Game.cpp:1392-1418] |
 
-W1 is the most consequential: `sv_serverType` becomes 1 as soon as any projectile is updated (on server and clients alike), which activates every `sv_serverType == 1` branch in `hitSV` (per-weapon `sv_*Damage` overrides, photon/flame distance curves) and the Pro rocket remote-detonation path. An admin who sets `sv_serverType 0` will see it flip back to 1 at the next grenade or rocket. Fix: `==`.
+W1 (now fixed) was the most consequential: `sv_serverType` becomes 1 as soon as any projectile is updated (on server and clients alike), which activates every `sv_serverType == 1` branch in `hitSV` (per-weapon `sv_*Damage` overrides, photon/flame distance curves) and the Pro rocket remote-detonation path. An admin who sets `sv_serverType 0` will see it flip back to 1 at the next grenade or rocket. Fix: `==`.
 [VERIFY: BaboViolent2/Code/Player.cpp:1116] [VERIFY: BaboViolent2/Code/ServerRecv.cpp:1049]
