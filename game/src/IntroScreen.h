@@ -34,13 +34,16 @@ public:
 
 public:
 	// Constructeur
-	IntroScreen(unsigned int in_font);
+	explicit IntroScreen(unsigned int in_font);
 
 	// Update
 	void update(float delay);
 
 	// Render
 	void render();
+
+	// "LOADING" in the big menu font, as Scene shows while it loads
+	static void renderLoading(unsigned int font, float brightness);
 };
 
 

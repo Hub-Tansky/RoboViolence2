@@ -45,11 +45,17 @@ void IntroScreen::update(float delay)
 
 
 //
-// Render: "LOADING" in the big menu font (as Scene's loading frame), fading in and out (PNS-53)
+// Render: "LOADING" fading in and out (PNS-53)
 //
 void IntroScreen::render()
 {
-	float brightness = (showDelay > 2) ? 1 - (showDelay - 2) : (showDelay > 1) ? 1 : showDelay;
+	renderLoading(font, (showDelay > 2) ? 1 - (showDelay - 2) : (showDelay > 1) ? 1 : showDelay);
+}
+
+
+
+void IntroScreen::renderLoading(unsigned int font, float brightness)
+{
 	dkglPushOrtho(800, 600);
 		glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT);
 			glEnable(GL_BLEND);

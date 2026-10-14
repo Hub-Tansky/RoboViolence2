@@ -69,16 +69,7 @@ Scene::Scene()
 		glDisable(GL_TEXTURE_2D);
 		glColor3f(1,1,1);
 
-		dkglPushOrtho(800, 600);
-
-		// Print au millieu
-		glColor3f(1,1,1);
-		dkfBindFont(font);
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		printCenterText(400, 268, 64, CString("LOADING"));
-
-		dkglPopOrtho();
+		IntroScreen::renderLoading(font, 1);
 
 		// On swap les buffers
 		dkglSwapBuffers();
@@ -169,13 +160,9 @@ void Scene::update(float delay)
 		if (introScreen->showDelay <= 0) 
 		{
 			ZEVEN_SAFE_DELETE(introScreen);
-		//	menu->isReady = true;
-		//	ZEVEN_SAFE_DELETE(menuManager.root);
-
 			if (gameVar.s_inGameMusic) dksPlayMusic("main/sounds/Menu.ogg", -1);
 			createMenu();
 			menuManager.root->visible = true;
-		/*	if (gameVar.s_inGameMusic) dksPlayMusic("main/sounds/Menu.ogg", -1);*/
 		}
 	}
 	else
