@@ -1,0 +1,21 @@
+name: osv-vcpkg
+# vcpkg ports against OSV by upstream commit (PNS-22): Dependabot and OSV can't read vcpkg purls. Weekly, so new
+# advisories surface without a code change. Not required.
+on:
+  schedule:
+    - cron: "0 6 * * 2"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  osv:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup-vcpkg
+        with:
+          cache-key: linux-x64
+      - name: Configure (installs the ports)
+        run: cmake --preset linux-x64
+      - name: Query OSV
+        run: python3 tools/osv-vcpkg.py build/linux-x64/vcpkg_installed

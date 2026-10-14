@@ -5,4 +5,4 @@
 - **Production** server config and credentials live in a deployment secret store, never in the repo.
 - Loader order ([ADR 0007](../docs/decisions/0007-data-root-pref-dir-config-layers.md)): `main/bv2.example.cfg`, pref-dir `bv2.cfg`, `config/local/*.cfg` (beside the package's `main/`, [ADR 0016](../docs/decisions/0016-player-data-lookup-and-package-content.md)) and `--config <file>`, environment (`BV2_MASTER_SERVERS`, `BV2_ACCOUNT_URL`, `BV2_SV_PASSWORD`, `BV2_ADMIN_PASS`). The last two layers are never saved.
 - Never commit a non-empty `sv_password`, `zsv_adminPass`, `cl_password`, `cl_accountPassword`, `cl_accountUsername` or `cl_lastUsedIP`; no public IPs or hosts. `.gitleaks.toml` and the pre-commit hook reject them.
-- Databases are generated from `content-seed/*.sql` (`sqlite3 bv2.db < content-seed/bv2.sql`); `MasterServers` and `AccountURL` start empty.
+- The build generates the master's `master.db` and `web.db` from `content-seed/*.sql`. The client creates its `bv2.db` in the pref dir on first start (`game/src/Paths.cpp` `openClientDb`); `MasterServers` and `AccountURL` start empty.
