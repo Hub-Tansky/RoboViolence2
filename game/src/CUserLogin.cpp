@@ -49,7 +49,7 @@ CUserLogin::CUserLogin(CControl * in_parent, CControl * in_alignTo)
 	label2->toolTips = "Type down your password.";
 	txt_password = new CControl(pnl_login, CVector2i(10,10), CVector2i(200,25),"", this, "EDIT", label2, CONTROL_SNAP_BOTTOM);
 	txt_password->password = true;
-	CControl * label3 = new CControl(pnl_login, CVector2i(10,10), CVector2i(375,400),"Note : There is two ways to create an acount:\n  - You can create it directly here.\n  - You can register on the official forum : \x3www.rndlabs.ca\x8\n\nYou will then be able to identify yourself both on\nthe forum and in the game by using the same\naccount.\nIf you already have a forum's account\nyou can use it here to log on.\n\nHave fun!", this, "LABEL", label1, CONTROL_SNAP_RIGHT, 100);
+	CControl * label3 = new CControl(pnl_login, CVector2i(10,10), CVector2i(375,400),"Note : You can create an account directly here.\n\nHave fun!", this, "LABEL", label1, CONTROL_SNAP_RIGHT, 100);
 	label3->textAlign = CONTROL_TEXTALIGN_TOPLEFT;
 
 	btn_login = new CControl(pnl_login, CVector2i(32,32),CVector2i(128,25),"Login",this,"BUTTON", txt_password, CONTROL_SNAP_BOTTOM, 15);
