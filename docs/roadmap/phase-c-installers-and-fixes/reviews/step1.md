@@ -36,7 +36,7 @@ Skill evidence: both rounds `SKILL: Launching skill: thermo-nuclear-code-quality
 | 2 | `dataRoot() != packageRoot()` in three places | fixed in 218f9e1: `dataFromEnv()` for the picker, `config/local` no longer branches; one use left in `reloadLanguage` |
 | 3 | `BV2_DATA_DIR` equal to the package lets the picker override it | fixed in 218f9e1 (`dataFromEnv()`) |
 | 4 | `config/local` beside the data root has no user | fixed in 218f9e1 (dropped) |
-| 5 | `config/README.md` doesn't say where `config/local` is read | pending: the file is outside Allowed paths; edit reverted, owner asked to approve it |
+| 5 | `config/README.md` doesn't say where `config/local` is read | fixed after owner approval (2026-10-14) added `config/README.md` to Allowed paths |
 | 6 | Review record missing | this file |
 | 7 | `game/README.md` lines read as contradictory | fixed in 218f9e1 |
 | 8 | Saved `en.lang` loaded twice | rejected: harmless, as the reviewer says |
