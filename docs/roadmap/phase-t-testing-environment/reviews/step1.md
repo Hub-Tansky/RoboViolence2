@@ -1,7 +1,7 @@
 # Step 1 review
 
-Reviewer: fresh-context subagent, /thermo-nuclear-code-quality-review, 2026-10-14 (5 rounds)
-Diff: d13985822019269bdb7d37e9e50a07da5ef5e2cf..c8c33a2 (plus this record, the raw report and their `ARCHITECTURE.md` rows)
+Reviewer: fresh-context subagent, /thermo-nuclear-code-quality-review, 2026-10-14 (6 rounds)
+Diff: d13985822019269bdb7d37e9e50a07da5ef5e2cf..c8c33a2 (rounds 1–5), c8c33a2..015abbe (round 6: merge of `main` with the ADR renumbered 0016 → 0017, `--placeholders`), plus this record, the raw report and their `ARCHITECTURE.md` rows
 
 ## review.sh
 
@@ -34,8 +34,10 @@ Raw report: [step1-report.md](step1-report.md).
 | 37 | Reused install records the new run id | rejected: same commit, same package |
 | 39 | Tighter lock pattern missed `bash agent.sh` | fixed in c8c33a2 |
 | 40 | Infra predicate written twice | fixed in c8c33a2 |
+| 41 | Deviation row doesn't say what `--sha` on a pre-`67fd59f` build does | fixed (wording) |
+| 42 | `BV2_DATA_DIR` overrides `--placeholders` in a manual run | fixed (comment) |
 
-Round 5 verdict: approved, no new findings.
+Round 5 verdict: approved, no new findings. Round 6 verdict: approved.
 
 ## Fix proof
 
@@ -43,5 +45,5 @@ None required: every fix is to code added in this step, not to a defect in merge
 
 ## Not done / unsure
 
-- Acceptance check "after the owner installs the LaunchAgent, the next `main` build is reported within 20 minutes" needs the owner: installing a LaunchAgent is persistent configuration on their Mac. Whether `gh` can read the keychain under `launchd` is only known after that. The step stays IN PROGRESS until then.
+- Owner check: the LaunchAgent (installed by the owner) passed preflight under `launchd` and tested `main` build `c2e5f28` (`local-smoke` pass 2026-10-14T17:22:34Z). The build finished at 16:08:38Z while the Mac slept (`pmset -g log`: 15:51Z–17:20Z); the agent ran at the first wake. Every awake interval in `agent.log` is 10 minutes. The owner accepted the check as "within 20 minutes while the Mac is awake" (2026-10-14).
 - ntfy notifications not exercised (no topic configured).

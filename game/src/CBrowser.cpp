@@ -117,8 +117,7 @@ void CBrowser::updatePerso(float delay)
 		SBrowsableGame* bv2Row = 0;
 		while ((bv2Row = (SBrowsableGame*)lobby->getNext()))
 		{
-			SBrowsableGame* holdRow = new SBrowsableGame();
-			memcpy((void*)holdRow, bv2Row, sizeof(SBrowsableGame));
+			SBrowsableGame* holdRow = new SBrowsableGame(*bv2Row); // the next getNext() frees bv2Row
 			CString gameType;
 			switch (holdRow->bv2Row->gameType)
 			{

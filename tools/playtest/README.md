@@ -36,7 +36,7 @@ sed "s|__HOME__|$HOME|g" tools/playtest/com.roboviolence2.playtest.plist > ~/Lib
 launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.roboviolence2.playtest.plist
 ```
 
-The agent runs at load, then every 10 minutes. Its first run is the preflight under `launchd`: if `gh` can't read the keychain there, it notifies `FAILED at preflight`.
+The agent runs at load, then every 10 minutes while the Mac is awake; a build that finished during sleep is tested at the first run after waking. Its first run is the preflight under `launchd`: if `gh` can't read the keychain there, it notifies `FAILED at preflight`.
 
 ## Use
 

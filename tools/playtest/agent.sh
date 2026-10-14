@@ -227,7 +227,7 @@ start_client() { # start_client <pref dir> <host> [player name]: packaged client
 		cfg="$CPREF/playtest.cfg" # absolute: run-client.sh changes to the package dir
 		printf 'r_fullScreen false\ncl_playerName "%s"\n' "$3" >"$cfg"
 	fi
-	# Automated tests run windowed on placeholder content: no first-run data-folder dialog (ADR 0016) to block them
+	# Automated tests run windowed on placeholder content (unless BV2_DATA_DIR is set): no first-run data-folder dialog (ADR 0016) to block them
 	(cd "$PKG" && BV2_PREF_DIR="$CPREF" exec ./run-client.sh ${cfg:+--placeholders --config "$cfg"} connect "$2" </dev/null >"$CPREF/client.log" 2>&1) &
 	CLIENT_PID=$!
 	sleep 10

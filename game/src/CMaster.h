@@ -65,6 +65,10 @@ struct SBrowsableGame
 {
 	int ping;
 	stBV2row * bv2Row;
+	SBrowsableGame() : ping(0), bv2Row(0) {}
+	// A copy owns its own row: the lobby frees its games (and their rows) while the browser still lists the copies
+	SBrowsableGame(const SBrowsableGame & other) : ping(other.ping), bv2Row(other.bv2Row ? new stBV2row(*other.bv2Row) : 0) {}
+	SBrowsableGame & operator=(const SBrowsableGame &) = delete;
 	~SBrowsableGame()
 	{
 		delete bv2Row;
