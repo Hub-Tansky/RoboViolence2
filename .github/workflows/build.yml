@@ -15,7 +15,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { os: windows-latest, preset: win-x64-msvc }
+          - { os: windows-2025, preset: win-x64-msvc }  # pinned (PNS-27): ADR 0012 names this image
           - { os: macos-14, preset: macos-arm64 }
           - { os: ubuntu-24.04, preset: linux-x64 }
     steps:
@@ -40,14 +40,42 @@ jobs:
           cmake --preset ${{ matrix.preset }}-release
           cmake --build --preset ${{ matrix.preset }}-release -- -k 0
           ctest --test-dir build/${{ matrix.preset }}-release --output-on-failure
-      - name: Package (client, servers, main/, databases, run scripts)
+      # The archive on every OS, plus the installer (Windows) or disk image (macOS); ADR 0018
+      - name: Package
         shell: bash
-        run: ${{ runner.os == 'Windows' && 'python' || 'python3' }} packaging/make-package.py build/${{ matrix.preset }}-release/runtime ${{ matrix.preset }} out
-      # archive: false uploads the package as-is (no zip around the zip); the artifact takes the file's name.
+        run: ${{ runner.os == 'Windows' && 'python' || 'python3' }} packaging/make-package.py build/${{ matrix.preset }}-release/runtime ${{ matrix.preset }} out ${{ github.ref_type == 'tag' && github.ref_name || '0.0.0-dev' }}
+      # archive: false uploads each file as-is (no zip around the zip); the artifact takes the file's name.
       - uses: actions/upload-artifact@v7
         with:
-          path: out/roboviolence2-${{ matrix.preset }}.*
+          path: out/roboviolence2-${{ matrix.preset }}.${{ runner.os == 'Linux' && 'tar.gz' || 'zip' }}
           archive: false
+      - uses: actions/upload-artifact@v7
+        if: runner.os != 'Linux'
+        with:
+          path: out/roboviolence2-${{ matrix.preset }}${{ runner.os == 'Windows' && '-setup.exe' || '.dmg' }}
+          archive: false
+  # A v* tag publishes the installers, the Linux package and the source as a GitHub release (ADR 0018)
+  release:
+    if: github.ref_type == 'tag' && startsWith(github.ref_name, 'v')
+    needs: build
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          path: dist
+          pattern: roboviolence2-*
+          merge-multiple: true
+      - name: Source tarball and release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git archive --format=tar.gz --prefix="roboviolence2-${GITHUB_REF_NAME}/" -o "dist/roboviolence2-${GITHUB_REF_NAME}-source.tar.gz" HEAD
+          gh release create "$GITHUB_REF_NAME" --title "Robo Violence 2 $GITHUB_REF_NAME" --generate-notes \
+            dist/roboviolence2-win-x64-msvc-setup.exe dist/roboviolence2-macos-arm64.dmg \
+            dist/roboviolence2-linux-x64.tar.gz "dist/roboviolence2-${GITHUB_REF_NAME}-source.tar.gz"
   package-check:
     name: package-check (clean ubuntu:24.04)
     needs: build
