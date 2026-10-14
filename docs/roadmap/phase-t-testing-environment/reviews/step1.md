@@ -5,7 +5,7 @@ Diff: d13985822019269bdb7d37e9e50a07da5ef5e2cf..c8c33a2 (plus this record, the r
 
 ## review.sh
 
-`tools/review.sh --full macos-arm64` on c8c33a2: architecture, hygiene, content-case, original-assets, secrets, diff-rules, configure, build, ctest all PASS; rerun with this record staged: all PASS.
+`tools/review.sh --full macos-arm64` on c8c33a2: all PASS except architecture (this record did not exist yet). Rerun with this record and the report staged: architecture, hygiene, content-case, original-assets, secrets, diff-rules, configure, build, ctest all PASS.
 
 ## Findings
 
