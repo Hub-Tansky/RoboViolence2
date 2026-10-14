@@ -440,7 +440,7 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
   - `game/src/IntroScreen.cpp:31`: RndLabs logo splash at start-up (from the player's data).
 - **Change (owner-approved [GUI], 2026-10-14):**
   - Game name Robo Violence 2 in the window title, server name and dedicated-server banner.
-  - Credits, in order: title "Robo Violence 2"; "Unofficial fork of BaboViolent 2 by bitHeads / RndLabs; not endorsed by them."; "Thank all of you for the game!"; header "Original credits below"; the original team list unchanged.
+  - Credits, in order: title "Robo Violence 2"; "Unofficial fork of BaboViolent 2 by bitHeads / RndLabs; not endorsed by them."; "Thanks to everyone for this game!"; header "Original credits below"; the original team list unchanged.
   - Remove the forum sentence from the login note.
   - Replace the RndLabs logo splash with a new splash showing "Loading" in a big font.
   - Remove dead code: the survey (`game/src/CSurvey.*`, its `Scene` and `CMaster` hooks, the `DidSurvey` seed row in `content-seed/bv2.sql`, the master's `SURVEY_*` handling in `masterserver/src/cNetManager.cpp`; message IDs stay as gaps) and the unused `lang_RndLabsTeam` (`GameVar.*`, `en.lang`).
@@ -448,7 +448,7 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Unchanged:** source copyright notices; in-game terms ("Babo", "Unnamed Babo", "Counter Baborist"); binaries, `BV2_*`, pref path `BaboViolent2`, master game ID (PNS-20).
 - **Depends on:** PNS-51, otherwise the player's original `en.lang` overrides the name.
 - **Suggested home:** Phase C, before the first release; an ADR amending 0008 and 0010.
-- **Status:** Accepted → [Phase C](phase-c-installers-and-fixes/README.md)
+- **Status:** Done in Phase C [step 2](phase-c-installers-and-fixes/step2-name-and-credits.md)
 
 ### PNS-54: miniaudio 0.11.25 has CVE-2026-32837
 
@@ -488,4 +488,12 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Extract:** "`deploy.sh` copies about 8 helpers from `tools/playtest/agent.sh` … a fix to one copy (e.g. step 1's lock fixes #24, #32, #39) must be ported by hand to the other."
 - **Why it matters:** the main-only run filter and the lock are security-relevant; the copies can drift. A shared lib was rejected in step 1 (#23) because each agent is installed as one file.
 - **Suggested home:** the next Phase T step that changes either agent: a shared `tools/lib/agent-common.sh` with a one-line install for both, or a test that checks the two `pick_run` filters are identical.
+- **Status:** Proposed
+
+### PNS-59: Leftovers of the RndLabs splash and the loading frame
+
+- **Found in:** Phase C step 2 review (2026-10-14), findings 5 and 9.
+- **Extract:** `tools/placeholder-manifest.tsv:44,56` still generate placeholder `HeadGames.tga` and `RnDLabs.tga`, which no code loads now. `game/src/Map.cpp:85-91` repeats the "LOADING" frame that `IntroScreen::renderLoading` now draws.
+- **Why it matters:** dead placeholder output, and a third copy of the loading frame.
+- **Suggested home:** the next step that touches `tools/` or `Map.cpp`; keep the `tools/original-assets.sha256` entries.
 - **Status:** Proposed

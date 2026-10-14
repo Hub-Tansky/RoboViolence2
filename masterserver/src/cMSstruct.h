@@ -33,9 +33,7 @@
 
 #define		ACCOUNT_URL	1015	// tell the accountUrl
 
-#define		SURVEY_SUBMIT	1016	//--- Survey ID
-#define		SURVEY_NEVER	1017	//--- The guy don't want to answer the survey, E.V.E.R
-#define		SURVEY_CONFIRM	1018	//--- Master send confirmation that he received the survey
+// 1016-1018: removed in Phase C step 2 (ADR 0019); don't reuse
 
 #define		CACHE_LIST_REMOTE	1019	// tell the master we want the list of cached list of remote server
 #define		CACHE_LIST_PLAYER	1021	// received along with data of cached players
@@ -260,34 +258,6 @@
 	};
 
 
-	//--- All information for the survey
-	struct SSurvey
-	{
-		char gender;
-		char age;
-		char continent;
-		char country[80];
-		char gameGenre;
-		char specifiedGenre[80];
-		char hourPlayerGames;
-		char magazine[80];
-		char console;
-
-		char hourPlayingBV2;
-		char kindOfServer;
-		char howYouLearnAboutBabo[80];
-		char whoDoYouPlayWith; //--- bitMask
-		char whatDoYouLike; //--- bitMask
-		char whatDoYouLikeOther[80];
-
-		char whatYouWouldLikeForBV3; //--- bitMask
-		char whatYouWouldLikeForBV3Other[80];
-		char adsAndFree;
-		char payNoAds;
-
-		char email[80];
-	};
-
 
 
 static_assert(sizeof(stCacheBan) == 68, "stCacheBan wire size (as engine/babonet/include/cMSstruct.h)");
@@ -306,7 +276,6 @@ static_assert(sizeof(stPlayerRegister) == 33, "stPlayerRegister wire size (as en
 static_assert(sizeof(stServerRegister) == 32, "stServerRegister wire size (as engine/babonet/include/cMSstruct.h)");
 static_assert(sizeof(stRegisterResult) == 5, "stRegisterResult wire size (as engine/babonet/include/cMSstruct.h)");
 static_assert(sizeof(stKillServ) == 2, "stKillServ wire size (as engine/babonet/include/cMSstruct.h)");
-static_assert(sizeof(SSurvey) == 573, "SSurvey wire size (as engine/babonet/include/cMSstruct.h)");
 static_assert(offsetof(stBV2row, port) == 113, "stBV2row port offset");
 
 #pragma pack(pop)

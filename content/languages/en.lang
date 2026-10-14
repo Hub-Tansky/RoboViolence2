@@ -1,4 +1,4 @@
-lang_gameName						Babo Violent 2
+lang_gameName						Robo Violence 2
 
 lang_dualMachineGun					Dual Machine Gun
 lang_subMachineGun					Sub Machine Gun
@@ -101,7 +101,6 @@ lang_reflectDamage					Reflect Damage
 lang_maps							Maps
 lang_includedMaps					Included Maps
 
-lang_RndLabsTeam					RndLabs Team
 lang_gameDesigner					Game Designer
 lang_programmers					Programmers
 lang_soundDesigners					Sound Designers

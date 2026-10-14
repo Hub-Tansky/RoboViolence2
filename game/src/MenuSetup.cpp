@@ -41,22 +41,5 @@ void Scene::createMenu()
 	mainTab = new CMainTab(menuManager.root);
 }
 
-
-void Scene::createSurvey()
-{
-	//--- Overall control
-	menuManager.root = new CControl();
-	menuManager.root->font = font;
-	menuManager.root->size.set(800,600);
-	menuManager.root->backColor.set(.3f,.5f,.8f);
-	menuManager.root->foreColor.set(1,1,1);
-	menuManager.root->textShadow = true;
-	menuManager.root->noFill = true;
-
-	//--- Create the survey container
-	survey = new CSurvey(menuManager.root);
-}
-
-
 #endif
 

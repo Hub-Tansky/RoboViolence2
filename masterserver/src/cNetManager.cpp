@@ -307,51 +307,6 @@ void cNetManager::ReceiveServerPacket(char *data,int typeID,UINT4 fromID)
 			return;
 		}
 
-		// we receive a survey submission
-		case SURVEY_SUBMIT:
-		{
-			//let's parse data
-			SSurvey survey;
-			memcpy(&survey,data,sizeof(SSurvey));
-
-			survey.country[79] = '\0';
-			survey.specifiedGenre[79] = '\0';
-			survey.magazine[79] = '\0';
-			survey.howYouLearnAboutBabo[79] = '\0';
-			survey.whatDoYouLikeOther[79] = '\0';
-			survey.whatYouWouldLikeForBV3Other[79] = '\0';
-			survey.email[79] = '\0';
-
-			// Text is bound: stored as sent (the old code swapped ' for `)
-			sqlite3 *DB=0;
-			sqlite3_open("survey.db",&DB);
-			SqlStatement(DB, "Insert Into SurveyEntries(gender,age,continent,country,gameGenre,specifiedGenre,hourPlayerGames,magazine,console,hourPlayingBV2,kindOfServer,howYouLearnAboutBabo,whoDoYouPlayWith,whatDoYouLike,whatDoYouLikeOther,whatYouWouldLikeForBV3,whatYouWouldLikeForBV3Other,adsAndFree,payNoAds,email) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);")
-				.bindInt(1, survey.gender).bindInt(2, survey.age).bindInt(3, survey.continent).bindText(4, survey.country)
-				.bindInt(5, survey.gameGenre).bindText(6, survey.specifiedGenre).bindInt(7, survey.hourPlayerGames).bindText(8, survey.magazine)
-				.bindInt(9, survey.console).bindInt(10, survey.hourPlayingBV2).bindInt(11, survey.kindOfServer).bindText(12, survey.howYouLearnAboutBabo)
-				.bindInt(13, survey.whoDoYouPlayWith).bindInt(14, survey.whatDoYouLike).bindText(15, survey.whatDoYouLikeOther)
-				.bindInt(16, survey.whatYouWouldLikeForBV3).bindText(17, survey.whatYouWouldLikeForBV3Other).bindInt(18, survey.adsAndFree)
-				.bindInt(19, survey.payNoAds).bindText(20, survey.email).run();
-			sqlite3_close(DB);
-
-			// send a reply back
-			bb_serverSend(0,0,SURVEY_CONFIRM,fromID,NET_TCP);
-
-
-			return;
-		}
-		case SURVEY_NEVER:
-		{
-			sqlite3 *DB=0;
-			sqlite3_open("survey.db",&DB);
-			SqlStatement(DB, "Insert Into SurveyEntries(gender) values(-1);").run();
-
-			sqlite3_close(DB);
-
-			// send a reply back
-			bb_serverSend(0,0,SURVEY_CONFIRM,fromID,NET_TCP);
-			return;
-		}
 	}
 }
 

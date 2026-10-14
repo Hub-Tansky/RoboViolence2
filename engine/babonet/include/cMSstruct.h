@@ -31,9 +31,7 @@
 
 #define		ACCOUNT_URL	1015	// tell the accountUrl
 
-#define		SURVEY_SUBMIT	1016	//--- Survey ID
-#define		SURVEY_NEVER	1017	//--- The guy don't want to answer the survey, E.V.E.R
-#define		SURVEY_CONFIRM	1018	//--- Master send confirmation that he received the survey
+// 1016-1018: removed in Phase C step 2 (ADR 0019); don't reuse
 
 #define		CACHE_LIST_REMOTE	1019	// tell the master we want the list of cached list of remote server
 #define		CACHE_LIST_PLAYER	1021	// received along with data of cached players
@@ -415,34 +413,6 @@
 	};
 
 
-	//--- All information for the survey
-	struct SSurvey
-	{
-		int8_t gender;
-		int8_t age;
-		int8_t continent;
-		char country[80];
-		int8_t gameGenre;
-		char specifiedGenre[80];
-		int8_t hourPlayerGames;
-		char magazine[80];
-		int8_t console;
-
-		int8_t hourPlayingBV2;
-		int8_t kindOfServer;
-		char howYouLearnAboutBabo[80];
-		int8_t whoDoYouPlayWith; //--- bitMask
-		int8_t whatDoYouLike; //--- bitMask
-		char whatDoYouLikeOther[80];
-
-		int8_t whatYouWouldLikeForBV3; //--- bitMask
-		char whatYouWouldLikeForBV3Other[80];
-		int8_t adsAndFree;
-		int8_t payNoAds;
-
-		char email[80];
-	};
-
 
 
 static_assert(sizeof(stCacheBan) == 68, "stCacheBan wire size");
@@ -460,7 +430,6 @@ static_assert(sizeof(stPlayerRegister) == 33, "stPlayerRegister wire size");
 static_assert(sizeof(stServerRegister) == 32, "stServerRegister wire size");
 static_assert(sizeof(stRegisterResult) == 5, "stRegisterResult wire size");
 static_assert(sizeof(stKillServ) == 2, "stKillServ wire size");
-static_assert(sizeof(SSurvey) == 573, "SSurvey wire size");
 static_assert(sizeof(stCacheListRemote) == 60, "stCacheListRemote wire size");
 static_assert(sizeof(stCachePlayer) == 56, "stCachePlayer wire size");
 static_assert(sizeof(stHashSeed) == 8, "stHashSeed wire size");

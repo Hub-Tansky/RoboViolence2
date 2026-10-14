@@ -35,12 +35,21 @@ CCredit::CCredit(CControl * in_parent, CControl * in_alignTo)
 	instance->textAlign = CONTROL_TEXTALIGN_MIDDLECENTER;
 	instance->borderColor.set(1,.5f,.25f);
 
-	CControl * label1 = new CControl(instance, CVector2i(10,10), CVector2i(700,64),"BaboViolent 2 | Team", this, "LABEL");
+	CControl * label1 = new CControl(instance, CVector2i(10,10), CVector2i(700,64),"Robo Violence 2", this, "LABEL");
 	label1->textSize = 64;
 	label1->textAlign = CONTROL_TEXTALIGN_MIDDLECENTER;
 
+	//--- The fork (PNS-53, ADR 0019)
+	label1 = new CControl(instance, CVector2i(10,10), CVector2i(700,25),"Unofficial fork of BaboViolent 2 by bitHeads / RndLabs; not endorsed by them.", this, "LABEL", label1, CONTROL_SNAP_BOTTOM);
+	label1->textAlign = CONTROL_TEXTALIGN_MIDDLECENTER;
+	label1 = new CControl(instance, CVector2i(10,10), CVector2i(700,25),"Thanks to everyone for this game!", this, "LABEL", label1, CONTROL_SNAP_BOTTOM);
+	label1->textAlign = CONTROL_TEXTALIGN_MIDDLECENTER;
+	label1 = new CControl(instance, CVector2i(10,10), CVector2i(700,25),"Original credits below", this, "LABEL", label1, CONTROL_SNAP_BOTTOM, 30);
+	label1->foreColor.set(1,.5f,.25f);
+	label1->textAlign = CONTROL_TEXTALIGN_MIDDLECENTER;
+
 	//--- game Designer
-	label1 = new CControl(instance, CVector2i(10,10), CVector2i(700,25),"Game Designer", this, "LABEL", label1, CONTROL_SNAP_BOTTOM, 30);
+	label1 = new CControl(instance, CVector2i(10,10), CVector2i(700,25),"Game Designer", this, "LABEL", label1, CONTROL_SNAP_BOTTOM, 15);
 	label1->foreColor.set(1,1,.5f);
 	label1->textAlign = CONTROL_TEXTALIGN_MIDDLECENTER;
 	label1 = new CControl(instance, CVector2i(10,10), CVector2i(700,25),"David St-Louis \"\x3RndLabs\"", this, "LABEL", label1, CONTROL_SNAP_BOTTOM);

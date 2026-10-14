@@ -40,8 +40,6 @@
 
 #include "AccountManager.h"
 
-extern bool surveyReceived;
-
 
 struct SMasterMessage
 {

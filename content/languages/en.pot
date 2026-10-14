@@ -5,7 +5,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 
 msgctxt "lang_gameName"
-msgid "Babo Violent 2"
+msgid "Robo Violence 2"
 msgstr ""
 
 msgctxt "lang_dualMachineGun"
@@ -334,10 +334,6 @@ msgstr ""
 
 msgctxt "lang_includedMaps"
 msgid "Included Maps"
-msgstr ""
-
-msgctxt "lang_RndLabsTeam"
-msgid "RndLabs Team"
 msgstr ""
 
 msgctxt "lang_gameDesigner"

@@ -172,7 +172,6 @@ GameVar::GameVar()
 	langs.push_back(SLangText("lang_maps", &lang_maps));
 	langs.push_back(SLangText("lang_includedMaps", &lang_includedMaps));
 
-	langs.push_back(SLangText("lang_RndLabsTeam", &lang_RndLabsTeam));
 	langs.push_back(SLangText("lang_gameDesigner", &lang_gameDesigner));
 	langs.push_back(SLangText("lang_programmers", &lang_programmers));
 	langs.push_back(SLangText("lang_soundDesigners", &lang_soundDesigners));
@@ -369,7 +368,7 @@ GameVar::GameVar()
 
 	sv_bombTime = 60;
 	dksvarRegister(CString("sv_bombTime [int : (default 60)]"), &sv_bombTime, 10, 0, LIMIT_MIN, true);
-	sv_gameName = "Babo Violent 2 - Server";
+	sv_gameName = "Robo Violence 2 - Server";
 	dksvarRegister(CString("sv_gameName [string : \"\"]"), &sv_gameName, true);
 	sv_port = 3333;
 	dksvarRegister(CString("sv_port [int : valid port (default 3333)]"), &sv_port, 1024, 65536,
