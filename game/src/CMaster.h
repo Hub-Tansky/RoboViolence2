@@ -41,7 +41,6 @@
 #include "AccountManager.h"
 
 
-
 struct SMasterMessage
 {
 	char* buffer;

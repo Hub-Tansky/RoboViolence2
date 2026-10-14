@@ -65,7 +65,6 @@ public:
 	// Notre intro screen (quand que lui n'est pas fini, on update ni affiche rien d'autre)
 	IntroScreen * introScreen;
 
-
 	// Notre curseur
 	unsigned int tex_crosshair;
 	unsigned int tex_menuCursor;

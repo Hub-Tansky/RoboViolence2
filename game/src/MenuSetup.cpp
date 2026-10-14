@@ -41,8 +41,5 @@ void Scene::createMenu()
 	mainTab = new CMainTab(menuManager.root);
 }
 
-
-
-
 #endif
 

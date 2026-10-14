@@ -143,7 +143,7 @@ Consequences used everywhere in the game code:
 [VERIFY: BaboViolent2/Code/Scene.cpp:172-317]
 
 1. `master->update()` (master server + P2P + remote admin): [VERIFY: BaboViolent2/Code/Scene.cpp:183]
-2. Intro screen / survey gating (client only): [VERIFY: BaboViolent2/Code/Scene.cpp:196-240]
+2. Intro screen gating (client only; the survey was removed in Phase C step 2): [VERIFY: BaboViolent2/Code/Scene.cpp:196-240]
 3. `server->update(delay)`; `disconnect()` if `needToShutDown`: [VERIFY: BaboViolent2/Code/Scene.cpp:249-257]
 4. `client->update(delay)`; SFX volume ducked by `viewShake`: [VERIFY: BaboViolent2/Code/Scene.cpp:264-284]
 5. `editor->update(delay)`: [VERIFY: BaboViolent2/Code/Scene.cpp:292-300]
