@@ -46,16 +46,24 @@ jobs:
         env:
           VERSION: ${{ github.ref_type == 'tag' && github.ref_name || '0.0.0-dev' }}
         run: ${{ runner.os == 'Windows' && 'python' || 'python3' }} packaging/make-package.py build/${{ matrix.preset }}-release/runtime ${{ matrix.preset }} out "$VERSION"
-      - name: The installer installs and uninstalls silently
+      # Install, upgrade over it (the master's databases stay), uninstall (they stay too); ADR 0018
+      - name: The installer installs, upgrades and uninstalls silently
         if: runner.os == 'Windows'
         shell: bash
+        env:
+          MSYS_NO_PATHCONV: "1"  # pass /VERYSILENT etc. through unchanged
         run: |
           dir="$(cygpath -u "$RUNNER_TEMP")/rv2-install"
-          ./out/roboviolence2-${{ matrix.preset }}-setup.exe //VERYSILENT //SUPPRESSMSGBOXES //NORESTART "//DIR=$(cygpath -w "$dir")"
-          test -f "$dir/bv2.exe" && test -f "$dir/licenses/sqlite3.txt" && test -f "$dir/master.db"
-          "$dir/unins000.exe" //VERYSILENT //SUPPRESSMSGBOXES //NORESTART
+          setup() { ./out/roboviolence2-${{ matrix.preset }}-setup.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART "/DIR=$(cygpath -m "$dir")"; }
+          setup
+          ls "$dir/bv2.exe" "$dir/bv2dedicated.exe" "$dir/main/languages/en.lang" "$dir/licenses/sqlite3.txt" "$dir/master.db" > /dev/null
+          echo kept >> "$dir/master.db"
+          setup
+          tail -c 5 "$dir/master.db" | grep -q kept
+          "$dir/unins000.exe" /VERYSILENT /SUPPRESSMSGBOXES /NORESTART
           for i in $(seq 1 30); do [ -f "$dir/bv2.exe" ] || break; sleep 1; done
-          test ! -f "$dir/bv2.exe"
+          [ ! -f "$dir/bv2.exe" ]
+          ls "$dir/master.db" "$dir/web.db" > /dev/null
       # archive: false uploads each file as-is (no zip around the zip); the artifact takes the file's name.
       - uses: actions/upload-artifact@v7
         with:
@@ -112,7 +120,7 @@ jobs:
           tar -xzf roboviolence2-linux-x64.tar.gz
           cd roboviolence2-linux-x64
           if ldd bv2 bv2dedicated bv2master | grep "not found"; then exit 1; fi
-          test -f LICENSE.txt && test -f licenses/sqlite3.txt && test -f licenses/glad.txt
+          ls LICENSE.txt licenses/sqlite3.txt licenses/glad.txt > /dev/null
           export BV2_PREF_DIR="$RUNNER_TEMP/pref"
           printf 'quit\n' | ./run-server.sh > server.log 2>&1   # pipefail: the server's exit code counts
           grep "Server Created on port 3333" server.log           # printed after data root, launch script, map and network init

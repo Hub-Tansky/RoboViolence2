@@ -17,6 +17,7 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
+from typing import Callable, NamedTuple
 
 PACKAGING = Path(__file__).resolve().parent
 SCRIPTS = PACKAGING / "scripts"
@@ -28,43 +29,50 @@ def run(*cmd):
     subprocess.run([str(c) for c in cmd], check=True)
 
 
-# Per OS: put the client into the stage (returns its path in the package), then ship the stage.
+# Per OS: put the client into the stage (returns its path in the package), then ship the stage (returns the files).
 
-def client_macos(runtime, stage):
+def client_macos(runtime, stage, exe):
     shutil.copytree(runtime / "bv2.app", stage / "bv2.app")  # Resources/main symlink becomes a copy
     run("codesign", "--force", "--sign", "-", stage / "bv2.app")
     return "bv2.app/Contents/MacOS/bv2"
 
 
-def client_binary(exe):
-    def stage_client(runtime, stage):
-        shutil.copy2(runtime / ("bv2" + exe), stage)
-        return "bv2" + exe
-    return stage_client
+def client_binary(runtime, stage, exe):
+    shutil.copy2(runtime / ("bv2" + exe), stage)
+    return "bv2" + exe
 
 
 def ship_macos(stage, out, name, version):
+    archive, dmg = out / (name + ".zip"), out / (name + ".dmg")
     # ditto keeps exec bits and the bundle signature, and writes no ._ files
-    run("ditto", "-c", "-k", "--keepParent", "--norsrc", "--noextattr", "--noqtn", stage, out / (name + ".zip"))
+    run("ditto", "-c", "-k", "--keepParent", "--norsrc", "--noextattr", "--noqtn", stage, archive)
     os.symlink("/Applications", stage / "Applications")  # in the .dmg only, so bv2.app can be dragged across
-    run("hdiutil", "create", "-quiet", "-volname", "Robo Violence 2", "-srcfolder", stage, "-ov", "-format", "UDZO",
-        out / (name + ".dmg"))
+    run("hdiutil", "create", "-quiet", "-volname", "Robo Violence 2", "-srcfolder", stage, "-ov", "-format", "UDZO", dmg)
+    return [archive, dmg]
 
 
 def ship_windows(stage, out, name, version):
-    shutil.make_archive(str(out / name), "zip", out, name)
+    archive = shutil.make_archive(str(out / name), "zip", out, name)
     run(ISCC, "/Q", f"/DSourceDir={stage.resolve()}", f"/DOutputDir={out.resolve()}", f"/DOutputName={name}-setup",
         f"/DAppVersion={version.removeprefix('v')}", PACKAGING / "windows" / "roboviolence2.iss")
+    return [archive, out / (name + "-setup.exe")]
 
 
 def ship_linux(stage, out, name, version):
-    shutil.make_archive(str(out / name), "gztar", out, name)  # keeps file modes
+    return [shutil.make_archive(str(out / name), "gztar", out, name)]  # keeps file modes
 
 
-PLATFORMS = {  # sys.platform: (executable suffix, script suffix, client, ship)
-    "darwin": ("", ".sh", client_macos, ship_macos),
-    "win32": (".exe", ".cmd", client_binary(".exe"), ship_windows),
-    "linux": ("", ".sh", client_binary(""), ship_linux),
+class Platform(NamedTuple):
+    exe: str
+    script: str
+    stage_client: Callable
+    ship: Callable
+
+
+PLATFORMS = {
+    "darwin": Platform("", ".sh", client_macos, ship_macos),
+    "win32": Platform(".exe", ".cmd", client_binary, ship_windows),
+    "linux": Platform("", ".sh", client_binary, ship_linux),
 }
 
 
@@ -86,7 +94,8 @@ def main():
     # Players get Release only: Debug starts windowed and, on Windows, carries the debug C++ runtime.
     if "CMAKE_BUILD_TYPE:STRING=Release" not in (runtime.parent / "CMakeCache.txt").read_text().splitlines():
         sys.exit(f"{runtime.parent} is not a Release build")
-    exe, script_ext, stage_client, ship = PLATFORMS[sys.platform]
+    platform = PLATFORMS[sys.platform]
+    exe = platform.exe
     name = f"roboviolence2-{preset}"
     stage = out / name
     shutil.rmtree(stage, ignore_errors=True)
@@ -94,11 +103,11 @@ def main():
 
     # copytree follows symlinks and Windows junctions by default, so main/ arrives as real files.
     shutil.copytree(runtime / "main", stage / "main")
-    client = stage_client(runtime, stage)
+    client = platform.stage_client(runtime, stage, exe)
     servers_and_dbs = ["bv2dedicated" + exe, "bv2master" + exe, "master.db", "web.db"]
     for f in servers_and_dbs:
         shutil.copy2(runtime / f, stage)
-    scripts = [f"run-{s}{script_ext}" for s in ("client", "server", "master")]
+    scripts = [f"run-{s}{platform.script}" for s in ("client", "server", "master")]
     for s in scripts:
         shutil.copy2(SCRIPTS / s, stage)  # raises if a script was renamed or removed
     stage_licences(runtime, stage)
@@ -110,9 +119,9 @@ def main():
     if missing:
         sys.exit(f"package {name} is missing: {', '.join(missing)}")
 
-    ship(stage, out, name, version)
+    written = platform.ship(stage, out, name, version)
     shutil.rmtree(stage)
-    for f in sorted(out.glob(name + "*")):
+    for f in written:
         print(f)
 
 
