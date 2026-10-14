@@ -449,3 +449,11 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Depends on:** PNS-51, otherwise the player's original `en.lang` overrides the name.
 - **Suggested home:** Phase C, before the first release; an ADR amending 0008 and 0010.
 - **Status:** Accepted → [Phase C](phase-c-installers-and-fixes/README.md)
+
+### PNS-54: miniaudio 0.11.25 has CVE-2026-32837
+
+- **Found in:** Phase C step 4 (2026-10-14), first run of `tools/osv-vcpkg.py`.
+- **Extract:** OSV: "heap out-of-bounds read … in the WAV BEXT metadata parser … crafted WAV files"; fixed upstream in miniaudio commit `1df46ae`; CVSS 4.0 `AV:L … VA:L`.
+- **Why it matters:** the client decodes `.wav` sounds from the player's data with miniaudio. Exposure is local files only (sounds are not downloaded from servers), so a crash at worst.
+- **Suggested home:** the next vcpkg baseline bump once the `miniaudio` port ships the fix (check `osv-vcpkg`), or an overlay port; any step allowed to edit `vcpkg.json`.
+- **Status:** Proposed
