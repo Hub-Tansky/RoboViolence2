@@ -5,4 +5,3 @@ CREATE TABLE MasterServers (Score NUMERIC, ID INTEGER PRIMARY KEY, IP TEXT, Loca
 INSERT INTO LauncherSettings (Name, Value) VALUES ('Version', '2.11');
 INSERT INTO LauncherSettings (Name, Value) VALUES ('DBVersion', '8');
 INSERT INTO LauncherSettings (Name, Value) VALUES ('AccountURL', '');
-INSERT INTO LauncherSettings (Name, Value) VALUES ('DidSurvey', '1');

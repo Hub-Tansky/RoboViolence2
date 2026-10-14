@@ -31,7 +31,6 @@
 #include "CMainTab.h"
 #include "CMenuManager.h"
 #include "IntroScreen.h"
-#include "CSurvey.h"
 #endif
 
 #define ICONE_DEDICATED			0x0001
@@ -66,15 +65,11 @@ public:
 	// Notre intro screen (quand que lui n'est pas fini, on update ni affiche rien d'autre)
 	IntroScreen * introScreen;
 
-	//--- Survey screen
-	CSurvey * survey;
 
 	// Notre curseur
 	unsigned int tex_crosshair;
 	unsigned int tex_menuCursor;
 
-	//--- The guy already sent the survey
-	bool surveySent;
 
 	//--- Head games logo bottom right
 	//unsigned int tex_miniHeadGames;
@@ -100,7 +95,6 @@ public:
 
 	// Creating menu
 	void createMenu();
-	void createSurvey();
 #endif
 	// Pour créer, join, disconnecter d'une game
 	void host(CString mapName);

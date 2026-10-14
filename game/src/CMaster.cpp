@@ -43,7 +43,6 @@ static void MD5(const unsigned char* data, size_t len, unsigned char* out)
 }
 
 CMaster* master = 0;
-bool surveyReceived = false;
 extern Scene* scene;
 
 
@@ -794,19 +793,6 @@ void CMaster::recvPacket(const char * buffer, int typeID)
 			// update the db
 			UpdateDB();
 			
-			break;
-		}
-	case SURVEY_CONFIRM:
-		{
-			surveyReceived = true;
-
-			//--- Write in db the 'surveySent' flag
-			sqlite3 *DB=bv2::openClientDb();
-			if (DB)
-			{
-				SqlStatement(DB, "Update LauncherSettings Set Value = '1' Where Name = 'DidSurvey';").run();
-				sqlite3_close(DB);
-			}
 			break;
 		}
 	case CLIENT_HASH:

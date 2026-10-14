@@ -35,7 +35,6 @@ set(BV2_GAME_SOURCES
   src/CSnow.cpp
   src/CStats.cpp
   src/CStatus.cpp
-  src/CSurvey.cpp
   src/CUserLogin.cpp
   src/CVertexBuffer.cpp
   src/CWeather.cpp

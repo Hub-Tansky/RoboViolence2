@@ -383,8 +383,7 @@ namespace bv2
 			"CREATE TABLE IF NOT EXISTS MasterServers (Score NUMERIC, ID INTEGER PRIMARY KEY, IP TEXT, Location TEXT, Port NUMERIC);"
 			"INSERT INTO LauncherSettings (Name, Value) SELECT 'Version', '2.11' WHERE NOT EXISTS (SELECT 1 FROM LauncherSettings WHERE Name = 'Version');"
 			"INSERT INTO LauncherSettings (Name, Value) SELECT 'DBVersion', '8' WHERE NOT EXISTS (SELECT 1 FROM LauncherSettings WHERE Name = 'DBVersion');"
-			"INSERT INTO LauncherSettings (Name, Value) SELECT 'AccountURL', '' WHERE NOT EXISTS (SELECT 1 FROM LauncherSettings WHERE Name = 'AccountURL');"
-			"INSERT INTO LauncherSettings (Name, Value) SELECT 'DidSurvey', '1' WHERE NOT EXISTS (SELECT 1 FROM LauncherSettings WHERE Name = 'DidSurvey');",
+			"INSERT INTO LauncherSettings (Name, Value) SELECT 'AccountURL', '' WHERE NOT EXISTS (SELECT 1 FROM LauncherSettings WHERE Name = 'AccountURL');",
 			0, 0, 0);
 		return db;
 	}
