@@ -264,6 +264,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 
 | path | purpose |
 |---|---|
+| `docs/roadmap/20261014_testing_environment_plan.md` | Testing environment plan (zero-cost): Mac pull agent, staging deploy agent, follow-up test steps |
 | `docs/roadmap/README.md` | Roadmap index: phases, step status and closing rules |
 | `docs/roadmap/_template-step.md` | Template for step files |
 | `docs/roadmap/possible-new-scope.md` | Findings from closed steps that may change later phases, pending owner decision |
