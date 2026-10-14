@@ -22,7 +22,7 @@ cp tools/playtest/agent.sh ~/RV2-playtest/bin/
 printf 'BV2_ADMIN_PASS=%s\n' "$(openssl rand -hex 16)" > ~/.config/rv2-playtest.env && chmod 600 ~/.config/rv2-playtest.env
 ```
 
-Optional keys in the env file: `NTFY_TOPIC` (phone notifications via ntfy.sh), `RV2_STAGING_HOST` and `RV2_STAGING_ADMIN_PASS` (staging tests). Keep real values out of the repo; private notes go in `docs/prv_wiki/docs_restricted/testing-environment/`.
+Optional keys in the env file: `NTFY_TOPIC` (phone notifications via ntfy.sh), `RV2_STAGING_HOST`, `RV2_STAGING_ADMIN_PASS` and `RV2_STAGING_ADMIN_PORT` (staging tests; port default 8443, 443 for a host with a public certificate). Keep real values out of the repo; private notes go in `docs/prv_wiki/docs_restricted/testing-environment/`.
 
 ```bash
 ~/RV2-playtest/bin/agent.sh --preflight
