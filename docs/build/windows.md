@@ -26,7 +26,7 @@ dir "$env:BV2_DATA_DIR\main\maps"
 
 ## Install from a release
 
-Download `roboviolence2-win-x64-msvc-setup.exe` from the [releases](https://github.com/Hub-Tansky/RoboViolence2/releases) and run it. It is unsigned: on the SmartScreen warning choose **More info → Run anyway**. It installs for your user only (no admin) and adds a Start-menu entry; the game asks for your BaboViolent 2 folder on first start.
+Download `roboviolence2-win-x64-msvc-setup.exe` from the [releases](https://github.com/Hub-Tansky/RoboViolence2/releases) and run it. It is unsigned: on the SmartScreen warning choose **More info → Run anyway**. It installs for your user only (no admin) and adds a Start-menu entry; the game asks for your BaboViolent 2 folder on first start. Upgrades keep the master's `master.db` and `web.db`; the uninstaller leaves them in the install folder.
 
 ## Use a downloaded package
 

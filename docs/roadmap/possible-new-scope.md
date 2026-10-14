@@ -481,3 +481,11 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Why it matters:** macOS CI rebuilds SDL3 and the other ports on every run until `vcpkg.json` changes.
 - **Suggested home:** the next step allowed to edit `.github/actions/`: add `triplets/**` to `hashFiles`. A baseline bump (PNS-54) also refreshes the key.
 - **Status:** Proposed
+
+### PNS-58: A licence file for the vendored glad loader
+
+- **Found in:** Phase C step 3 review round 2 (2026-10-14), finding 4.
+- **Extract:** `packaging/make-package.py` builds `licenses/glad.txt` from a hard-coded "glad 2.0.8 …: WTFPL OR CC0-1.0" and the first comment of `KHR/khrplatform.h`, repeating `engine/zeven/third_party/glad/README.md:3`.
+- **Why it matters:** regenerating glad or changing the header's comment silently changes or breaks the notice.
+- **Suggested home:** a step allowed to edit `engine/zeven/third_party/glad/`: commit `LICENSE.txt` there and copy it.
+- **Status:** Proposed
