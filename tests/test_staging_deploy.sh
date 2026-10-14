@@ -49,7 +49,7 @@ expect "first wait doesn't notify" no "$(waiting_update 1000 && echo yes || echo
 expect "waiting under 6 h doesn't notify" no "$(waiting_update 21000 && echo yes || echo no)"
 expect "waiting 6 h notifies" yes "$(waiting_update 22600 && echo yes || echo no)"
 expect "and only once" no "$(waiting_update 40000 && echo yes || echo no)"
-expect "a new commit keeps the start time" "1000 1" "$(cat "$ROOT/waiting")"
+expect "the start time is kept across waits (no SHA in the state)" "1000 1" "$(cat "$ROOT/waiting")"
 
 mkdir -p "$ROOT/releases"
 n=0

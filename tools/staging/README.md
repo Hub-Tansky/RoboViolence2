@@ -37,14 +37,14 @@ Cron, every 10 minutes (`crontab -e` for that user):
 */10 * * * * /opt/rv2-staging/deploy.sh >>/var/lib/rv2-staging/deploy.log 2>&1
 ```
 
-The first run deploys the newest build at once (nothing is running to protect).
+The first run deploys the newest build at once (nothing is running to protect). With a public name, Caddy must get its certificate within the 60 s verify window; if not, the deploy counts as failed and `--sha` retries it.
 
 ## Use
 
 | Command | Does |
 |---|---|
 | `deploy.sh` | newest successful `main` `containers` run, once `/status` shows `players 0` (what cron runs). If the server runs but `/status` doesn't answer (changed password, proxy down), it doesn't deploy |
-| `deploy.sh --sha <sha>` | that `main` build; also a manual rollback |
+| `deploy.sh --sha <sha>` | that `main` build; also a manual rollback. Use the full SHA for builds older than the last 30 runs |
 | `deploy.sh --force` | don't wait for players to leave |
 
 Notifications (ntfy): `RV2 staging now on <sha7>`; `FAILED at <stage>` with the rollback result; `waiting` once when players have held deploys back for 6 hours. Commits from before `BV2_IMAGE_TAG` existed are refused. A missing or unreadable env file is logged only (no ntfy topic yet). GitHub, download and pull failures notify once per stage and don't count; 3 failed deploys of a commit stop retries until `--sha`.

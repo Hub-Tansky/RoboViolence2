@@ -47,7 +47,7 @@ waiting_update() { # waiting_update <now>: records that players hold back a depl
 	return 1
 }
 
-prune_releases() { # prune_releases <keep>: delete the oldest release dirs beyond KEEP; prints the full SHA of each
+prune_releases() { # prune_releases <keep sha7>: delete the oldest release dirs beyond KEEP; prints the full SHA of each
 	local d sha
 	ls -1t "$ROOT/releases" 2>/dev/null | tail -n +$((KEEP + 1)) | while read -r d; do
 		[ "$d" = "$1" ] && continue
@@ -95,6 +95,13 @@ admin_status() { # the running server's /status through its own proxy; -k: loopb
 	local host=${BV2_ADMIN_HOST:-localhost} port=${BV2_ADMIN_PORT:-8443}
 	printf 'Authorization: Bearer %s\n' "$BV2_ADMIN_PASS" |
 		curl -fsS -k --max-time 5 -H @- --resolve "$host:$port:127.0.0.1" "https://$host:$port/status"
+}
+
+prune() { # prune <keep sha7>: old release dirs and their images; rmi without -f never removes an image in use
+	local old image
+	for old in $(prune_releases "$1"); do
+		for image in $IMAGES; do docker rmi "$image:$old" >/dev/null 2>&1; done
+	done
 }
 
 wait_for() { # wait_for <seconds> <command...>: true once the command succeeds
@@ -186,6 +193,7 @@ if [ -z "$FORCE" ] && server_running; then
 		say "$players players connected; ${SHA:0:7} waits"
 		waiting_update "$(date +%s)" &&
 			notify "RV2 staging deploy waiting" "Players held deploys back for 6 h; newest ${SHA:0:7}; deploy.sh --force to override"
+		prune "${PREV:0:7}" # each waiting commit fetched and pulled; keep the running one
 		exit 0
 	fi
 fi
@@ -200,6 +208,4 @@ printf '%s %s\n' "$SHA" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" | tee "$ROOT/deployed" 
 printf '%s\tpass\t-\t%s\n' "$SHA" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" >>"$ROOT/state.tsv"
 RESULT=pass
 notify "RV2 staging now on ${SHA:0:7}" "Deployed${PREV:+ (was ${PREV:0:7})}"
-for old in $(prune_releases "${SHA:0:7}"); do # the images of dropped releases; the rollback target stays
-	for image in $IMAGES; do docker rmi "$image:$old" >/dev/null 2>&1; done
-done
+prune "${SHA:0:7}"

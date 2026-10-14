@@ -45,11 +45,11 @@ From the repository root (or the folder holding the compose file):
 
 ## Ports
 
-Open inbound TCP 3333 (game) and TCP 10207 (master) on the host firewall; TCP 8443 only for remote admins (or 443 and 80 for a public certificate). All game traffic is TCP. Never publish the admin API port (8080).
+Open inbound TCP 3333 (game) and TCP 10207 (master) on the host firewall; TCP `BV2_ADMIN_PORT` only for remote admins (8443; 443 for a public name). All game traffic is TCP. Never publish the admin API port (8080).
 
 ## Remote admin
 
-The game server's admin API ([ADR 0015](../decisions/0015-admin-http-api-behind-tls-proxy.md)) is reachable only through the `admin-proxy` service (Caddy), which terminates TLS on port 8443.
+The game server's admin API ([ADR 0015](../decisions/0015-admin-http-api-behind-tls-proxy.md)) is reachable only through the `admin-proxy` service (Caddy), which terminates TLS on `BV2_ADMIN_PORT` (default 8443).
 
 - Token: the admin password, `BV2_ADMIN_PASS` in the env file. Empty refuses every request.
 - Certificate: for `localhost`, Caddy's own CA (`curl -k`, or trust the root in the `caddy-data` volume). For a public name, set `BV2_ADMIN_HOST` and `BV2_ADMIN_PORT=443` in the env file; Caddy fetches a certificate (TLS-ALPN challenge on 443).

@@ -59,6 +59,7 @@ jobs:
         run: |
           set -euo pipefail
           printf 'BV2_SV_PASSWORD=%s\nBV2_ADMIN_PASS=%s\n' "$(openssl rand -hex 8)" "$(openssl rand -hex 16)" > "$RUNNER_TEMP/ci.env"
+          mkdir -p packaging/docker/srv # the /deployed bind mount, owned by the runner user
           compose="docker compose -f packaging/docker/compose.example.yml --env-file $RUNNER_TEMP/ci.env"
           $compose up -d --no-build --wait --wait-timeout 120
           $compose ps
@@ -91,7 +92,7 @@ jobs:
       - name: /deployed serves the published commit
         run: |
           set -euo pipefail
-          echo "$GITHUB_SHA ci" | sudo tee packaging/docker/srv/deployed >/dev/null # the bind mount Docker created
+          echo "$GITHUB_SHA ci" > packaging/docker/srv/deployed # created before `up`, as deploy.sh does
           curl -skf https://localhost:8443/deployed | tee deployed.txt
           grep -q "^$GITHUB_SHA " deployed.txt
       - name: Logs and the master's game list
