@@ -1,6 +1,6 @@
 # Step 1: Mac pull agent
 
-**Status:** IN PROGRESS
+**Status:** DONE (2026-10-14)
 
 **Depends on:** Phase B step 2b (release packages), step 12 (admin API). **Next:** T8 staging (candidate). **Index:** [README.md](README.md)
 
@@ -72,7 +72,7 @@
 - `tools/playtest/agent.sh --sha <latest main sha>` on the owner's Mac: report shows every stage passed, notification `READY TO TEST`, no `bv2*` process left (`pgrep -l bv2` empty).
 - A digest mismatch is rejected (`playtest_agent` test); a busy master port fails at `ports-busy` and notifies with the stage.
 - `--play local` starts master, server and client; a scheduled run meanwhile skips without an attempt; `--stop` leaves no `bv2*` process.
-- After the owner installs the LaunchAgent: the next `main` build is reported within 20 minutes of its build ending (owner check).
+- After the owner installs the LaunchAgent: the next `main` build is reported within 20 minutes of its build ending, while the Mac is awake (owner check; `launchd` doesn't run the agent during sleep, owner decision 2026-10-14).
 - `tools/review.sh --full macos-arm64` passes, and `reviews/step1.md` and `reviews/step1-report.md` exist (`REVIEW.md` section 5).
 - `ARCHITECTURE.md` lists every file added in this step.
 - The secret scan is clean.
