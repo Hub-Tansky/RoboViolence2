@@ -135,7 +135,8 @@ set(BV2_SERVER_SOURCES
   src/tinyxmlparser.cpp
 )
 
-# visibility: PRIVATE for executables, PUBLIC for bv2server_lib (what links it needs the same)
+# visibility: PRIVATE for executables, PUBLIC for bv2server_lib, whose dependents (bv2dedicated, tests) need the same
+# includes and libraries
 function(bv2_game_target target visibility)
   target_include_directories(${target} ${visibility} src)
   target_link_libraries(${target} ${visibility} babonet dko zeven_core ${BV2_SQLITE_TARGET} unofficial-sodium::sodium Threads::Threads)
