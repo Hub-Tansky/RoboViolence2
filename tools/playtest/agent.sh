@@ -123,7 +123,7 @@ lock() {
 	mkdir -p "$ROOT" && chmod 700 "$ROOT"
 	local p; p=$(cat "$ROOT/lock" 2>/dev/null)
 	# macOS shlock never takes over a dead pid's lock: drop it when its pid is not a running agent
-	if [ -n "$p" ] && ! ps -p "$p" -o command= 2>/dev/null | grep -q agent.sh; then rm -f "$ROOT/lock"; fi
+	ps -p "$p" -o command= 2>/dev/null | grep -q '/bin/bash .*/agent\.sh' || rm -f "$ROOT/lock" # also an empty or missing file
 	shlock -p $$ -f "$ROOT/lock" || { say "locked by pid $(cat "$ROOT/lock" 2>/dev/null); skipped"; exit 0; }
 	LOCKED=1
 }
@@ -160,7 +160,7 @@ select_run() {
 fetch_install() { # sets PKG; reuses an installed copy of the same build
 	local vdir="$ROOT/versions/${SHA:0:7}" json info id hex dl installed=""
 	PKG="$vdir/$PKG_NAME"
-	read -r installed _ <"$vdir/BUILD" 2>/dev/null
+	read -r installed _ 2>/dev/null <"$vdir/BUILD"
 	if [ "$installed" = "$SHA" ]; then # any successful main run of a commit has the same package
 		say "already installed: $vdir"
 		return
@@ -279,8 +279,8 @@ finish() {
 		echo "$STAGE" >"$ROOT/infra-failure" # once per distinct failure, not every 10 minutes
 		notify "RV2 agent FAILED at $STAGE" "No attempt counted. Log: $ROOT/agent.log"
 	fi
-	# The unattended marker: cleared by any scheduled run that didn't fail, so the next incident notifies again
-	[ "$MODE" = smoke ] && [ "$RESULT" != fail ] && rm -f "$ROOT/infra-failure"
+	# The unattended marker: cleared by any scheduled run that got past the infrastructure, so the next incident notifies again
+	[ "$MODE" = smoke ] && ! { [ "$RESULT" = fail ] && is_infra "$STAGE"; } && rm -f "$ROOT/infra-failure"
 	[ -n "$LOCKED" ] && rm -f "$ROOT/lock"
 }
 

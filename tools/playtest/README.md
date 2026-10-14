@@ -42,7 +42,7 @@ The agent runs at load, then every 10 minutes. Its first run is the preflight un
 
 | Command | Does |
 |---|---|
-| `agent.sh` | `local-smoke` on the newest successful `main` build not yet passed or failed 3 times (what `launchd` runs). Failures before the build is tested (GitHub, download, busy port, no console session) notify once and don't count |
+| `agent.sh` | `local-smoke` on the newest successful `main` build not yet passed or failed 3 times (what `launchd` runs). In these scheduled runs, failures before the build is tested (GitHub, download, busy port, no console session) notify once and don't count |
 | `agent.sh --sha <sha>` | `local-smoke` on that `main` build, ignoring the attempt limit |
 | `agent.sh --play local` | master, server and client from the last passing build, for manual play; stays up |
 | `agent.sh --play staging` | client from the last passing build, joined to `RV2_STAGING_HOST` |
