@@ -247,8 +247,8 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/decisions/0013-r3-restore-normal-and-pro-rulesets.md` | ADR: `sv_serverType` 0 plays the Normal rules again (R3) |
 | `docs/decisions/0014-libsodium-hmac-for-credentials.md` | ADR: libsodium for the credential HMAC and nonces (step 10) |
 | `docs/decisions/0015-admin-http-api-behind-tls-proxy.md` | ADR: remote admin over an HTTP API behind Caddy TLS; legacy UDP remote admin refused (step 12) |
-| `docs/decisions/0017-in-game-name-and-fork-credits.md` | ADR: in-game name, fork credits, "LOADING" splash, survey removed (Phase C step 2) |
 | `docs/decisions/0016-player-data-lookup-and-package-content.md` | ADR: client finds or asks for the player's BV2 data; launch scripts, languages and default config come from the package (Phase C step 1) |
+| `docs/decisions/0017-in-game-name-and-fork-credits.md` | ADR: in-game name, fork credits, "LOADING" splash, survey removed (Phase C step 2) |
 | `docs/decisions/README.md` | ADR format and index |
 
 ### `docs/ops`
@@ -658,7 +658,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/IncorrectName.h` | Dialog: invalid player name |
 | `game/src/IncorrectPassword.h` | Dialog: wrong server password |
 | `game/src/IntroScreen.cpp` | "LOADING" splash after start-up (ADR 0017) |
-| `game/src/IntroScreen.h` | Intro screen |
+| `game/src/IntroScreen.h` | Interface of `IntroScreen.cpp`; `renderLoading` also draws Scene's loading frame |
 | `game/src/JoinGame.h` | Join-game screen |
 | `game/src/Key.cpp` | Key binding entry |
 | `game/src/Key.h` | Key binding entry |

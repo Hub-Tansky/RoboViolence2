@@ -465,3 +465,11 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Why it matters:** the two will drift; step 2 already has to edit both (the `DidSurvey` row, PNS-53).
 - **Suggested home:** step 2 (PNS-53 touches both): delete `content-seed/bv2.sql` and make `openClientDb` the schema, or embed the file and run it.
 - **Status:** Proposed
+
+### PNS-56: Leftovers of the RndLabs splash and the loading frame
+
+- **Found in:** Phase C step 2 review (2026-10-14), findings 5 and 9.
+- **Extract:** `tools/placeholder-manifest.tsv:44,56` still generate placeholder `HeadGames.tga` and `RnDLabs.tga`, which no code loads now. `game/src/Map.cpp:85-91` repeats the "LOADING" frame that `IntroScreen::renderLoading` now draws.
+- **Why it matters:** dead placeholder output, and a third copy of the loading frame.
+- **Suggested home:** the next step that touches `tools/` or `Map.cpp`; keep the `tools/original-assets.sha256` entries.
+- **Status:** Proposed
