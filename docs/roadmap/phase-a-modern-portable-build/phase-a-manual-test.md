@@ -59,22 +59,21 @@ With both clients in game:
 - [ ] Chat: T (all), messages appear on both clients.
 - [ ] Damage and kills register on both clients; scores match on the scoreboard (Tab).
 - [ ] Respawn after death.
-- [ ] Round ends at `sv_scoreLimit 3`; the next map loads.
+- [ ] Round ends at `sv_scoreLimit 3`; the next map loads. Rotation skips maps outside `sv_minTilesPerBabo`–`sv_maxTilesPerBabo` (55–80 tiles per player); with two players set both to 0.
 - [ ] Esc opens the in-game menu; Esc again returns to play.
-- [ ] Window: toggle fullscreen/windowed and resize without losing input or rendering.
+- [ ] Window: Options → Fullscreen applies at the next start, in both directions, with input and rendering intact. The window size comes from Options → Resolution; the window is not resizable.
 
 ## 4. Map download
 
 1. Server console: `changemap <dl-map>`.
 2. Client 1 (whose data lacks `<dl-map>`) shows download progress and then loads the map.
-3. `<pref-cl1>/maps/<dl-map>.bvm` exists and the map plays normally.
-4. Disconnect and reconnect client 1: the map loads from the pref dir without downloading again.
+3. The map plays normally. Downloaded maps stay in memory and are not saved (as in BV2), so a later join downloads it again.
 
 ## 5. TDM round
 
 Server console: `set sv_gameType 1`, then `changemap <tdm-map>`.
 
-- [ ] Both clients reload into TDM; team selection works; the two players end up on opposite teams.
+- [ ] Both clients reload into TDM; team selection works; the two players end up on opposite teams. `sv_autoBalance` (default on) disables Join blue/red; `set sv_autoBalance false` enables them.
 - [ ] Friendly fire follows `sv_friendlyFire`; enemy kills score for the team.
 - [ ] Team chat (Y) reaches only teammates.
 - [ ] Round ends at the score limit and the next map loads.
@@ -86,13 +85,13 @@ Server console: `set sv_gameType 2`, then `changemap <ctf-map>`. Alternatively r
 - [ ] Picking up the enemy flag, carrying it home and capturing scores for the team on both clients.
 - [ ] Killing the carrier drops the flag; touching your own dropped flag returns it.
 - [ ] Capture and flag sounds play.
-- [ ] Round ends at the score limit.
+- [ ] Round ends at `sv_winLimit` captures (default 7; CTF ignores `sv_scoreLimit`).
 
 ## 7. Shutdown
 
 - [ ] Client "Quit" exits cleanly (no crash dialog, exit code 0).
 - [ ] `quit` in the server console stops `bv2dedicated`; the master drops the server from the browser within 60 s (`MASTER_SERVER_TIMEOUT`, [../../../masterserver/README.md](../../../masterserver/README.md)).
-- [ ] `<pref-*>/console.log` shows no errors or warnings that weren't expected.
+- [ ] `<pref-*>/console.log` shows no errors or warnings that weren't expected (written only with `c_debug true`).
 
 ## Results
 
@@ -101,7 +100,7 @@ One row per OS. All three hosts run server, master and both clients locally; not
 | OS (version) | Commit | Date | Tester | 1 | 2 | 3 DM | 4 Download | 5 TDM | 6 CTF | 7 | Notes |
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | Linux (distro, X11/Wayland) | | | | | | | | | | | |
-| macOS | | | | | | | | | | | |
+| macOS 27.0.1, Apple silicon (two displays) | 5cfcfee (package) | 2026-10-14 | owner | pass | pass | pass | pass | pass | pass | pass | Phase B run. Browser join failed intermittently (freed game row, fixed in PR #56 after this package); joined with `connect`. Browser ping always `???` (PNS-56). Packages start fullscreen; clients ran with `r_fullScreen false` via `--config` |
 | Windows (10 22H2 or 11; note which) | | | | | | | | | | | |
 
 File each failure as an issue and link it in Notes. Phase A is done when every cell is a pass.
