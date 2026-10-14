@@ -11,7 +11,7 @@
 | Goal | vcpkg ports are checked against OSV, the build no longer makes an unused `bv2.db` or compiles the server twice, and the docs match the code |
 | In scope | Tasks 4.1–4.4 below |
 | Out of scope | Pinning the Windows runner (PNS-27, step 3); making `containers` a required check (owner, branch rules); the master's other stale README lines beyond PNS-36 |
-| Allowed paths | `tools/osv-vcpkg.py` (new), `.github/workflows/osv-vcpkg.yml` (new), `tools/CMakeLists.txt`, `game/CMakeLists.txt`, `tests/**`, `AGENTS.md`, `ARCHITECTURE.md`, `docs/analysis/**`, `masterserver/README.md`, `config/README.md`, `docs/roadmap/**` |
+| Allowed paths | `tools/osv-vcpkg.py` (new), `.github/workflows/osv-vcpkg.yml` (new), `tools/CMakeLists.txt`, `tools/seed_db.cpp` and `CMakeLists.txt` (comments naming `bv2.db`), `game/CMakeLists.txt`, `tests/**`, `AGENTS.md`, `ARCHITECTURE.md`, `docs/analysis/**`, `masterserver/README.md`, `config/README.md`, `docs/roadmap/**` |
 | Inputs | `AGENTS.md`, `ARCHITECTURE.md`, PNS-22, PNS-24, PNS-33, PNS-36, PNS-45, [ADR 0013](../../decisions/0013-r3-restore-normal-and-pro-rulesets.md) |
 | Deliverables | OSV check script and weekly workflow; build changes; doc fixes |
 | Definition of done | See "Acceptance checks". All must pass. `ARCHITECTURE.md` is updated |
