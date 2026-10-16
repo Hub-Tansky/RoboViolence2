@@ -498,7 +498,22 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Suggested home:** the next step that touches `tools/` or `Map.cpp`; keep the `tools/original-assets.sha256` entries.
 - **Status:** Proposed
 
-### PNS-60: The vcpkg cache key ignores the overlay triplets
+### PNS-60: Rename `bv2.example.cfg` to `robo2.defaults.cfg`
+
+- **Found in:** Phase B manual test, Linux (2026-10-16); owner request.
+- **Extract:** `config/bv2.example.cfg` is the original BV2 `bv2.cfg` with personal values blanked, and the first config layer (ADR 0007): its values, not `GameVar.cpp`, set the defaults players get (52 differ, among them `sv_serverType 1`, `sv_timeToSpawn 1` and the weapon damages). "Example" hides that; its `cl_playerName "Daivuk"` went unnoticed until fixed in PR #60.
+- **Why it matters:** contributors edit the code defaults expecting a change in game and see none.
+- **Suggested home:** with the rebrand of config and pref paths (PNS-20; roadmap ground rule 3 holds config paths until then). Rename the file and its copies in `CMakeLists.txt`, `packaging/` and `game/src/Paths.cpp`, keep reading the old name once, and update ADR 0007 and the docs that name it.
+- **Status:** Proposed
+
+### PNS-61: Windows CI link step fails on a locked file
+
+- **Found in:** Phase B step 12 follow-ups (2026-10-13, 2026-10-14): `build (win-x64-msvc)` failed three times linking a test executable (`test_master.exe`, `test_babonet.exe`) with "The process cannot access the file because it is being used by another process"; a rerun passed.
+- **Why it matters:** red `main` builds and PRs that need a manual rerun.
+- **Suggested home:** Phase C step 3 (pins the Windows runner, PNS-27) or step 4: retry the build step once, or exclude the build folder from Defender on the runner.
+- **Status:** Proposed
+
+### PNS-62: The vcpkg cache key ignores the overlay triplets
 
 - **Found in:** Phase C step 3 review (2026-10-14), finding 10.
 - **Extract:** `.github/actions/setup-vcpkg/action.yml` keys `actions/cache` on `hashFiles('vcpkg.json')` only; `triplets/arm64-osx.cmake` changes every macOS port's ABI, so the old cache is restored, all ports rebuild, and an exact key hit skips saving the new binaries.
@@ -506,7 +521,7 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Suggested home:** the next step allowed to edit `.github/actions/`: add `triplets/**` to `hashFiles`. A baseline bump (PNS-54) also refreshes the key.
 - **Status:** Proposed
 
-### PNS-61: A licence file for the vendored glad loader
+### PNS-63: A licence file for the vendored glad loader
 
 - **Found in:** Phase C step 3 review round 2 (2026-10-14), finding 4.
 - **Extract:** `packaging/make-package.py` builds `licenses/glad.txt` from a hard-coded "glad 2.0.8 …: WTFPL OR CC0-1.0" and the first comment of `KHR/khrplatform.h`, repeating `engine/zeven/third_party/glad/README.md:3`.
