@@ -105,7 +105,7 @@ void CBrowser::updatePerso(float delay)
 {
 	if (!command.isNull())
 	{
-		console->sendCommand(CString("%s", command.s));
+		console->sendCommand(command.s);
 		command = "";
 		menuManager.activeControl = 0;
 		menuManager.focusControl = 0;

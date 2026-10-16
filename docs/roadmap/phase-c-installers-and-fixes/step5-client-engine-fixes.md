@@ -11,7 +11,7 @@
 | Goal | A `char*` can no longer become a `CString` format by accident, DKT textures are freed and a malformed one can't crash the loader, menus default to the plain style, and old configs follow the OS language |
 | In scope | Tasks 5.1–5.4 below (PNS-34, PNS-38 R29, PNS-30, PNS-47) |
 | Out of scope | The "High detail menus" drawing (PNS-48, [GUI]); R28 (step 7); other `CString` API changes (`operator=`, `set`) |
-| Allowed paths | `engine/zeven/include/CString.h`, `engine/zeven/src/CString.cpp`, `engine/zeven/src/dkf.cpp`, `engine/zeven/README.md`, `engine/dko/src/ePTexture.{h,cpp}`, `game/src/**` (call sites the explicit constructor flags; `GameVar.cpp`, `Lang.{h,cpp}`), `config/bv2.example.cfg` (`r_highDetailMenu`), `content/languages/README.md`, `tests/**`, `docs/analysis/**`, `AGENTS.md`, `ARCHITECTURE.md`, `docs/roadmap/**` |
+| Allowed paths | `engine/zeven/include/CString.h`, `engine/zeven/src/CString.cpp`, `engine/zeven/src/dkf.cpp`, `engine/zeven/README.md`, `engine/dko/src/ePTexture.{h,cpp}`, `game/src/**` (`GameVar.cpp`, `Lang.{h,cpp}`, `Server.cpp`), `config/bv2.example.cfg` (`r_highDetailMenu`), `content/languages/README.md`, `tests/**`, `docs/analysis/**`, `AGENTS.md`, `ARCHITECTURE.md`, `docs/roadmap/**` |
 | Inputs | `AGENTS.md`, `ARCHITECTURE.md`, PNS-30, PNS-34, PNS-38, PNS-47, `docs/analysis/KEY_QUESTIONS.md` R29 |
 | Deliverables | One-argument text constructor and a formatting template (ADR 0021); R29 fix; new defaults; tests |
 | Definition of done | See "Acceptance checks". All must pass. `ARCHITECTURE.md` is updated |
@@ -27,7 +27,7 @@
 
 ### 5.1 `CString` conversions (PNS-34)
 
-- One argument is text, copied as is; two or more arguments format (ADR 0021). The `char*` sites found on the way use `CString("%s", text)`.
+- One argument is text, copied as is; two or more arguments format (ADR 0021). Call sites stay as they are.
 
 ### 5.2 R29
 

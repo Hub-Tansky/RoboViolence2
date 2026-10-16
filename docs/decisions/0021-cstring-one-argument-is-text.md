@@ -15,6 +15,7 @@
 ## Consequences
 - No call site can run text as a format by passing it alone; the format is always the first of several arguments.
 - A one-argument literal containing `%` is no longer formatted (none relied on it; `%%` now stays `%%`).
-- Passing a `CString` object as a format argument is a compile error (it can't go through C varargs); pass `.s`.
+- Passing a `CString` object as a format argument is a compile error on GCC and Clang (MSVC accepts it and copies the object's bytes); the required Linux and macOS CI builds catch it. Pass `.s`.
+- One-argument text is no longer cut at `MAX_CARAC - 1` (511) characters; only formatting is.
 - `CString::set(char* fmt, ...)` still formats with one argument; no call site passes wire text to it.
 - Rejected: `explicit` plus a verbatim array constructor (direct-init of a non-const array still picked the format constructor).

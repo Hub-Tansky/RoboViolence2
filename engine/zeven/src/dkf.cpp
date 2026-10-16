@@ -59,7 +59,7 @@ unsigned int	dkfCreateFont(char *filename)
 	// Sinon on cré la font
 	CFont *font = new CFont();
 	font->fontID = ++currentIDCount;
-	if (!font->create(CString("%s", filename)))
+	if (!font->create(filename))
 	{
 		delete font;
 		return 0;
