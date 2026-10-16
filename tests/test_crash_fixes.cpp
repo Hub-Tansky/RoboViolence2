@@ -116,7 +116,7 @@ static void r18(const char * scratch)
 	ePTexture * texture = new ePTexture();
 	texture->loadIt((char *)path.c_str());
 	CHECK(texture->baseMap.textureID == 0);
-	delete texture; // R29: layers without a texture make no GL call (the test has no GL context)
+	delete texture; // CONSOLE build: ~_typLayer has no GL call here; its R29 condition is checked by inspection
 }
 
 // R29: a texture chunk before a known map name doesn't dereference a null layer
