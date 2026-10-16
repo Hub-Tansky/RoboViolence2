@@ -5,7 +5,7 @@ One folder per phase; inside it, the phase README (index and "done when") and on
 | Phase | Folder | Status |
 |---|---|---|
 | A: modern portable build | [phase-a-modern-portable-build/](phase-a-modern-portable-build/README.md) | DONE (2026-10-06) |
-| B: security, infrastructure, anti-cheat | [phase-b-security-infrastructure-anti-cheat/](phase-b-security-infrastructure-anti-cheat/README.md) | TODO |
+| B: security, infrastructure, anti-cheat | [phase-b-security-infrastructure-anti-cheat/](phase-b-security-infrastructure-anti-cheat/README.md) | DONE (2026-10-17) |
 | C: installers and fixes | [phase-c-installers-and-fixes/](phase-c-installers-and-fixes/README.md) | TODO |
 | T: testing environment (alongside C) | [phase-t-testing-environment/](phase-t-testing-environment/README.md) | IN PROGRESS |
 

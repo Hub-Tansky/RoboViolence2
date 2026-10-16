@@ -101,6 +101,6 @@ One row per OS. All three hosts run server, master and both clients locally; not
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | Linux Mint, X11 | 907d94b (package) | 2026-10-16 | owner | pass | pass | pass | pass | pass | pass | pass | Phase B run. Browser join worked every time (PR #56). New players were named "Daivuk" (fixed in PR #60 after this package) |
 | macOS 27.0.1, Apple silicon (two displays) | 5cfcfee (package) | 2026-10-14 | owner | pass | pass | pass | pass | pass | pass | pass | Phase B run. Browser join failed intermittently (freed game row, fixed in PR #56 after this package); joined with `connect`. Browser ping always `???` (PNS-56). Packages start fullscreen; clients ran with `r_fullScreen false` via `--config` |
-| Windows (10 22H2 or 11; note which) | | | | | | | | | | | |
+| Windows (10 22H2 or 11; note which) | | | | | | | | | | | Phase B run skipped by the owner (no machine, 2026-10-17) |
 
 File each failure as an issue and link it in Notes. Phase A is done when every cell is a pass.
