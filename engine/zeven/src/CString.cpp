@@ -35,10 +35,16 @@
 /// d'arguments. Les arguments sont pass� tour �tour et int�r� �la string...
 ///
 ////////////////////////////////////////////////////////////////////////////////////////
-CString::CString(char* fmt, ...)
+CString::CString(const char* text)
+{
+	if (!text) text = "";
+	s = new char[strlen(text)+1];
+	strcpy(s, text);
+}
+
+void CString::format(const char* fmt, ...)
 {
     static char mString[MAX_CARAC];
-
     
 	if (!fmt)
 	{

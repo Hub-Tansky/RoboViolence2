@@ -11,9 +11,9 @@
 | Goal | A `char*` can no longer become a `CString` format by accident, DKT textures are freed and a malformed one can't crash the loader, menus default to the plain style, and old configs follow the OS language |
 | In scope | Tasks 5.1–5.4 below (PNS-34, PNS-38 R29, PNS-30, PNS-47) |
 | Out of scope | The "High detail menus" drawing (PNS-48, [GUI]); R28 (step 7); other `CString` API changes (`operator=`, `set`) |
-| Allowed paths | `engine/zeven/include/CString.h`, `engine/zeven/src/dkf.cpp`, `engine/zeven/README.md`, `engine/dko/src/ePTexture.{h,cpp}`, `game/src/**` (call sites the explicit constructor flags; `GameVar.cpp`, `Lang.{h,cpp}`), `config/bv2.example.cfg` (`r_highDetailMenu`), `content/languages/README.md`, `tests/**`, `docs/analysis/**`, `AGENTS.md`, `ARCHITECTURE.md`, `docs/roadmap/**` |
+| Allowed paths | `engine/zeven/include/CString.h`, `engine/zeven/src/CString.cpp`, `engine/zeven/src/dkf.cpp`, `engine/zeven/README.md`, `engine/dko/src/ePTexture.{h,cpp}`, `game/src/**` (call sites the explicit constructor flags; `GameVar.cpp`, `Lang.{h,cpp}`), `config/bv2.example.cfg` (`r_highDetailMenu`), `content/languages/README.md`, `tests/**`, `docs/analysis/**`, `AGENTS.md`, `ARCHITECTURE.md`, `docs/roadmap/**` |
 | Inputs | `AGENTS.md`, `ARCHITECTURE.md`, PNS-30, PNS-34, PNS-38, PNS-47, `docs/analysis/KEY_QUESTIONS.md` R29 |
-| Deliverables | `explicit` format constructor plus a verbatim array constructor; fixed call sites; R29 fix; new defaults; tests |
+| Deliverables | One-argument text constructor and a formatting template (ADR 0021); R29 fix; new defaults; tests |
 | Definition of done | See "Acceptance checks". All must pass. `ARCHITECTURE.md` is updated |
 
 ## Context
@@ -27,7 +27,7 @@
 
 ### 5.1 `CString` conversions (PNS-34)
 
-- The format constructor is `explicit`. A new implicit constructor from a string literal or `char` array copies the text verbatim (bounded by the array size). A `char*` needs `CString("%s", text)`; fix every site the compiler flags.
+- One argument is text, copied as is; two or more arguments format (ADR 0021). The `char*` sites found on the way use `CString("%s", text)`.
 
 ### 5.2 R29
 
@@ -48,7 +48,7 @@
 ## Acceptance checks
 
 - `ctest --test-dir build/<preset> --output-on-failure` passes, including `cstring`, `crash_fixes` (R29) and `lang` (PNS-47).
-- The CI builds (Windows MSVC, macOS, Linux; Debug and Release) compile with the explicit constructor.
+- The CI builds (Windows MSVC, macOS, Linux; Debug and Release) compile with the new constructors.
 - `tools/review.sh --full <preset>` passes, and the fresh-context review record `reviews/step5.md` and the raw reviewer report `reviews/step5-report.md` (with the skill's load line) exist (`REVIEW.md` section 5).
 - `ARCHITECTURE.md` lists every file added, moved or removed in this step.
 - The secret scan (`gitleaks git --staged` / CI) is clean.
