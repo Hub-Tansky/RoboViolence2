@@ -173,7 +173,9 @@ void ePTexture::loadMap(FILE* ficIn)
 			}
 		case CHUNK_MAP_TEXTURE:
 			{
-				loadTexture(ptrLayer, ficIn);
+				// R29: a texture before a known map name is read into a scratch layer and dropped
+				_typLayer unnamed;
+				loadTexture(ptrLayer ? ptrLayer : &unnamed, ficIn);
 				break;
 			}
 		}

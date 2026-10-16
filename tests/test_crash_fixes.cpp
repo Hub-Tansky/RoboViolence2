@@ -113,9 +113,31 @@ static void r18(const char * scratch)
 	std::fwrite(dim, 2, 3, f);
 	chunk(0x1230); // data
 	std::fclose(f);
-	ePTexture * texture = new ePTexture(); // not deleted: ~_typLayer calls GL, which the test has no context for
+	ePTexture * texture = new ePTexture();
 	texture->loadIt((char *)path.c_str());
 	CHECK(texture->baseMap.textureID == 0);
+	delete texture; // R29: layers without a texture make no GL call (the test has no GL context)
+}
+
+// R29: a texture chunk before a known map name doesn't dereference a null layer
+static void r29(const char * scratch)
+{
+	std::string path = std::string(scratch) + "/r29.dkt";
+	FILE * f = std::fopen(path.c_str(), "wb");
+	auto chunk = [f](uint16_t id) { uint16_t pad = 0; int32_t len = 0; std::fwrite(&id, 2, 1, f); std::fwrite(&pad, 2, 1, f); std::fwrite(&len, 4, 1, f); };
+	chunk(0x0000); // version
+	int16_t version = 1;
+	std::fwrite(&version, 2, 1, f);
+	chunk(0x1000); // map
+	chunk(0x1200); // texture, with no map name before it
+	chunk(0x1210); // dimension
+	int16_t dim[3] = {32767, 32767, 4};
+	std::fwrite(dim, 2, 3, f);
+	std::fclose(f);
+	ePTexture * texture = new ePTexture();
+	texture->loadIt((char *)path.c_str());
+	CHECK(texture->baseMap.textureID == 0);
+	delete texture;
 }
 
 // R10: clipping a position at the map's edge doesn't read cells outside the map (ASan builds report it)
@@ -237,6 +259,7 @@ int main(int, char ** argv)
 	r12();
 	r15();
 	r18(bv2::userFile("").c_str());
+	r29(bv2::userFile("").c_str());
 	harness::stop();
 	if (harness::failures() == 0) std::printf("ok: crash fixes\n");
 	return harness::failures() ? 1 : 0;
