@@ -93,6 +93,10 @@ int main(int argc, char ** argv)
 	check(lang::pickFile({dir, data}, {"de"}) == dir + "de.po", "package wins over the player's data");
 	check(lang::pickFile({dir, data}, {"nl", "de"}) == data + "nl.lang", "locale order beats folder order");
 
+	// PNS-47: the pre-step-13 saved default follows the OS; anything else is kept
+	check(lang::savedFile("main/languages/en.lang").empty(), "old default means the OS language");
+	check(lang::savedFile("main/languages/fr.lang") == "main/languages/fr.lang" && lang::savedFile("").empty(), "other values kept");
+
 	if (!failures) std::printf("ok: lang\n");
 	return failures ? 1 : 0;
 }
