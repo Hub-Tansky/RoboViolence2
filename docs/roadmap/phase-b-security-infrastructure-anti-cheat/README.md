@@ -1,6 +1,6 @@
 # Phase B: security, infrastructure, anti-cheat
 
-**Status:** TODO
+**Status:** DONE (2026-10-17). The owner waived the Windows manual-test run and the new-contributor build (see below).
 
 **Depends on:** Phase A ([README](../phase-a-modern-portable-build/README.md), DONE). **Rules:** [roadmap README](../README.md) (ground rules, step closing).
 
@@ -37,9 +37,9 @@ Order: 0 → 1 → 2. Step 2a runs while step 2 is IN PROGRESS; step 2's Windows
 
 - Every step is DONE.
 - CI is green, including CodeQL, and publishes macOS, Windows and Linux artifacts.
-- The [manual test](../phase-a-modern-portable-build/phase-a-manual-test.md) passes on all three OSes after step 2 (PNS-31), and again after the last step.
-- A new contributor builds each OS by following only `docs/build/<os>.md`.
-- Fuzz runs (2 min per message type, ASan) find no crash.
+- The [manual test](../phase-a-modern-portable-build/phase-a-manual-test.md) passes on all three OSes after step 2 (PNS-31), and again after the last step. Passed on macOS and Linux (2026-10-14, 2026-10-16); Windows skipped by the owner (no machine).
+- A new contributor builds each OS by following only `docs/build/<os>.md`. Skipped by the owner (2026-10-13).
+- Fuzz runs (2 min per message type, ASan) find no crash: `fuzz` passed on `main` (run 38647535303, d35743d).
 
 ## Risks
 
