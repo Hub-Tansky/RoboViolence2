@@ -512,3 +512,11 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Why it matters:** red `main` builds and PRs that need a manual rerun.
 - **Suggested home:** Phase C step 3 (pins the Windows runner, PNS-27) or step 4: retry the build step once, or exclude the build folder from Defender on the runner.
 - **Status:** Proposed
+
+### PNS-64: A DKT texture chunk after an unknown map name overwrites the previous layer
+
+- **Found in:** Phase C step 5 review (2026-10-17), finding 7.
+- **Extract:** in `ePTexture::loadMap` an unknown `CHUNK_MAP_NAME` leaves `ptrLayer` on the previous layer, so a later texture chunk replaces that layer's `textureID` without freeing it.
+- **Why it matters:** a texture leak (not a crash) with malformed or unusual `.DKT` files.
+- **Suggested home:** the next step touching `engine/dko/src/ePTexture.cpp`: reset `ptrLayer` on every map name.
+- **Status:** Proposed
