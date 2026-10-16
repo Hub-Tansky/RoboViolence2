@@ -1247,8 +1247,11 @@ bool GameVar::reloadLanguage()
 	std::vector<std::string> dirs(1, dir);
 	if (bv2::dataRoot() != bv2::packageRoot()) dirs.push_back("main/languages/");
 	std::string file = lang::savedFile(languageFile.s);
-	if (file.empty()) languageFile = ""; // saved back empty, so the old default goes for good (PNS-47)
-	if (file.empty()) file = lang::pickFile(dirs, osLocales());
+	if (file.empty())
+	{
+		languageFile = ""; // saved back empty, so the old default goes for good (PNS-47)
+		file = lang::pickFile(dirs, osLocales());
+	}
 	else file = bv2::contentFile(file); // a saved "main/languages/en.lang" is the package's, as in pickFile
 	lang::Texts texts;
 	languageLoaded = lang::load(dir, file, texts);
