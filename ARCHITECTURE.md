@@ -118,6 +118,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/test_credentials.cpp` | Step 10: the credential HMAC against RFC 4231; proofs check only with their own password, label and nonce |
 | `tests/test_crash_fixes.cpp` | Steps 5 and 7: one check per fixed defect (KEY_QUESTIONS Part D) on the in-process server |
 | `tests/test_dks.cpp` | R20: `dksPlayMusic` on a missing file 200 times; a sound deleted after `dksShutDown` (teardown) (ASan) |
+| `tests/test_example_cfg.py` | `config/bv2.example.cfg` names a new player as `GameVar.cpp` does |
 | `tests/test_fileio.cpp` | `FileIO` byte widths for `.bvm` data and the widths the `.DKO` loader relies on; `bv2ReadBytes` zero-fills a short read; fixed-string length prefix round trip; unterminated `CString::loadFromFile` (overflows under ASan without its bound); `getString` keeps 255 characters (R16); `MemIO` reads past its end as zero; `getNextToken` on a single token (R30) |
 | `tests/test_lang.cpp` | Step 13: PO parser (entries that change the English printf conversions or whose key English lacks are skipped; raw control bytes rejected), English fallback per key, OS locale matching (`ll_CC`, `ll`, `.po` before `.lang`), PO without glyphs skipped |
 | `tests/test_lang_check.py` | Step 13: `tools/lang-check.py` fails on changed conversions, unknown keys, repeated keywords, tabs and a stale `en.pot`; warns about missing glyphs |
