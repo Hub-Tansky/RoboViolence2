@@ -680,8 +680,8 @@ GameVar::GameVar()
 	dksvarRegister(CString("r_showCasing [bool : true | false (default true)]"), &r_showCasing, true);
 	r_showGroundMark = true;
 	dksvarRegister(CString("r_showGroundMark [bool : true | false (default true)]"), &r_showGroundMark, true);
-	r_highDetailMenu = true;
-	dksvarRegister(CString("r_highDetailMenu [bool : true | false (default true)]"), &r_highDetailMenu, true);
+	r_highDetailMenu = false; // PNS-30 (owner): the plain menu looks better
+	dksvarRegister(CString("r_highDetailMenu [bool : true | false (default false)]"), &r_highDetailMenu, true);
 	r_animatedMenu = false;
 	dksvarRegister(CString("r_animatedMenu [bool : true | false (default false)]"), &r_animatedMenu, true);
 	r_showLatency = false;
