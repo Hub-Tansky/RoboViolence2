@@ -59,7 +59,11 @@ public:
 
 	///Constructeur par d�aut. La string est initialis� avec un seul caract�e, le caract�e nul.
 	CString(){s = new char[1]; s[0] = '\0';}
-	CString(char* fmt, ...);
+	explicit CString(char* fmt, ...);
+
+	/// Implicit from a string literal or char array: copied as is, never used as a printf format (PNS-34).
+	/// A char* pointer needs CString("%s", text).
+	template <size_t N> CString(const char (&text)[N]) {size_t n = strnlen(text, N); s = new char[n+1]; memcpy(s, text, n); s[n] = '\0';}
 
 	/// Constructeur copie
 	CString(const CString & objToCopy){s = new char[strlen(objToCopy.s)+1]; strcpy(s, objToCopy.s);}

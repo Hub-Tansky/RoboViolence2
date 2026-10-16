@@ -407,9 +407,9 @@ void Client::update(float delay)
 			if (chatting.isActivated())
 			{
 				if (isChattingTeam)
-					sayteam(chatting.s);
+					sayteam(CString("%s", chatting.s));
 				else
-					sayall(chatting.s);
+					sayall(CString("%s", chatting.s));
 				chatting.clear();
 				chatting.loseFocus();
 				console->unlock();

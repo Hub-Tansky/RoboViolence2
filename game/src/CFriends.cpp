@@ -94,7 +94,7 @@ void CFriends::updatePerso(float delay)
 {
 	if (!command.isNull())
 	{
-		console->sendCommand(command.s);
+		console->sendCommand(CString("%s", command.s));
 		command = "";
 		menuManager.activeControl = 0;
 		menuManager.focusControl = 0;

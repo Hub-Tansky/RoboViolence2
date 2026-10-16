@@ -261,19 +261,19 @@ GameVar::GameVar()
 
 #ifndef CONSOLE
 	// Weapon names stay empty until main() calls reloadLanguage(): gameVar is a static, so this runs before pathsInit()
-	weapons[WEAPON_DUAL_MACHINE_GUN] = new Weapon("main/models/DualMachineGun.DKO", "main/sounds/DualMachineGun.wav", .1f, gameVar.lang_dualMachineGun.s, 
+	weapons[WEAPON_DUAL_MACHINE_GUN] = new Weapon("main/models/DualMachineGun.DKO", "main/sounds/DualMachineGun.wav", .1f, gameVar.lang_dualMachineGun, 
 		.13f, 10, 1, .8f, 2, WEAPON_DUAL_MACHINE_GUN, PROJECTILE_DIRECT);
-	weapons[WEAPON_SMG] = new Weapon("main/models/SMG.DKO", "main/sounds/SMG.wav", .1f, gameVar.lang_subMachineGun.s,
+	weapons[WEAPON_SMG] = new Weapon("main/models/SMG.DKO", "main/sounds/SMG.wav", .1f, gameVar.lang_subMachineGun,
 		.1f, 8, 1, .5f, 1, WEAPON_SMG, PROJECTILE_DIRECT);
-   weapons[WEAPON_CHAIN_GUN] = new Weapon("main/models/ChainGun.DKO", "main/sounds/ChainGun.wav", .1f, gameVar.lang_changGun.s,
+   weapons[WEAPON_CHAIN_GUN] = new Weapon("main/models/ChainGun.DKO", "main/sounds/ChainGun.wav", .1f, gameVar.lang_changGun,
       .19f, 15, 1, 2.00f, 5, WEAPON_CHAIN_GUN, PROJECTILE_DIRECT);
-	weapons[WEAPON_SHOTGUN] = new Weapon("main/models/ShotGun.DKO", "main/sounds/Shotgun.wav", 0.85f, gameVar.lang_shotgun.s,
+	weapons[WEAPON_SHOTGUN] = new Weapon("main/models/ShotGun.DKO", "main/sounds/Shotgun.wav", 0.85f, gameVar.lang_shotgun,
 		.21f, 20, 5, 3.0f, 12, WEAPON_SHOTGUN, PROJECTILE_DIRECT);
-	weapons[WEAPON_SNIPER] = new Weapon("main/models/Sniper.DKO", "main/sounds/Sniper.wav", 2.0f, gameVar.lang_sniper.s,
+	weapons[WEAPON_SNIPER] = new Weapon("main/models/Sniper.DKO", "main/sounds/Sniper.wav", 2.0f, gameVar.lang_sniper,
 		.30f, 0, 1, 3.0f, 0, WEAPON_SNIPER, PROJECTILE_DIRECT);
 	weapons[WEAPON_BAZOOKA] = new Weapon("main/models/Bazooka.DKO", "main/sounds/Bazooka.wav", 1.75f, lang_bazooka,
 		.75f, 0, 1, 3.0f, 0, WEAPON_BAZOOKA, PROJECTILE_ROCKET);
-	weapons[WEAPON_GRENADE] = new Weapon("main/models/Hand.DKO", "main/sounds/Grenade.wav", 1.0f, gameVar.lang_grenade.s,
+	weapons[WEAPON_GRENADE] = new Weapon("main/models/Hand.DKO", "main/sounds/Grenade.wav", 1.0f, gameVar.lang_grenade,
 		1.5f, 0, 1, -1.0f, 0, WEAPON_GRENADE, PROJECTILE_GRENADE);
 	weapons[WEAPON_COCKTAIL_MOLOTOV] = new Weapon("main/models/Hand.DKO", "main/sounds/Grenade.wav", 1.0f, "Flame",
 		0.15f, 0, 1, -1.0f, 0, WEAPON_COCKTAIL_MOLOTOV, PROJECTILE_COCKTAIL_MOLOTOV);
