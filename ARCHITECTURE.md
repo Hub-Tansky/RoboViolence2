@@ -114,6 +114,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/test_admin_login.cpp` | Step 10: admin login only with HMACs over the connection's challenge; no user, password or MD5 on the wire |
 | `tests/test_babonet.cpp` | R7: a 10000-byte message over a loopback babonet connection arrives over several reads and intact |
 | `tests/test_browsable_game.cpp` | A server browser row owns a copy of its lobby game's row (the lobby frees its own) |
+| `tests/test_cstring.cpp` | Phase C step 5: no implicit `char*` to `CString`; literals and char arrays convert verbatim; explicit format still formats |
 | `tests/test_config.cpp` | dksvar config layering, transient values not saved, secrets masked |
 | `tests/test_credentials.cpp` | Step 10: the credential HMAC against RFC 4231; proofs check only with their own password, label and nonce |
 | `tests/test_crash_fixes.cpp` | Steps 5 and 7: one check per fixed defect (KEY_QUESTIONS Part D) on the in-process server |
@@ -315,6 +316,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/roadmap/phase-c-installers-and-fixes/step1-player-data-dir.md` | Scope file for step1 |
 | `docs/roadmap/phase-c-installers-and-fixes/step2-name-and-credits.md` | Scope file for step2 |
 | `docs/roadmap/phase-c-installers-and-fixes/step4-housekeeping.md` | Scope file for step4 |
+| `docs/roadmap/phase-c-installers-and-fixes/step5-client-engine-fixes.md` | Scope file for step5 |
 
 ### `docs/roadmap/phase-c-installers-and-fixes/reviews`
 
