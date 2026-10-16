@@ -335,6 +335,8 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/roadmap/phase-c-installers-and-fixes/reviews/step3.md` | Step 3 review record |
 | `docs/roadmap/phase-c-installers-and-fixes/reviews/step4-report.md` | Raw fresh-context reviewer reports for step 4 |
 | `docs/roadmap/phase-c-installers-and-fixes/reviews/step4.md` | Step 4 review record |
+| `docs/roadmap/phase-c-installers-and-fixes/reviews/step5-report.md` | Raw fresh-context reviewer reports for step 5 |
+| `docs/roadmap/phase-c-installers-and-fixes/reviews/step5.md` | Step 5 review record |
 
 ### `docs/roadmap/phase-t-testing-environment`
 

@@ -262,7 +262,7 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Suggested home:** a build-only change to `game/CMakeLists.txt` in any later step that touches it; check the harness still links its fake `bb_*` first.
 - **Status:** Done in Phase C [step 4](phase-c-installers-and-fixes/step4-housekeeping.md)
 
-### PNS-34: Make `CString`'s format constructor explicit
+### PNS-34: `CString`'s format constructor runs any `char*` as a format
 
 - **Found in:** Phase B step 4 fresh-context review (2026-10-11), finding 4.
 - **Extract:** "`console->svChange(svChange.svChange)` … `TimedMessage(chat.message)` … Neither is a visible `CString(` call … Making the format constructor `explicit` would close the whole class of bugs."
@@ -535,4 +535,12 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Extract:** in `ePTexture::loadMap` an unknown `CHUNK_MAP_NAME` leaves `ptrLayer` on the previous layer, so a later texture chunk replaces that layer's `textureID` without freeing it.
 - **Why it matters:** a texture leak (not a crash) with malformed or unusual `.DKT` files.
 - **Suggested home:** the next step touching `engine/dko/src/ePTexture.cpp`: reset `ptrLayer` on every map name.
+- **Status:** Proposed
+
+### PNS-65: `CString::operator=(const char*)` dereferences null
+
+- **Found in:** Phase C step 5 review round 2 (2026-10-17), finding 5.
+- **Extract:** `CString::operator=(const char*)` (`engine/zeven/include/CString.h`) runs `strlen` on its argument; the one-argument constructor turns null into "" since ADR 0021.
+- **Why it matters:** inconsistent null handling; `x = ptr` with a null `ptr` crashes.
+- **Suggested home:** the next step touching `CString.h`.
 - **Status:** Proposed
