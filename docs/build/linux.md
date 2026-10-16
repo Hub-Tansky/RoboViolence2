@@ -26,6 +26,8 @@ this should show a list of `.bvm` map files (if you pointed it at `main/` itself
 
 ## Use a downloaded package of Robo Violence 2
 
+Releases ([GitHub](https://github.com/Hub-Tansky/RoboViolence2/releases)) carry `roboviolence2-linux-x64.tar.gz` and the source tarball; Flatpak comes later (PNS-52).
+
 1. Install the runtime libraries: the client and `bv2dedicated` link GL and GLU; `bv2master` needs nothing extra. On Ubuntu 24.04:
 
    ```bash

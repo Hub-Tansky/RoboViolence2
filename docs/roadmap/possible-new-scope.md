@@ -122,7 +122,7 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Original assets:** not shipped. Packages already carry generated placeholders and read the player's data through `BV2_DATA_DIR` (`game/src/Paths.cpp:144`); PNS-51 removes the env var and keeps packaged content loading.
 - **Why it matters:** friends install without building or unpacking archives.
 - **Suggested home:** after PNS-51; the PNS-23 ADR with it.
-- **Status:** Accepted → [Phase C](phase-c-installers-and-fixes/README.md)
+- **Status:** Done in Phase C [step 3](phase-c-installers-and-fixes/step3-unsigned-installers.md)
 
 ### PNS-17: Networking rework
 
@@ -184,7 +184,7 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Extract:** "Step task 1.2 asks for `.sh` and `.ps1` run scripts; `.cmd` was delivered … The new distribution format (archive layout, unarchived artifact upload, duplicate bundle `main/`, ad-hoc re-sign) has no ADR either."
 - **Why it matters:** A later agent might "fix" `.cmd` back to `.ps1`, drop the second macOS `main/`, or re-zip the artifacts without knowing why they are as they are (`packaging/make-package.py`, step 1 task 1.2).
 - **Suggested home:** a short ADR in the next PR that touches packaging, or with PNS-16 (signed distribution). The owner asked to check it further before writing one.
-- **Status:** Accepted → [Phase C](phase-c-installers-and-fixes/README.md)
+- **Status:** Done in Phase C [step 3](phase-c-installers-and-fixes/step3-unsigned-installers.md)
 
 ### PNS-24: Remove the unused runtime `bv2.db`
 
@@ -208,7 +208,7 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Extract:** `ld: warning: object file (…/vcpkg_installed/arm64-osx/debug/lib/libSDL3.a[248](SDL_dummysensor.c.o)) was built for newer 'macOS' version (27.0) than being linked (12.0)`.
 - **Why it matters:** `CMakePresets.json:58` sets `CMAKE_OSX_DEPLOYMENT_TARGET` 12.0 for our code, but the `arm64-osx` triplet builds SDL3 and the other ports for the build machine's macOS. The CI package (built on `macos-14`) therefore likely needs macOS 14+, while the docs promise 12+. Friends on older Macs may not be able to start it.
 - **Suggested home:** an overlay triplet setting `VCPKG_OSX_DEPLOYMENT_TARGET 12.0` for the macOS presets (touches `CMakePresets.json` and a new `triplets/`), or change the documented minimum. Before the PNS-31 cross-OS game if a tester has macOS < 14.
-- **Status:** Accepted → [Phase C](phase-c-installers-and-fixes/README.md)
+- **Status:** Done in Phase C [step 3](phase-c-installers-and-fixes/step3-unsigned-installers.md)
 
 ### PNS-27: Pin the Windows CI runner image
 
@@ -216,7 +216,7 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Extract:** "The CI log of run 38002113508 shows `Operating System: Microsoft Windows Server 2025`, `Image: windows-2025-vs2026` … Optionally pin `windows-2025` instead of `windows-latest` so the fact can't drift silently."
 - **Why it matters:** The docs and ADR 0012 name the Windows version CI tests on; `windows-latest` can change under them. `.github/workflows/` is outside step 2a's Allowed paths.
 - **Suggested home:** the next step that touches `.github/workflows/build.yml` (step 3 adds a fuzz job there).
-- **Status:** Accepted → [Phase C](phase-c-installers-and-fixes/README.md)
+- **Status:** Done in Phase C [step 3](phase-c-installers-and-fixes/step3-unsigned-installers.md)
 
 ### PNS-29: Shareable debug-capable Windows packages
 
@@ -511,4 +511,20 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Found in:** Phase B step 12 follow-ups (2026-10-13, 2026-10-14): `build (win-x64-msvc)` failed three times linking a test executable (`test_master.exe`, `test_babonet.exe`) with "The process cannot access the file because it is being used by another process"; a rerun passed.
 - **Why it matters:** red `main` builds and PRs that need a manual rerun.
 - **Suggested home:** Phase C step 3 (pins the Windows runner, PNS-27) or step 4: retry the build step once, or exclude the build folder from Defender on the runner.
+- **Status:** Proposed
+
+### PNS-62: The vcpkg cache key ignores the overlay triplets
+
+- **Found in:** Phase C step 3 review (2026-10-14), finding 10.
+- **Extract:** `.github/actions/setup-vcpkg/action.yml` keys `actions/cache` on `hashFiles('vcpkg.json')` only; `triplets/arm64-osx.cmake` changes every macOS port's ABI, so the old cache is restored, all ports rebuild, and an exact key hit skips saving the new binaries.
+- **Why it matters:** macOS CI rebuilds SDL3 and the other ports on every run until `vcpkg.json` changes.
+- **Suggested home:** the next step allowed to edit `.github/actions/`: add `triplets/**` to `hashFiles`. A baseline bump (PNS-54) also refreshes the key.
+- **Status:** Proposed
+
+### PNS-63: A licence file for the vendored glad loader
+
+- **Found in:** Phase C step 3 review round 2 (2026-10-14), finding 4.
+- **Extract:** `packaging/make-package.py` builds `licenses/glad.txt` from a hard-coded "glad 2.0.8 …: WTFPL OR CC0-1.0" and the first comment of `KHR/khrplatform.h`, repeating `engine/zeven/third_party/glad/README.md:3`.
+- **Why it matters:** regenerating glad or changing the header's comment silently changes or breaks the notice.
+- **Suggested home:** a step allowed to edit `engine/zeven/third_party/glad/`: commit `LICENSE.txt` there and copy it.
 - **Status:** Proposed
