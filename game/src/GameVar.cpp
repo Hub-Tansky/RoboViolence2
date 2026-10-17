@@ -370,6 +370,8 @@ GameVar::GameVar()
 	dksvarRegister(CString("sv_bombTime [int : (default 60)]"), &sv_bombTime, 10, 0, LIMIT_MIN, true);
 	sv_gameName = "Robo Violence 2 - Server";
 	dksvarRegister(CString("sv_gameName [string : \"\"]"), &sv_gameName, true);
+	sv_publicAddress = "";
+	dksvarRegister(CString("sv_publicAddress [string : \"\" (dotted IPv4 for the master list; empty: the address the master sees)]"), &sv_publicAddress, true);
 	sv_port = 3333;
 	dksvarRegister(CString("sv_port [int : valid port (default 3333)]"), &sv_port, 1024, 65536,
 		LIMIT_MIN | LIMIT_MAX, true);

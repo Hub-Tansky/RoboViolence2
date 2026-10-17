@@ -203,7 +203,7 @@ void cNetManager::ReceiveServerPacket(char *data,int typeID,UINT4 fromID)
 			stKillServ kill;
 			memcpy(&kill,data,sizeof(stKillServ));
 			
-			cBV2game	*game = Server->GetGameByIPport(Server->GetClientByID(fromID)->IP,kill.Port);
+			cBV2game	*game = Server->GetGameByConnection((UINT4)fromID,kill.Port);
 			if(game)	game->LastCheck	=	9999; //timeout la game
 			
 			bb_serverDisconnectClient(fromID);

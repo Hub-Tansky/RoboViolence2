@@ -98,6 +98,7 @@ public:
    int sv_subGameType;   
 	float sv_bombTime;
 	CString sv_gameName;
+	CString sv_publicAddress; // sent to the master as this server's address (PNS-44)
 	int sv_port;
 	int sv_maxPlayer;
    int sv_maxPlayerInGame;

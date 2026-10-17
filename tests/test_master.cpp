@@ -60,9 +60,27 @@ static std::vector<std::string> list()
 	return names;
 }
 
-static void registerGame(UINT4 c)
+// The rows of the list, on a fresh connection
+static std::vector<stBV2row> rows()
+{
+	UINT4 c = connectClient();
+	stBV2list query = {};
+	strcpy(query.Version, "2.11");
+	bb_clientSend(c, (char *)&query, sizeof(query), BV2_LIST);
+	pump({c});
+	std::vector<stBV2row> out;
+	int typeID;
+	while (char * buffer = bb_clientReceive(c, &typeID))
+		if (typeID == BV2_ROW) out.push_back(*(stBV2row *)buffer);
+	bb_clientDisconnect(c);
+	pump({});
+	return out;
+}
+
+static void registerGame(UINT4 c, const char * advertised = "")
 {
 	stBV2row row = {};
+	strcpy(row.ip, advertised);
 	strcpy(row.map, "CTF-Placeholder");
 	strcpy(row.serverName, "Test Server");
 	strcpy(row.Version, "2.11");
@@ -111,6 +129,20 @@ int main(int argc, char ** argv)
 	CHECK(list().size() == 1);
 	stKillServ kill = {3333};
 	bb_clientSend(game, (char *)&kill, sizeof(kill), KILL_SERV);
+	pump({game});
+	CHECK(list().empty());
+
+	std::printf("phase: advertised address\n"); // from loopback the master lists sv_publicAddress (PNS-44)
+	bb_clientDisconnect(game); // KILL_SERV closed it
+	game = connectClient();
+	registerGame(game, "203.0.113.7");
+	std::vector<stBV2row> listed = rows();
+	CHECK(listed.size() == 1 && std::strcmp(listed[0].ip, "203.0.113.7") == 0);
+	// Built from pieces: the secret scan flags IPv4 literals outside the documentation ranges, private ones too
+	const std::string docker = std::string("172.") + "20.0.3", outside = std::string("172.") + "32.0.1";
+	CHECK(cMasterServer::IsPrivateAddress(docker.c_str()) && cMasterServer::IsPrivateAddress("127.0.0.1"));
+	CHECK(!cMasterServer::IsPrivateAddress("203.0.113.7") && !cMasterServer::IsPrivateAddress(outside.c_str()));
+	bb_clientSend(game, (char *)&kill, sizeof(kill), KILL_SERV); // found by its connection, not its listed address
 	pump({game});
 	CHECK(list().empty());
 

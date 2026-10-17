@@ -842,7 +842,7 @@ void CMaster::sendGameInfo(Server* server)
 		strncpy(bv2Row.map, server->game->mapName.s, 16);
 		strncpy(bv2Row.serverName, gameVar.sv_gameName.s, 63);
 		strcpy(bv2Row.password, gameVar.sv_password != "" ? "*" : ""); // a flag: never the password (Q-S5)
-		bv2Row.ip[0] = '\0';
+		snprintf(bv2Row.ip, sizeof(bv2Row.ip), "%s", gameVar.sv_publicAddress.s); // the master trusts it only from a private source
 		bv2Row.port = (unsigned short)gameVar.sv_port;
 		int nbPlayer = 0;
 		for (i=0;i<MAX_PLAYER;++i)
