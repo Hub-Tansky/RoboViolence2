@@ -1,6 +1,16 @@
 #include "cNetManager.h"
 #include "SqlStatement.h"
 
+#include <cstdlib>
+#include <cstring>
+
+// Bans and unbans need BV2_MASTER_BAN_PASS (at most 7 characters: the game's wire field); unset refuses them (PNS-43)
+static bool banPasswordMatches(const char * pass)
+{
+	const char * secret = std::getenv("BV2_MASTER_BAN_PASS");
+	return secret && secret[0] && std::strncmp(pass, secret, 7) == 0 && std::strlen(secret) <= 7;
+}
+
 
 cNetManager::cNetManager()
 {
@@ -220,11 +230,7 @@ void cNetManager::ReceiveServerPacket(char *data,int typeID,UINT4 fromID)
 			memcpy(&cb,data,sizeof(stCacheBan));
 			cb.Nick[sizeof(cb.Nick) - 1] = cb.IP[sizeof(cb.IP) - 1] = cb.Pass[sizeof(cb.Pass) - 1] = '\0';
 
-			//check validity of the password
-			if( strcmp(cb.Pass,"roxbabo"))
-			{
-				return;
-			}
+			if (!banPasswordMatches(cb.Pass)) return;
 
 			Server->AddBan( cb.Nick , cb.IP , cb.Duration );
 			return;
@@ -235,11 +241,7 @@ void cNetManager::ReceiveServerPacket(char *data,int typeID,UINT4 fromID)
 			stCacheUnban cb;
 			memcpy(&cb,data,sizeof(stCacheUnban));
 
-			//check validity of the password
-			if( strcmp(cb.Pass,"roxbabo"))
-			{
-				return;
-			}
+			if (!banPasswordMatches(cb.Pass)) return;
 
 			Server->Unban( cb.ID );
 			return;

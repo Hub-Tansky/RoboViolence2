@@ -2150,12 +2150,7 @@ void Console::sendCommand(CString commandLine, bool isAdmin, unsigned long bbnet
 	{
 		if (scene->server)
 		{
-			CString strPass = tokenize.getFirstToken(' ');
-// 			if( strPass != "roxbabo" )
-// 			{
-// 				return;
-// 			}
-				
+			CString strPass = tokenize.getFirstToken(' '); // checked by the master (BV2_MASTER_BAN_PASS)
 			CString strID = tokenize.getFirstToken(' ');
 			if( strID == "" )
 			{

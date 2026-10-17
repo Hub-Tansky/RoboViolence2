@@ -84,6 +84,11 @@ int main(int argc, char ** argv)
 	for (const char * db : {"master.db", "web.db"})
 		fs::copy_file(fs::path(argv[1]) / db, fs::path(argv[2]) / db, fs::copy_options::overwrite_existing);
 	fs::current_path(argv[2]); // the master opens master.db and web.db in its working directory
+#ifdef _WIN32
+	_putenv_s("BV2_MASTER_BAN_PASS", "b4nTest");
+#else
+	setenv("BV2_MASTER_BAN_PASS", "b4nTest", 1);
+#endif
 
 	master = new cNetManager();
 	master->Init();
@@ -132,7 +137,18 @@ int main(int argc, char ** argv)
 	stCacheBan ban = {};
 	strcpy(ban.Nick, "Nick'--;%");
 	strcpy(ban.IP, "1';--%");
-	strcpy(ban.Pass, "roxbabo");
+	strcpy(ban.Pass, "roxbabo"); // the old built-in password: refused (PNS-43)
+	bb_clientSend(game, (char *)&ban, sizeof(ban), CACHE_BAN);
+	pump({game});
+	{
+		sqlite3 * db = 0;
+		sqlite3_open("master.db", &db);
+		SqlStatement bans(db, "Select ID From BanList Where IP = ?;");
+		bans.bindText(1, ban.IP);
+		CHECK(!bans.row());
+		sqlite3_close(db);
+	}
+	strcpy(ban.Pass, "b4nTest"); // BV2_MASTER_BAN_PASS, set before the master started
 	bb_clientSend(game, (char *)&ban, sizeof(ban), CACHE_BAN);
 	pump({game});
 	stCacheBanned query = {};
