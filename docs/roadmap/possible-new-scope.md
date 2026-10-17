@@ -576,3 +576,11 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Why it matters:** a stale or replaced prebuilt runs in every Windows CI run; a reverse of the choice (no Windows client test, WARP) has no ADR to weigh against.
 - **Suggested home:** the step that makes `package-smoke` required: an ADR for the dependency, a bump with the monthly vcpkg baseline, the hash checked against the release's published digest.
 - **Status:** Proposed
+
+### PNS-70: Packaged server and master start check is copied in three places
+
+- **Found in:** Phase T step 3 review round 2 (2026-10-17), findings 1 and 3.
+- **Extract:** `package-check` (Linux) and `package-smoke` (Windows, macOS) in `.github/workflows/build.yml` each repeat the server `quit` pipe, the `Server Created on port 3333` grep, the TCP 10207 wait and the master stop; `package-smoke` branches on `RUNNER_OS` four times.
+- **Why it matters:** a change to the port, banner or wait budget must be made three times.
+- **Suggested home:** a step allowed to touch `tools/`: one `tools/package-start-check.sh <dir>` taking the per-OS commands from matrix rows, called by both jobs.
+- **Status:** Proposed
