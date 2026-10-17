@@ -165,7 +165,6 @@ private:
 
 	void sendCacheListToMaster(const stCacheListRemote& info);
 
-	// hlper function to know if the current peer is remote admin authorized
 
 public:
 	AccountManagerClient AccountManager;

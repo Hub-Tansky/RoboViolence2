@@ -166,7 +166,6 @@ public:
 	// Pour modifier une variable remotly
 	void sendSVChange(CString varCom);
 
-	// Send player list to a remote admin
 
 	// Pour aller chercher la prochaine map � loader
 	CString queryNextMap();

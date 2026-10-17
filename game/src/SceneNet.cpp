@@ -212,7 +212,6 @@ void Scene::kick(CString playerName)
 				{
 					if (textColorLess(server->game->players[i]->name) == textColorLess(playerName))
 					{
-
 						bb_serverDisconnectClient(server->game->players[i]->babonetID);
 						console->add(CString("\x3> Disconnecting client %s (%s), kicked by server", server->game->players[i]->name.s, server->game->players[i]->playerIP), true);
 						ZEVEN_SAFE_DELETE(server->game->players[i]);

@@ -109,7 +109,6 @@ void Console::add(CString message, bool fromServer, bool isEvent)
 	printf("%s\n", textColorLess(message).s);
 #endif
 
-
 	if (isEvent == true)
 		m_eventMessages.push_back(message);
 	else
