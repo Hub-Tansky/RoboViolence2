@@ -568,3 +568,11 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Why it matters:** the predicted wedge did not happen: the step 7 `master` test phase "bad partial key" passes on macOS, Linux and Windows without a change (CI run 39027172674). A later `RemoveClient` on that client would `FD_CLR` and close descriptor 0.
 - **Suggested home:** the next babonet step (PNS-17): return 1 as the full-key path does, with a test that shows the stale client.
 - **Status:** Proposed
+
+### PNS-69: Mesa llvmpipe for Windows CI has no bump policy or upstream checksum check
+
+- **Found in:** Phase T step 3 review round 1 (2026-10-17), finding 1.
+- **Extract:** `package-smoke` downloads mesa-dist-win 26.0.3 (`.github/workflows/build.yml`, `MESA`/`MESA_SHA256`). The hash came from the first CI download; nothing covers the binary in `osv-vcpkg` and nobody owns bumping it.
+- **Why it matters:** a stale or replaced prebuilt runs in every Windows CI run; a reverse of the choice (no Windows client test, WARP) has no ADR to weigh against.
+- **Suggested home:** the step that makes `package-smoke` required: an ADR for the dependency, a bump with the monthly vcpkg baseline, the hash checked against the release's published digest.
+- **Status:** Proposed
