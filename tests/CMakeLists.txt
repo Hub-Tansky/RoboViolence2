@@ -125,11 +125,8 @@ if(TARGET bv2master_lib)
   target_link_libraries(test_master PRIVATE bv2master_lib)
   bv2_target_defaults(test_master)
   add_dependencies(test_master bv2_seed_master_db)
-  # Not on Windows (owner, 2026-10-10): R28, an intermittent babonet crash when a connection closes; step 5 re-enables it.
-  if(NOT WIN32)
-    add_test(NAME master COMMAND test_master "${BV2_RUNTIME_DIR}" "${BV2_TEST_SCRATCH}/master")
-    set_tests_properties(master PROPERTIES TIMEOUT 60 RESOURCE_LOCK bv2_master_port)
-  endif()
+  add_test(NAME master COMMAND test_master "${BV2_RUNTIME_DIR}" "${BV2_TEST_SCRATCH}/master")
+  set_tests_properties(master PROPERTIES TIMEOUT 60 RESOURCE_LOCK bv2_master_port)
 endif()
 
 if(TARGET zeven_client)
