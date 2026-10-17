@@ -1,6 +1,6 @@
 # Phase C: installers and fixes
 
-**Status:** TODO
+**Status:** IN PROGRESS (steps 1–7 DONE 2026-10-17; release and manual test open)
 
 **Depends on:** Phase B ([README](../phase-b-security-infrastructure-anti-cheat/README.md)). Steps 1–4 can start before Phase B's manual test (PNS-31); steps 5–7 change game, server or engine behaviour and wait for it as the regression baseline. **Rules:** [roadmap README](../README.md) (ground rules, step closing).
 

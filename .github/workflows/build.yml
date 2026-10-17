@@ -93,7 +93,9 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           git archive --format=tar.gz --prefix="roboviolence2-${GITHUB_REF_NAME}/" -o "dist/roboviolence2-${GITHUB_REF_NAME}-source.tar.gz" HEAD
-          gh release create "$GITHUB_REF_NAME" --title "Robo Violence 2 $GITHUB_REF_NAME" --generate-notes \
+          # v0.* and v*-<suffix> tags are pre-releases
+          pre=$([[ "$GITHUB_REF_NAME" == v0.* || "$GITHUB_REF_NAME" == *-* ]] && echo --prerelease || true)
+          gh release create "$GITHUB_REF_NAME" --title "Robo Violence 2 $GITHUB_REF_NAME" --generate-notes $pre \
             dist/roboviolence2-win-x64-msvc-setup.exe dist/roboviolence2-macos-arm64.dmg \
             dist/roboviolence2-linux-x64.tar.gz "dist/roboviolence2-${GITHUB_REF_NAME}-source.tar.gz"
   package-check:
