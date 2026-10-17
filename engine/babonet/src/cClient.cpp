@@ -79,6 +79,7 @@ cClient::cClient(sockaddr_in *ip, int fileDescriptor,UINT4 netID)
 
 	//clear master set
 	FD_ZERO(&masterS);
+	FD_ZERO(&master); // R28: Disconnect() clears it; on Windows an uninitialised fd_set count overruns the array
 
 	//add the new file descriptor to this clients fd
 	FD_SET( (unsigned int)(FileDescriptor) , &masterS );
