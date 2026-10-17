@@ -151,8 +151,9 @@ jobs:
           skip-decompress: true  # extract it ourselves: unzip in the action drops exec bits and bundle symlinks
       - name: Extract
         run: |
-          if [ "$RUNNER_OS" = Windows ]; then 7z x -bd roboviolence2-${{ matrix.preset }}.zip > /dev/null
-          else ditto -x -k roboviolence2-${{ matrix.preset }}.zip .; fi
+          ls -l
+          zip=$(ls roboviolence2-${{ matrix.preset }}.zip*)
+          if [ "$RUNNER_OS" = Windows ]; then 7z x -bd "$zip" > /dev/null; else ditto -x -k "$zip" .; fi
       # The runner has no OpenGL driver: Mesa's software renderer, loaded from the application folder
       - name: Mesa llvmpipe next to bv2.exe
         if: runner.os == 'Windows'
