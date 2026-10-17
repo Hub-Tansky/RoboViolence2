@@ -243,7 +243,9 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 			// A short password falls to offline guessing from one captured proof (PNS-42)
 			if (gameVar.zsv_adminPass.len() > 0 && gameVar.zsv_adminPass.len() < 12)
 			{
-				console->add("\x4> Admin login refused: zsv_adminPass is shorter than 12 characters", true);
+				static bool told = false; // once: a client can repeat the request
+				if (!told) console->add("\x4> Admin login refused: zsv_adminPass is shorter than 12 characters", true);
+				told = true;
 				break;
 			}
 			if (!gameVar.zsv_adminPass.isNull() &&
@@ -592,8 +594,6 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 					}
 				}
 			}
-
-		
 			break;
 		}
 	case NET_CLSV_SVCL_TEAM_REQUEST:
