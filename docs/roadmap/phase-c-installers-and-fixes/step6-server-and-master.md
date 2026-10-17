@@ -1,6 +1,6 @@
 # Step 6: Server and master
 
-**Status:** IN PROGRESS
+**Status:** DONE (2026-10-17)
 
 **Depends on:** Phase B DONE. **Next:** step 7 (R28). **Index:** [README.md](README.md)
 
