@@ -193,7 +193,7 @@ jobs:
           # run-client.cmd detaches (start ""), so its pid can't be tracked: start bv2.exe directly
           if [ "$RUNNER_OS" = Windows ]; then tmp=$(cygpath -m "$tmp"); client=./bv2.exe; else client=./run-client.sh; fi
           export BV2_PREF_DIR="$tmp/pref-client"
-          printf 'r_fullScreen false\n' > "$tmp/smoke.cfg"   # runners have no display mode to switch to
+          printf 'r_fullScreen false\nlanguageFile "main/languages/missing.lang"\n' > "$tmp/smoke.cfg"   # FIX PROOF, reverted next commit
           "$client" --placeholders --config "$tmp/smoke.cfg" > client.log 2>&1 & pid=$!
           sleep 10
           kill -0 "$pid" 2>/dev/null || { rc=0; wait "$pid" || rc=$?; cat client.log; echo "client exited early with $rc"; exit 1; }
