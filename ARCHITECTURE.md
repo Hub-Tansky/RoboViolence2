@@ -21,7 +21,7 @@ Robo Violence 2: unofficial fork of BaboViolent 2, a top-down multiplayer shoote
 | Supply chain | Dependency graph fed by vcpkg (`dependency-graph.yml`, on push to `main`); Dependabot alerts and security updates on; Dependabot version updates for GitHub Actions (`.github/dependabot.yml`); CodeQL `c-cpp` and `actions` (`codeql.yml`, not required). Dependabot and OSV can't read vcpkg purls; `osv-vcpkg.yml` (weekly) queries OSV by each port's upstream commit (`tools/osv-vcpkg.py`). Bump the vcpkg baseline monthly, or sooner when it reports a port. |
 | Hosting | Server images from `packaging/docker/Dockerfile` (GHCR on `main`), runbook [docs/ops/runbook.md](docs/ops/runbook.md). |
 | Known defects | [docs/analysis/KEY_QUESTIONS.md](docs/analysis/KEY_QUESTIONS.md). |
-| Decisions | [docs/decisions/README.md](docs/decisions/README.md): 0001 Ninja, 0002 libcurl compiled out, 0003 OpenGL 2.1 kept, 0004 project name (superseded by 0008), 0005 `main/` data root, 0006 platform layer, 0007 data root, pref dir and config layers, 0008 display name "Robo Violence 2", 0009 internal renaming, 0010 BV2 asset compatibility and GUI freeze, 0011 gettext PO translations, 0012 Windows 10 22H2 minimum, 0013 rulesets, 0014 libsodium HMAC, 0015 admin HTTP API, 0016 player data lookup and package content, 0017 playtest pull agent, 0018 staging pull deploy, 0019 in-game name and fork credits. |
+| Decisions | [docs/decisions/README.md](docs/decisions/README.md): 0001 Ninja, 0002 libcurl compiled out, 0003 OpenGL 2.1 kept, 0004 project name (superseded by 0008), 0005 `main/` data root, 0006 platform layer, 0007 data root, pref dir and config layers, 0008 display name "Robo Violence 2", 0009 internal renaming, 0010 BV2 asset compatibility and GUI freeze, 0011 gettext PO translations, 0012 Windows 10 22H2 minimum, 0013 rulesets, 0014 libsodium HMAC, 0015 admin HTTP API, 0016 player data lookup and package content, 0017 playtest pull agent, 0018 staging pull deploy, 0019 in-game name and fork credits, 0020 package and release format, 0021 one-argument CString is text, 0022 advertised server address. |
 
 ### Open items
 
@@ -54,7 +54,8 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `AGENTS.md` | Canonical agent and contributor instructions |
 | `ARCHITECTURE.md` | This file: summary and file inventory |
 | `CMakeLists.txt` | Root CMake project: options, runtime layout, placeholder content, subdirectories |
-| `CMakePresets.json` | Presets: linux-x64, macos-arm64, win-x64-msvc (Debug), -asan and -release variants (Ninja) |
+| `CMakePresets.json` | Presets: linux-x64, macos-arm64, win-x64-msvc (Debug), -asan and -release variants (Ninja); macOS uses the overlay triplet in `triplets/` |
+| `triplets/arm64-osx.cmake` | vcpkg overlay triplet: macOS arm64 ports built for macOS 12 (PNS-26) |
 | `LICENSE.txt` | GPLv3 text (code only) |
 | `README.md` | Project overview, fork and asset-removal statement |
 | `REVIEW.md` | Definition of done: `tools/review.sh` checks, reviewer checklist, defined terms, forbidden shortcuts, fresh-context step review and its record |
@@ -63,7 +64,8 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/Paths.cpp` | Package and data roots (`contentFile` for the package's own content), saved and detected BV2 data folder, per-user pref dir, layered config loading, map and DB path helpers (ADR 0016) |
 | `game/src/Paths.h` | Interface of `Paths.cpp` (namespace `bv2`) |
 | `packaging/linux/roboviolence2.desktop` | Linux desktop entry |
-| `packaging/make-package.py` | Builds the per-OS play-test package from a Release `runtime/` (links resolved, macOS bundle re-signed) |
+| `packaging/make-package.py` | Builds the per-OS package from a Release `runtime/` (links resolved, macOS bundle re-signed, licences), plus the Windows installer or macOS `.dmg` (ADR 0020) |
+| `packaging/windows/roboviolence2.iss` | Inno Setup script for the Windows installer (per-user, unsigned) |
 | `packaging/scripts/run-client.cmd` | Package script: starts the client (Windows) |
 | `packaging/scripts/run-client.sh` | Package script: starts the client (macOS bundle or Linux binary) |
 | `packaging/scripts/run-master.cmd` | Package script: starts the master server (Windows) |
@@ -114,10 +116,12 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/test_admin_login.cpp` | Step 10: admin login only with HMACs over the connection's challenge; no user, password or MD5 on the wire |
 | `tests/test_babonet.cpp` | R7: a 10000-byte message over a loopback babonet connection arrives over several reads and intact |
 | `tests/test_browsable_game.cpp` | A server browser row owns a copy of its lobby game's row (the lobby frees its own) |
+| `tests/test_cstring.cpp` | Phase C step 5: one-argument `CString` is text (arrays, `char*`, literals, direct and implicit); two or more arguments format (ADR 0021) |
 | `tests/test_config.cpp` | dksvar config layering, transient values not saved, secrets masked |
 | `tests/test_credentials.cpp` | Step 10: the credential HMAC against RFC 4231; proofs check only with their own password, label and nonce |
 | `tests/test_crash_fixes.cpp` | Steps 5 and 7: one check per fixed defect (KEY_QUESTIONS Part D) on the in-process server |
 | `tests/test_dks.cpp` | R20: `dksPlayMusic` on a missing file 200 times; a sound deleted after `dksShutDown` (teardown) (ASan) |
+| `tests/test_example_cfg.py` | `config/bv2.example.cfg` names a new player as `GameVar.cpp` does |
 | `tests/test_fileio.cpp` | `FileIO` byte widths for `.bvm` data and the widths the `.DKO` loader relies on; `bv2ReadBytes` zero-fills a short read; fixed-string length prefix round trip; unterminated `CString::loadFromFile` (overflows under ASan without its bound); `getString` keeps 255 characters (R16); `MemIO` reads past its end as zero; `getNextToken` on a single token (R30) |
 | `tests/test_lang.cpp` | Step 13: PO parser (entries that change the English printf conversions or whose key English lacks are skipped; raw control bytes rejected), English fallback per key, OS locale matching (`ll_CC`, `ll`, `.po` before `.lang`), PO without glyphs skipped |
 | `tests/test_lang_check.py` | Step 13: `tools/lang-check.py` fails on changed conversions, unknown keys, repeated keywords, tabs and a stale `en.pot`; warns about missing glyphs |
@@ -129,7 +133,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/fuzz_server.cpp` | Random-mutation fuzzer for one message type on the in-process server; writes the crashing input to `<out>/<type>/last.bin` (CI job `fuzz`) |
 | `tests/test_server_harness.cpp` | The in-process server starts on the placeholder CTF map, accepts a client and sends it the game state |
 | `tests/test_validator.cpp` | Steps 8, 9: the step 8 kicks, `sv_antiCheat` levels, and each step 9 rule against a cheat and against normal (lagged) play |
-| `tests/test_master.cpp` | In-process master on port 10207 with a scratch `master.db`: register, list, heartbeat timeout (simulated 61 s), removal by `KILL_SERV`, SQL injection in names, maps, nicks and IPs, and the ban list with LIKE filters (Q-S3). Not run on Windows (R28) |
+| `tests/test_master.cpp` | In-process master on port 10207 with a scratch `master.db`: register, list, heartbeat timeout (simulated 61 s), removal by `KILL_SERV`, SQL injection in names, maps, nicks and IPs, the ban list with LIKE filters (Q-S3), the ban secret, the advertised address and a reconnect; runs on Windows since R28 was fixed |
 | `tests/test_netpacket.cpp` | Byte-level layout of the packed wire structs |
 | `tests/test_staging_deploy.sh` | Phase T step 2: staging deploy helpers: main-only run selection, `/status` player count, failures per commit, infrastructure stages, env-file mode and readonly repository (ctest `staging_deploy`) |
 | `tests/test_playtest_agent.sh` | Phase T step 1: playtest agent helpers: main-only run selection (fork PR from `main` rejected), artifact digest, attempt limit, env-file mode and no export (ctest `playtest_agent`, Unix with `jq`) |
@@ -254,6 +258,9 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/decisions/0017-playtest-pull-agent.md` | ADR: main builds tested on the owner's Mac by a pull agent against a disposable local server; no self-hosted runner (phase T step 1) |
 | `docs/decisions/0018-staging-pull-deploy.md` | ADR: staging host deploys the newest main images by pull, pinned to a commit, only with no players; `/deployed`; multi-arch images (phase T step 2) |
 | `docs/decisions/0019-in-game-name-and-fork-credits.md` | ADR: in-game name, fork credits, "LOADING" splash, survey removed (Phase C step 2) |
+| `docs/decisions/0020-package-and-release-format.md` | ADR: package, installer, `.dmg` and release format; engine-only public releases (Phase C step 3) |
+| `docs/decisions/0021-cstring-one-argument-is-text.md` | ADR: one-argument `CString` copies text; two or more arguments format (Phase C step 5) |
+| `docs/decisions/0022-advertised-server-address.md` | ADR: the master lists `sv_publicAddress` only from private sources; `KILL_SERV` by connection (Phase C step 6) |
 | `docs/decisions/README.md` | ADR format and index |
 
 ### `docs/ops`
@@ -313,7 +320,11 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/roadmap/phase-c-installers-and-fixes/README.md` | Phase C scope: accepted PNS entries, order, done-when, risks |
 | `docs/roadmap/phase-c-installers-and-fixes/step1-player-data-dir.md` | Scope file for step1 |
 | `docs/roadmap/phase-c-installers-and-fixes/step2-name-and-credits.md` | Scope file for step2 |
+| `docs/roadmap/phase-c-installers-and-fixes/step3-unsigned-installers.md` | Scope file for step3 |
 | `docs/roadmap/phase-c-installers-and-fixes/step4-housekeeping.md` | Scope file for step4 |
+| `docs/roadmap/phase-c-installers-and-fixes/step5-client-engine-fixes.md` | Scope file for step5 |
+| `docs/roadmap/phase-c-installers-and-fixes/step6-server-and-master.md` | Scope file for step6 |
+| `docs/roadmap/phase-c-installers-and-fixes/step7-windows-tcp-close.md` | Scope file for step7 |
 
 ### `docs/roadmap/phase-c-installers-and-fixes/reviews`
 
@@ -323,8 +334,16 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/roadmap/phase-c-installers-and-fixes/reviews/step1.md` | Step 1 review record |
 | `docs/roadmap/phase-c-installers-and-fixes/reviews/step2-report.md` | Raw fresh-context reviewer report for step 2 |
 | `docs/roadmap/phase-c-installers-and-fixes/reviews/step2.md` | Step 2 review record |
+| `docs/roadmap/phase-c-installers-and-fixes/reviews/step3-report.md` | Raw fresh-context reviewer reports for step 3 |
+| `docs/roadmap/phase-c-installers-and-fixes/reviews/step3.md` | Step 3 review record |
 | `docs/roadmap/phase-c-installers-and-fixes/reviews/step4-report.md` | Raw fresh-context reviewer reports for step 4 |
 | `docs/roadmap/phase-c-installers-and-fixes/reviews/step4.md` | Step 4 review record |
+| `docs/roadmap/phase-c-installers-and-fixes/reviews/step5-report.md` | Raw fresh-context reviewer reports for step 5 |
+| `docs/roadmap/phase-c-installers-and-fixes/reviews/step5.md` | Step 5 review record |
+| `docs/roadmap/phase-c-installers-and-fixes/reviews/step6-report.md` | Raw fresh-context reviewer reports for step 6 |
+| `docs/roadmap/phase-c-installers-and-fixes/reviews/step6.md` | Step 6 review record |
+| `docs/roadmap/phase-c-installers-and-fixes/reviews/step7-report.md` | Raw fresh-context reviewer report for step 7 |
+| `docs/roadmap/phase-c-installers-and-fixes/reviews/step7.md` | Step 7 review record |
 
 ### `docs/roadmap/phase-t-testing-environment`
 
@@ -714,7 +733,6 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/Player.h` | Player entity: movement, weapons, hits, rendering |
 | `game/src/PlayerUpdate.cpp` | Player: per-tick update (physics, firing, timers) |
 | `game/src/Quit.h` | Quit confirmation dialog |
-| `game/src/RemoteAdminPackets.h` | Wire structs for the remote-admin protocol |
 | `game/src/ReportGen.cpp` | XML server report generation |
 | `game/src/ReportGen.h` | XML server report generation |
 | `game/src/Scene.cpp` | Top-level scene: main loop, menus, game and editor switching, rendering setup |

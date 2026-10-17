@@ -3,6 +3,11 @@ target_include_directories(test_netpacket PRIVATE ${CMAKE_SOURCE_DIR}/game/src $
 bv2_target_defaults(test_netpacket)
 add_test(NAME netpacket COMMAND test_netpacket)
 
+add_executable(test_cstring test_cstring.cpp)
+target_link_libraries(test_cstring PRIVATE zeven_core)
+bv2_target_defaults(test_cstring)
+add_test(NAME cstring COMMAND test_cstring)
+
 add_executable(test_config test_config.cpp)
 target_link_libraries(test_config PRIVATE zeven_core)
 bv2_target_defaults(test_config)
@@ -120,11 +125,8 @@ if(TARGET bv2master_lib)
   target_link_libraries(test_master PRIVATE bv2master_lib)
   bv2_target_defaults(test_master)
   add_dependencies(test_master bv2_seed_master_db)
-  # Not on Windows (owner, 2026-10-10): R28, an intermittent babonet crash when a connection closes; step 5 re-enables it.
-  if(NOT WIN32)
-    add_test(NAME master COMMAND test_master "${BV2_RUNTIME_DIR}" "${BV2_TEST_SCRATCH}/master")
-    set_tests_properties(master PROPERTIES TIMEOUT 60 RESOURCE_LOCK bv2_master_port)
-  endif()
+  add_test(NAME master COMMAND test_master "${BV2_RUNTIME_DIR}" "${BV2_TEST_SCRATCH}/master")
+  set_tests_properties(master PROPERTIES TIMEOUT 60 RESOURCE_LOCK bv2_master_port)
 endif()
 
 if(TARGET zeven_client)
@@ -168,6 +170,7 @@ endforeach()
 add_test(NAME paths COMMAND test_paths "${BV2_TEST_SCRATCH}")
 
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
+add_test(NAME example_cfg COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test_example_cfg.py)
 add_test(NAME lang_check COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test_lang_check.py "${BV2_TEST_SCRATCH}")
 add_test(NAME osv_vcpkg COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test_osv_vcpkg.py "${BV2_TEST_SCRATCH}")
 

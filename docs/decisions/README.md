@@ -51,3 +51,6 @@ What we do, in one or two sentences.
 | [0017](0017-playtest-pull-agent.md) | Test main builds on the owner's Mac with a pull agent | Accepted |
 | [0018](0018-staging-pull-deploy.md) | Staging deploys itself by pull, pinned to a commit, only when empty | Accepted |
 | [0019](0019-in-game-name-and-fork-credits.md) | The game shows its own name and credits the original as an unofficial fork | Accepted |
+| [0020](0020-package-and-release-format.md) | Package and release format; engine-only public releases | Accepted |
+| [0021](0021-cstring-one-argument-is-text.md) | A one-argument CString is text; formatting needs arguments | Accepted |
+| [0022](0022-advertised-server-address.md) | The master lists an advertised address only from private sources | Accepted |

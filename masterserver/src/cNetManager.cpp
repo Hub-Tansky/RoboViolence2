@@ -1,6 +1,16 @@
 #include "cNetManager.h"
 #include "SqlStatement.h"
 
+#include <cstdlib>
+#include <cstring>
+
+// Bans and unbans need BV2_MASTER_BAN_PASS (at most 7 characters: the game's wire field); unset refuses them (PNS-43)
+static bool banPasswordMatches(const char * pass)
+{
+	const char * secret = std::getenv("BV2_MASTER_BAN_PASS");
+	return secret && secret[0] && std::strncmp(pass, secret, 7) == 0 && std::strlen(secret) <= 7;
+}
+
 
 cNetManager::cNetManager()
 {
@@ -10,6 +20,9 @@ cNetManager::cNetManager()
 
 void cNetManager::Init()
 {
+	const char * banPass = std::getenv("BV2_MASTER_BAN_PASS");
+	if (!banPass || !banPass[0]) printf("BV2_MASTER_BAN_PASS is unset: bans and unbans are refused\n");
+	else if (std::strlen(banPass) > 7) printf("BV2_MASTER_BAN_PASS is longer than 7 characters: bans and unbans are refused\n");
 	if(bb_init())
 	{
 		printf("Error Loading BaboNet");
@@ -193,7 +206,7 @@ void cNetManager::ReceiveServerPacket(char *data,int typeID,UINT4 fromID)
 			stKillServ kill;
 			memcpy(&kill,data,sizeof(stKillServ));
 			
-			cBV2game	*game = Server->GetGameByIPport(Server->GetClientByID(fromID)->IP,kill.Port);
+			cBV2game	*game = Server->GetGameByConnection((UINT4)fromID,kill.Port);
 			if(game)	game->LastCheck	=	9999; //timeout la game
 			
 			bb_serverDisconnectClient(fromID);
@@ -220,11 +233,7 @@ void cNetManager::ReceiveServerPacket(char *data,int typeID,UINT4 fromID)
 			memcpy(&cb,data,sizeof(stCacheBan));
 			cb.Nick[sizeof(cb.Nick) - 1] = cb.IP[sizeof(cb.IP) - 1] = cb.Pass[sizeof(cb.Pass) - 1] = '\0';
 
-			//check validity of the password
-			if( strcmp(cb.Pass,"roxbabo"))
-			{
-				return;
-			}
+			if (!banPasswordMatches(cb.Pass)) return;
 
 			Server->AddBan( cb.Nick , cb.IP , cb.Duration );
 			return;
@@ -235,11 +244,7 @@ void cNetManager::ReceiveServerPacket(char *data,int typeID,UINT4 fromID)
 			stCacheUnban cb;
 			memcpy(&cb,data,sizeof(stCacheUnban));
 
-			//check validity of the password
-			if( strcmp(cb.Pass,"roxbabo"))
-			{
-				return;
-			}
+			if (!banPasswordMatches(cb.Pass)) return;
 
 			Server->Unban( cb.ID );
 			return;

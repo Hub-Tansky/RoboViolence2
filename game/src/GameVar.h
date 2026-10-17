@@ -98,6 +98,7 @@ public:
    int sv_subGameType;   
 	float sv_bombTime;
 	CString sv_gameName;
+	CString sv_publicAddress; // sent to the master as this server's address (PNS-44)
 	int sv_port;
 	int sv_maxPlayer;
    int sv_maxPlayerInGame;
@@ -557,11 +558,7 @@ public:
 
 	// Pour envoyer les variables servers au autres tayouin
 	void sendSVVar(UINT4 babonetID);
-	// send server var to a peer(remote admin)
-	void sendSVVar(INT4 peerId);
 	void sendOne(char * varName, UINT4 babonetID);
-	// send one var to a peer( remote admin )
-	void sendOne(char * varName, INT4 peerId);
 #ifndef CONSOLE
 	bool languageLoaded;
 	// Load languageFile (relative to the data root; empty: the OS language) over en.lang and refresh the weapon names;

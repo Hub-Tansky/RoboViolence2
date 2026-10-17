@@ -122,7 +122,7 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Original assets:** not shipped. Packages already carry generated placeholders and read the player's data through `BV2_DATA_DIR` (`game/src/Paths.cpp:144`); PNS-51 removes the env var and keeps packaged content loading.
 - **Why it matters:** friends install without building or unpacking archives.
 - **Suggested home:** after PNS-51; the PNS-23 ADR with it.
-- **Status:** Accepted → [Phase C](phase-c-installers-and-fixes/README.md)
+- **Status:** Done in Phase C [step 3](phase-c-installers-and-fixes/step3-unsigned-installers.md)
 
 ### PNS-17: Networking rework
 
@@ -184,7 +184,7 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Extract:** "Step task 1.2 asks for `.sh` and `.ps1` run scripts; `.cmd` was delivered … The new distribution format (archive layout, unarchived artifact upload, duplicate bundle `main/`, ad-hoc re-sign) has no ADR either."
 - **Why it matters:** A later agent might "fix" `.cmd` back to `.ps1`, drop the second macOS `main/`, or re-zip the artifacts without knowing why they are as they are (`packaging/make-package.py`, step 1 task 1.2).
 - **Suggested home:** a short ADR in the next PR that touches packaging, or with PNS-16 (signed distribution). The owner asked to check it further before writing one.
-- **Status:** Accepted → [Phase C](phase-c-installers-and-fixes/README.md)
+- **Status:** Done in Phase C [step 3](phase-c-installers-and-fixes/step3-unsigned-installers.md)
 
 ### PNS-24: Remove the unused runtime `bv2.db`
 
@@ -208,7 +208,7 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Extract:** `ld: warning: object file (…/vcpkg_installed/arm64-osx/debug/lib/libSDL3.a[248](SDL_dummysensor.c.o)) was built for newer 'macOS' version (27.0) than being linked (12.0)`.
 - **Why it matters:** `CMakePresets.json:58` sets `CMAKE_OSX_DEPLOYMENT_TARGET` 12.0 for our code, but the `arm64-osx` triplet builds SDL3 and the other ports for the build machine's macOS. The CI package (built on `macos-14`) therefore likely needs macOS 14+, while the docs promise 12+. Friends on older Macs may not be able to start it.
 - **Suggested home:** an overlay triplet setting `VCPKG_OSX_DEPLOYMENT_TARGET 12.0` for the macOS presets (touches `CMakePresets.json` and a new `triplets/`), or change the documented minimum. Before the PNS-31 cross-OS game if a tester has macOS < 14.
-- **Status:** Accepted → [Phase C](phase-c-installers-and-fixes/README.md)
+- **Status:** Done in Phase C [step 3](phase-c-installers-and-fixes/step3-unsigned-installers.md)
 
 ### PNS-27: Pin the Windows CI runner image
 
@@ -216,7 +216,7 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Extract:** "The CI log of run 38002113508 shows `Operating System: Microsoft Windows Server 2025`, `Image: windows-2025-vs2026` … Optionally pin `windows-2025` instead of `windows-latest` so the fact can't drift silently."
 - **Why it matters:** The docs and ADR 0012 name the Windows version CI tests on; `windows-latest` can change under them. `.github/workflows/` is outside step 2a's Allowed paths.
 - **Suggested home:** the next step that touches `.github/workflows/build.yml` (step 3 adds a fuzz job there).
-- **Status:** Accepted → [Phase C](phase-c-installers-and-fixes/README.md)
+- **Status:** Done in Phase C [step 3](phase-c-installers-and-fixes/step3-unsigned-installers.md)
 
 ### PNS-29: Shareable debug-capable Windows packages
 
@@ -232,7 +232,7 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Extract:** Options → "High detail menus" (`r_highDetailMenu`, default `true`, `game/src/GameVar.cpp:677`) drives `renderMenuQuad` (`game/src/Helper.cpp:248`), upstream code. Off (`game/src/Helper.cpp:342`): one smooth translucent vertical gradient. On (`game/src/Helper.cpp:296`): a two-part gradient with a hard step at mid-height, and four full-size black quads at alpha 0.25 meant as a 1 px shadow, which darken the whole panel by about 68%.
 - **Why it matters:** the default setting gives the worse-looking, less translucent menus.
 - **Change (owner-approved [GUI], 2026-10-14):** default `r_highDetailMenu` to `false` (one line). The drawing fix is PNS-48.
-- **Status:** Accepted → [Phase C](phase-c-installers-and-fixes/README.md)
+- **Status:** Done in Phase C [step 5](phase-c-installers-and-fixes/step5-client-engine-fixes.md)
 
 ### PNS-31: Finish the step 2 play-test checks
 
@@ -262,13 +262,13 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Suggested home:** a build-only change to `game/CMakeLists.txt` in any later step that touches it; check the harness still links its fake `bb_*` first.
 - **Status:** Done in Phase C [step 4](phase-c-installers-and-fixes/step4-housekeeping.md)
 
-### PNS-34: Make `CString`'s format constructor explicit
+### PNS-34: `CString`'s format constructor runs any `char*` as a format
 
 - **Found in:** Phase B step 4 fresh-context review (2026-10-11), finding 4.
 - **Extract:** "`console->svChange(svChange.svChange)` … `TimedMessage(chat.message)` … Neither is a visible `CString(` call … Making the format constructor `explicit` would close the whole class of bugs."
 - **Why it matters:** `CString(char* fmt, ...)` is implicit, so passing wire text anywhere a `CString` is expected runs it as a printf format (R16, R21–R23 and the two client cases). Step 4 fixed the sites it found; an `explicit` constructor would make the compiler find the rest.
 - **Suggested home:** step 7 (medium/low defects), or a step that touches `engine/zeven/include/CString.h`; expect many call-site changes.
-- **Status:** Accepted → [Phase C](phase-c-installers-and-fixes/README.md)
+- **Status:** Done in Phase C [step 5](phase-c-installers-and-fixes/step5-client-engine-fixes.md)
 
 ### PNS-36: Update docs that still describe R3 as current
 
@@ -293,7 +293,7 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Extract:** KEY_QUESTIONS R28 "On Windows, babonet intermittently crashes … when a TCP connection closes"; R29 "`~_typLayer` calls `glDeleteTextures` when `textureID == 0` … `loadTexture` dereferences a null `ptrLayer`".
 - **Why it matters:** R28 can crash the Windows game and master when a player leaves; the master test is off on Windows until it is fixed. R29 leaks every DKT texture.
 - **Suggested home:** step 7 (R29 is in `engine/dko/src/ePTexture.h`); R28 needs a Windows debugging session (a crash dump from the owner's PC or a Windows CI run with a debugger).
-- **Status:** Accepted → [Phase C](phase-c-installers-and-fixes/README.md)
+- **Status:** Done in Phase C: R29 in [step 5](phase-c-installers-and-fixes/step5-client-engine-fixes.md), R28 in [step 7](phase-c-installers-and-fixes/step7-windows-tcp-close.md)
 
 ### PNS-39: Why did the dropped-flag radii differ?
 
@@ -325,7 +325,7 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Extract:** the join and admin proofs are HMACs keyed by the password over a public nonce (ADR 0014). Someone who records one can test password guesses offline; the server accepts unlimited `ADMIN_REQUEST`s (no budget in step 9's rate limits).
 - **Why it matters:** a short `zsv_adminPass` or `sv_password` can be found from one captured login.
 - **Suggested home:** step 12 (remote admin): an attempt budget per connection, a minimum password length for `zsv_adminPass`; a PAKE or TLS if passwords must survive capture.
-- **Status:** Accepted → [Phase C](phase-c-installers-and-fixes/README.md)
+- **Status:** Done in Phase C [step 6](phase-c-installers-and-fixes/step6-server-and-master.md)
 
 ### PNS-43: Join-time identity gaps left after step 10
 
@@ -336,7 +336,7 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
   - The master's ban and unban messages are authorised by a hard-coded password (`roxbabo`) sent in cleartext.
 - **Why it matters:** privacy (IPs), and anyone can add master bans.
 - **Suggested home:** step 12 (remote admin) for the ban password; a protocol step for the join order and IPs.
-- **Status:** Accepted → [Phase C](phase-c-installers-and-fixes/README.md) (master ban password); join order and relayed IPs → Phase D with PNS-17
+- **Status:** Master ban password done in Phase C [step 6](phase-c-installers-and-fixes/step6-server-and-master.md) (wire format: PNS-66); join order and relayed IPs → Phase D with PNS-17
 
 ### PNS-44: The master lists a server at its connection's address
 
@@ -344,7 +344,7 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Extract:** `bv2Row.ip` is left empty (`game/src/CMaster.cpp`, `sendGameInfo`); the master records the address the heartbeat came from. In the compose example that is the server container's internal address.
 - **Why it matters:** remote clients can't join a co-located server from the browser; they must `connect` by hand.
 - **Suggested home:** an advertised address (`sv_publicAddress` or `BV2_PUBLIC_ADDRESS`) sent in the heartbeat and trusted by the master only when it matches a configured server.
-- **Status:** Accepted → [Phase C](phase-c-installers-and-fixes/README.md)
+- **Status:** Done in Phase C [step 6](phase-c-installers-and-fixes/step6-server-and-master.md)
 
 ### PNS-45: AGENTS.md and the CI list miss the containers workflow
 
@@ -362,7 +362,7 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
   - `BV2_ADMIN_API_PORT`, `BV2_ADMIN_API_BIND` and `BV2_ADMIN_API_PROXY` are not in the environment lists of AGENTS.md and config/README.md.
 - **Why it matters:** dead network code, and operators reading the config docs miss the admin API.
 - **Suggested home:** a cleanup step that may edit `game/src/CMaster.*`, AGENTS.md and config/README.md.
-- **Status:** Accepted → [Phase C](phase-c-installers-and-fixes/README.md)
+- **Status:** Done in Phase C [step 6](phase-c-installers-and-fixes/step6-server-and-master.md)
 
 ### PNS-47: Old saved `languageFile` pins English
 
@@ -370,7 +370,7 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Extract:** builds before step 13 saved `languageFile "main/languages/en.lang"` in the user's `bv2.cfg`; a saved value wins over the OS language (`game/src/GameVar.cpp` `reloadLanguage`), so upgraded players never get the OS default. `content/languages/README.md` only documents the workaround.
 - **Why it matters:** translations stay invisible to existing players until they edit their config.
 - **Suggested home:** PNS-21 or the next step touching `GameVar.cpp`: treat the old default value as empty once, on load.
-- **Status:** Accepted → [Phase C](phase-c-installers-and-fixes/README.md)
+- **Status:** Done in Phase C [step 5](phase-c-installers-and-fixes/step5-client-engine-fixes.md)
 
 ### PNS-48: Fix the "High detail menus" drawing
 
@@ -496,4 +496,75 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Extract:** `tools/placeholder-manifest.tsv:44,56` still generate placeholder `HeadGames.tga` and `RnDLabs.tga`, which no code loads now. `game/src/Map.cpp:85-91` repeats the "LOADING" frame that `IntroScreen::renderLoading` now draws.
 - **Why it matters:** dead placeholder output, and a third copy of the loading frame.
 - **Suggested home:** the next step that touches `tools/` or `Map.cpp`; keep the `tools/original-assets.sha256` entries.
+- **Status:** Proposed
+
+### PNS-60: Rename `bv2.example.cfg` to `robo2.defaults.cfg`
+
+- **Found in:** Phase B manual test, Linux (2026-10-16); owner request.
+- **Extract:** `config/bv2.example.cfg` is the original BV2 `bv2.cfg` with personal values blanked, and the first config layer (ADR 0007): its values, not `GameVar.cpp`, set the defaults players get (52 differ, among them `sv_serverType 1`, `sv_timeToSpawn 1` and the weapon damages). "Example" hides that; its `cl_playerName "Daivuk"` went unnoticed until fixed in PR #60.
+- **Why it matters:** contributors edit the code defaults expecting a change in game and see none.
+- **Suggested home:** with the rebrand of config and pref paths (PNS-20; roadmap ground rule 3 holds config paths until then). Rename the file and its copies in `CMakeLists.txt`, `packaging/` and `game/src/Paths.cpp`, keep reading the old name once, and update ADR 0007 and the docs that name it.
+- **Status:** Proposed
+
+### PNS-61: Windows CI link step fails on a locked file
+
+- **Found in:** Phase B step 12 follow-ups (2026-10-13, 2026-10-14): `build (win-x64-msvc)` failed three times linking a test executable (`test_master.exe`, `test_babonet.exe`) with "The process cannot access the file because it is being used by another process"; a rerun passed.
+- **Why it matters:** red `main` builds and PRs that need a manual rerun.
+- **Suggested home:** Phase C step 3 (pins the Windows runner, PNS-27) or step 4: retry the build step once, or exclude the build folder from Defender on the runner.
+- **Status:** Proposed
+
+### PNS-62: The vcpkg cache key ignores the overlay triplets
+
+- **Found in:** Phase C step 3 review (2026-10-14), finding 10.
+- **Extract:** `.github/actions/setup-vcpkg/action.yml` keys `actions/cache` on `hashFiles('vcpkg.json')` only; `triplets/arm64-osx.cmake` changes every macOS port's ABI, so the old cache is restored, all ports rebuild, and an exact key hit skips saving the new binaries.
+- **Why it matters:** macOS CI rebuilds SDL3 and the other ports on every run until `vcpkg.json` changes.
+- **Suggested home:** the next step allowed to edit `.github/actions/`: add `triplets/**` to `hashFiles`. A baseline bump (PNS-54) also refreshes the key.
+- **Status:** Proposed
+
+### PNS-63: A licence file for the vendored glad loader
+
+- **Found in:** Phase C step 3 review round 2 (2026-10-14), finding 4.
+- **Extract:** `packaging/make-package.py` builds `licenses/glad.txt` from a hard-coded "glad 2.0.8 …: WTFPL OR CC0-1.0" and the first comment of `KHR/khrplatform.h`, repeating `engine/zeven/third_party/glad/README.md:3`.
+- **Why it matters:** regenerating glad or changing the header's comment silently changes or breaks the notice.
+- **Suggested home:** a step allowed to edit `engine/zeven/third_party/glad/`: commit `LICENSE.txt` there and copy it.
+- **Status:** Proposed
+
+### PNS-64: A DKT texture chunk after an unknown map name overwrites the previous layer
+
+- **Found in:** Phase C step 5 review (2026-10-17), finding 7.
+- **Extract:** in `ePTexture::loadMap` an unknown `CHUNK_MAP_NAME` leaves `ptrLayer` on the previous layer, so a later texture chunk replaces that layer's `textureID` without freeing it.
+- **Why it matters:** a texture leak (not a crash) with malformed or unusual `.DKT` files.
+- **Suggested home:** the next step touching `engine/dko/src/ePTexture.cpp`: reset `ptrLayer` on every map name.
+- **Status:** Proposed
+
+### PNS-65: `CString::operator=(const char*)` dereferences null
+
+- **Found in:** Phase C step 5 review round 2 (2026-10-17), finding 5.
+- **Extract:** `CString::operator=(const char*)` (`engine/zeven/include/CString.h`) runs `strlen` on its argument; the one-argument constructor turns null into "" since ADR 0021.
+- **Why it matters:** inconsistent null handling; `x = ptr` with a null `ptr` crashes.
+- **Suggested home:** the next step touching `CString.h`.
+- **Status:** Proposed
+
+### PNS-66: Master bans still travel as a 7-character cleartext password
+
+- **Found in:** Phase C step 6 (2026-10-17), task 6.2.
+- **Extract:** `stCacheBan.Pass[8]` / `stCacheUnban.Pass[10]` (`masterserver/src/cMSstruct.h`); the game's `cacheban` sends the first 7 characters typed. Step 6 replaced `roxbabo` with `BV2_MASTER_BAN_PASS` but kept the wire format.
+- **Why it matters:** anyone on the path to the master reads the ban password; 7 characters are guessable.
+- **Suggested home:** with accounts or a master protocol step (PNS-14, PNS-17): an HMAC over a master nonce, as ADR 0014 does for servers.
+- **Status:** Proposed
+
+### PNS-67: The master's game list keeps dead priority logic and two update paths
+
+- **Found in:** Phase C step 6 review round 2 (2026-10-17), findings 1 and 2.
+- **Extract:** `Priority` is always 0 since step 6, so `GAME_TIMEOUT * 5` (`masterserver/src/cBV2game.cpp`) and `lastHighPriority` in `cMasterServer::CreateGame` take one path; `CreateGame` has two identical "update existing game" blocks (the loop and the tail).
+- **Why it matters:** a fix must be made twice (step 6 did); new games are inserted before the tail for no reason.
+- **Suggested home:** the next step touching `masterserver/src/cMasterServer.cpp`: one loop over all games, append at the tail, plain timeout.
+- **Status:** Proposed
+
+### PNS-68: A bad partial "RND1" key leaves a closed client in the server's list
+
+- **Found in:** Phase C step 7 review (2026-10-17), finding 1.
+- **Extract:** `cClient::ReceiveStream` (`engine/babonet/src/cClient.cpp:583`) calls `Disconnect()` on a wrong partial key and returns 0; the client stays in `cServer::Clients` with `FileDescriptor = 0`, while a wrong full key returns 1 and the server removes the client.
+- **Why it matters:** the predicted wedge did not happen: the step 7 `master` test phase "bad partial key" passes on macOS, Linux and Windows without a change (CI run 39027172674). A later `RemoveClient` on that client would `FD_CLR` and close descriptor 0.
+- **Suggested home:** the next babonet step (PNS-17): return 1 as the full-key path does, with a test that shows the stale client.
 - **Status:** Proposed

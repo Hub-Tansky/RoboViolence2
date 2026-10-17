@@ -20,7 +20,6 @@
 #include "Paths.h"
 #include "GameVar.h"
 #include "netPacket.h"
-#include "RemoteAdminPackets.h"
 #ifndef CONSOLE
 #include "KeyManager.h"
 #include "Lang.h"
@@ -261,19 +260,19 @@ GameVar::GameVar()
 
 #ifndef CONSOLE
 	// Weapon names stay empty until main() calls reloadLanguage(): gameVar is a static, so this runs before pathsInit()
-	weapons[WEAPON_DUAL_MACHINE_GUN] = new Weapon("main/models/DualMachineGun.DKO", "main/sounds/DualMachineGun.wav", .1f, gameVar.lang_dualMachineGun.s, 
+	weapons[WEAPON_DUAL_MACHINE_GUN] = new Weapon("main/models/DualMachineGun.DKO", "main/sounds/DualMachineGun.wav", .1f, gameVar.lang_dualMachineGun, 
 		.13f, 10, 1, .8f, 2, WEAPON_DUAL_MACHINE_GUN, PROJECTILE_DIRECT);
-	weapons[WEAPON_SMG] = new Weapon("main/models/SMG.DKO", "main/sounds/SMG.wav", .1f, gameVar.lang_subMachineGun.s,
+	weapons[WEAPON_SMG] = new Weapon("main/models/SMG.DKO", "main/sounds/SMG.wav", .1f, gameVar.lang_subMachineGun,
 		.1f, 8, 1, .5f, 1, WEAPON_SMG, PROJECTILE_DIRECT);
-   weapons[WEAPON_CHAIN_GUN] = new Weapon("main/models/ChainGun.DKO", "main/sounds/ChainGun.wav", .1f, gameVar.lang_changGun.s,
+   weapons[WEAPON_CHAIN_GUN] = new Weapon("main/models/ChainGun.DKO", "main/sounds/ChainGun.wav", .1f, gameVar.lang_changGun,
       .19f, 15, 1, 2.00f, 5, WEAPON_CHAIN_GUN, PROJECTILE_DIRECT);
-	weapons[WEAPON_SHOTGUN] = new Weapon("main/models/ShotGun.DKO", "main/sounds/Shotgun.wav", 0.85f, gameVar.lang_shotgun.s,
+	weapons[WEAPON_SHOTGUN] = new Weapon("main/models/ShotGun.DKO", "main/sounds/Shotgun.wav", 0.85f, gameVar.lang_shotgun,
 		.21f, 20, 5, 3.0f, 12, WEAPON_SHOTGUN, PROJECTILE_DIRECT);
-	weapons[WEAPON_SNIPER] = new Weapon("main/models/Sniper.DKO", "main/sounds/Sniper.wav", 2.0f, gameVar.lang_sniper.s,
+	weapons[WEAPON_SNIPER] = new Weapon("main/models/Sniper.DKO", "main/sounds/Sniper.wav", 2.0f, gameVar.lang_sniper,
 		.30f, 0, 1, 3.0f, 0, WEAPON_SNIPER, PROJECTILE_DIRECT);
 	weapons[WEAPON_BAZOOKA] = new Weapon("main/models/Bazooka.DKO", "main/sounds/Bazooka.wav", 1.75f, lang_bazooka,
 		.75f, 0, 1, 3.0f, 0, WEAPON_BAZOOKA, PROJECTILE_ROCKET);
-	weapons[WEAPON_GRENADE] = new Weapon("main/models/Hand.DKO", "main/sounds/Grenade.wav", 1.0f, gameVar.lang_grenade.s,
+	weapons[WEAPON_GRENADE] = new Weapon("main/models/Hand.DKO", "main/sounds/Grenade.wav", 1.0f, gameVar.lang_grenade,
 		1.5f, 0, 1, -1.0f, 0, WEAPON_GRENADE, PROJECTILE_GRENADE);
 	weapons[WEAPON_COCKTAIL_MOLOTOV] = new Weapon("main/models/Hand.DKO", "main/sounds/Grenade.wav", 1.0f, "Flame",
 		0.15f, 0, 1, -1.0f, 0, WEAPON_COCKTAIL_MOLOTOV, PROJECTILE_COCKTAIL_MOLOTOV);
@@ -370,6 +369,8 @@ GameVar::GameVar()
 	dksvarRegister(CString("sv_bombTime [int : (default 60)]"), &sv_bombTime, 10, 0, LIMIT_MIN, true);
 	sv_gameName = "Robo Violence 2 - Server";
 	dksvarRegister(CString("sv_gameName [string : \"\"]"), &sv_gameName, true);
+	sv_publicAddress = "";
+	dksvarRegister(CString("sv_publicAddress [string : \"\" (dotted IPv4 for the master list; empty: the address the master sees)]"), &sv_publicAddress, true);
 	sv_port = 3333;
 	dksvarRegister(CString("sv_port [int : valid port (default 3333)]"), &sv_port, 1024, 65536,
 		LIMIT_MIN | LIMIT_MAX, true);
@@ -680,8 +681,8 @@ GameVar::GameVar()
 	dksvarRegister(CString("r_showCasing [bool : true | false (default true)]"), &r_showCasing, true);
 	r_showGroundMark = true;
 	dksvarRegister(CString("r_showGroundMark [bool : true | false (default true)]"), &r_showGroundMark, true);
-	r_highDetailMenu = true;
-	dksvarRegister(CString("r_highDetailMenu [bool : true | false (default true)]"), &r_highDetailMenu, true);
+	r_highDetailMenu = false; // PNS-30 (owner): the plain menu looks better
+	dksvarRegister(CString("r_highDetailMenu [bool : true | false (default false)]"), &r_highDetailMenu, true);
 	r_animatedMenu = false;
 	dksvarRegister(CString("r_animatedMenu [bool : true | false (default false)]"), &r_animatedMenu, true);
 	r_showLatency = false;
@@ -883,98 +884,6 @@ void GameVar::sendSVVar(UINT4 babonetID)
 	sendOne("sv_ftExpirationTimer", babonetID);
 	sendOne("sv_explodingFT", babonetID);
 	sendOne("sv_enableVote", babonetID);
-}
-
-void GameVar::sendSVVar(INT4 peerId)
-{
-	sendOne("sv_friendlyFire", peerId);
-	sendOne("sv_reflectedDamage", peerId);
-	sendOne("sv_timeToSpawn", peerId);
-	sendOne("sv_topView", peerId);
-	sendOne("sv_minSendInterval", peerId);
-	sendOne("sv_forceRespawn", peerId);
-	sendOne("sv_baboStats", peerId);
-	sendOne("sv_roundTimeLimit", peerId);
-	sendOne("sv_gameTimeLimit", peerId);
-	sendOne("sv_scoreLimit", peerId);
-	sendOne("sv_winLimit", peerId);
-	sendOne("sv_gameType", peerId);
-   sendOne("sv_serverType", peerId);
-   sendOne("sv_spawnType", peerId);
-   sendOne("sv_subGameType", peerId);
-	sendOne("sv_bombTime", peerId);
-	sendOne("sv_gameName", peerId);
-	sendOne("sv_port", peerId);
-	sendOne("sv_maxPlayer", peerId);
-   sendOne("sv_maxPlayerInGame", peerId);
-	sendOne("sv_password", peerId);
-	sendOne("sv_enableSMG", peerId);
-	sendOne("sv_enableShotgun", peerId);
-	sendOne("sv_enableSniper", peerId);
-	sendOne("sv_enableDualMachineGun", peerId);
-	sendOne("sv_enableChainGun", peerId);
-	sendOne("sv_enableBazooka", peerId);
-	sendOne("sv_enablePhotonRifle", peerId);
-	sendOne("sv_enableFlameThrower", peerId);
-	sendOne("sv_enableShotgunReload", peerId);
-	sendOne("sv_slideOnIce", peerId);
-	sendOne("sv_showEnemyTag", peerId);
-	sendOne("sv_enableSecondary", peerId);
-	sendOne("sv_enableKnives", peerId);
-	sendOne("sv_enableNuclear", peerId);
-	sendOne("sv_enableShield", peerId);
-	sendOne("sv_enableMinibot", peerId);
-	sendOne("sv_showKills", peerId);
-	sendOne("sv_beGoodServer", peerId);
-	sendOne("sv_validateWeapons", peerId);
-	sendOne("sv_autoBalance", peerId);
-	sendOne("sv_autoBalanceTime", peerId);
-	sendOne("sv_gamePublic", peerId);
-	sendOne("sv_matchcode", peerId);
-	sendOne("sv_matchmode", peerId);
-	sendOne("sv_maxPing", peerId);
-	sendOne("sv_shottyDropRadius", peerId);
-	sendOne("sv_shottyRange", peerId);
-	sendOne("sv_enableMolotov", peerId);
-	sendOne("sv_ftMaxRange", peerId);
-	sendOne("sv_ftMinRange", peerId);
-	sendOne("sv_photonDamageCoefficient", peerId);
-	sendOne("sv_zookaRemoteDet", peerId);
-	sendOne("sv_smgDamage", peerId);
-	sendOne("sv_ftDamage", peerId);
-	sendOne("sv_dmgDamage", peerId);
-	sendOne("sv_cgDamage", peerId);
-	sendOne("sv_shottyDamage", peerId);
-	sendOne("sv_sniperDamage", peerId);
-	sendOne("sv_zookaDamage", peerId);
-	sendOne("sv_photonType", peerId);
-	sendOne("sv_zookaRadius", peerId);
-	sendOne("sv_nukeRadius", peerId);
-	sendOne("sv_nukeTimer", peerId);
-	sendOne("sv_nukeReload", peerId);
-	sendOne("sv_minTilesPerBabo",peerId);
-	sendOne("sv_maxTilesPerBabo",peerId);
-	sendOne("sv_photonDistMult", peerId);
-	sendOne("sv_photonVerticalShift", peerId);
-	sendOne("sv_photonHorizontalShift", peerId);
-	sendOne("sv_joinMessage", peerId);
-	sendOne("sv_sendJoinMessage", peerId);
-	sendOne("sv_ftExpirationTimer", peerId);
-	sendOne("sv_explodingFT", peerId);
-	sendOne("sv_enableVote", peerId);
-}
-
-void GameVar::sendOne(char * varName, INT4 peerId)
-{
-	if (dksvarIsSecret(varName)) return; // passwords never go on the wire (Q-S5)
-	CString varCom;
-	dksvarGetFormatedVar(varName, &varCom);
-	//varCom.insert("set ", 0);
-
-	if (varCom.len() > 79) varCom.resize(79);
-	net_ra_var ra_var;
-	memcpy(ra_var.var, varCom.s, varCom.len()+1);
-	bb_peerSend(peerId,(char*)&ra_var,RA_VAR,sizeof(net_ra_var),true);
 }
 
 void GameVar::sendOne(char * varName, UINT4 babonetID)
@@ -1246,8 +1155,12 @@ bool GameVar::reloadLanguage()
 	const std::string dir = bv2::contentFile("main/languages/");
 	std::vector<std::string> dirs(1, dir);
 	if (bv2::dataRoot() != bv2::packageRoot()) dirs.push_back("main/languages/");
-	std::string file = languageFile.s;
-	if (file.empty()) file = lang::pickFile(dirs, osLocales());
+	std::string file = lang::savedFile(languageFile.s);
+	if (file.empty())
+	{
+		languageFile = ""; // saved back empty, so the old default goes for good (PNS-47)
+		file = lang::pickFile(dirs, osLocales());
+	}
 	else file = bv2::contentFile(file); // a saved "main/languages/en.lang" is the package's, as in pickFile
 	lang::Texts texts;
 	languageLoaded = lang::load(dir, file, texts);

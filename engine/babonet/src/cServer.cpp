@@ -967,6 +967,7 @@ int cServer::RemoveClient(cClient *clientToKill)
 
 			//on va fermer sa connection
 			CloseSocket(C->FileDescriptor);
+			C->FileDescriptor = 0; // R28: ~cClient must not close it again (the handle may have been reused)
 			//closesocket(C->UDPfd);
 
 			nbClient--;

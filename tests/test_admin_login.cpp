@@ -1,5 +1,6 @@
 // Phase B step 10: an admin login is accepted only with HMACs of the admin user and password over the connection's
-// challenge, and neither the user, the password nor their MD5 crosses the wire.
+// challenge, and neither the user, the password nor their MD5 crosses the wire. Phase C step 6 (PNS-42): a password
+// under 12 characters disables admin login; the 5th failure on a connection disconnects it.
 #include "server_harness.h"
 
 #include "Console.h"
@@ -53,20 +54,25 @@ int main(int, char ** argv)
 {
 	if (!harness::start(argv[0])) return 1;
 	console->sendCommand("set zsv_adminUser boss");
-	console->sendCommand("set zsv_adminPass s3cret");
-	UINT4 a = harness::join(), b = harness::join();
+	console->sendCommand("set zsv_adminPass short3cret");
+	UINT4 a = harness::join(), b = harness::join(), c = harness::join();
+	login(a, "boss", "short3cret", nonceFor(a));
+	harness::tick();
+	CHECK(!accepted(a)); // 10 characters: admin login is off
+	console->sendCommand("set zsv_adminPass s3cret-long-enough");
+
 
 	login(a, "boss", "wrong", nonceFor(a));
 	CHECK(!accepted(a));
-	login(b, "boss", "s3cret", nonceFor(a)); // a's proof replayed on b's connection
+	login(b, "boss", "s3cret-long-enough", nonceFor(a)); // a's proof replayed on b's connection
 	CHECK(!accepted(b));
-	login(a, "boss", "s3cret", nonceFor(a));
+	login(a, "boss", "s3cret-long-enough", nonceFor(a));
 	CHECK(accepted(a) && scene->server->game->players[harness::slotOf(a)]->isAdmin);
 
 	std::vector<std::vector<char>> traffic = delivered;
 	for (const harness::SentPacket & p : harness::sent()) traffic.push_back(p.data);
 	bool clean = true;
-	for (const char * secret : {"boss", "s3cret"})
+	for (const char * secret : {"boss", "s3cret-long-enough"})
 	{
 		std::string md5(CMD5(secret).getMD5Digest()), upper = md5;
 		std::transform(upper.begin(), upper.end(), upper.begin(), [](unsigned char ch) { return (char)toupper(ch); });
@@ -74,6 +80,14 @@ int main(int, char ** argv)
 			clean &= !contains(data, secret) && !contains(data, md5) && !contains(data, upper);
 	}
 	CHECK(clean);
+
+	// Five wrong guesses disconnect the connection; four don't
+	for (int i = 0; i < 4; ++i) login(c, "boss", "guess", nonceFor(c));
+	harness::tick(2);
+	CHECK(harness::slotOf(c) >= 0);
+	login(c, "boss", "guess", nonceFor(c));
+	harness::tick(2);
+	CHECK(harness::slotOf(c) < 0);
 
 	harness::stop();
 	if (harness::failures() == 0) std::printf("ok: admin login\n");

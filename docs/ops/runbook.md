@@ -20,9 +20,13 @@ Hosting the game server and the master server as containers (Phase B step 11). I
   ```
   BV2_SV_PASSWORD=
   BV2_ADMIN_PASS=
+  BV2_MASTER_BAN_PASS=
+  BV2_PUBLIC_ADDRESS=
   ```
 
-- The server reads `BV2_SV_PASSWORD` (join password), `BV2_ADMIN_PASS` (`zsv_adminPass`) and `BV2_MASTER_SERVERS` and never saves them (ADR 0007). Empty means none.
+- The server reads `BV2_SV_PASSWORD` (join password), `BV2_ADMIN_PASS` (`zsv_adminPass`; in-game admin login needs 12 characters or more, and five failures disconnect) and `BV2_MASTER_SERVERS` and never saves them (ADR 0007). Empty means none.
+- `BV2_PUBLIC_ADDRESS`: the server's public IPv4, listed by the master instead of the compose network address (ADR 0022).
+- `BV2_MASTER_BAN_PASS` (master, at most 7 characters): needed for `cacheban`/`cacheunban`; empty refuses them. It crosses the network in cleartext.
 - The admin user and other settings: `name value` lines (no `set`), e.g. `zsv_adminUser "boss"`, in `bv2.cfg` in the server volume, or in a file passed with `--config <file> CTF` (name the launch script too). The launch script sets no secrets, so these and the environment values stay.
 
 ## Run
@@ -63,11 +67,11 @@ The game server's admin API ([ADR 0015](../decisions/0015-admin-http-api-behind-
 - The reply to a command is the console lines it printed. `restart`, `disconnect`, `host` and `connect` are refused (they rebuild the server). Each source may send 5 requests at once, then 1 a second (429 beyond).
 - `admin-audit.log` (in the server volume): one line per request (also refused, limited, too large and timed-out ones) with UTC time, source, result and command; secrets are masked. A command is logged before it runs.
 - The source is the client address Caddy reports; the server believes `X-Forwarded-For` only from `BV2_ADMIN_API_PROXY` (`admin-proxy`).
-- The old UDP remote admin (`RA_LOGIN`) is refused.
+- The old UDP remote admin (`RA_*`) was removed in Phase C step 6.
 
-## Master address limitation
+## Master address
 
-The master lists each game server at the address its connection comes from. With master and server on one host in compose, that is the container's internal address: clients on the host can join from the browser, remote clients cannot (they join by `connect <public host>`). PNS-44.
+The master lists each game server at the address its connection comes from. In compose that is the container's internal address: set `BV2_PUBLIC_ADDRESS` so remote clients can join from the browser ([ADR 0022](../decisions/0022-advertised-server-address.md)).
 
 ## Original game data
 
