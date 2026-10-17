@@ -444,8 +444,6 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 #else
 				console->add(CString("server> %s joined the game id:%d", playerInfo.playerName, playerInfo.playerID), true);
 #endif
-				// broadcast the info at remote admins
-				if( master ) master->RA_NewPlayer( textColorLess(CString("%s", playerInfo.playerName)).s, playerInfo.playerIP, (long)playerInfo.playerID );
 
 				// Password is transfered sans null terminator, already MD5'd
 				char pw[33];
@@ -595,13 +593,6 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 				}
 			}
 
-			// broadcast to potential remote admins
-			CString chatString("%s", chat.message); // R21: data, not a format
-			chatString = textColorLess( chatString );
-			if( master )
-			{
-				master->RA_Chat( chatString.s, slot );
-			}
 		
 			break;
 		}

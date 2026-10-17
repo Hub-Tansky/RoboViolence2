@@ -559,10 +559,8 @@ public:
 	// Pour envoyer les variables servers au autres tayouin
 	void sendSVVar(UINT4 babonetID);
 	// send server var to a peer(remote admin)
-	void sendSVVar(INT4 peerId);
 	void sendOne(char * varName, UINT4 babonetID);
 	// send one var to a peer( remote admin )
-	void sendOne(char * varName, INT4 peerId);
 #ifndef CONSOLE
 	bool languageLoaded;
 	// Load languageFile (relative to the data root; empty: the OS language) over en.lang and refresh the weapon names;

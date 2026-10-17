@@ -20,7 +20,6 @@
 #include "Server.h"
 #include "Console.h"
 #include "netPacket.h"
-#include "RemoteAdminPackets.h"
 #include "CCurl.h"
 #include "ReportGen.h"
 #include <time.h>
@@ -463,8 +462,6 @@ void Server::updateNet(float delay, bool send)
 					console->add(CString("\x3> Player disconnected : %s ID:%i", game->players[i]->name.s, i), true);
 					if (gameVar.c_netlog)
 						console->add(CString("server> [net] TCP link lost for babonetID=%i, cleared slot %i", -clientID, i), true);
-					// broadcast to potential remote admins
-					if( master ) master->RA_DisconnectedPlayer( textColorLess(game->players[i]->name).s, game->players[i]->playerIP, (long)game->players[i]->playerID );
 					ZEVEN_SAFE_DELETE(game->players[i]);
 					net_svcl_player_disconnect playerDisconnect;
 					playerDisconnect.playerID = (char)i;
@@ -629,7 +626,6 @@ void Server::update(float delay)
 					if( master->BannedAnswers[i].Answer && id >= 0 && id < MAX_PLAYER && game->players[id] )
 					{
 						// kick
-						if( master ) master->RA_DisconnectedPlayer( textColorLess(game->players[id]->name).s, game->players[id]->playerIP, (long)game->players[id]->playerID );
 						bb_serverDisconnectClient(game->players[id]->babonetID);
 						ZEVEN_SAFE_DELETE(game->players[id]);
 						net_svcl_player_disconnect playerDisconnect;
@@ -652,7 +648,6 @@ void Server::update(float delay)
 				if( game->players[it->second.playerID] &&
 					game->players[it->second.playerID]->babonetID == it->second.babonetID)
 				{
-					if( master ) master->RA_DisconnectedPlayer( textColorLess(game->players[it->second.playerID]->name).s, game->players[it->second.playerID]->playerIP, (long)game->players[it->second.playerID]->playerID );
 					bb_serverDisconnectClient(it->second.babonetID);
 					ZEVEN_SAFE_DELETE(game->players[it->second.playerID]);
 					net_svcl_player_disconnect playerDisconnect;
@@ -991,7 +986,6 @@ void Server::update(float delay)
 						if (game->players[i]->timePlayedCurGame > EPSILON)
 							cacheStats(game->players[i]);
 						// Connection interrupted (on le disconnect, on est s��e)
-						if( master ) master->RA_DisconnectedPlayer( textColorLess(game->players[i]->name).s, game->players[i]->playerIP, (long)game->players[i]->playerID);
 						bb_serverDisconnectClient(game->players[i]->babonetID);
 						console->add("\x3> Disconnecting client, no respond since 3sec", true);
 						if (gameVar.c_netlog)
@@ -1608,26 +1602,6 @@ void Server::addDelayedKick(unsigned long _babonetID, int _playerID, float _time
 		delayedKickStruct dks(_babonetID, _playerID, _timeToKick);
 		delayedKicks.insert(DelayedKicksPair(_babonetID, dks));
 	}
-}
-
-void Server::SendPlayerList( long in_peerId )
-{
-	if(!game) return;
-
-	for( int i=0; i<MAX_PLAYER; i++ )
-	{
-		if( game->players[i] )
-		{
-			net_ra_player_entry entry;
-			CString name = textColorLess(game->players[i]->name);
-			sprintf( entry.name, "%s", name.s );
-			sprintf( entry.ip, "%s", game->players[i]->playerIP );
-			entry.id = (long)game->players[i]->playerID;
-
-			bb_peerSend( in_peerId, (char*)&entry, RA_PLAYER_ENTRY, sizeof(net_ra_player_entry), true );
-		}
-	}
-
 }
 
 #ifndef CONSOLE

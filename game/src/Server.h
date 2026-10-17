@@ -167,7 +167,6 @@ public:
 	void sendSVChange(CString varCom);
 
 	// Send player list to a remote admin
-	void SendPlayerList( long in_peerId );
 
 	// Pour aller chercher la prochaine map � loader
 	CString queryNextMap();

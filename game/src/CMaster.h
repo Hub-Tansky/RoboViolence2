@@ -19,7 +19,6 @@
 #ifndef CMASTER_H_INCLUDED
 #define CMASTER_H_INCLUDED
 
-#include "RemoteAdminPackets.h"
 
 
 // some macros to help fetch data after an sql query
@@ -78,25 +77,11 @@ struct SPeer
 public:
 	long peerId;
 	float timeout;
-	bool remoteAdmin;
-	bool broadcastConsole;
-
-	// if the peer is currently sending us a new file, keep infos here
-	FILE * m_currentFile;
-	long	m_sizeRemaining;
 
 	SPeer( long in_peerId )
 	{
 		peerId = in_peerId;
 		timeout = 5.0f;
-		remoteAdmin = false;
-		broadcastConsole = false;
-		m_currentFile = 0;
-	}
-
-	~SPeer()
-	{
-		if( m_currentFile ) fclose( m_currentFile );
 	}
 };
 
@@ -181,7 +166,6 @@ private:
 	void sendCacheListToMaster(const stCacheListRemote& info);
 
 	// hlper function to know if the current peer is remote admin authorized
-	bool IsRemoteAdmin( long in_peerId );
 
 public:
 	AccountManagerClient AccountManager;
@@ -222,13 +206,6 @@ public:
 
 	//pass max len is 16 + null
 	void HashPass(char* pass);
-
-	// tell remote admins about a new player/disconnected player
-	void RA_NewPlayer( char * in_playerName, char * in_playerIp, long in_playerId );
-	void RA_DisconnectedPlayer( char * in_playerName, char * in_playerIp, long in_playerId );
-	void RA_Chat( char * in_chatString, int in_playerId );
-	void RA_ConsoleBroadcast( char * in_message );
-	void RA_PositionBroadcast( long in_playerId, short in_x, short in_y );
 };
 
 

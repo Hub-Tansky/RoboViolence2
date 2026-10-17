@@ -20,7 +20,6 @@
 #include "CMaster.h"
 #include "SqlStatement.h"
 #include "Console.h"
-#include "RemoteAdminPackets.h"
 #include "GameVar.h"
 #include "Scene.h"
 #ifndef CONSOLE
@@ -193,7 +192,7 @@ void CMaster::update(float in_delay)
 		}
 	}
 
-	//receive packets from peers ( udp broadcast )
+	//receive packets from peers (LAN browser broadcast)
 	ReceivePeersPacket();
 
 	//--- Update le ping
@@ -289,7 +288,6 @@ void CMaster::update(float in_delay)
 		m_peers[z].timeout -= in_delay;
 		if( m_peers[z].timeout < 0.0f )
 		{
-			if( m_peers[z].remoteAdmin ) console->add( CString("Remote admin timeout ") + (int)m_peers[z].peerId );
 			bb_peerDelete( m_peers[z].peerId, true );
 			m_peers.erase( m_peers.begin() + z );
 			z--;
@@ -383,219 +381,11 @@ void CMaster::ReceivePeersPacket()
 
 				break;
 			}
-
-			//--- The following packets are for Remote Admin application exclusively... they are in CMaster because we ar edelaing with all p2p stuff at
-			// the same place... or else it will become a mess...more than it already is
-			case RA_LOGIN:
-			{
-				// check if we can login: never (step 12, ADR 0015). The password came in cleartext and the peer was then
-				// trusted by IP:port; remote admin is the admin HTTP API now.
-				net_ra_login_reply reply;
-				reply.result = 0;
-				console->add("Remote admin login refused: use the admin HTTP API (docs/ops/runbook.md)");
-				// reply back
-				bb_peerSend( peerID, (char*)&reply, RA_LOGIN_REPLY, sizeof(net_ra_login_reply), true );
-				return;
-			}
-			case RA_VAR_LIST:
-			{
-				// this peer is asking for the var list, make sure he is remote admin authorized
-				if(!IsRemoteAdmin( peerID )) return;
-
-				// send him the var list
-				gameVar.sendSVVar(peerID);
-
-				// tell him its over
-				bb_peerSend( peerID, 0, RA_VAR_END, 0, true );
-				
-				return;
-			}
-			case RA_DISCONNECT:
-			{
-				if(!IsRemoteAdmin( peerID )) return;
-				for( unsigned int i=0; i<m_peers.size(); i++ )
-				{
-					if( m_peers[i].peerId == peerID )
-					{
-						m_peers.erase( m_peers.begin() + i );
-						break;
-					}
-				}
-
-				bb_peerDelete( peerID, true );
-				return;
-			}
-			case RA_COMMAND:
-			{
-				// we received a command from the remote admin that we should execute immediately
-				if(!IsRemoteAdmin( peerID )) return;
-
-				// extract command
-				net_ra_command command;
-				memcpy( &command , buf , sizeof(net_ra_command));
-				command.command[127] = '\0'; // makes sure remote admin doesnt send to big command ><
-
-				char ip[16];
-				unsigned short port;
-				bb_peerGetIPport( peerID, ip, &port);
-
-				CString log = CString("Remote admin command sent from IP %s",ip);
-				console->add( log );
-				console->sendCommand( CString(command.command), true );
-
-				return;
-			}
-			case RA_PLAYER_LIST:
-			{
-				// remote admin requesting player list
-				if(!IsRemoteAdmin( peerID )) return;
-
-				if( RunningServer )
-				{
-					RunningServer->SendPlayerList( peerID );
-				}
-				return;
-			}
-			case RA_CONSOLE_BROADCAST_ACTIVATE:
-			{
-				if(!IsRemoteAdmin( peerID )) return;
-				net_ra_console_broadcast_activate data;
-				memcpy( &data , buf , sizeof(net_ra_console_broadcast_activate));
-
-				for( unsigned int i=0; i<m_peers.size(); i++ )
-				{
-					if( m_peers[i].peerId == peerID )
-					{
-						m_peers[i].broadcastConsole = data.enabled == 1 ? true : false;
-						return;
-					}
-				}
-				return;
-			}
-			case RA_KEEP_ALIVE:
-			{
-				if(!IsRemoteAdmin( peerID )) return;
-				for( unsigned int i=0; i<m_peers.size(); i++ )
-				{
-					if( m_peers[i].peerId == peerID )
-					{
-						m_peers[i].timeout = 10.0f;
-						return;
-					}
-				}
-
-				return;
-			}
-			case RA_MAP_LIST_REQUEST:
-			{
-				if(!IsRemoteAdmin( peerID )) return;
-
-				// ask server for all maps on the server
-				if( RunningServer )
-				{
-					std::vector<CString> maps = RunningServer->populateMapList(true);
-
-					for( unsigned int i=0; i<maps.size(); i++ )
-					{
-						net_ra_map_entry map;
-						sprintf(map.mapName,"%s",maps[i].s);
-
-						// send the map entry
-						bb_peerSend( peerID, (char*)&map, RA_MAP_LIST_ENTRY, sizeof(net_ra_map_entry), true);	
-					}
-				}
-				return;
-			}
-			case RA_MAP_ROTATION_REQUEST:
-			{
-				if(!IsRemoteAdmin( peerID )) return;
-
-				// ask server for maps in the rotation on the server
-				if( RunningServer )
-				{
-					std::vector<CString> maps = RunningServer->populateMapList(false);
-
-					for( unsigned int i=0; i<maps.size(); i++ )
-					{
-						net_ra_map_rotation_entry map;
-						sprintf(map.mapName,"%s",maps[i].s);
-
-						// send the map entry
-						bb_peerSend( peerID, (char*)&map, RA_MAP_ROTATION_ENTRY, sizeof(net_ra_map_entry), true);	
-					}
-				}
-				return;
-			}
-			case RA_MAP_FILE_HEADER:
-			{
-				if(!IsRemoteAdmin( peerID )) return;
-
-				// a new file coming for us
-				net_ra_map_file_header header;
-				memcpy( &header , buf , sizeof(net_ra_map_file_header));
-				
-				// find our peer
-				for( unsigned int i=0; i<m_peers.size(); i++ )
-				{
-					if( m_peers[i].peerId == peerID )
-					{
-						m_peers[i].m_sizeRemaining = header.fileSize;
-						CString str("%s", bv2::mapFileForWrite(header.fileName).c_str());
-						m_peers[i].m_currentFile = fopen( str.s, "wb" );
-						CString message = "Receiving map from remote admin : ";
-						message += str;
-						message += "(";
-						message += (int)header.fileSize;
-						message += ")";
-						console->add( message );
-						return;
-					}
-				}
-				return;
-			}
-			case RA_MAP_FILE_CHUNK:
-			{
-				if(!IsRemoteAdmin( peerID )) return;
-
-				// find our peer
-				for( unsigned int i=0; i<m_peers.size(); i++ )
-				{
-					if( m_peers[i].peerId == peerID )
-					{
-						// read first 4 bytes of the buffer
-						long size;
-						memcpy( &size, buf, 4 );
-						fwrite( buf+4, size,1, m_peers[i].m_currentFile );
-
-						m_peers[i].m_sizeRemaining -= size;
-						if( m_peers[i].m_sizeRemaining == 0 )
-						{
-							// finished with this file
-							fclose( m_peers[i].m_currentFile );
-							m_peers[i].m_currentFile = 0;
-						}
-						return;
-					}
-				}
-				return;
-			}
 		}
 	}
 
 }
 
-
-bool CMaster::IsRemoteAdmin( long in_peerId )
-{				
-	for( unsigned int i=0; i<m_peers.size(); i++ )
-	{
-		if( m_peers[i].peerId == in_peerId)
-		{
-			return m_peers[i].remoteAdmin;
-		}
-	}
-	return false;
-}
 
 //
 //--- On efface les games
@@ -607,84 +397,6 @@ void CMaster::eraseGames()
 		delete m_games[i];
 	}
 	m_games.clear();
-}
-
-// Remote admin specific commands
-void CMaster::RA_NewPlayer( char * in_playerName, char * in_playerIp, long in_playerId )
-{
-	net_ra_new_player player;
-	sprintf( player.name, "%s", in_playerName );
-	sprintf( player.ip, "%s", in_playerIp );
-	player.id = in_playerId;
-
-	for( unsigned int i=0; i<m_peers.size();i++ )
-	{
-		if( m_peers[i].remoteAdmin )
-		{
-			bb_peerSend( m_peers[i].peerId, (char*)&player, RA_NEW_PLAYER, sizeof(net_ra_new_player), true );
-		}
-	}
-}
-
-void CMaster::RA_PositionBroadcast( long in_playerId, short in_x, short in_y )
-{
-	net_ra_player_position pos;
-	pos.playerId = in_playerId;
-	pos.x = in_x;
-	pos.y = in_y;
-
-	for( unsigned int i=0; i<m_peers.size();i++ )
-	{
-		if( m_peers[i].remoteAdmin )
-		{
-			bb_peerSend( m_peers[i].peerId, (char*)&pos, RA_PLAYER_POSITION, sizeof(net_ra_player_position), true );
-		}
-	}
-}
-
-void CMaster::RA_DisconnectedPlayer( char * in_playerName, char * in_playerIp, long in_playerId )
-{
-	net_ra_player_disconnected player;
-	player.id = in_playerId;
-
-	for( unsigned int i=0; i<m_peers.size();i++ )
-	{
-		if( m_peers[i].remoteAdmin )
-		{
-			bb_peerSend( m_peers[i].peerId, (char*)&player, RA_PLAYER_DISCONNECTED, sizeof(net_ra_player_disconnected), true );
-		}
-	}
-}
-
-void CMaster::RA_Chat( char * in_chatString, int playerId )
-{
-	net_ra_chat chat;
-	sprintf( chat.message, "%s", in_chatString );
-	chat.message[127] = '\0';
-	chat.id = playerId;
-
-	for( unsigned int i=0; i<m_peers.size();i++ )
-	{
-		if( m_peers[i].remoteAdmin )
-		{
-			bb_peerSend( m_peers[i].peerId, (char*)&chat, RA_CHAT, sizeof(net_ra_chat), true );
-		}
-	}
-}
-
-void CMaster::RA_ConsoleBroadcast( char * in_message )
-{
-	net_ra_console_broadcast bc;
-	sprintf( bc.message, "%s", in_message );
-	bc.message[127] = '\0';
-
-	for( unsigned int i=0; i<m_peers.size();i++ )
-	{
-		if( m_peers[i].remoteAdmin && m_peers[i].broadcastConsole)
-		{
-			bb_peerSend( m_peers[i].peerId, (char*)&bc, RA_CONSOLE_BROADCAST, sizeof(net_ra_console_broadcast), true );
-		}
-	}
 }
 
 //
