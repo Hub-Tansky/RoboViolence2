@@ -54,3 +54,4 @@ What we do, in one or two sentences.
 | [0020](0020-package-and-release-format.md) | Package and release format; engine-only public releases | Accepted |
 | [0021](0021-cstring-one-argument-is-text.md) | A one-argument CString is text; formatting needs arguments | Accepted |
 | [0022](0022-advertised-server-address.md) | The master lists an advertised address only from private sources | Accepted |
+| [0023](0023-step-review-subagent-in-repo.md) | The step-closing review subagent and its rubric live in the repo | Accepted |
