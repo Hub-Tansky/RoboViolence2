@@ -18,7 +18,7 @@ The game's strings. Format and fallback: [ADR 0011](../../docs/decisions/0011-ge
 ## How the game picks a language
 
 - `languageFile ""` (the default): the OS languages in preference order; for each, `<ll>_<CC>` then `<ll>`, `.po` before `.lang`; English if none matches.
-- `languageFile "main/languages/<file>"` in the config always wins (`.po` or an original BV2 `.lang`). Builds before step 13 saved `languageFile "main/languages/en.lang"` in the user's `bv2.cfg`; set it to `""` to follow the OS.
+- `languageFile "main/languages/<file>"` in the config always wins (`.po` or an original BV2 `.lang`). Builds before step 13 saved `languageFile "main/languages/en.lang"`; the game now treats that value as `""` and saves it back empty (PNS-47).
 - Every key missing from the chosen file shows in English.
 - The files are read from the package's `main/languages/`, then from the player's BV2 data (its original `.lang` files); for the same name the package wins ([ADR 0016](../../docs/decisions/0016-player-data-lookup-and-package-content.md)).
 

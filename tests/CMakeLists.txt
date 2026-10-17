@@ -3,6 +3,11 @@ target_include_directories(test_netpacket PRIVATE ${CMAKE_SOURCE_DIR}/game/src $
 bv2_target_defaults(test_netpacket)
 add_test(NAME netpacket COMMAND test_netpacket)
 
+add_executable(test_cstring test_cstring.cpp)
+target_link_libraries(test_cstring PRIVATE zeven_core)
+bv2_target_defaults(test_cstring)
+add_test(NAME cstring COMMAND test_cstring)
+
 add_executable(test_config test_config.cpp)
 target_link_libraries(test_config PRIVATE zeven_core)
 bv2_target_defaults(test_config)

@@ -52,3 +52,4 @@ What we do, in one or two sentences.
 | [0018](0018-staging-pull-deploy.md) | Staging deploys itself by pull, pinned to a commit, only when empty | Accepted |
 | [0019](0019-in-game-name-and-fork-credits.md) | The game shows its own name and credits the original as an unofficial fork | Accepted |
 | [0020](0020-package-and-release-format.md) | Package and release format; engine-only public releases | Accepted |
+| [0021](0021-cstring-one-argument-is-text.md) | A one-argument CString is text; formatting needs arguments | Accepted |

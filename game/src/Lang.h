@@ -21,6 +21,9 @@ namespace lang
 	// (parsed here and again by load: one small file, once per start); "" (English) when none exists.
 	// dirs[0] holds en.lang.
 	std::string pickFile(const std::vector<std::string> & dirs, const std::vector<std::string> & locales);
+	// The saved languageFile to use: "" (the OS language) for "main/languages/en.lang", the value builds before
+	// Phase B step 13 saved as their default, so upgraded configs follow the OS (PNS-47)
+	std::string savedFile(const std::string & languageFile);
 	// <dir>en.lang, then file ("" for none) on top of it, so a key the file lacks stays English
 	bool load(const std::string & dir, const std::string & file, Texts & out);
 }
