@@ -19,7 +19,7 @@
 ## Context
 
 - The Windows and macOS packages are built and uploaded, but no CI job starts their client; only the Linux ASan build's client runs (`smoke`), and only the Linux package's server and master start (`package-check`).
-- GitHub-hosted Windows runners have no OpenGL driver. Mesa llvmpipe from [mesa-dist-win](https://github.com/pal1000/mesa-dist-win) (pinned release and SHA-256) next to `bv2.exe` provides one; Windows loads `opengl32.dll` from the application folder first.
+- GitHub-hosted Windows runners have no OpenGL driver. Mesa llvmpipe from [mesa-dist-win](https://github.com/pal1000/mesa-dist-win) next to `bv2.exe` provides one; Windows loads `opengl32.dll` from the application folder first. Release 26.0.3, `mesa3d-26.0.3-release-msvc.7z`; its SHA-256 was taken from the first CI download (2026-10-17, over TLS from the GitHub release), not checked against an upstream checksum. Bump policy: [PNS-69](../possible-new-scope.md).
 - An init failure shows a modal message box (`game/src/main.cpp:464`, `:489`), so a client still alive after 10 s is not proof it started. The console, which creates `console.log` in the pref dir, is built only after window, input, GL, audio and network init succeed (`game/src/main.cpp:558`). That file is the start signal.
 - Release packages start fullscreen. The job passes `--config` with `r_fullScreen false`, as runners have no real display mode to switch.
 
