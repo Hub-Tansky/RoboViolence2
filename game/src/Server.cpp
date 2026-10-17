@@ -401,6 +401,7 @@ void Server::updateNet(float delay, bool send)
 			// A fresh password challenge, then the game version
 			net_svcl_join_challenge challenge;
 			credentials::nonce(joinNonce[playerID]);
+			adminFails[playerID] = 0;
 			memcpy(challenge.nonce, joinNonce[playerID], sizeof(challenge.nonce));
 			bb_serverSend((char*)&challenge, sizeof(net_svcl_join_challenge), NET_SVCL_JOIN_CHALLENGE, clientID);
 			net_svcl_gameversion gameVersion;

@@ -240,6 +240,12 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 			net_clsv_admin_request adminRequest;
 			memcpy(&adminRequest, buffer, sizeof(net_clsv_admin_request));
 
+			// A short password falls to offline guessing from one captured proof (PNS-42)
+			if (gameVar.zsv_adminPass.len() > 0 && gameVar.zsv_adminPass.len() < 12)
+			{
+				console->add("\x4> Admin login refused: zsv_adminPass is shorter than 12 characters", true);
+				break;
+			}
 			if (!gameVar.zsv_adminPass.isNull() &&
 				!gameVar.zsv_adminUser.isNull())
 			{
@@ -265,6 +271,11 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 					logInIP += sender->playerIP;
 					console->add(logInName);
 					console->add(logInIP);
+					if (++adminFails[slot] >= 5)
+					{
+						console->add(CString("\x4> Too many admin login attempts, disconnecting %s", sender->playerIP), true);
+						bb_serverDisconnectClient(bbnetID);
+					}
 				}
 			}
 			break;

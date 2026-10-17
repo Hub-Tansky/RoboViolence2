@@ -61,6 +61,8 @@ public:
 
 	// Per slot: the challenge sent in its JOIN_CHALLENGE, for the join and admin passwords (step 10)
 	uint8_t joinNonce[MAX_PLAYER][credentials::NONCE_SIZE] = {};
+	// Per slot: failed admin logins on this connection; the 5th disconnects it (PNS-42)
+	int adminFails[MAX_PLAYER] = {};
 
 #ifndef CONSOLE
 	// La font
