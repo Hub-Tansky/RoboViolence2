@@ -1,6 +1,6 @@
 # Step 7: Windows TCP-close crash (R28)
 
-**Status:** IN PROGRESS
+**Status:** DONE (2026-10-17)
 
 **Depends on:** Phase B DONE. **Next:** Phase C close. **Index:** [README.md](README.md)
 

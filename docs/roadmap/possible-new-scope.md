@@ -293,7 +293,7 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Extract:** KEY_QUESTIONS R28 "On Windows, babonet intermittently crashes … when a TCP connection closes"; R29 "`~_typLayer` calls `glDeleteTextures` when `textureID == 0` … `loadTexture` dereferences a null `ptrLayer`".
 - **Why it matters:** R28 can crash the Windows game and master when a player leaves; the master test is off on Windows until it is fixed. R29 leaks every DKT texture.
 - **Suggested home:** step 7 (R29 is in `engine/dko/src/ePTexture.h`); R28 needs a Windows debugging session (a crash dump from the owner's PC or a Windows CI run with a debugger).
-- **Status:** R29 done in Phase C [step 5](phase-c-installers-and-fixes/step5-client-engine-fixes.md); R28 → Phase C step 7
+- **Status:** Done in Phase C: R29 in [step 5](phase-c-installers-and-fixes/step5-client-engine-fixes.md), R28 in [step 7](phase-c-installers-and-fixes/step7-windows-tcp-close.md)
 
 ### PNS-39: Why did the dropped-flag radii differ?
 
@@ -559,4 +559,12 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Extract:** `Priority` is always 0 since step 6, so `GAME_TIMEOUT * 5` (`masterserver/src/cBV2game.cpp`) and `lastHighPriority` in `cMasterServer::CreateGame` take one path; `CreateGame` has two identical "update existing game" blocks (the loop and the tail).
 - **Why it matters:** a fix must be made twice (step 6 did); new games are inserted before the tail for no reason.
 - **Suggested home:** the next step touching `masterserver/src/cMasterServer.cpp`: one loop over all games, append at the tail, plain timeout.
+- **Status:** Proposed
+
+### PNS-68: A bad partial "RND1" key leaves a closed client in the server's list
+
+- **Found in:** Phase C step 7 review (2026-10-17), finding 1.
+- **Extract:** `cClient::ReceiveStream` (`engine/babonet/src/cClient.cpp:583`) calls `Disconnect()` on a wrong partial key and returns 0; the client stays in `cServer::Clients` with `FileDescriptor = 0`, while a wrong full key returns 1 and the server removes the client.
+- **Why it matters:** the predicted wedge did not happen: the step 7 `master` test phase "bad partial key" passes on macOS, Linux and Windows without a change (CI run 39027172674). A later `RemoveClient` on that client would `FD_CLR` and close descriptor 0.
+- **Suggested home:** the next babonet step (PNS-17): return 1 as the full-key path does, with a test that shows the stale client.
 - **Status:** Proposed
