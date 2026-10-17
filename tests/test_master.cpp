@@ -146,6 +146,17 @@ int main(int argc, char ** argv)
 	pump({game});
 	CHECK(list().empty());
 
+	std::printf("phase: reconnect\n"); // a server whose master link dropped heartbeats on a new connection
+	bb_clientDisconnect(game);
+	UINT4 first = connectClient();
+	registerGame(first);
+	game = connectClient();
+	registerGame(game);
+	bb_clientSend(game, (char *)&kill, sizeof(kill), KILL_SERV); // the new connection owns the game
+	pump({game});
+	CHECK(list().empty());
+	bb_clientDisconnect(first);
+
 	bb_clientDisconnect(game);
 	// 6.3 (Q-S3): quotes, comments, ';' and '%' in a game's name and map and in a ban's nick and IP are stored as
 	// sent, and the tables stay intact

@@ -386,6 +386,7 @@ int cMasterServer::UpdateGame(stBV2row *row,UINT4 fromID)
 	// A server behind NAT or Docker advertises its public address; trusted only from a private or loopback source
 	// (PNS-44, ADR 0022)
 	row->ip[sizeof(row->ip) - 1] = '\0';
+	row->Priority = 0; // master use only: a client-set priority would bypass the address rule
 	char * ip = (row->ip[0] && IsPrivateAddress(c->IP)) ? row->ip : c->IP;
 	int gameID = CreateGame(new cBV2game(ip,*row,fromID));
 	return gameID;
@@ -413,6 +414,7 @@ int cMasterServer::CreateGame(cBV2game* newGame)
 					G->LastCheck = 0;
 					//la game existe deja on update,delete et on sort
 					memcpy(&(G->GameInfos),&(newGame->GameInfos),sizeof(stBV2row));
+					G->BaboID = newGame->BaboID; // the connection that sent this heartbeat (KILL_SERV)
 
 					WriteWebGame(G->GameInfos, false);
 
@@ -433,6 +435,7 @@ int cMasterServer::CreateGame(cBV2game* newGame)
 				//la game existe deja on update, delete et on sort
 				G->LastCheck = 0;
 				memcpy(&(G->GameInfos),&(newGame->GameInfos),sizeof(stBV2row));
+					G->BaboID = newGame->BaboID; // the connection that sent this heartbeat (KILL_SERV)
 
 				WriteWebGame(G->GameInfos, false);
 
