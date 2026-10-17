@@ -58,7 +58,7 @@ public:
 	virtual ~_typLayer()
 	{
 #ifndef CONSOLE
-		if (textureID == 0) glDeleteTextures(1, &textureID);
+		if (textureID != 0) glDeleteTextures(1, &textureID); // R29: only a real texture
 #endif
 	}
 };

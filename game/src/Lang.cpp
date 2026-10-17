@@ -236,6 +236,11 @@ namespace lang
 		return "";
 	}
 
+	std::string savedFile(const std::string & languageFile)
+	{
+		return languageFile == "main/languages/en.lang" ? "" : languageFile;
+	}
+
 	bool load(const std::string & dir, const std::string & file, Texts & out)
 	{
 		if (!readLang(dir + "en.lang", out))

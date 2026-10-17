@@ -894,7 +894,7 @@ void Server::update(float delay)
 					for (size_t i = 0; i < reportUploadURLs.size(); i++)
 					{
 						console->add(CString("\x2Sending Report to: %s", reportUploadURLs[i].c_str()), true);
-						CCurl* request = new CCurl((char*)reportUploadURLs[i].c_str(), data.get());
+						CCurl* request = new CCurl(reportUploadURLs[i].c_str(), data.get());
 						reportUploads.push_back(request);
 						request->start();
 					}

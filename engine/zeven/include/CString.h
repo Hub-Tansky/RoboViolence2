@@ -59,7 +59,10 @@ public:
 
 	///Constructeur par d�aut. La string est initialis� avec un seul caract�e, le caract�e nul.
 	CString(){s = new char[1]; s[0] = '\0';}
-	CString(char* fmt, ...);
+	/// One argument is text, copied as is (null gives ""). Two or more are a printf format and its arguments, so
+	/// wire text never runs as a format (PNS-34, ADR 0021).
+	CString(const char* text);
+	template <class A, class... R> CString(const char* fmt, A arg, R... args) {format(fmt, arg, args...);}
 
 	/// Constructeur copie
 	CString(const CString & objToCopy){s = new char[strlen(objToCopy.s)+1]; strcpy(s, objToCopy.s);}
@@ -125,6 +128,11 @@ public:
 
 	// Lui setter une nouvelle valeur
 	void set(char* fmt, ...);
+
+private:
+	// The formatting constructor's body: s = fmt with the arguments, at most MAX_CARAC - 1 characters
+	void format(const char* fmt, ...);
+public:
 
 	// Pour le loader d'un fichier
 	void loadFromFile(FILE *fic);
