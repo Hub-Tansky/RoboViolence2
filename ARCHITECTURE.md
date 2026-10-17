@@ -168,7 +168,6 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `.github/workflows/hygiene.yml` | CI: ARCHITECTURE.md inventory, repository hygiene, content case; `review` (`tools/review.sh`) on PRs |
 | `.github/workflows/codeql.yml` | CodeQL: `c-cpp` (manual linux-x64 build of the three executables) and `actions`; push, PR, weekly; alerts under `build/` (vcpkg headers) filtered out |
 | `.github/workflows/dependency-graph.yml` | Submits resolved vcpkg ports to the dependency graph on push to `main` |
-| `.github/workflows/r28-windows.yml` | Temporary (Phase C step 7): loops `test_master` on Windows under ASan and cdb |
 | `.github/workflows/osv-vcpkg.yml` | Weekly OSV check of the vcpkg ports by upstream commit (`tools/osv-vcpkg.py`); not required |
 | `.github/workflows/containers.yml` | CI: builds both server images, checks non-root, runs the compose example (healthy, passworded server listed by the master), checks a remote `status` over TLS and `/deployed`, pushes multi-arch `:<sha>` and `:latest` to GHCR from `main` and weekly |
 
@@ -343,6 +342,8 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/roadmap/phase-c-installers-and-fixes/reviews/step5.md` | Step 5 review record |
 | `docs/roadmap/phase-c-installers-and-fixes/reviews/step6-report.md` | Raw fresh-context reviewer reports for step 6 |
 | `docs/roadmap/phase-c-installers-and-fixes/reviews/step6.md` | Step 6 review record |
+| `docs/roadmap/phase-c-installers-and-fixes/reviews/step7-report.md` | Raw fresh-context reviewer report for step 7 |
+| `docs/roadmap/phase-c-installers-and-fixes/reviews/step7.md` | Step 7 review record |
 
 ### `docs/roadmap/phase-t-testing-environment`
 
