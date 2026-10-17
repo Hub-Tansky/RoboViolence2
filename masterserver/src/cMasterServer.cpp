@@ -435,7 +435,7 @@ int cMasterServer::CreateGame(cBV2game* newGame)
 				//la game existe deja on update, delete et on sort
 				G->LastCheck = 0;
 				memcpy(&(G->GameInfos),&(newGame->GameInfos),sizeof(stBV2row));
-					G->BaboID = newGame->BaboID; // the connection that sent this heartbeat (KILL_SERV)
+				G->BaboID = newGame->BaboID; // the connection that sent this heartbeat (KILL_SERV)
 
 				WriteWebGame(G->GameInfos, false);
 

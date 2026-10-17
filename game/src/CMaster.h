@@ -165,7 +165,6 @@ private:
 
 	void sendCacheListToMaster(const stCacheListRemote& info);
 
-
 public:
 	AccountManagerClient AccountManager;
 
