@@ -370,6 +370,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/roadmap/phase-t-testing-environment/reviews/step1.md` | Fresh-context review record for step 1 |
 | `docs/roadmap/phase-t-testing-environment/reviews/step2-report.md` | Raw reviewer report for step 2 |
 | `docs/roadmap/phase-t-testing-environment/reviews/step2.md` | Fresh-context review record for step 2 |
+| `docs/roadmap/phase-t-testing-environment/reviews/step3-report-round1.md` | Raw reviewer report for step 3, round 1 (run without the skill) |
 | `docs/roadmap/phase-t-testing-environment/reviews/step3-report.md` | Raw reviewer report for step 3 |
 | `docs/roadmap/phase-t-testing-environment/reviews/step3.md` | Fresh-context review record for step 3 |
 

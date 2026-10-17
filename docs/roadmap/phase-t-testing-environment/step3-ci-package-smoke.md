@@ -1,6 +1,6 @@
 # Step 3: Packaged client, server and master start in CI on Windows and macOS
 
-**Status:** IN PROGRESS
+**Status:** DONE (2026-10-17)
 
 **Depends on:** Phase B step 2b (release packages), Phase C step 3 (installers; artifact names). **Next:** T3 client autotest mode (candidate). **Index:** [README.md](README.md)
 

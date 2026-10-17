@@ -9,7 +9,7 @@ Diff: baf8ac7..f27128a (step commits; merge of `main` at 59f81bd excluded)
 
 ## Findings
 
-Raw report: [step3-report.md](step3-report.md). R2a is this thread's round 2 run, R2b the separate thread's run on the same head.
+Raw reports: [step3-report.md](step3-report.md) (round 2, both runs) and [step3-report-round1.md](step3-report-round1.md) (round 1 without the skill, moved unedited so the DONE gate reads only skill-loaded rounds). R2a is this thread's round 2 run, R2b the separate thread's run on the same head.
 
 | # | Finding | Outcome |
 |---|---|---|
@@ -40,5 +40,5 @@ macOS failed in the same step at the same point. 4ac95fe reverts the commit.
 
 ## Not done / unsure
 
-- `tools/review.sh --full <preset>` not run locally; CI build and ctest on all three OSes is the evidence. The owner decides whether that counts before Status is set to DONE.
+- `tools/review.sh --full <preset>` not run locally; the owner accepted CI build and ctest on all three OSes as that evidence (2026-10-17).
 - Gating `package-smoke` after 10 consecutive green runs on `main` is the owner's call after merge.
