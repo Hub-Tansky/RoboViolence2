@@ -528,3 +528,11 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Why it matters:** regenerating glad or changing the header's comment silently changes or breaks the notice.
 - **Suggested home:** a step allowed to edit `engine/zeven/third_party/glad/`: commit `LICENSE.txt` there and copy it.
 - **Status:** Proposed
+
+### PNS-66: Master bans still travel as a 7-character cleartext password
+
+- **Found in:** Phase C step 6 (2026-10-17), task 6.2.
+- **Extract:** `stCacheBan.Pass[8]` / `stCacheUnban.Pass[10]` (`masterserver/src/cMSstruct.h`); the game's `cacheban` sends the first 7 characters typed. Step 6 replaced `roxbabo` with `BV2_MASTER_BAN_PASS` but kept the wire format.
+- **Why it matters:** anyone on the path to the master reads the ban password; 7 characters are guessable.
+- **Suggested home:** with accounts or a master protocol step (PNS-14, PNS-17): an HMAC over a master nonce, as ADR 0014 does for servers.
+- **Status:** Proposed
