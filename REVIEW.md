@@ -50,7 +50,7 @@ Outside a step branch, changes to guard files (`tools/check-*`, `tools/review.sh
 Also required for an architecture-changing PR outside a step (new or moved modules, libraries or interfaces, changed ownership or data flow, protocol or file-format changes); its record goes in the PR description.
 
 1. `tools/review.sh --full <preset>` passes.
-2. Spawn a **fresh subagent** (Agent tool). Its prompt holds only the step file path, this file, the merge-base and the paths of the phase's earlier records (`docs/roadmap/<phase>/reviews/step*.md`). It first calls the Skill tool with `thermo-nuclear-code-quality-review` and starts its report with `SKILL: <the tool's result, verbatim>`, or `SKILL: NOT LOADED – <reason>`. It then reads `git diff <merge-base>..HEAD`, applies the skill and checks section 2. From the earlier records it doesn't re-raise findings already rejected or deferred, and it flags a finding that repeats an earlier one. The author doesn't pre-filter its findings. If the skill isn't available, stop and tell the owner.
+2. Spawn the **`thermo-nuclear-code-quality-review` subagent** (Agent tool, `.claude/agents/`). Its prompt holds only the step file path, the merge-base and the paths of the phase's earlier records (`docs/roadmap/<phase>/reviews/step*.md`). It loads the `thermo-nuclear-review` skill (`.claude/skills/`), starts its report with the tool's load line (or `SKILL: NOT LOADED – <reason>`), reviews `git diff <merge-base>..HEAD` against the skill and section 2, and doesn't re-raise findings the earlier records rejected or deferred. The author doesn't pre-filter its findings. If the subagent or skill isn't available, stop and tell the owner.
    Save the report unedited as `docs/roadmap/<phase>/reviews/stepN-report.md` (later rounds are appended under `## Round k`). It is evidence, not proof: the author could forge it, so the owner may spot-check it against the session.
 3. Act on every finding:
 
@@ -70,7 +70,7 @@ Also required for an architecture-changing PR outside a step (new or moved modul
 ```markdown
 # Step N review
 
-Reviewer: fresh-context subagent, /thermo-nuclear-code-quality-review, YYYY-MM-DD
+Reviewer: fresh-context subagent thermo-nuclear-code-quality-review, YYYY-MM-DD
 Diff: <merge-base>..<head>
 
 ## review.sh
