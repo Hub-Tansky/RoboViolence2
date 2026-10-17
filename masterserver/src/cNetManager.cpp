@@ -20,6 +20,9 @@ cNetManager::cNetManager()
 
 void cNetManager::Init()
 {
+	const char * banPass = std::getenv("BV2_MASTER_BAN_PASS");
+	if (!banPass || !banPass[0]) printf("BV2_MASTER_BAN_PASS is unset: bans and unbans are refused\n");
+	else if (std::strlen(banPass) > 7) printf("BV2_MASTER_BAN_PASS is longer than 7 characters: bans and unbans are refused\n");
 	if(bb_init())
 	{
 		printf("Error Loading BaboNet");
