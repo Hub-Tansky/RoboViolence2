@@ -171,7 +171,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | path | purpose |
 |---|---|
 | `.github/workflows/secret-scan.yml` | CI: gitleaks over commits after the fork point and original-asset check |
-| `.github/workflows/build.yml` | CI: Debug and Release build and ctest, Release package on Windows, macOS, Linux (`roboviolence2-<preset>` artifacts); `package-check` of the Linux package in a clean `ubuntu:24.04`; ASan smoke job with client under xvfb; `release` job on `v*` tags (GitHub release, pre-release for `v0.*` and `v*-*`); `fuzz` job (not required, pushes to main): 2 min per client message type, uploads crash inputs |
+| `.github/workflows/build.yml` | CI: Debug and Release build and ctest, Release package on Windows, macOS, Linux (`roboviolence2-<preset>` artifacts); `package-check` of the Linux package in a clean `ubuntu:24.04`; `package-smoke` (not required): Windows and macOS packages start server, master and client (Mesa llvmpipe on Windows); ASan smoke job with client under xvfb; `release` job on `v*` tags (GitHub release, pre-release for `v0.*` and `v*-*`); `fuzz` job (not required, pushes to main): 2 min per client message type, uploads crash inputs |
 | `.github/workflows/hygiene.yml` | CI: ARCHITECTURE.md inventory, repository hygiene, content case; `review` (`tools/review.sh`) on PRs |
 | `.github/workflows/codeql.yml` | CodeQL: `c-cpp` (manual linux-x64 build of the three executables) and `actions`; push, PR, weekly; alerts under `build/` (vcpkg headers) filtered out |
 | `.github/workflows/dependency-graph.yml` | Submits resolved vcpkg ports to the dependency graph on push to `main` |
@@ -360,6 +360,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/roadmap/phase-t-testing-environment/README.md` | Phase T (testing environment, alongside Phase C): goal, steps, interaction with Phase C |
 | `docs/roadmap/phase-t-testing-environment/step1-mac-pull-agent.md` | Scope file for step1 |
 | `docs/roadmap/phase-t-testing-environment/step2-staging-deploy.md` | Scope file for step2 |
+| `docs/roadmap/phase-t-testing-environment/step3-ci-package-smoke.md` | Scope file for step3 |
 
 ### `docs/roadmap/phase-t-testing-environment/reviews`
 
@@ -369,6 +370,9 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/roadmap/phase-t-testing-environment/reviews/step1.md` | Fresh-context review record for step 1 |
 | `docs/roadmap/phase-t-testing-environment/reviews/step2-report.md` | Raw reviewer report for step 2 |
 | `docs/roadmap/phase-t-testing-environment/reviews/step2.md` | Fresh-context review record for step 2 |
+| `docs/roadmap/phase-t-testing-environment/reviews/step3-report-round1.md` | Raw reviewer report for step 3, round 1 (run without the skill) |
+| `docs/roadmap/phase-t-testing-environment/reviews/step3-report.md` | Raw reviewer report for step 3 |
+| `docs/roadmap/phase-t-testing-environment/reviews/step3.md` | Fresh-context review record for step 3 |
 
 ### `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews`
 

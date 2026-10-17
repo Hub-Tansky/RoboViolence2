@@ -14,7 +14,8 @@ Every successful `main` build is installed and tested on the owner's Mac without
 |---|---|---|---|
 | 1 | [Mac pull agent](step1-mac-pull-agent.md) | T1 | DONE (2026-10-14) |
 | 2 | [Staging host and deploy agent](step2-staging-deploy.md) | T8 | IN PROGRESS |
-| – | CI client smoke, autotest mode, E2E bots, Windows VM, workstation, screenshots | T2–T7 | candidate |
+| 3 | [Packaged client, server and master start in CI on Windows and macOS](step3-ci-package-smoke.md) | T2 | DONE (2026-10-17) |
+| – | Autotest mode, E2E bots, Windows VM, workstation, screenshots | T3–T7 | candidate |
 
 Candidates get a scope file only after step 1 is proven.
 

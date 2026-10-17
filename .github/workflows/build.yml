@@ -130,6 +130,77 @@ jobs:
           for i in $(seq 1 20); do (exec 3<>/dev/tcp/127.0.0.1/10207) 2>/dev/null && break; sleep 0.5; done
           (exec 3<>/dev/tcp/127.0.0.1/10207)                      # master listens on 10207
           kill "$pid"
+  # Phase T step 3: the Windows and macOS packages start. Not required until 10 consecutive green runs on main.
+  package-smoke:
+    name: package-smoke (${{ matrix.preset }})
+    needs: build
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: windows-2025, preset: win-x64-msvc }
+          - { os: macos-14, preset: macos-arm64 }
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: roboviolence2-${{ matrix.preset }}.zip
+          skip-decompress: true  # extract it ourselves: unzip in the action drops exec bits and bundle symlinks
+      - name: Extract
+        run: |
+          zip=roboviolence2-${{ matrix.preset }}.zip
+          if [ "$RUNNER_OS" = Windows ]; then 7z x -bd "$zip" > /dev/null; else ditto -x -k "$zip" .; fi
+      # The runner has no OpenGL driver: Mesa's software renderer, loaded from the application folder
+      - name: Mesa llvmpipe next to bv2.exe
+        if: runner.os == 'Windows'
+        env:
+          MESA: 26.0.3
+          MESA_SHA256: de1ec45c906164de2c046288a8969e83cf2d51d031dc8dfd1f9371bb31cd6755  # first download, 2026-10-17
+        run: |
+          curl -fsSLo mesa.7z "https://github.com/pal1000/mesa-dist-win/releases/download/$MESA/mesa3d-$MESA-release-msvc.7z"
+          echo "$MESA_SHA256  mesa.7z" | sha256sum -c
+          7z x -bd -omesa mesa.7z x64 > /dev/null
+          cp mesa/x64/*.dll roboviolence2-${{ matrix.preset }}/
+          echo GALLIUM_DRIVER=llvmpipe >> "$GITHUB_ENV"
+      - name: Server and master start from the package
+        working-directory: roboviolence2-${{ matrix.preset }}
+        env:
+          MSYS_NO_PATHCONV: "1"  # Git Bash would turn cmd's /c and taskkill's /F into paths
+        run: |
+          set -euo pipefail
+          export BV2_PREF_DIR="$RUNNER_TEMP/pref-server"
+          if [ "$RUNNER_OS" = Windows ]; then
+            printf 'quit\n' | cmd /c run-server.cmd > server.log 2>&1
+            cmd /c run-master.cmd &   # $! would be cmd's pid, not bv2master's: stopped by name below
+          else
+            printf 'quit\n' | ./run-server.sh > server.log 2>&1
+            ./run-master.sh & pid=$!
+          fi
+          cat server.log
+          grep "Server Created on port 3333" server.log
+          for i in $(seq 1 20); do (exec 3<>/dev/tcp/127.0.0.1/10207) 2>/dev/null && break; sleep 0.5; done
+          (exec 3<>/dev/tcp/127.0.0.1/10207)                      # master listens on 10207
+          if [ "$RUNNER_OS" = Windows ]; then taskkill /F /IM bv2master.exe; else kill "$pid"; fi
+      - name: Client starts and survives 10 s
+        working-directory: roboviolence2-${{ matrix.preset }}
+        env:
+          SDL_AUDIODRIVER: dummy
+        run: |
+          tmp=$RUNNER_TEMP   # Windows: cygpath -m gives D:/a/_temp, one path form for Git Bash and bv2.exe
+          # run-client.cmd detaches (start ""), so its pid can't be tracked: start bv2.exe directly
+          if [ "$RUNNER_OS" = Windows ]; then tmp=$(cygpath -m "$tmp"); client=./bv2.exe; else client=./run-client.sh; fi
+          export BV2_PREF_DIR="$tmp/pref-client"
+          printf 'r_fullScreen false\n' > "$tmp/smoke.cfg"   # runners have no display mode to switch to
+          "$client" --placeholders --config "$tmp/smoke.cfg" > client.log 2>&1 & pid=$!
+          sleep 10
+          kill -0 "$pid" 2>/dev/null || { rc=0; wait "$pid" || rc=$?; cat client.log; echo "client exited early with $rc"; exit 1; }
+          kill "$pid"
+          cat client.log
+          # An init failure blocks in a message box; the console (console.log) exists only after init succeeded
+          ls -l "$BV2_PREF_DIR/console.log"
   smoke:
     name: smoke (linux-x64-asan)
     runs-on: ubuntu-24.04
