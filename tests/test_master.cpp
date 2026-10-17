@@ -154,7 +154,7 @@ int main(int argc, char ** argv)
 	pump({game});
 	CHECK(list().empty());
 
-	std::printf("phase: bad partial key\n"); // a peer whose first bytes aren't "RND1" is dropped; the master keeps serving
+	std::printf("phase: bad partial key\n"); // a peer whose first bytes aren't "RND1" doesn't stop the master serving others (PNS-68)
 	{
 		int fd = (int)socket(AF_INET, SOCK_STREAM, 0);
 		sockaddr_in to = {};
