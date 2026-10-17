@@ -212,8 +212,6 @@ void Scene::kick(CString playerName)
 				{
 					if (textColorLess(server->game->players[i]->name) == textColorLess(playerName))
 					{
-						if( master ) master->RA_DisconnectedPlayer( textColorLess(playerName).s, server->game->players[i]->playerIP, (long)server->game->players[i]->playerID );
-
 						bb_serverDisconnectClient(server->game->players[i]->babonetID);
 						console->add(CString("\x3> Disconnecting client %s (%s), kicked by server", server->game->players[i]->name.s, server->game->players[i]->playerIP), true);
 						ZEVEN_SAFE_DELETE(server->game->players[i]);
@@ -237,7 +235,6 @@ void Scene::kick(int ID)
 		{
 			if (server->game->players[ID])
 			{
-				if( master ) master->RA_DisconnectedPlayer( textColorLess(server->game->players[ID]->name).s, server->game->players[ID]->playerIP, (long)server->game->players[ID]->playerID );
 				bb_serverDisconnectClient(server->game->players[ID]->babonetID);
 				console->add(CString("\x3> Disconnecting client %s (%s), kicked by server", server->game->players[ID]->name.s, server->game->players[ID]->playerIP), true);
 				ZEVEN_SAFE_DELETE(server->game->players[ID]);
@@ -274,7 +271,6 @@ void Scene::ban(int ID)
 			if (server->game->players[ID])
 	{
 
-		if( master ) master->RA_DisconnectedPlayer( textColorLess(server->game->players[ID]->name).s, server->game->players[ID]->playerIP, (long)server->game->players[ID]->playerID );
 		bb_serverDisconnectClient(server->game->players[ID]->babonetID);
 		server->banList.push_back(std::pair<CString,CString>(server->game->players[ID]->name,server->game->players[ID]->playerIP) );
 		

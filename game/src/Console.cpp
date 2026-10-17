@@ -109,10 +109,6 @@ void Console::add(CString message, bool fromServer, bool isEvent)
 	printf("%s\n", textColorLess(message).s);
 #endif
 
-	// broadcast to potential remote admins
-	CString messageStr = textColorLess( message );
-	if( master ) master->RA_ConsoleBroadcast( messageStr.s );
-
 	if (isEvent == true)
 		m_eventMessages.push_back(message);
 	else
@@ -1986,31 +1982,6 @@ void Console::sendCommand(CString commandLine, bool isAdmin, unsigned long bbnet
 		return;
 	}
 
-	if( command == "allplayerpos" )
-	{
-		if( !scene ) return;
-		if( !scene->server ) return;
-		if( !scene->server->game ) return;
-		if( !master ) return;
-		
-		
-		// send to remote admin all player positions (compressed to shorts)
-		for( unsigned int i=0; i<MAX_PLAYER; i++ )
-		{
-			if( scene->server->game->players[i] )
-			{
-				if( scene->server->game->players[i]->teamID > -1 )
-				{
-					long id = (long)i;
-					short x = (short)(scene->server->game->players[i]->currentCF.position.x() * 100);
-					short y = (short)(scene->server->game->players[i]->currentCF.position.y() * 100);
-					master->RA_PositionBroadcast( id, x, y );
-				}
-			}
-		}
-		return;
-	}
-
 #endif
 
 
@@ -2150,12 +2121,7 @@ void Console::sendCommand(CString commandLine, bool isAdmin, unsigned long bbnet
 	{
 		if (scene->server)
 		{
-			CString strPass = tokenize.getFirstToken(' ');
-// 			if( strPass != "roxbabo" )
-// 			{
-// 				return;
-// 			}
-				
+			CString strPass = tokenize.getFirstToken(' '); // checked by the master (BV2_MASTER_BAN_PASS)
 			CString strID = tokenize.getFirstToken(' ');
 			if( strID == "" )
 			{

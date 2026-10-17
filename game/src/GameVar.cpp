@@ -20,7 +20,6 @@
 #include "Paths.h"
 #include "GameVar.h"
 #include "netPacket.h"
-#include "RemoteAdminPackets.h"
 #ifndef CONSOLE
 #include "KeyManager.h"
 #include "Lang.h"
@@ -370,6 +369,8 @@ GameVar::GameVar()
 	dksvarRegister(CString("sv_bombTime [int : (default 60)]"), &sv_bombTime, 10, 0, LIMIT_MIN, true);
 	sv_gameName = "Robo Violence 2 - Server";
 	dksvarRegister(CString("sv_gameName [string : \"\"]"), &sv_gameName, true);
+	sv_publicAddress = "";
+	dksvarRegister(CString("sv_publicAddress [string : \"\" (dotted IPv4 for the master list; empty: the address the master sees)]"), &sv_publicAddress, true);
 	sv_port = 3333;
 	dksvarRegister(CString("sv_port [int : valid port (default 3333)]"), &sv_port, 1024, 65536,
 		LIMIT_MIN | LIMIT_MAX, true);
@@ -883,98 +884,6 @@ void GameVar::sendSVVar(UINT4 babonetID)
 	sendOne("sv_ftExpirationTimer", babonetID);
 	sendOne("sv_explodingFT", babonetID);
 	sendOne("sv_enableVote", babonetID);
-}
-
-void GameVar::sendSVVar(INT4 peerId)
-{
-	sendOne("sv_friendlyFire", peerId);
-	sendOne("sv_reflectedDamage", peerId);
-	sendOne("sv_timeToSpawn", peerId);
-	sendOne("sv_topView", peerId);
-	sendOne("sv_minSendInterval", peerId);
-	sendOne("sv_forceRespawn", peerId);
-	sendOne("sv_baboStats", peerId);
-	sendOne("sv_roundTimeLimit", peerId);
-	sendOne("sv_gameTimeLimit", peerId);
-	sendOne("sv_scoreLimit", peerId);
-	sendOne("sv_winLimit", peerId);
-	sendOne("sv_gameType", peerId);
-   sendOne("sv_serverType", peerId);
-   sendOne("sv_spawnType", peerId);
-   sendOne("sv_subGameType", peerId);
-	sendOne("sv_bombTime", peerId);
-	sendOne("sv_gameName", peerId);
-	sendOne("sv_port", peerId);
-	sendOne("sv_maxPlayer", peerId);
-   sendOne("sv_maxPlayerInGame", peerId);
-	sendOne("sv_password", peerId);
-	sendOne("sv_enableSMG", peerId);
-	sendOne("sv_enableShotgun", peerId);
-	sendOne("sv_enableSniper", peerId);
-	sendOne("sv_enableDualMachineGun", peerId);
-	sendOne("sv_enableChainGun", peerId);
-	sendOne("sv_enableBazooka", peerId);
-	sendOne("sv_enablePhotonRifle", peerId);
-	sendOne("sv_enableFlameThrower", peerId);
-	sendOne("sv_enableShotgunReload", peerId);
-	sendOne("sv_slideOnIce", peerId);
-	sendOne("sv_showEnemyTag", peerId);
-	sendOne("sv_enableSecondary", peerId);
-	sendOne("sv_enableKnives", peerId);
-	sendOne("sv_enableNuclear", peerId);
-	sendOne("sv_enableShield", peerId);
-	sendOne("sv_enableMinibot", peerId);
-	sendOne("sv_showKills", peerId);
-	sendOne("sv_beGoodServer", peerId);
-	sendOne("sv_validateWeapons", peerId);
-	sendOne("sv_autoBalance", peerId);
-	sendOne("sv_autoBalanceTime", peerId);
-	sendOne("sv_gamePublic", peerId);
-	sendOne("sv_matchcode", peerId);
-	sendOne("sv_matchmode", peerId);
-	sendOne("sv_maxPing", peerId);
-	sendOne("sv_shottyDropRadius", peerId);
-	sendOne("sv_shottyRange", peerId);
-	sendOne("sv_enableMolotov", peerId);
-	sendOne("sv_ftMaxRange", peerId);
-	sendOne("sv_ftMinRange", peerId);
-	sendOne("sv_photonDamageCoefficient", peerId);
-	sendOne("sv_zookaRemoteDet", peerId);
-	sendOne("sv_smgDamage", peerId);
-	sendOne("sv_ftDamage", peerId);
-	sendOne("sv_dmgDamage", peerId);
-	sendOne("sv_cgDamage", peerId);
-	sendOne("sv_shottyDamage", peerId);
-	sendOne("sv_sniperDamage", peerId);
-	sendOne("sv_zookaDamage", peerId);
-	sendOne("sv_photonType", peerId);
-	sendOne("sv_zookaRadius", peerId);
-	sendOne("sv_nukeRadius", peerId);
-	sendOne("sv_nukeTimer", peerId);
-	sendOne("sv_nukeReload", peerId);
-	sendOne("sv_minTilesPerBabo",peerId);
-	sendOne("sv_maxTilesPerBabo",peerId);
-	sendOne("sv_photonDistMult", peerId);
-	sendOne("sv_photonVerticalShift", peerId);
-	sendOne("sv_photonHorizontalShift", peerId);
-	sendOne("sv_joinMessage", peerId);
-	sendOne("sv_sendJoinMessage", peerId);
-	sendOne("sv_ftExpirationTimer", peerId);
-	sendOne("sv_explodingFT", peerId);
-	sendOne("sv_enableVote", peerId);
-}
-
-void GameVar::sendOne(char * varName, INT4 peerId)
-{
-	if (dksvarIsSecret(varName)) return; // passwords never go on the wire (Q-S5)
-	CString varCom;
-	dksvarGetFormatedVar(varName, &varCom);
-	//varCom.insert("set ", 0);
-
-	if (varCom.len() > 79) varCom.resize(79);
-	net_ra_var ra_var;
-	memcpy(ra_var.var, varCom.s, varCom.len()+1);
-	bb_peerSend(peerId,(char*)&ra_var,RA_VAR,sizeof(net_ra_var),true);
 }
 
 void GameVar::sendOne(char * varName, UINT4 babonetID)

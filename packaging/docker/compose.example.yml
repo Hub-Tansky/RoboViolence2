@@ -14,6 +14,8 @@ services:
     build: { context: ../.., dockerfile: packaging/docker/Dockerfile, target: master }
     ports: ["10207:10207/tcp"]
     volumes: ["master-data:/var/lib/bv2"]
+    environment:
+      BV2_MASTER_BAN_PASS: "${BV2_MASTER_BAN_PASS:-}" # empty: master bans refused
   server:
     <<: *common
     image: ghcr.io/hub-tansky/roboviolence2-server:${BV2_IMAGE_TAG:-latest}
@@ -22,6 +24,7 @@ services:
     environment:
       BV2_MASTER_SERVERS: "master:10207"
       BV2_SV_PASSWORD: "${BV2_SV_PASSWORD:-}" # empty: no join password
+      BV2_PUBLIC_ADDRESS: "${BV2_PUBLIC_ADDRESS:-}" # the address players use; empty: the master sees the compose network
       BV2_ADMIN_PASS: "${BV2_ADMIN_PASS:-}"   # empty: no admin login, and the admin API refuses everything
       BV2_ADMIN_API_PORT: "8080"              # the admin API, on the compose network only: never publish it
       BV2_ADMIN_API_BIND: "0.0.0.0"

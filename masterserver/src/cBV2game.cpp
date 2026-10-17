@@ -23,10 +23,7 @@ cBV2game::cBV2game(char *ip,stBV2row & gameinfos, UINT4 baboID)
 
 	memcpy(&GameInfos,&gameinfos,sizeof(stBV2row));
 	
-	if(GameInfos.Priority == 0)
-	{
-		sprintf(GameInfos.ip,"%s",ip);
-	}
+	snprintf(GameInfos.ip, sizeof(GameInfos.ip), "%s", ip); // UpdateGame chose it (ADR 0022)
 }
 
 int cBV2game::Update(float elapsed)

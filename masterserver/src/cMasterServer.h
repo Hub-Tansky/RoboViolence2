@@ -67,7 +67,8 @@ public:
 	void		RemoveClient(long baboNetID);
 
 	MasterClient*	GetClientByID(UINT4 babonetID);
-	cBV2game*	GetGameByIPport(char *ip,unsigned short port);								//va retourner la game qui est sur ce ip/port
+	cBV2game*	GetGameByConnection(UINT4 baboID,unsigned short port); // the game a connection registered
+	static bool	IsPrivateAddress(const char *ip); // 10/8, 127/8, 172.16/12, 192.168/16
 	UINT4	GetGameBaboIDByIPport(char *ip,unsigned short port);
 	int		CreateGame(cBV2game* newGame);										//permet de creer une nouvelle game de bv2
 	void		UpdateStats(const stPlayerResult & result);

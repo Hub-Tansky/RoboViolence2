@@ -21,7 +21,7 @@ Robo Violence 2: unofficial fork of BaboViolent 2, a top-down multiplayer shoote
 | Supply chain | Dependency graph fed by vcpkg (`dependency-graph.yml`, on push to `main`); Dependabot alerts and security updates on; Dependabot version updates for GitHub Actions (`.github/dependabot.yml`); CodeQL `c-cpp` and `actions` (`codeql.yml`, not required). Dependabot and OSV can't read vcpkg purls; `osv-vcpkg.yml` (weekly) queries OSV by each port's upstream commit (`tools/osv-vcpkg.py`). Bump the vcpkg baseline monthly, or sooner when it reports a port. |
 | Hosting | Server images from `packaging/docker/Dockerfile` (GHCR on `main`), runbook [docs/ops/runbook.md](docs/ops/runbook.md). |
 | Known defects | [docs/analysis/KEY_QUESTIONS.md](docs/analysis/KEY_QUESTIONS.md). |
-| Decisions | [docs/decisions/README.md](docs/decisions/README.md): 0001 Ninja, 0002 libcurl compiled out, 0003 OpenGL 2.1 kept, 0004 project name (superseded by 0008), 0005 `main/` data root, 0006 platform layer, 0007 data root, pref dir and config layers, 0008 display name "Robo Violence 2", 0009 internal renaming, 0010 BV2 asset compatibility and GUI freeze, 0011 gettext PO translations, 0012 Windows 10 22H2 minimum, 0013 rulesets, 0014 libsodium HMAC, 0015 admin HTTP API, 0016 player data lookup and package content, 0017 playtest pull agent, 0018 staging pull deploy, 0019 in-game name and fork credits, 0020 package and release format, 0021 one-argument CString is text. |
+| Decisions | [docs/decisions/README.md](docs/decisions/README.md): 0001 Ninja, 0002 libcurl compiled out, 0003 OpenGL 2.1 kept, 0004 project name (superseded by 0008), 0005 `main/` data root, 0006 platform layer, 0007 data root, pref dir and config layers, 0008 display name "Robo Violence 2", 0009 internal renaming, 0010 BV2 asset compatibility and GUI freeze, 0011 gettext PO translations, 0012 Windows 10 22H2 minimum, 0013 rulesets, 0014 libsodium HMAC, 0015 admin HTTP API, 0016 player data lookup and package content, 0017 playtest pull agent, 0018 staging pull deploy, 0019 in-game name and fork credits, 0020 package and release format, 0021 one-argument CString is text, 0022 advertised server address. |
 
 ### Open items
 
@@ -260,6 +260,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/decisions/0019-in-game-name-and-fork-credits.md` | ADR: in-game name, fork credits, "LOADING" splash, survey removed (Phase C step 2) |
 | `docs/decisions/0020-package-and-release-format.md` | ADR: package, installer, `.dmg` and release format; engine-only public releases (Phase C step 3) |
 | `docs/decisions/0021-cstring-one-argument-is-text.md` | ADR: one-argument `CString` copies text; two or more arguments format (Phase C step 5) |
+| `docs/decisions/0022-advertised-server-address.md` | ADR: the master lists `sv_publicAddress` only from private sources; `KILL_SERV` by connection (Phase C step 6) |
 | `docs/decisions/README.md` | ADR format and index |
 
 ### `docs/ops`
@@ -322,6 +323,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/roadmap/phase-c-installers-and-fixes/step3-unsigned-installers.md` | Scope file for step3 |
 | `docs/roadmap/phase-c-installers-and-fixes/step4-housekeeping.md` | Scope file for step4 |
 | `docs/roadmap/phase-c-installers-and-fixes/step5-client-engine-fixes.md` | Scope file for step5 |
+| `docs/roadmap/phase-c-installers-and-fixes/step6-server-and-master.md` | Scope file for step6 |
 
 ### `docs/roadmap/phase-c-installers-and-fixes/reviews`
 
@@ -337,6 +339,8 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/roadmap/phase-c-installers-and-fixes/reviews/step4.md` | Step 4 review record |
 | `docs/roadmap/phase-c-installers-and-fixes/reviews/step5-report.md` | Raw fresh-context reviewer reports for step 5 |
 | `docs/roadmap/phase-c-installers-and-fixes/reviews/step5.md` | Step 5 review record |
+| `docs/roadmap/phase-c-installers-and-fixes/reviews/step6-report.md` | Raw fresh-context reviewer reports for step 6 |
+| `docs/roadmap/phase-c-installers-and-fixes/reviews/step6.md` | Step 6 review record |
 
 ### `docs/roadmap/phase-t-testing-environment`
 
@@ -726,7 +730,6 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/Player.h` | Player entity: movement, weapons, hits, rendering |
 | `game/src/PlayerUpdate.cpp` | Player: per-tick update (physics, firing, timers) |
 | `game/src/Quit.h` | Quit confirmation dialog |
-| `game/src/RemoteAdminPackets.h` | Wire structs for the remote-admin protocol |
 | `game/src/ReportGen.cpp` | XML server report generation |
 | `game/src/ReportGen.h` | XML server report generation |
 | `game/src/Scene.cpp` | Top-level scene: main loop, menus, game and editor switching, rendering setup |

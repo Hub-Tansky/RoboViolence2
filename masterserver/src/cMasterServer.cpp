@@ -340,6 +340,13 @@ int cMasterServer::GetBV2List(MasterClient *client)
 	return 0;
 }
 
+bool cMasterServer::IsPrivateAddress(const char *ip)
+{
+	int a = -1, b = -1;
+	if (sscanf(ip, "%d.%d", &a, &b) != 2) return false;
+	return a == 10 || a == 127 || (a == 192 && b == 168) || (a == 172 && b >= 16 && b <= 31);
+}
+
 int cMasterServer::UpdateGame(stBV2row *row,UINT4 fromID)
 {
 	// check for racial slurs in the server name
@@ -376,7 +383,12 @@ int cMasterServer::UpdateGame(stBV2row *row,UINT4 fromID)
 	}
 
 	
-	int gameID = CreateGame(new cBV2game(c->IP,*row,fromID));
+	// A server behind NAT or Docker advertises its public address; trusted only from a private or loopback source
+	// (PNS-44, ADR 0022)
+	row->ip[sizeof(row->ip) - 1] = '\0';
+	row->Priority = 0; // master use only: a client-set priority would bypass the address rule
+	char * ip = (row->ip[0] && IsPrivateAddress(c->IP)) ? row->ip : c->IP;
+	int gameID = CreateGame(new cBV2game(ip,*row,fromID));
 	return gameID;
 }
 
@@ -402,6 +414,7 @@ int cMasterServer::CreateGame(cBV2game* newGame)
 					G->LastCheck = 0;
 					//la game existe deja on update,delete et on sort
 					memcpy(&(G->GameInfos),&(newGame->GameInfos),sizeof(stBV2row));
+					G->BaboID = newGame->BaboID; // the connection that sent this heartbeat (KILL_SERV)
 
 					WriteWebGame(G->GameInfos, false);
 
@@ -422,6 +435,7 @@ int cMasterServer::CreateGame(cBV2game* newGame)
 				//la game existe deja on update, delete et on sort
 				G->LastCheck = 0;
 				memcpy(&(G->GameInfos),&(newGame->GameInfos),sizeof(stBV2row));
+				G->BaboID = newGame->BaboID; // the connection that sent this heartbeat (KILL_SERV)
 
 				WriteWebGame(G->GameInfos, false);
 
@@ -463,18 +477,10 @@ int cMasterServer::CreateGame(cBV2game* newGame)
 	return 0;
 }
 
-cBV2game* cMasterServer::GetGameByIPport(char *ip,unsigned short port)
+cBV2game* cMasterServer::GetGameByConnection(UINT4 baboID,unsigned short port)
 {
 	for(cBV2game* G = Games; G; G=G->Next)
-	{
-		if(!stricmp(G->GameInfos.ip,ip))
-		{
-			if(G->GameInfos.port == port)
-			{
-				return G;
-			}
-		}
-	}
+		if(G->BaboID == baboID && G->GameInfos.port == port) return G;
 	return 0;
 }
 

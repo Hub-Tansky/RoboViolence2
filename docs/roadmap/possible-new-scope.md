@@ -325,7 +325,7 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Extract:** the join and admin proofs are HMACs keyed by the password over a public nonce (ADR 0014). Someone who records one can test password guesses offline; the server accepts unlimited `ADMIN_REQUEST`s (no budget in step 9's rate limits).
 - **Why it matters:** a short `zsv_adminPass` or `sv_password` can be found from one captured login.
 - **Suggested home:** step 12 (remote admin): an attempt budget per connection, a minimum password length for `zsv_adminPass`; a PAKE or TLS if passwords must survive capture.
-- **Status:** Accepted → [Phase C](phase-c-installers-and-fixes/README.md)
+- **Status:** Done in Phase C [step 6](phase-c-installers-and-fixes/step6-server-and-master.md)
 
 ### PNS-43: Join-time identity gaps left after step 10
 
@@ -336,7 +336,7 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
   - The master's ban and unban messages are authorised by a hard-coded password (`roxbabo`) sent in cleartext.
 - **Why it matters:** privacy (IPs), and anyone can add master bans.
 - **Suggested home:** step 12 (remote admin) for the ban password; a protocol step for the join order and IPs.
-- **Status:** Accepted → [Phase C](phase-c-installers-and-fixes/README.md) (master ban password); join order and relayed IPs → Phase D with PNS-17
+- **Status:** Master ban password done in Phase C [step 6](phase-c-installers-and-fixes/step6-server-and-master.md) (wire format: PNS-66); join order and relayed IPs → Phase D with PNS-17
 
 ### PNS-44: The master lists a server at its connection's address
 
@@ -344,7 +344,7 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Extract:** `bv2Row.ip` is left empty (`game/src/CMaster.cpp`, `sendGameInfo`); the master records the address the heartbeat came from. In the compose example that is the server container's internal address.
 - **Why it matters:** remote clients can't join a co-located server from the browser; they must `connect` by hand.
 - **Suggested home:** an advertised address (`sv_publicAddress` or `BV2_PUBLIC_ADDRESS`) sent in the heartbeat and trusted by the master only when it matches a configured server.
-- **Status:** Accepted → [Phase C](phase-c-installers-and-fixes/README.md)
+- **Status:** Done in Phase C [step 6](phase-c-installers-and-fixes/step6-server-and-master.md)
 
 ### PNS-45: AGENTS.md and the CI list miss the containers workflow
 
@@ -362,7 +362,7 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
   - `BV2_ADMIN_API_PORT`, `BV2_ADMIN_API_BIND` and `BV2_ADMIN_API_PROXY` are not in the environment lists of AGENTS.md and config/README.md.
 - **Why it matters:** dead network code, and operators reading the config docs miss the admin API.
 - **Suggested home:** a cleanup step that may edit `game/src/CMaster.*`, AGENTS.md and config/README.md.
-- **Status:** Accepted → [Phase C](phase-c-installers-and-fixes/README.md)
+- **Status:** Done in Phase C [step 6](phase-c-installers-and-fixes/step6-server-and-master.md)
 
 ### PNS-47: Old saved `languageFile` pins English
 
@@ -543,4 +543,20 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Extract:** `CString::operator=(const char*)` (`engine/zeven/include/CString.h`) runs `strlen` on its argument; the one-argument constructor turns null into "" since ADR 0021.
 - **Why it matters:** inconsistent null handling; `x = ptr` with a null `ptr` crashes.
 - **Suggested home:** the next step touching `CString.h`.
+- **Status:** Proposed
+
+### PNS-66: Master bans still travel as a 7-character cleartext password
+
+- **Found in:** Phase C step 6 (2026-10-17), task 6.2.
+- **Extract:** `stCacheBan.Pass[8]` / `stCacheUnban.Pass[10]` (`masterserver/src/cMSstruct.h`); the game's `cacheban` sends the first 7 characters typed. Step 6 replaced `roxbabo` with `BV2_MASTER_BAN_PASS` but kept the wire format.
+- **Why it matters:** anyone on the path to the master reads the ban password; 7 characters are guessable.
+- **Suggested home:** with accounts or a master protocol step (PNS-14, PNS-17): an HMAC over a master nonce, as ADR 0014 does for servers.
+- **Status:** Proposed
+
+### PNS-67: The master's game list keeps dead priority logic and two update paths
+
+- **Found in:** Phase C step 6 review round 2 (2026-10-17), findings 1 and 2.
+- **Extract:** `Priority` is always 0 since step 6, so `GAME_TIMEOUT * 5` (`masterserver/src/cBV2game.cpp`) and `lastHighPriority` in `cMasterServer::CreateGame` take one path; `CreateGame` has two identical "update existing game" blocks (the loop and the tail).
+- **Why it matters:** a fix must be made twice (step 6 did); new games are inserted before the tail for no reason.
+- **Suggested home:** the next step touching `masterserver/src/cMasterServer.cpp`: one loop over all games, append at the tail, plain timeout.
 - **Status:** Proposed
