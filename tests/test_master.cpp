@@ -3,6 +3,14 @@
 #include "SqlStatement.h"
 #include "cNetManager.h"
 
+#ifdef _WIN32
+#include <winsock2.h>
+#else
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <unistd.h>
+#endif
 #include <chrono>
 #include <cstdio>
 #include <filesystem>
@@ -145,6 +153,30 @@ int main(int argc, char ** argv)
 	bb_clientSend(game, (char *)&kill, sizeof(kill), KILL_SERV); // found by its connection, not its listed address
 	pump({game});
 	CHECK(list().empty());
+
+	std::printf("phase: bad partial key\n"); // a peer whose first bytes aren't "RND1" is dropped; the master keeps serving
+	{
+		int fd = (int)socket(AF_INET, SOCK_STREAM, 0);
+		sockaddr_in to = {};
+		to.sin_family = AF_INET;
+		to.sin_port = htons(10207);
+		to.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+		CHECK(connect(fd, (sockaddr *)&to, sizeof(to)) == 0);
+		pump({});
+		send(fd, "XY", 2, 0);
+		pump({});
+		UINT4 other = connectClient();
+		registerGame(other);
+		CHECK(list().size() == 1);
+		bb_clientSend(other, (char *)&kill, sizeof(kill), KILL_SERV);
+		pump({other});
+		bb_clientDisconnect(other);
+#ifdef _WIN32
+		closesocket(fd);
+#else
+		close(fd);
+#endif
+	}
 
 	std::printf("phase: reconnect\n"); // a server whose master link dropped heartbeats on a new connection
 	bb_clientDisconnect(game);
