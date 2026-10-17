@@ -159,10 +159,9 @@ jobs:
         if: runner.os == 'Windows'
         env:
           MESA: 26.0.3
-          MESA_SHA256: unpinned
+          MESA_SHA256: de1ec45c906164de2c046288a8969e83cf2d51d031dc8dfd1f9371bb31cd6755  # first download, 2026-10-17
         run: |
           curl -fsSLo mesa.7z "https://github.com/pal1000/mesa-dist-win/releases/download/$MESA/mesa3d-$MESA-release-msvc.7z"
-          sha256sum mesa.7z
           echo "$MESA_SHA256  mesa.7z" | sha256sum -c
           7z x -bd -omesa mesa.7z x64 > /dev/null
           cp mesa/x64/*.dll roboviolence2-${{ matrix.preset }}/
