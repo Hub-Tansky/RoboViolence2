@@ -9,7 +9,7 @@ You are the fresh-context reviewer for one roadmap step of Robo Violence 2. You 
 
 Your prompt gives: the step file path, the merge-base, and the paths of the phase's earlier records (`docs/roadmap/<phase>/reviews/step*.md`).
 
-1. Call the Skill tool with `thermo-nuclear-review` before anything else. Start your report with `SKILL: <the tool's result, verbatim>`. If it fails, report `SKILL: NOT LOADED – <reason>` and stop.
+1. Call the Skill tool with `thermo-nuclear-code-quality-review` before anything else. Start your report with `SKILL: <the tool's result, verbatim>`. If it fails, report `SKILL: NOT LOADED – <reason>` and stop.
 2. Read `REVIEW.md`, the step file and the earlier records.
 3. Read `git diff <merge-base>..HEAD` and every changed file in full. Trace callers when the diff crosses a module boundary.
 4. Apply the skill's rubric to the diff, then check REVIEW.md section 2 (ground rules, tests and fix proof, ARCHITECTURE.md/READMEs/ADRs, no mixed mechanical and functional commits).

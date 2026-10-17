@@ -48,7 +48,7 @@ cmake --build --preset <preset> --target bv2dedicated bv2master
 - Finish every step by updating `ARCHITECTURE.md` (inventory and changed facts) and running `tools/check-architecture.sh`.
 - When a step closes, set its **Status** to `DONE (YYYY-MM-DD)` and add what you learned about later phases or out-of-scope work to [docs/roadmap/possible-new-scope.md](docs/roadmap/possible-new-scope.md) ([docs/roadmap/README.md](docs/roadmap/README.md)).
 - Record non-obvious decisions as ADRs in `docs/decisions/`.
-- Work is done only per [REVIEW.md](REVIEW.md): `tools/review.sh` passes (CI `review` check), and a step closes with a review by the `thermo-nuclear-code-quality-review` subagent (`.claude/agents/`, rubric in `.claude/skills/thermo-nuclear-review/`), which any session can spawn, recorded in `docs/roadmap/<phase>/reviews/stepN.md`. Its stop rule and forbidden shortcuts apply to every change.
+- Work is done only per [REVIEW.md](REVIEW.md): `tools/review.sh` passes (CI `review` check), and a step closes with a review by the `thermo-nuclear-code-quality-review` subagent (`.claude/agents/`, rubric in `.claude/skills/thermo-nuclear-code-quality-review/`), which any session can spawn, recorded in `docs/roadmap/<phase>/reviews/stepN.md`. Its stop rule and forbidden shortcuts apply to every change.
 - Don't mix mechanical rewrites (encoding, renames, formatting) with functional changes in one commit.
 
 ## Compile-time variants
