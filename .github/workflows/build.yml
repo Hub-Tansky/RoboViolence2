@@ -164,6 +164,7 @@ jobs:
           echo "$MESA_SHA256  mesa.7z" | sha256sum -c
           7z x -bd -omesa mesa.7z x64 > /dev/null
           cp mesa/x64/*.dll roboviolence2-${{ matrix.preset }}/
+          echo GALLIUM_DRIVER=llvmpipe >> "$GITHUB_ENV"
       - name: Server and master start from the package
         working-directory: roboviolence2-${{ matrix.preset }}
         env:
@@ -187,7 +188,6 @@ jobs:
         working-directory: roboviolence2-${{ matrix.preset }}
         env:
           SDL_AUDIODRIVER: dummy
-          GALLIUM_DRIVER: llvmpipe
         run: |
           tmp=$RUNNER_TEMP   # Windows: cygpath -m gives D:/a/_temp, one path form for Git Bash and bv2.exe
           # run-client.cmd detaches (start ""), so its pid can't be tracked: start bv2.exe directly
