@@ -35,5 +35,4 @@ Skill evidence: both rounds `SKILL: Launching skill: thermo-nuclear-code-quality
 
 ## Not done / unsure
 
-- `docs/decisions/**` added to Allowed paths pending owner approval (ADR 0021).
 - The client was not run on screen for the menu default; it is a default value only.

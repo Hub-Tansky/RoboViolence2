@@ -1,6 +1,6 @@
 # Step 5: Client and engine fixes
 
-**Status:** IN PROGRESS
+**Status:** DONE (2026-10-17)
 
 **Depends on:** Phase B DONE (manual tests: macOS and Linux pass; Windows waived by the owner). **Next:** step 6 (server and master). **Index:** [README.md](README.md)
 
@@ -11,7 +11,7 @@
 | Goal | A `char*` can no longer become a `CString` format by accident, DKT textures are freed and a malformed one can't crash the loader, menus default to the plain style, and old configs follow the OS language |
 | In scope | Tasks 5.1–5.4 below (PNS-34, PNS-38 R29, PNS-30, PNS-47) |
 | Out of scope | The "High detail menus" drawing (PNS-48, [GUI]); R28 (step 7); other `CString` API changes (`operator=`, `set`) |
-| Allowed paths | `engine/zeven/include/CString.h`, `engine/zeven/src/CString.cpp`, `engine/zeven/src/dkf.cpp`, `engine/zeven/README.md`, `engine/dko/src/ePTexture.{h,cpp}`, `game/src/**` (`GameVar.cpp`, `Lang.{h,cpp}`, `Server.cpp`), `config/bv2.example.cfg` (`r_highDetailMenu`), `content/languages/README.md`, `tests/**`, `docs/analysis/**`, `AGENTS.md`, `ARCHITECTURE.md`, `docs/roadmap/**` |
+| Allowed paths | `engine/zeven/include/CString.h`, `engine/zeven/src/CString.cpp`, `engine/zeven/src/dkf.cpp`, `engine/zeven/README.md`, `engine/dko/src/ePTexture.{h,cpp}`, `game/src/**` (`GameVar.cpp`, `Lang.{h,cpp}`, `Server.cpp`), `config/bv2.example.cfg` (`r_highDetailMenu`), `content/languages/README.md`, `tests/**`, `docs/analysis/**`, `docs/decisions/**` (owner 2026-10-17: ADR 0021), `AGENTS.md`, `ARCHITECTURE.md`, `docs/roadmap/**` |
 | Inputs | `AGENTS.md`, `ARCHITECTURE.md`, PNS-30, PNS-34, PNS-38, PNS-47, `docs/analysis/KEY_QUESTIONS.md` R29 |
 | Deliverables | One-argument text constructor and a formatting template (ADR 0021); R29 fix; new defaults; tests |
 | Definition of done | See "Acceptance checks". All must pass. `ARCHITECTURE.md` is updated |

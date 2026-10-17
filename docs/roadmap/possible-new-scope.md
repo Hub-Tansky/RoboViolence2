@@ -232,7 +232,7 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Extract:** Options → "High detail menus" (`r_highDetailMenu`, default `true`, `game/src/GameVar.cpp:677`) drives `renderMenuQuad` (`game/src/Helper.cpp:248`), upstream code. Off (`game/src/Helper.cpp:342`): one smooth translucent vertical gradient. On (`game/src/Helper.cpp:296`): a two-part gradient with a hard step at mid-height, and four full-size black quads at alpha 0.25 meant as a 1 px shadow, which darken the whole panel by about 68%.
 - **Why it matters:** the default setting gives the worse-looking, less translucent menus.
 - **Change (owner-approved [GUI], 2026-10-14):** default `r_highDetailMenu` to `false` (one line). The drawing fix is PNS-48.
-- **Status:** Accepted → [Phase C](phase-c-installers-and-fixes/README.md)
+- **Status:** Done in Phase C [step 5](phase-c-installers-and-fixes/step5-client-engine-fixes.md)
 
 ### PNS-31: Finish the step 2 play-test checks
 
@@ -268,7 +268,7 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Extract:** "`console->svChange(svChange.svChange)` … `TimedMessage(chat.message)` … Neither is a visible `CString(` call … Making the format constructor `explicit` would close the whole class of bugs."
 - **Why it matters:** `CString(char* fmt, ...)` is implicit, so passing wire text anywhere a `CString` is expected runs it as a printf format (R16, R21–R23 and the two client cases). Step 4 fixed the sites it found; an `explicit` constructor would make the compiler find the rest.
 - **Suggested home:** step 7 (medium/low defects), or a step that touches `engine/zeven/include/CString.h`; expect many call-site changes.
-- **Status:** Accepted → [Phase C](phase-c-installers-and-fixes/README.md)
+- **Status:** Done in Phase C [step 5](phase-c-installers-and-fixes/step5-client-engine-fixes.md)
 
 ### PNS-36: Update docs that still describe R3 as current
 
@@ -293,7 +293,7 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Extract:** KEY_QUESTIONS R28 "On Windows, babonet intermittently crashes … when a TCP connection closes"; R29 "`~_typLayer` calls `glDeleteTextures` when `textureID == 0` … `loadTexture` dereferences a null `ptrLayer`".
 - **Why it matters:** R28 can crash the Windows game and master when a player leaves; the master test is off on Windows until it is fixed. R29 leaks every DKT texture.
 - **Suggested home:** step 7 (R29 is in `engine/dko/src/ePTexture.h`); R28 needs a Windows debugging session (a crash dump from the owner's PC or a Windows CI run with a debugger).
-- **Status:** Accepted → [Phase C](phase-c-installers-and-fixes/README.md)
+- **Status:** R29 done in Phase C [step 5](phase-c-installers-and-fixes/step5-client-engine-fixes.md); R28 → Phase C step 7
 
 ### PNS-39: Why did the dropped-flag radii differ?
 
@@ -370,7 +370,7 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Extract:** builds before step 13 saved `languageFile "main/languages/en.lang"` in the user's `bv2.cfg`; a saved value wins over the OS language (`game/src/GameVar.cpp` `reloadLanguage`), so upgraded players never get the OS default. `content/languages/README.md` only documents the workaround.
 - **Why it matters:** translations stay invisible to existing players until they edit their config.
 - **Suggested home:** PNS-21 or the next step touching `GameVar.cpp`: treat the old default value as empty once, on load.
-- **Status:** Accepted → [Phase C](phase-c-installers-and-fixes/README.md)
+- **Status:** Done in Phase C [step 5](phase-c-installers-and-fixes/step5-client-engine-fixes.md)
 
 ### PNS-48: Fix the "High detail menus" drawing
 
