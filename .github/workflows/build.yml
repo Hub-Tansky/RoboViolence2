@@ -167,13 +167,13 @@ jobs:
       - name: Server and master start from the package
         working-directory: roboviolence2-${{ matrix.preset }}
         env:
-          MSYS_NO_PATHCONV: "1"
+          MSYS_NO_PATHCONV: "1"  # Git Bash would turn cmd's /c and taskkill's /F into paths
         run: |
           set -euo pipefail
           export BV2_PREF_DIR="$RUNNER_TEMP/pref-server"
           if [ "$RUNNER_OS" = Windows ]; then
             printf 'quit\n' | cmd /c run-server.cmd > server.log 2>&1
-            cmd /c run-master.cmd &
+            cmd /c run-master.cmd &   # $! would be cmd's pid, not bv2master's: stopped by name below
           else
             printf 'quit\n' | ./run-server.sh > server.log 2>&1
             ./run-master.sh & pid=$!
@@ -189,7 +189,7 @@ jobs:
           SDL_AUDIODRIVER: dummy
           GALLIUM_DRIVER: llvmpipe
         run: |
-          tmp=$RUNNER_TEMP
+          tmp=$RUNNER_TEMP   # Windows: cygpath -m gives D:/a/_temp, one path form for Git Bash and bv2.exe
           # run-client.cmd detaches (start ""), so its pid can't be tracked: start bv2.exe directly
           if [ "$RUNNER_OS" = Windows ]; then tmp=$(cygpath -m "$tmp"); client=./bv2.exe; else client=./run-client.sh; fi
           export BV2_PREF_DIR="$tmp/pref-client"
