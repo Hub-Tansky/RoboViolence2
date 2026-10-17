@@ -133,7 +133,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/fuzz_server.cpp` | Random-mutation fuzzer for one message type on the in-process server; writes the crashing input to `<out>/<type>/last.bin` (CI job `fuzz`) |
 | `tests/test_server_harness.cpp` | The in-process server starts on the placeholder CTF map, accepts a client and sends it the game state |
 | `tests/test_validator.cpp` | Steps 8, 9: the step 8 kicks, `sv_antiCheat` levels, and each step 9 rule against a cheat and against normal (lagged) play |
-| `tests/test_master.cpp` | In-process master on port 10207 with a scratch `master.db`: register, list, heartbeat timeout (simulated 61 s), removal by `KILL_SERV`, SQL injection in names, maps, nicks and IPs, and the ban list with LIKE filters (Q-S3). Not run on Windows (R28) |
+| `tests/test_master.cpp` | In-process master on port 10207 with a scratch `master.db`: register, list, heartbeat timeout (simulated 61 s), removal by `KILL_SERV`, SQL injection in names, maps, nicks and IPs, the ban list with LIKE filters (Q-S3), the ban secret, the advertised address and a reconnect; runs on Windows since R28 was fixed |
 | `tests/test_netpacket.cpp` | Byte-level layout of the packed wire structs |
 | `tests/test_staging_deploy.sh` | Phase T step 2: staging deploy helpers: main-only run selection, `/status` player count, failures per commit, infrastructure stages, env-file mode and readonly repository (ctest `staging_deploy`) |
 | `tests/test_playtest_agent.sh` | Phase T step 1: playtest agent helpers: main-only run selection (fork PR from `main` rejected), artifact digest, attempt limit, env-file mode and no export (ctest `playtest_agent`, Unix with `jq`) |
@@ -168,6 +168,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `.github/workflows/hygiene.yml` | CI: ARCHITECTURE.md inventory, repository hygiene, content case; `review` (`tools/review.sh`) on PRs |
 | `.github/workflows/codeql.yml` | CodeQL: `c-cpp` (manual linux-x64 build of the three executables) and `actions`; push, PR, weekly; alerts under `build/` (vcpkg headers) filtered out |
 | `.github/workflows/dependency-graph.yml` | Submits resolved vcpkg ports to the dependency graph on push to `main` |
+| `.github/workflows/r28-windows.yml` | Temporary (Phase C step 7): loops `test_master` on Windows under ASan and cdb |
 | `.github/workflows/osv-vcpkg.yml` | Weekly OSV check of the vcpkg ports by upstream commit (`tools/osv-vcpkg.py`); not required |
 | `.github/workflows/containers.yml` | CI: builds both server images, checks non-root, runs the compose example (healthy, passworded server listed by the master), checks a remote `status` over TLS and `/deployed`, pushes multi-arch `:<sha>` and `:latest` to GHCR from `main` and weekly |
 
@@ -324,6 +325,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/roadmap/phase-c-installers-and-fixes/step4-housekeeping.md` | Scope file for step4 |
 | `docs/roadmap/phase-c-installers-and-fixes/step5-client-engine-fixes.md` | Scope file for step5 |
 | `docs/roadmap/phase-c-installers-and-fixes/step6-server-and-master.md` | Scope file for step6 |
+| `docs/roadmap/phase-c-installers-and-fixes/step7-windows-tcp-close.md` | Scope file for step7 |
 
 ### `docs/roadmap/phase-c-installers-and-fixes/reviews`
 
