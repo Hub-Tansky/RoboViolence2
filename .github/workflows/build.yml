@@ -132,7 +132,7 @@ jobs:
           kill "$pid"
   # Phase T step 3: the Windows and macOS packages start. Not required until 10 consecutive green runs on main.
   package-smoke:
-    name: package-smoke (${{ matrix.preset }}, not required)
+    name: package-smoke (${{ matrix.preset }})
     needs: build
     runs-on: ${{ matrix.os }}
     strategy:
@@ -151,8 +151,7 @@ jobs:
           skip-decompress: true  # extract it ourselves: unzip in the action drops exec bits and bundle symlinks
       - name: Extract
         run: |
-          ls -l
-          zip=$(ls roboviolence2-${{ matrix.preset }}.zip*)
+          zip=roboviolence2-${{ matrix.preset }}.zip
           if [ "$RUNNER_OS" = Windows ]; then 7z x -bd "$zip" > /dev/null; else ditto -x -k "$zip" .; fi
       # The runner has no OpenGL driver: Mesa's software renderer, loaded from the application folder
       - name: Mesa llvmpipe next to bv2.exe
@@ -191,13 +190,15 @@ jobs:
           GALLIUM_DRIVER: llvmpipe
         run: |
           tmp=$RUNNER_TEMP
+          # run-client.cmd detaches (start ""), so its pid can't be tracked: start bv2.exe directly
           if [ "$RUNNER_OS" = Windows ]; then tmp=$(cygpath -m "$tmp"); client=./bv2.exe; else client=./run-client.sh; fi
           export BV2_PREF_DIR="$tmp/pref-client"
           printf 'r_fullScreen false\n' > "$tmp/smoke.cfg"   # runners have no display mode to switch to
-          "$client" --placeholders --config "$tmp/smoke.cfg" & pid=$!
+          "$client" --placeholders --config "$tmp/smoke.cfg" > client.log 2>&1 & pid=$!
           sleep 10
-          kill -0 "$pid" 2>/dev/null || { rc=0; wait "$pid" || rc=$?; echo "client exited early with $rc"; exit 1; }
+          kill -0 "$pid" 2>/dev/null || { rc=0; wait "$pid" || rc=$?; cat client.log; echo "client exited early with $rc"; exit 1; }
           kill "$pid"
+          cat client.log
           # An init failure blocks in a message box; the console (console.log) exists only after init succeeded
           ls -l "$BV2_PREF_DIR/console.log"
   smoke:
