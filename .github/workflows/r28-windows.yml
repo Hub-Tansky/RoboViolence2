@@ -1,0 +1,51 @@
+name: r28-windows
+# Temporary diagnostic for R28 (Phase C step 7): runs the master test repeatedly on Windows under ASan and cdb.
+on:
+  push:
+    branches: [refactor/phase-c-step7-windows-tcp-close]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  loop:
+    name: loop (${{ matrix.preset }})
+    runs-on: windows-2025
+    strategy:
+      fail-fast: false
+      matrix:
+        preset: [win-x64-msvc-asan, win-x64-msvc]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup-vcpkg
+        with:
+          cache-key: ${{ matrix.preset }}
+      - uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
+        with:
+          arch: x64
+      - run: cmake --preset ${{ matrix.preset }} -DBV2_BUILD_CLIENT=OFF
+      - run: cmake --build --preset ${{ matrix.preset }} --target test_master bv2_seed_master_db
+      - name: Run test_master 50 times
+        shell: pwsh
+        run: |
+          $rt = "build/${{ matrix.preset }}/runtime"
+          $exe = Join-Path $rt "test_master.exe"
+          $cdb = Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\Debuggers\x64\cdb.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
+          Write-Host "cdb: $cdb"
+          $fails = 0
+          for ($i = 1; $i -le 50; $i++) {
+            $scratch = Join-Path $env:RUNNER_TEMP "m$i"
+            if ("${{ matrix.preset }}" -like "*asan*" -or -not $cdb) {
+              $out = & $exe (Resolve-Path $rt) $scratch 2>&1 | Out-String
+            } else {
+              $out = & $cdb.FullName -lines -c "g; .ecxr; kP; ~*kb; q" $exe (Resolve-Path $rt) $scratch 2>&1 | Out-String
+            }
+            $code = $LASTEXITCODE
+            $crashed = ($code -ne 0) -or ($out -match "Access violation|ERROR: AddressSanitizer|FAIL ")
+            if ($crashed) {
+              $fails++
+              Write-Host "===== run $i exit $code ====="
+              Write-Host $out
+            }
+          }
+          Write-Host "failed runs: $fails / 50"
+          if ($fails -gt 0) { exit 1 }
