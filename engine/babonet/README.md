@@ -11,4 +11,4 @@ Networking library: TCP (with optional UDP) client/server, a UDP peer-to-peer ma
 
 - Wire fields are 32-bit (`INT4`/`UINT4`, `platform.h`). The handshake and packet headers are fixed 4-byte fields.
 - Connection handles are `babonetID`, not game `playerID`; `bb_serverSend` destination 0 is broadcast.
-- Protocol analysis: [../../docs/analysis/ALGORITHM_01-Networking.md](../../docs/analysis/ALGORITHM_01-Networking.md).
+- Protocol analysis: [../../docs/analysis/ALGORITHM_01-Networking.md](https://github.com/Hub-Tansky/RoboViolence2/blob/fc0aff7c5aa946406c7c110e8e7c2d972a7daeb8/docs/analysis/ALGORITHM_01-Networking.md).
