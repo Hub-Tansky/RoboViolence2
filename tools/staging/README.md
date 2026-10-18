@@ -1,8 +1,8 @@
 # Staging deploy agent
 
-Keeps a staging host on the newest `main` server and master images: pulls only successful `containers` runs of `main` from this repo, deploys only when no one is connected, rolls back on failure and publishes the running commit at `/deployed`. Scope: [step 2](../../docs/roadmap/phase-t-testing-environment/step2-staging-deploy.md). Decision: [ADR 0018](../../docs/decisions/0018-staging-pull-deploy.md). Container operation: [runbook](../../docs/ops/runbook.md).
+Keeps a staging host on the newest `main` server and master images: pulls only successful `containers` runs of `main` from this repo, deploys only when no one is connected, rolls back on failure and publishes the running commit at `/deployed`. Scope: [step 2](https://github.com/Hub-Tansky/RoboViolence2/blob/58c91b2a660db2b290b0b5f504381980a6aedba2/docs/roadmap/phase-t-testing-environment/step2-staging-deploy.md). Decision: [ADR 0018](../../docs/decisions/0018-staging-pull-deploy.md). Container operation: [runbook](../../docs/ops/runbook.md).
 
-The host's address, provider and access go in the private wiki (`docs/prv_wiki/docs_restricted/testing-environment/`), never in the repo.
+The host's address, provider and access go in the owner's private Obsidian vault (`RoboViolence2/prv_wiki/docs_restricted/testing-environment/`), never in the repo.
 
 ## Needs
 

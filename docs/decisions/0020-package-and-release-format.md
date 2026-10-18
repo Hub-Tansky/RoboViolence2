@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-10-14
-- Affects: [Phase C step 3](../roadmap/phase-c-installers-and-fixes/step3-unsigned-installers.md); PNS-16, PNS-20, PNS-23
+- Affects: [Phase C step 3](https://github.com/Hub-Tansky/RoboViolence2/blob/58c91b2a660db2b290b0b5f504381980a6aedba2/docs/roadmap/phase-c-installers-and-fixes/step3-unsigned-installers.md); PNS-16, PNS-20, PNS-23
 
 ## Context
 - Phase B step 1 introduced per-OS play-test packages (`packaging/make-package.py`) without an ADR (PNS-23).

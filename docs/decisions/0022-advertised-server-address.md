@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-10-17
-- Affects: [Phase C step 6](../roadmap/phase-c-installers-and-fixes/step6-server-and-master.md) task 6.3; PNS-44
+- Affects: [Phase C step 6](https://github.com/Hub-Tansky/RoboViolence2/blob/58c91b2a660db2b290b0b5f504381980a6aedba2/docs/roadmap/phase-c-installers-and-fixes/step6-server-and-master.md) task 6.3; PNS-44
 
 ## Context
 - The master files a game under the heartbeat's source address. A server in Docker beside the master (the compose example) or behind NAT shows up at an address remote players can't reach.

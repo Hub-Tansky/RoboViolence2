@@ -110,7 +110,7 @@ def vec(x, y, z):
 
 
 def bvm(name, size=16):
-    """Walled arena with spawns for every mode (format: docs/analysis/02_DATA_STRUCTURES.md 4.3)."""
+    """Walled arena with spawns for every mode (format: https://github.com/Hub-Tansky/RoboViolence2/blob/fc0aff7c5aa946406c7c110e8e7c2d972a7daeb8/docs/analysis/02_DATA_STRUCTURES.md 4.3)."""
     out = struct.pack("<I", 20202)
     out += name.encode()[:24].ljust(25, b"\0")  # author field
     out += struct.pack("<hh", 0, 0)  # theme, weather (int16)

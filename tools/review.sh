@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
 # Mechanical review gate (REVIEW.md section 1). Exit 0 only if every check passed.
-# Usage: tools/review.sh [--base <ref>] [--step <step file>] [--full <preset>]
-#   --base  compare against this ref (default origin/main); the diff is merge-base..working tree
-#   --step  step file to check scope against (default: from a refactor/<phase>-stepN-* branch name)
-#   --full  also configure, build and ctest this preset (required before a step is DONE)
+# Usage: tools/review.sh [--base <ref>] [--scope <file>] [--full <preset>]
+#   --base   compare against this ref (default origin/main); the diff is merge-base..working tree
+#   --scope  file holding the PR description (default: $REVIEW_PR_BODY in CI, else `gh pr view` of this branch)
+#   --full   also configure, build and ctest this preset (required before the PR is ready)
 set -u
 cd "$(dirname "$0")/.."
 
-base=origin/main step="" full=""
+base=origin/main scope="" full=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --base) base=$2; shift 2 ;;
-    --step) step=$2; shift 2 ;;
+    --scope) scope=$2; shift 2 ;;
     --full) full=$2; shift 2 ;;
     *) sed -n '2,6p' "$0" >&2; exit 2 ;;
   esac
@@ -38,23 +38,27 @@ else
   echo "SKIP secrets: gitleaks not installed (CI secret-scan runs it)"
 fi
 
-# Scope, anti-gaming and DONE gate: one Python pass over the diff.
-check diff-rules env REVIEW_BASE="$mb" REVIEW_STEP="$step" REVIEW_BRANCH="${GITHUB_HEAD_REF:-${GITHUB_REF_NAME:-$(git rev-parse --abbrev-ref HEAD)}}" python3 - <<'EOF'
-import glob, os, re, subprocess, sys
+# PR description: --scope file, CI's REVIEW_PR_BODY, or this branch's PR via gh. Empty outside a PR.
+if [ -n "$scope" ]; then
+  body=$(cat "$scope")
+elif [ -n "${REVIEW_PR_BODY+x}" ]; then
+  body=$REVIEW_PR_BODY
+elif command -v gh >/dev/null 2>&1; then
+  body=$(gh pr view --json body -q .body 2>/dev/null || true)
+  [ -n "${REVIEW_PR_DRAFT:-}" ] || REVIEW_PR_DRAFT=$(gh pr view --json isDraft -q .isDraft 2>/dev/null || echo true)
+else
+  body=""
+fi
 
-base, step, branch = os.environ["REVIEW_BASE"], os.environ["REVIEW_STEP"], os.environ["REVIEW_BRANCH"]
+# Scope, anti-gaming and review gate: one Python pass over the diff.
+check diff-rules env REVIEW_BASE="$mb" REVIEW_BODY="$body" REVIEW_DRAFT="${REVIEW_PR_DRAFT:-true}" python3 - <<'EOF'
+import os, re, subprocess, sys
+
+base, body, draft = os.environ["REVIEW_BASE"], os.environ["REVIEW_BODY"].replace("\r\n", "\n"), os.environ["REVIEW_DRAFT"] == "true"
 git = lambda *a: subprocess.run(["git", *a], capture_output=True, text=True, check=True).stdout
 changed = [f for f in git("diff", "--name-only", "--diff-filter=ACMR", base).split() if f]
 changed += [f for f in git("ls-files", "--others", "--exclude-standard").split() if f]
 problems = []
-
-# Step file: given, or derived from refactor/<phase>-stepN-<slug>
-m = re.match(r"refactor/(phase-[a-z]+)-step(\d+[a-z]?)-", branch)
-if not step and m:
-    hits = glob.glob(f"docs/roadmap/{m.group(1)}-*/step{m.group(2)}-*.md")
-    if len(hits) != 1:
-        problems.append(f"branch {branch}: expected one step file, found {hits}")
-    step = hits[0] if len(hits) == 1 else ""
 
 def to_regex(g):
     r = re.escape(g).replace(r"\*\*/", "(?:.*/)?").replace(r"\*\*", ".*").replace(r"\*", "[^/]*").replace(r"\?", "[^/]")
@@ -65,19 +69,16 @@ def expand(g):  # {a,b} alternatives
     return [x for alt in mm.group(1).split(",") for x in expand(g[:mm.start()] + alt + g[mm.end():])] if mm else [g]
 
 GUARDS = re.compile(r"^(tools/check-|tools/review\.sh$|tools/original-assets|\.githooks/|\.github/|\.gitleaks\.toml$|\.gitignore$|REVIEW\.md$)")
-if step:
-    row = next((l for l in open(step, encoding="utf-8") if re.match(r"\|\s*Allowed paths\s*\|", l)), None)
-    if row is None:
-        problems.append(f"{step}: no '| Allowed paths |' row")
-    else:
-        globs = [to_regex(x) for t in re.findall(r"`([^`]+)`", row) for x in expand(t)]
-        for f in changed:
-            if not any(g.match(f) for g in globs):
-                problems.append(f"scope: {f} is outside {step} Allowed paths")
+row = next((l for l in body.splitlines() if re.match(r"\|\s*Allowed paths\s*\|", l)), None)
+if row:
+    globs = [to_regex(x) for t in re.findall(r"`([^`]+)`", row) for x in expand(t)]
+    for f in changed:
+        if not any(g.match(f) for g in globs):
+            problems.append(f"scope: {f} is outside the PR's Allowed paths")
 else:
     for f in changed:
         if GUARDS.match(f):
-            print(f"NOTE {f}: guard file changed outside a step; the owner must approve it")
+            print(f"NOTE {f}: guard file changed in a PR without Allowed paths; the owner must approve it")
 
 # Anti-gaming: added lines that switch checks off. Mark a justified line with 'review: allow <reason>'.
 BANNED = re.compile(r"#\s*pragma\s+(warning|clang\s+diagnostic|GCC\s+diagnostic)|NOLINT|-Wno-|\bDISABLED_|--no-verify|continue-on-error:\s*true")
@@ -89,34 +90,23 @@ for line in git("diff", "-U0", "--src-prefix=a/", "--dst-prefix=b/", base).split
         if BANNED.search(line) and "review: allow" not in line:
             problems.append(f"anti-gaming: {file}: {line[1:].strip()[:120]}")
 
-# DONE gate: a step set to DONE needs its fresh-context review record.
-for f in changed:
-    sm = re.match(r"(docs/roadmap/[^/]+)/step(\d+[a-z]?)-[^/]*\.md$", f)
-    if not sm or not os.path.exists(f) or "**Status:** DONE" not in open(f, encoding="utf-8").read():
-        continue
-    rec = f"{sm.group(1)}/reviews/step{sm.group(2)}.md"
-    text = open(rec, encoding="utf-8").read() if os.path.exists(rec) else ""
-    if not text:
-        problems.append(f"DONE gate: {f} is DONE but {rec} is missing")
-    elif "Reviewer: fresh-context subagent" not in text or "## Findings" not in text:
-        problems.append(f"DONE gate: {rec} lacks 'Reviewer: fresh-context subagent' or '## Findings'")
-    elif re.search(r"\|\s*pending\s*\|", text):
-        problems.append(f"DONE gate: {rec} still has pending findings")
-    elif not os.path.exists(rep := f"{sm.group(1)}/reviews/step{sm.group(2)}-report.md"):
-        problems.append(f"DONE gate: {rec} has no raw reviewer report {rep}")
-    elif "SKILL: Launching skill: thermo-nuclear-code-quality-review" not in (rtext := open(rep, encoding="utf-8").read()) or "SKILL: NOT LOADED" in rtext:
-        problems.append(f"DONE gate: {rep} lacks the skill's load line, or says NOT LOADED")
+# Review gate: a ready PR with Allowed paths needs its fresh-context review record in the description.
+if row and not draft:
+    rec = body.split("## Review record", 1)[1] if "## Review record" in body else ""
+    if not rec:
+        problems.append("review gate: the PR is ready but its description has no '## Review record'")
+    elif "Reviewer: fresh-context subagent" not in rec or "### Findings" not in rec:
+        problems.append("review gate: the record lacks 'Reviewer: fresh-context subagent' or '### Findings'")
+    elif re.search(r"\|\s*pending\s*\|", rec):
+        problems.append("review gate: the record still has pending findings")
+    elif "SKILL: Launching skill: thermo-nuclear-code-quality-review" not in rec or "SKILL: NOT LOADED" in rec:
+        problems.append("review gate: the raw reviewer report lacks the skill's load line, or says NOT LOADED")
     else:
-        pns = open("docs/roadmap/possible-new-scope.md", encoding="utf-8").read()
-        for row in re.findall(r"^\|.*\bdeferred\b.*\|\s*$", text, re.M):
-            ids = re.findall(r"PNS-(\d+)", row)
-            if not ids:
-                problems.append(f"DONE gate: {rec}: deferred finding without a PNS-n: {row.strip()[:100]}")
-            for n in ids:
-                if f"### PNS-{n}:" not in pns:
-                    problems.append(f"DONE gate: {rec}: PNS-{n} is not in possible-new-scope.md")
+        for r in re.findall(r"^\|.*\bdeferred\b.*\|\s*$", rec, re.M):
+            if not re.search(r"#\d+|github\.com/(users/Hub-Tansky/projects/1|Hub-Tansky/RoboViolence2/issues/)", r):
+                problems.append(f"review gate: deferred finding without a Project item or issue link: {r.strip()[:100]}")
 
-print(f"step: {step or 'none (not a step branch)'}; {len(changed)} changed files")
+print(f"scope: {'PR Allowed paths' if row else 'none (no Allowed paths row)'}; {len(changed)} changed files")
 for p in problems:
     print(p)
 sys.exit(1 if problems else 0)

@@ -102,7 +102,7 @@ if(TARGET bv2server_lib)
   add_executable(fuzz_server fuzz_server.cpp)
   target_link_libraries(fuzz_server PRIVATE bv2_server_harness)
   bv2_target_defaults(fuzz_server)
-  # Known defects (crash-*.bin, KEY_QUESTIONS.md): passes only while ASan reports the defect; its fix step deletes the file.
+  # Known defects (crash-*.bin, KEY_QUESTIONS.md at fc0aff7): passes only while ASan reports the defect; its fix step deletes the file.
   if(BV2_SANITIZE)
     file(GLOB BV2_CRASH_INPUTS CONFIGURE_DEPENDS "${BV2_CORPUS}/*/crash-*.bin")
     foreach(input ${BV2_CRASH_INPUTS})

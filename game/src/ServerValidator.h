@@ -1,5 +1,5 @@
 // Server-side cheat checks (Phase B steps 8, 9). The handlers in ServerRecv.cpp ask the validator after the
-// pre-dispatch check bound the sender's slot. Rules, limits and tuning: docs/analysis/ANTI_CHEAT_TUNING.md.
+// pre-dispatch check bound the sender's slot. Rules, limits and tuning: https://github.com/Hub-Tansky/RoboViolence2/blob/fc0aff7c5aa946406c7c110e8e7c2d972a7daeb8/docs/analysis/ANTI_CHEAT_TUNING.md
 #pragma once
 #include "Game.h"
 

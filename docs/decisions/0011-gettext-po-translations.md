@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-10-06
-- Affects: [Phase B step 13](../roadmap/phase-b-security-infrastructure-anti-cheat/step13-localisation.md), [PNS-21](../roadmap/possible-new-scope.md#pns-21-localisation-beyond-the-foundations)
+- Affects: [Phase B step 13](https://github.com/Hub-Tansky/RoboViolence2/blob/58c91b2a660db2b290b0b5f504381980a6aedba2/docs/roadmap/phase-b-security-infrastructure-anti-cheat/step13-localisation.md), [PNS-21](https://github.com/Hub-Tansky/RoboViolence2/blob/58c91b2a660db2b290b0b5f504381980a6aedba2/docs/roadmap/possible-new-scope.md#pns-21-localisation-beyond-the-foundations)
 
 ## Context
 - Strings live in `content/languages/en.lang` (`key<TAB>text`), loaded from `languageFile` (`game/src/GameVar.cpp:271`); English is the only language.

@@ -2,7 +2,7 @@
 
 - Status: Superseded by 0008
 - Date: 2026-10-03
-- Affects: [step0 §0.2](../roadmap/phase-a-modern-portable-build/step0-fork-rename-and-asset-removal.md)
+- Affects: [step0 §0.2](https://github.com/Hub-Tansky/RoboViolence2/blob/58c91b2a660db2b290b0b5f504381980a6aedba2/docs/roadmap/phase-a-modern-portable-build/step0-fork-rename-and-asset-removal.md)
 
 ## Context
 - The GPLv3 covers code only. The name "BaboViolent 2" and its logos are claimed by RndLabs Inc. (`License.txt` §2c) with no grant (the asset licence notes (kept outside this repository)).
@@ -10,7 +10,7 @@
 - Binaries, window titles, in-game strings and code identifiers (`bv2`, `babo`) still carry the old name.
 
 ## Decision
-The project is **RoboViolence 2**, an unofficial fork of BaboViolent 2. GitHub repo `Hub-Tansky/RoboViolence2`; local dir `RoboViolence2-master`. Code identifiers, binaries and in-game strings keep the old names until the rebrand ([PNS-20](../roadmap/possible-new-scope.md#pns-20-replacement-assets-and-rebrand)).
+The project is **RoboViolence 2**, an unofficial fork of BaboViolent 2. GitHub repo `Hub-Tansky/RoboViolence2`; local dir `RoboViolence2-master`. Code identifiers, binaries and in-game strings keep the old names until the rebrand ([PNS-20](https://github.com/Hub-Tansky/RoboViolence2/blob/58c91b2a660db2b290b0b5f504381980a6aedba2/docs/roadmap/possible-new-scope.md#pns-20-replacement-assets-and-rebrand)).
 
 ## Consequences
 - Docs and README say "RoboViolence 2" and "unofficial fork"; they never imply endorsement by the original authors.
