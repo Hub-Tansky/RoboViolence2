@@ -75,6 +75,13 @@ load_env() { # sourced, not exported: each secret is passed only to the process 
 	[ -n "${BV2_ADMIN_PASS:-}" ] || { echo "BV2_ADMIN_PASS is not set in $ENV_FILE"; return 1; }
 }
 
+# launch_script <cfg> <map>: the server launch script as console lines with <map> instead of its own map.
+# Original data (BV2_DATA_DIR) has no placeholder map; the server reads these lines on stdin.
+launch_script() {
+	[[ $2 =~ ^[A-Za-z0-9_-]+$ ]] || return 1
+	sed -E -e '/^endscript/,$d' -e '/^[[:space:]]*(\/\/|$)/d' -e "s/^(dedicate|addmap) .*/\1 $2/" "$1"
+}
+
 [ -n "${RV2_AGENT_SOURCE_ONLY:-}" ] && return 0
 
 # --- Run state ---
@@ -206,10 +213,21 @@ start_local() { # start_local <run dir>: master and server from PKG, on fixed po
 	mkfifo "$FIFO" || fail "fifo"
 	sleep 2147483647 >"$FIFO" 2>/dev/null & # holds the server's stdin open; `quit` is written beside it
 	PIDS="$PIDS $!"
+	local script=CTF map=${RV2_PLAYTEST_MAP:-CTF-Alert} lines=""
+	if [ -n "${BV2_DATA_DIR:-}" ]; then
+		script=""
+		lines=$(launch_script "$PKG/main/LaunchScript/CTF.cfg" "$map") || fail "RV2_PLAYTEST_MAP '$map': letters, digits, - and _ only"
+	fi
 	(cd "$PKG" && BV2_PREF_DIR="$RUN_DIR/pref" BV2_MASTER_SERVERS="127.0.0.1:$MASTER_PORT" BV2_ADMIN_API_PORT=$ADMIN_PORT \
-		BV2_ADMIN_PASS="$BV2_ADMIN_PASS" exec ./bv2dedicated CTF <"$FIFO" >"$RUN_DIR/server.log" 2>&1) &
+		BV2_ADMIN_PASS="$BV2_ADMIN_PASS" exec ./bv2dedicated $script <"$FIFO" >"$RUN_DIR/server.log" 2>&1) &
 	SERVER_PID=$!
 	PIDS="$PIDS $!"
+	if [ -n "$script" ]; then
+		say "content: placeholders"
+	else
+		say "content: $BV2_DATA_DIR, map $map"
+		printf '%s\n' "$lines" >"$FIFO"
+	fi
 	stage server-port # the port, not the log: the server's stdout is block-buffered in a file
 	wait_for 30 port_busy $GAME_PORT || fail "server not listening on $GAME_PORT within 30 s"
 	stage master-port

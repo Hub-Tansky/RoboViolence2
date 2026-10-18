@@ -1,5 +1,5 @@
 #!/bin/bash
-# Unit test for tools/playtest/agent.sh helpers: run selection, artifact digest, attempt rule, env-file mode.
+# Unit test for tools/playtest/agent.sh helpers: run selection, artifact digest, attempt rule, env-file mode, launch script.
 # Usage: test_playtest_agent.sh <scratch dir>
 set -u
 here=$(cd "$(dirname "$0")" && pwd)
@@ -72,6 +72,12 @@ expect "env file readable by others is refused" no "$(load_env >/dev/null && ech
 chmod 600 "$RV2_PLAYTEST_ENV"
 expect "env file mode 600 is loaded" test-only-value "$(load_env >/dev/null && echo "$BV2_ADMIN_PASS")"
 expect "loaded secrets are not exported" "" "$(load_env >/dev/null && sh -c 'printf %s "${BV2_ADMIN_PASS:-}"')"
+
+printf '//--- comment\n\nset sv_port 3333\ndedicate CTF-Placeholder\naddmap CTF-Placeholder\nset sv_enableVote true\nendscript\nafter end\n' >"$scratch/CTF.cfg"
+expect "launch script with the map swapped, no comments, blanks or endscript" \
+	"set sv_port 3333|dedicate CTF-Alert|addmap CTF-Alert|set sv_enableVote true|" \
+	"$(launch_script "$scratch/CTF.cfg" CTF-Alert | tr '\n' '|')"
+expect "map name with other characters refused" no "$(launch_script "$scratch/CTF.cfg" 'x/;e' >/dev/null && echo yes || echo no)"
 
 [ $failures -eq 0 ] && echo "all passed"
 exit $failures
