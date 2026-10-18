@@ -83,7 +83,7 @@ namespace corpus
 		return std::vector<char>();
 	}
 
-	// Inputs for known defects (KEY_QUESTIONS.md). crash-*.bin: ctest expects ASan to catch it until its fix step;
+	// Inputs for known defects (KEY_QUESTIONS.md at fc0aff7). crash-*.bin: ctest expects ASan to catch it until its fix step;
 	// fixed-*.bin: replayed like valid.bin, so the fix stays in place. Step 4 fixed all of these.
 	struct Input
 	{
