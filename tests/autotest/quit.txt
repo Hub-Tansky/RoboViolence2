@@ -1,0 +1,4 @@
+# The client quits before the last expect: not a pass, exit 1.
+expect-scene menu
+quit
+expect-scene game

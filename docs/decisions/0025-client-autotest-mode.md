@@ -9,7 +9,7 @@
 - Everything a player can do from the menu is reachable as a console command (`game/src/Console.cpp` `sendCommand`), and every console line goes through `Console::add`.
 
 ## Decision
-`bv2 --autotest <script> [--timeout <s>]` runs one step per frame tick: console commands, `wait`, `expect-console`, `expect-scene`. The client prints console lines and one result line to stdout and exits 0 (pass), 1 (an expect unmet when the budget ends, or a bad script) or 2 (a `wait` outlasts the budget, or a watchdog thread fires 30 s after it because the loop or init hung).
+`bv2 --autotest <script> [--timeout <s>]` runs one step per frame tick: console commands, `wait`, `expect-console`, `expect-scene`. The client prints console lines and one result line to stdout and exits 0 only when the script passes, 1 (an expect unmet when the budget ends, a bad script, or the client quitting or failing init first) or 2 (a `wait` outlasts the budget, or a watchdog thread fires 30 s after it because the loop or init hung).
 
 ## Consequences
 - CI, the playtest agent and E2E scenarios (T4) can assert client behaviour; screenshots (T7) add a step.

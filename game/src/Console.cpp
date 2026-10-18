@@ -24,6 +24,7 @@
 #include "Autotest.h"
 #include "KeyManager.h"
 #include "CStatus.h"
+extern roboviolence2::Autotest * autotest; // main.cpp: the running --autotest, or null
 #endif
 #include "Scene.h"
 #include <algorithm>

@@ -7,9 +7,6 @@
 
 using roboviolence2::Autotest;
 
-// The client global the header declares; the runner doesn't use it
-Autotest * autotest = nullptr;
-
 static const float step = 1.0f / 30; // the game's fixed step
 
 // Runs `script` against a fake client whose scene is `scene` and whose console echoes each command
@@ -60,6 +57,12 @@ int main()
 
 	check(run("wait soon\n", "menu", 2, &commands, &report) == Autotest::Fail && report == "autotest: FAIL line 1: wait needs seconds", "bad wait rejected");
 	check(run("expect-scene\n", "menu", 2, &commands, &report) == Autotest::Fail && report == "autotest: FAIL line 1: expect-scene needs an argument", "empty expect rejected");
+
+	Autotest early;
+	early.parse("expect-scene game\n");
+	check(early.report() == "autotest: FAIL the client quit at line 1: expect-scene game", "quit before the end is reported as a failure");
+	Autotest empty;
+	check(empty.report() == "autotest: FAIL the client quit before the script ran", "empty or unstarted script is not a pass");
 
 	Autotest missing;
 	check(!missing.load("no-such-autotest-script.txt") && missing.report() == "autotest: FAIL can't read no-such-autotest-script.txt", "missing script rejected");

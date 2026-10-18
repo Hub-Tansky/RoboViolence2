@@ -113,12 +113,13 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/harness/server_harness.h` | Harness API |
 | `tests/autotest/fail.txt` | Autotest script that never passes: the client exits 1 (ctest `autotest_fail`) |
 | `tests/autotest/menu-host.txt` | Autotest script: menu, `help` output, host and join the placeholder map (ctest `autotest_menu_host`) |
+| `tests/autotest/quit.txt` | Autotest script that quits before its last expect: the client exits 1, not 0 (ctest `autotest_quit`) |
 | `tests/autotest/timeout.txt` | Autotest script that outlasts `--timeout`: the client exits 2 (ctest `autotest_timeout`) |
-| `tests/run_autotest.py` | Runs `bv2 --autotest <script>` with a fresh pref dir, windowed, on placeholders (under `xvfb-run` on Linux without a display) and checks the exit code |
+| `tests/run_autotest.py` | Runs `bv2 --autotest <script>` with a fresh pref dir, windowed, on placeholders (under `xvfb-run` on Linux without a display); checks the exit code and the matching result line |
 | `tests/smoke_server.py` | Starts `bv2dedicated` headless, runs the CTF script, types a `sayall` with printf specifiers, quits; checks exit code, server creation and `bv2.cfg`. `--install-under` runs it from a non-ASCII path (Windows UTF-8 code page) |
 | `tests/test_admin_api.cpp` | Step 12: the admin API refuses a wrong token, limits a burst, runs a command, returns the status, audits with secrets masked (not on Windows) |
 | `tests/test_admin_login.cpp` | Step 10: admin login only with HMACs over the connection's challenge; no user, password or MD5 on the wire |
-| `tests/test_autotest.cpp` | Phase T3: autotest runner without a window: parsing, commands, waits, one match per expect, fail and timeout reports (ADR 0025) |
+| `tests/test_autotest.cpp` | Phase T3: autotest runner without a window: parsing, commands, waits, one match per expect, fail, timeout and early-quit reports (ADR 0025) |
 | `tests/test_babonet.cpp` | R7: a 10000-byte message over a loopback babonet connection arrives over several reads and intact |
 | `tests/test_browsable_game.cpp` | A server browser row owns a copy of its lobby game's row (the lobby frees its own) |
 | `tests/test_cstring.cpp` | Phase C step 5: one-argument `CString` is text (arrays, `char*`, literals, direct and implicit); two or more arguments format (ADR 0021) |

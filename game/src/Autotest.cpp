@@ -113,7 +113,10 @@ namespace roboviolence2
 	{
 		if (!m_error.empty()) return "autotest: FAIL " + m_error;
 		if (m_result == Pass) return "autotest: PASS";
+		if (m_next == m_steps.size()) return "autotest: FAIL the client quit before the script ran";
 		const Step & step = m_steps[m_next];
-		return std::string("autotest: ") + (m_result == Fail ? "FAIL" : "TIMEOUT") + " line " + std::to_string(step.line) + ": " + step.text;
+		std::string where = " line " + std::to_string(step.line) + ": " + step.text;
+		if (m_result == Running) return "autotest: FAIL the client quit at" + where;
+		return std::string("autotest: ") + (m_result == Fail ? "FAIL" : "TIMEOUT") + where;
 	}
 }

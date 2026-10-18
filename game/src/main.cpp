@@ -45,9 +45,47 @@ static void bv2ApplyNetlogFromEnv()
 	#include <cstdio>
 	#include <thread>
 
-// --autotest <script> (ADR 0025); null otherwise
+// --autotest <script> (ADR 0025): `autotest` points at the runner until it reports; Console.cpp feeds it lines
+static roboviolence2::Autotest autotestRunner;
 roboviolence2::Autotest * autotest = 0;
-static int autotestExitCode = 0;
+static int exitCode = 0; // Fail in autotest mode until the script passes
+
+// Reads --autotest and --timeout; false when the script can't be used (the client then exits with exitCode)
+static bool autotestStart(int argc, char * argv[])
+{
+	for (int i = 1; i + 1 < argc; ++i)
+	{
+		if (std::strcmp(argv[i], "--autotest") == 0)
+		{
+			autotest = &autotestRunner;
+			exitCode = roboviolence2::Autotest::Fail;
+			if (!autotest->load(argv[i + 1]))
+			{
+				printf("%s\n", autotest->report().c_str());
+				return false;
+			}
+		}
+		if (std::strcmp(argv[i], "--timeout") == 0) autotestRunner.timeout = std::strtof(argv[i + 1], nullptr);
+	}
+	if (!autotest) return true;
+	setvbuf(stdout, nullptr, _IOLBF, BUFSIZ); // console lines reach CI as they happen
+	// An init failure blocks in a message box and a hung loop never reports: both end here
+	float limit = autotest->timeout + 30;
+	std::thread([limit]()
+	{
+		std::this_thread::sleep_for(std::chrono::duration<float>(limit));
+		printf("autotest: TIMEOUT the client stopped responding\n");
+		fflush(stdout);
+		std::_Exit(roboviolence2::Autotest::Timeout);
+	}).detach();
+	return true;
+}
+
+// Startup options with a value, kept out of the startup console command
+static bool optionTakesValue(const char * arg)
+{
+	return std::strcmp(arg, "--config") == 0 || std::strcmp(arg, "--autotest") == 0 || std::strcmp(arg, "--timeout") == 0;
+}
 #endif
 
 
@@ -163,15 +201,14 @@ static const char * autotestScene()
 
 static void autotestUpdate(float delay)
 {
-	static bool reported = false;
 	roboviolence2::Autotest::Result result = autotest->update(delay, autotestScene(), [](const std::string & command)
 	{
 		console->sendCommand(CString("%s", command.c_str())); // script text is data, not a format
 	});
-	if (result == roboviolence2::Autotest::Running || reported) return;
-	reported = true;
+	if (result == roboviolence2::Autotest::Running) return;
 	printf("%s\n", autotest->report().c_str());
-	autotestExitCode = result;
+	exitCode = result;
+	autotest = 0;
 	dkwForceQuit();
 }
 
@@ -472,33 +509,7 @@ int main(int argc, char* argv[])
 {
 	// PREMIERE CHOSE A FAIRE, on load les config
 	bv2::pathsInit(argv[0]);
-	for (int i = 1; i + 1 < argc; ++i)
-	{
-		if (std::strcmp(argv[i], "--autotest") == 0)
-		{
-			if (!autotest) autotest = new roboviolence2::Autotest();
-			if (!autotest->load(argv[i + 1]))
-			{
-				printf("%s\n", autotest->report().c_str());
-				return roboviolence2::Autotest::Fail;
-			}
-		}
-	}
-	if (autotest)
-	{
-		for (int i = 1; i + 1 < argc; ++i)
-			if (std::strcmp(argv[i], "--timeout") == 0) autotest->timeout = std::strtof(argv[i + 1], nullptr);
-		setvbuf(stdout, nullptr, _IOLBF, BUFSIZ); // console lines reach CI as they happen
-		// An init failure blocks in a message box and a hung loop never reports: both end here
-		float limit = autotest->timeout + 30;
-		std::thread([limit]()
-		{
-			std::this_thread::sleep_for(std::chrono::duration<float>(limit));
-			printf("autotest: TIMEOUT the client stopped responding\n");
-			fflush(stdout);
-			std::_Exit(roboviolence2::Autotest::Timeout);
-		}).detach();
-	}
+	if (!autotestStart(argc, argv)) return exitCode;
 	bv2::chooseDataDir(argc, argv);
 	dksvarInit(&stringInterface);
 	std::string configPath = bv2::loadConfigLayers(argc, (const char* const*)argv);
@@ -510,7 +521,7 @@ int main(int argc, char* argv[])
 	if (!gameVar.reloadLanguage())
 	{
 		dkwShowMessage("Error", "Can not load language file\nTry deleting the config file.");
-		return 0;
+		return exitCode;
 	}
 
 	if (gameVar.r_bitdepth != 16 && gameVar.r_bitdepth != 32) gameVar.r_bitdepth = 32;
@@ -522,7 +533,7 @@ int main(int argc, char* argv[])
 	if (!dkwInit(gameVar.r_resolution[0], gameVar.r_resolution[1], gameVar.r_bitdepth, gameVar.lang_gameName.s, &mainLoopInterface, gameVar.r_fullScreen, gameVar.r_refreshRate))
 	{
 		dkwShowMessage("Error", dkwGetLastError());
-		return 0;
+		return exitCode;
 	}
 
 	// On init les input
@@ -530,7 +541,7 @@ int main(int argc, char* argv[])
 	{
 		dkwShutDown();
 		dkwShowMessage("Error", "Error creating Input");
-		return 0;
+		return exitCode;
 	}
 
 #ifdef BV2_PLATFORM_WINDOWS
@@ -547,7 +558,7 @@ int main(int argc, char* argv[])
 		dkiShutDown();
 		dkwShutDown();
 		dkwShowMessage("Error", "Error creating openGL context");
-		return 0;
+		return exitCode;
 	}
 
 #ifdef BV2_PLATFORM_WINDOWS
@@ -579,7 +590,7 @@ int main(int argc, char* argv[])
 		dkglShutDown();
 		dkwShutDown();
 		dkwShowMessage("Error", "Error creating the audio engine");
-		return 0;
+		return exitCode;
 	}
 
 	// On init la network
@@ -592,7 +603,7 @@ int main(int argc, char* argv[])
 		dkglShutDown();
 		dkwShutDown();
 		dkwShowMessage("Error", "Error initiating baboNet");
-		return 0;
+		return exitCode;
 	}
 
 	bbNetVersion = bb_getVersion();
@@ -608,7 +619,7 @@ int main(int argc, char* argv[])
 		dkglShutDown();
 		dkwShutDown();
 		dkwShowMessage("Error", "Wrong version of BaboNet\nReinstalling the game may resolve this prolem");
-		return 0;
+		return exitCode;
 	}
 
 	// On cree le lobby
@@ -631,18 +642,13 @@ int main(int argc, char* argv[])
 	CString str;
 	for (int i = 1; i < argc; ++i)
 	{
-		if (std::strcmp(argv[i], "--config") == 0)
+		if (optionTakesValue(argv[i]))
 		{
-			++i; // handled by the config layers
+			++i; // handled by the config layers or autotestStart
 			continue;
 		}
 		if (std::strcmp(argv[i], "--placeholders") == 0)
 			continue; // handled by chooseDataDir
-		if (std::strcmp(argv[i], "--autotest") == 0 || std::strcmp(argv[i], "--timeout") == 0)
-		{
-			++i; // handled at startup
-			continue;
-		}
 		if (str.len() > 0) str += " ";
 		str += argv[i];
 	}
@@ -653,6 +659,7 @@ int main(int argc, char* argv[])
 
 	// La loop principal
 	dkwMainLoop();
+	if (autotest) printf("%s\n", autotest->report().c_str()); // the loop ended before the script did
 
 	// On efface la scene
 	delete scene;
@@ -685,11 +692,8 @@ int main(int argc, char* argv[])
 	// Do last update after window is closed
 	delete status;
 
-	delete autotest;
-	autotest = 0;
-
 	// Tout c'est bien passe on retourne 0 (or the autotest result)
-	return autotestExitCode;
+	return exitCode;
 }
 
 #endif

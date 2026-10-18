@@ -25,7 +25,8 @@ namespace roboviolence2
 		// an expect is still unmet when the time budget runs out (Fail), or a wait outlasts it (Timeout).
 		Result update(float delay, const std::string & scene, const std::function<void(const std::string &)> & run);
 
-		// "autotest: PASS", "autotest: FAIL line N: <step>" or "autotest: TIMEOUT line N: <step>".
+		// "autotest: PASS", "autotest: FAIL line N: <step>" or "autotest: TIMEOUT line N: <step>"; while still
+		// Running, the client quit early: "autotest: FAIL the client quit at line N: <step>".
 		std::string report() const;
 
 		float timeout = 60;
@@ -51,8 +52,5 @@ namespace roboviolence2
 		std::string m_error;
 	};
 }
-
-// Defined in main.cpp (client): the running autotest, or null
-extern roboviolence2::Autotest * autotest;
 
 #endif

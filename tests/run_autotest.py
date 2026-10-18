@@ -3,7 +3,7 @@
 
 Usage: run_autotest.py <bv2> <scratch dir> <script> <expected exit code> [--timeout <s>]
 The client gets a fresh pref dir, a windowed config and the placeholder data. On Linux without a display it runs
-under xvfb-run. 0 = pass, 1 = failed expect, 2 = timeout (game/src/Autotest.h).
+under xvfb-run. 0 = pass, 1 = failed expect, 2 = timeout (game/src/Autotest.h); the matching result line must be in stdout.
 """
 import os
 import shutil
@@ -27,5 +27,9 @@ out = r.stdout.decode(errors="replace")
 print(out[-4000:])
 if r.returncode != expected:
     print(f"FAIL: exit code {r.returncode}, expected {expected}")
+    sys.exit(1)
+result = {0: "autotest: PASS", 1: "autotest: FAIL", 2: "autotest: TIMEOUT"}[expected]
+if result not in out:
+    print(f"FAIL: no '{result}' line: the script didn't decide the exit code")
     sys.exit(1)
 print(f"ok: {os.path.basename(script)} exited {expected}")
