@@ -31,7 +31,7 @@
 #include <string>
 
 // After main/bv2.cfg is loaded: BV2_NETLOG=1 forces c_netlog on, BV2_NETLOG=0 off.
-static void bv2ApplyNetlogFromEnv()
+static void roboviolence2ApplyNetlogFromEnv()
 {
 	const char* e = std::getenv("BV2_NETLOG");
 	if (e && e[0] != '\0')
@@ -392,7 +392,7 @@ int main(int argc, const char* argv[])
 	bv2::pathsInit(argv[0]);
 	dksvarInit(&stringInterface);
 	std::string configPath = bv2::loadConfigLayers(argc, (const char* const*)argv);
-	bv2ApplyNetlogFromEnv();
+	roboviolence2ApplyNetlogFromEnv();
 	FetchDBInfos();
 	dksvarSaveConfig((char*)configPath.c_str()); // On cre8 le config file aussi
 
@@ -513,7 +513,7 @@ int main(int argc, char* argv[])
 	bv2::chooseDataDir(argc, argv);
 	dksvarInit(&stringInterface);
 	std::string configPath = bv2::loadConfigLayers(argc, (const char* const*)argv);
-	bv2ApplyNetlogFromEnv();
+	roboviolence2ApplyNetlogFromEnv();
 	FetchDBInfos();
 	dksvarSaveConfig((char*)configPath.c_str()); // On cre8 le config file aussi
 
