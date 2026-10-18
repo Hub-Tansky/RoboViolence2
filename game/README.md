@@ -7,7 +7,7 @@ The game: client, listen server, dedicated server and map editor from one codeba
 - **Wire format:** `src/netPacket.h` (raw structs). Changing a layout needs a `GAME_VERSION_SV/CL` bump (`Server.h`, `Client.h`).
 - **Variables:** `GameVar.cpp` registers every `sv_*`/`cl_*` variable.
 - **Depends on:** `babonet`, `dko`, `zeven_core` (`zeven_client` for `bv2`), SQLite, libcurl (`BV2_WITH_HTTP`).
-- **Autotest:** `bv2 --autotest <script> [--timeout <s>]` runs console commands, `wait <s>`, `expect-console <text>` and `expect-scene intro|menu|loading|game|editor`, one per line; exits 0 only on a pass, 1 on a failed expect, bad script or early quit or init failure, 2 on timeout ([ADR 0025](../docs/decisions/0025-client-autotest-mode.md)). Examples: `tests/autotest/`.
+- **Autotest:** `bv2 --autotest <script> [--timeout <s>]` runs console commands, `wait <s>`, `expect-console <text>` and `expect-scene intro|menu|loading|game|editor`, one per line; exits 0 only on a pass, 1 on a failed expect, bad script or early quit or init failure, 2 on timeout ([ADR 0025](../docs/decisions/0025-client-autotest-mode.md)). Examples: `tests/autotest/`. `tests/e2e/e2e.py` drives several clients against a dedicated server and master; `refreshgames` requests the master list.
 - **Server file list:** `game/CMakeLists.txt` lists the files that produce code under `CONSOLE`. A file that is empty there (menus, editor, rendering) is left out.
 
 ## Gotchas

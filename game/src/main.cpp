@@ -374,6 +374,7 @@ int main(int argc, const char* argv[])
 
 	// lil print out so that people now know that its working
 
+	setvbuf(stdout, nullptr, _IOLBF, BUFSIZ); // console lines reach a pipe (tests/e2e) as they happen
 	printf("***************************************\n");
 	printf("*  Robo Violence 2 Dedicated Server   *\n");
 	printf("*   Version 2.11d                     *\n");

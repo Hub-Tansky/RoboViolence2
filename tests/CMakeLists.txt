@@ -190,6 +190,14 @@ if(TARGET bv2 AND (APPLE OR ROBOVIOLENCE2_XVFB))
   set_tests_properties(autotest_menu_host autotest_fail autotest_timeout autotest_quit PROPERTIES TIMEOUT 180 RESOURCE_LOCK bv2_server_port)
 endif()
 
+# Phase T4: server, master and autotest clients together (tests/e2e/e2e.py; Xvfb, so Linux only)
+if(TARGET bv2 AND TARGET bv2dedicated AND TARGET bv2master AND ROBOVIOLENCE2_XVFB AND NOT APPLE)
+  foreach(scenario join_leave password chat kick ban master_list)
+    add_test(NAME e2e_${scenario} COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/e2e/e2e.py "${BV2_RUNTIME_DIR}" "${BV2_TEST_SCRATCH}/e2e" ${scenario})
+    set_tests_properties(e2e_${scenario} PROPERTIES TIMEOUT 300 RESOURCE_LOCK "bv2_server_port;bv2_master_port")
+  endforeach()
+endif()
+
 if(WIN32 AND TARGET bv2 AND TARGET bv2dedicated AND TARGET bv2master)
   find_package(Python3 REQUIRED COMPONENTS Interpreter)
   add_test(NAME windows_no_crt_dlls
