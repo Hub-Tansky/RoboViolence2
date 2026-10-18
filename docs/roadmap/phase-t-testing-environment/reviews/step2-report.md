@@ -316,3 +316,71 @@ None.
 ## Verdict
 
 **Approved.** Round-2 findings 14 to 19 are all resolved. The new `prune` helper removes the duplicated logic, and it cannot remove the release dir or images of the running stack or the rollback target. Its behaviour for the waiting commit and for an empty `PREV` is safe. The CI directory is created before `compose up`. There are no new findings, and nothing blocks marking the step DONE.
+
+## Round 4
+
+SKILL: Launching skill: thermo-nuclear-code-quality-review
+
+## Scope
+
+Round 4. I reviewed `git diff 3d1c872..e47179b`, which is one functional commit, 8ce1ff0, merged to `main` as PR #70 from `claude/project-thread-npesoe`. It touches three files and adds 41 lines:
+- `/home/claude/RoboViolence2/tools/staging/cloud-init.yml`: new, 36 lines, read in full.
+- `/home/claude/RoboViolence2/tools/staging/README.md`: +4 lines, read in full.
+- `/home/claude/RoboViolence2/ARCHITECTURE.md`: +1 row.
+
+The new file feeds `deploy.sh` and compose, so I traced those boundaries:
+- `tools/staging/deploy.sh`: `load_env` (`:61-66`, mode-600 check, `--env-file` use at `:89`).
+- `packaging/docker/compose.example.yml`: `BV2_PUBLIC_ADDRESS` `:27`, `BV2_ADMIN_HOST` `:41`, `BV2_ADMIN_PORT` `:42`.
+- `docs/ops/runbook.md:24-28,74`.
+- `game/src/Paths.cpp:363`, where `BV2_PUBLIC_ADDRESS` becomes `sv_publicAddress`.
+
+I also read `REVIEW.md`, the step file, the records `reviews/step1.md`, `step2.md` and `step3.md`, and the commit message.
+
+## Verified correct
+
+- **Env file matches what `deploy.sh` accepts:**
+  - The file is mode 600, owned by `ubuntu`, and contains `BV2_ADMIN_PASS`.
+  - The keys `BV2_ADMIN_HOST`, `BV2_ADMIN_PORT` and `BV2_PUBLIC_ADDRESS` are the names compose interpolates.
+  - `BV2_ADMIN_PORT=443` follows the README rule for a public name.
+- **Cron line:** identical to the README one (`README.md:41`).
+- **Order and permissions on first boot:**
+  - `write_files` runs before `runcmd`.
+  - `install -d -o ubuntu -m 700 /var/lib/rv2-staging` matches the round-1 fix for the root-owned state directory (step2 finding 6).
+  - `sudo -u ubuntu` picks up the new `docker` group membership without a re-login, because sudo re-reads `/etc/group`.
+- **No secrets in the repo:** the password is generated on the host and is never in the user data. An existing env file is not overwritten.
+- **Inventory:** the `ARCHITECTURE.md` row is present and in order.
+- **Scope:** every changed path is inside the step's Allowed paths (`tools/staging/**`, `ARCHITECTURE.md`).
+- **File size:** no file comes near 1000 lines. No mechanical change is mixed with a functional one.
+
+## Findings
+
+1. **Medium: the host firewall rules are most likely dead code.** `tools/staging/cloud-init.yml:11-14`
+   - Every port the stack exposes is a Docker-published port (`compose.example.yml:15,32,42`).
+   - Docker DNATs external traffic to published ports in `nat PREROUTING` and filters it in `FORWARD` (its `DOCKER-USER`/`DOCKER-FORWARD` jumps go at the top of that chain). That traffic never reaches `INPUT`, so the two `INPUT` rules, the `sed` on `rules.v4` and the comment about "Docker's own rules" don't control access to 443, 3333 or 10207.
+   - Fix: on the VM, check the packet counters of that rule (`iptables -L INPUT -v -n`) after a client joins. If they stay at zero, delete lines 11-14 and the "host firewall" part of the header, the `ARCHITECTURE.md` row and the README.
+   - If they do count, replace the magic insert position 5 with `-I INPUT` (top of the chain). An ACCEPT rule doesn't care where it sits, and the hard-coded index ties the file to one image's rule layout. A generic Ubuntu 24.04 image, which the README promises at `README.md:13`, has neither the REJECT rule nor `/etc/iptables/rules.v4`.
+
+2. **Medium: the repo now names the hosting provider, against the module's own rule.** `tools/staging/cloud-init.yml:3,11`
+   - `tools/staging/README.md` says "The host's address, provider and access go in the private wiki ..., never in the repo."
+   - The file names Oracle twice, and commit 8ce1ff0 states that the T8 host runs on it. The plan mentions Oracle only as one example among candidates (`20261014_testing_environment_plan.md:214`), so that is no exception.
+   - Fix: make both comments provider-neutral, for example "paste as the VM's cloud-init user data" and "images that reject inbound traffic in iptables". Move the console path to the private wiki. If finding 1 deletes lines 11-14, only line 3 is left to fix.
+
+3. **Medium (process): this work sits outside the step's tasks and was merged before review.** Commit 8ce1ff0.
+   - The step lists tasks 2.1-2.5 and puts "Choosing and setting up the host" out of scope. This commit is host setup.
+   - It is not named `stepN.M:`, came from a non-step branch (so the CI scope check couldn't run against the step), and was merged to `main` before this round.
+   - Fix: add the task to the step file (for example "2.6 Host bootstrap", with the owner's approval of the scope change recorded there). In `reviews/step2.md`, record that this round covers a commit already on `main`. History can't be rewritten now; the record has to carry it.
+
+4. **Low-medium: the new script has no test and no recorded run.** `tools/staging/cloud-init.yml:20-36`
+   - `rv2-staging-setup` can be triggered by an operator, so under REVIEW.md section 3 it counts as new behaviour.
+   - Nothing checks the user data parses, or that the generated env file passes `load_env`.
+   - Fix: record the live VM bring-up in `reviews/step2.md` under fix proof / not done. It is the real evidence: env file accepted, first deploy healthy, `/deployed` shows the commit. If `cloud-init` is available on the CI runner, `cloud-init schema --config-file tools/staging/cloud-init.yml` is a cheap static check. Otherwise state explicitly that the live run is the only evidence.
+
+5. **Low: two install paths now disagree on the env file.** `tools/staging/README.md:30-33`
+   - The by-hand env file template lacks `BV2_PUBLIC_ADDRESS`, which `rv2-staging-setup` now writes (`cloud-init.yml:30-31`).
+   - Without it, a host set up by hand is listed by the master at its compose-network address, so remote clients can't join from the browser (runbook `:74`, ADR 0022).
+   - The cron line and env keys are now written in two places that must be kept in sync by hand.
+   - Fix: add `BV2_PUBLIC_ADDRESS=<public IPv4>` to the README template.
+
+6. **Low: `rv2-staging-setup` silently ignores its required argument on a re-run.** `tools/staging/cloud-init.yml:26-33`
+   - When `/etc/rv2-staging.env` already exists, `<public name>` and the optional ntfy topic are not used, yet the script still demands the name and prints nothing about it. An operator re-running it to correct a mistyped DNS name gets the old name and no hint.
+   - Fix: in the existing-file branch, print one line saying the env file is kept and to edit it by hand. Don't add merge logic.

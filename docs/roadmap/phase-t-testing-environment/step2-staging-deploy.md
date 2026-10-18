@@ -1,6 +1,6 @@
 # Step 2: Staging host and pull deploy agent
 
-**Status:** IN PROGRESS
+**Status:** DONE (2026-10-18)
 
 **Depends on:** step 1 (Mac agent's `staging-connect`), Phase B step 11 (containers), step 12 (admin API). **Next:** T2–T7 (candidates). **Index:** [README.md](README.md)
 
@@ -9,8 +9,8 @@
 | Field | Value |
 |---|---|
 | Goal | A long-lived staging server runs the newest `main` server and master images, updated by a pull agent on its own host, never during a game, and reports which commit it runs |
-| In scope | Tasks 2.1 … 2.5 below; plan item T8 ([plan](../20261014_testing_environment_plan.md#t8-staging-host-and-pull-deploy-agent)) |
-| Out of scope | Choosing and setting up the host (owner, later; details go in the private wiki); a public DNS name and certificate; PR builds on staging (never) |
+| In scope | Tasks 2.1 … 2.6 below; plan item T8 ([plan](../20261014_testing_environment_plan.md#t8-staging-host-and-pull-deploy-agent)) |
+| Out of scope | Choosing the host and its account (owner; details go in the private wiki); a public DNS name and certificate; PR builds on staging (never) |
 | Allowed paths | `tools/staging/**`, `tools/playtest/**`, `tests/test_staging_deploy.sh`, `tests/CMakeLists.txt`, `packaging/docker/compose.example.yml`, `packaging/docker/Caddyfile`, `.github/workflows/containers.yml`, `docs/ops/runbook.md`, `docs/roadmap/**`, `docs/decisions/**`, `ARCHITECTURE.md` |
 | Inputs | `AGENTS.md`, `ARCHITECTURE.md`, the plan, [step 1 review](reviews/step1.md), `docs/ops/runbook.md`, `.github/workflows/containers.yml`, [ADR 0015](../../decisions/0015-admin-http-api-behind-tls-proxy.md), [ADR 0017](../../decisions/0017-playtest-pull-agent.md) |
 | Deliverables | `tools/staging/deploy.sh`, `tools/staging/README.md`, `tests/test_staging_deploy.sh`, multi-arch images, `BV2_IMAGE_TAG`, `/deployed`, ADR 0018 |
@@ -48,6 +48,12 @@
 
 - `tools/staging/README.md` (host setup, env file, cron, rollback); runbook: `BV2_IMAGE_TAG` and `/deployed`.
 - Mac agent: `RV2_STAGING_ADMIN_PORT` (default 8443), for a host that publishes 443 with a public certificate.
+
+### 2.6 Host bootstrap
+
+Added 2026-10-18 at the owner's request, after the host was chosen (commit 8ce1ff0, merged as PR #70 before its review round).
+
+- `tools/staging/cloud-init.yml`: Docker, `deploy.sh`, and `rv2-staging-setup <public name>` (env file with a generated password and `BV2_PUBLIC_ADDRESS`, cron, first deploy).
 - ADR 0018; `ARCHITECTURE.md`.
 
 ## Critical files
