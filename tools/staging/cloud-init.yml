@@ -1,17 +1,13 @@
 #cloud-config
 # Staging host bootstrap (tools/staging/README.md), Ubuntu 24.04 with a public IPv4 at first boot.
-# Paste as the VM's cloud-init user data (Oracle: Advanced options > Management > cloud-init script).
-# Installs Docker, curl, jq; opens TCP 443, 3333, 10207 in the host firewall; installs deploy.sh.
+# Paste as the VM's cloud-init user data. Installs Docker, curl, jq and deploy.sh. Open TCP 443, 3333, 10207 in the
+# provider's firewall; the host's iptables INPUT chain doesn't apply, since Docker forwards published ports itself.
 # No secrets here: the admin password is generated on the host by rv2-staging-setup (run once after DNS works).
 package_update: true
 packages: [docker.io, docker-compose-v2, curl, jq]
 runcmd:
   - usermod -aG docker ubuntu
   - systemctl enable --now docker
-  # Oracle's Ubuntu image rejects all inbound but 22 in iptables. Open the ports now and in the saved rules
-  # (edited, not re-saved, so Docker's own rules are not persisted)
-  - iptables -I INPUT 5 -p tcp -m state --state NEW -m multiport --dports 443,3333,10207 -j ACCEPT
-  - sed -i '/-A INPUT -j REJECT/i -A INPUT -p tcp -m state --state NEW -m multiport --dports 443,3333,10207 -j ACCEPT' /etc/iptables/rules.v4
   - mkdir -p /opt/rv2-staging
   - install -d -o ubuntu -m 700 /var/lib/rv2-staging
   - curl -fsSL https://raw.githubusercontent.com/Hub-Tansky/RoboViolence2/main/tools/staging/deploy.sh -o /opt/rv2-staging/deploy.sh
@@ -30,6 +26,8 @@ write_files:
         printf 'BV2_ADMIN_PASS=%s\nBV2_ADMIN_HOST=%s\nBV2_ADMIN_PORT=443\nBV2_PUBLIC_ADDRESS=%s\nNTFY_TOPIC=%s\n' \
           "$(openssl rand -hex 16)" "$1" "$(curl -fsS https://ifconfig.me)" "${2:-}" > "$env"
         chown ubuntu "$env"; chmod 600 "$env"
+      else
+        echo "$env exists and is kept; edit it by hand to change the name or topic"
       fi
       echo '*/10 * * * * /opt/rv2-staging/deploy.sh >>/var/lib/rv2-staging/deploy.log 2>&1' | crontab -u ubuntu -
       echo "Env file: $env. First deploy now (this takes a few minutes):"

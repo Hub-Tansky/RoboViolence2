@@ -584,3 +584,11 @@ Items of the former Phase B plan (`future-phases.md`, deleted) that are not in a
 - **Why it matters:** a change to the port, banner or wait budget must be made three times.
 - **Suggested home:** a step allowed to touch `tools/`: one `tools/package-start-check.sh <dir>` taking the per-OS commands from matrix rows, called by both jobs.
 - **Status:** Proposed
+
+### PNS-71: Staging cloud-init has no static check
+
+- **Found in:** Phase T step 2 review round 4 (2026-10-18), finding 4.
+- **Extract:** `tools/staging/cloud-init.yml` is checked only by a live VM bring-up; nothing in CI validates the user data or that `rv2-staging-setup` writes an env file `deploy.sh` accepts.
+- **Why it matters:** an edit can break the next host rebuild unnoticed; rebuilds are rare, so the break surfaces late.
+- **Suggested home:** a later Phase T step touching `tools/staging/`: `cloud-init schema --config-file` in the `containers` workflow.
+- **Status:** Proposed
