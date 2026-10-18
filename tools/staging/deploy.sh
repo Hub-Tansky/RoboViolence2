@@ -1,6 +1,6 @@
 #!/bin/bash
 # Staging deploy agent: runs the newest main server and master images on this host, never during a game (ADR 0018).
-# Scope: docs/roadmap/phase-t-testing-environment/step2-staging-deploy.md. Setup: tools/staging/README.md.
+# Decision: docs/decisions/0018-staging-pull-deploy.md. Setup: tools/staging/README.md.
 # Usage: deploy.sh               the newest main build whose `containers` run passed, once no one is playing (cron runs this)
 #        deploy.sh --sha <sha>   that main build (also a manual rollback), once no one is playing
 #        deploy.sh --force       don't wait for an empty server

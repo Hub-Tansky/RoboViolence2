@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-10-11
-- Affects: [Phase B step 5](../roadmap/phase-b-security-infrastructure-anti-cheat/step5-crash-fixes.md) task 5.1; KEY_QUESTIONS R3
+- Affects: [Phase B step 5](https://github.com/Hub-Tansky/RoboViolence2/blob/58c91b2a660db2b290b0b5f504381980a6aedba2/docs/roadmap/phase-b-security-infrastructure-anti-cheat/step5-crash-fixes.md) task 5.1; KEY_QUESTIONS R3
 
 ## Context
 - `sv_serverType` selects the ruleset: 0 Normal, 1 Pro (`game/src/GameVar.cpp:366`). Pro changes weapons (`Game::UpdateProSettings`), the shotgun spread (`Game.cpp`), Photon and flame hits (`Player.cpp`), rocket damage and remote detonation (`GameProjectile.cpp`, `ServerRecv.cpp`).

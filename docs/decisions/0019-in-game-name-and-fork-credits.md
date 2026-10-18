@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-10-14
-- Affects: [Phase C step 2](../roadmap/phase-c-installers-and-fixes/step2-name-and-credits.md); amends [0008](0008-display-name-robo-violence-2.md) and [0010](0010-bv2-asset-compat-and-gui-freeze.md)
+- Affects: [Phase C step 2](https://github.com/Hub-Tansky/RoboViolence2/blob/58c91b2a660db2b290b0b5f504381980a6aedba2/docs/roadmap/phase-c-installers-and-fixes/step2-name-and-credits.md); amends [0008](0008-display-name-robo-violence-2.md) and [0010](0010-bv2-asset-compat-and-gui-freeze.md)
 
 ## Context
 - Engine-only releases ship before replacement assets (PNS-20, owner 2026-10-14). ADR 0008 requires the in-game name, credits and window title to change before any public release, without implying endorsement.

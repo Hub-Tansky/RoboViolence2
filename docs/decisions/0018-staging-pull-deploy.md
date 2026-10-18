@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-10-14
-- Affects: [phase T step 2](../roadmap/phase-t-testing-environment/step2-staging-deploy.md)
+- Affects: [phase T step 2](https://github.com/Hub-Tansky/RoboViolence2/blob/58c91b2a660db2b290b0b5f504381980a6aedba2/docs/roadmap/phase-t-testing-environment/step2-staging-deploy.md)
 
 ## Context
 - The Mac agent's `staging-connect` ([ADR 0017](0017-playtest-pull-agent.md)) needs a staging server on the same build, and must know which build it runs: `/status` doesn't say (`game/src/AdminApi.cpp:110`).

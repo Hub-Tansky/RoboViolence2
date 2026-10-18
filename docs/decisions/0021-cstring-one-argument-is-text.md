@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-10-17
-- Affects: [Phase C step 5](../roadmap/phase-c-installers-and-fixes/step5-client-engine-fixes.md) task 5.1; PNS-34
+- Affects: [Phase C step 5](https://github.com/Hub-Tansky/RoboViolence2/blob/58c91b2a660db2b290b0b5f504381980a6aedba2/docs/roadmap/phase-c-installers-and-fixes/step5-client-engine-fixes.md) task 5.1; PNS-34
 
 ## Context
 - `CString(char* fmt, ...)` was the only way to build a `CString` from text, and it was implicit: a player name, chat line or server `set` command passed as one argument ran as a printf format (R16, R21–R23; a `%n` crashes the reader).

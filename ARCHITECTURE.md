@@ -1,6 +1,6 @@
 # Architecture
 
-Robo Violence 2: unofficial fork of BaboViolent 2, a top-down multiplayer shooter (C++, GPLv3). State: Phase A done (portable CMake + vcpkg build, SDL3 + miniaudio + glad platform layer); Phase B in progress ([docs/roadmap/](docs/roadmap/README.md)).
+Robo Violence 2: unofficial fork of BaboViolent 2, a top-down multiplayer shooter (C++, GPLv3). State: Phases A and B done; Phase C done, first release pending; Phase T steps 1–3 done. Backlog, roadmap and bugs: the [GitHub Project](https://github.com/users/Hub-Tansky/projects/1) (private) and [issues](https://github.com/Hub-Tansky/RoboViolence2/issues).
 
 ## Summary
 
@@ -51,14 +51,14 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `.gitignore` | Ignore rules (OS, editors, builds, secrets, original assets) |
 | `.gitleaks.toml` | gitleaks rules: default plus config secrets, public IPs, master-server rows, hosts |
 | `.dockerignore` | Docker build context: sources only (no `.git`, builds, docs) |
-| `AGENTS.md` | Canonical agent and contributor instructions |
+| `AGENTS.md` | Canonical agent and contributor instructions; work tracking in the GitHub Project |
 | `ARCHITECTURE.md` | This file: summary and file inventory |
 | `CMakeLists.txt` | Root CMake project: options, runtime layout, placeholder content, subdirectories |
 | `CMakePresets.json` | Presets: linux-x64, macos-arm64, win-x64-msvc (Debug), -asan and -release variants (Ninja); macOS uses the overlay triplet in `triplets/` |
 | `triplets/arm64-osx.cmake` | vcpkg overlay triplet: macOS arm64 ports built for macOS 12 (PNS-26) |
 | `LICENSE.txt` | GPLv3 text (code only) |
 | `README.md` | Project overview, fork and asset-removal statement |
-| `REVIEW.md` | Definition of done: `tools/review.sh` checks, reviewer checklist, defined terms, forbidden shortcuts, fresh-context step review (`.claude/agents/`) and its record |
+| `REVIEW.md` | Definition of done: `tools/review.sh` checks, reviewer checklist, defined terms, forbidden shortcuts, fresh-context PR review (`.claude/agents/`) and its record in the PR description |
 | `SECURITY.md` | Security policy: supported versions, private vulnerability reporting, response timeline |
 | `docs/decisions/0007-data-root-pref-dir-config-layers.md` | ADR 0007 |
 | `game/src/Paths.cpp` | Package and data roots (`contentFile` for the package's own content), saved and detected BV2 data folder, per-user pref dir, layered config loading, map and DB path helpers (ADR 0016) |
@@ -172,7 +172,8 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 |---|---|
 | `.github/workflows/secret-scan.yml` | CI: gitleaks over commits after the fork point and original-asset check |
 | `.github/workflows/build.yml` | CI: Debug and Release build and ctest, Release package on Windows, macOS, Linux (`roboviolence2-<preset>` artifacts); `package-check` of the Linux package in a clean `ubuntu:24.04`; `package-smoke` (not required): Windows and macOS packages start server, master and client (Mesa llvmpipe on Windows); ASan smoke job with client under xvfb; `release` job on `v*` tags (GitHub release, pre-release for `v0.*` and `v*-*`); `fuzz` job (not required, pushes to main): 2 min per client message type, uploads crash inputs |
-| `.github/workflows/hygiene.yml` | CI: ARCHITECTURE.md inventory, repository hygiene, content case; `review` (`tools/review.sh`) on PRs |
+| `.github/workflows/hygiene.yml` | CI: ARCHITECTURE.md inventory, repository hygiene, content case; `review` (`tools/review.sh`, given the PR description) on PRs, rerun on description edits |
+| `.github/pull_request_template.md` | PR description: item, goal, out of scope, Allowed paths (read by `tools/review.sh`), tests |
 | `.github/workflows/codeql.yml` | CodeQL: `c-cpp` (manual linux-x64 build of the three executables) and `actions`; push, PR, weekly; alerts under `build/` (vcpkg headers) filtered out |
 | `.github/workflows/dependency-graph.yml` | Submits resolved vcpkg ports to the dependency graph on push to `main` |
 | `.github/workflows/osv-vcpkg.yml` | Weekly OSV check of the vcpkg ports by upstream commit (`tools/osv-vcpkg.py`); not required |
@@ -269,6 +270,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/decisions/0021-cstring-one-argument-is-text.md` | ADR: one-argument `CString` copies text; two or more arguments format (Phase C step 5) |
 | `docs/decisions/0022-advertised-server-address.md` | ADR: the master lists `sv_publicAddress` only from private sources; `KILL_SERV` by connection (Phase C step 6) |
 | `docs/decisions/0023-step-review-subagent-in-repo.md` | ADR: step-closing review subagent and rubric tracked in `.claude/` |
+| `docs/decisions/0024-github-project-is-the-backlog.md` | ADR: the private GitHub Project is the backlog; roadmap files removed; PR carries scope and review record |
 | `docs/decisions/README.md` | ADR format and index |
 
 ### `docs/ops`
@@ -276,138 +278,6 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | path | purpose |
 |---|---|
 | `docs/ops/runbook.md` | Hosting the server images: secrets, start, stop, upgrade, logs, console, ports, backups |
-
-### `docs/roadmap`
-
-| path | purpose |
-|---|---|
-| `docs/roadmap/20261014_testing_environment_plan.md` | Testing environment plan (zero-cost): Mac pull agent, staging deploy agent, follow-up test steps |
-| `docs/roadmap/README.md` | Roadmap index: phases, step status and closing rules |
-| `docs/roadmap/_template-step.md` | Template for step files |
-| `docs/roadmap/possible-new-scope.md` | Findings from closed steps that may change later phases, pending owner decision |
-
-### `docs/roadmap/phase-a-modern-portable-build`
-
-| path | purpose |
-|---|---|
-| `docs/roadmap/phase-a-modern-portable-build/README.md` | Phase A handoff and step index |
-| `docs/roadmap/phase-a-modern-portable-build/phase-a-manual-test.md` | Manual gameplay and master-listing checklist per OS |
-| `docs/roadmap/phase-a-modern-portable-build/step0-fork-rename-and-asset-removal.md` | Scope file for step0 |
-| `docs/roadmap/phase-a-modern-portable-build/step1-baseline-and-legacy-removal.md` | Scope file for step1 |
-| `docs/roadmap/phase-a-modern-portable-build/step2-cmake-build.md` | Scope file for step2 |
-| `docs/roadmap/phase-a-modern-portable-build/step3-dependency-upgrades.md` | Scope file for step3 |
-| `docs/roadmap/phase-a-modern-portable-build/step4-64bit-and-cross-platform.md` | Scope file for step4 |
-| `docs/roadmap/phase-a-modern-portable-build/step5-code-hygiene-and-ci.md` | Scope file for step5 |
-
-### `docs/roadmap/phase-b-security-infrastructure-anti-cheat`
-
-| path | purpose |
-|---|---|
-| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/README.md` | Phase B index: goal, steps, done-when, risks |
-| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/step0-supply-chain-security.md` | Scope file for step0 |
-| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/step1-playtest-builds-and-build-guides.md` | Scope file for step1 |
-| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/step2-cross-os-playtest.md` | Scope file for step2 |
-| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/step2a-windows-10-target.md` | Scope file for step2a |
-| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/step2b-release-packages.md` | Scope file for step2b |
-| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/step3-test-harness.md` | Scope file for step3 |
-| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/step4-packet-hygiene.md` | Scope file for step4 |
-| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/step5-crash-fixes.md` | Scope file for step5 |
-| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/step6-sql-prepared-statements.md` | Scope file for step6 |
-| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/step7-medium-low-defects.md` | Scope file for step7 |
-| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/step8-server-validator.md` | Scope file for step8 |
-| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/step9-anti-cheat-checks.md` | Scope file for step9 |
-| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/step10-server-credentials.md` | Scope file for step10 |
-| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/step11-server-containers.md` | Scope file for step11 |
-| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/step12-remote-admin.md` | Scope file for step12 |
-| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/step13-localisation.md` | Scope file for step13 |
-
-### `docs/roadmap/phase-c-installers-and-fixes`
-
-| path | purpose |
-|---|---|
-| `docs/roadmap/phase-c-installers-and-fixes/README.md` | Phase C scope: accepted PNS entries, order, done-when, risks |
-| `docs/roadmap/phase-c-installers-and-fixes/step1-player-data-dir.md` | Scope file for step1 |
-| `docs/roadmap/phase-c-installers-and-fixes/step2-name-and-credits.md` | Scope file for step2 |
-| `docs/roadmap/phase-c-installers-and-fixes/step3-unsigned-installers.md` | Scope file for step3 |
-| `docs/roadmap/phase-c-installers-and-fixes/step4-housekeeping.md` | Scope file for step4 |
-| `docs/roadmap/phase-c-installers-and-fixes/step5-client-engine-fixes.md` | Scope file for step5 |
-| `docs/roadmap/phase-c-installers-and-fixes/step6-server-and-master.md` | Scope file for step6 |
-| `docs/roadmap/phase-c-installers-and-fixes/step7-windows-tcp-close.md` | Scope file for step7 |
-
-### `docs/roadmap/phase-c-installers-and-fixes/reviews`
-
-| path | purpose |
-|---|---|
-| `docs/roadmap/phase-c-installers-and-fixes/reviews/step1-report.md` | Raw fresh-context reviewer reports for step 1 |
-| `docs/roadmap/phase-c-installers-and-fixes/reviews/step1.md` | Step 1 review record |
-| `docs/roadmap/phase-c-installers-and-fixes/reviews/step2-report.md` | Raw fresh-context reviewer report for step 2 |
-| `docs/roadmap/phase-c-installers-and-fixes/reviews/step2.md` | Step 2 review record |
-| `docs/roadmap/phase-c-installers-and-fixes/reviews/step3-report.md` | Raw fresh-context reviewer reports for step 3 |
-| `docs/roadmap/phase-c-installers-and-fixes/reviews/step3.md` | Step 3 review record |
-| `docs/roadmap/phase-c-installers-and-fixes/reviews/step4-report.md` | Raw fresh-context reviewer reports for step 4 |
-| `docs/roadmap/phase-c-installers-and-fixes/reviews/step4.md` | Step 4 review record |
-| `docs/roadmap/phase-c-installers-and-fixes/reviews/step5-report.md` | Raw fresh-context reviewer reports for step 5 |
-| `docs/roadmap/phase-c-installers-and-fixes/reviews/step5.md` | Step 5 review record |
-| `docs/roadmap/phase-c-installers-and-fixes/reviews/step6-report.md` | Raw fresh-context reviewer reports for step 6 |
-| `docs/roadmap/phase-c-installers-and-fixes/reviews/step6.md` | Step 6 review record |
-| `docs/roadmap/phase-c-installers-and-fixes/reviews/step7-report.md` | Raw fresh-context reviewer report for step 7 |
-| `docs/roadmap/phase-c-installers-and-fixes/reviews/step7.md` | Step 7 review record |
-
-### `docs/roadmap/phase-t-testing-environment`
-
-| path | purpose |
-|---|---|
-| `docs/roadmap/phase-t-testing-environment/README.md` | Phase T (testing environment, alongside Phase C): goal, steps, interaction with Phase C |
-| `docs/roadmap/phase-t-testing-environment/step1-mac-pull-agent.md` | Scope file for step1 |
-| `docs/roadmap/phase-t-testing-environment/step2-staging-deploy.md` | Scope file for step2 |
-| `docs/roadmap/phase-t-testing-environment/step3-ci-package-smoke.md` | Scope file for step3 |
-
-### `docs/roadmap/phase-t-testing-environment/reviews`
-
-| path | purpose |
-|---|---|
-| `docs/roadmap/phase-t-testing-environment/reviews/step1-report.md` | Raw reviewer report for step 1 |
-| `docs/roadmap/phase-t-testing-environment/reviews/step1.md` | Fresh-context review record for step 1 |
-| `docs/roadmap/phase-t-testing-environment/reviews/step2-report.md` | Raw reviewer report for step 2 |
-| `docs/roadmap/phase-t-testing-environment/reviews/step2.md` | Fresh-context review record for step 2 |
-| `docs/roadmap/phase-t-testing-environment/reviews/step3-report-round1.md` | Raw reviewer report for step 3, round 1 (run without the skill) |
-| `docs/roadmap/phase-t-testing-environment/reviews/step3-report.md` | Raw reviewer report for step 3 |
-| `docs/roadmap/phase-t-testing-environment/reviews/step3.md` | Fresh-context review record for step 3 |
-
-### `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews`
-
-| path | purpose |
-|---|---|
-| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step1-report.md` | Raw reviewer report for step 1 (round 2; round 1 not kept) |
-| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step1.md` | Fresh-context review record for step 1 |
-| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step10-report.md` | Raw reviewer report for step 10 |
-| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step10.md` | Fresh-context review record for step 10 |
-| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step11-report.md` | Raw reviewer report for step 11 |
-| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step11.md` | Fresh-context review record for step 11 |
-| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step12-report.md` | Raw reviewer report for step 12 |
-| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step12.md` | Fresh-context review record for step 12 |
-| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step13-report.md` | Raw reviewer report for step 13 |
-| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step13.md` | Fresh-context review record for step 13 |
-| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step2-report.md` | Raw reviewer report for step 2 |
-| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step2.md` | Fresh-context review record for step 2 |
-| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step2b-report.md` | Raw reviewer report for step 2b |
-| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step2b.md` | Fresh-context review record for step 2b |
-| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step3-report.md` | Raw reviewer report for step 3 |
-| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step3.md` | Fresh-context review record for step 3 |
-| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step6-report.md` | Raw reviewer report for step 6 |
-| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step6.md` | Fresh-context review record for step 6 |
-| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step7-report.md` | Raw reviewer report for step 7 |
-| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step7.md` | Fresh-context review record for step 7 |
-| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step8-report.md` | Raw reviewer report for step 8 |
-| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step8.md` | Fresh-context review record for step 8 |
-| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step9-report.md` | Raw reviewer report for step 9 |
-| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step9.md` | Fresh-context review record for step 9 |
-| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step5-report.md` | Raw reviewer report for step 5 |
-| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step5.md` | Fresh-context review record for step 5 |
-| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step4-report.md` | Raw reviewer report for step 4 |
-| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step4.md` | Fresh-context review record for step 4 |
-| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step2a-report.md` | Raw reviewer report for step 2a |
-| `docs/roadmap/phase-b-security-infrastructure-anti-cheat/reviews/step2a.md` | Fresh-context review record for step 2a |
 
 ### `engine/babonet`
 
@@ -826,6 +696,6 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tools/staging/cloud-init.yml` | Staging host bootstrap (cloud-init, Ubuntu 24.04): Docker, `deploy.sh`, `rv2-staging-setup` for the env file, cron and first deploy |
 | `tools/staging/README.md` | Staging deploy agent: host needs, install, env file, cron, commands, files |
 | `tools/staging/deploy.sh` | Staging deploy agent (Linux, cron): newest successful main `containers` build, pinned to its commit, deployed only with no players, rollback, `/deployed` (ADR 0018) |
-| `tools/review.sh` | Review gate (REVIEW.md section 1): all checks, scope against the step's Allowed paths, anti-gaming, DONE gate; `--full` builds and tests |
+| `tools/review.sh` | Review gate (REVIEW.md section 1): all checks, scope against the PR's Allowed paths, anti-gaming, review gate on the PR's review record; `--full` builds and tests |
 | `tools/setup-dev.ps1` | Activates hooks, checks tools (Windows) |
 | `tools/setup-dev.sh` | Activates hooks, checks tools (Unix); prints the apt line for building and the package names for running a package |
