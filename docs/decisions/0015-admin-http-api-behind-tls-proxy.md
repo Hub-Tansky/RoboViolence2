@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-10-12
-- Affects: [step 12](../roadmap/phase-b-security-infrastructure-anti-cheat/step12-remote-admin.md) §12.1
+- Affects: [step 12](https://github.com/Hub-Tansky/RoboViolence2/blob/58c91b2a660db2b290b0b5f504381980a6aedba2/docs/roadmap/phase-b-security-infrastructure-anti-cheat/step12-remote-admin.md) §12.1
 
 ## Context
 - Operators need console commands on `bv2dedicated` without the game client. The old remote admin (`RA_*` over babonet UDP peers, `game/src/CMaster.cpp:390-470`) logs in with the cleartext admin password and then trusts the peer's IP:port.

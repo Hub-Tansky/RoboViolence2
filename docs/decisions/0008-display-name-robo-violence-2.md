@@ -2,14 +2,14 @@
 
 - Status: Accepted; code-identifier timing amended by [0009](0009-rename-internal-identifiers-continuously.md); in-game name and credits done in [0019](0019-in-game-name-and-fork-credits.md)
 - Date: 2026-10-04
-- Affects: [step0 §0.2](../roadmap/phase-a-modern-portable-build/step0-fork-rename-and-asset-removal.md); supersedes [0004](0004-project-name-roboviolence2.md)
+- Affects: [step0 §0.2](https://github.com/Hub-Tansky/RoboViolence2/blob/58c91b2a660db2b290b0b5f504381980a6aedba2/docs/roadmap/phase-a-modern-portable-build/step0-fork-rename-and-asset-removal.md); supersedes [0004](0004-project-name-roboviolence2.md)
 
 ## Context
 - [ADR 0004](0004-project-name-roboviolence2.md) named the project "RoboViolence 2" for the trademark reasons it lists; those still hold.
 - The owner chose the two-word spelling for the display name.
 
 ## Decision
-The project's display name is **Robo Violence 2**, an unofficial fork of BaboViolent 2. Identifiers keep the one-word form: GitHub repo `Hub-Tansky/RoboViolence2`, local dir `RoboViolence2-main`, vcpkg name and desktop file `roboviolence2`, bundle/app id `org.roboviolence.bv2`. Code identifiers, binaries and in-game strings keep the old `bv2`/`babo` names until the rebrand ([PNS-20](../roadmap/possible-new-scope.md#pns-20-replacement-assets-and-rebrand)).
+The project's display name is **Robo Violence 2**, an unofficial fork of BaboViolent 2. Identifiers keep the one-word form: GitHub repo `Hub-Tansky/RoboViolence2`, local dir `RoboViolence2-main`, vcpkg name and desktop file `roboviolence2`, bundle/app id `org.roboviolence.bv2`. Code identifiers, binaries and in-game strings keep the old `bv2`/`babo` names until the rebrand ([PNS-20](https://github.com/Hub-Tansky/RoboViolence2/blob/58c91b2a660db2b290b0b5f504381980a6aedba2/docs/roadmap/possible-new-scope.md#pns-20-replacement-assets-and-rebrand)).
 
 ## Consequences
 - Docs, README and OS-visible names (`packaging/macos/Info.plist.in` `CFBundleName`/`CFBundleDisplayName`, `packaging/linux/roboviolence2.desktop` `Name`) say "Robo Violence 2" and "unofficial fork"; they never imply endorsement by the original authors.

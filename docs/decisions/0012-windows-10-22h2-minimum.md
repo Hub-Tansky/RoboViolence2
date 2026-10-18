@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-10-10
-- Affects: [Phase B step 2a](../roadmap/phase-b-security-infrastructure-anti-cheat/step2a-windows-10-target.md); supersedes the "Windows 11" floor in the Phase A plan
+- Affects: [Phase B step 2a](https://github.com/Hub-Tansky/RoboViolence2/blob/58c91b2a660db2b290b0b5f504381980a6aedba2/docs/roadmap/phase-b-security-infrastructure-anti-cheat/step2a-windows-10-target.md); supersedes the "Windows 11" floor in the Phase A plan
 
 ## Context
 - The owner's only Windows machine runs Windows 10 Pro 22H2; there is no Windows 11 machine to play-test on.

@@ -2,7 +2,7 @@
 
 - Status: Accepted; amended by [0016](0016-player-data-lookup-and-package-content.md)
 - Date: 2026-10-03
-- Affects: [step 4 §4.4, §4.5](../roadmap/phase-a-modern-portable-build/step4-64bit-and-cross-platform.md); refines [ADR 0005](0005-runtime-main-data-root.md)
+- Affects: [step 4 §4.4, §4.5](https://github.com/Hub-Tansky/RoboViolence2/blob/58c91b2a660db2b290b0b5f504381980a6aedba2/docs/roadmap/phase-a-modern-portable-build/step4-64bit-and-cross-platform.md); refines [ADR 0005](0005-runtime-main-data-root.md)
 
 ## Context
 - The game wrote `bv2.cfg`, `bv2.db`, logs, screenshots and downloaded maps into `main/` and the working directory. That fails in read-only installs and dirties the repo.

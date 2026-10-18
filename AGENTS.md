@@ -46,7 +46,7 @@ cmake --build --preset <preset> --target bv2dedicated bv2master
 - Branch `refactor/<phase>-stepN-<slug>` (e.g. `refactor/phase-b-step1-playtest-builds`), one commit per task item (`stepN.M: <summary>`), one PR per step. Phase A step 0 was the only step committed straight to `main`.
 - Never commit secrets, real hosts or IPs. Never use `--no-verify`.
 - Finish every step by updating `ARCHITECTURE.md` (inventory and changed facts) and running `tools/check-architecture.sh`.
-- When a step closes, set its **Status** to `DONE (YYYY-MM-DD)` and add what you learned about later phases or out-of-scope work to [docs/roadmap/possible-new-scope.md](docs/roadmap/possible-new-scope.md) ([docs/roadmap/README.md](docs/roadmap/README.md)).
+- When a step closes, set its **Status** to `DONE (YYYY-MM-DD)` and add what you learned about later phases or out-of-scope work to [docs/roadmap/possible-new-scope.md](https://github.com/Hub-Tansky/RoboViolence2/blob/58c91b2a660db2b290b0b5f504381980a6aedba2/docs/roadmap/possible-new-scope.md) ([docs/roadmap/README.md](https://github.com/Hub-Tansky/RoboViolence2/blob/58c91b2a660db2b290b0b5f504381980a6aedba2/docs/roadmap/README.md)).
 - Record non-obvious decisions as ADRs in `docs/decisions/`.
 - Work is done only per [REVIEW.md](REVIEW.md): `tools/review.sh` passes (CI `review` check), and a step closes with a review by the `thermo-nuclear-code-quality-review` subagent (`.claude/agents/`, rubric in `.claude/skills/thermo-nuclear-code-quality-review/`), which any session can spawn, recorded in `docs/roadmap/<phase>/reviews/stepN.md`. Its stop rule and forbidden shortcuts apply to every change.
 - Don't mix mechanical rewrites (encoding, renames, formatting) with functional changes in one commit.

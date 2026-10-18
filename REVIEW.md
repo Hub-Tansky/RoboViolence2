@@ -21,7 +21,7 @@ Outside a step branch, changes to guard files (`tools/check-*`, `tools/review.sh
 
 ## 2. Judged by the reviewer
 
-- The roadmap ground rules hold ([docs/roadmap/README.md](docs/roadmap/README.md#ground-rules-every-phase)): BV2 assets still load, no unapproved **[GUI]** change, renames only in separate mechanical commits.
+- The roadmap ground rules hold ([docs/roadmap/README.md](https://github.com/Hub-Tansky/RoboViolence2/blob/58c91b2a660db2b290b0b5f504381980a6aedba2/docs/roadmap/README.md#ground-rules-every-phase)): BV2 assets still load, no unapproved **[GUI]** change, renames only in separate mechanical commits.
 - New behaviour has a test. A fix has a test with **fix proof**.
 - `ARCHITECTURE.md`, every affected README and the ADRs are updated. Every non-obvious decision has an ADR.
 - Mechanical rewrites (encoding, renames, formatting) are not mixed with functional changes in one commit.

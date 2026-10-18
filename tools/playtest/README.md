@@ -1,6 +1,6 @@
 # Playtest agent (macOS)
 
-Installs each successful `main` build on the owner's Mac, tests it against a disposable local server and notifies pass or failure. Scope and stages: [step 1](../../docs/roadmap/phase-t-testing-environment/step1-mac-pull-agent.md). Decision: [ADR 0017](../../docs/decisions/0017-playtest-pull-agent.md).
+Installs each successful `main` build on the owner's Mac, tests it against a disposable local server and notifies pass or failure. Scope and stages: [step 1](https://github.com/Hub-Tansky/RoboViolence2/blob/58c91b2a660db2b290b0b5f504381980a6aedba2/docs/roadmap/phase-t-testing-environment/step1-mac-pull-agent.md). Decision: [ADR 0017](../../docs/decisions/0017-playtest-pull-agent.md).
 
 Never point it at pull request builds: it accepts only successful `push` runs on `main` of `Hub-Tansky/RoboViolence2`.
 

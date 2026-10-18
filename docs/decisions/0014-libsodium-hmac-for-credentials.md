@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-10-12
-- Affects: [step 10](../roadmap/phase-b-security-infrastructure-anti-cheat/step10-server-credentials.md) §10.1
+- Affects: [step 10](https://github.com/Hub-Tansky/RoboViolence2/blob/58c91b2a660db2b290b0b5f504381980a6aedba2/docs/roadmap/phase-b-security-infrastructure-anti-cheat/step10-server-credentials.md) §10.1
 
 ## Context
 - The join password crosses the wire in cleartext (`net_clsv_gameversion_accepted::password`, `game/src/netPacket.h:73`); the admin login sends unsalted MD5 (`net_clsv_admin_request`, `:86-89`). KEY_QUESTIONS Q-S5.

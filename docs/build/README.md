@@ -39,7 +39,7 @@ Run each program from its folder (a package folder, or `build/<preset>/runtime/`
 - To list the server in the client's server browser, start the master first and set `BV2_MASTER_SERVERS=127.0.0.1:10207` for both the server and the client.
 - Players on other machines use the server's LAN IP instead of `127.0.0.1`.
 - The server console reads commands from stdin (`maplistall`, `changemap <map>`, `quit`).
-- Full test script: [Phase A manual test](../roadmap/phase-a-modern-portable-build/phase-a-manual-test.md).
+- Full test script: [Phase A manual test](https://github.com/Hub-Tansky/RoboViolence2/blob/58c91b2a660db2b290b0b5f504381980a6aedba2/docs/roadmap/phase-a-modern-portable-build/phase-a-manual-test.md).
 
 ## Tests
 

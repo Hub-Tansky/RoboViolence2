@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-10-02
-- Affects: [step 3 §3.1, §3.3](../roadmap/phase-a-modern-portable-build/step3-dependency-upgrades.md), [PNS-15](../roadmap/possible-new-scope.md#pns-15-account-and-ladder-system-service-endpoints)
+- Affects: [step 3 §3.1, §3.3](https://github.com/Hub-Tansky/RoboViolence2/blob/58c91b2a660db2b290b0b5f504381980a6aedba2/docs/roadmap/phase-a-modern-portable-build/step3-dependency-upgrades.md), [PNS-15](https://github.com/Hub-Tansky/RoboViolence2/blob/58c91b2a660db2b290b0b5f504381980a6aedba2/docs/roadmap/possible-new-scope.md#pns-15-account-and-ladder-system-service-endpoints)
 
 ## Context
 
