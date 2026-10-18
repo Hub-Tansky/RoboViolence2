@@ -3,7 +3,7 @@
 
 Usage: run_autotest.py <bv2> <scratch dir> <script> <expected exit code> [--timeout <s>]
 The client gets a fresh pref dir, a windowed config and the placeholder data. On Linux without a display it runs
-under xvfb-run. 0 = pass, 1 = failed expect, 2 = timeout (game/src/Autotest.h); the matching result line must be in stdout.
+under its own Xvfb. 0 = pass, 1 = failed expect, 2 = timeout (game/src/Autotest.h); the matching result line must be in stdout.
 """
 import os
 import shutil
@@ -18,11 +18,23 @@ config = os.path.join(pref, "autotest.cfg")
 with open(config, "w") as f:
     f.write("r_fullScreen false\n")
 cmd = [exe, "--placeholders", "--config", config, "--autotest", script] + sys.argv[5:]
-if sys.platform.startswith("linux") and not os.environ.get("DISPLAY"):
-    cmd = ["xvfb-run", "-a", "-s", "-screen 0 1280x720x24"] + cmd
 env = dict(os.environ, BV2_PREF_DIR=pref, SDL_AUDIODRIVER="dummy")
-r = subprocess.run(cmd, env=env, cwd=os.path.dirname(os.path.abspath(exe)), stdout=subprocess.PIPE,
-                   stderr=subprocess.STDOUT, timeout=180)
+xvfb = None
+if sys.platform.startswith("linux") and not os.environ.get("DISPLAY"):
+    # Our own Xvfb, not xvfb-run: xvfb-run replaces the client's exit code with 5 when its cleanup fails
+    read, write = os.pipe()
+    xvfb = subprocess.Popen(["Xvfb", "-displayfd", str(write), "-screen", "0", "1280x720x24", "-nolisten", "tcp"],
+                            pass_fds=[write], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    os.close(write)
+    with os.fdopen(read) as f:
+        env["DISPLAY"] = ":" + f.readline().strip()
+try:
+    r = subprocess.run(cmd, env=env, cwd=os.path.dirname(os.path.abspath(exe)), stdout=subprocess.PIPE,
+                       stderr=subprocess.STDOUT, timeout=180)
+finally:
+    if xvfb:
+        xvfb.terminate()
+        xvfb.wait()
 out = r.stdout.decode(errors="replace")
 print(out[-4000:])
 if r.returncode != expected:

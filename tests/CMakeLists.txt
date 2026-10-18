@@ -174,14 +174,14 @@ add_test(NAME example_cfg COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_D
 add_test(NAME lang_check COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test_lang_check.py "${BV2_TEST_SCRATCH}")
 add_test(NAME osv_vcpkg COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test_osv_vcpkg.py "${BV2_TEST_SCRATCH}")
 
-# Phase T3: the autotest runner, then the client on autotest scripts (Linux under Xvfb, so only where xvfb-run is
-# installed, as in CI `smoke`; macOS natively). Expected exit codes: 0 pass, 1 failed expect, 2 timeout.
+# Phase T3: the autotest runner, then the client on autotest scripts (Linux under Xvfb, so only where it is installed;
+# macOS natively). Expected exit codes: 0 pass, 1 failed expect, 2 timeout.
 add_executable(test_autotest test_autotest.cpp ${CMAKE_SOURCE_DIR}/game/src/Autotest.cpp)
 target_include_directories(test_autotest PRIVATE ${CMAKE_SOURCE_DIR}/game/src)
 bv2_target_defaults(test_autotest)
 add_test(NAME autotest_runner COMMAND test_autotest)
-find_program(ROBOVIOLENCE2_XVFB_RUN xvfb-run)
-if(TARGET bv2 AND (APPLE OR ROBOVIOLENCE2_XVFB_RUN))
+find_program(ROBOVIOLENCE2_XVFB Xvfb)
+if(TARGET bv2 AND (APPLE OR ROBOVIOLENCE2_XVFB))
   set(ROBOVIOLENCE2_AUTOTEST ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_autotest.py $<TARGET_FILE:bv2> "${BV2_TEST_SCRATCH}/autotest")
   add_test(NAME autotest_menu_host COMMAND ${ROBOVIOLENCE2_AUTOTEST} ${CMAKE_CURRENT_SOURCE_DIR}/autotest/menu-host.txt 0)
   add_test(NAME autotest_fail COMMAND ${ROBOVIOLENCE2_AUTOTEST} ${CMAKE_CURRENT_SOURCE_DIR}/autotest/fail.txt 1 --timeout 5)
