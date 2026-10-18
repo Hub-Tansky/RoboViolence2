@@ -1,6 +1,6 @@
 # AGENTS.md: Robo Violence 2
 
-Robo Violence 2, an unofficial fork of BaboViolent 2 ([ADR 0008](docs/decisions/0008-display-name-robo-violence-2.md)): GPLv3 C++ top-down multiplayer shooter (bitHeads, 2012). Detailed architecture notes live in `docs/analysis/` (start with `docs/analysis/README.md`).
+Robo Violence 2, an unofficial fork of BaboViolent 2 ([ADR 0008](docs/decisions/0008-display-name-robo-violence-2.md)): GPLv3 C++ top-down multiplayer shooter (bitHeads, 2012). The original code analysis (data structures, data flow, algorithms) is at [docs/analysis/ as of fc0aff7](https://github.com/Hub-Tansky/RoboViolence2/blob/fc0aff7c5aa946406c7c110e8e7c2d972a7daeb8/docs/analysis/README.md).
 
 ## Layout
 
@@ -45,7 +45,7 @@ cmake --build --preset <preset> --target bv2dedicated bv2master
 - Every new item: a clear title, context (where it was found, evidence as `path:line` or a link), and an **Acceptance criteria** checklist. Set Phase, Category and Priority when known. Former PNS IDs live in the Source field.
 - Work discovered while doing something else goes to the Project as a new Proposed draft item, never into the current diff.
 - Moving an item: In progress when you start; Testing when the PR is up and waits for tests; Done comes from the PR merge or issue close. Run `gh` for the Project as below; it needs the `project` scope.
-- Durable knowledge stays Markdown in the repo: `ARCHITECTURE.md`, ADRs, module READMEs, build guides, `docs/analysis/`.
+- Durable knowledge stays Markdown in the repo: `ARCHITECTURE.md`, ADRs, module READMEs, build guides.
 
 ## Agent rules
 
@@ -98,7 +98,7 @@ Kept only for compatibility; remove once the trigger holds, each removal with an
 - The server is authoritative for hits, damage, spawns, projectiles and flags. Clients are authoritative for their own movement.
 - Server variables (`sv_*`) are registered in `game/src/GameVar.cpp` via `dksvarRegister` and pushed to clients.
 - Decisions are ADRs in `docs/decisions/` (format and index in its README). Read them before reversing a choice; write one for any non-obvious new choice.
-- Known defects (open and fixed, with the fixing step) are listed in `docs/analysis/KEY_QUESTIONS.md`. Check there before "fixing" odd behaviour, since some of it is load-bearing.
+- Known defects up to Phase C are in [KEY_QUESTIONS.md](https://github.com/Hub-Tansky/RoboViolence2/blob/fc0aff7c5aa946406c7c110e8e7c2d972a7daeb8/docs/analysis/KEY_QUESTIONS.md) (R/Q ids); new ones are Project items with Category Bug. Check both before "fixing" odd behaviour, since some of it is load-bearing.
 
 ## Writing documentation
 

@@ -39,4 +39,4 @@ Targets: Windows 10 22H2 or later (x64), macOS 12+ (arm64) and Linux x64, built 
 - [AGENTS.md](AGENTS.md): project rules for fellow robots, agents and even human contributors
 - [ARCHITECTURE.md](ARCHITECTURE.md): architecture index
 - [Issues](https://github.com/Hub-Tansky/RoboViolence2/issues): bug reports and public work items; the backlog and roadmap live in the maintainer's GitHub Project
-- [docs/analysis/](docs/analysis/README.md): original bv2 code analysis v1
+- [Original bv2 code analysis v1](https://github.com/Hub-Tansky/RoboViolence2/blob/fc0aff7c5aa946406c7c110e8e7c2d972a7daeb8/docs/analysis/README.md) (archived)

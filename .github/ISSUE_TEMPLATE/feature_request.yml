@@ -1,0 +1,28 @@
+name: Feature request
+description: Suggest a change or new feature
+labels: [enhancement, needs-triage]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What is hard or missing today, and who it affects (players, server operators, contributors).
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: What you would like to happen.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: How we'll know it's done.
+      placeholder: |
+        - [ ] ...
+  - type: markdown
+    attributes:
+      value: Menus, HUD and visible text are frozen to match BaboViolent 2 until replacement assets ship (ADR 0010), so interface changes need the maintainer's approval first.
