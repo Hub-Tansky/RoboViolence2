@@ -75,10 +75,16 @@ load_env() { # sourced, not exported: each secret is passed only to the process 
 	[ -n "${BV2_ADMIN_PASS:-}" ] || { echo "BV2_ADMIN_PASS is not set in $ENV_FILE"; return 1; }
 }
 
-# launch_script <cfg> <map>: the server launch script as console lines with <map> instead of its own map.
-# Original data (BV2_DATA_DIR) has no placeholder map; the server reads these lines on stdin.
+# playtest_map: the server map; original data (BV2_DATA_DIR) has no placeholder map
+playtest_map() { if [ -n "${BV2_DATA_DIR:-}" ]; then echo "${RV2_PLAYTEST_MAP:-CTF-Alert}"; else echo CTF-Placeholder; fi; }
+
+map_ok() { [[ $1 =~ ^[A-Za-z0-9_-]+$ ]]; } # map_ok <map>: safe in a sed expression and a console line
+
+# launch_script <cfg> <map>: the server launch script as console lines with <map> instead of its own map; the
+# server reads them on stdin. Mirrors Console.cpp `execute` except: no `novote` first, no ^n colour codes,
+# and only blank and `//` lines are dropped (execute skips every line starting with a space).
 launch_script() {
-	[[ $2 =~ ^[A-Za-z0-9_-]+$ ]] || return 1
+	map_ok "$2" || return 1
 	sed -E -e '/^endscript/,$d' -e '/^[[:space:]]*(\/\/|$)/d' -e "s/^(dedicate|addmap) .*/\1 $2/" "$1"
 }
 
@@ -150,6 +156,7 @@ preflight() { # tools and GitHub access; prints problems, true when there are no
 	done
 	gh auth token --user Hub-Tansky >/dev/null 2>&1 || { echo "gh has no token for Hub-Tansky (keychain locked?)"; bad=1; }
 	gh_api "repos/$REPO/actions/workflows/build.yml/runs?per_page=1" >/dev/null 2>&1 || { echo "GitHub API not reachable"; bad=1; }
+	map_ok "$(playtest_map)" || { echo "RV2_PLAYTEST_MAP: letters, digits, - and _ only"; bad=1; }
 	return $bad
 }
 
@@ -206,6 +213,9 @@ start_local() { # start_local <run dir>: master and server from PKG, on fixed po
 	for p in $GAME_PORT $MASTER_PORT $ADMIN_PORT; do port_busy "$p" && fail "port $p is in use"; done
 	stage local-start
 	RUN_DIR=$1
+	local map lines
+	map=$(playtest_map)
+	lines=$(launch_script "$PKG/main/LaunchScript/CTF.cfg" "$map") || fail "launch script for map $map"
 	mkdir -p "$RUN_DIR/pref" && cp "$PKG/master.db" "$PKG/web.db" "$RUN_DIR/" || fail "run dir"
 	(cd "$RUN_DIR" && exec "$PKG/bv2master" </dev/null >"$RUN_DIR/master.log" 2>&1) &
 	PIDS="$PIDS $!"
@@ -213,21 +223,12 @@ start_local() { # start_local <run dir>: master and server from PKG, on fixed po
 	mkfifo "$FIFO" || fail "fifo"
 	sleep 2147483647 >"$FIFO" 2>/dev/null & # holds the server's stdin open; `quit` is written beside it
 	PIDS="$PIDS $!"
-	local script=CTF map=${RV2_PLAYTEST_MAP:-CTF-Alert} lines=""
-	if [ -n "${BV2_DATA_DIR:-}" ]; then
-		script=""
-		lines=$(launch_script "$PKG/main/LaunchScript/CTF.cfg" "$map") || fail "RV2_PLAYTEST_MAP '$map': letters, digits, - and _ only"
-	fi
 	(cd "$PKG" && BV2_PREF_DIR="$RUN_DIR/pref" BV2_MASTER_SERVERS="127.0.0.1:$MASTER_PORT" BV2_ADMIN_API_PORT=$ADMIN_PORT \
-		BV2_ADMIN_PASS="$BV2_ADMIN_PASS" exec ./bv2dedicated $script <"$FIFO" >"$RUN_DIR/server.log" 2>&1) &
+		BV2_ADMIN_PASS="$BV2_ADMIN_PASS" exec ./bv2dedicated <"$FIFO" >"$RUN_DIR/server.log" 2>&1) &
 	SERVER_PID=$!
 	PIDS="$PIDS $!"
-	if [ -n "$script" ]; then
-		say "content: placeholders"
-	else
-		say "content: $BV2_DATA_DIR, map $map"
-		printf '%s\n' "$lines" >"$FIFO"
-	fi
+	say "content: ${BV2_DATA_DIR:-placeholders}, map $map"
+	printf '%s\n' "$lines" 1<>"$FIFO" # read-write: never blocks without a reader
 	stage server-port # the port, not the log: the server's stdout is block-buffered in a file
 	wait_for 30 port_busy $GAME_PORT || fail "server not listening on $GAME_PORT within 30 s"
 	stage master-port

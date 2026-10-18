@@ -77,6 +77,11 @@ printf '//--- comment\n\nset sv_port 3333\ndedicate CTF-Placeholder\naddmap CTF-
 expect "launch script with the map swapped, no comments, blanks or endscript" \
 	"set sv_port 3333|dedicate CTF-Alert|addmap CTF-Alert|set sv_enableVote true|" \
 	"$(launch_script "$scratch/CTF.cfg" CTF-Alert | tr '\n' '|')"
+expect "packaged CTF script gets the map once, no placeholder left" "1 0" \
+	"$(launch_script "$here/../content/LaunchScript/CTF.cfg" CTF-Alert | grep -c '^dedicate CTF-Alert$') $(launch_script "$here/../content/LaunchScript/CTF.cfg" CTF-Alert | grep -c Placeholder)"
+expect "placeholder map without BV2_DATA_DIR" CTF-Placeholder "$(unset BV2_DATA_DIR; playtest_map)"
+expect "RV2_PLAYTEST_MAP with BV2_DATA_DIR" CTF-Bunker "$(BV2_DATA_DIR=/data RV2_PLAYTEST_MAP=CTF-Bunker playtest_map)"
+expect "default original-data map" CTF-Alert "$(unset RV2_PLAYTEST_MAP; BV2_DATA_DIR=/data playtest_map)"
 expect "map name with other characters refused" no "$(launch_script "$scratch/CTF.cfg" 'x/;e' >/dev/null && echo yes || echo no)"
 
 [ $failures -eq 0 ] && echo "all passed"
