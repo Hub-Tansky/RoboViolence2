@@ -5,7 +5,7 @@ One file per non-obvious decision: `NNNN-kebab-title.md`, numbered in order, nev
 ## Rules
 
 - An accepted ADR is never edited except for its **Status** line. To change a decision, write a new ADR and mark the old one `Superseded by NNNN`.
-- Keep it under one screen. Cite code as `path:line`; link the step file it affects.
+- Keep it under one screen. Cite code as `path:line`; link the Project item, issue, PR or file it affects.
 - Add every new ADR to the index below and to the `ARCHITECTURE.md` inventory.
 
 ## Format
@@ -15,7 +15,7 @@ One file per non-obvious decision: `NNNN-kebab-title.md`, numbered in order, nev
 
 - Status: Accepted | Superseded by NNNN | Deprecated
 - Date: YYYY-MM-DD
-- Affects: <step file §section>
+- Affects: <Project item, issue, PR or file>
 
 ## Context
 Facts that force the decision, with `path:line` citations. 2–5 bullets.
@@ -55,3 +55,4 @@ What we do, in one or two sentences.
 | [0021](0021-cstring-one-argument-is-text.md) | A one-argument CString is text; formatting needs arguments | Accepted |
 | [0022](0022-advertised-server-address.md) | The master lists an advertised address only from private sources | Accepted |
 | [0023](0023-step-review-subagent-in-repo.md) | The step-closing review subagent and its rubric live in the repo | Accepted |
+| [0024](0024-github-project-is-the-backlog.md) | The private GitHub Project is the backlog; no roadmap files in the repo | Accepted |

@@ -2,6 +2,7 @@ name: hygiene
 on:
   push:
   pull_request:
+    types: [opened, synchronize, reopened, edited, ready_for_review, converted_to_draft]  # review reads the PR description
 permissions:
   contents: read
 jobs:
@@ -23,4 +24,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: tools/review.sh against the PR base (REVIEW.md section 1)
+        env:
+          REVIEW_PR_BODY: ${{ github.event.pull_request.body }}
+          REVIEW_PR_DRAFT: ${{ github.event.pull_request.draft }}  # empty on push: treated as draft
         run: tools/review.sh --base origin/${{ github.base_ref || 'main' }}  # pushes compare against main, so no skipped run can mask a failure

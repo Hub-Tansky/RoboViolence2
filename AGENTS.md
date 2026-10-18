@@ -37,19 +37,45 @@ cmake --build --preset <preset> --target bv2dedicated bv2master
 - Databases are generated from `content-seed/*.sql`, never committed.
 - Run `tools/setup-dev.sh` (or `.ps1`) once: it activates `.githooks` (identity, gitleaks, original-asset and encoding checks).
 
+## Work tracking
+
+- The private GitHub Project [Robo Violence 2](https://github.com/users/Hub-Tansky/projects/1) is the only source of truth for backlog, next steps, bugs, features and proposed scope ([ADR 0024](docs/decisions/0024-github-project-is-the-backlog.md)). Never create `step*.md`, `NEXT_STEPS.md`, roadmap, task-list or scope files. If the Project can't be reached, say so and stop; no Markdown fallback.
+- Statuses: **Proposed** (ideas, discovered or accepted-but-unscheduled work) → **Next** → **In progress** (also when blocked: the item body then starts with `Blocked by: <what>`) → **Testing** (implemented, awaiting tests before review or merge) → **Done**.
+- New ideas and private plans are **draft items**. Convert a draft to a public issue only when the work is ready to expose or collaborate on. Issues are public.
+- Every new item: a clear title, context (where it was found, evidence as `path:line` or a link), and an **Acceptance criteria** checklist. Set Phase, Category and Priority when known. Former PNS IDs live in the Source field.
+- Work discovered while doing something else goes to the Project as a new Proposed draft item, never into the current diff.
+- Moving an item: In progress when you start; Testing when the PR is up and waits for tests; Done comes from the PR merge or issue close. Run `gh` for the Project as below; it needs the `project` scope.
+- Durable knowledge stays Markdown in the repo: `ARCHITECTURE.md`, ADRs, module READMEs, build guides, `docs/analysis/`.
+
 ## Agent rules
 
-- Work one step at a time, from its scope file in `docs/roadmap/<phase>/`. Stay inside the step's **Allowed paths**; note out-of-scope work instead of doing it.
-- Propose Minimal Changes: Provide only the simplest, most direct code or solution required to make the step work or fix the bug.
+- Work one Project item at a time. The PR description holds its scope from [the PR template](.github/pull_request_template.md): goal, item link, out of scope and **Allowed paths**. Stay inside the Allowed paths; record out-of-scope work as a new draft item instead of doing it.
+- Propose Minimal Changes: Provide only the simplest, most direct code or solution required to make the item work or fix the bug.
 - Ignore Corner Cases: Do not write defensive code for rare edge cases, scale considerations, or downstream exceptions.
-- Deliverables: Your output must reflect a "Minimum Viable Product" mindset for scope of step or bug. Keep the diff or response as small and readable as possible.
-- Branch `refactor/<phase>-stepN-<slug>` (e.g. `refactor/phase-b-step1-playtest-builds`), one commit per task item (`stepN.M: <summary>`), one PR per step. Phase A step 0 was the only step committed straight to `main`.
+- Deliverables: Your output must reflect a "Minimum Viable Product" mindset for scope of item or bug. Keep the diff or response as small and readable as possible.
+- Branch `<kind>/<slug>` with kind `feat`, `fix`, `refactor`, `ci`, `docs` or `chore` (e.g. `fix/master-ban-wire-format`); one commit per task (`<kind>: <summary>`); one PR per item, with `Closes #n` when the item is an issue.
 - Never commit secrets, real hosts or IPs. Never use `--no-verify`.
-- Finish every step by updating `ARCHITECTURE.md` (inventory and changed facts) and running `tools/check-architecture.sh`.
-- When a step closes, set its **Status** to `DONE (YYYY-MM-DD)` and add what you learned about later phases or out-of-scope work to [docs/roadmap/possible-new-scope.md](https://github.com/Hub-Tansky/RoboViolence2/blob/58c91b2a660db2b290b0b5f504381980a6aedba2/docs/roadmap/possible-new-scope.md) ([docs/roadmap/README.md](https://github.com/Hub-Tansky/RoboViolence2/blob/58c91b2a660db2b290b0b5f504381980a6aedba2/docs/roadmap/README.md)).
+- Finish every PR by updating `ARCHITECTURE.md` (inventory and changed facts) and running `tools/check-architecture.sh`.
 - Record non-obvious decisions as ADRs in `docs/decisions/`.
-- Work is done only per [REVIEW.md](REVIEW.md): `tools/review.sh` passes (CI `review` check), and a step closes with a review by the `thermo-nuclear-code-quality-review` subagent (`.claude/agents/`, rubric in `.claude/skills/thermo-nuclear-code-quality-review/`), which any session can spawn, recorded in `docs/roadmap/<phase>/reviews/stepN.md`. Its stop rule and forbidden shortcuts apply to every change.
+- Work is done only per [REVIEW.md](REVIEW.md): `tools/review.sh` passes (CI `review` check), and a scoped PR is ready only with a review by the `thermo-nuclear-code-quality-review` subagent (`.claude/agents/`, rubric in `.claude/skills/thermo-nuclear-code-quality-review/`), which any session can spawn, recorded in the PR description. Its stop rule and forbidden shortcuts apply to every change.
 - Don't mix mechanical rewrites (encoding, renames, formatting) with functional changes in one commit.
+
+## Ground rules
+
+1. **BV2 asset compatibility** ([ADR 0010](docs/decisions/0010-bv2-asset-compat-and-gui-freeze.md)). Until replacement assets ship (PNS-20, H.1), the game runs on original BV2 data (`BV2_DATA_DIR`) unchanged: same file formats (`.DKO`, `.bvm`, textures, sounds, fonts, `.lang`), names and paths under `main/`, and map download sends `.bvm` unchanged. New formats are added beside old ones, never instead. A PR touching a loader is tested locally with original data; CI keeps using placeholders.
+2. **GUI freeze** (same ADR). Menus, HUD, layout, fonts and visible text stay as in BV2. Work marked **[GUI]** changes what the player sees and needs the owner's explicit approval, noted on its Project item, before work starts. If unmarked work turns out to change the interface, stop and ask.
+3. **Internal renaming** ([ADR 0009](docs/decisions/0009-rename-internal-identifiers-continuously.md)). Replace `bv2`/`babo` with `roboviolence2` in code symbols, namespaces, source file and class names, internal CMake targets and variables, and comments, in files a PR already touches. Binaries (`bv2`, `bv2dedicated`, `bv2master`), `BV2_*` env vars and CMake options, cvars, config and pref paths, `bv2.db`, file formats, protocol and master-server IDs, and visible strings wait for the rebrand (PNS-20, H.7). Renames are separate mechanical commits; tests stay green.
+4. **Touch-and-improve** (PNS-19). In files a PR already touches, replace raw `sprintf`/`strcpy`/`strcat` with `snprintf` or `std::string`, and use `std::unique_ptr` where ownership is clear. Add a test with each fix.
+
+PNS-n names a Project item by its Source field.
+
+## Deprecated, to be removed
+
+Kept only for compatibility; remove once the trigger holds, each removal with an ADR.
+
+| Item | Kept for | Remove when |
+|---|---|---|
+| `.lang` language files and their loader (`game/src/GameVar.cpp` `loadLanguage`) | Original BV2 data (ADR 0010, ADR 0011) | BV2 assets are no longer supported (after PNS-20 H.1); `.po` becomes the only format and `en.po` replaces `en.lang` as the source for `en.pot` |
 
 ## Compile-time variants
 
@@ -60,7 +86,7 @@ cmake --build --preset <preset> --target bv2dedicated bv2master
 
 - All commits, merges, pushes and GitHub actions for this project run as **`Hub-Tansky`**: `user.email = 337104978+Hub-Tansky@users.noreply.github.com`. Never `patpi`, never a personal email.
 - Run `gh` as `GH_TOKEN=$(gh auth token --user Hub-Tansky) gh …`. Don't run `gh auth switch`; other projects rely on `patpi` being active.
-- Setup and guard hook: `docs/roadmap/phase-a-modern-portable-build/step0-fork-rename-and-asset-removal.md` §0.0.
+- Setup and guard hook: `tools/setup-dev.sh` and `.githooks/` (history: [Phase A step 0 §0.0](https://github.com/Hub-Tansky/RoboViolence2/blob/58c91b2a660db2b290b0b5f504381980a6aedba2/docs/roadmap/phase-a-modern-portable-build/step0-fork-rename-and-asset-removal.md)).
 
 ## Conventions and gotchas
 
