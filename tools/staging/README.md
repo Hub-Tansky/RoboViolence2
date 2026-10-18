@@ -10,7 +10,7 @@ Linux (amd64 or arm64) with Docker and the compose plugin, `curl`, `jq`; inbound
 
 ## Install
 
-On a fresh Ubuntu 24.04 VM, paste [cloud-init.yml](cloud-init.yml) as the user data. The VM needs a public IPv4 at first boot, or the install has no network. It does the steps below except the env file and cron; once the DNS name points at the host, `sudo rv2-staging-setup <public name>` writes the env file (generated password, the host's public IP as `BV2_PUBLIC_ADDRESS`), installs the cron line and runs the first deploy. Open TCP 443, 3333 and 10207 in the provider's firewall too.
+On a fresh Ubuntu 24.04 VM, paste [cloud-init.yml](cloud-init.yml) as the user data. The VM needs a public IPv4 at first boot, or the install has no network. It does the steps below except the env file and cron; once the DNS name points at the host, `sudo rv2-staging-setup <public name>` writes the env file (generated password, the host's public IP as `BV2_PUBLIC_ADDRESS`), installs the cron line and runs the first deploy. Open TCP 443, 3333 and 10207 in the provider's firewall.
 
 By hand:
 
@@ -30,6 +30,7 @@ sudo curl -fsSL https://raw.githubusercontent.com/Hub-Tansky/RoboViolence2/main/
 BV2_ADMIN_PASS=<random, 16+ characters>
 BV2_ADMIN_HOST=<public name, or localhost>
 BV2_ADMIN_PORT=<443 with a public name; default 8443>
+BV2_PUBLIC_ADDRESS=<public IPv4; the master lists it, ADR 0022>
 NTFY_TOPIC=<optional>
 ```
 

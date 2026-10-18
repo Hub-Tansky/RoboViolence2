@@ -823,7 +823,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tools/playtest/README.md` | Playtest agent: install, env file, commands, files, uninstall |
 | `tools/playtest/agent.sh` | Playtest pull agent (macOS): fetches and verifies successful `main` packages, tests the client against a disposable local server or staging, reports and notifies (ADR 0017) |
 | `tools/playtest/com.roboviolence2.playtest.plist` | LaunchAgent template for the playtest agent (every 10 min) |
-| `tools/staging/cloud-init.yml` | Staging host bootstrap (cloud-init, Ubuntu 24.04): Docker, host firewall, `deploy.sh`, `rv2-staging-setup` for the env file, cron and first deploy |
+| `tools/staging/cloud-init.yml` | Staging host bootstrap (cloud-init, Ubuntu 24.04): Docker, `deploy.sh`, `rv2-staging-setup` for the env file, cron and first deploy |
 | `tools/staging/README.md` | Staging deploy agent: host needs, install, env file, cron, commands, files |
 | `tools/staging/deploy.sh` | Staging deploy agent (Linux, cron): newest successful main `containers` build, pinned to its commit, deployed only with no players, rollback, `/deployed` (ADR 0018) |
 | `tools/review.sh` | Review gate (REVIEW.md section 1): all checks, scope against the step's Allowed paths, anti-gaming, DONE gate; `--full` builds and tests |
