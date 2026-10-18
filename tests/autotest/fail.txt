@@ -1,0 +1,3 @@
+# Never true: the run ends with exit 1 naming line 3.
+expect-scene menu
+expect-console this text never appears in the console

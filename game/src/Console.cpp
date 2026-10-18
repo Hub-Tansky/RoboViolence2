@@ -21,6 +21,7 @@
 #include "FileIO.h"
 #include "CMaster.h"
 #ifndef CONSOLE
+#include "Autotest.h"
 #include "KeyManager.h"
 #include "CStatus.h"
 #endif
@@ -107,6 +108,13 @@ void Console::add(CString message, bool fromServer, bool isEvent)
 {
 #ifdef CONSOLE
 	printf("%s\n", textColorLess(message).s);
+#else
+	if (autotest)
+	{
+		CString line = textColorLess(message);
+		printf("%s\n", line.s);
+		autotest->consoleLine(line.s);
+	}
 #endif
 
 	if (isEvent == true)

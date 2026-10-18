@@ -40,6 +40,14 @@ static void bv2ApplyNetlogFromEnv()
 #ifndef CONSOLE
 	#include "CStatus.h"
 	#include "CLobby.h"
+	#include "Autotest.h"
+	#include <chrono>
+	#include <cstdio>
+	#include <thread>
+
+// --autotest <script> (ADR 0025); null otherwise
+roboviolence2::Autotest * autotest = 0;
+static int autotestExitCode = 0;
 #endif
 
 
@@ -144,6 +152,29 @@ CVector2i dkwGetCursorPos_main()
 
 #ifndef CONSOLE
 
+// The scene name expect-scene compares against
+static const char * autotestScene()
+{
+	if (scene->introScreen) return "intro";
+	if (scene->editor) return "editor";
+	if (scene->client) return scene->client->game->map ? "game" : "loading";
+	return "menu";
+}
+
+static void autotestUpdate(float delay)
+{
+	static bool reported = false;
+	roboviolence2::Autotest::Result result = autotest->update(delay, autotestScene(), [](const std::string & command)
+	{
+		console->sendCommand(CString("%s", command.c_str())); // script text is data, not a format
+	});
+	if (result == roboviolence2::Autotest::Running || reported) return;
+	reported = true;
+	printf("%s\n", autotest->report().c_str());
+	autotestExitCode = result;
+	dkwForceQuit();
+}
+
 class MainLoopInterface : public CMainLoopInterface
 {
 public:
@@ -186,6 +217,8 @@ public:
 
 			// On appel nos fonction pour animer ici
 			scene->update(delay);
+
+			if (autotest) autotestUpdate(delay);
 
 			// On d�r�ente pour le prochain frame
 			nbFrameElapsed--;
@@ -439,6 +472,33 @@ int main(int argc, char* argv[])
 {
 	// PREMIERE CHOSE A FAIRE, on load les config
 	bv2::pathsInit(argv[0]);
+	for (int i = 1; i + 1 < argc; ++i)
+	{
+		if (std::strcmp(argv[i], "--autotest") == 0)
+		{
+			if (!autotest) autotest = new roboviolence2::Autotest();
+			if (!autotest->load(argv[i + 1]))
+			{
+				printf("%s\n", autotest->report().c_str());
+				return roboviolence2::Autotest::Fail;
+			}
+		}
+	}
+	if (autotest)
+	{
+		for (int i = 1; i + 1 < argc; ++i)
+			if (std::strcmp(argv[i], "--timeout") == 0) autotest->timeout = std::strtof(argv[i + 1], nullptr);
+		setvbuf(stdout, nullptr, _IOLBF, BUFSIZ); // console lines reach CI as they happen
+		// An init failure blocks in a message box and a hung loop never reports: both end here
+		float limit = autotest->timeout + 30;
+		std::thread([limit]()
+		{
+			std::this_thread::sleep_for(std::chrono::duration<float>(limit));
+			printf("autotest: TIMEOUT the client stopped responding\n");
+			fflush(stdout);
+			std::_Exit(roboviolence2::Autotest::Timeout);
+		}).detach();
+	}
 	bv2::chooseDataDir(argc, argv);
 	dksvarInit(&stringInterface);
 	std::string configPath = bv2::loadConfigLayers(argc, (const char* const*)argv);
@@ -578,6 +638,11 @@ int main(int argc, char* argv[])
 		}
 		if (std::strcmp(argv[i], "--placeholders") == 0)
 			continue; // handled by chooseDataDir
+		if (std::strcmp(argv[i], "--autotest") == 0 || std::strcmp(argv[i], "--timeout") == 0)
+		{
+			++i; // handled at startup
+			continue;
+		}
 		if (str.len() > 0) str += " ";
 		str += argv[i];
 	}
@@ -620,8 +685,11 @@ int main(int argc, char* argv[])
 	// Do last update after window is closed
 	delete status;
 
-	// Tout c'est bien passe on retourne 0
-	return 0;
+	delete autotest;
+	autotest = 0;
+
+	// Tout c'est bien passe on retourne 0 (or the autotest result)
+	return autotestExitCode;
 }
 
 #endif
