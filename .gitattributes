@@ -12,3 +12,4 @@
 *.bvm binary
 *.ttf binary
 *.zip binary
+*.md -diff
