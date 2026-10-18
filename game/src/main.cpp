@@ -81,6 +81,13 @@ static bool autotestStart(int argc, char * argv[])
 	return true;
 }
 
+// Every init failure exit: a result line for autotest callers, then the exit code
+static int initFailed()
+{
+	if (autotest) printf("autotest: FAIL the client failed to start\n");
+	return exitCode;
+}
+
 // Startup options with a value, kept out of the startup console command
 static bool optionTakesValue(const char * arg)
 {
@@ -521,7 +528,7 @@ int main(int argc, char* argv[])
 	if (!gameVar.reloadLanguage())
 	{
 		dkwShowMessage("Error", "Can not load language file\nTry deleting the config file.");
-		return exitCode;
+		return initFailed();
 	}
 
 	if (gameVar.r_bitdepth != 16 && gameVar.r_bitdepth != 32) gameVar.r_bitdepth = 32;
@@ -533,7 +540,7 @@ int main(int argc, char* argv[])
 	if (!dkwInit(gameVar.r_resolution[0], gameVar.r_resolution[1], gameVar.r_bitdepth, gameVar.lang_gameName.s, &mainLoopInterface, gameVar.r_fullScreen, gameVar.r_refreshRate))
 	{
 		dkwShowMessage("Error", dkwGetLastError());
-		return exitCode;
+		return initFailed();
 	}
 
 	// On init les input
@@ -541,7 +548,7 @@ int main(int argc, char* argv[])
 	{
 		dkwShutDown();
 		dkwShowMessage("Error", "Error creating Input");
-		return exitCode;
+		return initFailed();
 	}
 
 #ifdef BV2_PLATFORM_WINDOWS
@@ -558,7 +565,7 @@ int main(int argc, char* argv[])
 		dkiShutDown();
 		dkwShutDown();
 		dkwShowMessage("Error", "Error creating openGL context");
-		return exitCode;
+		return initFailed();
 	}
 
 #ifdef BV2_PLATFORM_WINDOWS
@@ -590,7 +597,7 @@ int main(int argc, char* argv[])
 		dkglShutDown();
 		dkwShutDown();
 		dkwShowMessage("Error", "Error creating the audio engine");
-		return exitCode;
+		return initFailed();
 	}
 
 	// On init la network
@@ -603,7 +610,7 @@ int main(int argc, char* argv[])
 		dkglShutDown();
 		dkwShutDown();
 		dkwShowMessage("Error", "Error initiating baboNet");
-		return exitCode;
+		return initFailed();
 	}
 
 	bbNetVersion = bb_getVersion();
@@ -619,7 +626,7 @@ int main(int argc, char* argv[])
 		dkglShutDown();
 		dkwShutDown();
 		dkwShowMessage("Error", "Wrong version of BaboNet\nReinstalling the game may resolve this prolem");
-		return exitCode;
+		return initFailed();
 	}
 
 	// On cree le lobby
