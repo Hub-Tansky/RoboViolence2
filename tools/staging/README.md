@@ -10,6 +10,10 @@ Linux (amd64 or arm64) with Docker and the compose plugin, `curl`, `jq`; inbound
 
 ## Install
 
+On a fresh Ubuntu 24.04 VM, paste [cloud-init.yml](cloud-init.yml) as the user data. The VM needs a public IPv4 at first boot, or the install has no network. It does the steps below except the env file and cron; once the DNS name points at the host, `sudo rv2-staging-setup <public name>` writes the env file (generated password, the host's public IP as `BV2_PUBLIC_ADDRESS`), installs the cron line and runs the first deploy. Open TCP 443, 3333 and 10207 in the provider's firewall too.
+
+By hand:
+
 As the user that runs Docker (root, or a member of the `docker` group):
 
 ```bash
