@@ -1,5 +1,5 @@
 // Replays tests/corpus through the in-process server: no crash, and the expected reply to each valid sample.
-//   test_replay <corpus dir>          every file except crash-*.bin (known defects, see KEY_QUESTIONS.md)
+//   test_replay <corpus dir>          every file except crash-*.bin (known defects, see KEY_QUESTIONS.md at fc0aff7)
 //   test_replay <corpus dir> <file>   the same, then <file> (ctest runs each crash-*.bin this way under ASan)
 #include "corpus_types.h"
 #include "server_harness.h"

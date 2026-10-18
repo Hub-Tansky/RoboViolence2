@@ -1,4 +1,4 @@
-// Phase B step 5: one check per fixed defect (KEY_QUESTIONS.md Part D) on the in-process server.
+// Phase B step 5: one check per fixed defect (KEY_QUESTIONS.md at fc0aff7 Part D) on the in-process server.
 #include "server_harness.h"
 
 #include "CMaster.h"

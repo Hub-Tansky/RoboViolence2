@@ -20,7 +20,7 @@ Robo Violence 2: unofficial fork of BaboViolent 2, a top-down multiplayer shoote
 | Encoding | UTF-8 without BOM, LF; `tools/check-encoding.py`. Some comments hold U+FFFD where upstream lost accents. |
 | Supply chain | Dependency graph fed by vcpkg (`dependency-graph.yml`, on push to `main`); Dependabot alerts and security updates on; Dependabot version updates for GitHub Actions (`.github/dependabot.yml`); CodeQL `c-cpp` and `actions` (`codeql.yml`, not required). Dependabot and OSV can't read vcpkg purls; `osv-vcpkg.yml` (weekly) queries OSV by each port's upstream commit (`tools/osv-vcpkg.py`). Bump the vcpkg baseline monthly, or sooner when it reports a port. |
 | Hosting | Server images from `packaging/docker/Dockerfile` (GHCR on `main`), runbook [docs/ops/runbook.md](docs/ops/runbook.md). |
-| Known defects | [docs/analysis/KEY_QUESTIONS.md](docs/analysis/KEY_QUESTIONS.md). |
+| Known defects | [docs/analysis/KEY_QUESTIONS.md](https://github.com/Hub-Tansky/RoboViolence2/blob/fc0aff7c5aa946406c7c110e8e7c2d972a7daeb8/docs/analysis/KEY_QUESTIONS.md). |
 | Decisions | [docs/decisions/README.md](docs/decisions/README.md): 0001 Ninja, 0002 libcurl compiled out, 0003 OpenGL 2.1 kept, 0004 project name (superseded by 0008), 0005 `main/` data root, 0006 platform layer, 0007 data root, pref dir and config layers, 0008 display name "Robo Violence 2", 0009 internal renaming, 0010 BV2 asset compatibility and GUI freeze, 0011 gettext PO translations, 0012 Windows 10 22H2 minimum, 0013 rulesets, 0014 libsodium HMAC, 0015 admin HTTP API, 0016 player data lookup and package content, 0017 playtest pull agent, 0018 staging pull deploy, 0019 in-game name and fork credits, 0020 package and release format, 0021 one-argument CString is text, 0022 advertised server address, 0023 step review subagent in the repo. |
 
 ### Open items
@@ -233,22 +233,6 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/build/linux.md` | Linux build and run guide |
 | `docs/build/macos.md` | macOS build and run guide |
 | `docs/build/windows.md` | Windows build and run guide |
-
-### `docs/analysis`
-
-| path | purpose |
-|---|---|
-| `docs/analysis/01_SYSTEM_OVERVIEW.md` | Code analysis: 01 SYSTEM OVERVIEW |
-| `docs/analysis/02_DATA_STRUCTURES.md` | Code analysis: 02 DATA STRUCTURES |
-| `docs/analysis/03_DATA_FLOW.md` | Code analysis: 03 DATA FLOW |
-| `docs/analysis/ANTI_CHEAT_TUNING.md` | Server anti-cheat levels, rules, limits and tuning (step 9) |
-| `docs/analysis/ALGORITHM_01-Networking.md` | Code analysis: ALGORITHM 01 Networking |
-| `docs/analysis/ALGORITHM_02-Movement-Collision-Interpolation.md` | Code analysis: ALGORITHM 02 Movement Collision Interpolation |
-| `docs/analysis/ALGORITHM_03-Weapons-Hitscan-Projectiles.md` | Code analysis: ALGORITHM 03 Weapons Hitscan Projectiles |
-| `docs/analysis/ALGORITHM_04-GameModes-Spawning-Rounds.md` | Code analysis: ALGORITHM 04 GameModes Spawning Rounds |
-| `docs/analysis/FORK_jmainguy-modern.md` | Code analysis: FORK jmainguy modern |
-| `docs/analysis/KEY_QUESTIONS.md` | Code analysis: KEY QUESTIONS |
-| `docs/analysis/README.md` | Index of the code analysis |
 
 ### `docs/decisions`
 
