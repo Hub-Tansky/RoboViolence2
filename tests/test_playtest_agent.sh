@@ -81,6 +81,7 @@ expect "packaged CTF script gets the map once, no placeholder left" "1 0" \
 	"$(launch_script "$here/../content/LaunchScript/CTF.cfg" CTF-Alert | grep -c '^dedicate CTF-Alert$') $(launch_script "$here/../content/LaunchScript/CTF.cfg" CTF-Alert | grep -c Placeholder)"
 expect "placeholder map without BV2_DATA_DIR" CTF-Placeholder "$(unset BV2_DATA_DIR; playtest_map)"
 expect "RV2_PLAYTEST_MAP with BV2_DATA_DIR" CTF-Bunker "$(BV2_DATA_DIR=/data RV2_PLAYTEST_MAP=CTF-Bunker playtest_map)"
+expect "unexported BV2_DATA_DIR (env file) keeps placeholders" CTF-Placeholder "$(unset BV2_DATA_DIR; BV2_DATA_DIR=/data; playtest_map)"
 expect "default original-data map" CTF-Alert "$(unset RV2_PLAYTEST_MAP; BV2_DATA_DIR=/data playtest_map)"
 expect "map name with other characters refused" no "$(launch_script "$scratch/CTF.cfg" 'x/;e' >/dev/null && echo yes || echo no)"
 

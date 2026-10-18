@@ -75,8 +75,9 @@ load_env() { # sourced, not exported: each secret is passed only to the process 
 	[ -n "${BV2_ADMIN_PASS:-}" ] || { echo "BV2_ADMIN_PASS is not set in $ENV_FILE"; return 1; }
 }
 
-# playtest_map: the server map; original data (BV2_DATA_DIR) has no placeholder map
-playtest_map() { if [ -n "${BV2_DATA_DIR:-}" ]; then echo "${RV2_PLAYTEST_MAP:-CTF-Alert}"; else echo CTF-Placeholder; fi; }
+# playtest_map: the server map; original data (BV2_DATA_DIR) has no placeholder map. printenv: only an exported
+# BV2_DATA_DIR (the plist, not the env file) reaches the server and client.
+playtest_map() { if [ -n "$(printenv BV2_DATA_DIR)" ]; then echo "${RV2_PLAYTEST_MAP:-CTF-Alert}"; else echo CTF-Placeholder; fi; }
 
 map_ok() { [[ $1 =~ ^[A-Za-z0-9_-]+$ ]]; } # map_ok <map>: safe in a sed expression and a console line
 
@@ -227,7 +228,7 @@ start_local() { # start_local <run dir>: master and server from PKG, on fixed po
 		BV2_ADMIN_PASS="$BV2_ADMIN_PASS" exec ./bv2dedicated <"$FIFO" >"$RUN_DIR/server.log" 2>&1) &
 	SERVER_PID=$!
 	PIDS="$PIDS $!"
-	say "content: ${BV2_DATA_DIR:-placeholders}, map $map"
+	say "content: $(printenv BV2_DATA_DIR || echo placeholders), map $map"
 	printf '%s\n' "$lines" 1<>"$FIFO" # read-write: never blocks without a reader
 	stage server-port # the port, not the log: the server's stdout is block-buffered in a file
 	wait_for 30 port_busy $GAME_PORT || fail "server not listening on $GAME_PORT within 30 s"
