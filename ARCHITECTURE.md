@@ -617,7 +617,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/ReportGen.h` | XML server report generation |
 | `game/src/Scene.cpp` | Top-level scene: main loop, menus, game and editor switching, rendering setup |
 | `game/src/Scene.h` | Top-level scene: main loop, menus, game and editor switching, rendering setup |
-| `game/src/SceneNet.cpp` | Scene: starts and stops client and server, hosting and joining |
+| `game/src/SceneNet.cpp` | Scene: starts and stops client and server, hosting and joining; kick, ban and the banlist file (48-byte NUL-padded records) |
 | `game/src/Server.cpp` | Authoritative server: connections, joins, tick, map and mode control |
 | `game/src/Server.h` | Authoritative server: connections, joins, tick, map and mode control |
 | `game/src/ServerCTF.cpp` | Server: capture-the-flag rules |
