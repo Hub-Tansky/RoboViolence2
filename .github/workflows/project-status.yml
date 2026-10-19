@@ -1,0 +1,27 @@
+name: project-status
+# Moves the PR's Project item: draft PR -> In progress, ready PR -> Testing, merged -> Done (ADR 0027). Needs the
+# PROJECT_TOKEN secret (classic PAT with the `project` scope); skipped without it. Not required.
+# pull_request_target: the script runs from the base branch, so a PR branch can't change the code that holds the
+# token. The PR is never checked out; its description is only matched by regexes.
+on:
+  pull_request_target:
+    types: [opened, reopened, ready_for_review, converted_to_draft, closed]
+permissions:
+  contents: read
+jobs:
+  move:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: tools/project-status.py
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+      - name: Move the Project item
+        env:
+          PROJECT_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+        run: |
+          if [ -z "$PROJECT_TOKEN" ]; then echo "PROJECT_TOKEN not set; skipping"; exit 0; fi
+          python3 tools/project-status.py

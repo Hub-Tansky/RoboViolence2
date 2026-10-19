@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Item | <Project item or issue link; `Closes #n` for an issue> |
+| Item | <`Closes #n` for an issue, or [Project](https://github.com/users/Hub-Tansky/projects/1) draft item "<exact title>"> |
 | Goal | <one sentence: what is true after this PR> |
 | Out of scope | <tempting work left out, with its Project item> |
 | Allowed paths | <globs in backticks, e.g. `game/src/Server*.cpp` `tests/**` `ARCHITECTURE.md`> |

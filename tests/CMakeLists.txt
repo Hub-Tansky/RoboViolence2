@@ -173,6 +173,7 @@ find_package(Python3 REQUIRED COMPONENTS Interpreter)
 add_test(NAME example_cfg COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test_example_cfg.py)
 add_test(NAME lang_check COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test_lang_check.py "${BV2_TEST_SCRATCH}")
 add_test(NAME osv_vcpkg COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test_osv_vcpkg.py "${BV2_TEST_SCRATCH}")
+add_test(NAME project_status COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test_project_status.py "${BV2_TEST_SCRATCH}")
 
 # Phase T3: the autotest runner, then the client on autotest scripts (Linux under Xvfb, so only where it is installed;
 # macOS natively). Expected exit codes: 0 pass, 1 failed expect, 2 timeout.

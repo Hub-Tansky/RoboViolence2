@@ -16,4 +16,4 @@ The private Project [Robo Violence 2](https://github.com/users/Hub-Tansky/projec
 - Statuses Proposed → Next → In progress → Testing → Done; blocked work stays In progress with `Blocked by:` in the item. Project workflows move items on issue and PR events.
 - `docs/roadmap/` is removed; its last state is commit `58c91b2`, which existing links point at. PNS-n IDs survive in the Project's Source field. The owner keeps a private copy in the Obsidian vault.
 - The `review` CI job reruns on PR description edits.
-- Rejected: Markdown task files as a fallback when the Project is unreachable (two sources drift again); public Project (exposes private plans); an Actions workflow for status sync (needs a stored PAT; built-in Project workflows cover it).
+- Rejected: Markdown task files as a fallback when the Project is unreachable (two sources drift again); public Project (exposes private plans); an Actions workflow for status sync (needs a stored PAT; built-in Project workflows cover it), superseded by [ADR 0027](0027-project-status-workflow.md).
