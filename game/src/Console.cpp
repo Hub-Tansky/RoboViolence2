@@ -2212,8 +2212,8 @@ void Console::sendCommand(CString commandLine, bool isAdmin, unsigned long bbnet
 			stCacheBan cb;
 			cb.Duration		=	duration;
 			cb.ID			=	ID;
-			snprintf(cb.IP, sizeof(cb.IP), "%s", scene->server->CachedPlayers[ID].IP );
-			snprintf(cb.Nick, sizeof(cb.Nick), "%s", scene->server->CachedPlayers[ID].NickName );
+			snprintf(cb.IP, sizeof(cb.IP), "%s", scene->server->CachedPlayers[ID].IP);
+			snprintf(cb.Nick, sizeof(cb.Nick), "%s", scene->server->CachedPlayers[ID].NickName);
 			memcpy( cb.Pass, strPass.s, 7 );
 			cb.Pass[7] = '\0';
 			
@@ -2233,8 +2233,8 @@ void Console::sendCommand(CString commandLine, bool isAdmin, unsigned long bbnet
 		{
 			CString strFilter = tokenize.getFirstToken(' ');
 			stCacheList cl;
-			snprintf(cl.Filter, sizeof(cl.Filter), "%s", strFilter.s );
-			
+			snprintf(cl.Filter, sizeof(cl.Filter), "%s", strFilter.s);
+
 			// we have everything, tell the master server to send us the cachebanned
 			master->sendPacket( (char*)&cl , sizeof(stCacheList) , CACHE_BAN_LIST );
 
@@ -2322,8 +2322,8 @@ void Console::sendCommand(CString commandLine, bool isAdmin, unsigned long bbnet
 			stCacheBan cb;
 			cb.Duration		=	duration;
 			cb.ID			=	ID;
-			snprintf(cb.IP, sizeof(cb.IP), "%s", master->CachedPlayersRemote[ID].IP );
-			snprintf(cb.Nick, sizeof(cb.Nick), "%s", master->CachedPlayersRemote[ID].NickName );
+			snprintf(cb.IP, sizeof(cb.IP), "%s", master->CachedPlayersRemote[ID].IP);
+			snprintf(cb.Nick, sizeof(cb.Nick), "%s", master->CachedPlayersRemote[ID].NickName);
 			memcpy( cb.Pass, strPass.s, 7 );
 			cb.Pass[7] = '\0';
 			
