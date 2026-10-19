@@ -83,7 +83,7 @@ static void SaveScreenGrab(const char* filename)
 	//GLenum   format  =  (bitdepth==32) ? GL_BGRA_EXT : GL_BGR_EXT;
    //int bpp          =  (bitdepth==32) ? 4 : 3;
 
-   std::vector<unsigned char> pdata(sw * sh * bpp);
+   std::vector<unsigned char> pdata((size_t)sw * sh * bpp);
    glReadBuffer(GL_BACK);
    glReadPixels(0, 0, sw, sh, format, GL_UNSIGNED_BYTE, pdata.data());
    SaveBitmapToFile(pdata.data(), sw, sh, bitdepth, filename);
@@ -105,14 +105,9 @@ void SaveRequestedScreenGrab()
 	requestedGrab.clear();
 }
 
-bool SaveScreenGrabAuto() 
+void SaveScreenGrabAuto()
 {
-   char path[512];
-   time_t time;
-   ::time(&time);
-   snprintf(path, sizeof(path), "%s", bv2::userFile("screenshots/SS_" + std::to_string((long long)time) + ".bmp").c_str());
-   RequestScreenGrab(path);
-   return true;
+   RequestScreenGrab(bv2::userFile("screenshots/SS_" + std::to_string((long long)::time(nullptr)) + ".bmp"));
 }
 
 bool SaveStatsAuto()
@@ -120,8 +115,7 @@ bool SaveStatsAuto()
    char path[512];
    time_t time;
    ::time(&time);
-   snprintf(path, sizeof(path), "%s", bv2::userFile("screenshots/SS_" + std::to_string((long long)time) + ".bmp").c_str());
-   RequestScreenGrab(path);
+   RequestScreenGrab(bv2::userFile("screenshots/SS_" + std::to_string((long long)time) + ".bmp"));
    snprintf(path, sizeof(path), "%s", bv2::userFile("screenshots/SS_" + std::to_string((long long)time) + ".txt").c_str());
 
   FILE * pFile;

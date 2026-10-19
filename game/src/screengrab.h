@@ -22,7 +22,7 @@
 #include <string>
 
 bool SaveStatsAuto();
-bool SaveScreenGrabAuto();
+void SaveScreenGrabAuto();
 // Every screenshot is the next frame, read from the back buffer before it is shown (main.cpp calls SaveRequestedScreenGrab before the swap)
 void RequestScreenGrab(const std::string& filename);
 void SaveRequestedScreenGrab();
