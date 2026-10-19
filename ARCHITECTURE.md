@@ -142,7 +142,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/test_master.cpp` | In-process master on port 10207 with a scratch `master.db`: register, list, heartbeat timeout (simulated 61 s), removal by `KILL_SERV`, SQL injection in names, maps, nicks and IPs, the ban list with LIKE filters (Q-S3), the ban secret, the advertised address and a reconnect; runs on Windows since R28 was fixed |
 | `tests/test_netpacket.cpp` | Byte-level layout of the packed wire structs |
 | `tests/test_staging_deploy.sh` | Phase T step 2: staging deploy helpers: main-only run selection, `/status` player count, failures per commit, infrastructure stages, env-file mode and readonly repository (ctest `staging_deploy`) |
-| `tests/test_playtest_agent.sh` | Phase T step 1: playtest agent helpers: main-only run selection (fork PR from `main` rejected), artifact digest, attempt limit, env-file mode and no export (ctest `playtest_agent`, Unix with `jq`) |
+| `tests/test_playtest_agent.sh` | Phase T step 1: playtest agent helpers: main-only run selection (fork PR from `main` rejected), artifact digest, attempt limit, env-file mode and no export, launch script map swap (ctest `playtest_agent`, Unix with `jq`) |
 | `tools/check-content-case.py` | Fails when a literal `main/...` path differs from a real file name only by case |
 | `vcpkg.json` | vcpkg manifest (sqlite3, curl; Step 3 completes it) |
 
@@ -687,7 +687,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tools/lang-to-pot.py` | Generates `content/languages/en.pot` from `en.lang` |
 | `tools/seed_db.cpp` | Creates a SQLite DB from SQL files (build helper) |
 | `tools/playtest/README.md` | Playtest agent: install, env file, commands, files, uninstall |
-| `tools/playtest/agent.sh` | Playtest pull agent (macOS): fetches and verifies successful `main` packages, tests the client against a disposable local server or staging, reports and notifies (ADR 0017) |
+| `tools/playtest/agent.sh` | Playtest pull agent (macOS): fetches and verifies successful `main` packages, tests the client against a disposable local server (placeholders, or original data from `BV2_DATA_DIR` on `RV2_PLAYTEST_MAP`) or staging, reports and notifies (ADR 0017) |
 | `tools/playtest/com.roboviolence2.playtest.plist` | LaunchAgent template for the playtest agent (every 10 min) |
 | `tools/staging/cloud-init.yml` | Staging host bootstrap (cloud-init, Ubuntu 24.04): Docker, `deploy.sh`, `rv2-staging-setup` for the env file, cron and first deploy |
 | `tools/staging/README.md` | Staging deploy agent: host needs, install, env file, cron, commands, files |
