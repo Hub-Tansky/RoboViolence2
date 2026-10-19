@@ -174,6 +174,7 @@ def kick(run):
     client = run.client("e2e-a", DROPPED)
     run.joined("e2e-a")
     run.command("kick e2e-a")
+    wait(lambda: "kicked by server" in run.server_text(), 10, "server kicked e2e-a")
     wait(lambda: run.players() == 0, 10, "/status players 0 after POST /command kick", API_INTERVAL)
     check(run.finished(client) == 0, "kicked client sees the server disconnect it")
 
@@ -183,6 +184,7 @@ def ban(run):
     client = run.client("e2e-a", DROPPED)
     run.joined("e2e-a")
     run.command("ban e2e-a")
+    wait(lambda: "banned by server" in run.server_text(), 10, "server banned e2e-a")
     wait(lambda: run.players() == 0, 10, "/status players 0 after POST /command ban", API_INTERVAL)
     check(run.finished(client) == 0, "banned client sees the server disconnect it")
     again = run.client("e2e-b", DROPPED)
