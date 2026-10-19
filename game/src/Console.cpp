@@ -973,10 +973,16 @@ void Console::sendCommand(CString commandLine, bool isAdmin, unsigned long bbnet
 	// Holds the scoreboard and hides the in-game menu, as Esc then Tab do (tests/screenshots)
 	if (command == "scoreboard")
 	{
+		if (tokenize != "0" && tokenize != "1")
+		{
+			add("\x9> usage: scoreboard 0|1");
+			return;
+		}
 		if (!scene->client || !scene->client->game)
 			return;
-		scene->client->showMenu = false;
 		scene->client->game->forceStats = tokenize == "1";
+		if (scene->client->game->forceStats)
+			scene->client->showMenu = false;
 		return;
 	}
 	// Saves the next frame to <pref dir>/screenshots/<name>.bmp (tests/screenshots.py goldens)

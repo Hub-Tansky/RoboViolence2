@@ -68,13 +68,51 @@ void SaveBitmapToFile( const unsigned char* pBitmapBits, int lWidth, int lHeight
 	fclose(f);
 }
 
+// Reads the back buffer: call after rendering, before the swap
+static void SaveScreenGrab(const char* filename)
+{
+	// get some info about the screen size
+   CVector2i res = dkwGetResolution();
+   
+   int sw           =  res.x();
+	int sh           =  res.y();
+   int bitdepth     =  32;
+   GLenum   format  =  GL_BGRA_EXT;
+   int bpp          =  4;
+	//int bitdepth     =  gameVar.r_bitdepth;
+	//GLenum   format  =  (bitdepth==32) ? GL_BGRA_EXT : GL_BGR_EXT;
+   //int bpp          =  (bitdepth==32) ? 4 : 3;
+
+   std::vector<unsigned char> pdata(sw * sh * bpp);
+   glReadBuffer(GL_BACK);
+   glReadPixels(0, 0, sw, sh, format, GL_UNSIGNED_BYTE, pdata.data());
+   SaveBitmapToFile(pdata.data(), sw, sh, bitdepth, filename);
+}
+
+// The next frame's path for SaveRequestedScreenGrab (P and L keys, screenshot console command)
+static std::string requestedGrab;
+
+void RequestScreenGrab(const std::string& filename)
+{
+	requestedGrab = filename;
+}
+
+void SaveRequestedScreenGrab()
+{
+	if (requestedGrab.empty())
+		return;
+	SaveScreenGrab(requestedGrab.c_str());
+	requestedGrab.clear();
+}
+
 bool SaveScreenGrabAuto() 
 {
    char path[512];
    time_t time;
    ::time(&time);
    snprintf(path, sizeof(path), "%s", bv2::userFile("screenshots/SS_" + std::to_string((long long)time) + ".bmp").c_str());
-   return SaveScreenGrab(path);
+   RequestScreenGrab(path);
+   return true;
 }
 
 bool SaveStatsAuto()
@@ -83,7 +121,7 @@ bool SaveStatsAuto()
    time_t time;
    ::time(&time);
    snprintf(path, sizeof(path), "%s", bv2::userFile("screenshots/SS_" + std::to_string((long long)time) + ".bmp").c_str());
-   SaveScreenGrab(path);
+   RequestScreenGrab(path);
    snprintf(path, sizeof(path), "%s", bv2::userFile("screenshots/SS_" + std::to_string((long long)time) + ".txt").c_str());
 
   FILE * pFile;
@@ -127,46 +165,6 @@ bool SaveStatsAuto()
     fclose(pFile);
   }
  
-   return true;
-}
-
-// The next frame's path for SaveRequestedScreenGrab (screenshot console command)
-static std::string requestedGrab;
-
-void RequestScreenGrab(const std::string& filename)
-{
-	requestedGrab = filename;
-}
-
-void SaveRequestedScreenGrab()
-{
-	if (requestedGrab.empty())
-		return;
-	SaveScreenGrab(requestedGrab.c_str(), GL_BACK);
-	requestedGrab.clear();
-}
-
-bool SaveScreenGrab(const char* filename, GLenum buffer)
-{
-
-	// get some info about the screen size
-   CVector2i res = dkwGetResolution();
-   
-   int sw           =  res.x();
-	int sh           =  res.y();
-   int bitdepth     =  32;
-   GLenum   format  =  GL_BGRA_EXT;
-   int bpp          =  4;
-	//int bitdepth     =  gameVar.r_bitdepth;
-	//GLenum   format  =  (bitdepth==32) ? GL_BGRA_EXT : GL_BGR_EXT;
-   //int bpp          =  (bitdepth==32) ? 4 : 3;
-
-   std::vector<unsigned char> pdata(sw * sh * bpp);
-   glReadBuffer(buffer);
-   glReadPixels(0, 0, sw, sh, format, GL_UNSIGNED_BYTE, pdata.data());
-   SaveBitmapToFile(pdata.data(), sw, sh, bitdepth, filename);
-
-   // done
    return true;
 }
 

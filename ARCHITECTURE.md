@@ -119,11 +119,12 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/golden/options.png` | Golden for `screenshot_options` |
 | `tests/golden/scoreboard.txt` | Screenshot script: host the placeholder map, hold the scoreboard (ctest `screenshot_scoreboard`) |
 | `tests/golden/scoreboard.png` | Golden for `screenshot_scoreboard` |
-| `tests/autotest_client.py` | Shared by `run_autotest.py` and `e2e/e2e.py`: starts Xvfb with `-displayfd` and builds the `bv2 --autotest` command line and env |
+| `tests/autotest_client.py` | Shared by `run_autotest.py`, `screenshots.py` and `e2e/e2e.py`: starts Xvfb with `-displayfd`, builds the `bv2 --autotest` command line and env, and runs a client with a fresh pref dir (`run_client`) |
 | `tests/autotest/fail.txt` | Autotest script that never passes: the client exits 1 (ctest `autotest_fail`) |
 | `tests/autotest/menu-host.txt` | Autotest script: menu, `help` output, host and join the placeholder map (ctest `autotest_menu_host`) |
 | `tests/autotest/quit.txt` | Autotest script that quits before its last expect: the client exits 1, not 0 (ctest `autotest_quit`) |
 | `tests/autotest/timeout.txt` | Autotest script that outlasts `--timeout`: the client exits 2 (ctest `autotest_timeout`) |
+| `tests/autotest/usage.txt` | Autotest script: bad arguments to `screenshot`, `menutab` and `scoreboard` print their usage (ctest `autotest_usage`) |
 | `tests/run_autotest.py` | Runs `bv2 --autotest <script>` with a fresh pref dir, windowed, on placeholders (under its own Xvfb on Linux without a display, so the exit code is the client's); checks the exit code and the expected result text |
 | `tests/smoke_server.py` | Starts `bv2dedicated` headless, runs the CTF script, types a `sayall` with printf specifiers, quits; checks exit code, server creation and `bv2.cfg`. `--install-under` runs it from a non-ASCII path (Windows UTF-8 code page) |
 | `tests/test_admin_api.cpp` | Step 12: the admin API refuses a wrong token, limits a burst, runs a command, returns the status, audits with secrets masked (not on Windows) |
@@ -273,8 +274,8 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/decisions/0022-advertised-server-address.md` | ADR: the master lists `sv_publicAddress` only from private sources; `KILL_SERV` by connection (Phase C step 6) |
 | `docs/decisions/0023-step-review-subagent-in-repo.md` | ADR: step-closing review subagent and rubric tracked in `.claude/` |
 | `docs/decisions/0024-github-project-is-the-backlog.md` | ADR: the private GitHub Project is the backlog; roadmap files removed; PR carries scope and review record |
-| `docs/decisions/0026-screenshot-goldens.md` | ADR: Linux llvmpipe screenshot goldens compared within a tolerance; the `screenshot`, `menutab` and `scoreboard` commands |
 | `docs/decisions/0025-client-autotest-mode.md` | ADR: the client runs scripted console commands and expectations (`--autotest`) with exit codes 0/1/2 and a watchdog |
+| `docs/decisions/0026-screenshot-goldens.md` | ADR: Linux llvmpipe screenshot goldens compared within a tolerance; the `screenshot`, `menutab` and `scoreboard` commands |
 | `docs/decisions/README.md` | ADR format and index |
 
 ### `docs/ops`
@@ -646,7 +647,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/changes-log.txt` | Upstream change log |
 | `game/src/main.cpp` | Program entry: window, engine init, main loop; `--autotest` startup, per-step hook and watchdog (ADR 0025); the dedicated server line-buffers stdout; saves a requested screenshot before the swap |
 | `game/src/netPacket.h` | Wire structs and message IDs (raw memcpy'd structs) |
-| `game/src/screengrab.cpp` | Screenshot capture: P key from the front buffer, `screenshot` command from the back buffer before the swap |
+| `game/src/screengrab.cpp` | Screenshot capture (P and L keys, `screenshot` command): the next frame, from the back buffer before the swap |
 | `game/src/screengrab.h` | Screenshot capture |
 | `game/src/tinyxml.cpp` | TinyXML (third-party XML parser) |
 | `game/src/tinyxml.h` | TinyXML (third-party XML parser) |

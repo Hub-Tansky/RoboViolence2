@@ -20,12 +20,10 @@
 #define SCREEN_GRAB__H__
 
 #include <string>
-#include "glheaders.h"
 
 bool SaveStatsAuto();
 bool SaveScreenGrabAuto();
-bool SaveScreenGrab(const char* filename, GLenum buffer = GL_FRONT);
-// Saves the frame being rendered, read from the back buffer before it is shown (main.cpp calls it before the swap)
+// Every screenshot is the next frame, read from the back buffer before it is shown (main.cpp calls SaveRequestedScreenGrab before the swap)
 void RequestScreenGrab(const std::string& filename);
 void SaveRequestedScreenGrab();
 

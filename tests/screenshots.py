@@ -10,11 +10,10 @@ pixels red) for the CI artifact. --update writes the golden instead.
 import os
 import shutil
 import struct
-import subprocess
 import sys
 import zlib
 
-from autotest_client import client_command, start_xvfb
+from autotest_client import run_client
 
 CHANNEL_TOLERANCE = 24  # per channel, 0-255: absorbs rasterizer rounding
 MAX_CHANGED = 0.005  # fraction of pixels
@@ -83,24 +82,11 @@ def main():
     here = os.path.dirname(os.path.abspath(__file__))
     script, golden = os.path.join(here, "golden", name + ".txt"), os.path.join(here, "golden", name + ".png")
     pref = os.path.join(scratch, name)
-    shutil.rmtree(pref, ignore_errors=True)
-    os.makedirs(pref)
-    cmd, env = client_command(exe, pref, script, "r_showStats false\n")  # no FPS counter
-    xvfb = None
-    if sys.platform.startswith("linux") and not os.environ.get("DISPLAY"):
-        xvfb, env["DISPLAY"] = start_xvfb()
-    try:
-        r = subprocess.run(cmd, env=env, cwd=os.path.dirname(os.path.abspath(exe)), stdout=subprocess.PIPE,
-                           stderr=subprocess.STDOUT, timeout=180)
-    finally:
-        if xvfb:
-            xvfb.terminate()
-            xvfb.wait()
-    out = r.stdout.decode(errors="replace")
+    returncode, out = run_client(exe, pref, script, "r_showStats false\n", own_xvfb=True)  # no FPS counter
     shot = os.path.join(pref, "screenshots", name + ".bmp")
-    if r.returncode != 0 or not os.path.exists(shot):
+    if returncode != 0 or not os.path.exists(shot):
         print(out[-4000:])
-        print(f"FAIL: exit code {r.returncode}, screenshot {'saved' if os.path.exists(shot) else 'missing'}")
+        print(f"FAIL: exit code {returncode}, screenshot {'saved' if os.path.exists(shot) else 'missing'}")
         return 1
     actual = read_bmp(shot)
     if "--update" in sys.argv:
@@ -116,10 +102,11 @@ def main():
         print(f"FAIL: {name}: {fraction:.4%} of the pixels changed (limit {MAX_CHANGED:.2%})")
         if diff:
             write_png(os.path.join(scratch, name + "-diff.png"), actual[0], actual[1], diff)
+            print(f"kept {scratch}/{name}-diff.png")
     else:
         print(f"FAIL: no golden {golden}; run with --update to create it")
     write_png(os.path.join(scratch, name + "-actual.png"), *actual)
-    print(f"kept {scratch}/{name}-actual.png" + (" and -diff.png" if os.path.exists(golden) else ""))
+    print(f"kept {scratch}/{name}-actual.png")
     return 1
 
 

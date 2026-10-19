@@ -6,11 +6,12 @@
 
 ## Context
 - Autotest (ADR 0025) checks console text and scenes, not what is drawn.
-- Reading `GL_FRONT` after the swap gives a black frame under Xvfb, so the P-key path can't feed tests.
+- The P key read `GL_FRONT` after the swap, which gives a black frame under Xvfb.
 - Rendering differs per GPU and driver; macOS and Windows CI have no shared software renderer with Linux.
 
 ## Decision
-- Client console commands `screenshot <name>` (the next frame, read from the back buffer before the swap, to `<pref dir>/screenshots/<name>.bmp`), `menutab <tab>` and `scoreboard 0|1` let autotest scripts reach and capture a screen.
+- Every screenshot (P and L keys, and the new console command `screenshot <name>` to `<pref dir>/screenshots/<name>.bmp`) is the next frame, read from the back buffer before the swap.
+- Console commands `menutab <tab>` and `scoreboard 0|1` let autotest scripts reach the screens.
 - Goldens are PNGs from the Linux client on placeholders under Xvfb (Mesa llvmpipe), one autotest script beside each: `tests/golden/<name>.txt` and `.png`. ctest `screenshot_<name>` runs on Linux only.
 - A screenshot passes when at most 0.5 % of its pixels differ by more than 24 in a channel. A pass deletes the client's pref dir; a failure keeps `<name>-actual.png` and `<name>-diff.png` for the CI artifact.
 - Regenerate a golden with `tests/screenshots.py <bv2> <scratch> <name> --update` after an intended visual change (also the version text in the menu).
