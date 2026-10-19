@@ -79,7 +79,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `packaging/docker/compose.example.yml` | Compose example: master, game server and the admin TLS proxy on one host, secrets from an env file outside the repo; `BV2_IMAGE_TAG` pins both images to a commit |
 | `packaging/windows/bv2.manifest` | Windows manifest for `bv2`, `bv2dedicated` and `bv2master`: PerMonitorV2 DPI, UTF-8 code page, Windows 10/11 |
 | `packaging/windows/bv2.rc.in` | Windows resource script template; CMake fills in the generated icon |
-| `tests/CMakeLists.txt` | ctest targets: netPacket, config, fileio, credentials, join password, admin login, admin API, babonet large message, the two `SqlStatement.h` copies identical, crash fixes, validator, missing music (client builds), dedicated-server smoke, in-process server harness (`bv2server_lib` + fake babonet), packet hygiene, corpus replay, crash-input tests for `crash-*.bin` under ASan (none at present), master server, autotest runner and (with Xvfb on Linux, or on macOS) the client on autotest scripts; with Xvfb on Linux the e2e scenarios (`e2e_*`); on Windows also the non-ASCII install path smoke and the no-VC++-runtime-DLL check |
+| `tests/CMakeLists.txt` | ctest targets: netPacket, config, fileio, credentials, join password, admin login, admin API, babonet large message, the two `SqlStatement.h` copies identical, crash fixes, validator, missing music (client builds), dedicated-server smoke, in-process server harness (`bv2server_lib` + fake babonet), packet hygiene, corpus replay, crash-input tests for `crash-*.bin` under ASan (none at present), master server, autotest runner and (with Xvfb on Linux, or on macOS) the client on autotest scripts; with Xvfb on Linux the e2e scenarios (`e2e_*`) and screenshots (`screenshot_*`); on Windows also the non-ASCII install path smoke and the no-VC++-runtime-DLL check |
 | `tests/check_windows_deps.py` | Windows: fails if `bv2`, `bv2dedicated` or `bv2master` needs a Visual C++ runtime DLL |
 | `tests/corpus/clsv_admin_request/valid.bin` | Replay corpus: valid `clsv_admin_request` payload (`gen_corpus`) |
 | `tests/corpus/clsv_gameversion_accepted/valid.bin` | Replay corpus: valid `clsv_gameversion_accepted` payload (`gen_corpus`) |
@@ -112,11 +112,19 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/harness/server_harness.cpp` | In-process dedicated server for tests: start, connect, join, deliver, tick |
 | `tests/harness/server_harness.h` | Harness API |
 | `tests/e2e/e2e.py` | E2E scenarios (Phase T4): `bv2dedicated` with the admin API, `bv2master` and `bv2 --autotest` clients under its own Xvfb; join/leave, password, chat, kick, ban, master list (ctest `e2e_<scenario>`) |
-| `tests/autotest_client.py` | Shared by `run_autotest.py` and `e2e/e2e.py`: starts Xvfb with `-displayfd` and builds the `bv2 --autotest` command line and env |
+| `tests/screenshots.py` | Phase T7: runs `tests/golden/<name>.txt` and compares the frame with `<name>.png` within a tolerance; keeps actual and diff PNGs on failure, `--update` writes the golden (ADR 0026) |
+| `tests/golden/main-menu.txt` | Screenshot script: main menu, news tab (ctest `screenshot_main-menu`) |
+| `tests/golden/main-menu.png` | Golden for `screenshot_main-menu` |
+| `tests/golden/options.txt` | Screenshot script: main menu, options tab (ctest `screenshot_options`) |
+| `tests/golden/options.png` | Golden for `screenshot_options` |
+| `tests/golden/scoreboard.txt` | Screenshot script: host the placeholder map, hold the scoreboard (ctest `screenshot_scoreboard`) |
+| `tests/golden/scoreboard.png` | Golden for `screenshot_scoreboard` |
+| `tests/autotest_client.py` | Shared by `run_autotest.py`, `screenshots.py` and `e2e/e2e.py`: starts Xvfb with `-displayfd`, builds the `bv2 --autotest` command line and env, and runs a client with a fresh pref dir (`run_client`) |
 | `tests/autotest/fail.txt` | Autotest script that never passes: the client exits 1 (ctest `autotest_fail`) |
 | `tests/autotest/menu-host.txt` | Autotest script: menu, `help` output, host and join the placeholder map (ctest `autotest_menu_host`) |
 | `tests/autotest/quit.txt` | Autotest script that quits before its last expect: the client exits 1, not 0 (ctest `autotest_quit`) |
 | `tests/autotest/timeout.txt` | Autotest script that outlasts `--timeout`: the client exits 2 (ctest `autotest_timeout`) |
+| `tests/autotest/usage.txt` | Autotest script: bad arguments to `screenshot`, `menutab` and `scoreboard` print their usage (ctest `autotest_usage`) |
 | `tests/run_autotest.py` | Runs `bv2 --autotest <script>` with a fresh pref dir, windowed, on placeholders (under its own Xvfb on Linux without a display, so the exit code is the client's); checks the exit code and the expected result text |
 | `tests/smoke_server.py` | Starts `bv2dedicated` headless, runs the CTF script, types a `sayall` with printf specifiers, quits; checks exit code, server creation and `bv2.cfg`. `--install-under` runs it from a non-ASCII path (Windows UTF-8 code page) |
 | `tests/test_admin_api.cpp` | Step 12: the admin API refuses a wrong token, limits a burst, runs a command, returns the status, audits with secrets masked (not on Windows) |
@@ -182,7 +190,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | path | purpose |
 |---|---|
 | `.github/workflows/secret-scan.yml` | CI: gitleaks over commits after the fork point and original-asset check |
-| `.github/workflows/build.yml` | CI: Debug and Release build and ctest, Release package on Windows, macOS, Linux (`roboviolence2-<preset>` artifacts); `package-check` of the Linux package in a clean `ubuntu:24.04`; `package-smoke` (not required): Windows and macOS packages start server, master and client (Mesa llvmpipe on Windows); ASan smoke job with client under xvfb; `release` job on `v*` tags (GitHub release, pre-release for `v0.*` and `v*-*`); `fuzz` job (not required, pushes to main): 2 min per client message type, uploads crash inputs |
+| `.github/workflows/build.yml` | CI: Debug and Release build and ctest, Release package on Windows, macOS, Linux (`roboviolence2-<preset>` artifacts); `package-check` of the Linux package in a clean `ubuntu:24.04`; `package-smoke` (not required): Windows and macOS packages start server, master and client (Mesa llvmpipe on Windows); ASan smoke job with client under xvfb; Linux jobs upload the actual and diff PNGs of failed `screenshot_*` tests (`screenshots-<preset>`); `release` job on `v*` tags (GitHub release, pre-release for `v0.*` and `v*-*`); `fuzz` job (not required, pushes to main): 2 min per client message type, uploads crash inputs |
 | `.github/workflows/hygiene.yml` | CI: ARCHITECTURE.md inventory, repository hygiene, content case; `review` (`tools/review.sh`, given the PR description) on PRs, rerun on description edits |
 | `.github/pull_request_template.md` | PR description: item, goal, out of scope, Allowed paths (read by `tools/review.sh`), tests |
 | `.github/workflows/codeql.yml` | CodeQL: `c-cpp` (manual linux-x64 build of the three executables) and `actions`; push, PR, weekly; alerts under `build/` (vcpkg headers) filtered out |
@@ -267,6 +275,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/decisions/0023-step-review-subagent-in-repo.md` | ADR: step-closing review subagent and rubric tracked in `.claude/` |
 | `docs/decisions/0024-github-project-is-the-backlog.md` | ADR: the private GitHub Project is the backlog; roadmap files removed; PR carries scope and review record |
 | `docs/decisions/0025-client-autotest-mode.md` | ADR: the client runs scripted console commands and expectations (`--autotest`) with exit codes 0/1/2 and a watchdog |
+| `docs/decisions/0026-screenshot-goldens.md` | ADR: Linux llvmpipe screenshot goldens compared within a tolerance; the `screenshot`, `menutab` and `scoreboard` commands |
 | `docs/decisions/README.md` | ADR format and index |
 
 ### `docs/ops`
@@ -544,7 +553,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/ConfirmPass.cpp` | Password confirmation dialog |
 | `game/src/ConfirmPass.h` | Password confirmation dialog |
 | `game/src/ConnectFailed.h` | Dialog: connection failed |
-| `game/src/Console.cpp` | In-game console: commands, log, remote console; feeds console lines to a running autotest; `refreshgames` asks the master for the game list |
+| `game/src/Console.cpp` | In-game console: commands, log, remote console; feeds console lines to a running autotest; `refreshgames` asks the master for the game list; `screenshot`, `menutab` and `scoreboard` for screenshot tests (ADR 0026) |
 | `game/src/Console.h` | In-game console: commands, log, remote console |
 | `game/src/Credentials.cpp` | HMAC-SHA256, nonces and constant-time checks for the join and admin passwords (libsodium, ADR 0014) |
 | `game/src/Credentials.h` | Credential proofs: the client answers the server's nonce with HMAC(password, label + nonce) |
@@ -569,7 +578,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/FileIO.cpp` | File and memory-buffer reader/writer with fixed-width types |
 | `game/src/FileIO.h` | File and memory-buffer reader/writer with fixed-width types |
 | `game/src/Game.cpp` | Game state: players, projectiles, items, flags, round and mode logic (shared by client and server) |
-| `game/src/Game.h` | Game state: players, projectiles, items, flags, round and mode logic (shared by client and server) |
+| `game/src/Game.h` | Game state: players, projectiles, items, flags, round and mode logic (shared by client and server); `forceStats` holds the scoreboard |
 | `game/src/GameProjectile.cpp` | Game: projectile and explosion simulation |
 | `game/src/GameRender.cpp` | Game: world rendering |
 | `game/src/GameShowStats.cpp` | Game: scoreboard and end-of-round stats drawing |
@@ -636,9 +645,9 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/WrongVersion.h` | Dialog: client/server version mismatch |
 | `game/src/Zeven.h` | Umbrella include for engine headers and common types |
 | `game/src/changes-log.txt` | Upstream change log |
-| `game/src/main.cpp` | Program entry: window, engine init, main loop; `--autotest` startup, per-step hook and watchdog (ADR 0025); the dedicated server line-buffers stdout |
+| `game/src/main.cpp` | Program entry: window, engine init, main loop; `--autotest` startup, per-step hook and watchdog (ADR 0025); the dedicated server line-buffers stdout; saves a requested screenshot before the swap |
 | `game/src/netPacket.h` | Wire structs and message IDs (raw memcpy'd structs) |
-| `game/src/screengrab.cpp` | Screenshot capture |
+| `game/src/screengrab.cpp` | Screenshot capture (P and L keys, `screenshot` command): the next frame, from the back buffer before the swap |
 | `game/src/screengrab.h` | Screenshot capture |
 | `game/src/tinyxml.cpp` | TinyXML (third-party XML parser) |
 | `game/src/tinyxml.h` | TinyXML (third-party XML parser) |

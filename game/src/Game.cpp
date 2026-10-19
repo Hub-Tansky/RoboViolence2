@@ -58,6 +58,7 @@ Game::Game(CString pMapName)
 
 	// Pour afficher les stats multiplayers
 	showStats = false;
+	forceStats = false;
 #endif
 	isServerGame = false;
 	roundState = GAME_PLAYING;
@@ -552,7 +553,7 @@ void Game::update(float delay)
 
 	// Si on tiens tab, on montre les stats
 #ifndef CONSOLE
-	if ((!console->isActive() && dkiGetState(gameVar.k_showScore)) || roundState != GAME_PLAYING)
+	if ((!console->isActive() && dkiGetState(gameVar.k_showScore)) || roundState != GAME_PLAYING || forceStats)
 	{
 		showStats = true;
 	}

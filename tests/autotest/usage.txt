@@ -1,0 +1,8 @@
+# Bad arguments to the screenshot-test commands print their usage (Phase T7, ADR 0026)
+expect-scene menu
+screenshot ../x
+expect-console usage: screenshot
+menutab nope
+expect-console usage: menutab
+scoreboard 2
+expect-console usage: scoreboard

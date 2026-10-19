@@ -20,6 +20,7 @@
 #include "screengrab.h"
 #include "Paths.h"
 #include <string>
+#include <vector>
 #include "Zeven.h"
 #include "GameVar.h"
 #include "Game.h"
@@ -67,13 +68,46 @@ void SaveBitmapToFile( const unsigned char* pBitmapBits, int lWidth, int lHeight
 	fclose(f);
 }
 
-bool SaveScreenGrabAuto() 
+// Reads the back buffer: call after rendering, before the swap
+static void SaveScreenGrab(const char* filename)
 {
-   char path[512];
-   time_t time;
-   ::time(&time);
-   snprintf(path, sizeof(path), "%s", bv2::userFile("screenshots/SS_" + std::to_string((long long)time) + ".bmp").c_str());
-   return SaveScreenGrab(path);
+	// get some info about the screen size
+   CVector2i res = dkwGetResolution();
+   
+   int sw           =  res.x();
+	int sh           =  res.y();
+   int bitdepth     =  32;
+   GLenum   format  =  GL_BGRA_EXT;
+   int bpp          =  4;
+	//int bitdepth     =  gameVar.r_bitdepth;
+	//GLenum   format  =  (bitdepth==32) ? GL_BGRA_EXT : GL_BGR_EXT;
+   //int bpp          =  (bitdepth==32) ? 4 : 3;
+
+   std::vector<unsigned char> pdata((size_t)sw * sh * bpp);
+   glReadBuffer(GL_BACK);
+   glReadPixels(0, 0, sw, sh, format, GL_UNSIGNED_BYTE, pdata.data());
+   SaveBitmapToFile(pdata.data(), sw, sh, bitdepth, filename);
+}
+
+// The next frame's path for SaveRequestedScreenGrab (P and L keys, screenshot console command)
+static std::string requestedGrab;
+
+void RequestScreenGrab(const std::string& filename)
+{
+	requestedGrab = filename;
+}
+
+void SaveRequestedScreenGrab()
+{
+	if (requestedGrab.empty())
+		return;
+	SaveScreenGrab(requestedGrab.c_str());
+	requestedGrab.clear();
+}
+
+void SaveScreenGrabAuto()
+{
+   RequestScreenGrab(bv2::userFile("screenshots/SS_" + std::to_string((long long)::time(nullptr)) + ".bmp"));
 }
 
 bool SaveStatsAuto()
@@ -81,8 +115,7 @@ bool SaveStatsAuto()
    char path[512];
    time_t time;
    ::time(&time);
-   snprintf(path, sizeof(path), "%s", bv2::userFile("screenshots/SS_" + std::to_string((long long)time) + ".bmp").c_str());
-   SaveScreenGrab(path);
+   RequestScreenGrab(bv2::userFile("screenshots/SS_" + std::to_string((long long)time) + ".bmp"));
    snprintf(path, sizeof(path), "%s", bv2::userFile("screenshots/SS_" + std::to_string((long long)time) + ".txt").c_str());
 
   FILE * pFile;
@@ -127,40 +160,6 @@ bool SaveStatsAuto()
   }
  
    return true;
-}
-
-
-
-bool SaveScreenGrab(const char* filename) {
-
-	// get some info about the screen size
-   CVector2i res = dkwGetResolution();
-   
-   int sw           =  res.x();
-	int sh           =  res.y();
-   int bitdepth     =  32;
-   GLenum   format  =  GL_BGRA_EXT;
-   int bpp          =  4;
-	//int bitdepth     =  gameVar.r_bitdepth;
-	//GLenum   format  =  (bitdepth==32) ? GL_BGRA_EXT : GL_BGR_EXT;
-   //int bpp          =  (bitdepth==32) ? 4 : 3;
-
-	// allocate memory to store image data
-	unsigned char* pdata = new unsigned char[sw*sh*bpp];
-	// read from front buffer
-	glReadBuffer(GL_FRONT);
-
-	// read pixel data
-	glReadPixels(0,0,sw,sh,format,GL_UNSIGNED_BYTE,pdata);
-
-	// write data as a tga file
-   SaveBitmapToFile(pdata,sw,sh,bitdepth,filename);
-
-	// clean up
-	delete [] pdata;
-
-	// done
-	return true;
 }
 
 #endif

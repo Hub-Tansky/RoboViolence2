@@ -1,6 +1,8 @@
-"""Shared by run_autotest.py and e2e/e2e.py: an Xvfb display and the `bv2 --autotest` command line (ADR 0025)."""
+"""Shared by run_autotest.py, screenshots.py and e2e/e2e.py: an Xvfb display and the `bv2 --autotest` command line (ADR 0025)."""
 import os
+import shutil
 import subprocess
+import sys
 
 
 def start_xvfb():
@@ -20,3 +22,24 @@ def client_command(exe, pref, script, config_lines=""):
         f.write("r_fullScreen false\n" + config_lines)
     cmd = [exe, "--placeholders", "--config", config, "--autotest", script]
     return cmd, dict(os.environ, BV2_PREF_DIR=pref, SDL_AUDIODRIVER="dummy")
+
+
+def run_client(exe, pref, script, config_lines="", extra_args=(), own_xvfb=False):
+    """Runs `exe --autotest script` with a fresh pref dir; returns (exit code, output). On Linux it gets its own Xvfb when
+    there is no display, or always with own_xvfb (and SDL on X11), so the frame doesn't depend on the desktop"""
+    shutil.rmtree(pref, ignore_errors=True)
+    os.makedirs(pref)
+    cmd, env = client_command(exe, pref, script, config_lines)
+    cmd += list(extra_args)
+    xvfb = None
+    if sys.platform.startswith("linux") and (own_xvfb or not os.environ.get("DISPLAY")):
+        xvfb, env["DISPLAY"] = start_xvfb()
+        env["SDL_VIDEO_DRIVER"] = "x11"
+    try:
+        r = subprocess.run(cmd, env=env, cwd=os.path.dirname(os.path.abspath(exe)), stdout=subprocess.PIPE,
+                           stderr=subprocess.STDOUT, timeout=180)
+    finally:
+        if xvfb:
+            xvfb.terminate()
+            xvfb.wait()
+    return r.returncode, r.stdout.decode(errors="replace")

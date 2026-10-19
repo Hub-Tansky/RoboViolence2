@@ -6,32 +6,16 @@ The client gets a fresh pref dir, a windowed config and the placeholder data. On
 under its own Xvfb. 0 = pass, 1 = fail, 2 = timeout (ADR 0025); the result text names the path, so a test passes only by the path it is for.
 """
 import os
-import shutil
-import subprocess
 import sys
 
-from autotest_client import client_command, start_xvfb
+from autotest_client import run_client
 
 exe, scratch, script, expected, result = sys.argv[1], sys.argv[2], os.path.abspath(sys.argv[3]), int(sys.argv[4]), sys.argv[5]
 pref = os.path.join(scratch, os.path.splitext(os.path.basename(script))[0])
-shutil.rmtree(pref, ignore_errors=True)
-os.makedirs(pref)
-cmd, env = client_command(exe, pref, script)
-cmd += sys.argv[6:]
-xvfb = None
-if sys.platform.startswith("linux") and not os.environ.get("DISPLAY"):
-    xvfb, env["DISPLAY"] = start_xvfb()
-try:
-    r = subprocess.run(cmd, env=env, cwd=os.path.dirname(os.path.abspath(exe)), stdout=subprocess.PIPE,
-                       stderr=subprocess.STDOUT, timeout=180)
-finally:
-    if xvfb:
-        xvfb.terminate()
-        xvfb.wait()
-out = r.stdout.decode(errors="replace")
+returncode, out = run_client(exe, pref, script, extra_args=sys.argv[6:])
 print(out[-4000:])
-if r.returncode != expected:
-    print(f"FAIL: exit code {r.returncode}, expected {expected}")
+if returncode != expected:
+    print(f"FAIL: exit code {returncode}, expected {expected}")
     sys.exit(1)
 if result not in out:
     print(f"FAIL: no '{result}' in the output")

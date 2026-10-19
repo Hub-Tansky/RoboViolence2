@@ -442,6 +442,7 @@ public:
 	
 	// Render stats
 	bool showStats;
+	bool forceStats; // scoreboard console command
 
 	// Map buffer
 	MemIO mapBuffer;

@@ -1,0 +1,5 @@
+# Main menu (news tab) after the intro (Phase T7)
+expect-scene menu
+wait 2
+screenshot main-menu
+wait 1

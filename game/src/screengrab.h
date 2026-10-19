@@ -19,8 +19,12 @@
 #ifndef SCREEN_GRAB__H__
 #define SCREEN_GRAB__H__
 
+#include <string>
+
 bool SaveStatsAuto();
-bool SaveScreenGrabAuto();
-bool SaveScreenGrab(const char* filename);
+void SaveScreenGrabAuto();
+// Every screenshot is the next frame, read from the back buffer before it is shown (main.cpp calls SaveRequestedScreenGrab before the swap)
+void RequestScreenGrab(const std::string& filename);
+void SaveRequestedScreenGrab();
 
 #endif

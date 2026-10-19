@@ -27,6 +27,10 @@
 extern roboviolence2::Autotest * autotest; // main.cpp: the running --autotest, or null
 #endif
 #include "Scene.h"
+#ifndef CONSOLE
+#include "CMainTab.h"
+#include "screengrab.h"
+#endif
 #include <algorithm>
 #include <string>
 
@@ -945,6 +949,54 @@ void Console::sendCommand(CString commandLine, bool isAdmin, unsigned long bbnet
 		if (master) master->requestGames();
 		return;
 	}
+	// Opens a main menu tab, as its button does (tests/screenshots)
+	if (command == "menutab")
+	{
+		if (!scene->mainTab)
+			return;
+		CMainTab* tab = scene->mainTab;
+		const struct
+		{
+			const char* name;
+			CControl* button;
+		} tabs[] = {
+			{"news", tab->btn_news}, {"profile", tab->btn_profile}, {"browser", tab->btn_browser}, {"host", tab->btn_create}, {"editor", tab->btn_editor}, {"options", tab->btn_option}, {"credits", tab->btn_credits}};
+		for (const auto& t : tabs)
+			if (tokenize == t.name)
+			{
+				tab->Click(t.button);
+				return;
+			}
+		add("\x9> usage: menutab news|profile|browser|host|editor|options|credits");
+		return;
+	}
+	// Holds the scoreboard and hides the in-game menu, as Esc then Tab do (tests/screenshots)
+	if (command == "scoreboard")
+	{
+		if (tokenize != "0" && tokenize != "1")
+		{
+			add("\x9> usage: scoreboard 0|1");
+			return;
+		}
+		if (!scene->client || !scene->client->game)
+			return;
+		scene->client->game->forceStats = tokenize == "1";
+		if (scene->client->game->forceStats)
+			scene->client->showMenu = false;
+		return;
+	}
+	// Saves the next frame to <pref dir>/screenshots/<name>.bmp (tests/screenshots.py goldens)
+	if (command == "screenshot")
+	{
+		std::string name = tokenize.s;
+		if (name.empty() || name.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_") != std::string::npos)
+		{
+			add("\x9> usage: screenshot <name> (letters, digits, - and _)");
+			return;
+		}
+		RequestScreenGrab(bv2::userFile("screenshots/" + name + ".bmp"));
+		return;
+	}
 #endif
 	// Pour hoster une game
 	if (command == "dedicate")
@@ -1530,7 +1582,7 @@ void Console::sendCommand(CString commandLine, bool isAdmin, unsigned long bbnet
 					//--- On send le token au server pour lancer le vote
 					if (tokenize.len() > 79) tokenize.resize(79);
 					net_clsv_svcl_vote_request voteRequest;
-					strcpy(voteRequest.vote, tokenize.s);
+					snprintf(voteRequest.vote, sizeof(voteRequest.vote), "%s", tokenize.s);
 					voteRequest.playerID = scene->client->game->thisPlayer->playerID;
 					bb_clientSend(scene->client->uniqueClientID, (char*)(&voteRequest), sizeof(net_clsv_svcl_vote_request), NET_CLSV_SVCL_VOTE_REQUEST);
 				}
@@ -2160,8 +2212,8 @@ void Console::sendCommand(CString commandLine, bool isAdmin, unsigned long bbnet
 			stCacheBan cb;
 			cb.Duration		=	duration;
 			cb.ID			=	ID;
-			sprintf( cb.IP , "%s", scene->server->CachedPlayers[ID].IP );
-			sprintf( cb.Nick , "%s", scene->server->CachedPlayers[ID].NickName );
+			snprintf(cb.IP, sizeof(cb.IP), "%s", scene->server->CachedPlayers[ID].IP);
+			snprintf(cb.Nick, sizeof(cb.Nick), "%s", scene->server->CachedPlayers[ID].NickName);
 			memcpy( cb.Pass, strPass.s, 7 );
 			cb.Pass[7] = '\0';
 			
@@ -2181,8 +2233,8 @@ void Console::sendCommand(CString commandLine, bool isAdmin, unsigned long bbnet
 		{
 			CString strFilter = tokenize.getFirstToken(' ');
 			stCacheList cl;
-			sprintf( cl.Filter , "%s", strFilter.s );
-			
+			snprintf(cl.Filter, sizeof(cl.Filter), "%s", strFilter.s);
+
 			// we have everything, tell the master server to send us the cachebanned
 			master->sendPacket( (char*)&cl , sizeof(stCacheList) , CACHE_BAN_LIST );
 
@@ -2270,8 +2322,8 @@ void Console::sendCommand(CString commandLine, bool isAdmin, unsigned long bbnet
 			stCacheBan cb;
 			cb.Duration		=	duration;
 			cb.ID			=	ID;
-			sprintf( cb.IP , "%s", master->CachedPlayersRemote[ID].IP );
-			sprintf( cb.Nick , "%s", master->CachedPlayersRemote[ID].NickName );
+			snprintf(cb.IP, sizeof(cb.IP), "%s", master->CachedPlayersRemote[ID].IP);
+			snprintf(cb.Nick, sizeof(cb.Nick), "%s", master->CachedPlayersRemote[ID].NickName);
 			memcpy( cb.Pass, strPass.s, 7 );
 			cb.Pass[7] = '\0';
 			

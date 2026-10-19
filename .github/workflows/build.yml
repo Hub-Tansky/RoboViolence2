@@ -40,6 +40,13 @@ jobs:
           cmake --preset ${{ matrix.preset }}-release
           cmake --build --preset ${{ matrix.preset }}-release -- -k 0
           ctest --test-dir build/${{ matrix.preset }}-release --output-on-failure
+      # Screenshot regression (T7, ADR 0026): the frame and diff of each failed screenshot_* test, Debug and Release
+      - uses: actions/upload-artifact@v7
+        if: failure() && runner.os == 'Linux'
+        with:
+          name: screenshots-${{ matrix.preset }}
+          path: build/*/test-scratch/screenshots/*.png
+          if-no-files-found: ignore
       # The archive on every OS, plus the installer (Windows) or disk image (macOS); ADR 0020
       - name: Package
         shell: bash
@@ -217,6 +224,12 @@ jobs:
         env:
           ASAN_OPTIONS: detect_leaks=0
         run: ctest --test-dir build/linux-x64-asan --output-on-failure
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: screenshots-linux-x64-asan
+          path: build/linux-x64-asan/test-scratch/screenshots/*.png
+          if-no-files-found: ignore
       - name: Client reaches the main menu and survives 10 s
         working-directory: build/linux-x64-asan/runtime
         env:
