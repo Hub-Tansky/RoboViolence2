@@ -1,0 +1,63 @@
+name: Bug report
+description: Something in the game, server, master server or installer doesn't work
+labels: [bug, needs-triage]
+body:
+  - type: markdown
+    attributes:
+      value: Security problems go to [private vulnerability reporting](https://github.com/Hub-Tansky/RoboViolence2/security/advisories/new), never here.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Start the client
+        2. Join a CTF server
+        3. ...
+    validations:
+      required: true
+  - type: dropdown
+    id: part
+    attributes:
+      label: Part
+      options: [Client, Dedicated server, Master server, Installer or package, Build from source, Other]
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      multiple: true
+      options: [Windows, macOS, Linux]
+    validations:
+      required: true
+  - type: input
+    id: os-version
+    attributes:
+      label: OS version and hardware
+      placeholder: Windows 11 23H2, GeForce GTX 1060 / macOS 15.1, M2
+  - type: input
+    id: version
+    attributes:
+      label: Game version
+      description: Release tag, package file name, or commit SHA.
+      placeholder: v0.1.0 / roboviolence2-macos-arm64-release.dmg
+    validations:
+      required: true
+  - type: dropdown
+    id: data
+    attributes:
+      label: Game data
+      options: [Original BaboViolent 2 data, Placeholder content, Not sure]
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: "Console output or log files from the pref directory: Windows `%APPDATA%\\BaboViolent2\\bv2`, macOS `~/Library/Application Support/BaboViolent2/bv2`, Linux `~/.local/share/BaboViolent2/bv2`. Remove passwords and IP addresses."
+      render: text

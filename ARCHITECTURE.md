@@ -157,6 +157,9 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 
 | path | purpose |
 |---|---|
+| `.github/ISSUE_TEMPLATE/bug_report.yml` | Issue form: bug report (part, OS, version, game data, logs); labels `bug`, `needs-triage` |
+| `.github/ISSUE_TEMPLATE/config.yml` | Issue chooser: no blank issues; security reports go to private vulnerability reporting |
+| `.github/ISSUE_TEMPLATE/feature_request.yml` | Issue form: feature request with acceptance criteria; labels `enhancement`, `needs-triage` |
 | `.github/dependabot.yml` | Dependabot version updates: GitHub Actions and the server images' Docker base, weekly |
 
 ### `.claude`
