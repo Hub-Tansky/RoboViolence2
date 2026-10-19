@@ -23,6 +23,7 @@
 #include "JoinGame.h"
 #include "CStatus.h"
 #endif
+#include <cstdio>
 #include <fstream>
 
 
@@ -246,6 +247,15 @@ void Scene::kick(int ID)
 	}
 }
 
+// One banlist record, as Server's constructor reads it: name and IP NUL-padded to 32 and 16 bytes
+static void writeBanEntry(std::ofstream & file, const char * name, const char * ip)
+{
+	char record[48] = {};
+	snprintf(record, 32, "%s", name);
+	snprintf(record + 32, 16, "%s", ip);
+	file.write(record, sizeof(record));
+}
+
 void Scene::ban(CString playerName)
 {
 	if (server)
@@ -275,10 +285,7 @@ void Scene::ban(int ID)
 		server->banList.push_back(std::pair<CString,CString>(server->game->players[ID]->name,server->game->players[ID]->playerIP) );
 		
 		std::ofstream file(bv2::userFile("banlist"), std::ios::app | std::ios::binary);
-		CString name = server->game->players[ID]->name;
-		name.resize(32);
-		file.write(name.s, sizeof(char)*32);
-		file.write(server->game->players[ID]->playerIP, sizeof(char)*16);
+		writeBanEntry(file, server->game->players[ID]->name.s, server->game->players[ID]->playerIP);
 
 		console->add(CString("\x3> Disconnecting client %s (%s), banned by server", server->game->players[ID]->name.s, server->game->players[ID]->playerIP), true);
 		ZEVEN_SAFE_DELETE(server->game->players[ID]);
@@ -296,10 +303,7 @@ void Scene::banIP(CString playerIP)
 		server->banList.push_back(std::pair<CString,CString>(playerName,playerIP) );
 
 		std::ofstream file(bv2::userFile("banlist"), std::ios::app | std::ios::binary);
-		playerName.resize(32);
-		playerIP.resize(16);
-		file.write(playerName.s, sizeof(char)*32);
-		file.write(playerIP.s, sizeof(char)*16);
+		writeBanEntry(file, playerName.s, playerIP.s);
 	}
 }
 
@@ -313,18 +317,8 @@ void Scene::unban(int banID)
 
 		// Then rewrite file
 		std::ofstream file(bv2::userFile("banlist"), std::ios::trunc | std::ios::binary);
-		CString name;
-
 		for(std::size_t i = 0; i < server->banList.size(); ++i)
-		{
-			// Ensure name is 32 characters
-			name = server->banList[i].first;
-			name.resize(32);
-			
-			// Write data
-			file.write(name.s, sizeof(char)*32);
-			file.write(server->banList[i].second.s, sizeof(char)*16);
-		}
+			writeBanEntry(file, server->banList[i].first.s, server->banList[i].second.s);
 	}
 }
 

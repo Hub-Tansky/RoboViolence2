@@ -295,7 +295,12 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 				{
 					if (gameVar.c_netlog)
 						console->add(CString("server> [net] join password mismatch for slot %i, disconnecting", (int)gameVersionAccepted.playerID), true);
+					// Free the slot too: no disconnect event follows, and the ping watchdog skips loading players
 					bb_serverDisconnectClient(game->players[gameVersionAccepted.playerID]->babonetID);
+					ZEVEN_SAFE_DELETE(game->players[gameVersionAccepted.playerID]);
+					net_svcl_player_disconnect playerDisconnect;
+					playerDisconnect.playerID = gameVersionAccepted.playerID;
+					bb_serverSend((char*)&playerDisconnect, sizeof(net_svcl_player_disconnect), NET_SVCL_PLAYER_DISCONNECT, 0);
 					break;
 				}
 
@@ -486,7 +491,7 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 					{
 						stCacheBanned banned;
 						banned.ID	=	playerInfo.playerID;
-						sprintf( banned.IP , "%s" , playerInfo.playerIP );
+						snprintf(banned.IP, sizeof(banned.IP), "%s", playerInfo.playerIP);
 	
 	
 						if ( master )

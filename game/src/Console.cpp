@@ -939,6 +939,12 @@ void Console::sendCommand(CString commandLine, bool isAdmin, unsigned long bbnet
 		m_isActive = false;
 		return;
 	}
+	// Asks the master for the game list, like the browser's refresh button (tests/e2e master_list)
+	if (command == "refreshgames")
+	{
+		if (master) master->requestGames();
+		return;
+	}
 #endif
 	// Pour hoster une game
 	if (command == "dedicate")

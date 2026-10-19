@@ -10,24 +10,17 @@ import shutil
 import subprocess
 import sys
 
+from autotest_client import client_command, start_xvfb
+
 exe, scratch, script, expected, result = sys.argv[1], sys.argv[2], os.path.abspath(sys.argv[3]), int(sys.argv[4]), sys.argv[5]
 pref = os.path.join(scratch, os.path.splitext(os.path.basename(script))[0])
 shutil.rmtree(pref, ignore_errors=True)
 os.makedirs(pref)
-config = os.path.join(pref, "autotest.cfg")
-with open(config, "w") as f:
-    f.write("r_fullScreen false\n")
-cmd = [exe, "--placeholders", "--config", config, "--autotest", script] + sys.argv[6:]
-env = dict(os.environ, BV2_PREF_DIR=pref, SDL_AUDIODRIVER="dummy")
+cmd, env = client_command(exe, pref, script)
+cmd += sys.argv[6:]
 xvfb = None
 if sys.platform.startswith("linux") and not os.environ.get("DISPLAY"):
-    # Our own Xvfb, not xvfb-run: xvfb-run replaces the client's exit code with 5 when its cleanup fails
-    read, write = os.pipe()
-    xvfb = subprocess.Popen(["Xvfb", "-displayfd", str(write), "-screen", "0", "1280x720x24", "-nolisten", "tcp"],
-                            pass_fds=[write], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    os.close(write)
-    with os.fdopen(read) as f:
-        env["DISPLAY"] = ":" + f.readline().strip()
+    xvfb, env["DISPLAY"] = start_xvfb()
 try:
     r = subprocess.run(cmd, env=env, cwd=os.path.dirname(os.path.abspath(exe)), stdout=subprocess.PIPE,
                        stderr=subprocess.STDOUT, timeout=180)
