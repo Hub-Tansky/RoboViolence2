@@ -174,6 +174,22 @@ add_test(NAME example_cfg COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_D
 add_test(NAME lang_check COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test_lang_check.py "${BV2_TEST_SCRATCH}")
 add_test(NAME osv_vcpkg COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test_osv_vcpkg.py "${BV2_TEST_SCRATCH}")
 
+# Phase T3: the autotest runner, then the client on autotest scripts (Linux under Xvfb, so only where it is installed;
+# macOS natively). Expected exit codes: 0 pass, 1 failed expect, 2 timeout.
+add_executable(test_autotest test_autotest.cpp ${CMAKE_SOURCE_DIR}/game/src/Autotest.cpp)
+target_include_directories(test_autotest PRIVATE ${CMAKE_SOURCE_DIR}/game/src)
+bv2_target_defaults(test_autotest)
+add_test(NAME autotest_runner COMMAND test_autotest)
+find_program(ROBOVIOLENCE2_XVFB Xvfb)
+if(TARGET bv2 AND (APPLE OR ROBOVIOLENCE2_XVFB))
+  set(ROBOVIOLENCE2_AUTOTEST ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_autotest.py $<TARGET_FILE:bv2> "${BV2_TEST_SCRATCH}/autotest")
+  add_test(NAME autotest_menu_host COMMAND ${ROBOVIOLENCE2_AUTOTEST} ${CMAKE_CURRENT_SOURCE_DIR}/autotest/menu-host.txt 0 "autotest: PASS")
+  add_test(NAME autotest_fail COMMAND ${ROBOVIOLENCE2_AUTOTEST} ${CMAKE_CURRENT_SOURCE_DIR}/autotest/fail.txt 1 "autotest: FAIL line 3: expect-console" --timeout 5)
+  add_test(NAME autotest_timeout COMMAND ${ROBOVIOLENCE2_AUTOTEST} ${CMAKE_CURRENT_SOURCE_DIR}/autotest/timeout.txt 2 "autotest: TIMEOUT line 3: wait 600" --timeout 5)
+  add_test(NAME autotest_quit COMMAND ${ROBOVIOLENCE2_AUTOTEST} ${CMAKE_CURRENT_SOURCE_DIR}/autotest/quit.txt 1 "autotest: FAIL the client quit at line 4: expect-scene game")
+  set_tests_properties(autotest_menu_host autotest_fail autotest_timeout autotest_quit PROPERTIES TIMEOUT 180 RESOURCE_LOCK bv2_server_port)
+endif()
+
 if(WIN32 AND TARGET bv2 AND TARGET bv2dedicated AND TARGET bv2master)
   find_package(Python3 REQUIRED COMPONENTS Interpreter)
   add_test(NAME windows_no_crt_dlls

@@ -1,0 +1,7 @@
+# The client reaches the menu, runs a console command, then hosts and joins the placeholder map.
+expect-scene menu
+help
+expect-console playerlist maplist addmap
+host CTF-Placeholder
+expect-console Server Created on port
+expect-scene game

@@ -1,0 +1,3 @@
+# Outlasts --timeout: the run ends with exit 2.
+expect-scene menu
+wait 600

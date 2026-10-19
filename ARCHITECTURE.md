@@ -79,7 +79,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `packaging/docker/compose.example.yml` | Compose example: master, game server and the admin TLS proxy on one host, secrets from an env file outside the repo; `BV2_IMAGE_TAG` pins both images to a commit |
 | `packaging/windows/bv2.manifest` | Windows manifest for `bv2`, `bv2dedicated` and `bv2master`: PerMonitorV2 DPI, UTF-8 code page, Windows 10/11 |
 | `packaging/windows/bv2.rc.in` | Windows resource script template; CMake fills in the generated icon |
-| `tests/CMakeLists.txt` | ctest targets: netPacket, config, fileio, credentials, join password, admin login, admin API, babonet large message, the two `SqlStatement.h` copies identical, crash fixes, validator, missing music (client builds), dedicated-server smoke, in-process server harness (`bv2server_lib` + fake babonet), packet hygiene, corpus replay, crash-input tests for `crash-*.bin` under ASan (none at present), master server; on Windows also the non-ASCII install path smoke and the no-VC++-runtime-DLL check |
+| `tests/CMakeLists.txt` | ctest targets: netPacket, config, fileio, credentials, join password, admin login, admin API, babonet large message, the two `SqlStatement.h` copies identical, crash fixes, validator, missing music (client builds), dedicated-server smoke, in-process server harness (`bv2server_lib` + fake babonet), packet hygiene, corpus replay, crash-input tests for `crash-*.bin` under ASan (none at present), master server, autotest runner and (with Xvfb on Linux, or on macOS) the client on autotest scripts; on Windows also the non-ASCII install path smoke and the no-VC++-runtime-DLL check |
 | `tests/check_windows_deps.py` | Windows: fails if `bv2`, `bv2dedicated` or `bv2master` needs a Visual C++ runtime DLL |
 | `tests/corpus/clsv_admin_request/valid.bin` | Replay corpus: valid `clsv_admin_request` payload (`gen_corpus`) |
 | `tests/corpus/clsv_gameversion_accepted/valid.bin` | Replay corpus: valid `clsv_gameversion_accepted` payload (`gen_corpus`) |
@@ -111,9 +111,15 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/harness/fake_babonet.cpp` | Test `bb_*` API: queued connects and messages in, captured sends out, disconnects reported back; an object file, so it wins over babonet's `baboNet.cpp` |
 | `tests/harness/server_harness.cpp` | In-process dedicated server for tests: start, connect, join, deliver, tick |
 | `tests/harness/server_harness.h` | Harness API |
+| `tests/autotest/fail.txt` | Autotest script that never passes: the client exits 1 (ctest `autotest_fail`) |
+| `tests/autotest/menu-host.txt` | Autotest script: menu, `help` output, host and join the placeholder map (ctest `autotest_menu_host`) |
+| `tests/autotest/quit.txt` | Autotest script that quits before its last expect: the client exits 1, not 0 (ctest `autotest_quit`) |
+| `tests/autotest/timeout.txt` | Autotest script that outlasts `--timeout`: the client exits 2 (ctest `autotest_timeout`) |
+| `tests/run_autotest.py` | Runs `bv2 --autotest <script>` with a fresh pref dir, windowed, on placeholders (under its own Xvfb on Linux without a display, so the exit code is the client's); checks the exit code and the expected result text |
 | `tests/smoke_server.py` | Starts `bv2dedicated` headless, runs the CTF script, types a `sayall` with printf specifiers, quits; checks exit code, server creation and `bv2.cfg`. `--install-under` runs it from a non-ASCII path (Windows UTF-8 code page) |
 | `tests/test_admin_api.cpp` | Step 12: the admin API refuses a wrong token, limits a burst, runs a command, returns the status, audits with secrets masked (not on Windows) |
 | `tests/test_admin_login.cpp` | Step 10: admin login only with HMACs over the connection's challenge; no user, password or MD5 on the wire |
+| `tests/test_autotest.cpp` | Phase T3: autotest runner without a window: parsing, commands, waits, one match per expect, fail, timeout and early-quit reports (ADR 0025) |
 | `tests/test_babonet.cpp` | R7: a 10000-byte message over a loopback babonet connection arrives over several reads and intact |
 | `tests/test_browsable_game.cpp` | A server browser row owns a copy of its lobby game's row (the lobby frees its own) |
 | `tests/test_cstring.cpp` | Phase C step 5: one-argument `CString` is text (arrays, `char*`, literals, direct and implicit); two or more arguments format (ADR 0021) |
@@ -258,6 +264,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/decisions/0022-advertised-server-address.md` | ADR: the master lists `sv_publicAddress` only from private sources; `KILL_SERV` by connection (Phase C step 6) |
 | `docs/decisions/0023-step-review-subagent-in-repo.md` | ADR: step-closing review subagent and rubric tracked in `.claude/` |
 | `docs/decisions/0024-github-project-is-the-backlog.md` | ADR: the private GitHub Project is the backlog; roadmap files removed; PR carries scope and review record |
+| `docs/decisions/0025-client-autotest-mode.md` | ADR: the client runs scripted console commands and expectations (`--autotest`) with exit codes 0/1/2 and a watchdog |
 | `docs/decisions/README.md` | ADR format and index |
 
 ### `docs/ops`
@@ -452,6 +459,8 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/AccountManager.h` | Account create/login/clan/friend requests over the master connection |
 | `game/src/AdminApi.cpp` | Admin HTTP API: non-blocking listener on the game thread, bearer token, per-source budget, connection cap, refused scene-rebuilding commands, audit log with secrets masked (step 12) |
 | `game/src/AdminApi.h` | Admin HTTP API (`POST /command`, `GET /status`) behind a TLS proxy, ADR 0015 |
+| `game/src/Autotest.cpp` | `--autotest` script runner: parse, run commands, waits, `expect-console`, `expect-scene`, result report (ADR 0025) |
+| `game/src/Autotest.h` | Autotest runner API; exit codes 0 pass, 1 fail, 2 timeout |
 | `game/src/Button.cpp` | Menu button widget |
 | `game/src/Button.h` | Menu button widget |
 | `game/src/CAStar.cpp` | A* path finding grid |
@@ -533,7 +542,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/ConfirmPass.cpp` | Password confirmation dialog |
 | `game/src/ConfirmPass.h` | Password confirmation dialog |
 | `game/src/ConnectFailed.h` | Dialog: connection failed |
-| `game/src/Console.cpp` | In-game console: commands, log, remote console |
+| `game/src/Console.cpp` | In-game console: commands, log, remote console; feeds console lines to a running autotest |
 | `game/src/Console.h` | In-game console: commands, log, remote console |
 | `game/src/Credentials.cpp` | HMAC-SHA256, nonces and constant-time checks for the join and admin passwords (libsodium, ADR 0014) |
 | `game/src/Credentials.h` | Credential proofs: the client answers the server's nonce with HMAC(password, label + nonce) |
@@ -625,7 +634,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/WrongVersion.h` | Dialog: client/server version mismatch |
 | `game/src/Zeven.h` | Umbrella include for engine headers and common types |
 | `game/src/changes-log.txt` | Upstream change log |
-| `game/src/main.cpp` | Program entry: window, engine init, main loop |
+| `game/src/main.cpp` | Program entry: window, engine init, main loop; `--autotest` startup, per-step hook and watchdog (ADR 0025) |
 | `game/src/netPacket.h` | Wire structs and message IDs (raw memcpy'd structs) |
 | `game/src/screengrab.cpp` | Screenshot capture |
 | `game/src/screengrab.h` | Screenshot capture |

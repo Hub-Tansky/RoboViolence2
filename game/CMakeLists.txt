@@ -3,6 +3,7 @@
 set(BV2_GAME_SOURCES
   src/AccountManager.cpp
   src/AdminApi.cpp
+  src/Autotest.cpp
   src/Button.cpp
   src/CAStar.cpp
   src/CAStar_FindPath.cpp
