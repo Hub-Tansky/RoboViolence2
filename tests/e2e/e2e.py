@@ -93,7 +93,7 @@ class Run:
             return None
 
     def joined(self, name):
-        """Waits until the server has the player's name: /status counts the slot from the TCP connect, before it"""
+        """Waits for the server's join line: /status counts a slot from the TCP connect, before PLAYER_INFO sets its name"""
         wait(lambda: f"server> {name} joined the game" in self.server_text(), 40, f"{name} joined the game")
 
     def command(self, text):
