@@ -22,7 +22,9 @@ cp tools/playtest/agent.sh ~/RV2-playtest/bin/
 printf 'BV2_ADMIN_PASS=%s\n' "$(openssl rand -hex 16)" > ~/.config/rv2-playtest.env && chmod 600 ~/.config/rv2-playtest.env
 ```
 
-Optional keys in the env file: `NTFY_TOPIC` (phone notifications via ntfy.sh), `RV2_STAGING_HOST`, `RV2_STAGING_ADMIN_PASS` and `RV2_STAGING_ADMIN_PORT` (staging tests; port default 8443, 443 for a host with a public certificate). Keep real values out of the repo; private notes go in the owner's Obsidian vault (`RoboViolence2/prv_wiki/docs_restricted/testing-environment/`).
+Optional keys in the env file: `NTFY_TOPIC` (phone notifications via ntfy.sh), `RV2_STAGING_HOST`, `RV2_STAGING_ADMIN_PASS` and `RV2_STAGING_ADMIN_PORT` (staging tests; port default 8443, 443 for a host with a public certificate), `RV2_PLAYTEST_MAP` (server map with original data, default `CTF-Alert`). Keep real values out of the repo; private notes go in the owner's Obsidian vault (`RoboViolence2/prv_wiki/docs_restricted/testing-environment/`).
+
+Original data: add `BV2_DATA_DIR` to the plist's `EnvironmentVariables` (not the env file, which isn't exported). Server and client then use it, and the server starts on `RV2_PLAYTEST_MAP` instead of the placeholder map. Keep the data outside `~/Documents`, which `launchd` jobs can't read.
 
 ```bash
 ~/RV2-playtest/bin/agent.sh --preflight
