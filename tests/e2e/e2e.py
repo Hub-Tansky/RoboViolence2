@@ -13,9 +13,13 @@ import threading
 import time
 import urllib.request
 
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+from autotest_client import client, start_xvfb  # noqa: E402
+
 ADMIN_PASS = "e2e-admin-pass"
 ADMIN_PORT = 18080
 JOIN_PASSWORD = "e2e-secret"
+API_INTERVAL = 1.2  # seconds between admin API probes: its budget refills one request per second (AdminApi.cpp)
 
 
 class Run:
@@ -26,12 +30,9 @@ class Run:
         os.makedirs(self.dir)
         self.procs = []
         self.server_out = []
-        read, write = os.pipe()  # Xvfb writes its display number here
-        self.start(["Xvfb", "-displayfd", str(write), "-screen", "0", "1280x720x24", "-nolisten", "tcp"],
-                   pass_fds=[write], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        os.close(write)
-        with os.fdopen(read) as f:
-            self.display = ":" + f.readline().strip()
+        self.logs = []
+        xvfb, self.display = start_xvfb()
+        self.procs.append(xvfb)
 
     def start(self, cmd, **kw):
         p = subprocess.Popen(cmd, **kw)
@@ -46,6 +47,8 @@ class Run:
                     p.wait(10)
                 except subprocess.TimeoutExpired:
                     p.kill()
+        for log in self.logs:
+            log.close()
 
     def master(self):
         home = os.path.join(self.dir, "master")
@@ -64,7 +67,7 @@ class Run:
         p.stdin.write(b"execute CTF\n")
         p.stdin.flush()
         wait(lambda: "Server Created on port 3333" in self.server_text(), 30, "server created")
-        wait(lambda: self.players() == 0, 10, "admin API answering")
+        wait(lambda: self.players() == 0, 10, "admin API answering", API_INTERVAL)
 
     @staticmethod
     def collect(stream, lines):
@@ -82,7 +85,6 @@ class Run:
 
     def players(self):
         """Player count from GET /status, or None while the API doesn't answer"""
-        time.sleep(1.2)  # the API's budget refills one request per second
         try:
             for line in self.admin("GET", "/status").splitlines():
                 if line.startswith("players "):
@@ -97,15 +99,14 @@ class Run:
         """Starts a bv2 autotest client named `name`; returns its process (exit 0 = its script passed)"""
         pref = os.path.join(self.dir, name)
         os.makedirs(pref)
-        script, config = os.path.join(pref, "script.txt"), os.path.join(pref, "e2e.cfg")
+        script = os.path.join(pref, "script.txt")
         with open(script, "w") as f:
             f.write("\n".join(steps) + "\n")
-        with open(config, "w") as f:
-            f.write(f'r_fullScreen false\ncl_playerName "{name}"\n')
-        env = dict(os.environ, DISPLAY=self.display, BV2_PREF_DIR=pref, SDL_AUDIODRIVER="dummy", **env)
+        cmd, client_env = client(os.path.join(self.runtime, "bv2"), pref, script, f'cl_playerName "{name}"\n')
         log = open(os.path.join(pref, "client.log"), "w")
-        return self.start([os.path.join(self.runtime, "bv2"), "--placeholders", "--config", config, "--autotest", script],
-                          cwd=self.runtime, env=env, stdout=log, stderr=subprocess.STDOUT)
+        self.logs.append(log)
+        return self.start(cmd, cwd=self.runtime, env=dict(client_env, DISPLAY=self.display, **env), stdout=log,
+                          stderr=subprocess.STDOUT)
 
     def finished(self, client, timeout=90):
         """The client's exit code once its script ended"""
@@ -121,12 +122,12 @@ def port_open(port):
         return s.connect_ex(("127.0.0.1", port)) == 0
 
 
-def wait(condition, seconds, what):
+def wait(condition, seconds, what, interval=0.5):
     end = time.time() + seconds
     while time.time() < end:
         if condition():
             return
-        time.sleep(0.5)
+        time.sleep(interval)
     raise AssertionError(f"timed out after {seconds} s waiting for: {what}")
 
 
@@ -141,18 +142,19 @@ JOIN = ["expect-scene menu", "connect 127.0.0.1", "expect-scene game"]
 def join_leave(run):
     run.server()
     client = run.client("e2e-a", JOIN + ["wait 6"])
-    wait(lambda: run.players() == 1, 40, "/status players 1 after the join")
+    wait(lambda: run.players() == 1, 40, "/status players 1 after the join", API_INTERVAL)
     check(run.finished(client) == 0, "client script passed")
-    wait(lambda: run.players() == 0, 20, "/status players 0 after the client left")
+    wait(lambda: run.players() == 0, 20, "/status players 0 after the client left", API_INTERVAL)
 
 
 def password(run):
     run.server(BV2_SV_PASSWORD=JOIN_PASSWORD)
     wrong = run.client("e2e-wrong", ["expect-scene menu", "connect 127.0.0.1 3333 wrong", "expect-console Server disconnected"])
     check(run.finished(wrong) == 0, "wrong password: client sees the server disconnect it")
-    check(run.players() == 0, "wrong password: /status players 0")
+    # The refused player keeps its slot until the ping watchdog drops it (Server.cpp, 300 frames)
+    wait(lambda: run.players() == 0, 30, "wrong password: /status players 0", API_INTERVAL)
     right = run.client("e2e-right", ["expect-scene menu", f"connect 127.0.0.1 3333 {JOIN_PASSWORD}", "expect-scene game", "wait 6"])
-    wait(lambda: run.players() == 1, 40, "right password: /status players 1")
+    wait(lambda: run.players() == 1, 40, "right password: /status players 1", API_INTERVAL)
     check(run.finished(right) == 0, "right password: client script passed")
 
 
@@ -166,22 +168,22 @@ def chat(run):
 def kick(run):
     run.server()
     client = run.client("e2e-a", JOIN + ["expect-console Server disconnected"])
-    wait(lambda: run.players() == 1, 40, "/status players 1 before the kick")
+    wait(lambda: run.players() == 1, 40, "/status players 1 before the kick", API_INTERVAL)
     run.command("kick e2e-a")
-    wait(lambda: run.players() == 0, 10, "/status players 0 after POST /command kick")
+    wait(lambda: run.players() == 0, 10, "/status players 0 after POST /command kick", API_INTERVAL)
     check(run.finished(client) == 0, "kicked client sees the server disconnect it")
 
 
 def ban(run):
     run.server()
     client = run.client("e2e-a", JOIN + ["expect-console Server disconnected"])
-    wait(lambda: run.players() == 1, 40, "/status players 1 before the ban")
+    wait(lambda: run.players() == 1, 40, "/status players 1 before the ban", API_INTERVAL)
     run.command("ban e2e-a")
-    wait(lambda: run.players() == 0, 10, "/status players 0 after POST /command ban")
+    wait(lambda: run.players() == 0, 10, "/status players 0 after POST /command ban", API_INTERVAL)
     check(run.finished(client) == 0, "banned client sees the server disconnect it")
-    again = run.client("e2e-b", ["expect-scene menu", "connect 127.0.0.1", "wait 10"])
-    seen = [run.players() for _ in range(6)]
-    check(run.finished(again) == 0 and 1 not in seen, f"banned address can't rejoin: /status players {seen}")
+    again = run.client("e2e-b", ["expect-scene menu", "connect 127.0.0.1", "expect-console Server disconnected"])
+    wait(lambda: "Disconnecting banned client" in run.server_text(), 40, "server refuses the banned address")
+    check(run.finished(again) == 0, "refused client sees the server disconnect it")
 
 
 def master_list(run):
@@ -200,13 +202,13 @@ if __name__ == "__main__":
     run = Run(runtime, scratch, name)
     try:
         SCENARIOS[name](run)
-    except AssertionError as e:
+    except Exception as e:
         print(f"FAIL {name}: {e}")
         print("--- server stdout (tail)\n" + run.server_text()[-3000:])
-        for client in sorted(os.listdir(run.dir)):
-            log = os.path.join(run.dir, client, "client.log")
+        for bot in sorted(os.listdir(run.dir)):
+            log = os.path.join(run.dir, bot, "client.log")
             if os.path.exists(log):
-                print(f"--- {client} (tail)\n" + open(log, errors="replace").read()[-3000:])
+                print(f"--- {bot} (tail)\n" + open(log, errors="replace").read()[-3000:])
         sys.exit(1)
     finally:
         run.stop()
