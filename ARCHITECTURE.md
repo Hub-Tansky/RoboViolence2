@@ -622,7 +622,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/Server.h` | Authoritative server: connections, joins, tick, map and mode control |
 | `game/src/ServerCTF.cpp` | Server: capture-the-flag rules |
 | `game/src/ServerClose.h` | Dialog shown when the server closes the connection |
-| `game/src/ServerRecv.cpp` | Server: handlers for every client-to-server packet, after the pre-dispatch check `Server::checkPacket` |
+| `game/src/ServerRecv.cpp` | Server: handlers for every client-to-server packet, after the pre-dispatch check `Server::checkPacket`; a wrong join password frees the slot |
 | `game/src/ServerSnD.cpp` | Server: search-and-destroy rules |
 | `game/src/ServerValidator.cpp` | Server cheat checks: spawn weapon whitelist, speed/frame kick, step 9 rules (weapon, movement, rate limits) with a decaying score |
 | `game/src/ServerValidator.h` | Server cheat checks (`Server::validator`), asked by the `ServerRecv.cpp` handlers |

@@ -13,7 +13,7 @@ def start_xvfb():
         return proc, ":" + f.readline().strip()
 
 
-def client(exe, pref, script, config_lines=""):
+def client_command(exe, pref, script, config_lines=""):
     """Command line and env for `exe --autotest script` with pref dir `pref`, windowed, on the placeholder data"""
     config = os.path.join(pref, "autotest.cfg")
     with open(config, "w") as f:

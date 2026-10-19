@@ -10,13 +10,13 @@ import shutil
 import subprocess
 import sys
 
-from autotest_client import client, start_xvfb
+from autotest_client import client_command, start_xvfb
 
 exe, scratch, script, expected, result = sys.argv[1], sys.argv[2], os.path.abspath(sys.argv[3]), int(sys.argv[4]), sys.argv[5]
 pref = os.path.join(scratch, os.path.splitext(os.path.basename(script))[0])
 shutil.rmtree(pref, ignore_errors=True)
 os.makedirs(pref)
-cmd, env = client(exe, pref, script)
+cmd, env = client_command(exe, pref, script)
 cmd += sys.argv[6:]
 xvfb = None
 if sys.platform.startswith("linux") and not os.environ.get("DISPLAY"):

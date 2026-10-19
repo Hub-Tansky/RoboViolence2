@@ -14,7 +14,7 @@ import time
 import urllib.request
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
-from autotest_client import client, start_xvfb  # noqa: E402
+from autotest_client import client_command, start_xvfb  # noqa: E402
 
 ADMIN_PASS = "e2e-admin-pass"
 ADMIN_PORT = 18080
@@ -102,7 +102,7 @@ class Run:
         script = os.path.join(pref, "script.txt")
         with open(script, "w") as f:
             f.write("\n".join(steps) + "\n")
-        cmd, client_env = client(os.path.join(self.runtime, "bv2"), pref, script, f'cl_playerName "{name}"\n')
+        cmd, client_env = client_command(os.path.join(self.runtime, "bv2"), pref, script, f'cl_playerName "{name}"\n')
         log = open(os.path.join(pref, "client.log"), "w")
         self.logs.append(log)
         return self.start(cmd, cwd=self.runtime, env=dict(client_env, DISPLAY=self.display, **env), stdout=log,
@@ -151,8 +151,7 @@ def password(run):
     run.server(BV2_SV_PASSWORD=JOIN_PASSWORD)
     wrong = run.client("e2e-wrong", ["expect-scene menu", "connect 127.0.0.1 3333 wrong", "expect-console Server disconnected"])
     check(run.finished(wrong) == 0, "wrong password: client sees the server disconnect it")
-    # The refused player keeps its slot until the ping watchdog drops it (Server.cpp, 300 frames)
-    wait(lambda: run.players() == 0, 30, "wrong password: /status players 0", API_INTERVAL)
+    wait(lambda: run.players() == 0, 10, "wrong password: the refused player's slot is freed", API_INTERVAL)
     right = run.client("e2e-right", ["expect-scene menu", f"connect 127.0.0.1 3333 {JOIN_PASSWORD}", "expect-scene game", "wait 6"])
     wait(lambda: run.players() == 1, 40, "right password: /status players 1", API_INTERVAL)
     check(run.finished(right) == 0, "right password: client script passed")
