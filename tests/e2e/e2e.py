@@ -92,6 +92,10 @@ class Run:
         except OSError:
             return None
 
+    def joined(self, name):
+        """Waits until the server has the player's name: /status counts the slot from the TCP connect, before it"""
+        wait(lambda: f"server> {name} joined the game" in self.server_text(), 40, f"{name} joined the game")
+
     def command(self, text):
         return self.admin("POST", "/command", text.encode())
 
@@ -167,7 +171,7 @@ def chat(run):
 def kick(run):
     run.server()
     client = run.client("e2e-a", JOIN + ["expect-console Server disconnected"])
-    wait(lambda: run.players() == 1, 40, "/status players 1 before the kick", API_INTERVAL)
+    run.joined("e2e-a")
     run.command("kick e2e-a")
     wait(lambda: run.players() == 0, 10, "/status players 0 after POST /command kick", API_INTERVAL)
     check(run.finished(client) == 0, "kicked client sees the server disconnect it")
@@ -176,7 +180,7 @@ def kick(run):
 def ban(run):
     run.server()
     client = run.client("e2e-a", JOIN + ["expect-console Server disconnected"])
-    wait(lambda: run.players() == 1, 40, "/status players 1 before the ban", API_INTERVAL)
+    run.joined("e2e-a")
     run.command("ban e2e-a")
     wait(lambda: run.players() == 0, 10, "/status players 0 after POST /command ban", API_INTERVAL)
     check(run.finished(client) == 0, "banned client sees the server disconnect it")
