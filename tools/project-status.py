@@ -59,7 +59,8 @@ def item_key(content):
 
 
 def main():
-    event = json.load(open(os.environ["GITHUB_EVENT_PATH"]))
+    with open(os.environ["GITHUB_EVENT_PATH"]) as f:
+        event = json.load(f)
     pr = event["pull_request"]
     if event["action"] == "closed":
         if not pr["merged"]:
