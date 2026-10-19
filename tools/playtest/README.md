@@ -14,6 +14,8 @@ macOS on Apple silicon, `gh` logged in as Hub-Tansky, and `jq`, `curl`, `ditto`,
 mkdir -p ~/RV2-playtest ~/Dev/RoboViolence2/tools/automatic_tests ~/.config && chmod 700 ~/RV2-playtest
 ```
 
+`~/Dev/RoboViolence2/` is the folder that holds the checkouts, not a clone: keep the installed agent outside any working tree.
+
 ```bash
 cp tools/playtest/agent.sh ~/Dev/RoboViolence2/tools/automatic_tests/
 ```

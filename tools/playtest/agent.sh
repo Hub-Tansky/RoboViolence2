@@ -302,7 +302,7 @@ finish() {
 		fi
 		prune "$ROOT/versions" $KEEP; prune "$ROOT/pref" $KEEP; prune "$ROOT/run" $KEEP; prune "$ROOT/reports" $KEEP_REPORTS
 	elif [ -n "$infra" ] && [ "$MODE" = smoke ] && [ "$(cat "$ROOT/infra-failure" 2>/dev/null)" != "$STAGE" ]; then
-		echo "$STAGE" >"$ROOT/infra-failure" # once per distinct failure, not every 30 minutes
+		echo "$STAGE" >"$ROOT/infra-failure" # once per distinct failure, not on every scheduled run
 		notify "RV2 agent FAILED at $STAGE" "No attempt counted. Log: $ROOT/agent.log"
 	fi
 	# The unattended marker: cleared by any scheduled run that got past the infrastructure, so the next incident notifies again
