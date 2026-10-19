@@ -27,6 +27,10 @@
 extern roboviolence2::Autotest * autotest; // main.cpp: the running --autotest, or null
 #endif
 #include "Scene.h"
+#ifndef CONSOLE
+#include "CMainTab.h"
+#include "screengrab.h"
+#endif
 #include <algorithm>
 #include <string>
 
@@ -943,6 +947,48 @@ void Console::sendCommand(CString commandLine, bool isAdmin, unsigned long bbnet
 	if (command == "refreshgames")
 	{
 		if (master) master->requestGames();
+		return;
+	}
+	// Opens a main menu tab, as its button does (tests/screenshots)
+	if (command == "menutab")
+	{
+		if (!scene->mainTab)
+			return;
+		CMainTab* tab = scene->mainTab;
+		const struct
+		{
+			const char* name;
+			CControl* button;
+		} tabs[] = {
+			{"news", tab->btn_news}, {"profile", tab->btn_profile}, {"browser", tab->btn_browser}, {"host", tab->btn_create}, {"editor", tab->btn_editor}, {"options", tab->btn_option}, {"credits", tab->btn_credits}};
+		for (const auto& t : tabs)
+			if (tokenize == t.name)
+			{
+				tab->Click(t.button);
+				return;
+			}
+		add("\x9> usage: menutab news|profile|browser|host|editor|options|credits");
+		return;
+	}
+	// Holds the scoreboard and hides the in-game menu, as Esc then Tab do (tests/screenshots)
+	if (command == "scoreboard")
+	{
+		if (!scene->client || !scene->client->game)
+			return;
+		scene->client->showMenu = false;
+		scene->client->game->forceStats = tokenize == "1";
+		return;
+	}
+	// Saves the next frame to <pref dir>/screenshots/<name>.bmp (tests/screenshots.py goldens)
+	if (command == "screenshot")
+	{
+		std::string name = tokenize.s;
+		if (name.empty() || name.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_") != std::string::npos)
+		{
+			add("\x9> usage: screenshot <name> (letters, digits, - and _)");
+			return;
+		}
+		RequestScreenGrab(bv2::userFile("screenshots/" + name + ".bmp"));
 		return;
 	}
 #endif

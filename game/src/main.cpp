@@ -41,6 +41,7 @@ static void roboviolence2ApplyNetlogFromEnv()
 	#include "CStatus.h"
 	#include "CLobby.h"
 	#include "Autotest.h"
+	#include "screengrab.h"
 	#include <chrono>
 	#include <cstdio>
 	#include <thread>
@@ -270,6 +271,7 @@ public:
 
 		// On render le tout
 		scene->render();
+		SaveRequestedScreenGrab();
 
 		// Present the frame
 		dkglSwapBuffers();

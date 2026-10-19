@@ -20,6 +20,7 @@
 #include "screengrab.h"
 #include "Paths.h"
 #include <string>
+#include <vector>
 #include "Zeven.h"
 #include "GameVar.h"
 #include "Game.h"
@@ -129,9 +130,24 @@ bool SaveStatsAuto()
    return true;
 }
 
+// The next frame's path for SaveRequestedScreenGrab (screenshot console command)
+static std::string requestedGrab;
 
+void RequestScreenGrab(const std::string& filename)
+{
+	requestedGrab = filename;
+}
 
-bool SaveScreenGrab(const char* filename) {
+void SaveRequestedScreenGrab()
+{
+	if (requestedGrab.empty())
+		return;
+	SaveScreenGrab(requestedGrab.c_str(), GL_BACK);
+	requestedGrab.clear();
+}
+
+bool SaveScreenGrab(const char* filename, GLenum buffer)
+{
 
 	// get some info about the screen size
    CVector2i res = dkwGetResolution();
@@ -145,22 +161,13 @@ bool SaveScreenGrab(const char* filename) {
 	//GLenum   format  =  (bitdepth==32) ? GL_BGRA_EXT : GL_BGR_EXT;
    //int bpp          =  (bitdepth==32) ? 4 : 3;
 
-	// allocate memory to store image data
-	unsigned char* pdata = new unsigned char[sw*sh*bpp];
-	// read from front buffer
-	glReadBuffer(GL_FRONT);
+   std::vector<unsigned char> pdata(sw * sh * bpp);
+   glReadBuffer(buffer);
+   glReadPixels(0, 0, sw, sh, format, GL_UNSIGNED_BYTE, pdata.data());
+   SaveBitmapToFile(pdata.data(), sw, sh, bitdepth, filename);
 
-	// read pixel data
-	glReadPixels(0,0,sw,sh,format,GL_UNSIGNED_BYTE,pdata);
-
-	// write data as a tga file
-   SaveBitmapToFile(pdata,sw,sh,bitdepth,filename);
-
-	// clean up
-	delete [] pdata;
-
-	// done
-	return true;
+   // done
+   return true;
 }
 
 #endif

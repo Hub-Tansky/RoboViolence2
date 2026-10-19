@@ -1,0 +1,6 @@
+# Options tab of the main menu (Phase T7)
+expect-scene menu
+menutab options
+wait 2
+screenshot options
+wait 1

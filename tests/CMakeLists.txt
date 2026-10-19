@@ -198,6 +198,14 @@ if(TARGET bv2 AND TARGET bv2dedicated AND TARGET bv2master AND ROBOVIOLENCE2_XVF
   endforeach()
 endif()
 
+# Phase T7: screenshots against tests/golden/*.png (screenshots.py; Xvfb, so Linux only: goldens are Mesa llvmpipe frames)
+if(TARGET bv2 AND ROBOVIOLENCE2_XVFB AND NOT APPLE)
+  foreach(shot main-menu options scoreboard)
+    add_test(NAME screenshot_${shot} COMMAND ${Python3_EXECUTABLE} -B ${CMAKE_CURRENT_SOURCE_DIR}/screenshots.py $<TARGET_FILE:bv2> "${BV2_TEST_SCRATCH}/screenshots" ${shot})
+    set_tests_properties(screenshot_${shot} PROPERTIES TIMEOUT 180 RESOURCE_LOCK bv2_server_port)
+  endforeach()
+endif()
+
 if(WIN32 AND TARGET bv2 AND TARGET bv2dedicated AND TARGET bv2master)
   find_package(Python3 REQUIRED COMPONENTS Interpreter)
   add_test(NAME windows_no_crt_dlls

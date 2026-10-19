@@ -57,3 +57,4 @@ What we do, in one or two sentences.
 | [0023](0023-step-review-subagent-in-repo.md) | The step-closing review subagent and its rubric live in the repo | Accepted |
 | [0024](0024-github-project-is-the-backlog.md) | The private GitHub Project is the backlog; no roadmap files in the repo | Accepted |
 | [0025](0025-client-autotest-mode.md) | Test the real client through a scripted autotest mode | Accepted |
+| [0026](0026-screenshot-goldens.md) | Screenshot goldens are Linux llvmpipe frames compared within a tolerance | Accepted |

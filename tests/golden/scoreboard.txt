@@ -1,0 +1,9 @@
+# Scoreboard on the placeholder map, hosted by this client (Phase T7)
+expect-scene menu
+host CTF-Placeholder
+expect-scene game
+wait 2
+scoreboard 1
+wait 2
+screenshot scoreboard
+wait 1
