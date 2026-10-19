@@ -141,6 +141,7 @@ def check(ok, what):
 
 
 JOIN = ["expect-scene menu", "connect 127.0.0.1", "expect-scene game"]
+DROPPED = ["expect-scene menu", "connect 127.0.0.1", "expect-console Server disconnected"]  # kicked or banned, maybe before the game scene
 
 
 def join_leave(run):
@@ -170,7 +171,7 @@ def chat(run):
 
 def kick(run):
     run.server()
-    client = run.client("e2e-a", JOIN + ["expect-console Server disconnected"])
+    client = run.client("e2e-a", DROPPED)
     run.joined("e2e-a")
     run.command("kick e2e-a")
     wait(lambda: run.players() == 0, 10, "/status players 0 after POST /command kick", API_INTERVAL)
@@ -179,12 +180,12 @@ def kick(run):
 
 def ban(run):
     run.server()
-    client = run.client("e2e-a", JOIN + ["expect-console Server disconnected"])
+    client = run.client("e2e-a", DROPPED)
     run.joined("e2e-a")
     run.command("ban e2e-a")
     wait(lambda: run.players() == 0, 10, "/status players 0 after POST /command ban", API_INTERVAL)
     check(run.finished(client) == 0, "banned client sees the server disconnect it")
-    again = run.client("e2e-b", ["expect-scene menu", "connect 127.0.0.1", "expect-console Server disconnected"])
+    again = run.client("e2e-b", DROPPED)
     wait(lambda: "Disconnecting banned client" in run.server_text(), 40, "server refuses the banned address")
     check(run.finished(again) == 0, "refused client sees the server disconnect it")
 
