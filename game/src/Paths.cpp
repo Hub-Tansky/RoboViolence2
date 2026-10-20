@@ -352,9 +352,9 @@ namespace bv2
 		// 2. the user's saved settings; the first run writes them out from the defaults
 		std::string cfg = configFile();
 		applySavedSettings(cfg);
-		std::error_code ec;
 
 		// 3. local overrides: config/local/*.cfg beside the package's main/ (ADR 0016), then --config files
+		std::error_code ec;
 		std::vector<std::string> dirs(1, g_packageRoot + "config/local");
 		for (size_t d = 0; d < dirs.size(); ++d)
 		{
