@@ -1,4 +1,4 @@
-# The website (website/, ADR 0027): tests on PRs, deploys to GitHub Pages from main.
+# The website (website/, ADR 0029): tests on PRs, deploys to GitHub Pages from main.
 # build.yml is a trigger because the tests read the release job's asset names from it.
 name: pages
 on:

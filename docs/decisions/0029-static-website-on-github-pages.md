@@ -1,4 +1,4 @@
-# 0027: The website is static HTML on GitHub Pages; downloads come from the GitHub releases API
+# 0029: The website is static HTML on GitHub Pages; downloads come from the GitHub releases API
 
 - Status: Accepted
 - Date: 2026-10-20

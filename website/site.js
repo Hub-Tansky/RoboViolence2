@@ -1,4 +1,4 @@
-// Robo Violence 2 website: download button, download list, Discord link (ADR 0027).
+// Robo Violence 2 website: download button, download list, Discord link (ADR 0029).
 // The exports are for tests/website/site.test.mjs; the DOM part runs only in a browser.
 
 const REPO = 'Hub-Tansky/RoboViolence2';
