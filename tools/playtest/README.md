@@ -40,6 +40,8 @@ launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.roboviolence2.playte
 
 The agent runs at load, then every 30 minutes while the Mac is awake; a build that finished during sleep is tested at the first run after waking. Its first run is the preflight under `launchd`: if `gh` can't read the keychain there, it notifies `FAILED at preflight`.
 
+Upgrading from `~/RV2-playtest/bin/` (10-minute install): run the Uninstall `bootout`, then the install steps above, then `rm -r ~/RV2-playtest/bin`.
+
 ## Use
 
 | Command | Does |
