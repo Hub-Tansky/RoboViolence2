@@ -154,7 +154,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/test_netpacket.cpp` | Byte-level layout of the packed wire structs |
 | `tests/test_staging_deploy.sh` | Phase T step 2: staging deploy helpers: main-only run selection, `/status` player count, failures per commit, infrastructure stages, env-file mode and readonly repository (ctest `staging_deploy`) |
 | `tests/test_playtest_agent.sh` | Phase T step 1: playtest agent helpers: main-only run selection (fork PR from `main` rejected), artifact digest, attempt limit, env-file mode and no export, launch script map swap (ctest `playtest_agent`, Unix with `jq`) |
-| `tests/website/site.test.mjs` | Website: installer per OS against the asset names in `build.yml`, OS detection, newest release incl. pre-releases, button offer and fallback, identical menu and footer on every page (`node --test`, `pages.yml`) |
+| `tests/website/site.test.mjs` | Website: installer per OS against the asset names in `build.yml`, OS detection, newest release incl. pre-releases, button offer and fallback, install text names the release files, no API call off the landing page, identical menu and footer on every page (`node --test`, `pages.yml`) |
 | `tools/check-content-case.py` | Fails when a literal `main/...` path differs from a real file name only by case |
 | `vcpkg.json` | vcpkg manifest (sqlite3, curl; Step 3 completes it) |
 
@@ -199,7 +199,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `.github/workflows/dependency-graph.yml` | Submits resolved vcpkg ports to the dependency graph on push to `main` |
 | `.github/workflows/osv-vcpkg.yml` | Weekly OSV check of the vcpkg ports by upstream commit (`tools/osv-vcpkg.py`); not required |
 | `.github/workflows/containers.yml` | CI: builds both server images, checks non-root, runs the compose example (healthy, passworded server listed by the master), checks a remote `status` over TLS and `/deployed`, pushes multi-arch `:<sha>` and `:latest` to GHCR from `main` and weekly |
-| `.github/workflows/pages.yml` | Website: `node --test tests/website/` on PRs touching `website/` or `build.yml`; deploys `website/` to GitHub Pages from `main` (ADR 0027) |
+| `.github/workflows/pages.yml` | Website: `node --test tests/website/site.test.mjs` on PRs touching `website/` or `build.yml`; deploys `website/` to GitHub Pages from `main` (ADR 0027) |
 
 ### `config`
 

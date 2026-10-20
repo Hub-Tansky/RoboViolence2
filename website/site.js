@@ -15,7 +15,7 @@ export const PLATFORMS = {
   linux: { label: 'Linux', suffix: '-linux-x64.tar.gz' },
 };
 
-// 'windows', 'macos', 'linux' or null (phones, tablets, unknown).
+// 'windows', 'macos', 'linux' or null (phones, Android tablets, unknown). iPadOS Safari reports a Mac and gets the .dmg.
 export function detectOS(userAgent, platform = '') {
   const ua = `${userAgent} ${platform}`;
   if (/Android|iPhone|iPad|iPod|CrOS/i.test(ua)) return null;

@@ -1,7 +1,7 @@
 # 0027: The website is static HTML on GitHub Pages; downloads come from the GitHub releases API
 
 - Status: Accepted
-- Date: 2026-10-21
+- Date: 2026-10-20
 - Affects: `website/`, `.github/workflows/pages.yml`, Project item "Website on GitHub Pages at roboviolence.com"
 
 ## Context
@@ -18,4 +18,4 @@
 - The asset suffixes in `site.js` must follow the release job's file names: `tests/website/site.test.mjs` reads them from `build.yml`, and `pages.yml` runs on changes to it.
 - Menu and footer are copied into each page (no build step); the same test fails when they differ.
 - The Discord invite is one constant in `site.js`; the server status block (`#server-status`) is an empty hook for the status feed item.
-- Rejected: a static site generator (a build step for four pages); hosting on the game VPS (couples the site to game server uptime); `releases/latest` links (skip pre-releases).
+- Rejected: a static site generator (a build step for three pages); hosting on the game VPS (couples the site to game server uptime); `releases/latest` links (skip pre-releases).

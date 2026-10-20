@@ -58,6 +58,25 @@ test('downloadOffer: installer, releases page fallback, or the list', () => {
   assert.equal(downloadOffer(release, null).href, '#install');
 });
 
+test('the install instructions name the files the release job publishes', () => {
+  const index = read('website/index.html');
+  for (const name of assetNames.filter((n) => !n.endsWith('-source.tar.gz'))) assert.ok(index.includes(name), name);
+});
+
+test('pages without the download button never call the API', async () => {
+  let fetched = 0;
+  globalThis.document = { getElementById: () => null, querySelectorAll: () => [] };
+  globalThis.fetch = async () => fetched++;
+  try {
+    await import('../../website/site.js?page=about');
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  } finally {
+    delete globalThis.document;
+    delete globalThis.fetch;
+  }
+  assert.equal(fetched, 0);
+});
+
 test('every page has the same menu and footer', () => {
   const chrome = (page) => {
     const html = read(`website/${page}`);
