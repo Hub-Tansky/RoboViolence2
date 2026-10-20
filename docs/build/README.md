@@ -32,7 +32,7 @@ Run each program from its folder (a package folder, or `build/<preset>/runtime/`
 
 | Program | Package | Arguments |
 |---|---|---|
-| Master server | `run-master` | none; only needed for the server browser, with `BV2_MASTER_SERVERS` (below) |
+| Master server | `run-master` | none; only needed to test with a local master, with `BV2_MASTER_SERVERS` (below) |
 | Game server | `run-server` | launch script name, default `CTF` (`main/LaunchScript/CTF.cfg`). The default applies only with no arguments: with `--config <file>`, also name the script |
 | Client | `run-client` | one console command, e.g. `connect 127.0.0.1` |
 

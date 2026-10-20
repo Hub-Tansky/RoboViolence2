@@ -17,12 +17,12 @@ def start_xvfb():
 
 def client_command(exe, pref, script, config_lines=""):
     """Command line and env for `exe --autotest script` with pref dir `pref`, windowed, on the placeholder data, with no
-    master unless BV2_MASTER_SERVERS names one (ADR 0027)"""
+    master (BV2_MASTER_SERVERS=none, ADR 0027; the caller may replace it in the env)"""
     config = os.path.join(pref, "autotest.cfg")
     with open(config, "w") as f:
-        f.write('r_fullScreen false\ncl_masterServers "none"\n' + config_lines)  # tests never reach the public master
+        f.write("r_fullScreen false\n" + config_lines)
     cmd = [exe, "--placeholders", "--config", config, "--autotest", script]
-    return cmd, dict(os.environ, BV2_PREF_DIR=pref, SDL_AUDIODRIVER="dummy")
+    return cmd, dict(os.environ, BV2_PREF_DIR=pref, SDL_AUDIODRIVER="dummy", BV2_MASTER_SERVERS="none")
 
 
 def run_client(exe, pref, script, config_lines="", extra_args=(), own_xvfb=False):

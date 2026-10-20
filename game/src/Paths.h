@@ -92,7 +92,7 @@ namespace bv2
 	// Opens prefDir()/bv2.db, creating the tables on first use (content-seed/bv2.sql). Close with sqlite3_close.
 	sqlite3 * openClientDb();
 
-	// "host:port" entries from cl_masterServers (comma or space separated); port defaults to 11112; "none" is skipped
+	// "host:port" entries from cl_masterServers (comma or space separated); port defaults to 11112; a "none" entry is skipped, so "none" alone means no master
 	struct HostPort { std::string host; int port; };
 	std::vector<HostPort> parseHostPorts(const std::string & list);
 }

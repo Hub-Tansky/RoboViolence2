@@ -60,8 +60,8 @@ class Run:
         wait(lambda: port_open(10207), 10, "master listening on 10207")
 
     def server(self, **env):
-        env = dict(dict(os.environ, BV2_MASTER_SERVERS="none"), BV2_PREF_DIR=os.path.join(self.dir, "server"),
-                   BV2_ADMIN_PASS=ADMIN_PASS, BV2_ADMIN_API_PORT=str(ADMIN_PORT), **env)  # no public master (ADR 0027)
+        env = {**os.environ, "BV2_MASTER_SERVERS": "none", "BV2_PREF_DIR": os.path.join(self.dir, "server"),  # ADR 0027
+               "BV2_ADMIN_PASS": ADMIN_PASS, "BV2_ADMIN_API_PORT": str(ADMIN_PORT), **env}
         p = self.start([os.path.join(self.runtime, "bv2dedicated")], cwd=self.runtime, env=env, stdin=subprocess.PIPE,
                        stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         threading.Thread(target=self.collect, args=(p.stdout, self.server_out), daemon=True).start()

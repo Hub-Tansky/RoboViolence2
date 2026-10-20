@@ -114,6 +114,7 @@ int main(int argc, char ** argv)
 	bv2::loadConfigLayers(1, args);
 	check(bv2::parseHostPorts(masters.s).empty(), "BV2_MASTER_SERVERS=none turns the master list off");
 	setEnv("BV2_MASTER_SERVERS", "");
+	check(bv2::parseHostPorts("none,127.0.0.1:10207").size() == 1, "a none entry beside a master is skipped");
 	std::vector<bv2::HostPort> hp = bv2::parseHostPorts("master.roboviolence.com:10207, other.invalid");
 	check(hp.size() == 2 && hp[0].host == "master.roboviolence.com" && hp[0].port == 10207 && hp[1].port == 11112,
 		"host:port list");

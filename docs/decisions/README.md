@@ -38,7 +38,7 @@ What we do, in one or two sentences.
 | [0004](0004-project-name-roboviolence2.md) | Name the project RoboViolence 2, an unofficial fork of BaboViolent 2 | Superseded by 0008 |
 | [0005](0005-runtime-main-data-root.md) | Keep the `main/` data root; the runtime dir assembles it | Accepted (amended by 0016) |
 | [0006](0006-sdl3-miniaudio-glad-platform-layer.md) | SDL3, miniaudio and glad behind the unchanged dk* APIs | Accepted |
-| [0007](0007-data-root-pref-dir-config-layers.md) | Data root, per-user pref dir and layered config | Accepted (amended by 0016) |
+| [0007](0007-data-root-pref-dir-config-layers.md) | Data root, per-user pref dir and layered config | Accepted (amended by 0016, 0027) |
 | [0008](0008-display-name-robo-violence-2.md) | Spell the display name "Robo Violence 2" | Accepted (identifier timing amended by 0009; in-game name by 0017) |
 | [0009](0009-rename-internal-identifiers-continuously.md) | Rename internal identifiers continuously; interface names wait for §H | Accepted |
 | [0010](0010-bv2-asset-compat-and-gui-freeze.md) | Keep BV2 asset compatibility and the BV2 interface until replacement assets ship | Accepted (amended by 0017) |
