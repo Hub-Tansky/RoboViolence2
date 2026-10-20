@@ -295,7 +295,6 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 				{
 					if (gameVar.c_netlog)
 						console->add(CString("server> [net] join password mismatch for slot %i, disconnecting", (int)gameVersionAccepted.playerID), true);
-					// Free the slot too: no disconnect event follows, and the ping watchdog skips loading players
 					dropSlot(gameVersionAccepted.playerID, "join_password");
 					break;
 				}

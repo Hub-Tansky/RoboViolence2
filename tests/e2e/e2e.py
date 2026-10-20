@@ -8,6 +8,7 @@ Scenarios: join_leave, password, chat, kick, ban, master_list, ctf_capture, ghos
 import os
 import re
 import shutil
+import socket
 import subprocess
 import sys
 import threading
@@ -130,7 +131,6 @@ class Run:
 
 
 def port_open(port):
-    import socket
     with socket.socket() as s:
         return s.connect_ex(("127.0.0.1", port)) == 0
 
@@ -221,7 +221,6 @@ def ctf_capture(run):
 def ghost(run):
     """A TCP client that never answers the join handshake (a port scanner) loses its slot after the join timeout"""
     run.server()
-    import socket
     with socket.create_connection(("127.0.0.1", 3333)):
         wait(lambda: run.players() == 1, 10, "/status counts the silent connection", API_INTERVAL)
         wait(lambda: run.players() == 0, 25, "/status players 0 once the join timeout drops it", API_INTERVAL)

@@ -108,7 +108,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/corpus/svcl_console/fixed-unterminated.bin` | Regression input (R22: console text without `\0`), fixed in step 4; replayed like `valid.bin` |
 | `tests/corpus_types.h` | Client-to-server message types, valid samples and known-defect inputs for the corpus, replay and fuzz tests |
 | `tests/gen_corpus.cpp` | Writes `tests/corpus/<type>/valid.bin` and the known-defect inputs from `netPacket.h` structs |
-| `tests/harness/fake_babonet.cpp` | Test `bb_*` API: queued connects and messages in, captured sends out, disconnects reported back; an object file, so it wins over babonet's `baboNet.cpp` |
+| `tests/harness/fake_babonet.cpp` | Test `bb_*` API: queued connects and messages in, captured sends out, client disconnects queued by the test (a server-side `bb_serverDisconnectClient` raises no event, like babonet); an object file, so it wins over babonet's `baboNet.cpp` |
 | `tests/harness/server_harness.cpp` | In-process dedicated server for tests: start, connect, join, deliver, tick |
 | `tests/harness/server_harness.h` | Harness API |
 | `tests/e2e/e2e.py` | E2E scenarios (Phase T4): `bv2dedicated` with the admin API, `bv2master` and `bv2 --autotest` clients under its own Xvfb; join/leave, password, chat, kick, ban, master list, CTF capture, a silent connection dropped by the join timeout (ctest `e2e_<scenario>`) |

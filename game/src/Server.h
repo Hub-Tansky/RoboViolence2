@@ -152,7 +152,8 @@ public:
 
 	void nukeAll();
 	void nukePlayer(int);
-	// Disconnects a slot's client and frees the slot at once; `reason` goes to the netlog
+	// Disconnects a slot's client and frees the slot at once (no disconnect event follows, and the ping watchdog
+	// skips loading players); `reason` goes to the netlog
 	void dropSlot(int i, const char * reason);
 	// Drops the slots whose join handshake is still pending after JOIN_TIMEOUT
 	void dropStalledJoins(float delay);
