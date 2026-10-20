@@ -162,7 +162,7 @@ namespace
 			dksvarLoadConfig((char *)f.c_str());
 	}
 
-	// Settings that ship with the release, not player settings: bv2.cfg neither saves nor sets them (ADR 0027).
+	// Settings that ship with the release, not player settings: bv2.cfg neither saves nor sets them (ADR 0028).
 	// Builds up to 0.0.1 saved cl_masterServers "" there, which would otherwise hide the built-in master.
 	const char * const kReleaseSettings[] = { "cl_masterServers" };
 

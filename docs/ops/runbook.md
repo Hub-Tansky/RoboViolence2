@@ -24,10 +24,10 @@ Hosting the game server and the master server as containers (Phase B step 11). I
   BV2_PUBLIC_ADDRESS=
   ```
 
-- The server reads `BV2_SV_PASSWORD` (join password), `BV2_ADMIN_PASS` (`zsv_adminPass`; in-game admin login needs 12 characters or more, and five failures disconnect) and `BV2_MASTER_SERVERS` and never saves them (ADR 0007). Empty means none, except `BV2_MASTER_SERVERS`: unset, the server lists itself on the public master `master.roboviolence.com:10207`; `none` lists it nowhere (ADR 0027).
+- The server reads `BV2_SV_PASSWORD` (join password), `BV2_ADMIN_PASS` (`zsv_adminPass`; in-game admin login needs 12 characters or more, and five failures disconnect) and `BV2_MASTER_SERVERS` and never saves them (ADR 0007). Empty means none, except `BV2_MASTER_SERVERS`: unset, the server lists itself on the public master `master.roboviolence.com:10207`; `none` lists it nowhere (ADR 0028).
 - `BV2_PUBLIC_ADDRESS`: the server's public IPv4, listed by the master instead of the compose network address (ADR 0022).
 - `BV2_MASTER_BAN_PASS` (master, at most 7 characters): needed for `cacheban`/`cacheunban`; empty refuses them. It crosses the network in cleartext.
-- The admin user and other settings: `name value` lines (no `set`), e.g. `zsv_adminUser "boss"`, in `bv2.cfg` in the server volume, or in a file passed with `--config <file> CTF` (name the launch script too). The launch script sets no secrets, so these and the environment values stay. `cl_masterServers` in `bv2.cfg` is ignored (ADR 0027): use `BV2_MASTER_SERVERS` or `--config`.
+- The admin user and other settings: `name value` lines (no `set`), e.g. `zsv_adminUser "boss"`, in `bv2.cfg` in the server volume, or in a file passed with `--config <file> CTF` (name the launch script too). The launch script sets no secrets, so these and the environment values stay. `cl_masterServers` in `bv2.cfg` is ignored (ADR 0028): use `BV2_MASTER_SERVERS` or `--config`.
 
 ## Run
 

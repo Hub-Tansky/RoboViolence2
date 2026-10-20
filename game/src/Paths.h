@@ -82,7 +82,7 @@ namespace bv2
 	//   2. prefDir()/bv2.cfg           the user's saved settings (created from the defaults on first run)
 	//   3. config/local/*.cfg and --config <file> (argv)   server and local overrides, never saved back
 	//   4. environment: BV2_MASTER_SERVERS, BV2_ACCOUNT_URL, BV2_SV_PASSWORD, BV2_ADMIN_PASS   never saved back
-	// cl_masterServers is never saved and layer 2 cannot set it (ADR 0027).
+	// cl_masterServers is never saved and layer 2 cannot set it (ADR 0028).
 	// Call after dksvarInit(). Returns the path of the saved bv2.cfg.
 	std::string loadConfigLayers(int argc, const char * const * argv);
 

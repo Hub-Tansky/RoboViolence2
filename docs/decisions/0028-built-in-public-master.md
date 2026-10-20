@@ -1,4 +1,4 @@
-# 0027: The client and server ship with the public master built in
+# 0028: The client and server ship with the public master built in
 
 - Status: Accepted
 - Date: 2026-10-20

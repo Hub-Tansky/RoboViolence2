@@ -36,7 +36,7 @@ Run each program from its folder (a package folder, or `build/<preset>/runtime/`
 | Game server | `run-server` | launch script name, default `CTF` (`main/LaunchScript/CTF.cfg`). The default applies only with no arguments: with `--config <file>`, also name the script |
 | Client | `run-client` | one console command, e.g. `connect 127.0.0.1` |
 
-- Server and client use the public master `master.roboviolence.com:10207` by default ([ADR 0027](../decisions/0027-built-in-public-master.md)), so a local server shows up there after 20 s. To test with a local master, start it first and set `BV2_MASTER_SERVERS=127.0.0.1:10207` for both the server and the client; `BV2_MASTER_SERVERS=none` keeps a server off every master.
+- Server and client use the public master `master.roboviolence.com:10207` by default ([ADR 0028](../decisions/0028-built-in-public-master.md)), so a local server shows up there after 20 s. To test with a local master, start it first and set `BV2_MASTER_SERVERS=127.0.0.1:10207` for both the server and the client; `BV2_MASTER_SERVERS=none` keeps a server off every master.
 - Players on other machines use the server's LAN IP instead of `127.0.0.1`.
 - The server console reads commands from stdin (`maplistall`, `changemap <map>`, `quit`).
 - Full test script: [Phase A manual test](https://github.com/Hub-Tansky/RoboViolence2/blob/58c91b2a660db2b290b0b5f504381980a6aedba2/docs/roadmap/phase-a-modern-portable-build/phase-a-manual-test.md).

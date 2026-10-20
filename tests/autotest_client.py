@@ -17,7 +17,7 @@ def start_xvfb():
 
 def client_command(exe, pref, script, config_lines=""):
     """Command line and env for `exe --autotest script` with pref dir `pref`, windowed, on the placeholder data, with no
-    master (BV2_MASTER_SERVERS=none, ADR 0027; the caller may replace it in the env)"""
+    master (BV2_MASTER_SERVERS=none, ADR 0028; the caller may replace it in the env)"""
     config = os.path.join(pref, "autotest.cfg")
     with open(config, "w") as f:
         f.write("r_fullScreen false\n" + config_lines)

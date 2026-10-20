@@ -91,7 +91,7 @@ int main(int argc, char ** argv)
 	dksvarInit(&sink);
 	int local = 1;
 	dksvarRegister(CString("test_local [int : (default 1)]"), &local, 0, 100, 0, true);
-	// ADR 0027: the built-in master wins over an old bv2.cfg that saved cl_masterServers "", and is never saved
+	// ADR 0028: the built-in master wins over an old bv2.cfg that saved cl_masterServers "", and is never saved
 	CString masters("master.example.invalid:10207");
 	dksvarRegister(CString("cl_masterServers [string : (default master.example.invalid:10207)]"), &masters, true);
 	setEnv("BV2_MASTER_SERVERS", "");
