@@ -554,9 +554,9 @@ GameVar::GameVar()
 	db_accountServer = ""; // from cl_accountURL or the master (see loadDBInfos)
 	db_version = 0;
 
-	// Endpoints: nothing is built in. Empty means the feature is off (no master list, no account login).
-	cl_masterServers = "";
-	dksvarRegister(CString("cl_masterServers [string : \"host:port,host:port\" (default \"\")]"), &cl_masterServers, true);
+	// Endpoints: the public master is built in (ADR 0027); "none" turns it off. No account login is built in (empty = off).
+	cl_masterServers = "master.roboviolence.com:10207";
+	dksvarRegister(CString("cl_masterServers [string : \"host:port,host:port\" or \"none\" (default \"master.roboviolence.com:10207\")]"), &cl_masterServers, true);
 	cl_accountURL = "";
 	dksvarRegister(CString("cl_accountURL [string : \"\" (default \"\")]"), &cl_accountURL, true);
 

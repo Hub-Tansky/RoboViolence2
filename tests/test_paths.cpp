@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <filesystem>
 #include <fstream>
+#include <iterator>
 #include <string>
 
 namespace fs = std::filesystem;
@@ -90,9 +91,32 @@ int main(int argc, char ** argv)
 	dksvarInit(&sink);
 	int local = 1;
 	dksvarRegister(CString("test_local [int : (default 1)]"), &local, 0, 100, 0, true);
+	// ADR 0027: the built-in master wins over an old bv2.cfg that saved cl_masterServers "", and is never saved
+	CString masters("master.example.invalid:10207");
+	dksvarRegister(CString("cl_masterServers [string : (default master.example.invalid:10207)]"), &masters, true);
+	setEnv("BV2_MASTER_SERVERS", "");
+	fs::create_directories(fs::path(bv2::configFile()).parent_path());
+	std::ofstream(bv2::configFile()) << "cl_masterServers \"\"\n\n";
 	const char * args[1] = { argv[0] };
 	bv2::loadConfigLayers(1, args);
 	check(local == 5, "config/local beside the package");
+	check(masters == CString("master.example.invalid:10207"), "bv2.cfg cannot pin the master list");
+	dksvarSaveConfig((char *)bv2::configFile().c_str());
+	{
+		std::ifstream in(bv2::configFile());
+		std::string saved((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
+		check(saved.find("cl_masterServers") == std::string::npos, "the master list is not saved");
+	}
+	setEnv("BV2_MASTER_SERVERS", "127.0.0.1:10207");
+	bv2::loadConfigLayers(1, args);
+	check(masters == CString("127.0.0.1:10207"), "BV2_MASTER_SERVERS overrides the built-in master");
+	setEnv("BV2_MASTER_SERVERS", "none");
+	bv2::loadConfigLayers(1, args);
+	check(bv2::parseHostPorts(masters.s).empty(), "BV2_MASTER_SERVERS=none turns the master list off");
+	setEnv("BV2_MASTER_SERVERS", "");
+	std::vector<bv2::HostPort> hp = bv2::parseHostPorts("master.roboviolence.com:10207, other.invalid");
+	check(hp.size() == 2 && hp[0].host == "master.roboviolence.com" && hp[0].port == 10207 && hp[1].port == 11112,
+		"host:port list");
 
 	setEnv("BV2_DATA_DIR", (content / "main").string());
 	fs::current_path(pkg);

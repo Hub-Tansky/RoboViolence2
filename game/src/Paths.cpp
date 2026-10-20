@@ -332,12 +332,17 @@ namespace bv2
 		// 1. defaults shipped with the game
 		applyFile(contentFile("main/bv2.example.cfg"), false);
 
-		// 2. the user's saved settings; the first run writes them out from the defaults
+		// 2. the user's saved settings; the first run writes them out from the defaults.
+		// The master list ships with the game, it is not a player setting: bv2.cfg never saves or pins it (ADR 0027).
+		// Builds up to 0.0.1 saved cl_masterServers "" there, which would otherwise hide the built-in master.
+		const CString masters = dksvarGetValue("cl_masterServers");
+		dksvarSetTransient("cl_masterServers", masters.s);
 		std::string cfg = configFile();
 		std::error_code ec;
 		if (!fs::exists(cfg, ec))
 			dksvarSaveConfig((char *)cfg.c_str());
 		applyFile(cfg, false);
+		dksvarSetTransient("cl_masterServers", masters.s);
 
 		// 3. local overrides: config/local/*.cfg beside the package's main/ (ADR 0016), then --config files
 		std::vector<std::string> dirs(1, g_packageRoot + "config/local");
@@ -410,6 +415,8 @@ namespace bv2
 				}
 				else
 					hp.host = w;
+				if (hp.host == "none")
+					continue; // the master list turned off (BV2_MASTER_SERVERS=none)
 				if (!hp.host.empty() && hp.port > 0 && hp.port < 65536)
 					out.push_back(hp);
 			}

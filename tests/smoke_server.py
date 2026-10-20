@@ -16,7 +16,7 @@ import sys
 
 exe, pref = sys.argv[1], sys.argv[2]
 cwd = os.path.dirname(os.path.abspath(exe))
-env = dict(os.environ, BV2_PREF_DIR=pref)
+env = dict(os.environ, BV2_PREF_DIR=pref, BV2_MASTER_SERVERS="none")  # never registers with the public master (ADR 0027)
 if len(sys.argv) == 5 and sys.argv[3] == "--install-under":
     base = sys.argv[4]
     shutil.rmtree(base, ignore_errors=True)

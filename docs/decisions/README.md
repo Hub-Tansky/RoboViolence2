@@ -58,3 +58,4 @@ What we do, in one or two sentences.
 | [0024](0024-github-project-is-the-backlog.md) | The private GitHub Project is the backlog; no roadmap files in the repo | Accepted |
 | [0025](0025-client-autotest-mode.md) | Test the real client through a scripted autotest mode | Accepted |
 | [0026](0026-screenshot-goldens.md) | Screenshot goldens are Linux llvmpipe frames compared within a tolerance | Accepted |
+| [0027](0027-built-in-public-master.md) | The client and server ship with the public master built in | Accepted |

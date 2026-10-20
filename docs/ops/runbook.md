@@ -24,7 +24,7 @@ Hosting the game server and the master server as containers (Phase B step 11). I
   BV2_PUBLIC_ADDRESS=
   ```
 
-- The server reads `BV2_SV_PASSWORD` (join password), `BV2_ADMIN_PASS` (`zsv_adminPass`; in-game admin login needs 12 characters or more, and five failures disconnect) and `BV2_MASTER_SERVERS` and never saves them (ADR 0007). Empty means none.
+- The server reads `BV2_SV_PASSWORD` (join password), `BV2_ADMIN_PASS` (`zsv_adminPass`; in-game admin login needs 12 characters or more, and five failures disconnect) and `BV2_MASTER_SERVERS` and never saves them (ADR 0007). Empty means none, except `BV2_MASTER_SERVERS`: unset, the server lists itself on the public master `master.roboviolence.com:10207`; `none` lists it nowhere (ADR 0027).
 - `BV2_PUBLIC_ADDRESS`: the server's public IPv4, listed by the master instead of the compose network address (ADR 0022).
 - `BV2_MASTER_BAN_PASS` (master, at most 7 characters): needed for `cacheban`/`cacheunban`; empty refuses them. It crosses the network in cleartext.
 - The admin user and other settings: `name value` lines (no `set`), e.g. `zsv_adminUser "boss"`, in `bv2.cfg` in the server volume, or in a file passed with `--config <file> CTF` (name the launch script too). The launch script sets no secrets, so these and the environment values stay.
@@ -44,7 +44,7 @@ From the repository root (or the folder holding the compose file):
 | One commit | `BV2_IMAGE_TAG=<sha>` before any command above pins both images to that `main` commit (multi-arch); default `latest` |
 | Deployed commit | `curl -k https://localhost:8443/deployed`: `srv/deployed` beside the compose file, written by the staging deploy agent ([tools/staging/](../../tools/staging/README.md)); 404 otherwise |
 
-- A client connects with `connect <host> 3333 <password>`. The server browser needs the client's `BV2_MASTER_SERVERS=<host>:10207`.
+- A client connects with `connect <host> 3333 <password>`. The client's server browser uses the public master by default; for another master, set the client's `BV2_MASTER_SERVERS=<host>:10207`.
 - Upgrades across a protocol version (`GAME_VERSION_SV/CL`) need new clients too. Master and game servers share the master protocol, which has no version: upgrade them together.
 
 ## Ports
