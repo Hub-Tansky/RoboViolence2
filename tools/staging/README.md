@@ -48,7 +48,7 @@ The first run deploys the newest build at once (nothing is running to protect). 
 
 | Command | Does |
 |---|---|
-| `deploy.sh` | newest successful `main` `containers` run, once `/status` of CTF and `/tdm/status` of TDM both show `players 0` (what cron runs). If the server runs but `/status` doesn't answer (changed password, proxy down), it doesn't deploy |
+| `deploy.sh` | newest successful `main` `containers` run, once `/status` of CTF and `/tdm/status` of TDM both show `players 0` (what cron runs). If a game server runs but its `/status` doesn't answer (changed password, proxy down), it doesn't deploy |
 | `deploy.sh --sha <sha>` | that `main` build; also a manual rollback. Use the full SHA for builds older than the last 30 runs |
 | `deploy.sh --force` | don't wait for players to leave |
 
