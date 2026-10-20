@@ -29,6 +29,17 @@ pick_run() {
 
 players_in() { sed -n 's/^players \([0-9]*\)$/\1/p'; } # /status text on stdin -> player count
 
+# Both use running and admin_status (below; the test stubs them)
+players_of() { # players_of <service> [path prefix]: its player count, 0 when it doesn't run; fails when /status doesn't answer
+	local status n
+	running "$1" || { echo 0; return 0; }
+	status=$(admin_status "${2:-}") || return 1
+	n=$(printf '%s\n' "$status" | players_in)
+	echo "${n:-0}"
+}
+
+all_status() { admin_status && { ! running tdm || admin_status /tdm; }; } # CTF answers, and TDM where the release has it
+
 failures_of() { # failures_of <sha>: failed deploys recorded for it
 	[ -f "$ROOT/state.tsv" ] && awk -F'\t' -v s="$1" '$1 == s && $2 == "fail"' "$ROOT/state.tsv" | wc -l | tr -d ' ' || echo 0
 }
@@ -89,12 +100,14 @@ compose() { # compose <sha> <args...>: that commit's compose file, images pinned
 	BV2_IMAGE_TAG=$sha docker compose -f "$ROOT/releases/${sha:0:7}/compose.example.yml" --env-file "$ENV_FILE" "$@"
 }
 
-server_running() { [ -n "$(docker ps -q -f "label=com.docker.compose.project=$PROJECT" -f label=com.docker.compose.service=server -f status=running)" ]; }
+running() { # running <service>: that compose service has a running container
+	[ -n "$(docker ps -q -f "label=com.docker.compose.project=$PROJECT" -f "label=com.docker.compose.service=$1" -f status=running)" ]
+}
 
-admin_status() { # the running server's /status through its own proxy; -k: loopback to our own Caddy
+admin_status() { # admin_status [path prefix]: a game server's /status through our own proxy (CTF; /tdm for TDM); -k: loopback
 	local host=${BV2_ADMIN_HOST:-localhost} port=${BV2_ADMIN_PORT:-8443}
 	printf 'Authorization: Bearer %s\n' "$BV2_ADMIN_PASS" |
-		curl -fsS -k --max-time 5 -H @- --resolve "$host:$port:127.0.0.1" "https://$host:$port/status"
+		curl -fsS -k --max-time 5 -H @- --resolve "$host:$port:127.0.0.1" "https://$host:$port${1:-}/status"
 }
 
 prune() { # prune <keep sha7>: old release dirs and their images; rmi without -f never removes an image in use
@@ -135,7 +148,7 @@ finish() {
 	if [ "$RESULT" = fail ] && [ -z "$infra" ] && [ -n "$SHA" ]; then
 		printf '%s\tfail\t%s\t%s\n' "$SHA" "$STAGE" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" >>"$ROOT/state.tsv"
 		if [ -n "$PREV" ] && [ "$PREV" != "$SHA" ] && compose "$PREV" up -d --no-build --wait --wait-timeout 120 >/dev/null 2>&1 &&
-			wait_for 60 admin_status; then
+			wait_for 60 all_status; then
 			notify "RV2 staging deploy ${SHA:0:7} FAILED at $STAGE" "Rolled back to ${PREV:0:7}"
 		else
 			notify "RV2 staging deploy ${SHA:0:7} FAILED at $STAGE" "No rollback${PREV:+: ${PREV:0:7} did not come back}; staging may be down"
@@ -185,11 +198,12 @@ echo "$SHA" >"$rel/SHA"
 stage pull
 for image in $IMAGES; do docker pull -q "$image:$SHA" >/dev/null || fail "$image:$SHA"; done
 
-stage wait-empty # decided by the container, not the API: an unreadable /status must not look like an empty server
-if [ -z "$FORCE" ] && server_running; then
-	status=$(admin_status) || fail "server runs but /status doesn't answer (password changed? proxy down?); --force to deploy"
-	players=$(printf '%s\n' "$status" | players_in)
-	if [ "${players:-0}" -gt 0 ]; then
+stage wait-empty # decided by the containers, not the API: an unreadable /status must not look like an empty server
+if [ -z "$FORCE" ]; then
+	ctf=$(players_of server) || fail "CTF server runs but /status doesn't answer (password changed? proxy down?); --force to deploy"
+	tdm=$(players_of tdm /tdm) || fail "TDM server runs but /tdm/status doesn't answer; --force to deploy"
+	players=$((ctf + tdm))
+	if [ "$players" -gt 0 ]; then
 		say "$players players connected; ${SHA:0:7} waits"
 		waiting_update "$(date +%s)" &&
 			notify "RV2 staging deploy waiting" "Players held deploys back for 6 h; newest ${SHA:0:7}; deploy.sh --force to override"
@@ -203,7 +217,7 @@ stage deploy
 compose "$SHA" up -d --no-build --wait --wait-timeout 120 || fail "compose up"
 
 stage verify
-wait_for 60 admin_status || fail "/status did not answer within 60 s"
+wait_for 60 all_status || fail "/status of CTF or TDM did not answer within 60 s"
 printf '%s %s\n' "$SHA" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" | tee "$ROOT/deployed" >"$rel/srv/deployed" # served at /deployed
 printf '%s\tpass\t-\t%s\n' "$SHA" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" >>"$ROOT/state.tsv"
 RESULT=pass

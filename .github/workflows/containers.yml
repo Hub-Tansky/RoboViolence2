@@ -53,25 +53,27 @@ jobs:
             echo "$image: uid $uid"
             [ "$uid" != 0 ]
           done
-      # The join password comes from the environment and survives the launch script: the master lists the game as
-      # passworded. Both values are random throwaways for this run.
-      - name: The compose example comes up healthy; the master lists the passworded server
+      # The join password comes from the environment and survives the launch script: the master lists the games as
+      # passworded. Both values are random throwaways for this run. BV2_PUBLIC_ADDRESS (a documentation address): both
+      # servers share one public IP, as on production, and the master lists each under it (ADR 0022)
+      - name: The compose example comes up healthy; the master lists both passworded servers (CTF 3333, TDM 3334)
         run: |
           set -euo pipefail
-          printf 'BV2_SV_PASSWORD=%s\nBV2_ADMIN_PASS=%s\n' "$(openssl rand -hex 8)" "$(openssl rand -hex 16)" > "$RUNNER_TEMP/ci.env"
+          printf 'BV2_SV_PASSWORD=%s\nBV2_ADMIN_PASS=%s\nBV2_PUBLIC_ADDRESS=203.0.113.7\n' "$(openssl rand -hex 8)" "$(openssl rand -hex 16)" > "$RUNNER_TEMP/ci.env"
           mkdir -p packaging/docker/srv # the /deployed bind mount, owned by the runner user
           compose="docker compose -f packaging/docker/compose.example.yml --env-file $RUNNER_TEMP/ci.env"
           $compose up -d --no-build --wait --wait-timeout 120
           $compose ps
+          want="[('203.0.113.7', 3333, 'CTF-Placeholder', 1), ('203.0.113.7', 3334, 'TDM-Placeholder', 1)]"
           listed=""
           for i in $(seq 1 30); do
             $compose cp master:/var/lib/bv2/web.db web.db 2>/dev/null || true
-            listed=$(python3 -c "import sqlite3; print(sqlite3.connect('web.db').execute('select Password from Games where Port = 3333').fetchone() or '')" 2>/dev/null || true)
-            [ -n "$listed" ] && break
+            listed=$(python3 -c "import sqlite3; print(sqlite3.connect('web.db').execute('select IP, Port, Map, Password from Games order by Port').fetchall())" 2>/dev/null || true)
+            [ "$listed" = "$want" ] && break
             sleep 5
           done
           echo "listed: $listed"
-          [ "$listed" = "(1,)" ]
+          [ "$listed" = "$want" ]
       # Step 12: the admin API through the TLS proxy (Caddy's own CA for localhost, hence -k)
       - name: Remote status and a command over TLS
         run: |
@@ -88,6 +90,8 @@ jobs:
           grep -q '^map ' status.txt
           curl -skf -H "Authorization: Bearer $token" --data 'info' https://localhost:8443/command | tee info.txt
           grep -q 'Server Info' info.txt
+          curl -skf -H "Authorization: Bearer $token" https://localhost:8443/tdm/status | tee tdm-status.txt
+          grep -qx 'game type 1' tdm-status.txt
       # Phase T step 2: the staging deploy agent publishes the running commit at /deployed
       - name: /deployed serves the published commit
         run: |
@@ -101,6 +105,7 @@ jobs:
           compose="docker compose -f packaging/docker/compose.example.yml"
           $compose logs --no-color master | tail -40
           $compose logs --no-color server | tail -40
+          $compose logs --no-color tdm | tail -40
           $compose cp master:/var/lib/bv2/web.db web.db && python3 -c "import sqlite3; c=sqlite3.connect('web.db'); print([r for r in c.execute('select * from Games')])" || true
   push:
     name: push (${{ matrix.arch }})

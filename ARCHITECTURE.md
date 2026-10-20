@@ -73,10 +73,10 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `packaging/scripts/run-server.cmd` | Package script: starts the dedicated server, default launch script CTF (Windows) |
 | `packaging/scripts/run-server.sh` | Package script: starts the dedicated server, default launch script CTF (Unix) |
 | `packaging/macos/Info.plist.in` | macOS bundle `Info.plist` template |
-| `packaging/docker/Dockerfile` | Server images: one Ubuntu 24.04 build, targets `server` (`bv2dedicated`) and `master` (`bv2master`), non-root, pref dir volume (step 11) |
+| `packaging/docker/Dockerfile` | Server images: one Ubuntu 24.04 build, targets `server` (`bv2dedicated`, launch script as argument, healthcheck on `BV2_HEALTH_PORT`) and `master` (`bv2master`), non-root, pref dir volume (step 11) |
 | `packaging/docker/master-entrypoint.sh` | Master image entrypoint: seeds `master.db` and `web.db` into the volume, then runs `bv2master` |
-| `packaging/docker/Caddyfile` | Caddy site: TLS for the game server's admin API (`BV2_ADMIN_HOST`, default localhost) (step 12); `/deployed` serves the staging commit (phase T step 2) |
-| `packaging/docker/compose.example.yml` | Compose example: master, game server and the admin TLS proxy on one host, secrets from an env file outside the repo; `BV2_IMAGE_TAG` pins both images to a commit |
+| `packaging/docker/Caddyfile` | Caddy site: TLS for the game servers' admin APIs, CTF at `/`, TDM at `/tdm/` (`BV2_ADMIN_HOST`, default localhost) (step 12); `/deployed` serves the staging commit (phase T step 2) |
+| `packaging/docker/compose.example.yml` | Compose example: master, CTF (3333) and TDM (3334) game servers and the admin TLS proxy on one host, secrets from an env file outside the repo; `BV2_IMAGE_TAG` pins both images to a commit |
 | `packaging/windows/bv2.manifest` | Windows manifest for `bv2`, `bv2dedicated` and `bv2master`: PerMonitorV2 DPI, UTF-8 code page, Windows 10/11 |
 | `packaging/windows/bv2.rc.in` | Windows resource script template; CMake fills in the generated icon |
 | `tests/CMakeLists.txt` | ctest targets: netPacket, config, fileio, credentials, join password, admin login, admin API, babonet large message, the two `SqlStatement.h` copies identical, crash fixes, validator, missing music (client builds), dedicated-server smoke, in-process server harness (`bv2server_lib` + fake babonet), packet hygiene, corpus replay, crash-input tests for `crash-*.bin` under ASan (none at present), master server, autotest runner and (with Xvfb on Linux, or on macOS) the client on autotest scripts; with Xvfb on Linux the e2e scenarios (`e2e_*`) and screenshots (`screenshot_*`); on Windows also the non-ASCII install path smoke and the no-VC++-runtime-DLL check |
@@ -151,7 +151,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/test_validator.cpp` | Steps 8, 9: the step 8 kicks, `sv_antiCheat` levels, and each step 9 rule against a cheat and against normal (lagged) play |
 | `tests/test_master.cpp` | In-process master on port 10207 with a scratch `master.db`: register, list, heartbeat timeout (simulated 61 s), removal by `KILL_SERV`, SQL injection in names, maps, nicks and IPs, the ban list with LIKE filters (Q-S3), the ban secret, the advertised address and a reconnect; runs on Windows since R28 was fixed |
 | `tests/test_netpacket.cpp` | Byte-level layout of the packed wire structs |
-| `tests/test_staging_deploy.sh` | Phase T step 2: staging deploy helpers: main-only run selection, `/status` player count, failures per commit, infrastructure stages, env-file mode and readonly repository (ctest `staging_deploy`) |
+| `tests/test_staging_deploy.sh` | Phase T step 2: staging deploy helpers: main-only run selection, `/status` player count, CTF and TDM player counts and verify, failures per commit, infrastructure stages, env-file mode and readonly repository (ctest `staging_deploy`) |
 | `tests/test_playtest_agent.sh` | Phase T step 1: playtest agent helpers: main-only run selection (fork PR from `main` rejected), artifact digest, attempt limit, env-file mode and no export, launch script map swap (ctest `playtest_agent`, Unix with `jq`) |
 | `tools/check-content-case.py` | Fails when a literal `main/...` path differs from a real file name only by case |
 | `vcpkg.json` | vcpkg manifest (sqlite3, curl; Step 3 completes it) |
@@ -196,7 +196,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `.github/workflows/codeql.yml` | CodeQL: `c-cpp` (manual linux-x64 build of the three executables) and `actions`; push, PR, weekly; alerts under `build/` (vcpkg headers) filtered out |
 | `.github/workflows/dependency-graph.yml` | Submits resolved vcpkg ports to the dependency graph on push to `main` |
 | `.github/workflows/osv-vcpkg.yml` | Weekly OSV check of the vcpkg ports by upstream commit (`tools/osv-vcpkg.py`); not required |
-| `.github/workflows/containers.yml` | CI: builds both server images, checks non-root, runs the compose example (healthy, passworded server listed by the master), checks a remote `status` over TLS and `/deployed`, pushes multi-arch `:<sha>` and `:latest` to GHCR from `main` and weekly |
+| `.github/workflows/containers.yml` | CI: builds both server images, checks non-root, runs the compose example (healthy, both passworded servers listed by the master under one `BV2_PUBLIC_ADDRESS`), checks a remote `status` of CTF and TDM over TLS and `/deployed`, pushes multi-arch `:<sha>` and `:latest` to GHCR from `main` and weekly |
 
 ### `config`
 
@@ -223,7 +223,8 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 
 | path | purpose |
 |---|---|
-| `content/LaunchScript/CTF.cfg` | Example dedicated-server launch script (CTF; map is a placeholder) |
+| `content/LaunchScript/CTF.cfg` | Example dedicated-server launch script (CTF, port 3333; map is a placeholder) |
+| `content/LaunchScript/TDM.cfg` | Dedicated-server launch script (TDM, port 3334; map is a placeholder); the compose example's `tdm` service |
 
 ### `content/languages`
 
@@ -276,6 +277,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/decisions/0024-github-project-is-the-backlog.md` | ADR: the private GitHub Project is the backlog; roadmap files removed; PR carries scope and review record |
 | `docs/decisions/0025-client-autotest-mode.md` | ADR: the client runs scripted console commands and expectations (`--autotest`) with exit codes 0/1/2 and a watchdog |
 | `docs/decisions/0026-screenshot-goldens.md` | ADR: Linux llvmpipe screenshot goldens compared within a tolerance; the `screenshot`, `menutab` and `scoreboard` commands |
+| `docs/decisions/0027-several-game-servers-per-host.md` | ADR: several game servers per host (CTF, TDM): one image, `BV2_HEALTH_PORT`, one env file, admin APIs at `/` and `/tdm/`, deploy waits for both |
 | `docs/decisions/README.md` | ADR format and index |
 
 ### `docs/ops`
@@ -702,7 +704,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tools/playtest/com.roboviolence2.playtest.plist` | LaunchAgent template for the playtest agent (every 30 min, script in `~/Dev/RoboViolence2/tools/automatic_tests/`) |
 | `tools/staging/cloud-init.yml` | Staging host bootstrap (cloud-init, Ubuntu 24.04): Docker, `deploy.sh`, `rv2-staging-setup` for the env file, cron and first deploy |
 | `tools/staging/README.md` | Staging deploy agent: host needs, install, env file, cron, commands, files |
-| `tools/staging/deploy.sh` | Staging deploy agent (Linux, cron): newest successful main `containers` build, pinned to its commit, deployed only with no players, rollback, `/deployed` (ADR 0018) |
+| `tools/staging/deploy.sh` | Staging deploy agent (Linux, cron): newest successful main `containers` build, pinned to its commit, deployed only with no players on CTF and TDM, rollback, `/deployed` (ADR 0018) |
 | `tools/review.sh` | Review gate (REVIEW.md section 1): all checks, scope against the PR's Allowed paths, anti-gaming, review gate on the PR's review record; `--full` builds and tests |
 | `tools/setup-dev.ps1` | Activates hooks, checks tools (Windows) |
 | `tools/setup-dev.sh` | Activates hooks, checks tools (Unix); prints the apt line for building and the package names for running a package |

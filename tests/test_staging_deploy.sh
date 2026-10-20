@@ -59,6 +59,28 @@ done
 expect "prune drops the oldest beyond 5, never the kept one, and names their SHAs" "sha-r2" "$(prune_releases r1 | tr '\n' ' ' | sed 's/ $//')"
 expect "releases left" "r1 r3 r4 r5 r6 r7" "$(ls "$ROOT/releases" | tr '\n' ' ' | sed 's/ $//')"
 
+# CTF and TDM (stubs: which services run, and each one's /status by path prefix)
+RUNNING="server tdm" CTF_STATUS="players 2" TDM_STATUS="players 3"
+running() { case " $RUNNING " in *" $1 "*) return 0 ;; esac; return 1; }
+admin_status() {
+	case "${1:-}" in
+		"") [ -n "$CTF_STATUS" ] && echo "$CTF_STATUS" ;;
+		/tdm) [ -n "$TDM_STATUS" ] && echo "$TDM_STATUS" ;;
+		*) return 1 ;;
+	esac
+}
+expect "CTF players" 2 "$(players_of server)"
+expect "TDM players at /tdm" 3 "$(players_of tdm /tdm)"
+expect "both answer" yes "$(all_status >/dev/null && echo yes || echo no)"
+TDM_STATUS=""
+expect "TDM runs, /tdm/status silent: no count" fail "$(players_of tdm /tdm || echo fail)"
+expect "TDM runs, /tdm/status silent: verify fails" no "$(all_status >/dev/null && echo yes || echo no)"
+RUNNING="server"
+expect "a release without TDM counts 0 there" 0 "$(players_of tdm /tdm)"
+expect "and verifies on CTF alone" yes "$(all_status >/dev/null && echo yes || echo no)"
+RUNNING=""
+expect "nothing running: 0 players" 0 "$(players_of server)"
+
 printf 'BV2_ADMIN_PASS=test-only-value\n' >"$RV2_STAGING_ENV"
 chmod 644 "$RV2_STAGING_ENV"
 expect "env file readable by others is refused" no "$(load_env >/dev/null && echo yes || echo no)"
