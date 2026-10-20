@@ -6,6 +6,7 @@ Scenarios: join_leave, password, chat, kick, ban, master_list, ctf_capture. Each
 `GET /status` player count or score, the server's stdout, or a client's autotest result (ADR 0025). Linux only (Xvfb).
 """
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -83,14 +84,22 @@ class Run:
         with urllib.request.urlopen(req, timeout=5) as r:
             return r.read().decode()
 
+    def status(self):
+        """GET /status as {first word: the other words}, or {} while the API doesn't answer"""
+        try:
+            return {w[0]: w[1:] for w in (line.split() for line in self.admin("GET", "/status").splitlines()) if w}
+        except OSError:
+            return {}
+
     def players(self):
         """Player count from GET /status, or None while the API doesn't answer"""
-        try:
-            for line in self.admin("GET", "/status").splitlines():
-                if line.startswith("players "):
-                    return int(line.split()[1])
-        except OSError:
-            return None
+        players = self.status().get("players")
+        return int(players[0]) if players else None
+
+    def score(self):
+        """(blue, red) from GET /status `score blue N red M`, or None while the API doesn't answer"""
+        score = self.status().get("score")
+        return (int(score[1]), int(score[3])) if score else None
 
     def joined(self, name):
         """Waits for the server's join line: /status counts a slot from the TCP connect, before PLAYER_INFO sets its name"""
@@ -192,25 +201,20 @@ def ban(run):
     check(run.finished(again) == 0, "refused client sees the server disconnect it")
 
 
-def score(run):
-    """`score blue N red M` from GET /status, as (N, M)"""
-    for line in run.admin("GET", "/status").splitlines():
-        if line.startswith("score "):
-            return int(line.split()[2]), int(line.split()[4])
-
-
 def ctf_capture(run):
     """The server moves the bot: blue team, spawned on the red flag pod, then on its own (CTF-Placeholder pods: blue
     at 3,8, red at 13,8; tools/gen-placeholder-content.py). Bots can't steer, and the server only checks positions."""
     run.server()
-    client = run.client("e2e-a", JOIN + ["wait 20"])
+    client = run.client("e2e-a", JOIN + ["wait 40"])  # stays well past both 10 s waits below
     run.joined("e2e-a")
-    slot = run.command("playerlist").split("]")[0].lstrip("[")
+    slot = re.search(r"^\[(\d+)\] e2e-a ", run.command("playerlist"), re.M)
+    check(slot, "playerlist names e2e-a")
+    slot = slot.group(1)
     run.command("move 0 e2e-a")
     run.command(f"forceplayerspawn {slot} 13 8")
     wait(lambda: "took the red flag" in run.server_text(), 10, "e2e-a took the red flag")
     run.command(f"forceplayerspawn {slot} 3 8")
-    wait(lambda: score(run) == (1, 0), 10, "/status score blue 1 red 0", API_INTERVAL)
+    wait(lambda: run.score() == (1, 0), 10, "/status score blue 1 red 0", API_INTERVAL)
     check(run.finished(client) == 0, "client script passed")
 
 
