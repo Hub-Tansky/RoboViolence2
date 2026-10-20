@@ -401,6 +401,7 @@ void Server::updateNet(float delay, bool send)
 			net_svcl_join_challenge challenge;
 			credentials::nonce(joinNonce[playerID]);
 			adminFails[playerID] = 0;
+			joinWait[playerID] = 0.0f;
 			memcpy(challenge.nonce, joinNonce[playerID], sizeof(challenge.nonce));
 			bb_serverSend((char*)&challenge, sizeof(net_svcl_join_challenge), NET_SVCL_JOIN_CHALLENGE, clientID);
 			net_svcl_gameversion gameVersion;
@@ -938,6 +939,16 @@ void Server::update(float delay)
 			{
 				nbPlayers++;
 
+				// A connection that never answers the join handshake (a port scanner) would hold
+				// its slot forever: the heartbeat below skips loading players
+				if (!joined.count(game->players[i]->babonetID) && (joinWait[i] += delay) > JOIN_TIMEOUT)
+				{
+					console->add(CString("\x3> Disconnecting %s, no join handshake after %.0f sec", game->players[i]->playerIP, JOIN_TIMEOUT), true);
+					dropSlot(i);
+					nbPlayers--;
+					continue;
+				}
+
 				// No heartbeat while the client is still loading, or hasn't spawned yet
 				// (team pick / intro): it may not be pumping the network loop.
 				if (game->players[i]->status == PLAYER_STATUS_LOADING)
@@ -986,15 +997,11 @@ void Server::update(float delay)
 						if (game->players[i]->timePlayedCurGame > EPSILON)
 							cacheStats(game->players[i]);
 						// Connection interrupted (on le disconnect, on est s��e)
-						bb_serverDisconnectClient(game->players[i]->babonetID);
 						console->add("\x3> Disconnecting client, no respond since 3sec", true);
 						if (gameVar.c_netlog)
 							console->add(CString("server> [net] kick slot=%i reason=no_PONG currentPingFrame=%i status=%i",
 								i, game->players[i]->currentPingFrame, (int)game->players[i]->status), true);
-						ZEVEN_SAFE_DELETE(game->players[i]);
-						net_svcl_player_disconnect playerDisconnect;
-						playerDisconnect.playerID = (char)i;
-						bb_serverSend((char*)&playerDisconnect,sizeof(net_svcl_player_disconnect),NET_SVCL_PLAYER_DISCONNECT,0);
+						dropSlot(i);
 						continue;
 //						connectionInterrupted = true;
 //						game->players[i]->currentCF = game->players[i]->netCF1; // Pour les autres joueurs
@@ -1424,6 +1431,17 @@ void Server::nukeAll()
 			game->radiusHit(game->players[i]->currentCF.position, gameVar.sv_nukeRadius, game->players[i]->playerID, WEAPON_NUCLEAR);
 		}
 	}
+}
+
+// Disconnects slot i and frees it now: bb_serverDisconnectClient raises no disconnect event for it
+void Server::dropSlot(int i)
+{
+	joined.erase(game->players[i]->babonetID);
+	bb_serverDisconnectClient(game->players[i]->babonetID);
+	ZEVEN_SAFE_DELETE(game->players[i]);
+	net_svcl_player_disconnect playerDisconnect;
+	playerDisconnect.playerID = (char)i;
+	bb_serverSend((char*)&playerDisconnect, sizeof(net_svcl_player_disconnect), NET_SVCL_PLAYER_DISCONNECT, 0);
 }
 
 void Server::nukePlayer(int i)

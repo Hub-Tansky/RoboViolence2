@@ -2,7 +2,7 @@
 """Phase T4: end-to-end scenarios: bv2dedicated with the admin API, plus bv2 autotest clients under Xvfb.
 
 Usage: e2e.py <runtime dir> <scratch dir> <scenario>
-Scenarios: join_leave, password, chat, kick, ban, master_list, ctf_capture. Each has one observable: the admin API's
+Scenarios: join_leave, password, chat, kick, ban, master_list, ctf_capture, ghost. Each has one observable: the admin API's
 `GET /status` player count or score, the server's stdout, or a client's autotest result (ADR 0025). Linux only (Xvfb).
 """
 import os
@@ -218,6 +218,16 @@ def ctf_capture(run):
     check(run.finished(client) == 0, "client script passed")
 
 
+def ghost(run):
+    """A TCP client that never answers the join handshake (a port scanner) loses its slot after the join timeout"""
+    run.server()
+    import socket
+    with socket.create_connection(("127.0.0.1", 3333)):
+        wait(lambda: run.players() == 1, 10, "/status counts the silent connection", API_INTERVAL)
+        wait(lambda: run.players() == 0, 25, "/status players 0 once the join timeout drops it", API_INTERVAL)
+    check("no join handshake" in run.server_text(), "server logs why it dropped the client")
+
+
 def master_list(run):
     run.master()
     masters = "127.0.0.1:10207"
@@ -227,7 +237,7 @@ def master_list(run):
     check(run.finished(client) == 0, "client lists the server: Games found : 1")
 
 
-SCENARIOS = {f.__name__: f for f in (join_leave, password, chat, kick, ban, master_list, ctf_capture)}
+SCENARIOS = {f.__name__: f for f in (join_leave, password, chat, kick, ban, master_list, ctf_capture, ghost)}
 
 if __name__ == "__main__":
     runtime, scratch, name = sys.argv[1:4]
