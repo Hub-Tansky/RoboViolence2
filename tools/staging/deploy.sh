@@ -10,6 +10,7 @@ set -u
 readonly REPO=Hub-Tansky/RoboViolence2
 readonly IMAGES="ghcr.io/hub-tansky/roboviolence2-server ghcr.io/hub-tansky/roboviolence2-master"
 readonly PROJECT=roboviolence2 # `name:` in compose.example.yml
+readonly GAME_SERVERS="server: tdm:/tdm" # <compose service>:<admin API path prefix on the proxy> (ADR 0027)
 readonly ROOT=${RV2_STAGING_ROOT:-/var/lib/rv2-staging}
 readonly ENV_FILE=${RV2_STAGING_ENV:-/etc/rv2-staging.env}
 readonly MAX_ATTEMPTS=3 WAIT_NOTIFY_SECONDS=21600 KEEP=5
@@ -29,7 +30,7 @@ pick_run() {
 
 players_in() { sed -n 's/^players \([0-9]*\)$/\1/p'; } # /status text on stdin -> player count
 
-# Both use running and admin_status (below; the test stubs them)
+# These use running and admin_status (below; the test stubs them). `up --remove-orphans` makes running mean "in the release"
 players_of() { # players_of <service> [path prefix]: its player count, 0 when it doesn't run; fails when /status doesn't answer
 	local status n
 	running "$1" || { echo 0; return 0; }
@@ -38,7 +39,24 @@ players_of() { # players_of <service> [path prefix]: its player count, 0 when it
 	echo "${n:-0}"
 }
 
-all_status() { admin_status && { ! running tdm || admin_status /tdm; }; } # CTF answers, and TDM where the release has it
+total_players() { # players on every running game server; on a silent /status prints that service and fails
+	local s n total=0
+	for s in $GAME_SERVERS; do
+		n=$(players_of "${s%%:*}" "${s#*:}") || { echo "${s%%:*}"; return 1; }
+		total=$((total + n))
+	done
+	echo "$total"
+}
+
+all_status() { # at least one game server runs, and every running one answers /status
+	local s up=""
+	for s in $GAME_SERVERS; do
+		running "${s%%:*}" || continue
+		admin_status "${s#*:}" >/dev/null || return 1
+		up=1
+	done
+	[ -n "$up" ]
+}
 
 failures_of() { # failures_of <sha>: failed deploys recorded for it
 	[ -f "$ROOT/state.tsv" ] && awk -F'\t' -v s="$1" '$1 == s && $2 == "fail"' "$ROOT/state.tsv" | wc -l | tr -d ' ' || echo 0
@@ -147,7 +165,7 @@ finish() {
 	fi
 	if [ "$RESULT" = fail ] && [ -z "$infra" ] && [ -n "$SHA" ]; then
 		printf '%s\tfail\t%s\t%s\n' "$SHA" "$STAGE" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" >>"$ROOT/state.tsv"
-		if [ -n "$PREV" ] && [ "$PREV" != "$SHA" ] && compose "$PREV" up -d --no-build --wait --wait-timeout 120 >/dev/null 2>&1 &&
+		if [ -n "$PREV" ] && [ "$PREV" != "$SHA" ] && compose "$PREV" up -d --no-build --remove-orphans --wait --wait-timeout 120 >/dev/null 2>&1 &&
 			wait_for 60 all_status; then
 			notify "RV2 staging deploy ${SHA:0:7} FAILED at $STAGE" "Rolled back to ${PREV:0:7}"
 		else
@@ -200,9 +218,7 @@ for image in $IMAGES; do docker pull -q "$image:$SHA" >/dev/null || fail "$image
 
 stage wait-empty # decided by the containers, not the API: an unreadable /status must not look like an empty server
 if [ -z "$FORCE" ]; then
-	ctf=$(players_of server) || fail "CTF server runs but /status doesn't answer (password changed? proxy down?); --force to deploy"
-	tdm=$(players_of tdm /tdm) || fail "TDM server runs but /tdm/status doesn't answer; --force to deploy"
-	players=$((ctf + tdm))
+	players=$(total_players) || fail "$players runs but its /status doesn't answer (password changed? proxy down?); --force to deploy"
 	if [ "$players" -gt 0 ]; then
 		say "$players players connected; ${SHA:0:7} waits"
 		waiting_update "$(date +%s)" &&
@@ -214,10 +230,10 @@ fi
 rm -f "$ROOT/waiting"
 
 stage deploy
-compose "$SHA" up -d --no-build --wait --wait-timeout 120 || fail "compose up"
+compose "$SHA" up -d --no-build --remove-orphans --wait --wait-timeout 120 || fail "compose up"
 
 stage verify
-wait_for 60 all_status || fail "/status of CTF or TDM did not answer within 60 s"
+wait_for 60 all_status || fail "/status of a game server did not answer within 60 s"
 printf '%s %s\n' "$SHA" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" | tee "$ROOT/deployed" >"$rel/srv/deployed" # served at /deployed
 printf '%s\tpass\t-\t%s\n' "$SHA" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" >>"$ROOT/state.tsv"
 RESULT=pass
