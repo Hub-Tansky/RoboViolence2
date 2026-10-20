@@ -11,11 +11,11 @@ macOS on Apple silicon, `gh` logged in as Hub-Tansky, and `jq`, `curl`, `ditto`,
 ## Install
 
 ```bash
-mkdir -p ~/RV2-playtest/bin ~/.config && chmod 700 ~/RV2-playtest
+mkdir -p ~/RV2-playtest ~/Dev/RoboViolence2/tools/automatic_tests ~/.config && chmod 700 ~/RV2-playtest
 ```
 
 ```bash
-cp tools/playtest/agent.sh ~/RV2-playtest/bin/
+cp tools/playtest/agent.sh ~/Dev/RoboViolence2/tools/automatic_tests/
 ```
 
 ```bash
@@ -27,7 +27,7 @@ Optional keys in the env file: `NTFY_TOPIC` (phone notifications via ntfy.sh), `
 Original data: add `BV2_DATA_DIR` to the plist's `EnvironmentVariables` (not the env file, which isn't exported). Server and client then use it, and the server starts on `RV2_PLAYTEST_MAP` instead of the placeholder map. Keep the data outside `~/Documents`, which `launchd` jobs can't read.
 
 ```bash
-~/RV2-playtest/bin/agent.sh --preflight
+~/Dev/RoboViolence2/tools/automatic_tests/agent.sh --preflight
 ```
 
 ```bash
@@ -38,7 +38,9 @@ sed "s|__HOME__|$HOME|g" tools/playtest/com.roboviolence2.playtest.plist > ~/Lib
 launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.roboviolence2.playtest.plist
 ```
 
-The agent runs at load, then every 10 minutes while the Mac is awake; a build that finished during sleep is tested at the first run after waking. Its first run is the preflight under `launchd`: if `gh` can't read the keychain there, it notifies `FAILED at preflight`.
+The agent runs at load, then every 30 minutes while the Mac is awake; a build that finished during sleep is tested at the first run after waking. Its first run is the preflight under `launchd`: if `gh` can't read the keychain there, it notifies `FAILED at preflight`.
+
+Upgrading from `~/RV2-playtest/bin/` (10-minute install): run the Uninstall `bootout`, then the install steps above, then `rm -r ~/RV2-playtest/bin`.
 
 ## Use
 
