@@ -17,7 +17,7 @@ Hosting the game server and the master server as containers (Phase B step 11). I
 
 The compose example runs two game servers from the same image and the same env file: `server` (CTF, `content/LaunchScript/CTF.cfg`) and `tdm` (TDM, `content/LaunchScript/TDM.cfg`). They differ only in the launch script, the port and the volume. Both register with the master; with `BV2_PUBLIC_ADDRESS` set, the master lists both under that address, told apart by port.
 
-- Another mode or a second server of one mode: copy the `tdm` service, give it its own launch script (with its own `sv_port`), port, volume and `BV2_HEALTH_PORT`, and add a `handle_path` route for its admin API to the Caddyfile.
+- Another mode or a second server of one mode: copy the `tdm` service (it builds on the `x-game-server` anchor), give it its own launch script (with its own `sv_port`), port, volume and `BV2_HEALTH_PORT`, add a `handle_path` route for its admin API to the Caddyfile and an entry to `GAME_SERVERS` in `tools/staging/deploy.sh`.
 - `BV2_HEALTH_PORT` (default 3333) only tells the image's healthcheck which port to watch: set it to the launch script's `sv_port`, or the container stays unhealthy.
 
 ## Secrets

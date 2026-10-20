@@ -13,9 +13,9 @@
 - `BV2_HEALTH_PORT` (default 3333) tells the image's healthcheck which port to watch; it doesn't change `sv_port`.
 - The compose example runs `server` (CTF) and `tdm` with the same environment (one env file, one `BV2_PUBLIC_ADDRESS`, one admin token) and a volume each.
 - One Caddy site serves both admin APIs: CTF at `/`, TDM at `/tdm/` (prefix stripped).
-- The staging deploy agent waits until both servers report 0 players and verifies both; it skips TDM where a release has no `tdm` service.
+- The staging deploy agent waits until every running game server in its `GAME_SERVERS` list reports 0 players and verifies every running one; `up --remove-orphans` keeps the running services equal to the release's, so a release from before TDM has no `tdm` container to check.
 
 ## Consequences
-- A further server is a copied service, a launch script, a port, a volume, `BV2_HEALTH_PORT` and one Caddy route.
+- A further server is a service on the compose file's `x-game-server` anchor (launch script, port, volume, `BV2_HEALTH_PORT`), a launch script, one Caddy route and one `GAME_SERVERS` entry in `tools/staging/deploy.sh`.
 - Old CTF admin URLs keep working.
 - Rejected: a second published admin port per server (one more firewall opening and certificate host per server); a healthcheck that accepts any listening socket (the admin API's socket would pass it while the game port is down); `BV2_HEALTH_PORT` also setting `sv_port` (the launch script runs after the environment and would override it).
