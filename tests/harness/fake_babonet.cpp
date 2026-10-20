@@ -70,7 +70,7 @@ char * bb_serverReceive(UINT4 & babonetID, int & typeID, int * size)
 }
 char * bb_serverGetLastError() { return noError; }
 char * bb_serverGetLastMessage() { return noError; }
-int bb_serverDisconnectClient(UINT4 baboNetID) { harness::disconnect(baboNetID); return 0; } // like babonet: reported next update
+int bb_serverDisconnectClient(UINT4) { return 0; } // like babonet (cServer::RemoveClient): no disconnect event follows
 int bb_serverShutdown() { return 0; }
 UINT4 bb_serverGetBytesSent() { return 0; }
 UINT4 bb_serverGetBytesReceived() { return 0; }

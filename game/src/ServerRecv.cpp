@@ -276,7 +276,7 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 					if (++adminFails[slot] >= 5)
 					{
 						console->add(CString("\x4> Too many admin login attempts, disconnecting %s", sender->playerIP), true);
-						bb_serverDisconnectClient(bbnetID);
+						dropSlot(slot, "admin_fails");
 					}
 				}
 			}
