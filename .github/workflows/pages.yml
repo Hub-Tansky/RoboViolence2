@@ -1,11 +1,12 @@
-# The website (website/, ADR 0027): tests on PRs, deploys to GitHub Pages on push to main
+# The website (website/, ADR 0027): tests on PRs, deploys to GitHub Pages from main.
+# build.yml is a trigger because the tests read the release job's asset names from it.
 name: pages
 on:
   push:
     branches: [main]
-    paths: ["website/**", "tests/website/**", ".github/workflows/pages.yml"]
+    paths: ["website/**", "tests/website/**", ".github/workflows/pages.yml", ".github/workflows/build.yml"]
   pull_request:
-    paths: ["website/**", "tests/website/**", ".github/workflows/pages.yml"]
+    paths: ["website/**", "tests/website/**", ".github/workflows/pages.yml", ".github/workflows/build.yml"]
   workflow_dispatch:
 permissions:
   contents: read
@@ -23,7 +24,7 @@ jobs:
       - run: node --test tests/website/site.test.mjs
   deploy:
     needs: test
-    if: github.event_name != 'pull_request'
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     permissions:
       pages: write

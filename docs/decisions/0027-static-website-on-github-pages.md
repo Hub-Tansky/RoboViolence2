@@ -15,6 +15,7 @@
 ## Consequences
 - Pages source must be "GitHub Actions" and the custom domain is set in the repository's Pages settings (no `CNAME` file: Actions deploys ignore it).
 - The API allows 60 unauthenticated requests per hour per visitor IP; beyond that a visitor gets the releases-page fallback.
-- The asset suffixes in `site.js` must follow the release job's file names; `tests/website/site.test.mjs` pins them.
+- The asset suffixes in `site.js` must follow the release job's file names: `tests/website/site.test.mjs` reads them from `build.yml`, and `pages.yml` runs on changes to it.
+- Menu and footer are copied into each page (no build step); the same test fails when they differ.
 - The Discord invite is one constant in `site.js`; the server status block (`#server-status`) is an empty hook for the status feed item.
 - Rejected: a static site generator (a build step for four pages); hosting on the game VPS (couples the site to game server uptime); `releases/latest` links (skip pre-releases).

@@ -22,7 +22,7 @@ Robo Violence 2: unofficial fork of BaboViolent 2, a top-down multiplayer shoote
 | Website | `website/`: static pages for roboviolence.com on GitHub Pages (`pages.yml`, [ADR 0027](docs/decisions/0027-static-website-on-github-pages.md)). |
 | Hosting | Server images from `packaging/docker/Dockerfile` (GHCR on `main`), runbook [docs/ops/runbook.md](docs/ops/runbook.md). |
 | Known defects | [docs/analysis/KEY_QUESTIONS.md](https://github.com/Hub-Tansky/RoboViolence2/blob/fc0aff7c5aa946406c7c110e8e7c2d972a7daeb8/docs/analysis/KEY_QUESTIONS.md). |
-| Decisions | [docs/decisions/README.md](docs/decisions/README.md): 0001 Ninja, 0002 libcurl compiled out, 0003 OpenGL 2.1 kept, 0004 project name (superseded by 0008), 0005 `main/` data root, 0006 platform layer, 0007 data root, pref dir and config layers, 0008 display name "Robo Violence 2", 0009 internal renaming, 0010 BV2 asset compatibility and GUI freeze, 0011 gettext PO translations, 0012 Windows 10 22H2 minimum, 0013 rulesets, 0014 libsodium HMAC, 0015 admin HTTP API, 0016 player data lookup and package content, 0017 playtest pull agent, 0018 staging pull deploy, 0019 in-game name and fork credits, 0020 package and release format, 0021 one-argument CString is text, 0022 advertised server address, 0023 step review subagent in the repo, 0027 static website on GitHub Pages. |
+| Decisions | [docs/decisions/README.md](docs/decisions/README.md): 0001 Ninja, 0002 libcurl compiled out, 0003 OpenGL 2.1 kept, 0004 project name (superseded by 0008), 0005 `main/` data root, 0006 platform layer, 0007 data root, pref dir and config layers, 0008 display name "Robo Violence 2", 0009 internal renaming, 0010 BV2 asset compatibility and GUI freeze, 0011 gettext PO translations, 0012 Windows 10 22H2 minimum, 0013 rulesets, 0014 libsodium HMAC, 0015 admin HTTP API, 0016 player data lookup and package content, 0017 playtest pull agent, 0018 staging pull deploy, 0019 in-game name and fork credits, 0020 package and release format, 0021 one-argument CString is text, 0022 advertised server address, 0023 step review subagent in the repo, 0024 GitHub Project is the backlog, 0025 client autotest mode, 0026 screenshot goldens, 0027 static website on GitHub Pages. |
 
 ### Open items
 
@@ -154,7 +154,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/test_netpacket.cpp` | Byte-level layout of the packed wire structs |
 | `tests/test_staging_deploy.sh` | Phase T step 2: staging deploy helpers: main-only run selection, `/status` player count, failures per commit, infrastructure stages, env-file mode and readonly repository (ctest `staging_deploy`) |
 | `tests/test_playtest_agent.sh` | Phase T step 1: playtest agent helpers: main-only run selection (fork PR from `main` rejected), artifact digest, attempt limit, env-file mode and no export, launch script map swap (ctest `playtest_agent`, Unix with `jq`) |
-| `tests/website/site.test.mjs` | Website download logic: OS detection, newest release incl. pre-releases, installer per OS (`node --test`, `pages.yml`) |
+| `tests/website/site.test.mjs` | Website: installer per OS against the asset names in `build.yml`, OS detection, newest release incl. pre-releases, button offer and fallback, identical menu and footer on every page (`node --test`, `pages.yml`) |
 | `tools/check-content-case.py` | Fails when a literal `main/...` path differs from a real file name only by case |
 | `vcpkg.json` | vcpkg manifest (sqlite3, curl; Step 3 completes it) |
 
@@ -199,7 +199,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `.github/workflows/dependency-graph.yml` | Submits resolved vcpkg ports to the dependency graph on push to `main` |
 | `.github/workflows/osv-vcpkg.yml` | Weekly OSV check of the vcpkg ports by upstream commit (`tools/osv-vcpkg.py`); not required |
 | `.github/workflows/containers.yml` | CI: builds both server images, checks non-root, runs the compose example (healthy, passworded server listed by the master), checks a remote `status` over TLS and `/deployed`, pushes multi-arch `:<sha>` and `:latest` to GHCR from `main` and weekly |
-| `.github/workflows/pages.yml` | Website: `node --test` of `website/site.js` on PRs; deploys `website/` to GitHub Pages on push to `main` (ADR 0027) |
+| `.github/workflows/pages.yml` | Website: `node --test tests/website/` on PRs touching `website/` or `build.yml`; deploys `website/` to GitHub Pages from `main` (ADR 0027) |
 
 ### `config`
 
