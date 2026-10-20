@@ -2,8 +2,8 @@
 """Phase T4: end-to-end scenarios: bv2dedicated with the admin API, plus bv2 autotest clients under Xvfb.
 
 Usage: e2e.py <runtime dir> <scratch dir> <scenario>
-Scenarios: join_leave, password, chat, kick, ban, master_list. Each has one observable: the admin API's
-`GET /status` player count, the server's stdout, or a client's autotest result (ADR 0025). Linux only (Xvfb).
+Scenarios: join_leave, password, chat, kick, ban, master_list, ctf_capture. Each has one observable: the admin API's
+`GET /status` player count or score, the server's stdout, or a client's autotest result (ADR 0025). Linux only (Xvfb).
 """
 import os
 import shutil
@@ -192,6 +192,28 @@ def ban(run):
     check(run.finished(again) == 0, "refused client sees the server disconnect it")
 
 
+def score(run):
+    """`score blue N red M` from GET /status, as (N, M)"""
+    for line in run.admin("GET", "/status").splitlines():
+        if line.startswith("score "):
+            return int(line.split()[2]), int(line.split()[4])
+
+
+def ctf_capture(run):
+    """The server moves the bot: blue team, spawned on the red flag pod, then on its own (CTF-Placeholder pods: blue
+    at 3,8, red at 13,8; tools/gen-placeholder-content.py). Bots can't steer, and the server only checks positions."""
+    run.server()
+    client = run.client("e2e-a", JOIN + ["wait 20"])
+    run.joined("e2e-a")
+    slot = run.command("playerlist").split("]")[0].lstrip("[")
+    run.command("move 0 e2e-a")
+    run.command(f"forceplayerspawn {slot} 13 8")
+    wait(lambda: "took the red flag" in run.server_text(), 10, "e2e-a took the red flag")
+    run.command(f"forceplayerspawn {slot} 3 8")
+    wait(lambda: score(run) == (1, 0), 10, "/status score blue 1 red 0", API_INTERVAL)
+    check(run.finished(client) == 0, "client script passed")
+
+
 def master_list(run):
     run.master()
     masters = "127.0.0.1:10207"
@@ -201,7 +223,7 @@ def master_list(run):
     check(run.finished(client) == 0, "client lists the server: Games found : 1")
 
 
-SCENARIOS = {f.__name__: f for f in (join_leave, password, chat, kick, ban, master_list)}
+SCENARIOS = {f.__name__: f for f in (join_leave, password, chat, kick, ban, master_list, ctf_capture)}
 
 if __name__ == "__main__":
     runtime, scratch, name = sys.argv[1:4]
