@@ -213,12 +213,8 @@ void Scene::kick(CString playerName)
 				{
 					if (textColorLess(server->game->players[i]->name) == textColorLess(playerName))
 					{
-						bb_serverDisconnectClient(server->game->players[i]->babonetID);
 						console->add(CString("\x3> Disconnecting client %s (%s), kicked by server", server->game->players[i]->name.s, server->game->players[i]->playerIP), true);
-						ZEVEN_SAFE_DELETE(server->game->players[i]);
-						net_svcl_player_disconnect playerDisconnect;
-						playerDisconnect.playerID = (char)i;
-						bb_serverSend((char*)&playerDisconnect,sizeof(net_svcl_player_disconnect),NET_SVCL_PLAYER_DISCONNECT,0);
+						server->dropSlot(i, "kick");
 						continue;
 					}
 				}
@@ -236,12 +232,8 @@ void Scene::kick(int ID)
 		{
 			if (server->game->players[ID])
 			{
-				bb_serverDisconnectClient(server->game->players[ID]->babonetID);
 				console->add(CString("\x3> Disconnecting client %s (%s), kicked by server", server->game->players[ID]->name.s, server->game->players[ID]->playerIP), true);
-				ZEVEN_SAFE_DELETE(server->game->players[ID]);
-				net_svcl_player_disconnect playerDisconnect;
-				playerDisconnect.playerID = (char)ID;
-				bb_serverSend((char*)&playerDisconnect,sizeof(net_svcl_player_disconnect),NET_SVCL_PLAYER_DISCONNECT,0);
+				server->dropSlot(ID, "kick");
 			}
 		}
 	}
@@ -281,17 +273,13 @@ void Scene::ban(int ID)
 			if (server->game->players[ID])
 	{
 
-		bb_serverDisconnectClient(server->game->players[ID]->babonetID);
 		server->banList.push_back(std::pair<CString,CString>(server->game->players[ID]->name,server->game->players[ID]->playerIP) );
 		
 		std::ofstream file(bv2::userFile("banlist"), std::ios::app | std::ios::binary);
 		writeBanEntry(file, server->game->players[ID]->name.s, server->game->players[ID]->playerIP);
 
 		console->add(CString("\x3> Disconnecting client %s (%s), banned by server", server->game->players[ID]->name.s, server->game->players[ID]->playerIP), true);
-		ZEVEN_SAFE_DELETE(server->game->players[ID]);
-		net_svcl_player_disconnect playerDisconnect;
-		playerDisconnect.playerID = (char)ID;
-		bb_serverSend((char*)&playerDisconnect,sizeof(net_svcl_player_disconnect),NET_SVCL_PLAYER_DISCONNECT,0);
+		server->dropSlot(ID, "ban");
 	}
 }
 

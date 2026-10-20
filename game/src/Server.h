@@ -152,8 +152,10 @@ public:
 
 	void nukeAll();
 	void nukePlayer(int);
-	// Disconnects a slot's client and frees the slot at once
-	void dropSlot(int i);
+	// Disconnects a slot's client and frees the slot at once; `reason` goes to the netlog
+	void dropSlot(int i, const char * reason);
+	// Drops the slots whose join handshake is still pending after JOIN_TIMEOUT
+	void dropStalledJoins(float delay);
 	// Pour chatter
 	void sayall(CString message);
 #ifndef CONSOLE
