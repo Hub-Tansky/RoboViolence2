@@ -13,6 +13,7 @@
 - `BV2_HEALTH_PORT` (default 3333) tells the image's healthcheck which port to watch; it doesn't change `sv_port`.
 - The compose example runs `server` (CTF) and `tdm` with the same environment (one env file, one `BV2_PUBLIC_ADDRESS`, one admin token) and a volume each.
 - One Caddy site serves both admin APIs: CTF at `/`, TDM at `/tdm/` (prefix stripped).
+- Owner-approved [GUI] exception (2026-10-21), amending [ADR 0019](0019-in-game-name-and-fork-credits.md): the shipped launch scripts' `sv_gameName` say Robo Violence 2 (`Robo Violence 2 CTF Server`, `Robo Violence 2 TDM Server`); other visible names stay as ADR 0009 says.
 - The staging deploy agent waits until every running game server in its `GAME_SERVERS` list reports 0 players and verifies every running one; `up --remove-orphans` keeps the running services equal to the release's, so a release from before TDM has no `tdm` container to check.
 
 ## Consequences
