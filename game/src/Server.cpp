@@ -401,6 +401,7 @@ void Server::updateNet(float delay, bool send)
 			net_svcl_join_challenge challenge;
 			credentials::nonce(joinNonce[playerID]);
 			adminFails[playerID] = 0;
+			joinWait[playerID] = 0.0f;
 			memcpy(challenge.nonce, joinNonce[playerID], sizeof(challenge.nonce));
 			bb_serverSend((char*)&challenge, sizeof(net_svcl_join_challenge), NET_SVCL_JOIN_CHALLENGE, clientID);
 			net_svcl_gameversion gameVersion;
@@ -625,12 +626,7 @@ void Server::update(float delay)
 					const int id = master->BannedAnswers[i].ID; // R4: from the master; the player may have left
 					if( master->BannedAnswers[i].Answer && id >= 0 && id < MAX_PLAYER && game->players[id] )
 					{
-						// kick
-						bb_serverDisconnectClient(game->players[id]->babonetID);
-						ZEVEN_SAFE_DELETE(game->players[id]);
-						net_svcl_player_disconnect playerDisconnect;
-						playerDisconnect.playerID = (char)id;
-						bb_serverSend((char*)&playerDisconnect,sizeof(net_svcl_player_disconnect),NET_SVCL_PLAYER_DISCONNECT,0);
+						dropSlot(id, "master_ban");
 					}
 					master->BannedAnswers[i].ID = -1;
 					master->BannedAnswers[i].Answer = -1;
@@ -648,11 +644,7 @@ void Server::update(float delay)
 				if( game->players[it->second.playerID] &&
 					game->players[it->second.playerID]->babonetID == it->second.babonetID)
 				{
-					bb_serverDisconnectClient(it->second.babonetID);
-					ZEVEN_SAFE_DELETE(game->players[it->second.playerID]);
-					net_svcl_player_disconnect playerDisconnect;
-					playerDisconnect.playerID = (char)it->second.playerID;
-					bb_serverSend((char*)&playerDisconnect,sizeof(net_svcl_player_disconnect),NET_SVCL_PLAYER_DISCONNECT,0);
+					dropSlot(it->second.playerID, "delayed_kick");
 				}
 				itTmp = it;
 				it++;
@@ -930,6 +922,8 @@ void Server::update(float delay)
 			recvPacket(buffer, size, messageID, babonetID);
 		}
 
+		dropStalledJoins(delay);
+
 		int nbPlayers = 0;
 		// On update et send les ping
 		for (int i=0;i<MAX_PLAYER;++i)
@@ -986,15 +980,8 @@ void Server::update(float delay)
 						if (game->players[i]->timePlayedCurGame > EPSILON)
 							cacheStats(game->players[i]);
 						// Connection interrupted (on le disconnect, on est s��e)
-						bb_serverDisconnectClient(game->players[i]->babonetID);
 						console->add("\x3> Disconnecting client, no respond since 3sec", true);
-						if (gameVar.c_netlog)
-							console->add(CString("server> [net] kick slot=%i reason=no_PONG currentPingFrame=%i status=%i",
-								i, game->players[i]->currentPingFrame, (int)game->players[i]->status), true);
-						ZEVEN_SAFE_DELETE(game->players[i]);
-						net_svcl_player_disconnect playerDisconnect;
-						playerDisconnect.playerID = (char)i;
-						bb_serverSend((char*)&playerDisconnect,sizeof(net_svcl_player_disconnect),NET_SVCL_PLAYER_DISCONNECT,0);
+						dropSlot(i, "no_PONG");
 						continue;
 //						connectionInterrupted = true;
 //						game->players[i]->currentCF = game->players[i]->netCF1; // Pour les autres joueurs
@@ -1422,6 +1409,34 @@ void Server::nukeAll()
 			explosion.radius = gameVar.sv_nukeRadius;
 			bb_serverSend((char*)&explosion, sizeof(net_svcl_explosion), NET_SVCL_EXPLOSION, 0);
 			game->radiusHit(game->players[i]->currentCF.position, gameVar.sv_nukeRadius, game->players[i]->playerID, WEAPON_NUCLEAR);
+		}
+	}
+}
+
+// Disconnects slot i and frees it now: bb_serverDisconnectClient raises no disconnect event for it
+void Server::dropSlot(int i, const char * reason)
+{
+	if (gameVar.c_netlog)
+		console->add(CString("server> [net] drop slot=%i reason=%s status=%i", i, reason, (int)game->players[i]->status), true);
+	joined.erase(game->players[i]->babonetID);
+	bb_serverDisconnectClient(game->players[i]->babonetID);
+	ZEVEN_SAFE_DELETE(game->players[i]);
+	net_svcl_player_disconnect playerDisconnect;
+	playerDisconnect.playerID = (char)i;
+	bb_serverSend((char*)&playerDisconnect, sizeof(net_svcl_player_disconnect), NET_SVCL_PLAYER_DISCONNECT, 0);
+}
+
+// A connection that never answers the join handshake (a port scanner) would hold its slot forever: the ping
+// watchdog skips loading players. Only the handshake is timed; a client that passes it and then goes quiet
+// while loading still keeps its slot, since a map download can take long.
+void Server::dropStalledJoins(float delay)
+{
+	for (int i = 0; i < MAX_PLAYER; ++i)
+	{
+		if (game->players[i] && !joined.count(game->players[i]->babonetID) && (joinWait[i] += delay) > JOIN_TIMEOUT)
+		{
+			console->add(CString("\x3> Disconnecting %s, no join handshake after %.0f sec", game->players[i]->playerIP, JOIN_TIMEOUT), true);
+			dropSlot(i, "join_timeout");
 		}
 	}
 }
