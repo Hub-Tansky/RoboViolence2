@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Your own Robo Violence 2 game server</title>
+  <meta name="description" content="Host a Robo Violence 2 game server and master server, from a download or with Docker.">
+  <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="site.js"></script>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <nav>
+      <a class="brand" href="./">Robo Violence 2</a>
+      <a href="./#install">Download</a>
+      <a href="about.html">About</a>
+      <a data-discord href="#">Discord server</a>
+      <a href="server.html" aria-current="page">Your own game server</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <section>
+    <h1>Your own game server</h1>
+    <p>Each download includes the game server (<code>bv2dedicated</code>) and the master server (<code>bv2master</code>) that feeds the in-game server browser. For an always-on host, use the Docker images.</p>
+    <h2>Ports</h2>
+    <p>Open inbound <strong>TCP 3333</strong> (game) and, if you run a master, <strong>TCP 10207</strong>. All game traffic is TCP.</p>
+
+    <h2>Quick start from a download</h2>
+    <p>In the unpacked folder (Linux and macOS shown; on Windows double-click <code>run-server.cmd</code>):</p>
+    <pre><code>./run-server.sh</code></pre>
+    <p>Players join with the console command <code>connect &lt;your address&gt;</code>. The server reads your BaboViolent 2 maps from <code>BV2_DATA_DIR</code> (the folder that contains <code>main/</code>) and sends missing maps to players.</p>
+
+    <h2>Docker</h2>
+    <p>Images for amd64 and arm64: <code>ghcr.io/hub-tansky/roboviolence2-server</code> and <code>ghcr.io/hub-tansky/roboviolence2-master</code>. The compose example runs a master, a game server and a TLS proxy for the admin API:</p>
+    <pre><code>git clone https://github.com/Hub-Tansky/RoboViolence2.git
+cd RoboViolence2
+docker compose -f packaging/docker/compose.example.yml --env-file ~/bv2-secrets.env up -d</code></pre>
+    <p>Keep secrets in that env file, outside the repository:</p>
+    <pre><code># join password, empty for none
+BV2_SV_PASSWORD=
+# admin login and admin API token
+BV2_ADMIN_PASS=
+# master bans, at most 7 characters
+BV2_MASTER_BAN_PASS=
+# your public IPv4, so the server browser lists a reachable address
+BV2_PUBLIC_ADDRESS=</code></pre>
+
+    <p>The <a href="https://github.com/Hub-Tansky/RoboViolence2/blob/main/docs/ops/runbook.md">server runbook</a> covers logs, the server console, upgrades, remote admin over HTTPS, original game data in containers and backups.</p>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="badges">
+      <img alt="GitHub Created At" src="https://img.shields.io/github/created-at/Hub-Tansky/RoboViolence2">
+      <img alt="GitHub Release Date" src="https://img.shields.io/github/release-date-pre/Hub-Tansky/RoboViolence2">
+    </div>
+    <p>Unofficial fork of BaboViolent 2 by bitHeads / RndLabs, not endorsed by them. Code under GPLv3 on <a href="https://github.com/Hub-Tansky/RoboViolence2">GitHub</a>.</p>
+  </div>
+</footer>
+</body>
+</html>
