@@ -132,3 +132,7 @@ MasterServer/Source/src/linuxmaster
 # Local agent entry point (imports AGENTS.md); not committed
 /CLAUDE.md
 /.CLAUDE.md
+
+# Python bytecode caches from running tools/ and tests/ scripts
+__pycache__/
+*.pyc
