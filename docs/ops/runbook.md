@@ -6,12 +6,19 @@ Hosting the game server and the master server as containers (Phase B step 11). I
 
 | Image | Process | Port | Volume |
 |---|---|---|---|
-| `ghcr.io/hub-tansky/roboviolence2-server` | `bv2dedicated CTF` | TCP 3333 | `/var/lib/bv2`: saved config, `bv2.db`, logs, downloaded maps |
+| `ghcr.io/hub-tansky/roboviolence2-server` | `bv2dedicated CTF` (service `server`), `bv2dedicated TDM` (service `tdm`) | TCP 3333 (CTF), 3334 (TDM) | `/var/lib/bv2`: saved config, `bv2.db`, logs, downloaded maps; one volume per server (`server-data`, `tdm-data`) |
 | `ghcr.io/hub-tansky/roboviolence2-master` | `bv2master` | TCP 10207 | `/var/lib/bv2`: `master.db` (bans), `web.db` (game list), seeded on first start |
 
 - CI pushes multi-arch (amd64, arm64) `latest` and the commit SHA from `main`. GHCR packages start private: make them public, or `docker login ghcr.io` with a token that can read packages.
 - Both run as uid 10001. A local build follows the host (amd64 or arm64). The game data in the image is the generated placeholder set; for the original data see below.
 - Build locally instead: `docker compose -f packaging/docker/compose.example.yml build`.
+
+## Game servers
+
+The compose example runs two game servers from the same image and the same env file: `server` (CTF, `content/LaunchScript/CTF.cfg`) and `tdm` (TDM, `content/LaunchScript/TDM.cfg`). They differ only in the launch script, the port and the volume. Both register with the master; with `BV2_PUBLIC_ADDRESS` set, the master lists both under that address, told apart by port.
+
+- Another mode or a second server of one mode: copy the `tdm` service (it builds on the `x-game-server` anchor), give it its own launch script (with its own `sv_port`), port, volume and `BV2_HEALTH_PORT`, add a `handle_path` route for its admin API to the Caddyfile and an entry to `GAME_SERVERS` in `tools/staging/deploy.sh`.
+- `BV2_HEALTH_PORT` (default 3333) only tells the image's healthcheck which port to watch: set it to the launch script's `sv_port`, or the container stays unhealthy.
 
 ## Secrets
 
@@ -37,23 +44,23 @@ From the repository root (or the folder holding the compose file):
 |---|---|
 | Start | `docker compose -f packaging/docker/compose.example.yml --env-file ~/bv2-secrets.env up -d` |
 | Status, health | `docker compose -f packaging/docker/compose.example.yml ps` |
-| Logs | `docker compose -f packaging/docker/compose.example.yml logs -f server` |
-| Server console | `docker attach roboviolence2-server-1`; detach with Ctrl-P Ctrl-Q; `quit` stops the server |
+| Logs | `docker compose -f packaging/docker/compose.example.yml logs -f server` (CTF) or `... logs -f tdm` |
+| Server console | `docker attach roboviolence2-server-1` (CTF) or `roboviolence2-tdm-1`; detach with Ctrl-P Ctrl-Q; `quit` stops the server |
 | Stop | `docker compose -f packaging/docker/compose.example.yml stop` (`init: true` forwards the signal) |
 | Upgrade | `docker compose -f packaging/docker/compose.example.yml pull`, then Start again |
 | One commit | `BV2_IMAGE_TAG=<sha>` before any command above pins both images to that `main` commit (multi-arch); default `latest` |
 | Deployed commit | `curl -k https://localhost:8443/deployed`: `srv/deployed` beside the compose file, written by the staging deploy agent ([tools/staging/](../../tools/staging/README.md)); 404 otherwise |
 
-- A client connects with `connect <host> 3333 <password>`. The server browser needs the client's `BV2_MASTER_SERVERS=<host>:10207`.
+- A client connects with `connect <host> 3333 <password>` (CTF) or `connect <host> 3334 <password>` (TDM). The server browser needs the client's `BV2_MASTER_SERVERS=<host>:10207`.
 - Upgrades across a protocol version (`GAME_VERSION_SV/CL`) need new clients too. Master and game servers share the master protocol, which has no version: upgrade them together.
 
 ## Ports
 
-Open inbound TCP 3333 (game) and TCP 10207 (master) on the host firewall; TCP `BV2_ADMIN_PORT` only for remote admins (8443; 443 for a public name). All game traffic is TCP. Never publish the admin API port (8080).
+Open inbound TCP 3333 (CTF), TCP 3334 (TDM) and TCP 10207 (master) on the host firewall; TCP `BV2_ADMIN_PORT` only for remote admins (8443; 443 for a public name). All game traffic is TCP. Never publish the admin API port (8080).
 
 ## Remote admin
 
-The game server's admin API ([ADR 0015](../decisions/0015-admin-http-api-behind-tls-proxy.md)) is reachable only through the `admin-proxy` service (Caddy), which terminates TLS on `BV2_ADMIN_PORT` (default 8443).
+Each game server's admin API ([ADR 0015](../decisions/0015-admin-http-api-behind-tls-proxy.md)) is reachable only through the `admin-proxy` service (Caddy), which terminates TLS on `BV2_ADMIN_PORT` (default 8443). CTF answers at `/`, TDM at `/tdm/` (`/tdm/status`, `/tdm/command`); both take the same token.
 
 - Token: the admin password, `BV2_ADMIN_PASS` in the env file. Empty refuses every request.
 - Certificate: for `localhost`, Caddy's own CA (`curl -k`, or trust the root in the `caddy-data` volume). For a public name, set `BV2_ADMIN_HOST` and `BV2_ADMIN_PORT=443` in the env file; Caddy fetches a certificate (TLS-ALPN challenge on 443).
@@ -62,7 +69,8 @@ The game server's admin API ([ADR 0015](../decisions/0015-admin-http-api-behind-
 |---|---|
 | Status | `curl -k -H "Authorization: Bearer $BV2_ADMIN_PASS" https://localhost:8443/status` |
 | A console command | `curl -k -H "Authorization: Bearer $BV2_ADMIN_PASS" --data 'kick Tester' https://localhost:8443/command` |
-| Audit log | `docker compose -f packaging/docker/compose.example.yml exec server tail /var/lib/bv2/admin-audit.log` |
+| TDM status | `curl -k -H "Authorization: Bearer $BV2_ADMIN_PASS" https://localhost:8443/tdm/status` |
+| Audit log | `docker compose -f packaging/docker/compose.example.yml exec server tail /var/lib/bv2/admin-audit.log` (`exec tdm` for TDM) |
 
 - The reply to a command is the console lines it printed. `restart`, `disconnect`, `host` and `connect` are refused (they rebuild the server). Each source may send 5 requests at once, then 1 a second (429 beyond).
 - `admin-audit.log` (in the server volume): one line per request (also refused, limited, too large and timed-out ones) with UTC time, source, result and command; secrets are masked. A command is logged before it runs.
@@ -71,7 +79,7 @@ The game server's admin API ([ADR 0015](../decisions/0015-admin-http-api-behind-
 
 ## Master address
 
-The master lists each game server at the address its connection comes from. In compose that is the container's internal address: set `BV2_PUBLIC_ADDRESS` so remote clients can join from the browser ([ADR 0022](../decisions/0022-advertised-server-address.md)).
+The master lists each game server at the address its connection comes from. In compose that is the container's internal address: set `BV2_PUBLIC_ADDRESS` so remote clients can join from the browser. Both servers take it from the same env file ([ADR 0022](../decisions/0022-advertised-server-address.md)).
 
 ## Original game data
 
@@ -85,7 +93,7 @@ Keep your own copy outside the repository. Mount the folder that holds its `main
 
 ## Backups
 
-The volumes hold all state: back up `master-data` (bans) and `server-data` (config, `bv2.db`). For example:
+The volumes hold all state: back up `master-data` (bans), `server-data` and `tdm-data` (config, `bv2.db`). For example:
 
 ```
 docker run --rm -v roboviolence2_master-data:/data -v "$PWD":/backup ubuntu:24.04 tar -czf /backup/master-data.tgz -C /data .
