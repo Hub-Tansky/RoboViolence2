@@ -167,9 +167,10 @@ jobs:
           apt-get update
           apt-get install -y --no-install-recommends ./roboviolence2-linux-x64.deb
           if ldd /usr/games/bv2 /usr/games/bv2dedicated | grep "not found"; then exit 1; fi
+          # Only copyright from /usr/share/doc: the Docker images tell dpkg to skip the rest (ctest make_deb checks it)
           ls /usr/lib/x86_64-linux-gnu/libGL.so.1 /usr/share/bv2/main/LaunchScript/CTF.cfg \
             /usr/share/applications/roboviolence2.desktop /usr/share/icons/hicolor/128x128/apps/roboviolence2.png \
-            /usr/share/doc/roboviolence2/copyright /usr/share/doc/roboviolence2/licenses/glad.txt > /dev/null
+            /usr/share/doc/roboviolence2/copyright > /dev/null
           useradd -m player
           printf 'quit\n' | runuser -u player -- /usr/games/bv2dedicated CTF > server.log 2>&1
           grep "Server Created on port 3333" server.log
