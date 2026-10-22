@@ -709,7 +709,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tools/playtest/com.roboviolence2.playtest.plist` | LaunchAgent template for the playtest agent (every 30 min, script in `~/Dev/RoboViolence2/tools/automatic_tests/`) |
 | `tools/staging/cloud-init.yml` | Staging host bootstrap (cloud-init, Ubuntu 24.04): Docker, `deploy.sh`, `rv2-staging-setup` for the env file, cron and first deploy |
 | `tools/staging/README.md` | Staging deploy agent: host needs, install, env file, cron, commands, files |
-| `tools/staging/deploy.sh` | Staging deploy agent (Linux, cron): newest successful main `containers` build, pinned to its commit, deployed only with no players on CTF and TDM, rollback, `/deployed` (ADR 0018) |
+| `tools/staging/deploy.sh` | Staging deploy agent (Linux, cron; production runs it by hand with `RV2_DEPLOY_LABEL=prod`): newest successful main `containers` build, pinned to its commit, deployed only with no players on CTF and TDM, rollback, `/deployed` (ADR 0018) |
 | `tools/review.sh` | Review gate (REVIEW.md section 1): all checks, scope against the PR's Allowed paths, anti-gaming, review gate on the PR's review record; `--full` builds and tests |
 | `tools/setup-dev.ps1` | Activates hooks, checks tools (Windows) |
 | `tools/setup-dev.sh` | Activates hooks, checks tools (Unix); prints the apt line for building and the package names for running a package |

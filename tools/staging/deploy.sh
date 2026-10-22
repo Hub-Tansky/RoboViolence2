@@ -1,8 +1,10 @@
 #!/bin/bash
 # Staging deploy agent: runs the newest main server and master images on this host, never during a game (ADR 0018).
+# Also production, by hand with RV2_DEPLOY_LABEL=prod and no cron (docs/ops/runbook.md#production): a change here changes prod.
 # Decision: docs/decisions/0018-staging-pull-deploy.md. Setup: tools/staging/README.md.
 # Usage: deploy.sh               the newest main build whose `containers` run passed, once no one is playing (cron runs this)
 #        deploy.sh --sha <sha>   that main build (also a manual rollback), once no one is playing
+#        While anyone plays, a run deploys nothing and exits 0 (log line "waits"); the next run retries
 #        deploy.sh --force       don't wait for an empty server
 set -u
 
@@ -11,9 +13,10 @@ readonly REPO=Hub-Tansky/RoboViolence2
 readonly IMAGES="ghcr.io/hub-tansky/roboviolence2-server ghcr.io/hub-tansky/roboviolence2-master"
 readonly PROJECT=roboviolence2 # `name:` in compose.example.yml
 readonly GAME_SERVERS="server: tdm:/tdm" # <compose service>:<admin API path prefix on the proxy> (ADR 0027)
-readonly ROOT=${RV2_STAGING_ROOT:-/var/lib/rv2-staging}
-readonly ENV_FILE=${RV2_STAGING_ENV:-/etc/rv2-staging.env}
-readonly LABEL=${RV2_DEPLOY_LABEL:-staging} # names the host in notifications; production sets prod (docs/ops/runbook.md)
+# The label names the host in notifications and its state and env file paths; production sets prod (docs/ops/runbook.md)
+readonly LABEL=${RV2_DEPLOY_LABEL:-staging}
+readonly ROOT=${RV2_STAGING_ROOT:-/var/lib/rv2-$LABEL}
+readonly ENV_FILE=${RV2_STAGING_ENV:-/etc/rv2-$LABEL.env}
 readonly MAX_ATTEMPTS=3 WAIT_NOTIFY_SECONDS=21600 KEEP=5
 # Failures in these stages say nothing about the build: they notify once and don't use up an attempt.
 # wait-empty fails only when the server runs but /status doesn't answer: never deploy over a game we can't see.
