@@ -179,7 +179,7 @@ finish() {
 	[ -n "$LOCKED" ] && rm -f "$ROOT/lock"
 }
 
-usage() { sed -n '4,6p' "$0" >&2; exit 2; }
+usage() { sed -n '/^# Usage:/,/--force/p' "$0" >&2; exit 2; }
 
 while [ $# -gt 0 ]; do
 	case "$1" in
