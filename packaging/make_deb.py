@@ -1,0 +1,121 @@
+"""Builds the Linux .deb from make-package.py's stage folder (ADR 0031). Needs dpkg-deb and dpkg-shlibdeps (dpkg-dev).
+
+The client and bv2dedicated go to /usr/games, the package's main/ to /usr/share/bv2 (the game looks in
+<exe>/../share/bv2, game/src/Paths.cpp), plus the .desktop file, the hicolor icons and the licences in
+/usr/share/doc/roboviolence2. bv2master stays in the .tar.gz: it keeps master.db and web.db in its working directory.
+"""
+import email.utils
+import gzip
+import shutil
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+
+PACKAGING = Path(__file__).resolve().parent
+PACKAGE = "roboviolence2"
+MAINTAINER = "Robo Violence 2 contributors <337104978+Hub-Tansky@users.noreply.github.com>"
+REPO = "https://github.com/Hub-Tansky/RoboViolence2"
+BINARIES = ("bv2", "bv2dedicated")
+
+CONTROL = """\
+Package: {package}
+Version: {version}
+Architecture: amd64
+Maintainer: {maintainer}
+Installed-Size: {size_kib}
+Depends: {depends}
+Section: games
+Priority: optional
+Homepage: https://roboviolence.com
+Description: free top-down multiplayer arena shooter
+ Robo Violence 2 is an unofficial revival of BaboViolent 2. This package holds
+ the game client (bv2) and the dedicated server (bv2dedicated). Without the
+ original BaboViolent 2 data it plays with placeholder art.
+"""
+
+COPYRIGHT = f"""\
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: Robo Violence 2
+Source: {REPO}
+
+Files: *
+Copyright: 2012 bitHeads inc.
+           Robo Violence 2 contributors
+License: GPL-3+
+ On Debian systems the full text of the GNU General Public License version 3
+ is in /usr/share/common-licenses/GPL-3. The libraries built into the binaries
+ come with their own licences in /usr/share/doc/{PACKAGE}/licenses/.
+"""
+
+CHANGELOG = """\
+{package} ({version}) unstable; urgency=medium
+
+  * {tag}: {repo}/releases
+
+ -- {maintainer}  {date}
+"""
+
+
+def deb_version(version):
+    """v0.0.2 -> 0.0.2; a '-' suffix becomes '~' so v0.1.0-rc1 sorts before v0.1.0 (0.0.0-dev -> 0.0.0~dev)"""
+    v = version.removeprefix("v").replace("-", "~")
+    if not v[:1].isdigit():
+        sys.exit(f"version {version!r} must start with a digit after the v")
+    return v
+
+
+def depends(binaries):
+    """The packages of the shared libraries the binaries need, with minimum versions (dpkg-shlibdeps)"""
+    with tempfile.TemporaryDirectory() as tmp:
+        (Path(tmp) / "debian").mkdir()  # dpkg-shlibdeps insists on a source package around the binaries
+        (Path(tmp) / "debian" / "control").write_text(f"Source: {PACKAGE}\n\nPackage: {PACKAGE}\nArchitecture: any\n")
+        r = subprocess.run(["dpkg-shlibdeps", "-O", *(f"-e{b.resolve()}" for b in binaries)], cwd=tmp,
+                           capture_output=True, text=True)
+    if r.returncode != 0:
+        sys.exit(f"dpkg-shlibdeps failed:\n{r.stderr}")
+    # SDL loads libGL.so.1 at run time (glad, no link), so dpkg-shlibdeps can't see it
+    return r.stdout.strip().removeprefix("shlibs:Depends=") + ", libgl1"
+
+
+def desktop_entry():
+    """packaging/linux/roboviolence2.desktop with Exec naming /usr/games/bv2: a launcher can't count on /usr/games
+    being in its PATH"""
+    text = (PACKAGING / "linux" / "roboviolence2.desktop").read_text()
+    if "\nExec=bv2\n" not in text:
+        sys.exit("roboviolence2.desktop: expected the line Exec=bv2")
+    return text.replace("\nExec=bv2\n", "\nExec=/usr/games/bv2\n")
+
+
+def build_deb(stage, deb, version):
+    root = stage.parent / (stage.name + "-deb")
+    shutil.rmtree(root, ignore_errors=True)
+    usr = root / "usr"
+    games = usr / "games"
+    games.mkdir(parents=True)
+    binaries = [games / b for b in BINARIES]
+    for b in binaries:
+        # Release builds carry no debug info, only symbol tables; the .tar.gz keeps them
+        subprocess.run(["strip", "--strip-unneeded", "-o", b, stage / b.name], check=True)
+    shutil.copytree(stage / "main", usr / "share" / "bv2" / "main")
+    (usr / "share" / "applications").mkdir()
+    (usr / "share" / "applications" / f"{PACKAGE}.desktop").write_text(desktop_entry())
+    shutil.copytree(PACKAGING / "icons" / "hicolor", usr / "share" / "icons" / "hicolor")
+    doc = usr / "share" / "doc" / PACKAGE
+    shutil.copytree(stage / "licenses", doc / "licenses")
+    (doc / "copyright").write_text(COPYRIGHT)
+    v = deb_version(version)
+    changelog = CHANGELOG.format(package=PACKAGE, version=v, repo=REPO, tag=version, maintainer=MAINTAINER,
+                                 date=email.utils.formatdate())
+    (doc / "changelog.gz").write_bytes(gzip.compress(changelog.encode(), compresslevel=9, mtime=0))
+    # dpkg records modes as they are on disk: the umask of whoever built main/ must not leak into the package
+    for p in root.rglob("*"):
+        p.chmod(0o755 if p.is_dir() or p in binaries else 0o644)
+    root.chmod(0o755)
+    size_kib = sum(p.stat().st_size for p in root.rglob("*") if p.is_file()) // 1024 + 1
+    (root / "DEBIAN").mkdir()
+    (root / "DEBIAN" / "control").write_text(CONTROL.format(
+        package=PACKAGE, version=v, maintainer=MAINTAINER, size_kib=size_kib, depends=depends(binaries)))
+    subprocess.run(["dpkg-deb", "--root-owner-group", "-Zxz", "--build", root, deb], check=True)
+    shutil.rmtree(root)
+    return deb

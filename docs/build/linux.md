@@ -26,7 +26,17 @@ this should show a list of `.bvm` map files (if you pointed it at `main/` itself
 
 ## Use a downloaded package of Robo Violence 2
 
-Releases ([GitHub](https://github.com/Hub-Tansky/RoboViolence2/releases)) carry `roboviolence2-linux-x64.tar.gz` and the source tarball; Flatpak comes later (PNS-52).
+Releases ([GitHub](https://github.com/Hub-Tansky/RoboViolence2/releases)) carry `roboviolence2-linux-x64.deb`, `roboviolence2-linux-x64.tar.gz` and the source tarball; Flatpak comes later (PNS-52). Both need glibc 2.39 or newer: Ubuntu 24.04, Linux Mint 22, Debian 13 or later.
+
+### The .deb (Ubuntu, Mint, Debian)
+
+```bash
+sudo apt install ./roboviolence2-linux-x64.deb
+```
+
+apt installs the libraries it needs. Start **Robo Violence 2** from the applications menu, or run `bv2` (`bv2dedicated CTF` for a server). Settings, logs and saved maps go to `~/.local/share/BaboViolent2/bv2/`. To upgrade, run the same command with the newer file; `sudo apt remove roboviolence2` uninstalls. The `.deb` holds the client and `bv2dedicated`; for the master server use the `.tar.gz` ([ADR 0031](../decisions/0031-linux-deb-package.md)).
+
+### The .tar.gz (any distribution)
 
 1. Install the runtime libraries: the client and `bv2dedicated` link GL and GLU; `bv2master` needs nothing extra. On Ubuntu 24.04:
 

@@ -62,3 +62,4 @@ What we do, in one or two sentences.
 | [0028](0028-built-in-public-master.md) | The client and server ship with the public master built in | Accepted |
 | [0029](0029-static-website-on-github-pages.md) | The website is static HTML on GitHub Pages; downloads come from the GitHub releases API | Accepted |
 | [0030](0030-app-icon-and-dmg-layout.md) | One committed application icon for every OS; the .dmg shows only the app and Applications | Accepted |
+| [0031](0031-linux-deb-package.md) | A .deb with the client and bv2dedicated beside the Linux .tar.gz | Accepted |

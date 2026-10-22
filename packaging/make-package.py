@@ -10,8 +10,8 @@ The macOS bundle gets a real Contents/Resources/main instead of the build's syml
 licences, then an ad-hoc signature; the servers read the folder's own main/ (docs/build/macos.md).
 Also writes roboviolence2-<preset>-setup.exe on Windows (Inno Setup, packaging/windows/roboviolence2.iss) and
 roboviolence2-<preset>.dmg on macOS: only "Robo Violence 2.app" and an Applications link, laid out over
-packaging/macos/dmg-background.png (dmgbuild, ADR 0030). <version> (e.g. a v1.2.0 tag or 0.0.0-dev) goes into the
-installer.
+packaging/macos/dmg-background.png (dmgbuild, ADR 0030), and roboviolence2-<preset>.deb on Linux (dpkg-deb, ADR 0031).
+<version> (e.g. a v1.2.0 tag or 0.0.0-dev) goes into the installer and the .deb.
 Fails if the build is not Release, or if anything the package must hold is missing.
 """
 import json
@@ -104,7 +104,9 @@ def ship_windows(stage, out, name, version):
 
 
 def ship_linux(stage, out, name, version):
-    return [shutil.make_archive(str(out / name), "gztar", out, name)]  # keeps file modes
+    archive = shutil.make_archive(str(out / name), "gztar", out, name)  # keeps file modes
+    from make_deb import build_deb  # dpkg-dev, Linux packaging only
+    return [archive, build_deb(stage, out / (name + ".deb"), version)]
 
 
 class Platform(NamedTuple):
