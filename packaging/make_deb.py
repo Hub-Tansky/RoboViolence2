@@ -1,11 +1,13 @@
-"""Builds the Linux .deb from make-package.py's stage folder (ADR 0031). Needs dpkg-deb and dpkg-shlibdeps (dpkg-dev).
+"""Builds the Linux .deb from a Release build's `cmake --install` (ADR 0031). Needs dpkg-deb and dpkg-shlibdeps (dpkg-dev).
 
-The client and bv2dedicated go to /usr/games, the package's main/ to /usr/share/bv2 (the game looks in
-<exe>/../share/bv2, game/src/Paths.cpp), plus the .desktop file, the hicolor icons and the licences in
-/usr/share/doc/roboviolence2. bv2master stays in the .tar.gz: it keeps master.db and web.db in its working directory.
+The install rules (CMakeLists.txt) define the layout: binaries, share/bv2/main (the game looks in <exe>/../share/bv2,
+game/src/Paths.cpp), the .desktop file and the hicolor icons. The .deb moves the client and bv2dedicated to /usr/games
+and adds the licences, copyright and changelog in /usr/share/doc/roboviolence2. bv2master (install component master)
+stays in the .tar.gz: it keeps master.db and web.db in its working directory.
 """
 import email.utils
 import gzip
+import os
 import shutil
 import subprocess
 import sys
@@ -78,31 +80,27 @@ def depends(binaries):
     return r.stdout.strip().removeprefix("shlibs:Depends=") + ", libgl1"
 
 
-def desktop_entry():
-    """packaging/linux/roboviolence2.desktop with Exec naming /usr/games/bv2: a launcher can't count on /usr/games
-    being in its PATH"""
-    text = (PACKAGING / "linux" / "roboviolence2.desktop").read_text()
+def point_launcher_at_games(desktop):
+    """Exec=bv2 becomes Exec=/usr/games/bv2: a launcher can't count on /usr/games being in its PATH"""
+    text = desktop.read_text()
     if "\nExec=bv2\n" not in text:
-        sys.exit("roboviolence2.desktop: expected the line Exec=bv2")
-    return text.replace("\nExec=bv2\n", "\nExec=/usr/games/bv2\n")
+        sys.exit(f"{desktop.name}: expected the line Exec=bv2")
+    desktop.write_text(text.replace("\nExec=bv2\n", "\nExec=/usr/games/bv2\n"))
 
 
-def build_deb(stage, deb, version):
-    root = stage.parent / (stage.name + "-deb")
+def build_deb(build, licences, deb, version):
+    """deb from `cmake --install <build>`, licences (a folder of <library>.txt) in the doc folder"""
+    root = deb.parent / (deb.stem + "-root")
     shutil.rmtree(root, ignore_errors=True)
+    for component in ("Unspecified", "icons"):  # everything but the master
+        subprocess.run(["cmake", "--install", build, "--prefix", "/usr", "--component", component, "--strip"],
+                       env={**os.environ, "DESTDIR": str(root)}, check=True, stdout=subprocess.DEVNULL)
     usr = root / "usr"
-    games = usr / "games"
-    games.mkdir(parents=True)
-    binaries = [games / b for b in BINARIES]
-    for b in binaries:
-        # Release builds carry no debug info, only symbol tables; the .tar.gz keeps them
-        subprocess.run(["strip", "--strip-unneeded", "-o", b, stage / b.name], check=True)
-    shutil.copytree(stage / "main", usr / "share" / "bv2" / "main")
-    (usr / "share" / "applications").mkdir()
-    (usr / "share" / "applications" / f"{PACKAGE}.desktop").write_text(desktop_entry())
-    shutil.copytree(PACKAGING / "icons" / "hicolor", usr / "share" / "icons" / "hicolor")
+    (usr / "bin").rename(usr / "games")  # Debian policy: games in /usr/games; the game finds ../share/bv2 from either
+    binaries = [usr / "games" / b for b in BINARIES]
+    point_launcher_at_games(usr / "share" / "applications" / f"{PACKAGE}.desktop")
     doc = usr / "share" / "doc" / PACKAGE
-    shutil.copytree(stage / "licenses", doc / "licenses")
+    shutil.copytree(licences, doc / "licenses")
     (doc / "copyright").write_text(COPYRIGHT)
     v = deb_version(version)
     changelog = CHANGELOG.format(package=PACKAGE, version=v, repo=REPO, tag=version, maintainer=MAINTAINER,

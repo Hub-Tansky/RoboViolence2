@@ -153,16 +153,22 @@ if(BV2_BUILD_TESTS)
   add_subdirectory(tests)
 endif()
 
-# Install layout (FHS; the game looks for <prefix>/share/bv2/main next to <prefix>/bin). On macOS the bundle
-# holds the content in Contents/Resources instead (packaging is a later phase).
+# Install layout (FHS; the game looks for <prefix>/share/bv2/main next to <prefix>/bin): the binaries and the data root
+# as the build's runtime/main holds it (content/ entries, bv2.example.cfg, generated placeholders). On macOS the bundle
+# holds the content in Contents/Resources instead. The Linux .deb is this install (packaging/make_deb.py, ADR 0031):
+# the default component and icons, without the master (component master).
 include(GNUInstallDirs)
-foreach(tgt bv2 bv2dedicated bv2master)
+foreach(tgt bv2 bv2dedicated)
   if(TARGET ${tgt})
     install(TARGETS ${tgt} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} BUNDLE DESTINATION .)
   endif()
 endforeach()
-install(DIRECTORY content/ DESTINATION ${CMAKE_INSTALL_DATADIR}/bv2/main)
-install(FILES config/bv2.example.cfg DESTINATION ${CMAKE_INSTALL_DATADIR}/bv2/main)
+if(TARGET bv2master)
+  install(TARGETS bv2master RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT master)
+endif()
+# runtime/main links content/'s entries, which install(DIRECTORY) would copy as links: those come from content/
+install(DIRECTORY "${BV2_DATA_DIR}/" DESTINATION ${CMAKE_INSTALL_DATADIR}/bv2/main PATTERN languages EXCLUDE PATTERN LaunchScript EXCLUDE)
+install(DIRECTORY content/languages content/LaunchScript DESTINATION ${CMAKE_INSTALL_DATADIR}/bv2/main)
 if(UNIX AND NOT APPLE)
   install(FILES packaging/linux/roboviolence2.desktop DESTINATION ${CMAKE_INSTALL_DATADIR}/applications)
   install(DIRECTORY packaging/icons/hicolor DESTINATION ${CMAKE_INSTALL_DATADIR}/icons COMPONENT icons)

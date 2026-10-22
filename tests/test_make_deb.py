@@ -1,9 +1,11 @@
 """packaging/make_deb.py builds a .deb that apt can install: FHS layout, modes, version mapping, Depends (ADR 0031).
 
-Builds the package from a stand-in stage (/bin/true as both binaries) in a scratch folder and reads it back with
-dpkg-deb. Linux with dpkg-dev only. Usage: test_make_deb.py <scratch dir>
+Builds the package from this build's `cmake --install` in a scratch folder and reads it back with dpkg-deb; its
+share/bv2/main must hold exactly what runtime/main holds, so the install rules and the packages can't drift apart.
+Linux client builds with dpkg-dev only. Usage: test_make_deb.py <build dir> <scratch dir>
 """
 import importlib.util
+import os
 import pathlib
 import shutil
 import subprocess
@@ -36,16 +38,11 @@ except SystemExit:
 older = subprocess.run(["dpkg", "--compare-versions", make_deb.deb_version("v0.1.0-rc1"), "lt", make_deb.deb_version("v0.1.0")])
 check(older.returncode == 0, "0.1.0~rc1 does not sort before 0.1.0")
 
-scratch = pathlib.Path(sys.argv[1]) / "make_deb"
+build, scratch = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2]) / "make_deb"
 shutil.rmtree(scratch, ignore_errors=True)
-stage = scratch / "roboviolence2-linux-x64"
-(stage / "main" / "LaunchScript").mkdir(parents=True)
-(stage / "main" / "LaunchScript" / "CTF.cfg").write_text("// stand-in\n")
-(stage / "licenses").mkdir()
-(stage / "licenses" / "glad.txt").write_text("stand-in\n")
-for b in ("bv2", "bv2dedicated", "bv2master"):
-    shutil.copy2("/bin/true", stage / b)
-deb = make_deb.build_deb(stage, scratch / "test.deb", "v0.1.0-rc1")
+(scratch / "licenses").mkdir(parents=True)
+(scratch / "licenses" / "glad.txt").write_text("stand-in\n")
+deb = make_deb.build_deb(build, scratch / "licenses", scratch / "test.deb", "v0.1.0-rc1")
 
 entries = {}
 for line in dpkg_deb("-c", deb).splitlines():  # "-rwxr-xr-x root/root 1234 2026-10-22 12:00 ./usr/games/bv2"
@@ -61,6 +58,12 @@ for path, mode in (("/usr/games/bv2", "-rwxr-xr-x"), ("/usr/games/bv2dedicated",
     check(entries.get(path, ("missing",))[0] == mode, f"{path}: {entries.get(path, ('missing',))[0]}, expected {mode}")
 check(all(owner == "root/root" for _, owner in entries.values()), "files not owned by root/root")
 check(not any("bv2master" in p for p in entries), "bv2master is in the .deb (it belongs to the .tar.gz)")
+runtime_main = build / "runtime" / "main"
+expected = {"/usr/share/bv2/main/" + (pathlib.Path(d) / f).relative_to(runtime_main).as_posix()
+            for d, _, files in os.walk(runtime_main, followlinks=True) for f in files}  # through the links to content/
+installed = {p for p, (mode, _) in entries.items() if p.startswith("/usr/share/bv2/main/") and not mode.startswith("d")}
+check(installed == expected, f"share/bv2/main differs from runtime/main: missing {sorted(expected - installed)}, "
+                             f"extra {sorted(installed - expected)}")
 
 check(dpkg_deb("-f", deb, "Package").strip() == "roboviolence2", "Package is not roboviolence2")
 check(dpkg_deb("-f", deb, "Version").strip() == "0.1.0~rc1", "Version is not 0.1.0~rc1")

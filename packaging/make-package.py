@@ -47,7 +47,7 @@ def client_binary(runtime, stage, exe):
     return "bv2" + exe
 
 
-def ship_macos(stage, out, name, version):
+def ship_macos(runtime, stage, out, name, version):
     from dmgbuild import build_dmg  # pip, macOS packaging only (build.yml installs it)
 
     archive, dmg = out / (name + ".zip"), out / (name + ".dmg")
@@ -98,16 +98,16 @@ def check_dmg(dmg):
             run("hdiutil", "detach", "-quiet", mount)
 
 
-def ship_windows(stage, out, name, version):
+def ship_windows(runtime, stage, out, name, version):
     archive = shutil.make_archive(str(out / name), "zip", out, name)
     run(ISCC, "/Q", f"/DSourceDir={stage.resolve()}", f"/DOutputDir={out.resolve()}", f"/DOutputName={name}-setup",
         f"/DAppVersion={version.removeprefix('v')}", PACKAGING / "windows" / "roboviolence2.iss")
     return [archive, out / (name + "-setup.exe")]
 
 
-def ship_linux(stage, out, name, version):
+def ship_linux(runtime, stage, out, name, version):
     archive = shutil.make_archive(str(out / name), "gztar", out, name)  # keeps file modes
-    return [archive, build_deb(stage, out / (name + ".deb"), version)]
+    return [archive, build_deb(runtime.parent, stage / "licenses", out / (name + ".deb"), version)]
 
 
 class Platform(NamedTuple):
@@ -167,7 +167,7 @@ def main():
     if missing:
         sys.exit(f"package {name} is missing: {', '.join(missing)}")
 
-    written = platform.ship(stage, out, name, version)
+    written = platform.ship(runtime, stage, out, name, version)
     shutil.rmtree(stage)
     for f in written:
         print(f)
