@@ -8,7 +8,7 @@ Engine utilities behind small C APIs with a `dk` prefix.
 | `dksvar`, `CSystemVariable` | config variable registry (`sv_*`, `cl_*`), `set` command | `zeven_core` |
 | `CString`, `CVector`, `CMatrix` | string and math types shared by the whole project | `zeven_core` |
 | `dkt_console.cpp` | no-op `dkt` for the headless server | `zeven_console` |
-| `dkw` | SDL3 window, GL 2.1 compatibility context host, event pump | `zeven_client` |
+| `dkw` | SDL3 window, GL 2.1 compatibility context host, event pump, window icon | `zeven_client` |
 | `dki` | keyboard (`DIK_*` IDs, `dikeys.h`), mouse and gamepad state | `zeven_client` |
 | `dkgl`, `dkt`, `dkf`/`CFont`, `dkp`/`CParticle` | GL state, textures, fonts, particles | `zeven_client` |
 | `dks` | miniaudio effects and music | `zeven_client` |

@@ -65,7 +65,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/Paths.cpp` | Package and data roots (`contentFile` for the package's own content), saved and detected BV2 data folder, per-user pref dir, layered config loading (release settings like the master list skip `bv2.cfg`, ADR 0028), map and DB path helpers (ADR 0016) |
 | `game/src/Paths.h` | Interface of `Paths.cpp` (namespace `bv2`) |
 | `packaging/linux/roboviolence2.desktop` | Linux desktop entry |
-| `packaging/make-package.py` | Builds the per-OS package from a Release `runtime/` (links resolved, macOS bundle re-signed, licences), plus the Windows installer or macOS `.dmg` (ADR 0020) |
+| `packaging/make-package.py` | Builds the per-OS package from a Release `runtime/` (links resolved, macOS bundle re-signed, licences), plus the Windows installer or macOS `.dmg` with only the app and Applications (ADR 0020, 0030) |
 | `packaging/windows/roboviolence2.iss` | Inno Setup script for the Windows installer (per-user, unsigned) |
 | `packaging/scripts/run-client.cmd` | Package script: starts the client (Windows) |
 | `packaging/scripts/run-client.sh` | Package script: starts the client (macOS bundle or Linux binary) |
@@ -73,14 +73,28 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `packaging/scripts/run-master.sh` | Package script: starts the master server (Unix) |
 | `packaging/scripts/run-server.cmd` | Package script: starts the dedicated server, default launch script CTF (Windows) |
 | `packaging/scripts/run-server.sh` | Package script: starts the dedicated server, default launch script CTF (Unix) |
-| `packaging/macos/Info.plist.in` | macOS bundle `Info.plist` template |
+| `packaging/macos/Info.plist.in` | macOS bundle `Info.plist` template (names the icon) |
+| `packaging/macos/dmg-background.png` | `.dmg` window background: arrow from the app to Applications ([ADR 0030](docs/decisions/0030-app-icon-and-dmg-layout.md)) |
+| `packaging/macos/dmg-background@2x.png` | The same background for Retina displays |
+| `packaging/macos/dmg-layout.json` | `.dmg` window size, icon centres and caption line, read by `tools/gen-app-icon.py` and `packaging/make-package.py` |
+| `packaging/macos/requirements.txt` | dmgbuild and its dependencies, pinned with hashes, for the `.dmg` layout (CI venv) |
+| `packaging/icons/roboviolence2.icns` | macOS application icon (bundle and `.dmg` volume), from `tools/gen-app-icon.py` |
+| `packaging/icons/roboviolence2.ico` | Windows application icon (`bv2.exe` and the installer), 16-256 px |
+| `packaging/icons/hicolor/16x16/apps/roboviolence2.png` | Linux hicolor icon, 16 px (installed as is) |
+| `packaging/icons/hicolor/24x24/apps/roboviolence2.png` | Linux hicolor icon, 24 px (installed as is) |
+| `packaging/icons/hicolor/32x32/apps/roboviolence2.png` | Linux hicolor icon, 32 px (installed as is) |
+| `packaging/icons/hicolor/48x48/apps/roboviolence2.png` | Linux hicolor icon, 48 px (installed as is) |
+| `packaging/icons/hicolor/64x64/apps/roboviolence2.png` | Linux hicolor icon, 64 px (installed as is) |
+| `packaging/icons/hicolor/128x128/apps/roboviolence2.png` | Linux hicolor icon, 128 px (installed as is); compiled into the Linux client as its window icon |
+| `packaging/icons/hicolor/256x256/apps/roboviolence2.png` | Linux hicolor icon, 256 px (installed as is) |
+| `packaging/icons/hicolor/512x512/apps/roboviolence2.png` | Linux hicolor icon, 512 px (installed as is) |
 | `packaging/docker/Dockerfile` | Server images: one Ubuntu 24.04 build, targets `server` (`bv2dedicated`, launch script as argument, healthcheck on `BV2_HEALTH_PORT`) and `master` (`bv2master`), non-root, pref dir volume (step 11) |
 | `packaging/docker/master-entrypoint.sh` | Master image entrypoint: seeds `master.db` and `web.db` into the volume, then runs `bv2master` |
 | `packaging/docker/Caddyfile` | Caddy site: TLS for the game servers' admin APIs, CTF at `/`, TDM at `/tdm/` (`BV2_ADMIN_HOST`, default localhost) (step 12); `/deployed` serves the staging commit (phase T step 2) |
 | `packaging/docker/compose.example.yml` | Compose example: master, CTF (3333) and TDM (3334) game servers and the admin TLS proxy on one host, secrets from an env file outside the repo; `BV2_IMAGE_TAG` pins both images to a commit |
 | `packaging/windows/bv2.manifest` | Windows manifest for `bv2`, `bv2dedicated` and `bv2master`: PerMonitorV2 DPI, UTF-8 code page, Windows 10/11 |
-| `packaging/windows/bv2.rc.in` | Windows resource script template; CMake fills in the generated icon |
-| `tests/CMakeLists.txt` | ctest targets: netPacket, config, fileio, credentials, join password, admin login, admin API, babonet large message, the two `SqlStatement.h` copies identical, crash fixes, validator, missing music (client builds), dedicated-server smoke, in-process server harness (`bv2server_lib` + fake babonet), packet hygiene, corpus replay, crash-input tests for `crash-*.bin` under ASan (none at present), master server, autotest runner and (with Xvfb on Linux, or on macOS) the client on autotest scripts; with Xvfb on Linux the e2e scenarios (`e2e_*`) and screenshots (`screenshot_*`); on Windows also the non-ASCII install path smoke and the no-VC++-runtime-DLL check |
+| `packaging/windows/bv2.rc.in` | Windows resource script template: embeds `packaging/icons/roboviolence2.ico` |
+| `tests/CMakeLists.txt` | ctest targets: netPacket, config, fileio, credentials, join password, admin login, admin API, babonet large message, the two `SqlStatement.h` copies identical, crash fixes, validator, missing music (client builds), app icon files and wiring, the built-in window icon (Linux client builds), the hicolor install (Linux), dedicated-server smoke, in-process server harness (`bv2server_lib` + fake babonet), packet hygiene, corpus replay, crash-input tests for `crash-*.bin` under ASan (none at present), master server, autotest runner and (with Xvfb on Linux, or on macOS) the client on autotest scripts; with Xvfb on Linux the e2e scenarios (`e2e_*`) and screenshots (`screenshot_*`); on Windows also the non-ASCII install path smoke and the no-VC++-runtime-DLL check |
 | `tests/check_windows_deps.py` | Windows: fails if `bv2`, `bv2dedicated` or `bv2master` needs a Visual C++ runtime DLL |
 | `tests/corpus/clsv_admin_request/valid.bin` | Replay corpus: valid `clsv_admin_request` payload (`gen_corpus`) |
 | `tests/corpus/clsv_gameversion_accepted/valid.bin` | Replay corpus: valid `clsv_gameversion_accepted` payload (`gen_corpus`) |
@@ -139,6 +153,8 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/test_crash_fixes.cpp` | Steps 5 and 7: one check per fixed defect (KEY_QUESTIONS Part D) on the in-process server |
 | `tests/test_dks.cpp` | R20: `dksPlayMusic` on a missing file 200 times; a sound deleted after `dksShutDown` (teardown) (ASan) |
 | `tests/test_example_cfg.py` | `config/bv2.example.cfg` names a new player as `GameVar.cpp` does |
+| `tests/test_window_icon.cpp` | `dkwSetWindowIcon` accepts the Linux client's compiled-in icon (`AppIcon.h`) and refuses bytes that aren't a PNG |
+| `tests/test_app_icon.py` | The icon files hold every size each OS needs; the exe, installer, bundle, `.desktop` and `.dmg` layout point at them |
 | `tests/test_fileio.cpp` | `FileIO` byte widths for `.bvm` data and the widths the `.DKO` loader relies on; `bv2ReadBytes` zero-fills a short read; fixed-string length prefix round trip; unterminated `CString::loadFromFile` (overflows under ASan without its bound); `getString` keeps 255 characters (R16); `MemIO` reads past its end as zero; `getNextToken` on a single token (R30) |
 | `tests/test_lang.cpp` | Step 13: PO parser (entries that change the English printf conversions or whose key English lacks are skipped; raw control bytes rejected), English fallback per key, OS locale matching (`ll_CC`, `ll`, `.po` before `.lang`), PO without glyphs skipped |
 | `tests/test_lang_check.py` | Step 13: `tools/lang-check.py` fails on changed conversions, unknown keys, repeated keywords, tabs and a stale `en.pot`; warns about missing glyphs |
@@ -284,6 +300,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/decisions/0027-several-game-servers-per-host.md` | ADR: several game servers per host (CTF, TDM): one image, `BV2_HEALTH_PORT`, one env file, admin APIs at `/` and `/tdm/`, deploy waits for both |
 | `docs/decisions/0028-built-in-public-master.md` | ADR: `cl_masterServers` defaults to `master.roboviolence.com:10207`; `bv2.cfg` neither saves nor sets it; `none` turns it off |
 | `docs/decisions/0029-static-website-on-github-pages.md` | ADR: website is static HTML on GitHub Pages; OS-detected download from the GitHub releases API, pre-releases included |
+| `docs/decisions/0030-app-icon-and-dmg-layout.md` | ADR: committed application icon per OS (exe, bundle, Linux window icon); `.dmg` with only the app and Applications |
 | `docs/decisions/README.md` | ADR format and index |
 
 ### `docs/ops`
@@ -408,7 +425,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `engine/zeven/include/dksvar.h` | dksvar: configuration variable registry |
 | `engine/zeven/include/dksvardef.h` | dksvar: variable definition macros |
 | `engine/zeven/include/dkt.h` | dkt: texture loading (TGA) and binding |
-| `engine/zeven/include/dkw.h` | dkw: window creation and events |
+| `engine/zeven/include/dkw.h` | dkw: window creation and events, window icon |
 | `engine/zeven/include/glheaders.h` | The only OpenGL include: glad, then GLU |
 | `engine/zeven/include/platform.h` | Platform macros (BV2_PLATFORM_*, BV2_POSIX), INT4/UINT4, `bv2ReadBytes` (checked `fread` for the engine loaders and `FileIO`), POSIX includes and Win32 type shims; force-included |
 
@@ -437,7 +454,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `engine/zeven/src/dkt.cpp` | dkt: texture loading (TGA) and binding |
 | `engine/zeven/src/dkt_console.cpp` | No-op dkt for the headless server |
 | `engine/zeven/src/dkti.h` | Internal header of the matching dk module |
-| `engine/zeven/src/dkw.cpp` | dkw: window creation and events |
+| `engine/zeven/src/dkw.cpp` | dkw: window creation and events, window icon |
 
 ### `engine/zeven/third_party/glad`
 
@@ -467,7 +484,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 
 | path | purpose |
 |---|---|
-| `game/CMakeLists.txt` | Targets `bv2server_lib` (the CONSOLE file list without `main.cpp`; also linked by the tests), bv2dedicated (`main.cpp` + `bv2server_lib`) and bv2 (client) |
+| `game/CMakeLists.txt` | Targets `bv2server_lib` (the CONSOLE file list without `main.cpp`; also linked by the tests), bv2dedicated (`main.cpp` + `bv2server_lib`) and bv2 (client, with the per-OS application icon; on Linux `bv2_app_icon` generates `AppIcon.h`) |
 | `game/README.md` | Module README: game |
 
 ### `game/src`
@@ -700,7 +717,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tools/convert-encoding.py` | One-off UTF-8/LF converter used in step 1.4 |
 | `tools/placeholder-manifest.tsv` | Files the game loads at startup and their formats, for the placeholder generator |
 | `tools/gen-placeholder-content.py` | Writes placeholder maps, textures, a readable font atlas, sounds and models for dev and CI |
-| `tools/gen-placeholder-icon.py` | Writes the placeholder Windows application icon at build time |
+| `tools/gen-app-icon.py` | Renders the application icons and the `.dmg` background into `packaging/` (by hand; numpy, Pillow) |
 | `tools/check-hygiene.py` | Fails on spaces in paths, tracked ignored files, files over 5 MB, bad encoding, failed translation check |
 | `tools/lang-check.py` | Fails when `en.pot` is stale, a `.po` is invalid, has unknown keys or changes printf conversions; warns about missing glyphs; lists untranslated keys |
 | `tools/lang-to-pot.py` | Generates `content/languages/en.pot` from `en.lang` |

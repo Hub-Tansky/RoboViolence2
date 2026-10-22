@@ -142,6 +142,18 @@ if(TARGET zeven_client)
   add_test(NAME dks_missing_music COMMAND test_dks)
 endif()
 
+if(TARGET bv2_app_icon)
+  add_executable(test_window_icon test_window_icon.cpp)
+  target_link_libraries(test_window_icon PRIVATE zeven_client bv2_app_icon)
+  bv2_target_defaults(test_window_icon)
+  add_test(NAME window_icon COMMAND test_window_icon)
+endif()
+if(UNIX AND NOT APPLE)
+  # The hicolor tree installs where desktop environments look for the .desktop file's Icon=roboviolence2
+  set(icon_prefix "${BV2_TEST_SCRATCH}/install-icons")
+  add_test(NAME install_hicolor_icons COMMAND sh -c "rm -rf '${icon_prefix}' && '${CMAKE_COMMAND}' --install '${CMAKE_BINARY_DIR}' --component icons --prefix '${icon_prefix}' > /dev/null && test -f '${icon_prefix}/share/icons/hicolor/128x128/apps/roboviolence2.png'")
+endif()
+
 add_executable(test_babonet test_babonet.cpp)
 target_link_libraries(test_babonet PRIVATE babonet)
 bv2_target_defaults(test_babonet)
@@ -177,6 +189,7 @@ add_test(NAME paths COMMAND test_paths "${BV2_TEST_SCRATCH}")
 
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
 add_test(NAME example_cfg COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test_example_cfg.py)
+add_test(NAME app_icon COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test_app_icon.py)
 add_test(NAME lang_check COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test_lang_check.py "${BV2_TEST_SCRATCH}")
 add_test(NAME osv_vcpkg COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test_osv_vcpkg.py "${BV2_TEST_SCRATCH}")
 

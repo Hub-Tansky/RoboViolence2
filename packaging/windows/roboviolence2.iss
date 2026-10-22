@@ -20,6 +20,8 @@ InfoBeforeFile={#SourceDir}\LICENSE.txt
 OutputDir={#OutputDir}
 OutputBaseFilename={#OutputName}
 UninstallDisplayIcon={app}\bv2.exe
+; The installer exe shows the game icon (relative to this script, ADR 0030)
+SetupIconFile=..\icons\roboviolence2.ico
 Compression=lzma2
 SolidCompression=yes
 WizardStyle=modern

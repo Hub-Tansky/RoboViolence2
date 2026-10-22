@@ -389,6 +389,20 @@ int dkwInit(int width, int height, int colorDepth, char* mTitle, CMainLoopInterf
 	return 1;
 }
 
+bool dkwSetWindowIcon(const unsigned char* png, size_t size)
+{
+	SDL_Surface* icon = SDL_LoadPNG_IO(SDL_IOFromConstMem(png, size), true);
+	if (!icon)
+	{
+		setError(SDL_GetError());
+		return false;
+	}
+	// Best effort: Wayland compositors without xdg_toplevel_icon_v1 refuse it and take the .desktop file's icon
+	SDL_SetWindowIcon(g_window, icon);
+	SDL_DestroySurface(icon);
+	return true;
+}
+
 void dkwForceQuit()
 {
 	g_done = true;

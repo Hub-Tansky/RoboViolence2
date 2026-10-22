@@ -22,13 +22,13 @@ Terminal tabs and the run scripts now use your data. Starting the app by double-
 
 ## Install from a release
 
-1. Download `roboviolence2-macos-arm64.dmg` from the [releases](https://github.com/Hub-Tansky/RoboViolence2/releases), open it and drag `bv2.app` to Applications.
-2. It is unsigned, so the first start is blocked: open System Settings → Privacy & Security and click **Open Anyway** (or run `xattr -dr com.apple.quarantine /Applications/bv2.app`).
-3. The game asks for your BaboViolent 2 folder on first start. To run the servers, copy the disk image's folder to your disk first: the image is read-only and the master writes `master.db`.
+1. Download `roboviolence2-macos-arm64.dmg` from the [releases](https://github.com/Hub-Tansky/RoboViolence2/releases), open it and drag **Robo Violence 2** to Applications (the image holds only the app; [ADR 0030](../decisions/0030-app-icon-and-dmg-layout.md)).
+2. It is unsigned, so the first start is blocked: open System Settings → Privacy & Security and click **Open Anyway** (or run `xattr -dr com.apple.quarantine "/Applications/Robo Violence 2.app"`).
+3. The game asks for your BaboViolent 2 folder on first start. The servers are not in the disk image: download `roboviolence2-macos-arm64.zip` from the same release and follow the next section.
 
 ## Use a downloaded package
 
-1. Unzip `roboviolence2-macos-arm64.zip`.
+1. Unzip `roboviolence2-macos-arm64.zip` (from a release or a CI run).
 2. The build is unsigned, so Gatekeeper blocks it. Clear the quarantine flag once:
 
    ```bash

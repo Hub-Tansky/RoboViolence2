@@ -47,6 +47,13 @@ jobs:
           name: screenshots-${{ matrix.preset }}
           path: build/*/test-scratch/screenshots/*.png
           if-no-files-found: ignore
+      # dmgbuild lays out the disk image window (ADR 0030); a venv, since the runner's Python is externally managed
+      - name: dmgbuild
+        if: runner.os == 'macOS'
+        run: |
+          python3 -m venv "$RUNNER_TEMP/dmgbuild"
+          "$RUNNER_TEMP/dmgbuild/bin/pip" install --quiet --require-hashes -r packaging/macos/requirements.txt
+          echo "$RUNNER_TEMP/dmgbuild/bin" >> "$GITHUB_PATH"
       # The archive on every OS, plus the installer (Windows) or disk image (macOS); ADR 0020
       - name: Package
         shell: bash
@@ -81,7 +88,8 @@ jobs:
         with:
           path: out/roboviolence2-${{ matrix.preset }}${{ runner.os == 'Windows' && '-setup.exe' || '.dmg' }}
           archive: false
-  # A v* tag publishes the installers, the Linux package and the source as a GitHub release (ADR 0020)
+  # A v* tag publishes the installers, the macOS and Linux packages and the source as a GitHub release (ADR 0020;
+  # the macOS .zip carries the servers, which the .dmg leaves out, ADR 0030)
   release:
     if: github.ref_type == 'tag' && startsWith(github.ref_name, 'v')
     needs: build
@@ -104,7 +112,7 @@ jobs:
           pre=$([[ "$GITHUB_REF_NAME" == v0.* || "$GITHUB_REF_NAME" == *-* ]] && echo --prerelease || true)
           gh release create "$GITHUB_REF_NAME" --title "Robo Violence 2 $GITHUB_REF_NAME" --generate-notes $pre \
             dist/roboviolence2-win-x64-msvc-setup.exe dist/roboviolence2-macos-arm64.dmg \
-            dist/roboviolence2-linux-x64.tar.gz "dist/roboviolence2-${GITHUB_REF_NAME}-source.tar.gz"
+            dist/roboviolence2-macos-arm64.zip dist/roboviolence2-linux-x64.tar.gz "dist/roboviolence2-${GITHUB_REF_NAME}-source.tar.gz"
   package-check:
     name: package-check (clean ubuntu:24.04)
     needs: build
