@@ -77,23 +77,23 @@ def ship_macos(stage, out, name, version):
 def check_dmg(dmg):
     """Mount the image; fail unless it shows exactly the app and the Applications link, has the hidden files of
     the window settings, background and volume icon, and the app's signature verifies"""
-    mount = Path(tempfile.mkdtemp())
-    run("hdiutil", "attach", "-quiet", "-nobrowse", "-readonly", "-mountpoint", mount, dmg)
-    try:
-        visible = sorted(p.name for p in mount.iterdir() if not p.name.startswith("."))
-        if visible != sorted([DMG_APP, "Applications"]):
-            sys.exit(f"{dmg.name} shows {visible}")
-        if (mount / "Applications").readlink() != Path("/Applications"):
-            sys.exit(f"{dmg.name}: Applications links to {(mount / 'Applications').readlink()}")
-        missing = [f for f in (".DS_Store", ".VolumeIcon.icns", ".background.tiff") if not (mount / f).is_file()]
-        if missing:
-            sys.exit(f"{dmg.name} lacks {', '.join(missing)}")
-        if not (mount / DMG_APP / "Contents" / "Resources" / "roboviolence2.icns").is_file():
-            sys.exit(f"{dmg.name}: the app has no icon")
-        run("codesign", "--verify", "--strict", mount / DMG_APP)
-    finally:
-        run("hdiutil", "detach", "-quiet", mount)
-        mount.rmdir()
+    with tempfile.TemporaryDirectory() as tmp:
+        mount = Path(tmp)
+        run("hdiutil", "attach", "-quiet", "-nobrowse", "-readonly", "-mountpoint", mount, dmg)
+        try:
+            visible = sorted(p.name for p in mount.iterdir() if not p.name.startswith("."))
+            if visible != sorted([DMG_APP, "Applications"]):
+                sys.exit(f"{dmg.name} shows {visible}")
+            if (mount / "Applications").readlink() != Path("/Applications"):
+                sys.exit(f"{dmg.name}: Applications links to {(mount / 'Applications').readlink()}")
+            missing = [f for f in (".DS_Store", ".VolumeIcon.icns", ".background.tiff") if not (mount / f).is_file()]
+            if missing:
+                sys.exit(f"{dmg.name} lacks {', '.join(missing)}")
+            if not (mount / DMG_APP / "Contents" / "Resources" / "roboviolence2.icns").is_file():
+                sys.exit(f"{dmg.name}: the app has no icon")
+            run("codesign", "--verify", "--strict", mount / DMG_APP)
+        finally:
+            run("hdiutil", "detach", "-quiet", mount)
 
 
 def ship_windows(stage, out, name, version):

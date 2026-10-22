@@ -147,9 +147,11 @@ if(TARGET bv2_app_icon)
   target_link_libraries(test_window_icon PRIVATE zeven_client bv2_app_icon)
   bv2_target_defaults(test_window_icon)
   add_test(NAME window_icon COMMAND test_window_icon)
+endif()
+if(UNIX AND NOT APPLE)
   # The hicolor tree installs where desktop environments look for the .desktop file's Icon=roboviolence2
   set(icon_prefix "${BV2_TEST_SCRATCH}/install-icons")
-  add_test(NAME install_hicolor_icons COMMAND sh -c "rm -rf '${icon_prefix}' && '${CMAKE_COMMAND}' --install '${CMAKE_BINARY_DIR}' --prefix '${icon_prefix}' > /dev/null && test -f '${icon_prefix}/share/icons/hicolor/128x128/apps/roboviolence2.png'")
+  add_test(NAME install_hicolor_icons COMMAND sh -c "rm -rf '${icon_prefix}' && '${CMAKE_COMMAND}' --install '${CMAKE_BINARY_DIR}' --component icons --prefix '${icon_prefix}' > /dev/null && test -f '${icon_prefix}/share/icons/hicolor/128x128/apps/roboviolence2.png'")
 endif()
 
 add_executable(test_babonet test_babonet.cpp)
