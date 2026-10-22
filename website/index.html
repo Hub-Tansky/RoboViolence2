@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Robo Violence 2: free top-down multiplayer arena shooter</title>
+  <meta name="description" content="Robo Violence 2 is a free top-down multiplayer arena shooter for Windows, macOS and Linux, an unofficial revival of BaboViolent 2.">
+  <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="site.js"></script>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <nav>
+      <a class="brand" href="./">Robo Violence 2</a>
+      <a href="#install">Download</a>
+      <a href="about.html">About</a>
+      <a data-discord href="#">Discord server</a>
+      <a href="server.html">Your own game server</a>
+    </nav>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="wrap">
+    <div>
+      <h1>Robo Violence 2</h1>
+      <p class="lead">Free top-down multiplayer arena shooter for Windows, macOS and Linux. An unofficial revival of BaboViolent 2.</p>
+      <a id="download-button" class="button" href="https://github.com/Hub-Tansky/RoboViolence2/releases">Download</a>
+      <p id="download-note" class="download-note"></p>
+      <a href="#install">Other platforms</a>
+    </div>
+    <img src="img/hero.webp" width="1000" height="1000" alt="Top-down arena: a blue and a red player shoot at each other">
+  </div>
+</div>
+
+<main class="wrap">
+  <!-- Hook for the "Server status feed" item: master status and players online from status.json, every 15 minutes. -->
+  <section id="server-status" hidden></section>
+
+  <section id="install">
+    <h2>Installation instructions</h2>
+    <p class="notice"><strong>Alpha:</strong> in-progress experimental version with placeholder art. For now we recommend using your own original <a href="https://github.com/Daivuk/BaboViolent2">BaboViolent 2</a> data.</p>
+    <ol>
+      <li>Download the original game: <a href="https://github.com/Daivuk/BaboViolent2/archive/refs/heads/master.zip">BaboViolent2-master.zip</a>.</li>
+      <li>Unzip it into your Downloads, Desktop or Documents folder. Robo Violence 2 finds it there on start.</li>
+      <li>Elsewhere, the game asks on first start: choose <code>BaboViolent2-master/BaboViolent2/Content/main/</code> or any folder above it.</li>
+    </ol>
+
+    <h3>Downloads <span id="release-tag"></span></h3>
+    <ul id="download-list">
+      <li><a href="https://github.com/Hub-Tansky/RoboViolence2/releases">All files on the GitHub releases page</a></li>
+    </ul>
+    <p>Requirements: Windows 10 22H2 or later (x64) with an OpenGL 2.1 GPU driver. macOS 12 or later, Apple Silicon (M1 or newer). Linux x64 with glibc 2.39 or newer: Ubuntu 24.04, Linux Mint 22, Debian 13 or later.</p>
+
+    <div class="cols">
+      <div class="card">
+        <h3>Windows</h3>
+        <p>Run <code>roboviolence2-win-x64-msvc-setup.exe</code>. It installs for your user only, without admin rights, and adds a Start-menu entry.</p>
+        <p>The installer is unsigned. On "Windows protected your PC" (SmartScreen) choose <strong>More info → Run anyway</strong>.</p>
+      </div>
+      <div class="card">
+        <h3>macOS</h3>
+        <p>Open <code>roboviolence2-macos-arm64.dmg</code> and drag <code>bv2.app</code> to Applications.</p>
+        <p>The app is unsigned, so Gatekeeper blocks the first start. Open <strong>System Settings → Privacy &amp; Security</strong> and click <strong>Open Anyway</strong>, or run:</p>
+        <pre><code>xattr -dr com.apple.quarantine /Applications/bv2.app</code></pre>
+      </div>
+      <div class="card">
+        <h3>Linux</h3>
+        <p>Install the GL libraries (Ubuntu, Mint, Debian):</p>
+        <pre><code>sudo apt install libgl1 libglu1-mesa</code></pre>
+        <p>Unpack and start:</p>
+        <pre><code>tar -xzf roboviolence2-linux-x64.tar.gz
+cd roboviolence2-linux-x64
+./run-client.sh</code></pre>
+      </div>
+    </div>
+    <p>More detail, troubleshooting and building from source: <a href="https://github.com/Hub-Tansky/RoboViolence2/tree/main/docs/build">build guides</a>.</p>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="badges">
+      <img alt="GitHub Created At" src="https://img.shields.io/github/created-at/Hub-Tansky/RoboViolence2">
+      <img alt="GitHub Release Date" src="https://img.shields.io/github/release-date-pre/Hub-Tansky/RoboViolence2">
+    </div>
+    <p>Unofficial fork of BaboViolent 2 by bitHeads / RndLabs, not endorsed by them. Code under GPLv3 on <a href="https://github.com/Hub-Tansky/RoboViolence2">GitHub</a>.</p>
+  </div>
+</footer>
+</body>
+</html>
