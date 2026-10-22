@@ -28,6 +28,11 @@ def dpkg_deb(*args):
 # Versions: tags and the dev build map to versions dpkg orders as releases are ordered
 for tag, expected in (("v0.0.2", "0.0.2"), ("v0.1.0-rc1", "0.1.0~rc1"), ("0.0.0-dev", "0.0.0~dev")):
     check(make_deb.deb_version(tag) == expected, f"deb_version({tag!r}) is {make_deb.deb_version(tag)!r}, not {expected!r}")
+try:
+    make_deb.deb_version("vX")
+    failures.append("deb_version('vX') accepted a version dpkg refuses")
+except SystemExit:
+    pass
 older = subprocess.run(["dpkg", "--compare-versions", make_deb.deb_version("v0.1.0-rc1"), "lt", make_deb.deb_version("v0.1.0")])
 check(older.returncode == 0, "0.1.0~rc1 does not sort before 0.1.0")
 
