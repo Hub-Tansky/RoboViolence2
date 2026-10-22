@@ -63,6 +63,9 @@ public:
 	uint8_t joinNonce[MAX_PLAYER][credentials::NONCE_SIZE] = {};
 	// Per slot: failed admin logins on this connection; the 5th disconnects it (PNS-42)
 	int adminFails[MAX_PLAYER] = {};
+	// Per slot: seconds since the TCP connect while the join handshake is pending; past JOIN_TIMEOUT it is dropped
+	float joinWait[MAX_PLAYER] = {};
+	static constexpr float JOIN_TIMEOUT = 10.0f;
 
 #ifndef CONSOLE
 	// La font
@@ -149,6 +152,11 @@ public:
 
 	void nukeAll();
 	void nukePlayer(int);
+	// Disconnects a slot's client and frees the slot at once (no disconnect event follows, and the ping watchdog
+	// skips loading players); `reason` goes to the netlog
+	void dropSlot(int i, const char * reason);
+	// Drops the slots whose join handshake is still pending after JOIN_TIMEOUT
+	void dropStalledJoins(float delay);
 	// Pour chatter
 	void sayall(CString message);
 #ifndef CONSOLE
