@@ -22,6 +22,8 @@ import tempfile
 from pathlib import Path
 from typing import Callable, NamedTuple
 
+from make_deb import build_deb
+
 PACKAGING = Path(__file__).resolve().parent
 SCRIPTS = PACKAGING / "scripts"
 GLAD = PACKAGING.parent / "engine" / "zeven" / "third_party" / "glad"
@@ -105,7 +107,6 @@ def ship_windows(stage, out, name, version):
 
 def ship_linux(stage, out, name, version):
     archive = shutil.make_archive(str(out / name), "gztar", out, name)  # keeps file modes
-    from make_deb import build_deb  # dpkg-dev, Linux packaging only
     return [archive, build_deb(stage, out / (name + ".deb"), version)]
 
 
