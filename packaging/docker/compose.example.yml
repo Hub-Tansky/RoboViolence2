@@ -1,4 +1,4 @@
-# A master, a game server and a TLS proxy for its admin API on one host (built for the host: amd64 or arm64). Placeholder values only: real secrets come from an env file
+# A master, two game servers (CTF on 3333, TDM on 3334) and a TLS proxy for their admin APIs on one host (built for the host: amd64 or arm64). Placeholder values only: real secrets come from an env file
 # outside the repository (docs/ops/runbook.md). Start from the repository root:
 #   docker compose -f packaging/docker/compose.example.yml --env-file ~/bv2-secrets.env up -d
 # BV2_IMAGE_TAG pins both images to one commit (default latest); the staging deploy agent sets it (tools/staging/).
@@ -7,6 +7,20 @@ x-common: &common
   init: true # forwards stop signals: the servers install no handlers of their own
   restart: unless-stopped
   logging: { driver: json-file, options: { max-size: "10m", max-file: "3" } }
+x-game-server: &game-server # one game server; each service adds its launch script, port, volume and health port
+  <<: *common
+  image: ghcr.io/hub-tansky/roboviolence2-server:${BV2_IMAGE_TAG:-latest}
+  depends_on: { master: { condition: service_healthy } }
+  environment: &game-env
+    BV2_MASTER_SERVERS: "master:10207"
+    BV2_SV_PASSWORD: "${BV2_SV_PASSWORD:-}" # empty: no join password
+    BV2_PUBLIC_ADDRESS: "${BV2_PUBLIC_ADDRESS:-}" # the address players use; empty: the master sees the compose network
+    BV2_ADMIN_PASS: "${BV2_ADMIN_PASS:-}"   # empty: no admin login, and the admin API refuses everything
+    BV2_ADMIN_API_PORT: "8080"              # the admin API, on the compose network only: never publish it
+    BV2_ADMIN_API_BIND: "0.0.0.0"
+    BV2_ADMIN_API_PROXY: "admin-proxy"      # only its X-Forwarded-For is believed
+  stdin_open: true # `docker attach` reaches the server console
+  tty: true        # and Ctrl-P Ctrl-Q detaches
 services:
   master:
     <<: *common
@@ -16,33 +30,30 @@ services:
     volumes: ["master-data:/var/lib/bv2"]
     environment:
       BV2_MASTER_BAN_PASS: "${BV2_MASTER_BAN_PASS:-}" # empty: master bans refused
-  server:
-    <<: *common
-    image: ghcr.io/hub-tansky/roboviolence2-server:${BV2_IMAGE_TAG:-latest}
+  server: # CTF (the image's default launch script); its admin API at / on the proxy
+    <<: *game-server
     build: { context: ../.., dockerfile: packaging/docker/Dockerfile, target: server }
-    depends_on: { master: { condition: service_healthy } }
-    environment:
-      BV2_MASTER_SERVERS: "master:10207"
-      BV2_SV_PASSWORD: "${BV2_SV_PASSWORD:-}" # empty: no join password
-      BV2_PUBLIC_ADDRESS: "${BV2_PUBLIC_ADDRESS:-}" # the address players use; empty: the master sees the compose network
-      BV2_ADMIN_PASS: "${BV2_ADMIN_PASS:-}"   # empty: no admin login, and the admin API refuses everything
-      BV2_ADMIN_API_PORT: "8080"              # the admin API, on the compose network only: never publish it
-      BV2_ADMIN_API_BIND: "0.0.0.0"
-      BV2_ADMIN_API_PROXY: "admin-proxy"      # only its X-Forwarded-For is believed
     ports: ["3333:3333/tcp"]
     volumes: ["server-data:/var/lib/bv2"]
-    stdin_open: true # `docker attach` reaches the server console
-    tty: true        # and Ctrl-P Ctrl-Q detaches
+  tdm: # its admin API at /tdm/ on the proxy
+    <<: *game-server
+    command: ["TDM"]
+    environment:
+      <<: *game-env
+      BV2_HEALTH_PORT: "3334" # sv_port in content/LaunchScript/TDM.cfg
+    ports: ["3334:3334/tcp"]
+    volumes: ["tdm-data:/var/lib/bv2"]
   admin-proxy:
     <<: *common
     image: caddy:2.11.7
-    depends_on: { server: { condition: service_healthy } }
+    depends_on: { server: { condition: service_healthy }, tdm: { condition: service_healthy } }
     environment:
       BV2_ADMIN_HOST: "${BV2_ADMIN_HOST:-localhost}"
-    ports: ["${BV2_ADMIN_PORT:-8443}:443/tcp"] # the admin API over TLS; 443 for a public name (docs/ops/runbook.md)
+    ports: ["${BV2_ADMIN_PORT:-8443}:443/tcp"] # the admin APIs over TLS; 443 for a public name (docs/ops/runbook.md)
     # ./srv/deployed: the staging commit, served at /deployed (tools/staging/); an empty folder elsewhere
     volumes: ["./Caddyfile:/etc/caddy/Caddyfile:ro", "./srv:/srv:ro", "caddy-data:/data"]
 volumes:
   master-data: {}
   server-data: {}
+  tdm-data: {}
   caddy-data: {}

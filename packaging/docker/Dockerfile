@@ -50,10 +50,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends libgl1 libglu1-
 COPY --from=build /out/bv2dedicated /opt/bv2/
 COPY --from=build /out/main /opt/bv2/main
 USER bv2
-EXPOSE 3333/tcp
-# A listening socket, not a connection: a connection would join the game as a player
-HEALTHCHECK --interval=10s --timeout=3s --start-period=10s CMD grep -q ':0D05 00000000:0000 0A' /proc/net/tcp
-# Arguments: a launch script in main/LaunchScript (default CTF); with --config <file>, name the script too
+EXPOSE 3333/tcp 3334/tcp
+# A listening socket, not a connection: a connection would join the game as a player. BV2_HEALTH_PORT: the launch
+# script's sv_port (3333 for CTF, 3334 for TDM); it only tells the healthcheck where to look
+ENV BV2_HEALTH_PORT=3333
+HEALTHCHECK --interval=10s --timeout=3s --start-period=10s \
+    CMD grep -q ":$(printf %04X "$BV2_HEALTH_PORT") 00000000:0000 0A" /proc/net/tcp
+# Arguments: a launch script in main/LaunchScript (CTF, the default, or TDM); with --config <file>, name the script too
 ENTRYPOINT ["/opt/bv2/bv2dedicated"]
 CMD ["CTF"]
 
