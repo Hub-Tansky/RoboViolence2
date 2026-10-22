@@ -93,13 +93,34 @@ Keep your own copy outside the repository. Mount the folder that holds its `main
 
 ## Backups
 
-The volumes hold all state: back up `master-data` (bans), `server-data` and `tdm-data` (config, `bv2.db`). For example:
+The volumes hold all state: back up `master-data` (bans), `server-data` and `tdm-data` (config, `bv2.db`), and `caddy-data` (the admin certificate and its key). For example:
 
 ```
 docker run --rm -v roboviolence2_master-data:/data -v "$PWD":/backup ubuntu:24.04 tar -czf /backup/master-data.tgz -C /data .
 ```
 
 Restore by extracting into the volume before `up`.
+
+## Production
+
+Production runs the same compose file and the same deploy agent as staging ([tools/staging/](../../tools/staging/README.md)), by hand. The host's address, provider and access stay in the owner's private Obsidian vault (`RoboViolence2/prv_wiki/docs_restricted/prod/`), never in the repo.
+
+- **Pinned, by hand.** No cron. The owner deploys one `main` commit (a release commit once releases carry server images) with `--sha <full sha>`, which pins the images and the compose file to it. Rolls back on failure like staging.
+- **Never over a game, and no retry.** While anyone plays on any game server, a run deploys nothing and exits 0 (the log line says `waits`); without cron nothing retries. Run it again later, or add `--force` for an urgent fix or rollback. `/deployed` is the only success signal: check it after every run.
+- **Own label.** `RV2_DEPLOY_LABEL=prod` gives notifications `RV2 prod ...`, state in `/var/lib/rv2-prod` and the env file `/etc/rv2-prod.env`, so staging's state is never touched. A wrapper that sets `RV2_STAGING_ROOT` and `RV2_STAGING_ENV` instead still finds the right files but notifies as `staging`: replace both with `RV2_DEPLOY_LABEL=prod`.
+- **Env file.** As for staging, plus `BV2_MASTER_BAN_PASS`; `BV2_ADMIN_HOST` is the public admin name and `BV2_ADMIN_PORT=443`; `BV2_PUBLIC_ADDRESS` is the host's IPv4. Mode 600, only on the host.
+- **The agent itself** is the `deploy.sh` downloaded at install. Update it deliberately (download it again from the commit you deploy) when `tools/staging/deploy.sh` changes.
+
+Install (a new or failover host): the staging README's [By hand](../../tools/staging/README.md#install) steps with `rv2-prod` in place of `rv2-staging` in every path, `<full sha>` in place of `main` in the download URL, and no cron line (no `cloud-init.yml`, no `rv2-staging-setup`: both install cron and deploy the newest `main`). Open TCP 443, 3333, 3334 and 10207. Deploy with `RV2_DEPLOY_LABEL=prod /opt/rv2-prod/deploy.sh --sha <full sha>` (a one-line wrapper holding that prefix is fine).
+
+| Task | Do |
+|---|---|
+| Deploy a commit | `RV2_DEPLOY_LABEL=prod /opt/rv2-prod/deploy.sh --sha <full sha>`, then check `https://<admin host>/deployed` and that the master lists every game server |
+| Roll back | the same with the previous full SHA: the second-to-last `pass` row of `/var/lib/rv2-prod/state.tsv` (`deployed` holds the running one); `--force` if players are on |
+| Add a game server | as in [Game servers](#game-servers); open its port in the host firewall and add an external monitor for it |
+| Fail over to another host | install as above, restore the latest backup into the volumes and `/etc/rv2-prod.env`, set the new `BV2_PUBLIC_ADDRESS`, deploy the same SHA, then point the `master` and `admin` DNS records at it. The restored `caddy-data` carries the admin certificate, so verify passes before DNS moves; if it has expired, point `admin` first and deploy again |
+
+Backups: a nightly job copies `/etc/rv2-prod.env` and every `roboviolence2_*` volume off the host (see [Backups](#backups) for what they hold); restore one snapshot to a scratch folder now and then to prove it works.
 
 ## Without compose
 

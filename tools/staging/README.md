@@ -1,5 +1,7 @@
 # Staging deploy agent
 
+Production runs the same agent by hand ([runbook: Production](../../docs/ops/runbook.md#production)), so a change here changes production too.
+
 Keeps a staging host on the newest `main` server and master images: pulls only successful `containers` runs of `main` from this repo, deploys only when no one is connected, rolls back on failure and publishes the running commit at `/deployed`. Scope: [step 2](https://github.com/Hub-Tansky/RoboViolence2/blob/58c91b2a660db2b290b0b5f504381980a6aedba2/docs/roadmap/phase-t-testing-environment/step2-staging-deploy.md). Decision: [ADR 0018](../../docs/decisions/0018-staging-pull-deploy.md). Container operation: [runbook](../../docs/ops/runbook.md).
 
 The host's address, provider and access go in the owner's private Obsidian vault (`RoboViolence2/prv_wiki/docs_restricted/testing-environment/`), never in the repo.
@@ -52,7 +54,7 @@ The first run deploys the newest build at once (nothing is running to protect). 
 | `deploy.sh --sha <sha>` | that `main` build; also a manual rollback. Use the full SHA for builds older than the last 30 runs |
 | `deploy.sh --force` | don't wait for players to leave |
 
-Notifications (ntfy): `RV2 staging now on <sha7>`; `FAILED at <stage>` with the rollback result; `waiting` once when players have held deploys back for 6 hours. Commits from before `BV2_IMAGE_TAG` existed are refused. A missing or unreadable env file is logged only (no ntfy topic yet). GitHub, download and pull failures notify once per stage and don't count; 3 failed deploys of a commit stop retries until `--sha`.
+Notifications (ntfy): `RV2 staging now on <sha7>` (`RV2_DEPLOY_LABEL`, default `staging`, names the host there and in the state and env file paths; production sets `prod`); `FAILED at <stage>` with the rollback result; `waiting` once when players have held deploys back for 6 hours. Commits from before `BV2_IMAGE_TAG` existed are refused. A missing or unreadable env file is logged only (no ntfy topic yet). GitHub, download and pull failures notify once per stage and don't count; 3 failed deploys of a commit stop retries until `--sha`.
 
 Files under `/var/lib/rv2-staging/`: `deployed` (running commit), `state.tsv` (commit, result, stage, time), `releases/<sha7>/` (that commit's compose file, Caddyfile and `srv/deployed`, last 5; older releases' images are removed), `waiting`, `deploy.log`.
 

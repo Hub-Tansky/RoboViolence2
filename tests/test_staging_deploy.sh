@@ -5,6 +5,7 @@ set -u
 here=$(cd "$(dirname "$0")" && pwd)
 scratch=${1:?scratch dir}
 rm -rf "$scratch" && mkdir -p "$scratch"
+unset RV2_DEPLOY_LABEL
 export RV2_DEPLOY_SOURCE_ONLY=1 RV2_STAGING_ROOT="$scratch/root" RV2_STAGING_ENV="$scratch/env"
 # shellcheck source=../tools/staging/deploy.sh
 . "$here/../tools/staging/deploy.sh"
@@ -93,6 +94,14 @@ expect "env file mode 600 is loaded" test-only-value "$(load_env >/dev/null && e
 printf 'REPO=someone/fork\n' >>"$RV2_STAGING_ENV"
 # bash refuses to assign a readonly variable: REPO keeps its value whatever the env file says
 expect "env file can't change the repository filter" yes "$([ "$(load_env >/dev/null 2>&1; echo "$REPO")" != someone/fork ] && echo yes || echo no)"
+
+paths_for() { # paths_for <label or empty>: "<root> <env file>" with no path overrides
+	env -u RV2_STAGING_ROOT -u RV2_STAGING_ENV ${1:+RV2_DEPLOY_LABEL=$1} bash -c '. "$1"; echo "$ROOT $ENV_FILE"' _ "$here/../tools/staging/deploy.sh"
+}
+usage=$(RV2_DEPLOY_SOURCE_ONLY= bash "$here/../tools/staging/deploy.sh" --bogus 2>&1); code=$?
+expect "usage exits 2 and lists every option" "2 1 1" "$code $(printf '%s\n' "$usage" | grep -c -- '--sha') $(printf '%s\n' "$usage" | grep -c -- '--force')"
+expect "staging keeps its paths" "/var/lib/rv2-staging /etc/rv2-staging.env" "$(paths_for "")"
+expect "production gets its own state and env file" "/var/lib/rv2-prod /etc/rv2-prod.env" "$(paths_for prod)"
 
 [ $failures -eq 0 ] && echo "all passed"
 exit $failures
