@@ -52,7 +52,7 @@ The first run deploys the newest build at once (nothing is running to protect). 
 | `deploy.sh --sha <sha>` | that `main` build; also a manual rollback. Use the full SHA for builds older than the last 30 runs |
 | `deploy.sh --force` | don't wait for players to leave |
 
-Notifications (ntfy): `RV2 staging now on <sha7>`; `FAILED at <stage>` with the rollback result; `waiting` once when players have held deploys back for 6 hours. Commits from before `BV2_IMAGE_TAG` existed are refused. A missing or unreadable env file is logged only (no ntfy topic yet). GitHub, download and pull failures notify once per stage and don't count; 3 failed deploys of a commit stop retries until `--sha`.
+Notifications (ntfy): `RV2 staging now on <sha7>` (`RV2_DEPLOY_LABEL` replaces `staging`; production sets `prod`); `FAILED at <stage>` with the rollback result; `waiting` once when players have held deploys back for 6 hours. Commits from before `BV2_IMAGE_TAG` existed are refused. A missing or unreadable env file is logged only (no ntfy topic yet). GitHub, download and pull failures notify once per stage and don't count; 3 failed deploys of a commit stop retries until `--sha`.
 
 Files under `/var/lib/rv2-staging/`: `deployed` (running commit), `state.tsv` (commit, result, stage, time), `releases/<sha7>/` (that commit's compose file, Caddyfile and `srv/deployed`, last 5; older releases' images are removed), `waiting`, `deploy.log`.
 

@@ -94,5 +94,8 @@ printf 'REPO=someone/fork\n' >>"$RV2_STAGING_ENV"
 # bash refuses to assign a readonly variable: REPO keeps its value whatever the env file says
 expect "env file can't change the repository filter" yes "$([ "$(load_env >/dev/null 2>&1; echo "$REPO")" != someone/fork ] && echo yes || echo no)"
 
+expect "notifications name staging by default" staging "$LABEL"
+expect "production names itself" prod "$(RV2_DEPLOY_LABEL=prod bash -c '. "$1"; echo "$LABEL"' _ "$here/../tools/staging/deploy.sh")"
+
 [ $failures -eq 0 ] && echo "all passed"
 exit $failures

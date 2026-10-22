@@ -13,6 +13,7 @@ readonly PROJECT=roboviolence2 # `name:` in compose.example.yml
 readonly GAME_SERVERS="server: tdm:/tdm" # <compose service>:<admin API path prefix on the proxy> (ADR 0027)
 readonly ROOT=${RV2_STAGING_ROOT:-/var/lib/rv2-staging}
 readonly ENV_FILE=${RV2_STAGING_ENV:-/etc/rv2-staging.env}
+readonly LABEL=${RV2_DEPLOY_LABEL:-staging} # names the host in notifications; production sets prod (docs/ops/runbook.md)
 readonly MAX_ATTEMPTS=3 WAIT_NOTIFY_SECONDS=21600 KEEP=5
 # Failures in these stages say nothing about the build: they notify once and don't use up an attempt.
 # wait-empty fails only when the server runs but /status doesn't answer: never deploy over a game we can't see.
@@ -158,7 +159,7 @@ finish() {
 	if [ -n "$infra" ]; then
 		if [ "$(cat "$ROOT/infra-failure" 2>/dev/null)" != "$STAGE" ]; then
 			echo "$STAGE" >"$ROOT/infra-failure" # once per distinct failure, not every 10 minutes
-			notify "RV2 staging deploy FAILED at $STAGE" "No attempt counted${PREV:+; staging still on ${PREV:0:7}}"
+			notify "RV2 $LABEL deploy FAILED at $STAGE" "No attempt counted${PREV:+; $LABEL still on ${PREV:0:7}}"
 		fi
 	else
 		rm -f "$ROOT/infra-failure"
@@ -167,9 +168,9 @@ finish() {
 		printf '%s\tfail\t%s\t%s\n' "$SHA" "$STAGE" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" >>"$ROOT/state.tsv"
 		if [ -n "$PREV" ] && [ "$PREV" != "$SHA" ] && compose "$PREV" up -d --no-build --remove-orphans --wait --wait-timeout 120 >/dev/null 2>&1 &&
 			wait_for 60 all_status; then
-			notify "RV2 staging deploy ${SHA:0:7} FAILED at $STAGE" "Rolled back to ${PREV:0:7}"
+			notify "RV2 $LABEL deploy ${SHA:0:7} FAILED at $STAGE" "Rolled back to ${PREV:0:7}"
 		else
-			notify "RV2 staging deploy ${SHA:0:7} FAILED at $STAGE" "No rollback${PREV:+: ${PREV:0:7} did not come back}; staging may be down"
+			notify "RV2 $LABEL deploy ${SHA:0:7} FAILED at $STAGE" "No rollback${PREV:+: ${PREV:0:7} did not come back}; $LABEL may be down"
 		fi
 	fi
 	[ -n "$LOCKED" ] && rm -f "$ROOT/lock"
@@ -222,7 +223,7 @@ if [ -z "$FORCE" ]; then
 	if [ "$players" -gt 0 ]; then
 		say "$players players connected; ${SHA:0:7} waits"
 		waiting_update "$(date +%s)" &&
-			notify "RV2 staging deploy waiting" "Players held deploys back for 6 h; newest ${SHA:0:7}; deploy.sh --force to override"
+			notify "RV2 $LABEL deploy waiting" "Players held deploys back for 6 h; newest ${SHA:0:7}; deploy.sh --force to override"
 		prune "${PREV:0:7}" # each waiting commit fetched and pulled; keep the running one
 		exit 0
 	fi
@@ -237,5 +238,5 @@ wait_for 60 all_status || fail "/status of a game server did not answer within 6
 printf '%s %s\n' "$SHA" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" | tee "$ROOT/deployed" >"$rel/srv/deployed" # served at /deployed
 printf '%s\tpass\t-\t%s\n' "$SHA" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" >>"$ROOT/state.tsv"
 RESULT=pass
-notify "RV2 staging now on ${SHA:0:7}" "Deployed${PREV:+ (was ${PREV:0:7})}"
+notify "RV2 $LABEL now on ${SHA:0:7}" "Deployed${PREV:+ (was ${PREV:0:7})}"
 prune "${SHA:0:7}"

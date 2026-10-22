@@ -101,6 +101,23 @@ docker run --rm -v roboviolence2_master-data:/data -v "$PWD":/backup ubuntu:24.0
 
 Restore by extracting into the volume before `up`.
 
+## Production
+
+Production runs the same compose file and the same deploy agent as staging ([tools/staging/](../../tools/staging/README.md)), with three differences. The host's address, provider and access stay in the owner's private wiki, never in the repo.
+
+- **Pinned, by hand.** No cron. The owner deploys one `main` commit (a release commit once releases carry server images) with `deploy.sh --sha <full sha>`. It still waits for 0 players on every game server and rolls back on failure.
+- **Own paths and name.** A wrapper sets `RV2_STAGING_ROOT=/var/lib/rv2-prod`, `RV2_STAGING_ENV=/etc/rv2-prod.env` and `RV2_DEPLOY_LABEL=prod`, so notifications say `RV2 prod ...` and staging's state is never touched.
+- **Env file.** As for staging, plus `BV2_MASTER_BAN_PASS`; `BV2_ADMIN_HOST` is the public admin name and `BV2_ADMIN_PORT=443`; `BV2_PUBLIC_ADDRESS` is the host's IPv4. Mode 600, only on the host.
+
+| Task | Do |
+|---|---|
+| Deploy a commit | `<wrapper> --sha <full sha>`; check `https://<admin host>/deployed` and that the master lists every game server |
+| Roll back | the same with the previous SHA (`deployed` and `state.tsv` under the prod root name it) |
+| Add a game server | as in [Game servers](#game-servers); open its port in the host firewall and add an external monitor for it |
+| Fail over to another host | new host from the same steps, restore the latest backup into the volumes and env file, set the new `BV2_PUBLIC_ADDRESS`, deploy the same SHA, then point the `master` and `admin` DNS records at it |
+
+Backups: a nightly job copies the env file and every `roboviolence2_*` volume off the host (see [Backups](#backups) for what they hold); restore one snapshot to a scratch folder now and then to prove it works.
+
 ## Without compose
 
 `docker run` needs `--init` (stop signals) and `-it` (the console): `docker run -d -it --init -p 3333:3333 -v bv2-server:/var/lib/bv2 ghcr.io/hub-tansky/roboviolence2-server`.
