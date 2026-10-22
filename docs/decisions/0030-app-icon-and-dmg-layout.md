@@ -11,7 +11,7 @@
 - Each OS expects its own shape: macOS draws no mask, so the icon carries Apple's grid (824 px squircle in a 1024 px canvas) and drop shadow; Windows and Linux add their own effects, so their icon fills the canvas.
 
 ## Decision
-- `tools/gen-app-icon.py` (numpy and Pillow, run by hand) renders the art; its outputs are committed in `packaging/icons/`: `roboviolence2.icns` (the ten types `iconutil` writes), `roboviolence2.ico` (16-256 px) and `hicolor/<n>x<n>/apps/roboviolence2.png` (the Linux hicolor tree, installed as is). 16-32 px keep the flat favicon shapes. The icon is new work, not an original BV2 asset.
+- `tools/gen-app-icon.py` (numpy and Pillow, run by hand) renders the art; its outputs are committed in `packaging/icons/`: `roboviolence2.icns` (the ten types `iconutil` writes), `roboviolence2.ico` (16-256 px) and `hicolor/<n>x<n>/apps/roboviolence2.png` (the Linux hicolor tree, installed as is). 16-32 px are drawn flat (no shading or tracers). The icon is new work, not an original BV2 asset.
 - Windows: `bv2.rc.in` embeds the `.ico` in `bv2.exe`; the installer uses it too (`SetupIconFile`). Taskbar and Start menu take it from the exe.
 - macOS: the `.icns` goes into `bv2.app/Contents/Resources`, named by `CFBundleIconFile`.
 - Linux: no file format carries an icon, so the client compiles in the 128 px PNG (CMake writes `AppIcon.h`, target `bv2_app_icon`) and sets it with `SDL_SetWindowIcon` (`dkwSetWindowIcon`). Only a PNG that doesn't decode is an error; a compositor without window icons (GNOME on Wayland) takes the `.desktop` file's icon instead. `cmake --install` puts the hicolor tree in `share/icons` for the `.desktop` file.

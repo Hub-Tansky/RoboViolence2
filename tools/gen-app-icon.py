@@ -3,8 +3,8 @@
 
 The icon is the website favicon (website/img/favicon.svg) grown up: a dark rounded tile, a blue ball bottom-left
 and a red ball top-right, shooting at each other (muzzle flashes and two side-by-side tracers). Large sizes add
-sphere shading and a light edge that keeps the tile visible on dark docks and taskbars; 16, 24 and 32 px keep the
-flat favicon shapes and drop the tracers so they stay sharp.
+sphere shading and a light edge that keeps the tile visible on dark docks and taskbars; 16, 24 and 32 px drop the
+shading and the tracers so they stay sharp.
 
 Writes, relative to the repository root:
   packaging/icons/roboviolence2.icns          macOS: Apple's grid (824 px squircle in 1024) with its drop shadow
@@ -19,6 +19,7 @@ The outputs are committed: run this only to change the art. Needs numpy and Pill
 Usage: tools/gen-app-icon.py [--font <ttf/otf for the .dmg caption, default Inter Regular as on Debian/Ubuntu>]
 """
 import argparse
+from collections import namedtuple
 import io
 import json
 import os
@@ -39,7 +40,7 @@ ICNS_TYPES = (("icp4", 16), ("icp5", 32), ("ic11", 32), ("ic12", 64), ("ic07", 1
               ("ic08", 256), ("ic14", 512), ("ic09", 512), ("ic10", 1024))
 PNG_SIZES = (16, 24, 32, 48, 64, 128, 256, 512)
 ICO_SIZES = (256, 128, 64, 48, 32, 24, 16)
-FLAT_MAX = 32  # sizes up to this use the flat favicon shapes
+FLAT_MAX = 32  # sizes up to this are drawn flat: no shading, no tracers
 
 # The .dmg window, in points. The image is as tall as the whole window, so whether Finder counts the title bar in
 # the window bounds or not, no edge of it shows.
@@ -55,10 +56,12 @@ def hexrgb(h):
 BG_TOP, BG_BOT, BG_FLAT = hexrgb("#2a2f40"), hexrgb("#12141b"), hexrgb("#1b1e28")
 BLUE, RED, EDGE = hexrgb("#2f7df6"), hexrgb("#e5383b"), hexrgb("#4a5170")
 FLASH = hexrgb("#ffd166")
-# In favicon units (0..32): ball centres and radius, how far round the rim each gun sits from the line to the
-# other ball (so the two tracers run side by side), tracer length and muzzle flash radius
+# In favicon units (0..32): ball radius and balls (centre, colour, shot colour; smaller and further apart than in
+# favicon.svg to make room for the shots), how far round the rim each gun sits from the line to the other ball (so
+# the two tracers run side by side), tracer length and muzzle flash radius
+Ball = namedtuple("Ball", "x y colour shot")
 BALL_R = 5.2
-BALLS = ((9.5, 22.5, BLUE, hexrgb("#8fd8ff")), (22.5, 9.5, RED, hexrgb("#ff9a3c")))
+BALLS = (Ball(9.5, 22.5, BLUE, hexrgb("#8fd8ff")), Ball(22.5, 9.5, RED, hexrgb("#ff9a3c")))
 GUN_ANGLE = np.radians(40)
 TRACER_LEN = 5.0
 FLASH_R = 2.4
@@ -67,14 +70,17 @@ FLASH_R = 2.4
 def shots():
     """(muzzle x, y, unit direction x, y, shot colour) for each ball firing at the other."""
     out = []
-    for (cx, cy, _, shot), (tx, ty, _, _) in zip(BALLS, BALLS[::-1]):
-        dx, dy = tx - cx, ty - cy
+    for ball, target in zip(BALLS, BALLS[::-1]):
+        dx, dy = target.x - ball.x, target.y - ball.y
         n = np.hypot(dx, dy)
         dx, dy = dx / n, dy / n
         ca, sa = np.cos(GUN_ANGLE), np.sin(GUN_ANGLE)
         gx, gy = dx * ca - dy * sa, dx * sa + dy * ca
-        out.append((cx + gx * BALL_R, cy + gy * BALL_R, dx, dy, shot))
+        out.append((ball.x + gx * BALL_R, ball.y + gy * BALL_R, dx, dy, ball.shot))
     return out
+
+
+SHOTS = shots()
 
 
 def superellipse_mask(X, Y, cx, cy, half, n=5.0):
@@ -132,7 +138,7 @@ def render(px, style):
     img[..., :3] = EDGE * ea + img[..., :3] * (1 - ea)
 
     if style != "flat":  # at 16-32 px the tracers turn the picture into a dumbbell; the flashes alone carry it
-        for (mx, my, dx, dy, shot) in shots():
+        for (mx, my, dx, dy, shot) in SHOTS:
             # tracer: tapered streak from the muzzle toward the other ball, brightest at the head
             tU, tV = U - mx, V - my
             along = tU * dx + tV * dy
@@ -145,28 +151,28 @@ def render(px, style):
             over(img, shot, glow * tile)
             over(img, np.minimum(shot * 0.5 + 0.6, 1), core * tile)
 
-    R = BALL_R
-    for (cx, cy, base, _) in BALLS:
+    for cx, cy, base, _ in BALLS:
         d = np.hypot(U - cx, V - cy)
-        ball = (d <= R).astype(float) * tile
+        ball = (d <= BALL_R).astype(float) * tile
         if style == "flat":
             over(img, base, ball)
             continue
         # contact shadow below and right of the ball
         sd = np.hypot(U - cx - 0.6, V - cy - 1.1)
-        sh = np.clip(1 - (sd - (R - 0.8)) / 1.6, 0, 1) * 0.45 * tile * (1 - ball)
+        sh = np.clip(1 - (sd - (BALL_R - 0.8)) / 1.6, 0, 1) * 0.45 * tile * (1 - ball)
         img[..., :3] *= (1 - sh)[..., None]
         # sphere shading, light from the upper left
-        ld = np.clip(np.hypot(U - (cx - 0.4 * R), V - (cy - 0.43 * R)) / (1.5 * R), 0, 1)[..., None]
+        ld = np.clip(np.hypot(U - (cx - 0.4 * BALL_R), V - (cy - 0.43 * BALL_R)) / (1.5 * BALL_R), 0, 1)[..., None]
         col = np.minimum(base * 1.35 + 0.08, 1) * (1 - ld) + base * ld
-        rimk = np.clip((d - (R - 1.4)) / 1.4, 0, 1)[..., None]
+        rimk = np.clip((d - (BALL_R - 1.4)) / 1.4, 0, 1)[..., None]
         col = col * (1 - rimk * 0.55) + base * 0.45 * rimk * 0.55
-        sp = np.exp(-(((U - (cx - 0.38 * R)) / 1.4) ** 2 + ((V - (cy - 0.42 * R)) / 0.95) ** 2))[..., None] * 0.55
+        sx, sy = cx - 0.38 * BALL_R, cy - 0.42 * BALL_R  # specular highlight
+        sp = np.exp(-(((U - sx) / 1.4) ** 2 + ((V - sy) / 0.95) ** 2))[..., None] * 0.55
         col = col * (1 - sp) + sp
         a = ball[..., None]
         img[..., :3] = col * a + img[..., :3] * (1 - a)
 
-    for (mx, my, dx, dy, shot) in shots():
+    for (mx, my, dx, dy, shot) in SHOTS:
         # muzzle flash: 5-point star aimed along the shot, hot white core
         fU, fV = U - mx, V - my
         r = np.hypot(fU, fV)
