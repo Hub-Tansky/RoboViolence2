@@ -6,13 +6,14 @@ Usage: make-package.py <runtime dir> <preset> <out dir> <version>
 Writes <out dir>/roboviolence2-<preset>.<zip|tar.gz> holding one folder with the client, bv2dedicated,
 bv2master, main/ (links resolved), the generated databases, the run scripts from packaging/scripts/, LICENSE.txt
 and licenses/<port>.txt for every vcpkg port and glad.
-The macOS bundle gets a real Contents/Resources/main instead of the build's symlink, then an ad-hoc signature;
-the servers read the folder's own main/ (docs/build/macos.md).
+The macOS bundle gets a real Contents/Resources/main instead of the build's symlink and its own copy of the
+licences, then an ad-hoc signature; the servers read the folder's own main/ (docs/build/macos.md).
 Also writes roboviolence2-<preset>-setup.exe on Windows (Inno Setup, packaging/windows/roboviolence2.iss) and
-roboviolence2-<preset>.dmg on macOS. <version> (e.g. a v1.2.0 tag or 0.0.0-dev) goes into the installer.
+roboviolence2-<preset>.dmg on macOS: only "Robo Violence 2.app" and an Applications link, laid out over
+packaging/macos/dmg-background.png (dmgbuild, ADR 0030). <version> (e.g. a v1.2.0 tag or 0.0.0-dev) goes into the
+installer.
 Fails if the build is not Release, or if anything the package must hold is missing.
 """
-import os
 import shutil
 import subprocess
 import sys
@@ -23,6 +24,10 @@ PACKAGING = Path(__file__).resolve().parent
 SCRIPTS = PACKAGING / "scripts"
 GLAD = PACKAGING.parent / "engine" / "zeven" / "third_party" / "glad"
 ISCC = r"C:\Program Files (x86)\Inno Setup 6\ISCC.exe"  # its default install, as on the GitHub Windows runner
+# The .dmg window: size and icon centres match the background drawn by tools/gen-app-icon.py
+DMG_APP = "Robo Violence 2.app"
+DMG_WINDOW = (640, 400)
+DMG_ICONS = {DMG_APP: (160, 170), "Applications": (480, 170)}
 
 
 def run(*cmd):
@@ -33,7 +38,6 @@ def run(*cmd):
 
 def client_macos(runtime, stage, exe):
     shutil.copytree(runtime / "bv2.app", stage / "bv2.app")  # Resources/main symlink becomes a copy
-    run("codesign", "--force", "--sign", "-", stage / "bv2.app")
     return "bv2.app/Contents/MacOS/bv2"
 
 
@@ -43,12 +47,46 @@ def client_binary(runtime, stage, exe):
 
 
 def ship_macos(stage, out, name, version):
+    from dmgbuild import build_dmg  # pip, macOS packaging only (build.yml installs it)
+
     archive, dmg = out / (name + ".zip"), out / (name + ".dmg")
+    app = stage / "bv2.app"
+    # The .dmg holds only the app, so the app carries the licences; signed last, after every change to the bundle
+    shutil.copy2(stage / "LICENSE.txt", app / "Contents" / "Resources")
+    shutil.copytree(stage / "licenses", app / "Contents" / "Resources" / "licenses")
+    run("codesign", "--force", "--sign", "-", app)
     # ditto keeps exec bits and the bundle signature, and writes no ._ files
     run("ditto", "-c", "-k", "--keepParent", "--norsrc", "--noextattr", "--noqtn", stage, archive)
-    os.symlink("/Applications", stage / "Applications")  # in the .dmg only, so bv2.app can be dragged across
-    run("hdiutil", "create", "-quiet", "-volname", "Robo Violence 2", "-srcfolder", stage, "-ov", "-format", "UDZO", dmg)
+    dmg.unlink(missing_ok=True)
+    build_dmg(str(dmg), "Robo Violence 2", settings={
+        "format": "UDZO",
+        "files": [(str(app), DMG_APP)],  # the name Finder, Launchpad and the Dock show
+        "symlinks": {"Applications": "/Applications"},
+        "icon": str(PACKAGING / "icons" / "roboviolence2.icns"),  # the mounted volume's icon
+        "background": str(PACKAGING / "macos" / "dmg-background.png"),  # dmgbuild adds the @2x file
+        "window_rect": ((200, 120), DMG_WINDOW),
+        "icon_size": 128,
+        "text_size": 13,
+        "icon_locations": DMG_ICONS,
+    })
+    check_dmg(dmg)
     return [archive, dmg]
+
+
+def check_dmg(dmg):
+    """Mount the image and fail unless it shows exactly the app and the link, laid out, with a valid signature"""
+    mount = Path(subprocess.run(["mktemp", "-d"], check=True, capture_output=True, text=True).stdout.strip())
+    run("hdiutil", "attach", "-quiet", "-nobrowse", "-readonly", "-mountpoint", mount, dmg)
+    try:
+        visible = sorted(p.name for p in mount.iterdir() if not p.name.startswith("."))
+        hidden = [f for f in (".DS_Store", ".VolumeIcon.icns", ".background.tiff") if not (mount / f).is_file()]
+        if visible != sorted(DMG_ICONS) or hidden or (mount / "Applications").readlink() != Path("/Applications"):
+            sys.exit(f"{dmg.name}: shows {visible}, missing {hidden}")
+        run("codesign", "--verify", "--strict", mount / DMG_APP)
+        if not (mount / DMG_APP / "Contents" / "Resources" / "roboviolence2.icns").is_file():
+            sys.exit(f"{dmg.name}: the app has no icon")
+    finally:
+        run("hdiutil", "detach", "-quiet", mount)
 
 
 def ship_windows(stage, out, name, version):

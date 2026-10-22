@@ -28,6 +28,9 @@
 #include "CMaster.h"
 #include "Paths.h"
 #include "DataDirPicker.h"
+#ifdef BV2_APP_ICON_PNG
+#include "AppIcon.h"
+#endif
 #include <string>
 
 // After main/bv2.cfg is loaded: BV2_NETLOG=1 forces c_netlog on, BV2_NETLOG=0 off.
@@ -547,6 +550,11 @@ int main(int argc, char* argv[])
 		dkwShowMessage("Error", dkwGetLastError());
 		return initFailed();
 	}
+#ifdef BV2_APP_ICON_PNG
+	// Windows and macOS take the icon from the executable or the bundle (ADR 0030)
+	if (!dkwSetWindowIcon(g_appIconPng, sizeof(g_appIconPng)))
+		std::cerr << "Window icon not set: " << dkwGetLastError() << std::endl;
+#endif
 
 	// On init les input
 	if (!dkiInit())

@@ -389,6 +389,16 @@ int dkwInit(int width, int height, int colorDepth, char* mTitle, CMainLoopInterf
 	return 1;
 }
 
+bool dkwSetWindowIcon(const unsigned char* png, size_t size)
+{
+	SDL_Surface* icon = SDL_LoadPNG_IO(SDL_IOFromConstMem(png, size), true);
+	bool ok = icon && SDL_SetWindowIcon(g_window, icon);
+	if (!ok)
+		setError(SDL_GetError());
+	SDL_DestroySurface(icon);
+	return ok;
+}
+
 void dkwForceQuit()
 {
 	g_done = true;
