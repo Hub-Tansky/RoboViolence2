@@ -162,6 +162,23 @@ namespace
 			dksvarLoadConfig((char *)f.c_str());
 	}
 
+	// Settings that ship with the release, not player settings: bv2.cfg neither saves nor sets them (ADR 0028).
+	// Builds up to 0.0.1 saved cl_masterServers "" there, which would otherwise hide the built-in master.
+	const char * const kReleaseSettings[] = { "cl_masterServers" };
+
+	void applySavedSettings(const std::string & cfg)
+	{
+		std::vector<CString> release;
+		for (const char * name : kReleaseSettings)
+			release.push_back(dksvarGetValue(name));
+		std::error_code ec;
+		if (!fs::exists(cfg, ec))
+			dksvarSaveConfig((char *)cfg.c_str());
+		applyFile(cfg, false);
+		for (size_t i = 0; i < release.size(); ++i)
+			dksvarSetTransient(kReleaseSettings[i], release[i].s); // undo bv2.cfg; transient, so never saved again
+	}
+
 	void applyEnv(const char * envName, const char * varName)
 	{
 		std::string v = getEnv(envName);
@@ -334,12 +351,10 @@ namespace bv2
 
 		// 2. the user's saved settings; the first run writes them out from the defaults
 		std::string cfg = configFile();
-		std::error_code ec;
-		if (!fs::exists(cfg, ec))
-			dksvarSaveConfig((char *)cfg.c_str());
-		applyFile(cfg, false);
+		applySavedSettings(cfg);
 
 		// 3. local overrides: config/local/*.cfg beside the package's main/ (ADR 0016), then --config files
+		std::error_code ec;
 		std::vector<std::string> dirs(1, g_packageRoot + "config/local");
 		for (size_t d = 0; d < dirs.size(); ++d)
 		{
@@ -410,6 +425,8 @@ namespace bv2
 				}
 				else
 					hp.host = w;
+				if (hp.host == "none")
+					continue; // "none": no master (BV2_MASTER_SERVERS=none)
 				if (!hp.host.empty() && hp.port > 0 && hp.port < 65536)
 					out.push_back(hp);
 			}

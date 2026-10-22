@@ -62,7 +62,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `REVIEW.md` | Definition of done: `tools/review.sh` checks, reviewer checklist, defined terms, forbidden shortcuts, fresh-context PR review (`.claude/agents/`) and its record in the PR description |
 | `SECURITY.md` | Security policy: supported versions, private vulnerability reporting, response timeline |
 | `docs/decisions/0007-data-root-pref-dir-config-layers.md` | ADR 0007 |
-| `game/src/Paths.cpp` | Package and data roots (`contentFile` for the package's own content), saved and detected BV2 data folder, per-user pref dir, layered config loading, map and DB path helpers (ADR 0016) |
+| `game/src/Paths.cpp` | Package and data roots (`contentFile` for the package's own content), saved and detected BV2 data folder, per-user pref dir, layered config loading (release settings like the master list skip `bv2.cfg`, ADR 0028), map and DB path helpers (ADR 0016) |
 | `game/src/Paths.h` | Interface of `Paths.cpp` (namespace `bv2`) |
 | `packaging/linux/roboviolence2.desktop` | Linux desktop entry |
 | `packaging/make-package.py` | Builds the per-OS package from a Release `runtime/` (links resolved, macOS bundle re-signed, licences), plus the Windows installer or macOS `.dmg` (ADR 0020) |
@@ -134,7 +134,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/test_babonet.cpp` | R7: a 10000-byte message over a loopback babonet connection arrives over several reads and intact |
 | `tests/test_browsable_game.cpp` | A server browser row owns a copy of its lobby game's row (the lobby frees its own) |
 | `tests/test_cstring.cpp` | Phase C step 5: one-argument `CString` is text (arrays, `char*`, literals, direct and implicit); two or more arguments format (ADR 0021) |
-| `tests/test_config.cpp` | dksvar config layering, transient values not saved, secrets masked |
+| `tests/test_config.cpp` | dksvar config layering, transient values not saved, secrets masked, `dksvarGetValue` |
 | `tests/test_credentials.cpp` | Step 10: the credential HMAC against RFC 4231; proofs check only with their own password, label and nonce |
 | `tests/test_crash_fixes.cpp` | Steps 5 and 7: one check per fixed defect (KEY_QUESTIONS Part D) on the in-process server |
 | `tests/test_dks.cpp` | R20: `dksPlayMusic` on a missing file 200 times; a sound deleted after `dksShutDown` (teardown) (ASan) |
@@ -144,7 +144,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/test_lang_check.py` | Step 13: `tools/lang-check.py` fails on changed conversions, unknown keys, repeated keywords, tabs and a stale `en.pot`; warns about missing glyphs |
 | `tests/test_join_password.cpp` | Step 10: a client joins a passworded server only with the HMAC over its own challenge; no password or MD5 of it on the wire |
 | `tests/test_join_timeout.cpp` | A connection that never answers the join handshake loses its slot after `Server::JOIN_TIMEOUT`; a client past the handshake keeps it while loading |
-| `tests/test_paths.cpp` | Phase C step 1: package vs data root, `contentFile`, `findDataIn` (upstream layout, `main/` itself), saved folder, auto-detect, `BV2_DATA_DIR` |
+| `tests/test_paths.cpp` | Phase C step 1: package vs data root, `contentFile`, `findDataIn` (upstream layout, `main/` itself), saved folder, auto-detect, `BV2_DATA_DIR`; the built-in master list vs `bv2.cfg`, `BV2_MASTER_SERVERS` and `none` (ADR 0028) |
 | `tests/test_osv_vcpkg.py` | Phase C step 4: `tools/osv-vcpkg.py` maps SPDX download locations to upstream repository and tag (offline) |
 | `tests/test_packet_hygiene.cpp` | Step 4 checks: sender binding (Q-S1), index ranges with controls (Q-S2), map names (Q-S6), skin and sound relay (Q-S7), `SV_CHANGE` filter (Q-S4), the handshake gate, `checkPacket` per message type and size, the client's `checkServerMessage` on values the server sends |
 | `tests/test_replay.cpp` | Replays the corpus through the in-process server: no crash, expected replies; each `crash-*.bin` (none at present) is its own ctest under ASan |
@@ -282,6 +282,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/decisions/0025-client-autotest-mode.md` | ADR: the client runs scripted console commands and expectations (`--autotest`) with exit codes 0/1/2 and a watchdog |
 | `docs/decisions/0026-screenshot-goldens.md` | ADR: Linux llvmpipe screenshot goldens compared within a tolerance; the `screenshot`, `menutab` and `scoreboard` commands |
 | `docs/decisions/0027-several-game-servers-per-host.md` | ADR: several game servers per host (CTF, TDM): one image, `BV2_HEALTH_PORT`, one env file, admin APIs at `/` and `/tdm/`, deploy waits for both |
+| `docs/decisions/0028-built-in-public-master.md` | ADR: `cl_masterServers` defaults to `master.roboviolence.com:10207`; `bv2.cfg` neither saves nor sets it; `none` turns it off |
 | `docs/decisions/0029-static-website-on-github-pages.md` | ADR: website is static HTML on GitHub Pages; OS-detected download from the GitHub releases API, pre-releases included |
 | `docs/decisions/README.md` | ADR format and index |
 

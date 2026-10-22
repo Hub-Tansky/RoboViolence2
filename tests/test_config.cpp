@@ -81,6 +81,9 @@ int main(int argc, char ** argv)
 	CHECK(dksvarSetTransient("test_masters", "other.invalid:2"));
 	CHECK(masters == CString("other.invalid:2"));
 	CHECK(!dksvarSetTransient("no_such_variable", "x"));
+	CHECK(dksvarGetValue("test_masters") == CString("other.invalid:2")); // no config-file quotes
+	CHECK(dksvarGetValue("test_level") == CString("30"));
+	CHECK(dksvarGetValue("no_such_variable") == CString(""));
 
 	dksvarSaveConfig((char *)saved.c_str());
 	std::string out = slurp(saved);
