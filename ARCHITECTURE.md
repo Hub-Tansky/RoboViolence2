@@ -272,7 +272,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/decisions/0015-admin-http-api-behind-tls-proxy.md` | ADR: remote admin over an HTTP API behind Caddy TLS; legacy UDP remote admin refused (step 12) |
 | `docs/decisions/0016-player-data-lookup-and-package-content.md` | ADR: client finds or asks for the player's BV2 data; launch scripts, languages and default config come from the package (Phase C step 1) |
 | `docs/decisions/0017-playtest-pull-agent.md` | ADR: main builds tested on the owner's Mac by a pull agent against a disposable local server; no self-hosted runner (phase T step 1) |
-| `docs/decisions/0018-staging-pull-deploy.md` | ADR: staging host deploys the newest main images by pull, pinned to a commit, only with no players; `/deployed`; multi-arch images (phase T step 2) |
+| `docs/decisions/0018-staging-pull-deploy.md` | ADR: staging host deploys the newest main images by pull, pinned to a commit, only with no players; `/deployed`; multi-arch images (phase T step 2); amendment: production runs the same agent by hand (`RV2_DEPLOY_LABEL=prod`, `--sha`, no cron) |
 | `docs/decisions/0019-in-game-name-and-fork-credits.md` | ADR: in-game name, fork credits, "LOADING" splash, survey removed (Phase C step 2) |
 | `docs/decisions/0020-package-and-release-format.md` | ADR: package, installer, `.dmg` and release format; engine-only public releases (Phase C step 3) |
 | `docs/decisions/0021-cstring-one-argument-is-text.md` | ADR: one-argument `CString` copies text; two or more arguments format (Phase C step 5) |
