@@ -98,6 +98,7 @@ expect "env file can't change the repository filter" yes "$([ "$(load_env >/dev/
 paths_for() { # paths_for <label or empty>: "<root> <env file>" with no path overrides
 	env -u RV2_STAGING_ROOT -u RV2_STAGING_ENV ${1:+RV2_DEPLOY_LABEL=$1} bash -c '. "$1"; echo "$ROOT $ENV_FILE"' _ "$here/../tools/staging/deploy.sh"
 }
+expect "usage lists every option" "2 yes" "$(out=$(RV2_DEPLOY_SOURCE_ONLY= bash "$here/../tools/staging/deploy.sh" --bogus 2>&1); echo "$? $(case $out in *--sha*--force*) echo yes ;; *) echo no ;; esac)")"
 expect "staging keeps its paths" "/var/lib/rv2-staging /etc/rv2-staging.env" "$(paths_for "")"
 expect "production gets its own state and env file" "/var/lib/rv2-prod /etc/rv2-prod.env" "$(paths_for prod)"
 
