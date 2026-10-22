@@ -2,8 +2,9 @@
 """Render the application icons and the macOS disk image background into packaging/ (ADR 0030).
 
 The icon is the website favicon (website/img/favicon.svg) grown up: a dark rounded tile, a blue ball bottom-left
-and a red ball top-right. Large sizes add sphere shading and a light edge that keeps the tile visible on dark docks
-and taskbars; 16, 24 and 32 px keep the flat favicon shapes so they stay sharp.
+and a red ball top-right, shooting at each other (muzzle flashes and two side-by-side tracers). Large sizes add
+sphere shading and a light edge that keeps the tile visible on dark docks and taskbars; 16, 24 and 32 px keep the
+flat favicon shapes and drop the tracers so they stay sharp.
 
 Writes, relative to the repository root:
   packaging/icons/roboviolence2.icns          macOS: Apple's grid (824 px squircle in 1024) with its drop shadow
@@ -29,7 +30,8 @@ from PIL import Image, ImageDraw, ImageFilter, ImageFont
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ICONS = os.path.join(ROOT, "packaging", "icons")
 MACOS = os.path.join(ROOT, "packaging", "macos")
-SS = 4  # supersampling per output pixel
+SS = 4  # supersampling per output pixel of the .dmg background
+ICON_SS = 3  # supersampling per output pixel of the icon
 
 MAC_SIZES = (1024, 512, 256, 128, 64, 32, 16)
 # The full set iconutil writes: each type holds a PNG of this many pixels (the 2x types reuse the same images)
@@ -52,6 +54,27 @@ def hexrgb(h):
 
 BG_TOP, BG_BOT, BG_FLAT = hexrgb("#2a2f40"), hexrgb("#12141b"), hexrgb("#1b1e28")
 BLUE, RED, EDGE = hexrgb("#2f7df6"), hexrgb("#e5383b"), hexrgb("#4a5170")
+FLASH = hexrgb("#ffd166")
+# In favicon units (0..32): ball centres and radius, how far round the rim each gun sits from the line to the
+# other ball (so the two tracers run side by side), tracer length and muzzle flash radius
+BALL_R = 5.2
+BALLS = ((9.5, 22.5, BLUE, hexrgb("#8fd8ff")), (22.5, 9.5, RED, hexrgb("#ff9a3c")))
+GUN_ANGLE = np.radians(40)
+TRACER_LEN = 5.0
+FLASH_R = 2.4
+
+
+def shots():
+    """(muzzle x, y, unit direction x, y, shot colour) for each ball firing at the other."""
+    out = []
+    for (cx, cy, _, shot), (tx, ty, _, _) in zip(BALLS, BALLS[::-1]):
+        dx, dy = tx - cx, ty - cy
+        n = np.hypot(dx, dy)
+        dx, dy = dx / n, dy / n
+        ca, sa = np.cos(GUN_ANGLE), np.sin(GUN_ANGLE)
+        gx, gy = dx * ca - dy * sa, dx * sa + dy * ca
+        out.append((cx + gx * BALL_R, cy + gy * BALL_R, dx, dy, shot))
+    return out
 
 
 def superellipse_mask(X, Y, cx, cy, half, n=5.0):
@@ -74,7 +97,7 @@ def over(dst, rgb, a):
 
 def render(px, style):
     """style: 'mac' (824/1024 squircle + shadow), 'full' (Windows/Linux, small margin), 'flat' (favicon)."""
-    N = px * SS
+    N = px * ICON_SS
     Y, X = np.mgrid[0:N, 0:N].astype(float) + 0.5
     X /= N
     Y /= N
@@ -108,25 +131,56 @@ def render(px, style):
     ea = (np.clip(tile - inner, 0, 1) * (1.0 if style == "flat" else 0.6))[..., None]
     img[..., :3] = EDGE * ea + img[..., :3] * (1 - ea)
 
-    for (cx, cy, base) in ((11, 21, BLUE), (22, 10, RED)):
+    if style != "flat":  # at 16-32 px the tracers turn the picture into a dumbbell; the flashes alone carry it
+        for (mx, my, dx, dy, shot) in shots():
+            # tracer: tapered streak from the muzzle toward the other ball, brightest at the head
+            tU, tV = U - mx, V - my
+            along = tU * dx + tV * dy
+            perp = np.abs(-tU * dy + tV * dx)
+            k = np.clip(along / TRACER_LEN, 0, 1)
+            width = 0.25 + 0.55 * k
+            inside = (along >= 0) & (along <= TRACER_LEN)
+            core = np.clip(1 - perp / width, 0, 1) * inside * (0.35 + 0.65 * k)
+            glow = np.exp(-(perp / (width * 2.6)) ** 2) * inside * (0.2 + 0.5 * k) * 0.55
+            over(img, shot, glow * tile)
+            over(img, np.minimum(shot * 0.5 + 0.6, 1), core * tile)
+
+    R = BALL_R
+    for (cx, cy, base, _) in BALLS:
         d = np.hypot(U - cx, V - cy)
-        ball = (d <= 6).astype(float) * tile
+        ball = (d <= R).astype(float) * tile
         if style == "flat":
             over(img, base, ball)
             continue
         # contact shadow below and right of the ball
         sd = np.hypot(U - cx - 0.6, V - cy - 1.1)
-        sh = np.clip(1 - (sd - 5.2) / 1.6, 0, 1) * 0.45 * tile * (1 - ball)
+        sh = np.clip(1 - (sd - (R - 0.8)) / 1.6, 0, 1) * 0.45 * tile * (1 - ball)
         img[..., :3] *= (1 - sh)[..., None]
         # sphere shading, light from the upper left
-        ld = np.clip(np.hypot(U - (cx - 2.4), V - (cy - 2.6)) / 9.0, 0, 1)[..., None]
+        ld = np.clip(np.hypot(U - (cx - 0.4 * R), V - (cy - 0.43 * R)) / (1.5 * R), 0, 1)[..., None]
         col = np.minimum(base * 1.35 + 0.08, 1) * (1 - ld) + base * ld
-        rimk = np.clip((d - 4.6) / 1.4, 0, 1)[..., None]
+        rimk = np.clip((d - (R - 1.4)) / 1.4, 0, 1)[..., None]
         col = col * (1 - rimk * 0.55) + base * 0.45 * rimk * 0.55
-        sp = np.exp(-(((U - (cx - 2.3)) / 1.5) ** 2 + ((V - (cy - 2.5)) / 1.0) ** 2))[..., None] * 0.55
+        sp = np.exp(-(((U - (cx - 0.38 * R)) / 1.4) ** 2 + ((V - (cy - 0.42 * R)) / 0.95) ** 2))[..., None] * 0.55
         col = col * (1 - sp) + sp
         a = ball[..., None]
         img[..., :3] = col * a + img[..., :3] * (1 - a)
+
+    for (mx, my, dx, dy, shot) in shots():
+        # muzzle flash: 5-point star aimed along the shot, hot white core
+        fU, fV = U - mx, V - my
+        r = np.hypot(fU, fV)
+        th = np.arctan2(fV, fU) - np.arctan2(dy, dx)
+        spikes = 0.5 + 0.5 * np.cos(5 * th)
+        fwd = np.clip(np.cos(th), 0, 1)
+        reach = FLASH_R * (0.45 + 0.55 * spikes ** 3) * (0.7 + 0.5 * fwd)
+        star = np.clip((reach - r) / 0.35, 0, 1)
+        if style == "flat":
+            over(img, FLASH, star * tile)
+            continue
+        over(img, shot, np.exp(-(r / (FLASH_R * 1.1)) ** 2) * 0.6 * tile)  # halo
+        over(img, FLASH, star * tile)
+        over(img, np.ones(3), np.clip((FLASH_R * 0.42 - r) / 0.3, 0, 1) * tile)
 
     img[..., :3] = np.clip(img[..., :3], 0, 1) * img[..., 3:]  # premultiplied, for a clean downscale
     im = Image.fromarray((img * 255).round().astype(np.uint8), "RGBa").resize((px, px), Image.LANCZOS)

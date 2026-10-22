@@ -6,7 +6,7 @@
 
 ## Context
 - The client had only a generated placeholder `.ico` on Windows; the macOS bundle and the Linux window had no icon.
-- The owner approved an icon on 2026-10-22: the website favicon (`website/img/favicon.svg`: dark tile, blue ball, red ball) with shading at large sizes.
+- The owner approved an icon on 2026-10-22: the website favicon (`website/img/favicon.svg`: dark tile, blue ball, red ball) with the two balls shooting at each other (muzzle flashes and side-by-side tracers) and shading at large sizes. At 16-32 px the tracers are dropped and the flashes stay.
 - The `.dmg` used to hold the whole package folder (servers, scripts, `main/`, databases, licences), so its window showed a dozen icons. The owner asked for the standard macOS layout: the app, an arrow, the Applications folder.
 - Each OS expects its own shape: macOS draws no mask, so the icon carries Apple's grid (824 px squircle in a 1024 px canvas) and drop shadow; Windows and Linux add their own effects, so their icon fills the canvas.
 
