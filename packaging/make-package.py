@@ -14,9 +14,11 @@ packaging/macos/dmg-background.png (dmgbuild, ADR 0030). <version> (e.g. a v1.2.
 installer.
 Fails if the build is not Release, or if anything the package must hold is missing.
 """
+import json
 import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 from typing import Callable, NamedTuple
 
@@ -24,10 +26,7 @@ PACKAGING = Path(__file__).resolve().parent
 SCRIPTS = PACKAGING / "scripts"
 GLAD = PACKAGING.parent / "engine" / "zeven" / "third_party" / "glad"
 ISCC = r"C:\Program Files (x86)\Inno Setup 6\ISCC.exe"  # its default install, as on the GitHub Windows runner
-# The .dmg window: size and icon centres match the background drawn by tools/gen-app-icon.py
-DMG_APP = "Robo Violence 2.app"
-DMG_WINDOW = (640, 400)
-DMG_ICONS = {DMG_APP: (160, 170), "Applications": (480, 170)}
+DMG_APP = "Robo Violence 2.app"  # the name Finder, Launchpad and the Dock show
 
 
 def run(*cmd):
@@ -57,36 +56,44 @@ def ship_macos(stage, out, name, version):
     run("codesign", "--force", "--sign", "-", app)
     # ditto keeps exec bits and the bundle signature, and writes no ._ files
     run("ditto", "-c", "-k", "--keepParent", "--norsrc", "--noextattr", "--noqtn", stage, archive)
+    # The same layout tools/gen-app-icon.py drew the background for
+    layout = json.loads((PACKAGING / "macos" / "dmg-layout.json").read_text())
     dmg.unlink(missing_ok=True)
     build_dmg(str(dmg), "Robo Violence 2", settings={
         "format": "UDZO",
-        "files": [(str(app), DMG_APP)],  # the name Finder, Launchpad and the Dock show
+        "files": [(str(app), DMG_APP)],
         "symlinks": {"Applications": "/Applications"},
         "icon": str(PACKAGING / "icons" / "roboviolence2.icns"),  # the mounted volume's icon
         "background": str(PACKAGING / "macos" / "dmg-background.png"),  # dmgbuild adds the @2x file
-        "window_rect": ((200, 120), DMG_WINDOW),
+        "window_rect": ((200, 120), tuple(layout["window"])),
         "icon_size": 128,
         "text_size": 13,
-        "icon_locations": DMG_ICONS,
+        "icon_locations": {DMG_APP: tuple(layout["app"]), "Applications": tuple(layout["applications"])},
     })
     check_dmg(dmg)
     return [archive, dmg]
 
 
 def check_dmg(dmg):
-    """Mount the image and fail unless it shows exactly the app and the link, laid out, with a valid signature"""
-    mount = Path(subprocess.run(["mktemp", "-d"], check=True, capture_output=True, text=True).stdout.strip())
+    """Mount the image; fail unless it shows exactly the app and the Applications link, has the hidden files of
+    the window settings, background and volume icon, and the app's signature verifies"""
+    mount = Path(tempfile.mkdtemp())
     run("hdiutil", "attach", "-quiet", "-nobrowse", "-readonly", "-mountpoint", mount, dmg)
     try:
         visible = sorted(p.name for p in mount.iterdir() if not p.name.startswith("."))
-        hidden = [f for f in (".DS_Store", ".VolumeIcon.icns", ".background.tiff") if not (mount / f).is_file()]
-        if visible != sorted(DMG_ICONS) or hidden or (mount / "Applications").readlink() != Path("/Applications"):
-            sys.exit(f"{dmg.name}: shows {visible}, missing {hidden}")
-        run("codesign", "--verify", "--strict", mount / DMG_APP)
+        if visible != sorted([DMG_APP, "Applications"]):
+            sys.exit(f"{dmg.name} shows {visible}")
+        if (mount / "Applications").readlink() != Path("/Applications"):
+            sys.exit(f"{dmg.name}: Applications links to {(mount / 'Applications').readlink()}")
+        missing = [f for f in (".DS_Store", ".VolumeIcon.icns", ".background.tiff") if not (mount / f).is_file()]
+        if missing:
+            sys.exit(f"{dmg.name} lacks {', '.join(missing)}")
         if not (mount / DMG_APP / "Contents" / "Resources" / "roboviolence2.icns").is_file():
             sys.exit(f"{dmg.name}: the app has no icon")
+        run("codesign", "--verify", "--strict", mount / DMG_APP)
     finally:
         run("hdiutil", "detach", "-quiet", mount)
+        mount.rmdir()
 
 
 def ship_windows(stage, out, name, version):

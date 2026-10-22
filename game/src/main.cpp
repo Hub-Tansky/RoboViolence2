@@ -553,7 +553,7 @@ int main(int argc, char* argv[])
 #ifdef BV2_APP_ICON_PNG
 	// Windows and macOS take the icon from the executable or the bundle (ADR 0030)
 	if (!dkwSetWindowIcon(g_appIconPng, sizeof(g_appIconPng)))
-		std::cerr << "Window icon not set: " << dkwGetLastError() << std::endl;
+		std::cerr << "Built-in window icon doesn't decode: " << dkwGetLastError() << std::endl;
 #endif
 
 	// On init les input

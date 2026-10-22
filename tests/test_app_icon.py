@@ -1,11 +1,11 @@
 """The application icon files are complete and every package format points at them (ADR 0030).
 
 Checks the committed art from tools/gen-app-icon.py (the .ico and .icns hold every size each OS asks for, the Linux
-PNGs are the size their name says) and the wiring: the Windows resource and installer, the macOS Info.plist, the
-Linux .desktop file, and the .dmg window geometry make-package.py shares with the background image.
+hicolor tree holds the sizes its folders name) and the wiring: the Windows resource and installer, the macOS
+Info.plist, the Linux .desktop file, and the .dmg backgrounds drawn for dmg-layout.json's window size.
 Python 3, stdlib only.
 """
-import ast
+import json
 import pathlib
 import re
 import struct
@@ -27,10 +27,16 @@ def png_size(data):
     return width, height, depth, colour
 
 
-# Linux hicolor sizes and the client's built-in window icon: 8-bit RGBA, as large as the name says
-for size in (16, 24, 32, 48, 64, 128, 256, 512):
-    f = icons / f"roboviolence2-{size}.png"
-    check(f.is_file() and png_size(f.read_bytes()) == (size, size, 8, 6), f"{f.name}: not a {size} px RGBA PNG")
+# Linux hicolor tree (installed as is) and the client's built-in window icon: 8-bit RGBA, as large as the folder says
+hicolor = {}
+for f in sorted((icons / "hicolor").glob("*/apps/roboviolence2.png")):
+    size = int(f.parent.parent.name.split("x")[0])
+    hicolor[size] = f
+    check(f.parent.parent.name == f"{size}x{size}" and png_size(f.read_bytes()) == (size, size, 8, 6),
+          f"{f.relative_to(root)}: not a {size} px RGBA PNG")
+check(sorted(hicolor) == [16, 24, 32, 48, 64, 128, 256, 512], f"hicolor sizes: {sorted(hicolor)}")
+check(not [p for p in (icons / "hicolor").rglob("*") if p.is_file() and p.name != "roboviolence2.png"],
+      "hicolor holds files other than roboviolence2.png")
 
 # Windows: every size Explorer, the taskbar and the Start menu ask for, at 100-200 % scaling
 ico = (icons / "roboviolence2.ico").read_bytes()
@@ -70,24 +76,11 @@ desktop = (root / "packaging/linux/roboviolence2.desktop").read_text()
 check(re.search(r"^Icon=roboviolence2$", desktop, re.M), "roboviolence2.desktop: Icon is not roboviolence2")
 
 
-# The .dmg window: make-package.py places the icons where the background draws the arrow and is as big as it
-def constants(path, names):
-    """The module-level NAME = <literal> assignments; a value may use the constants above it"""
-    env = {}
-    for n in ast.parse(path.read_text()).body:
-        if isinstance(n, ast.Assign) and len(n.targets) == 1 and getattr(n.targets[0], "id", None) in names:
-            env[n.targets[0].id] = eval(compile(ast.Expression(n.value), str(path), "eval"), {"__builtins__": {}}, env)
-    return env
-
-
-gen = constants(root / "tools/gen-app-icon.py", {"DMG_SIZE", "DMG_APP_AT", "DMG_APPLICATIONS_AT"})
-pkg = constants(root / "packaging/make-package.py", {"DMG_APP", "DMG_WINDOW", "DMG_ICONS"})
-check(pkg["DMG_WINDOW"] == gen["DMG_SIZE"], "dmg window size differs from the background's")
-check(pkg["DMG_ICONS"] == {pkg["DMG_APP"]: gen["DMG_APP_AT"], "Applications": gen["DMG_APPLICATIONS_AT"]},
-      "dmg icon positions differ from the background's arrow")
+# The .dmg backgrounds are drawn for the window size make-package.py opens (both read dmg-layout.json)
+layout = json.loads((root / "packaging/macos/dmg-layout.json").read_text())
 for name, scale in (("dmg-background.png", 1), ("dmg-background@2x.png", 2)):
     size = png_size((root / "packaging/macos" / name).read_bytes())[:2]
-    check(size == (gen["DMG_SIZE"][0] * scale, gen["DMG_SIZE"][1] * scale), f"{name} is {size}")
+    check(list(size) == [n * scale for n in layout["window"]], f"{name} is {size}, the window {layout['window']}")
 
 for f in failures:
     print("FAIL", f)

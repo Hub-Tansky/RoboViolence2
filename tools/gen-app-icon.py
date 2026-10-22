@@ -8,14 +8,18 @@ and taskbars; 16, 24 and 32 px keep the flat favicon shapes so they stay sharp.
 Writes, relative to the repository root:
   packaging/icons/roboviolence2.icns          macOS: Apple's grid (824 px squircle in 1024) with its drop shadow
   packaging/icons/roboviolence2.ico           Windows: 16-256 px, near full bleed, no baked shadow
-  packaging/icons/roboviolence2-<n>.png       Linux hicolor sizes and the client's window icon (same art as .ico)
-  packaging/macos/dmg-background(@2x).png     the .dmg window: arrow from the app to Applications
+  packaging/icons/hicolor/<n>x<n>/apps/roboviolence2.png
+                                              Linux hicolor tree (installed as is); 128 px is the client's
+                                              window icon (same art as the .ico)
+  packaging/macos/dmg-background(@2x).png     the .dmg window: arrow from the app to Applications, laid out by
+                                              packaging/macos/dmg-layout.json (make-package.py reads it too)
 
 The outputs are committed: run this only to change the art. Needs numpy and Pillow (not a build dependency).
-Usage: tools/gen-app-icon.py [--font <ttf/otf for the .dmg caption>]
+Usage: tools/gen-app-icon.py [--font <ttf/otf for the .dmg caption, default Inter Regular as on Debian/Ubuntu>]
 """
 import argparse
 import io
+import json
 import os
 import struct
 
@@ -35,12 +39,10 @@ PNG_SIZES = (16, 24, 32, 48, 64, 128, 256, 512)
 ICO_SIZES = (256, 128, 64, 48, 32, 24, 16)
 FLAT_MAX = 32  # sizes up to this use the flat favicon shapes
 
-# .dmg window, in points: make-package.py uses the same size and icon centres. The image is as tall as the whole
-# window, so whether Finder counts the title bar in the window bounds or not, no edge of it shows.
-DMG_SIZE = (640, 400)
-DMG_APP_AT = (160, 170)
-DMG_APPLICATIONS_AT = (480, 170)
-DMG_CAPTION_Y = 310
+# The .dmg window, in points. The image is as tall as the whole window, so whether Finder counts the title bar in
+# the window bounds or not, no edge of it shows.
+with open(os.path.join(MACOS, "dmg-layout.json")) as f:
+    DMG = json.load(f)
 
 
 def hexrgb(h):
@@ -156,7 +158,7 @@ def write_icns(path, images):
 
 def dmg_background(scale, font_path):
     """Light window (Finder's own look), a grey arrow between the two icon slots, a one-line caption."""
-    w, h = DMG_SIZE[0] * scale, DMG_SIZE[1] * scale
+    w, h = DMG["window"][0] * scale, DMG["window"][1] * scale
     t = np.linspace(0, 1, h)[:, None, None]
     top, bot = np.array([250, 250, 252], float), np.array([236, 237, 241], float)
     im = Image.fromarray(np.broadcast_to(top * (1 - t) + bot * t, (h, w, 3)).round().astype(np.uint8), "RGB")
@@ -164,8 +166,8 @@ def dmg_background(scale, font_path):
     big = im.resize((w * SS, h * SS), Image.NEAREST)
     draw = ImageDraw.Draw(big)
     grey = (142, 146, 156)
-    y = DMG_APP_AT[1] * s
-    x0, x1 = (DMG_APP_AT[0] + 96) * s, (DMG_APPLICATIONS_AT[0] - 96) * s
+    y = DMG["app"][1] * s
+    x0, x1 = (DMG["app"][0] + 96) * s, (DMG["applications"][0] - 96) * s
     width, head = 6 * s, 22 * s
     draw.line([(x0, y), (x1 - width // 2, y)], fill=grey, width=width)
     draw.line([(x1 - head, y - head), (x1, y), (x1 - head, y + head)], fill=grey, width=width, joint="curve")
@@ -173,8 +175,8 @@ def dmg_background(scale, font_path):
         r = width // 2
         draw.ellipse([cx - r, cy - r, cx + r, cy + r], fill=grey)
     im = big.resize((w, h), Image.LANCZOS)
-    font = ImageFont.truetype(font_path, 14 * scale) if font_path else ImageFont.load_default(14 * scale)
-    ImageDraw.Draw(im).text((w // 2, DMG_CAPTION_Y * scale), "Drag Robo Violence 2 to Applications", font=font,
+    font = ImageFont.truetype(font_path, 14 * scale)
+    ImageDraw.Draw(im).text((w // 2, DMG["caption_y"] * scale), "Drag Robo Violence 2 to Applications", font=font,
                             fill=(110, 115, 128), anchor="mm")
     return im
 
@@ -183,7 +185,9 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--font", default="/usr/share/fonts/opentype/inter/Inter-Regular.otf")
     args = parser.parse_args()
-    font = args.font if os.path.isfile(args.font) else None
+    if not os.path.isfile(args.font):
+        parser.error(f"no font at {args.font}: pass --font (the committed caption uses Inter Regular)")
+    font = args.font
     os.makedirs(ICONS, exist_ok=True)
 
     mac = {s: render(s, "mac") for s in MAC_SIZES}
@@ -191,7 +195,9 @@ def main():
 
     icons = {s: render(s, "flat" if s <= FLAT_MAX else "full") for s in PNG_SIZES}
     for s in PNG_SIZES:
-        icons[s].save(os.path.join(ICONS, f"roboviolence2-{s}.png"), optimize=True)
+        apps = os.path.join(ICONS, "hicolor", f"{s}x{s}", "apps")
+        os.makedirs(apps, exist_ok=True)
+        icons[s].save(os.path.join(apps, "roboviolence2.png"), optimize=True)
     icons[256].save(os.path.join(ICONS, "roboviolence2.ico"), sizes=[(s, s) for s in ICO_SIZES],
                     append_images=[icons[s] for s in ICO_SIZES[1:]])
 

@@ -76,17 +76,18 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `packaging/macos/Info.plist.in` | macOS bundle `Info.plist` template (names the icon) |
 | `packaging/macos/dmg-background.png` | `.dmg` window background: arrow from the app to Applications ([ADR 0030](docs/decisions/0030-app-icon-and-dmg-layout.md)) |
 | `packaging/macos/dmg-background@2x.png` | The same background for Retina displays |
+| `packaging/macos/dmg-layout.json` | `.dmg` window size, icon centres and caption line, read by `tools/gen-app-icon.py` and `packaging/make-package.py` |
 | `packaging/macos/requirements.txt` | dmgbuild and its dependencies, pinned with hashes, for the `.dmg` layout (CI venv) |
 | `packaging/icons/roboviolence2.icns` | macOS application icon (bundle and `.dmg` volume), from `tools/gen-app-icon.py` |
 | `packaging/icons/roboviolence2.ico` | Windows application icon (`bv2.exe` and the installer), 16-256 px |
-| `packaging/icons/roboviolence2-16.png` | Linux hicolor icon, 16 px |
-| `packaging/icons/roboviolence2-24.png` | Linux hicolor icon, 24 px |
-| `packaging/icons/roboviolence2-32.png` | Linux hicolor icon, 32 px |
-| `packaging/icons/roboviolence2-48.png` | Linux hicolor icon, 48 px |
-| `packaging/icons/roboviolence2-64.png` | Linux hicolor icon, 64 px |
-| `packaging/icons/roboviolence2-128.png` | Linux hicolor icon, 128 px; compiled into the Linux client as its window icon |
-| `packaging/icons/roboviolence2-256.png` | Linux hicolor icon, 256 px |
-| `packaging/icons/roboviolence2-512.png` | Linux hicolor icon, 512 px |
+| `packaging/icons/hicolor/16x16/apps/roboviolence2.png` | Linux hicolor icon, 16 px (installed as is) |
+| `packaging/icons/hicolor/24x24/apps/roboviolence2.png` | Linux hicolor icon, 24 px (installed as is) |
+| `packaging/icons/hicolor/32x32/apps/roboviolence2.png` | Linux hicolor icon, 32 px (installed as is) |
+| `packaging/icons/hicolor/48x48/apps/roboviolence2.png` | Linux hicolor icon, 48 px (installed as is) |
+| `packaging/icons/hicolor/64x64/apps/roboviolence2.png` | Linux hicolor icon, 64 px (installed as is) |
+| `packaging/icons/hicolor/128x128/apps/roboviolence2.png` | Linux hicolor icon, 128 px (installed as is); compiled into the Linux client as its window icon |
+| `packaging/icons/hicolor/256x256/apps/roboviolence2.png` | Linux hicolor icon, 256 px (installed as is) |
+| `packaging/icons/hicolor/512x512/apps/roboviolence2.png` | Linux hicolor icon, 512 px (installed as is) |
 | `packaging/docker/Dockerfile` | Server images: one Ubuntu 24.04 build, targets `server` (`bv2dedicated`, launch script as argument, healthcheck on `BV2_HEALTH_PORT`) and `master` (`bv2master`), non-root, pref dir volume (step 11) |
 | `packaging/docker/master-entrypoint.sh` | Master image entrypoint: seeds `master.db` and `web.db` into the volume, then runs `bv2master` |
 | `packaging/docker/Caddyfile` | Caddy site: TLS for the game servers' admin APIs, CTF at `/`, TDM at `/tdm/` (`BV2_ADMIN_HOST`, default localhost) (step 12); `/deployed` serves the staging commit (phase T step 2) |
@@ -152,6 +153,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/test_crash_fixes.cpp` | Steps 5 and 7: one check per fixed defect (KEY_QUESTIONS Part D) on the in-process server |
 | `tests/test_dks.cpp` | R20: `dksPlayMusic` on a missing file 200 times; a sound deleted after `dksShutDown` (teardown) (ASan) |
 | `tests/test_example_cfg.py` | `config/bv2.example.cfg` names a new player as `GameVar.cpp` does |
+| `tests/test_window_icon.cpp` | The Linux client's compiled-in window icon (`AppIcon.h`) decodes at 128 x 128 |
 | `tests/test_app_icon.py` | The icon files hold every size each OS needs; the exe, installer, bundle, `.desktop` and `.dmg` layout point at them |
 | `tests/test_fileio.cpp` | `FileIO` byte widths for `.bvm` data and the widths the `.DKO` loader relies on; `bv2ReadBytes` zero-fills a short read; fixed-string length prefix round trip; unterminated `CString::loadFromFile` (overflows under ASan without its bound); `getString` keeps 255 characters (R16); `MemIO` reads past its end as zero; `getNextToken` on a single token (R30) |
 | `tests/test_lang.cpp` | Step 13: PO parser (entries that change the English printf conversions or whose key English lacks are skipped; raw control bytes rejected), English fallback per key, OS locale matching (`ll_CC`, `ll`, `.po` before `.lang`), PO without glyphs skipped |
@@ -423,7 +425,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `engine/zeven/include/dksvar.h` | dksvar: configuration variable registry |
 | `engine/zeven/include/dksvardef.h` | dksvar: variable definition macros |
 | `engine/zeven/include/dkt.h` | dkt: texture loading (TGA) and binding |
-| `engine/zeven/include/dkw.h` | dkw: window creation and events |
+| `engine/zeven/include/dkw.h` | dkw: window creation and events, window icon |
 | `engine/zeven/include/glheaders.h` | The only OpenGL include: glad, then GLU |
 | `engine/zeven/include/platform.h` | Platform macros (BV2_PLATFORM_*, BV2_POSIX), INT4/UINT4, `bv2ReadBytes` (checked `fread` for the engine loaders and `FileIO`), POSIX includes and Win32 type shims; force-included |
 
@@ -452,7 +454,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `engine/zeven/src/dkt.cpp` | dkt: texture loading (TGA) and binding |
 | `engine/zeven/src/dkt_console.cpp` | No-op dkt for the headless server |
 | `engine/zeven/src/dkti.h` | Internal header of the matching dk module |
-| `engine/zeven/src/dkw.cpp` | dkw: window creation and events |
+| `engine/zeven/src/dkw.cpp` | dkw: window creation and events, window icon |
 
 ### `engine/zeven/third_party/glad`
 
@@ -482,7 +484,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 
 | path | purpose |
 |---|---|
-| `game/CMakeLists.txt` | Targets `bv2server_lib` (the CONSOLE file list without `main.cpp`; also linked by the tests), bv2dedicated (`main.cpp` + `bv2server_lib`) and bv2 (client) |
+| `game/CMakeLists.txt` | Targets `bv2server_lib` (the CONSOLE file list without `main.cpp`; also linked by the tests), bv2dedicated (`main.cpp` + `bv2server_lib`) and bv2 (client, with the per-OS application icon; on Linux `bv2_app_icon` generates `AppIcon.h`) |
 | `game/README.md` | Module README: game |
 
 ### `game/src`

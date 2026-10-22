@@ -43,8 +43,9 @@ public:
 /// Returns 1 on success, 0 on failure (see dkwGetLastError).
 int				dkwInit(int width, int height, int colorDepth, char *title, CMainLoopInterface *mMainLoopObject, bool fullScreen, int refreshRate = -1);
 
-/// Sets the window icon from PNG bytes (a trusted, built-in image). For platforms where the executable carries
-/// no icon of its own; returns false and sets dkwGetLastError if the image or the window can't take it.
+/// Sets the window icon from PNG bytes (a trusted, built-in image), for platforms where the executable carries
+/// no icon of its own. Returns false and sets dkwGetLastError only if the PNG doesn't decode; a window system that
+/// doesn't take window icons (some Wayland compositors) is not an error.
 bool			dkwSetWindowIcon(const unsigned char *png, size_t size);
 
 /// Asks the main loop to end.
