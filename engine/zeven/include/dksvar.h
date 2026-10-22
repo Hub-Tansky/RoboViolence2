@@ -80,6 +80,8 @@ void			dksvarLoadConfigSVOnly(char * filename);
 void			dksvarLoadConfigTransient(char * filename);
 /// Sets one variable to a value, transient (see above). Returns false if the variable does not exist.
 bool			dksvarSetTransient(const char * name, const char * value);
+/// A variable's current value as text, without the quotes strings get in a config file. Empty if it does not exist.
+CString			dksvarGetValue(const char * name);
 /// True for variables holding secrets (name contains "pass"); callers must not echo their values.
 bool			dksvarIsSecret(const char * name);
 void			dksvarSaveConfig(char * filename);

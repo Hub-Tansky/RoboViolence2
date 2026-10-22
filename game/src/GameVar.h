@@ -177,7 +177,7 @@ public:
 	CString zsv_adminApiProxy;
 
 	CString db_accountServer;
-	CString cl_masterServers; // host:port list (BV2_MASTER_SERVERS); empty = no master
+	CString cl_masterServers; // host:port list (BV2_MASTER_SERVERS); "none" or empty = no master; never saved (ADR 0028)
 	CString cl_accountURL;    // account/ladder endpoint (BV2_ACCOUNT_URL); empty = accounts off
 	int db_version;
 

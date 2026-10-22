@@ -143,6 +143,22 @@ bool			dksvarSetTransient(const char * name, const char * value)
 	return true;
 }
 
+CString			dksvarGetValue(const char * name)
+{
+	for (int i=0;i<(int)systemVariable.variables.size();++i)
+	{
+		CSVType * var = systemVariable.variables[i];
+		CString varName = var->variableName;
+		if (varName.getFirstToken(' ') == name)
+		{
+			CString value = var->getValue();
+			value.trim('\"');
+			return value;
+		}
+	}
+	return CString();
+}
+
 bool			dksvarIsSecret(const char * name)
 {
 	if (!name)
