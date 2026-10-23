@@ -22,7 +22,7 @@ Robo Violence 2: unofficial fork of BaboViolent 2, a top-down multiplayer shoote
 | Website | `website/`: static pages for roboviolence.com on GitHub Pages (`pages.yml`, [ADR 0029](docs/decisions/0029-static-website-on-github-pages.md)). |
 | Hosting | Server images from `packaging/docker/Dockerfile` (GHCR on `main`), runbook [docs/ops/runbook.md](docs/ops/runbook.md). |
 | Known defects | [docs/analysis/KEY_QUESTIONS.md](https://github.com/Hub-Tansky/RoboViolence2/blob/fc0aff7c5aa946406c7c110e8e7c2d972a7daeb8/docs/analysis/KEY_QUESTIONS.md). |
-| Decisions | [docs/decisions/README.md](docs/decisions/README.md): 0001 Ninja, 0002 libcurl compiled out, 0003 OpenGL 2.1 kept, 0004 project name (superseded by 0008), 0005 `main/` data root, 0006 platform layer, 0007 data root, pref dir and config layers, 0008 display name "Robo Violence 2", 0009 internal renaming, 0010 BV2 asset compatibility and GUI freeze, 0011 gettext PO translations, 0012 Windows 10 22H2 minimum, 0013 rulesets, 0014 libsodium HMAC, 0015 admin HTTP API, 0016 player data lookup and package content, 0017 playtest pull agent, 0018 staging pull deploy, 0019 in-game name and fork credits, 0020 package and release format, 0021 one-argument CString is text, 0022 advertised server address, 0023 step review subagent in the repo, 0024 GitHub Project is the backlog, 0025 client autotest mode, 0026 screenshot goldens, 0029 static website on GitHub Pages. |
+| Decisions | [docs/decisions/README.md](docs/decisions/README.md): 0001 Ninja, 0002 libcurl compiled out, 0003 OpenGL 2.1 kept, 0004 project name (superseded by 0008), 0005 `main/` data root, 0006 platform layer, 0007 data root, pref dir and config layers, 0008 display name "Robo Violence 2", 0009 internal renaming, 0010 BV2 asset compatibility and GUI freeze, 0011 gettext PO translations, 0012 Windows 10 22H2 minimum, 0013 rulesets, 0014 libsodium HMAC, 0015 admin HTTP API, 0016 player data lookup and package content, 0017 playtest pull agent, 0018 staging pull deploy, 0019 in-game name and fork credits, 0020 package and release format, 0021 one-argument CString is text, 0022 advertised server address, 0023 step review subagent in the repo, 0024 GitHub Project is the backlog, 0025 client autotest mode, 0026 screenshot goldens, 0029 static website on GitHub Pages, 0033 first-run data dialog recommends the BV2 zip. |
 
 ### Open items
 
@@ -307,6 +307,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/decisions/0030-app-icon-and-dmg-layout.md` | ADR: committed application icon per OS (exe, bundle, Linux window icon); `.dmg` with only the app and Applications |
 | `docs/decisions/0031-linux-deb-package.md` | ADR: Linux `.deb` with the client and `bv2dedicated` in `/usr/games`, beside the `.tar.gz`; reverses ADR 0020's rejection |
 | `docs/decisions/0032-discord-release-post.md` | ADR: the release job posts each release to Discord `#announcements` through a webhook secret, pinging only the opt-in role |
+| `docs/decisions/0033-first-run-dialog-recommends-bv2-zip.md` | ADR: the first-run data dialog recommends the original BV2 zip, shows its URL and the folder to choose, and has a Download button (amends 0016) |
 | `docs/decisions/README.md` | ADR format and index |
 
 ### `docs/ops`
@@ -594,7 +595,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/ControlListener.h` | Menu control listener interface |
 | `game/src/CreateGame.h` | Create-game screen |
 | `game/src/Credits.h` | Credits screen |
-| `game/src/DataDirPicker.cpp` | Client start-up: saved or detected BV2 data folder, else a first-run message box (recommends and opens the original BV2 zip) and OS folder dialog (ADR 0016) |
+| `game/src/DataDirPicker.cpp` | Client start-up: saved or detected BV2 data folder, else a first-run message box (recommends and opens the original BV2 zip) and OS folder dialog (ADR 0016, 0033) |
 | `game/src/DataDirPicker.h` | Interface of `DataDirPicker.cpp` |
 | `game/src/Dialog.cpp` | Menu dialog base |
 | `game/src/Dialog.h` | Menu dialog base |
