@@ -1,4 +1,4 @@
-// Markdown copies of the website pages for AI agents (website/<page>.md beside <page>.html, ADR 0029).
+// Markdown copies of the website pages for AI agents (website/<page>.md beside <page>.html, ADR 0035).
 // Run after changing a page: node tools/website-markdown.mjs. tests/website/site.test.mjs fails when a copy is stale.
 // Handles the HTML the pages use: headings, paragraphs, flat lists, code blocks, links and inline emphasis inside <main>.
 import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
@@ -93,7 +93,7 @@ export function toMarkdown(html) {
 
 export const pages = (dir) => readdirSync(dir).filter((f) => f.endsWith('.html'));
 
-if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const dir = new URL('../website/', import.meta.url);
   for (const page of pages(dir)) {
     writeFileSync(new URL(page.replace(/\.html$/, '.md'), dir), toMarkdown(readFileSync(new URL(page, dir), 'utf8')));

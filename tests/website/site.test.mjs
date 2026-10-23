@@ -1,4 +1,4 @@
-// Website download logic and shared page chrome (website/, ADR 0029). Run: node --test tests/website/site.test.mjs
+// Website download logic and shared page chrome (website/, ADR 0029, 0035). Run: node --test tests/website/site.test.mjs
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
 import test from 'node:test';

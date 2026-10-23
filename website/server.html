@@ -28,7 +28,7 @@
 </head>
 <body>
 <header class="site-header">
-  <nav class="site-nav" aria-label="Main">
+  <nav class="site-nav site-container" aria-label="Main">
     <a class="site-brand" href="./"><img src="img/rv2-icon.png" width="32" height="32" alt="">Robo Violence 2</a>
     <button class="menu-button" type="button" data-menu-button aria-expanded="false" aria-controls="menu"><i data-lucide="menu"></i><span class="sr-only">Menu</span></button>
     <div class="menu" id="menu">
@@ -41,43 +41,43 @@
 </header>
 
 <main class="page">
-  <div class="page-body">
-  <div class="prose-rv">
-    <h1>Your own game server</h1>
-    <p>The Windows and Linux downloads include the game server (<code>bv2dedicated</code>). On macOS it is in <code>roboviolence2-macos-arm64.zip</code> on the <a href="https://github.com/Hub-Tansky/RoboViolence2/releases">releases page</a>, not in the <code>.dmg</code>. For an always-on host, use the Docker image.</p>
-    <p>A new server shows up in the in-game server list by itself.</p>
+  <div class="page-body site-container">
+    <div class="prose-rv">
+      <h1>Your own game server</h1>
+      <p>The Windows and Linux downloads include the game server (<code>bv2dedicated</code>). On macOS it is in <code>roboviolence2-macos-arm64.zip</code> on the <a href="https://github.com/Hub-Tansky/RoboViolence2/releases">releases page</a>, not in the <code>.dmg</code>. For an always-on host, use the Docker image.</p>
+      <p>A new server shows up in the in-game server list by itself.</p>
 
-    <h2 id="ports">Ports</h2>
-    <p>Open inbound <strong>TCP 3333</strong>. A team deathmatch server (launch script <code>TDM</code>) uses <strong>TCP 3334</strong>. All game traffic is TCP.</p>
+      <h2 id="ports">Ports</h2>
+      <p>Open inbound <strong>TCP 3333</strong>. A team deathmatch server (launch script <code>TDM</code>) uses <strong>TCP 3334</strong>. All game traffic is TCP.</p>
 
-    <h2 id="quick-start">Quick start from a download</h2>
-    <p>In the unpacked folder (Linux and macOS shown; on Windows double-click <code>run-server.cmd</code>):</p>
-    <pre><code>./run-server.sh</code></pre>
-    <p>This starts capture the flag; <code>./run-server.sh TDM</code> starts team deathmatch. Players join from the server list or with the console command <code>connect &lt;your address&gt;</code>. The server reads your BaboViolent 2 maps from <code>BV2_DATA_DIR</code> (the folder that contains <code>main/</code>) and sends missing maps to players.</p>
+      <h2 id="quick-start">Quick start from a download</h2>
+      <p>In the unpacked folder (Linux and macOS shown; on Windows double-click <code>run-server.cmd</code>):</p>
+      <pre><code>./run-server.sh</code></pre>
+      <p>This starts capture the flag; <code>./run-server.sh TDM</code> starts team deathmatch. Players join from the server list or with the console command <code>connect &lt;your address&gt;</code>. The server reads your BaboViolent 2 maps from <code>BV2_DATA_DIR</code> (the folder that contains <code>main/</code>) and sends missing maps to players.</p>
 
-    <h2 id="docker">Docker</h2>
-    <p>Image for amd64 and arm64: <code>ghcr.io/hub-tansky/roboviolence2-server</code>. One capture the flag server with its saved state in a volume:</p>
-    <pre><code>docker run -dit --name rv2-ctf --restart unless-stopped \
-  -p 3333:3333 -v rv2-ctf:/var/lib/bv2 \
-  --env-file ~/rv2-server.env \
-  ghcr.io/hub-tansky/roboviolence2-server</code></pre>
-    <p>Keep settings and secrets in that env file:</p>
-    <pre><code># join password, empty for none
-BV2_SV_PASSWORD=
-# admin login password
-BV2_ADMIN_PASS=
-# your public IPv4, so the server list shows a reachable address
-BV2_PUBLIC_ADDRESS=</code></pre>
-    <p>For team deathmatch, add <code>TDM</code> after the image name, publish <code>3334:3334</code> instead and add <code>-e BV2_HEALTH_PORT=3334</code> so the container health check watches that port. <code>docker attach rv2-ctf</code> opens the server console; <kbd>Ctrl-P</kbd> <kbd>Ctrl-Q</kbd> leaves it running. To use your BaboViolent 2 maps, mount the folder that holds <code>main/</code> read-only and point <code>BV2_DATA_DIR</code> at it:</p>
-    <pre><code>-v /path/to/BaboViolent2/Content:/opt/bv2-data:ro -e BV2_DATA_DIR=/opt/bv2-data</code></pre>
+      <h2 id="docker">Docker</h2>
+      <p>Image for amd64 and arm64: <code>ghcr.io/hub-tansky/roboviolence2-server</code>. One capture the flag server with its saved state in a volume:</p>
+      <pre><code>docker run -dit --name rv2-ctf --restart unless-stopped \
+    -p 3333:3333 -v rv2-ctf:/var/lib/bv2 \
+    --env-file ~/rv2-server.env \
+    ghcr.io/hub-tansky/roboviolence2-server</code></pre>
+      <p>Keep settings and secrets in that env file:</p>
+      <pre><code># join password, empty for none
+  BV2_SV_PASSWORD=
+  # admin login password
+  BV2_ADMIN_PASS=
+  # your public IPv4, so the server list shows a reachable address
+  BV2_PUBLIC_ADDRESS=</code></pre>
+      <p>For team deathmatch, add <code>TDM</code> after the image name, publish <code>3334:3334</code> instead and add <code>-e BV2_HEALTH_PORT=3334</code> so the container health check watches that port. <code>docker attach rv2-ctf</code> opens the server console; <kbd>Ctrl-P</kbd> <kbd>Ctrl-Q</kbd> leaves it running. To use your BaboViolent 2 maps, mount the folder that holds <code>main/</code> read-only and point <code>BV2_DATA_DIR</code> at it:</p>
+      <pre><code>-v /path/to/BaboViolent2/Content:/opt/bv2-data:ro -e BV2_DATA_DIR=/opt/bv2-data</code></pre>
 
-    <p>The <a href="https://github.com/Hub-Tansky/RoboViolence2/blob/main/docs/ops/runbook.md">server runbook</a> covers logs, the server console, upgrades, remote admin over HTTPS and backups.</p>
-  </div>
+      <p>The <a href="https://github.com/Hub-Tansky/RoboViolence2/blob/main/docs/ops/runbook.md">server runbook</a> covers logs, the server console, upgrades, remote admin over HTTPS and backups.</p>
+    </div>
   </div>
 </main>
 
 <footer class="site-footer">
-  <div>
+  <div class="site-footer-inner site-container">
     <div class="flex flex-wrap gap-2">
       <img alt="GitHub License" src="https://img.shields.io/github/license/Hub-Tansky/RoboViolence2" height="20">
       <img alt="GitHub Created At" src="https://img.shields.io/github/created-at/Hub-Tansky/RoboViolence2" height="20">

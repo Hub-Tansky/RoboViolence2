@@ -63,16 +63,7 @@
         const md = `@media (min-width: ${theme('screens.md')})`;
         // The menu folds into the toggled panel below 1024 px: tablets get the panel too.
         const lg = `@media (min-width: ${theme('screens.lg')})`;
-        // The 1200 px container plus a style; the media query goes last so it wins over the base rules.
-        const container = (style, mdStyle = {}) => ({
-          maxWidth: theme('maxWidth.site'),
-          marginLeft: 'auto',
-          marginRight: 'auto',
-          paddingLeft: '1rem',
-          paddingRight: '1rem',
-          ...style,
-          [md]: { paddingLeft: '1.5rem', paddingRight: '1.5rem', ...mdStyle },
-        });
+
         addBase({
           html: { scrollBehavior: 'smooth', colorScheme: 'dark' },
           body: { minHeight: '100vh', background: c.ink, color: c.fg, fontSize: '17px', lineHeight: '1.625', WebkitFontSmoothing: 'antialiased', MozOsxFontSmoothing: 'grayscale' },
@@ -83,9 +74,18 @@
           'a:focus-visible, button:focus-visible': { outline: `2px solid ${c.link}`, outlineOffset: '3px', borderRadius: '6px' },
         });
         addComponents({
+          // The 1200 px content column with its side gutter, for the chrome and every page section
+          '.site-container': {
+            maxWidth: theme('maxWidth.site'),
+            marginLeft: 'auto',
+            marginRight: 'auto',
+            paddingLeft: '1rem',
+            paddingRight: '1rem',
+            [md]: { paddingLeft: '1.5rem', paddingRight: '1.5rem' },
+          },
           // Page chrome: the sticky menu bar (a toggled panel below 1024 px) and the footer
           '.site-header': { position: 'sticky', top: '0', zIndex: '20', borderBottom: `1px solid ${c.line}`, background: rgba(c.ink, 0.85), backdropFilter: 'blur(8px)' },
-          '.site-nav': container({ position: 'relative', display: 'flex', alignItems: 'center', gap: '2rem', paddingTop: '0.75rem', paddingBottom: '0.75rem' }),
+          '.site-nav': { position: 'relative', display: 'flex', alignItems: 'center', gap: '2rem', paddingTop: '0.75rem', paddingBottom: '0.75rem' },
           '.site-brand': { marginRight: 'auto', display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '1.125rem', fontWeight: '700', letterSpacing: '-0.01em', color: c.fg },
           '.site-brand img': { width: '2rem', height: '2rem', borderRadius: '0.5rem' },
           '.menu-button': {
@@ -123,10 +123,16 @@
             [lg]: { padding: '0' },
           },
           '.site-footer': { borderTop: `1px solid ${c.line}` },
-          '.site-footer > div': container(
-            { display: 'flex', flexDirection: 'column', gap: '1rem', paddingTop: '2.5rem', paddingBottom: '2.5rem', fontSize: '0.875rem', color: c.muted },
-            { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-          ),
+          '.site-footer-inner': {
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '1rem',
+            paddingTop: '2.5rem',
+            paddingBottom: '2.5rem',
+            fontSize: '0.875rem',
+            color: c.muted,
+            [md]: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+          },
           '.footer-link': { ...link, color: c.muted },
           // Text pages: the grid pattern fading out under the menu, and the content container
           '.page': { position: 'relative' },
@@ -140,7 +146,7 @@
             maskImage: 'linear-gradient(180deg, #000, transparent)',
             pointerEvents: 'none',
           },
-          '.page-body': container({ position: 'relative', paddingTop: '3rem', paddingBottom: '3rem' }, { paddingTop: '5rem', paddingBottom: '5rem' }),
+          '.page-body': { position: 'relative', paddingTop: '3rem', paddingBottom: '3rem', [md]: { paddingTop: '5rem', paddingBottom: '5rem' } },
           '.link': link,
           '.btn-primary': {
             ...button,
