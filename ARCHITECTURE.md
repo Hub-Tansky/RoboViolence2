@@ -313,6 +313,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/decisions/0032-discord-release-post.md` | ADR: the release job posts each release to Discord `#announcements` through a webhook secret, pinging only the opt-in role |
 | `docs/decisions/0033-first-run-dialog-recommends-bv2-zip.md` | ADR: the first-run data dialog recommends the original BV2 zip, shows its URL and the folder to choose, and has a Download button (amends 0016) |
 | `docs/decisions/0034-player-data-retention-and-privacy-policy.md` | ADR: the server never relays player IPs, bans (`banlist.tsv`) expire after `sv_banDays`, `admin-audit.log` after 90 days; privacy policy page, installer link and opt-out |
+| `docs/decisions/0035-website-tailwind-install-page-agent-files.md` | ADR: Tailwind Play CDN + `theme.js` instead of a stylesheet, separate install guide, robots.txt/sitemap/llms.txt and generated Markdown copies for AI agents |
 | `docs/decisions/README.md` | ADR format and index |
 
 ### `docs/ops`
@@ -732,6 +733,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tools/placeholder-manifest.tsv` | Files the game loads at startup and their formats, for the placeholder generator |
 | `tools/gen-placeholder-content.py` | Writes placeholder maps, textures, a readable font atlas, sounds and models for dev and CI |
 | `tools/gen-app-icon.py` | Renders the application icons and the `.dmg` background into `packaging/` (by hand; numpy, Pillow) |
+| `tools/website-markdown.mjs` | Writes `website/<page>.md` from each page's `<main>` (by hand after a page change; the website tests fail on a stale copy) |
 | `tools/check-hygiene.py` | Fails on spaces in paths, tracked ignored files, files over 5 MB, bad encoding, failed translation check |
 | `tools/lang-check.py` | Fails when `en.pot` is stale, a `.po` is invalid, has unknown keys or changes printf conversions; warns about missing glyphs; lists untranslated keys |
 | `tools/lang-to-pot.py` | Generates `content/languages/en.pot` from `en.lang` |
@@ -751,11 +753,22 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 
 | path | purpose |
 |---|---|
-| `website/index.html` | Landing page: hero, OS-detected download button, installation instructions, downloads list, status hook (ADR 0029) |
+| `website/index.html` | Landing page: hero with the OS-detected download button, features, start steps, community links, status hook, VideoGame JSON-LD (ADR 0029, 0035) |
+| `website/install.html` | Install guide: download button with version and size, original data steps, requirements, downloads list, per-OS steps |
 | `website/about.html` | What the game is; credits to BaboViolent 2 |
 | `website/privacy.html` | Privacy policy (GDPR): data processed by the game, servers and website, legal basis, hosting, retention, rights (ADR 0034) |
-| `website/server.html` | Hosting your own game and master server (summary of `docs/ops/runbook.md`) |
-| `website/site.js` | Download button and list from the GitHub releases API, Discord invite constant, contact address assembled from `data-mail` attributes |
-| `website/style.css` | Dark theme, layout |
+| `website/server.html` | Hosting your own game server (summary of `docs/ops/runbook.md`) |
+| `website/site.js` | Download button and list from the GitHub releases API, Discord invite constant, mobile menu, icons, `/#install` redirect, contact address assembled from `data-mail` attributes |
+| `website/theme.js` | Tailwind Play CDN theme for every page: palette, layout steps, shared component classes (ADR 0035) |
+| `website/index.md` | Markdown copy of `index.html` for AI agents, from `tools/website-markdown.mjs` |
+| `website/install.md` | Markdown copy of `install.html` for AI agents, from `tools/website-markdown.mjs` |
+| `website/about.md` | Markdown copy of `about.html` for AI agents, from `tools/website-markdown.mjs` |
+| `website/server.md` | Markdown copy of `server.html` for AI agents, from `tools/website-markdown.mjs` |
+| `website/privacy.md` | Markdown copy of `privacy.html` for AI agents, from `tools/website-markdown.mjs` |
+| `website/robots.txt` | Crawl rules: AI search fetchers allowed, AI training crawlers refused, Content Signals in every group, sitemap address (ADR 0035) |
+| `website/sitemap.xml` | Every page's canonical address (the website tests check it) |
+| `website/llms.txt` | Summary and Markdown page links for AI agents (llmstxt.org) |
 | `website/img/hero.webp` | Placeholder hero picture |
+| `website/img/og.png` | Link preview picture (Open Graph, 1200x630) |
+| `website/img/rv2-icon.png` | Application icon v2, 512 px (menu logo, Apple touch icon; also linked from elsewhere) |
 | `website/img/favicon.svg` | Site icon |

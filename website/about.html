@@ -4,47 +4,65 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>About Robo Violence 2</title>
-  <meta name="description" content="What Robo Violence 2 is, and credits to BaboViolent 2 by bitHeads / RndLabs.">
+  <meta name="description" content="What Robo Violence 2 is, and credits to BaboViolent 2.">
+  <link rel="canonical" href="https://roboviolence.com/about.html">
+  <link rel="alternate" type="text/markdown" href="about.md">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Robo Violence 2">
+  <meta property="og:title" content="About Robo Violence 2">
+  <meta property="og:description" content="What Robo Violence 2 is, and credits to BaboViolent 2.">
+  <meta property="og:url" content="https://roboviolence.com/about.html">
+  <meta property="og:image" content="https://roboviolence.com/img/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Robo Violence 2: a blue and a red player shooting at each other in a top-down arena">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="theme-color" content="#2f7df6">
   <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="style.css">
+  <link rel="apple-touch-icon" href="img/rv2-icon.png">
+  <style>body { background: #12141b; color: #e6e8ef; }</style>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="theme.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/lucide@1.49.0/dist/umd/lucide.min.js"></script>
   <script type="module" src="site.js"></script>
 </head>
-<body>
-<header>
-  <div class="wrap">
-    <nav>
-      <a class="brand" href="./">Robo Violence 2</a>
-      <a href="./#install">Download</a>
-      <a href="about.html" aria-current="page">About</a>
-      <a data-discord href="#">Discord server</a>
-      <a href="server.html">Your own game server</a>
-    </nav>
-  </div>
+<body class="min-h-screen bg-ink font-sans text-[17px] leading-relaxed text-fg antialiased">
+<header class="sticky top-0 z-20 border-b border-line bg-ink/85 backdrop-blur">
+  <nav class="relative mx-auto flex max-w-site items-center gap-8 px-4 py-3 md:px-6" aria-label="Main">
+    <a class="mr-auto flex items-center gap-3 text-lg font-bold tracking-tight text-fg" href="./"><img class="h-8 w-8 rounded-lg" src="img/rv2-icon.png" width="32" height="32" alt="">Robo Violence 2</a>
+    <button class="inline-flex h-11 w-11 items-center justify-center rounded-lg border border-line text-fg hover:border-link md:hidden" type="button" data-menu-button aria-expanded="false" aria-controls="menu"><i data-lucide="menu"></i><span class="sr-only">Menu</span></button>
+    <div class="absolute inset-x-0 top-full hidden flex-col border-b border-line bg-ink px-4 pb-3 data-[open]:flex md:static md:flex md:flex-row md:items-center md:gap-8 md:border-0 md:bg-transparent md:p-0" id="menu">
+      <a class="nav-link py-3 md:py-0" href="install.html">Download</a>
+      <a class="nav-link py-3 md:py-0" href="about.html" aria-current="page">About</a>
+      <a class="nav-link py-3 md:py-0" data-discord href="#">Discord server</a>
+      <a class="nav-link py-3 md:py-0" href="server.html">Your own game server</a>
+    </div>
+  </nav>
 </header>
 
-<main class="wrap">
-  <section>
+<main class="relative">
+  <div class="pointer-events-none absolute inset-x-0 top-0 h-80 bg-grid bg-cell [mask-image:linear-gradient(180deg,#000,transparent)]" aria-hidden="true"></div>
+  <div class="prose-rv relative mx-auto max-w-site px-4 py-12 md:px-6 md:py-20">
     <h1>About Robo Violence 2</h1>
     <p>Robo Violence 2 is a free top-down multiplayer arena shooter. Players drive armed balls through small arenas and play deathmatch, team deathmatch and capture the flag against each other over the internet or a local network.</p>
-    <p>It continues BaboViolent 2 on a modern base: one codebase for Windows, macOS and Linux, a dedicated server and master server you can host yourself (also as Docker images), and automated builds, tests and releases.</p>
-    <p class="notice"><strong>Status: alpha.</strong> The game works with placeholder art. It plays best with your own copy of the original BaboViolent 2 data (see <a href="./#install">Installation instructions</a>). Replacement art comes later.</p>
-  </section>
+    <p>It continues BaboViolent 2 on a modern base, with one codebase for Windows, macOS and Linux, plus game servers hosted by us or other players.</p>
+    <p class="notice"><strong>Status: alpha.</strong> The game works with placeholder art. It plays best with your own copy of the original BaboViolent 2 data (see <a href="install.html#data">Installation instructions</a>). Replacement art comes later.</p>
 
-  <section id="credits">
-    <h2>Credits</h2>
-    <p>Robo Violence 2 is an unofficial fork of <strong>BaboViolent 2</strong> by <strong>bitHeads / RndLabs</strong> (2012), built on its GPLv3 source release: <a href="https://github.com/Daivuk/BaboViolent2">github.com/Daivuk/BaboViolent2</a>. It is not affiliated with or endorsed by the original authors. Thank you to them and to everyone who made maps and art for BaboViolent 2.</p>
+    <h2 id="credits">Credits</h2>
+    <p>Robo Violence 2 is a fork of <strong>BaboViolent 2</strong> built on its GPLv3 source release: <a href="https://github.com/Daivuk/BaboViolent2">github.com/Daivuk/BaboViolent2</a>. It is not affiliated with or endorsed by the original authors. Big thanks to authors and to everyone who made maps and art for BaboViolent 2.</p>
     <p>The GPL covers the code only. The original assets (maps, models, textures, sounds, music, fonts) and the name "BaboViolent 2" are not part of this project and are not redistributed here.</p>
     <p>Robo Violence 2 source code: <a href="https://github.com/Hub-Tansky/RoboViolence2">github.com/Hub-Tansky/RoboViolence2</a> (GPLv3). Bugs and ideas: <a href="https://github.com/Hub-Tansky/RoboViolence2/issues">issues</a>.</p>
-  </section>
+  </div>
 </main>
 
-<footer>
-  <div class="wrap">
-    <div class="badges">
-      <img alt="GitHub Created At" src="https://img.shields.io/github/created-at/Hub-Tansky/RoboViolence2">
-      <img alt="GitHub Release Date" src="https://img.shields.io/github/release-date-pre/Hub-Tansky/RoboViolence2">
+<footer class="border-t border-line">
+  <div class="mx-auto flex max-w-site flex-col gap-4 px-4 py-10 text-sm text-muted md:flex-row md:items-center md:justify-between md:px-6">
+    <div class="flex flex-wrap gap-2">
+      <img alt="GitHub License" src="https://img.shields.io/github/license/Hub-Tansky/RoboViolence2" height="20">
+      <img alt="GitHub Created At" src="https://img.shields.io/github/created-at/Hub-Tansky/RoboViolence2" height="20">
+      <img alt="GitHub Release Date" src="https://img.shields.io/github/release-date-pre/Hub-Tansky/RoboViolence2" height="20">
     </div>
-    <p>Unofficial fork of BaboViolent 2 by bitHeads / RndLabs, not endorsed by them. Code under GPLv3 on <a href="https://github.com/Hub-Tansky/RoboViolence2">GitHub</a>. <a href="privacy.html">Privacy policy</a>.</p>
+    <p><a class="footer-link" href="privacy.html">Privacy policy</a></p>
   </div>
 </footer>
 </body>

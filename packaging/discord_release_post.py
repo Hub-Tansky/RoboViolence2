@@ -26,8 +26,8 @@ def payload(tag, *, prerelease=False, role_id=""):
         "embeds": [{
             "title": f"Robo Violence 2 {tag}{' (alpha)' if prerelease else ''} is out",
             "url": f"{REPO}/releases/tag/{tag}",
-            "description": f"{links}\n\nInstall guide and all files: {WEBSITE}/#install",
-            "color": 0xE5383B,  # website --red
+            "description": f"{links}\n\nInstall guide and all files: {WEBSITE}/install.html",
+            "color": 0xE5383B,  # website brand red
         }],
         "allowed_mentions": {"parse": [], "roles": [role_id] if role_id else []},
     }

@@ -1,0 +1,20 @@
+# Robo Violence 2
+
+> Free top-down multiplayer arena shooter for Windows, macOS and Linux, an unofficial revival of BaboViolent 2. Players drive armed balls through small arenas and play deathmatch, team deathmatch and capture the flag over the internet or a local network. Alpha: placeholder art; plays best with the original BaboViolent 2 data. Code under GPLv3.
+
+Every page is also available as Markdown at the same address with `.md` instead of `.html` (the landing page is `/index.md`).
+
+## Pages
+
+- [Home](https://roboviolence.com/index.md): what the game is, download, community links
+- [Install guide](https://roboviolence.com/install.md): requirements, release files and install steps for Windows, macOS and Linux, original game data
+- [Your own game server](https://roboviolence.com/server.md): ports, starting a server from a download, Docker image
+- [About](https://roboviolence.com/about.md): project background and credits
+- [Privacy policy](https://roboviolence.com/privacy.md): personal data the game, servers and website process (GDPR)
+
+## Project
+
+- [Source code](https://github.com/Hub-Tansky/RoboViolence2): GPLv3, build guides in docs/build
+- [Releases](https://github.com/Hub-Tansky/RoboViolence2/releases): installers and packages, pre-releases included
+- [Issues](https://github.com/Hub-Tansky/RoboViolence2/issues): bug reports and ideas
+- [Discord](https://discord.gg/gRehxx43z): players, bug reports, release news
