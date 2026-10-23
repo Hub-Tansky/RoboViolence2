@@ -67,6 +67,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `packaging/linux/roboviolence2.desktop` | Linux desktop entry |
 | `packaging/make-package.py` | Builds the per-OS package from a Release `runtime/` (links resolved, macOS bundle re-signed, licences), plus the Windows installer, the macOS `.dmg` with only the app and Applications, or the Linux `.deb` (ADR 0020, 0030, 0031) |
 | `packaging/make_deb.py` | Builds the Linux `.deb` from the build's `cmake --install` (stripped, without the master): client and `bv2dedicated` moved to `/usr/games`, launcher pointed there, licences, copyright and changelog added; Depends from `dpkg-shlibdeps` plus `libgl1` (ADR 0031) |
+| `packaging/discord_release_post.py` | Prints the Discord webhook payload of the release job: one embed with the release page, the player downloads and the website, an optional ping of the opt-in role and no other mention (ADR 0032) |
 | `packaging/windows/roboviolence2.iss` | Inno Setup script for the Windows installer (per-user, unsigned) |
 | `packaging/scripts/run-client.cmd` | Package script: starts the client (Windows) |
 | `packaging/scripts/run-client.sh` | Package script: starts the client (macOS bundle or Linux binary) |
@@ -156,6 +157,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/test_example_cfg.py` | `config/bv2.example.cfg` names a new player as `GameVar.cpp` does |
 | `tests/test_window_icon.cpp` | `dkwSetWindowIcon` accepts the Linux client's compiled-in icon (`AppIcon.h`) and refuses bytes that aren't a PNG |
 | `tests/test_make_deb.py` | `make_deb.py` builds an installable `.deb` from the build's install: `share/bv2/main` equals `runtime/main`, layout, modes, root ownership, no master, version mapping (`-rc1` sorts before the release), Depends, launcher path (ctest `make_deb`, Linux client builds with dpkg-dev) |
+| `tests/test_discord_release_post.py` | The release post links only files the release job uploads, pings the given role and nothing else, marks pre-releases (ctest `discord_release_post`) |
 | `tests/test_app_icon.py` | The icon files hold every size each OS needs; the exe, installer, bundle, `.desktop` and `.dmg` layout point at them |
 | `tests/test_fileio.cpp` | `FileIO` byte widths for `.bvm` data and the widths the `.DKO` loader relies on; `bv2ReadBytes` zero-fills a short read; fixed-string length prefix round trip; unterminated `CString::loadFromFile` (overflows under ASan without its bound); `getString` keeps 255 characters (R16); `MemIO` reads past its end as zero; `getNextToken` on a single token (R30) |
 | `tests/test_lang.cpp` | Step 13: PO parser (entries that change the English printf conversions or whose key English lacks are skipped; raw control bytes rejected), English fallback per key, OS locale matching (`ll_CC`, `ll`, `.po` before `.lang`), PO without glyphs skipped |
@@ -304,6 +306,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/decisions/0029-static-website-on-github-pages.md` | ADR: website is static HTML on GitHub Pages; OS-detected download from the GitHub releases API, pre-releases included |
 | `docs/decisions/0030-app-icon-and-dmg-layout.md` | ADR: committed application icon per OS (exe, bundle, Linux window icon); `.dmg` with only the app and Applications |
 | `docs/decisions/0031-linux-deb-package.md` | ADR: Linux `.deb` with the client and `bv2dedicated` in `/usr/games`, beside the `.tar.gz`; reverses ADR 0020's rejection |
+| `docs/decisions/0032-discord-release-post.md` | ADR: the release job posts each release to Discord `#announcements` through a webhook secret, pinging only the opt-in role |
 | `docs/decisions/README.md` | ADR format and index |
 
 ### `docs/ops`

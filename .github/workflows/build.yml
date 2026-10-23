@@ -113,6 +113,15 @@ jobs:
             dist/roboviolence2-win-x64-msvc-setup.exe dist/roboviolence2-macos-arm64.dmg \
             dist/roboviolence2-macos-arm64.zip dist/roboviolence2-linux-x64.tar.gz dist/roboviolence2-linux-x64.deb \
             "dist/roboviolence2-${GITHUB_REF_NAME}-source.tar.gz"
+      # The post in Discord #announcements, pinging the opt-in release-ping role (ADR 0032); the owner clicks Publish
+      - name: Discord release post
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_RELEASE_WEBHOOK }}
+          DISCORD_ROLE_ID: ${{ vars.DISCORD_RELEASE_ROLE_ID }}
+        run: |
+          if [ -z "$DISCORD_WEBHOOK" ]; then echo "No DISCORD_RELEASE_WEBHOOK secret: no Discord post"; exit 0; fi
+          python3 -I packaging/discord_release_post.py "$GITHUB_REF_NAME" "$DISCORD_ROLE_ID" |
+            curl -fsS --retry 3 -H "Content-Type: application/json" --data-binary @- "$DISCORD_WEBHOOK" -o /dev/null
   package-check:
     name: package-check (clean ubuntu:24.04)
     needs: build
