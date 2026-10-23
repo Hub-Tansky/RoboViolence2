@@ -140,9 +140,9 @@ test('every robots.txt group declares the content signals and a rule', () => {
     .split(/\n\s*\n/)
     .map((g) => g.split('\n').filter((l) => !l.startsWith('#')))
     .filter((g) => g.some((l) => l.startsWith('User-agent:')));
-  assert.ok(groups.length >= 3);
+  assert.ok(groups.length >= 2);
   for (const g of groups) {
-    assert.ok(g.includes('Content-Signal: search=yes, ai-input=yes, ai-train=no'), g[0]);
+    assert.ok(g.includes('Content-Signal: search=yes, ai-input=yes, ai-train=yes'), g[0]);
     assert.ok(g.some((l) => /^(Allow|Disallow): \//.test(l)), g[0]);
   }
 });

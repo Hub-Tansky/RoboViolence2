@@ -765,7 +765,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `website/about.md` | Markdown copy of `about.html` for AI agents, from `tools/website-markdown.mjs` |
 | `website/server.md` | Markdown copy of `server.html` for AI agents, from `tools/website-markdown.mjs` |
 | `website/privacy.md` | Markdown copy of `privacy.html` for AI agents, from `tools/website-markdown.mjs` |
-| `website/robots.txt` | Crawl rules: AI search fetchers allowed, AI training crawlers refused, Content Signals in every group, sitemap address (ADR 0035) |
+| `website/robots.txt` | Crawl rules: AI search and training crawlers named and allowed, Content Signals in every group, sitemap address (ADR 0035) |
 | `website/sitemap.xml` | Every page's canonical address (the website tests check it) |
 | `website/llms.txt` | Summary and Markdown page links for AI agents (llmstxt.org) |
 | `website/img/hero.webp` | Placeholder hero picture |
