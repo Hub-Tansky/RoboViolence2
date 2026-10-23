@@ -594,7 +594,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/ControlListener.h` | Menu control listener interface |
 | `game/src/CreateGame.h` | Create-game screen |
 | `game/src/Credits.h` | Credits screen |
-| `game/src/DataDirPicker.cpp` | Client start-up: saved or detected BV2 data folder, else a first-run message box and OS folder dialog (ADR 0016) |
+| `game/src/DataDirPicker.cpp` | Client start-up: saved or detected BV2 data folder, else a first-run message box (recommends and opens the original BV2 zip) and OS folder dialog (ADR 0016) |
 | `game/src/DataDirPicker.h` | Interface of `DataDirPicker.cpp` |
 | `game/src/Dialog.cpp` | Menu dialog base |
 | `game/src/Dialog.h` | Menu dialog base |

@@ -71,6 +71,8 @@ int main(int argc, char ** argv)
 	check(bv2::packageRoot() == root(pkg) && bv2::dataRoot() == root(pkg), "without BV2_DATA_DIR the data root is the package");
 
 	check(bv2::findDataIn((home / "Downloads" / "BaboViolent2-master").string()) == root(content), "upstream zip layout");
+	check(bv2::findDataIn(content.parent_path().string()) == root(content), "upstream BaboViolent2/");
+	check(bv2::findDataIn(content.string()) == root(content), "upstream Content/");
 	check(bv2::findDataIn((content / "main").string()) == root(content), "main/ itself");
 	check(bv2::findDataIn(pkg.string()).empty(), "no main/textures: not BV2 data");
 	check(bv2::detectDataDir() == root(content), "auto-detect in ~/Downloads");

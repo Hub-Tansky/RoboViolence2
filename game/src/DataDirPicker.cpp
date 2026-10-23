@@ -41,23 +41,38 @@ namespace
 		return choice.path;
 	}
 
+	const char * DATA_URL = "https://github.com/Daivuk/BaboViolent2/archive/refs/heads/master.zip";
+
+	enum Button { PLACEHOLDERS, CHOOSE, DOWNLOAD };
+
 	// "" when the player picks placeholders
 	std::string askDataDir()
 	{
-		const SDL_MessageBoxButtonData buttons[2] = {
-			{ SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT, 1, "Choose folder..." },
-			{ SDL_MESSAGEBOX_BUTTON_ESCAPEKEY_DEFAULT, 0, "Use placeholders" },
+		const SDL_MessageBoxButtonData buttons[3] = {
+			{ SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT, CHOOSE, "Choose folder..." },
+			{ 0, DOWNLOAD, "Download BV2 data" },
+			{ SDL_MESSAGEBOX_BUTTON_ESCAPEKEY_DEFAULT, PLACEHOLDERS, "Use placeholders" },
 		};
-		const SDL_MessageBoxData box = { SDL_MESSAGEBOX_INFORMATION, 0, TITLE,
+		// explicit line breaks: the X11 message box doesn't wrap
+		const std::string text = std::string(
 			"Robo Violence 2 plays with your own copy of the BaboViolent 2 data, which is not included.\n\n"
-			"Choose the folder that contains main/ (with textures, sounds and maps).\n\n"
-			"Without it the game starts with placeholder graphics and no music.",
-			2, buttons, 0 };
+			"It is strongly recommended to download the original game from GitHub:\n") + DATA_URL + "\n\n"
+			"Unzip it, then choose the BaboViolent2-master folder,\n"
+			"or any folder inside it down to BaboViolent2-master/BaboViolent2/Content/main/.\n"
+			"Unzipped into Downloads, Desktop or Documents, it is found on the next start.\n\n"
+			"Without it the game starts with placeholder graphics and no music.";
+		const SDL_MessageBoxData box = { SDL_MESSAGEBOX_INFORMATION, 0, TITLE, text.c_str(), 3, buttons, 0 };
 		for (;;)
 		{
-			int button = 0;
-			if (!SDL_ShowMessageBox(&box, &button) || button != 1)
+			int button = PLACEHOLDERS;
+			// closing the box (button -1) counts as placeholders
+			if (!SDL_ShowMessageBox(&box, &button) || (button != CHOOSE && button != DOWNLOAD))
 				return "";
+			if (button == DOWNLOAD)
+			{
+				SDL_OpenURL(DATA_URL);
+				continue;
+			}
 			std::string picked = askFolder();
 			if (picked.empty())
 				continue;
@@ -65,7 +80,8 @@ namespace
 			if (!data.empty())
 				return data;
 			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_WARNING, TITLE,
-				"That folder has no BaboViolent 2 data (main/textures). Choose the folder that contains main/.", 0);
+				"That folder has no BaboViolent 2 data (main/textures).\n"
+				"Choose the unzipped BaboViolent2-master folder or a folder inside it that contains main/.", 0);
 		}
 	}
 }
