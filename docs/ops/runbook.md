@@ -122,6 +122,8 @@ Install (a new or failover host): the staging README's [By hand](../../tools/sta
 
 Backups: a nightly job copies `/etc/rv2-prod.env` and every `roboviolence2_*` volume off the host (see [Backups](#backups) for what they hold); restore one snapshot to a scratch folder now and then to prove it works.
 
+Health: install `tools/staging/health-watch.sh` from the same commit as `deploy.sh`, into the same folder (it reads `deploy.sh` beside it), with a cron line for the deploy user: `* * * * * RV2_DEPLOY_LABEL=prod /opt/rv2-prod/health-watch.sh >>/var/lib/rv2-prod/health.log 2>&1`. It sends `RV2 prod unhealthy` with the bad containers within about two minutes, and `RV2 prod healthy again` after. An outside monitor still checks the public ports.
+
 ## Without compose
 
 `docker run` needs `--init` (stop signals) and `-it` (the console): `docker run -d -it --init -p 3333:3333 -v bv2-server:/var/lib/bv2 ghcr.io/hub-tansky/roboviolence2-server`.

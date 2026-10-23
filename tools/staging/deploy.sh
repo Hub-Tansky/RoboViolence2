@@ -99,15 +99,8 @@ load_env() { # sourced, not exported; compose reads the same file with --env-fil
 	[ -n "${BV2_ADMIN_PASS:-}" ] || { echo "BV2_ADMIN_PASS is not set in $ENV_FILE"; return 1; }
 }
 
-[ -n "${RV2_DEPLOY_SOURCE_ONLY:-}" ] && return 0
-
-# --- Run state ---
-
-WANT_SHA="" FORCE="" SHA="" PREV="" STAGE="" RESULT="" LOCKED=""
-
+# say and notify are shared with health-watch.sh
 say() { printf '%s %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$*"; }
-stage() { STAGE=$1; say "stage $1"; }
-fail() { say "FAIL $STAGE: $*"; RESULT=fail; exit 1; }
 
 notify() { # notify <title> <message>: ntfy only (a server has no desktop); the topic goes to curl on stdin
 	say "notify: $1 - $2"
@@ -116,6 +109,15 @@ notify() { # notify <title> <message>: ntfy only (a server has no desktop); the 
 	fi
 	return 0
 }
+
+[ -n "${RV2_DEPLOY_SOURCE_ONLY:-}" ] && return 0
+
+# --- Run state ---
+
+WANT_SHA="" FORCE="" SHA="" PREV="" STAGE="" RESULT="" LOCKED=""
+
+stage() { STAGE=$1; say "stage $1"; }
+fail() { say "FAIL $STAGE: $*"; RESULT=fail; exit 1; }
 
 compose() { # compose <sha> <args...>: that commit's compose file, images pinned to it
 	local sha=$1; shift

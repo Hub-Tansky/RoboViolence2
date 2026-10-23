@@ -25,3 +25,7 @@ A cron job on the staging host (`tools/staging/deploy.sh`) selects the newest su
 - A busy server makes a run exit without deploying; nothing retries. `/deployed` is the success signal ([runbook: Production](../ops/runbook.md#production)).
 - Failover is a new host from the same steps, the latest off-host backup restored, a new `BV2_PUBLIC_ADDRESS` and a DNS change.
 - Rejected: cron on production (deploys every `main` commit, not the one the owner picked); a separate production tool (two agents to keep in step); a floating IP for failover (provider-specific, costs more).
+
+## Amendment 2026-10-23: health watcher
+- `tools/staging/health-watch.sh` runs every minute from cron beside the agent and shares its label, env file, state folder and ntfy helper. It notifies when a container of the stack is unhealthy, stopped or restarting, or none exists, and again when all are well; a state must hold for two runs, and nothing is checked while `deploy.sh` holds its lock. External reachability stays with an outside monitor (UptimeRobot).
+- Rejected: a `docker events` listener (a long-running process to supervise, and it misses states that began while it was down); an autoheal container (restarts hide the cause, and `restart: unless-stopped` already restarts exits); a mode of `deploy.sh` (a cron line every minute through the deploy path).
