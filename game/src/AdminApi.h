@@ -2,9 +2,10 @@
 // `GET /status` returns the game's state. Listens on zsv_adminApiBind:zsv_adminApiPort (port 0: off), only behind a
 // TLS proxy (zsv_adminApiProxy: the only peer whose X-Forwarded-For is believed). A request carries
 // `Authorization: Bearer <zsv_adminPass>`; each source has a request budget, and every request leaves a line in
-// admin-audit.log in the pref dir.
+// admin-audit.log in the pref dir, kept retention::AUDIT_DAYS.
 #pragma once
 #include <cstdint>
+#include <ctime>
 #include <map>
 #include <string>
 #include <vector>
@@ -33,6 +34,7 @@ private:
 	std::string wantedAddress;
 	std::vector<Connection> connections;
 	std::map<std::string, float> budget; // per source: requests left (burst 5, 1 per second); absent = full
+	std::time_t auditPruned = 0; // when admin-audit.log last lost its lines past retention::AUDIT_DAYS
 
 	void listen(int port, const std::string & address);
 	void close();

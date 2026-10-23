@@ -60,22 +60,8 @@ Server::Server(Game * pGame): maxTimeOverMaxPing(5.0f)//, maxIdleTime(180.0f)
 		CachedPlayers[i].IP[0] = '\0';
 	}
 
-	// Load banlist
-	std::ifstream file(bv2::userFile("banlist"), std::ios::binary);
-	char name[32], ip[16];
-
-	while(file.is_open() && !file.eof())
-	{
-		file.read(name, sizeof(char)*32);
-		file.read(ip, sizeof(char)*16);
-
-		// Will not hit eof until after first read
-		if(file.eof()) break;
-
-		// Add to ban list
-		banList.push_back( std::pair<CString,CString>(name, ip) );
-
-	}
+	// Load the bans without the expired ones; 0.0.1's binary banlist moves to banlist.tsv, dated today
+	bans.load(bv2::userFile("banlist.tsv"), bv2::userFile("banlist"), (long long)time(nullptr), gameVar.sv_banDays);
 	//reportUploadURLs.push_back("http://localhost/index.php");
 }
 
@@ -91,7 +77,6 @@ Server::~Server()
 	if (master) master->RunningServer = 0;
 
     mapList.clear();
-	banList.clear();
 #ifndef CONSOLE
 	dkfDeleteFont(&font);
 #endif
@@ -373,15 +358,11 @@ void Server::updateNet(float delay, bool send)
 			console->add(CString("server> [net] new TCP client babonetID=%i IP=%s (expect GAMEVERSION_ACCEPTED then PLAYER_INFO)", clientID, IPDuGars), true);
 
 		// Check against ban list
-		for(std::size_t i = 0; i < banList.size(); ++i)
+		if (const retention::Ban * ban = bans.match(IPDuGars, (long long)time(nullptr), gameVar.sv_banDays))
 		{
-			if(banList[i].second == IPDuGars)
-			{
-				bb_serverDisconnectClient(clientID);
-				console->add(CString("\x3> Disconnecting banned client, %s. IP: %s",
-								banList[i].first.s, banList[i].second.s), true);
-				return;
-			}
+			bb_serverDisconnectClient(clientID);
+			console->add(CString("\x3> Disconnecting banned client, %s. IP: %s", ban->name.c_str(), ban->ip.c_str()), true);
+			return;
 		}
 
 		// On le cr�A

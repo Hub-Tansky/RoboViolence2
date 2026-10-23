@@ -34,6 +34,9 @@ Description: free top-down multiplayer arena shooter
  Robo Violence 2 is an unofficial revival of BaboViolent 2. This package holds
  the game client (bv2) and the dedicated server (bv2dedicated). Without the
  original BaboViolent 2 data it plays with placeholder art.
+ .
+ Online play sends your IP address, nickname and chat to the servers you join;
+ privacy policy: https://roboviolence.com/privacy.html
 """
 
 COPYRIGHT = f"""\

@@ -65,3 +65,4 @@ What we do, in one or two sentences.
 | [0031](0031-linux-deb-package.md) | A .deb with the client and bv2dedicated beside the Linux .tar.gz | Accepted |
 | [0032](0032-discord-release-post.md) | The release job posts each release to Discord through a webhook | Accepted |
 | [0033](0033-first-run-dialog-recommends-bv2-zip.md) | The first-run data dialog recommends the original BV2 zip and can open it | Accepted |
+| [0034](0034-player-data-retention-and-privacy-policy.md) | Player IPs stay on the server, personal data on disk expires, and a privacy policy says so | Accepted |

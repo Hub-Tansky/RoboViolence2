@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
-import { PLATFORMS, RELEASES_PAGE, detectOS, downloadOffer, newestRelease, pickAsset } from '../../website/site.js';
+import { PLATFORMS, RELEASES_PAGE, detectOS, downloadOffer, mailAddress, newestRelease, pickAsset } from '../../website/site.js';
 
 const root = new URL('../../', import.meta.url);
 const read = (path) => readFileSync(new URL(path, root), 'utf8');
@@ -83,5 +83,18 @@ test('every page has the same menu and footer', () => {
     const part = (tag) => html.slice(html.indexOf(`<${tag}>`), html.indexOf(`</${tag}>`));
     return (part('header') + part('footer')).replace(' aria-current="page"', '').replace('href="./#install"', 'href="#install"');
   };
-  for (const page of ['about.html', 'server.html']) assert.equal(chrome(page), chrome('index.html'), page);
+  for (const page of ['about.html', 'server.html', 'privacy.html']) assert.equal(chrome(page), chrome('index.html'), page);
+});
+
+test('the privacy contact is assembled in the browser, never written in the page', () => {
+  const privacy = read('website/privacy.html');
+  const link = privacy.match(/<a data-mail data-user="([^"]+)" data-domain="([^"]+)"/);
+  assert.ok(link, 'privacy.html has a data-mail link');
+  const address = mailAddress(link[1], link[2]);
+  assert.match(address, /^[^@\s]+@[^@\s]+\.[a-z]+$/);
+  for (const page of ['index.html', 'about.html', 'server.html', 'privacy.html']) {
+    assert.ok(!read(`website/${page}`).includes(address), `${page} holds the address in clear`);
+    assert.ok(read(`website/${page}`).includes('<a href="privacy.html">Privacy policy</a>'), `${page} links the policy`);
+  }
+  assert.equal(mailAddress('', 'example.org'), null);
 });

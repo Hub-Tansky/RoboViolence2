@@ -101,6 +101,7 @@ public:
 	CString sv_publicAddress; // sent to the master as this server's address (PNS-44)
 	int sv_port;
 	int sv_maxPlayer;
+	int sv_banDays;
    int sv_maxPlayerInGame;
    float sv_minTilesPerBabo;
    float sv_maxTilesPerBabo;

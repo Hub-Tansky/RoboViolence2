@@ -1,4 +1,4 @@
-// Robo Violence 2 website: download button, download list, Discord link (ADR 0029).
+// Robo Violence 2 website: download button, download list, Discord link (ADR 0029), contact address.
 // The exports are for tests/website/site.test.mjs; the DOM part runs only in a browser.
 
 const REPO = 'Hub-Tansky/RoboViolence2';
@@ -88,8 +88,24 @@ function setUpDiscord() {
   }
 }
 
+// A mail address assembled in the browser from data-user and data-domain: the page source never holds it, so
+// address-harvesting bots that read HTML don't find it.
+export function mailAddress(user, domain) {
+  return user && domain ? `${user}@${domain}` : null;
+}
+
+function setUpMail() {
+  for (const link of document.querySelectorAll('[data-mail]')) {
+    const address = mailAddress(link.dataset.user, link.dataset.domain);
+    if (!address) continue;
+    link.href = `mailto:${address}`;
+    link.textContent = address;
+  }
+}
+
 async function main() {
   setUpDiscord();
+  setUpMail();
   // Only the landing page asks the API: 60 requests per hour per visitor IP.
   const button = document.getElementById('download-button');
   if (!button) return;
