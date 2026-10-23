@@ -65,14 +65,14 @@ namespace
 		for (;;)
 		{
 			int button = PLACEHOLDERS;
-			// closing the box (button -1) counts as placeholders
-			if (!SDL_ShowMessageBox(&box, &button) || (button != CHOOSE && button != DOWNLOAD))
-				return "";
-			if (button == DOWNLOAD)
+			bool shown = SDL_ShowMessageBox(&box, &button);
+			if (shown && button == DOWNLOAD)
 			{
 				SDL_OpenURL(DATA_URL);
 				continue;
 			}
+			if (!shown || button != CHOOSE) // closing the box (-1) counts as placeholders
+				return "";
 			std::string picked = askFolder();
 			if (picked.empty())
 				continue;
