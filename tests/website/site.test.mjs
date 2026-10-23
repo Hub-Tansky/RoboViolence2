@@ -1,13 +1,13 @@
 // Website download logic and shared page chrome (website/, ADR 0029). Run: node --test tests/website/site.test.mjs
 import assert from 'node:assert/strict';
-import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import test from 'node:test';
-import { toMarkdown } from '../../tools/website-markdown.mjs';
-import { DOWNLOADS, PLATFORMS, RELEASES_PAGE, detectOS, downloadOffer, mailAddress, movedSection, newestRelease, pickAsset } from '../../website/site.js';
+import { pages as htmlPages, toMarkdown } from '../../tools/website-markdown.mjs';
+import { DISCORD_INVITE, DOWNLOADS, PLATFORMS, RELEASES_PAGE, detectOS, downloadOffer, mailAddress, movedSection, newestRelease, pickAsset } from '../../website/site.js';
 
 const root = new URL('../../', import.meta.url);
 const read = (path) => readFileSync(new URL(path, root), 'utf8');
-const pages = readdirSync(new URL('website/', root)).filter((f) => f.endsWith('.html'));
+const pages = htmlPages(new URL('website/', root));
 
 // The asset names the release job publishes: the dist/ files of `gh release create` in build.yml
 const releaseJob = read('.github/workflows/build.yml');
@@ -69,18 +69,19 @@ test('old links to the install section of the landing page go to the install gui
   assert.equal(movedSection('#install'), 'install.html');
   assert.equal(movedSection('#features'), null);
   assert.equal(movedSection(''), null);
-  assert.match(read('website/index.html'), /<body [^>]*data-page="home"/);
 });
 
 test('pages without the download button never call the API', async () => {
   let fetched = 0;
-  globalThis.document = { body: { dataset: {} }, getElementById: () => null, querySelector: () => null, querySelectorAll: () => [] };
+  globalThis.document = { getElementById: () => null, querySelector: () => null, querySelectorAll: () => [] };
+  globalThis.location = { hash: '' };
   globalThis.fetch = async () => fetched++;
   try {
     await import('../../website/site.js?page=about');
     await new Promise((resolve) => setTimeout(resolve, 0));
   } finally {
     delete globalThis.document;
+    delete globalThis.location;
     delete globalThis.fetch;
   }
   assert.equal(fetched, 0);
@@ -116,7 +117,8 @@ test('every page loads the Tailwind CDN and the shared theme, and has its own ca
   assert.ok(!existsSync(new URL('website/style.css', root)), 'no stylesheet files: styles come from Tailwind');
   for (const page of pages) {
     const html = read(`website/${page}`);
-    const cdn = html.indexOf('<script src="https://cdn.tailwindcss.com"></script>');
+    // Pinned: theme.js is written for the Tailwind 3 Play CDN (ADR 0035)
+    const cdn = html.indexOf('<script src="https://cdn.tailwindcss.com/3.4.17"></script>');
     assert.ok(cdn > 0 && html.indexOf('<script src="theme.js"></script>') > cdn, `${page}: theme.js right after the CDN`);
     const canonical = page === 'index.html' ? 'https://roboviolence.com/' : `https://roboviolence.com/${page}`;
     assert.ok(html.includes(`<link rel="canonical" href="${canonical}">`), `${page}: canonical`);
@@ -153,6 +155,28 @@ test('every page has a current Markdown copy, linked from the page and from llms
     assert.ok(read(`website/${page}`).includes(`<link rel="alternate" type="text/markdown" href="${md}">`), page);
     assert.ok(llms.includes(`(https://roboviolence.com/${md})`), `llms.txt links ${md}`);
   }
+  assert.ok(llms.includes(`(${DISCORD_INVITE})`), 'llms.txt has the current Discord invite');
+});
+
+test('toMarkdown maps the pages\' HTML: own pages to .md, other sites unchanged', () => {
+  const html = `<main>
+  <div aria-hidden="true">decoration</div><section hidden>hook</section>
+  <h2>Steps <span>now</span></h2>
+  <p>Read <a href="install.html#data">the guide</a>, <a href="./">home</a>, <a href="https://www.gnu.org/licenses/gpl-3.0.html">GPL</a>,
+    <a href="#top">top</a>, <a data-discord href="#">Discord</a>, <a>no link</a> and <strong>run</strong> <code>a &amp;&amp; b</code>.</p>
+  <ol><li><span aria-hidden="true">1</span><div><h3>Get</h3><p>The file.</p></div></li></ol>
+  <pre><code>tar -xzf x.tar.gz
+cd x</code></pre>
+  <a class="btn" href="server.html">Server</a>
+</main>`;
+  assert.equal(toMarkdown(html), [
+    '## Steps now',
+    'Read [the guide](https://roboviolence.com/install.md#data), [home](https://roboviolence.com/index.md), ' +
+      '[GPL](https://www.gnu.org/licenses/gpl-3.0.html), [top](#top), ' + `[Discord](${DISCORD_INVITE}), no link and **run** \`a && b\`.`,
+    '1. **Get** The file.',
+    '```\ntar -xzf x.tar.gz\ncd x\n```',
+    '[Server](https://roboviolence.com/server.md)',
+  ].join('\n\n') + '\n');
 });
 
 test('the landing page describes the game as schema.org VideoGame data', () => {
@@ -162,4 +186,5 @@ test('the landing page describes the game as schema.org VideoGame data', () => {
   assert.equal(data['@type'], 'VideoGame');
   assert.equal(data.offers.price, '0');
   assert.equal(data.url, 'https://roboviolence.com/');
+  assert.ok(data.sameAs.includes(DISCORD_INVITE), 'JSON-LD has the current Discord invite');
 });

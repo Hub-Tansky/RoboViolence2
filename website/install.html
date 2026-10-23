@@ -21,28 +21,27 @@
   <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="img/rv2-icon.png">
   <style>body { background: #12141b; color: #e6e8ef; }</style>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <script src="theme.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/lucide@1.49.0/dist/umd/lucide.min.js"></script>
   <script type="module" src="site.js"></script>
 </head>
-<body class="min-h-screen bg-ink font-sans text-[17px] leading-relaxed text-fg antialiased">
-<header class="sticky top-0 z-20 border-b border-line bg-ink/85 backdrop-blur">
-  <nav class="relative mx-auto flex max-w-site items-center gap-8 px-4 py-3 md:px-6" aria-label="Main">
-    <a class="mr-auto flex items-center gap-3 text-lg font-bold tracking-tight text-fg" href="./"><img class="h-8 w-8 rounded-lg" src="img/rv2-icon.png" width="32" height="32" alt="">Robo Violence 2</a>
-    <button class="inline-flex h-11 w-11 items-center justify-center rounded-lg border border-line text-fg hover:border-link md:hidden" type="button" data-menu-button aria-expanded="false" aria-controls="menu"><i data-lucide="menu"></i><span class="sr-only">Menu</span></button>
-    <div class="absolute inset-x-0 top-full hidden flex-col border-b border-line bg-ink px-4 pb-3 data-[open]:flex md:static md:flex md:flex-row md:items-center md:gap-8 md:border-0 md:bg-transparent md:p-0" id="menu">
-      <a class="nav-link py-3 md:py-0" href="install.html" aria-current="page">Download</a>
-      <a class="nav-link py-3 md:py-0" href="about.html">About</a>
-      <a class="nav-link py-3 md:py-0" data-discord href="#">Discord server</a>
-      <a class="nav-link py-3 md:py-0" href="server.html">Your own game server</a>
+<body>
+<header class="site-header">
+  <nav class="site-nav" aria-label="Main">
+    <a class="site-brand" href="./"><img src="img/rv2-icon.png" width="32" height="32" alt="">Robo Violence 2</a>
+    <button class="menu-button" type="button" data-menu-button aria-expanded="false" aria-controls="menu"><i data-lucide="menu"></i><span class="sr-only">Menu</span></button>
+    <div class="menu" id="menu">
+      <a class="nav-link" href="install.html" aria-current="page">Download</a>
+      <a class="nav-link" href="about.html">About</a>
+      <a class="nav-link" data-discord href="#">Discord server</a>
+      <a class="nav-link" href="server.html">Your own game server</a>
     </div>
   </nav>
 </header>
 
-<main class="relative">
-  <div class="pointer-events-none absolute inset-x-0 top-0 h-80 bg-grid bg-cell [mask-image:linear-gradient(180deg,#000,transparent)]" aria-hidden="true"></div>
-  <div class="relative mx-auto max-w-site px-4 py-12 md:px-6 md:py-20">
+<main class="page">
+  <div class="page-body">
     <div class="prose-rv">
       <h1>Install Robo Violence 2</h1>
       <p class="notice"><strong>Alpha:</strong> in-progress experimental version with placeholder art. For now we recommend using your own original <a href="https://github.com/Daivuk/BaboViolent2">BaboViolent 2</a> data.</p>
@@ -106,8 +105,8 @@ cd roboviolence2-linux-x64
   </div>
 </main>
 
-<footer class="border-t border-line">
-  <div class="mx-auto flex max-w-site flex-col gap-4 px-4 py-10 text-sm text-muted md:flex-row md:items-center md:justify-between md:px-6">
+<footer class="site-footer">
+  <div>
     <div class="flex flex-wrap gap-2">
       <img alt="GitHub License" src="https://img.shields.io/github/license/Hub-Tansky/RoboViolence2" height="20">
       <img alt="GitHub Created At" src="https://img.shields.io/github/created-at/Hub-Tansky/RoboViolence2" height="20">

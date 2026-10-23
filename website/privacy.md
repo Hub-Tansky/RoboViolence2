@@ -106,4 +106,4 @@ The Game does not ask for your age or any identifying information. It is not dir
 
 ## 10. Changes to this policy
 
-We update this policy when the Game or our servers change how they handle personal data. The date at the top shows the latest version; the full history is in the [project repository](https://github.com/Hub-Tansky/RoboViolence2/commits/main/website/privacy.md).
+We update this policy when the Game or our servers change how they handle personal data. The date at the top shows the latest version; the full history is in the [project repository](https://github.com/Hub-Tansky/RoboViolence2/commits/main/website/privacy.html).

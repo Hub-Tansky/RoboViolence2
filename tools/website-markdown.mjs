@@ -2,6 +2,7 @@
 // Run after changing a page: node tools/website-markdown.mjs. tests/website/site.test.mjs fails when a copy is stale.
 // Handles the HTML the pages use: headings, paragraphs, flat lists, code blocks, links and inline emphasis inside <main>.
 import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { pathToFileURL } from 'node:url';
 import { DISCORD_INVITE } from '../website/site.js';
 
 const SITE = 'https://roboviolence.com/';
@@ -33,14 +34,17 @@ function parse(html) {
 function href(attrs) {
   if ('data-discord' in attrs) return DISCORD_INVITE;
   if (attrs.href.startsWith('#')) return attrs.href; // in-page
-  return new URL(attrs.href.replace(/\.html(#|$)/, '.md$1').replace(/^\.\/$/, 'index.md'), SITE).href;
+  // The site's own pages point at their Markdown copies; other sites' links stay as they are.
+  const url = new URL(attrs.href, SITE);
+  if (url.origin === new URL(SITE).origin) url.pathname = url.pathname.replace(/\.html$/, '.md').replace(/\/$/, '/index.md');
+  return url.href;
 }
 
 function inline(node) {
   if (typeof node === 'string') return node.replace(/\s+/g, ' ');
   const text = node.children.map(inline).join('');
   switch (node.tag) {
-    case 'a': return `[${text.trim()}](${href(node.attrs)})`;
+    case 'a': return 'href' in node.attrs ? `[${text.trim()}](${href(node.attrs)})` : text;
     case 'strong': return `**${text}**`;
     case 'code': case 'kbd': return `\`${text}\``;
     case 'br': return '  \n';
@@ -89,7 +93,7 @@ export function toMarkdown(html) {
 
 export const pages = (dir) => readdirSync(dir).filter((f) => f.endsWith('.html'));
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   const dir = new URL('../website/', import.meta.url);
   for (const page of pages(dir)) {
     writeFileSync(new URL(page.replace(/\.html$/, '.md'), dir), toMarkdown(readFileSync(new URL(page, dir), 'utf8')));

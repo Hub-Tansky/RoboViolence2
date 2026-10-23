@@ -21,7 +21,7 @@
   <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="img/rv2-icon.png">
   <style>body { background: #12141b; color: #e6e8ef; }</style>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <script src="theme.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/lucide@1.49.0/dist/umd/lucide.min.js"></script>
   <script type="module" src="site.js"></script>
@@ -65,16 +65,16 @@
   }
   </script>
 </head>
-<body class="min-h-screen bg-ink font-sans text-[17px] leading-relaxed text-fg antialiased" data-page="home">
-<header class="sticky top-0 z-20 border-b border-line bg-ink/85 backdrop-blur">
-  <nav class="relative mx-auto flex max-w-site items-center gap-8 px-4 py-3 md:px-6" aria-label="Main">
-    <a class="mr-auto flex items-center gap-3 text-lg font-bold tracking-tight text-fg" href="./"><img class="h-8 w-8 rounded-lg" src="img/rv2-icon.png" width="32" height="32" alt="">Robo Violence 2</a>
-    <button class="inline-flex h-11 w-11 items-center justify-center rounded-lg border border-line text-fg hover:border-link md:hidden" type="button" data-menu-button aria-expanded="false" aria-controls="menu"><i data-lucide="menu"></i><span class="sr-only">Menu</span></button>
-    <div class="absolute inset-x-0 top-full hidden flex-col border-b border-line bg-ink px-4 pb-3 data-[open]:flex md:static md:flex md:flex-row md:items-center md:gap-8 md:border-0 md:bg-transparent md:p-0" id="menu">
-      <a class="nav-link py-3 md:py-0" href="install.html">Download</a>
-      <a class="nav-link py-3 md:py-0" href="about.html">About</a>
-      <a class="nav-link py-3 md:py-0" data-discord href="#">Discord server</a>
-      <a class="nav-link py-3 md:py-0" href="server.html">Your own game server</a>
+<body>
+<header class="site-header">
+  <nav class="site-nav" aria-label="Main">
+    <a class="site-brand" href="./"><img src="img/rv2-icon.png" width="32" height="32" alt="">Robo Violence 2</a>
+    <button class="menu-button" type="button" data-menu-button aria-expanded="false" aria-controls="menu"><i data-lucide="menu"></i><span class="sr-only">Menu</span></button>
+    <div class="menu" id="menu">
+      <a class="nav-link" href="install.html">Download</a>
+      <a class="nav-link" href="about.html">About</a>
+      <a class="nav-link" data-discord href="#">Discord server</a>
+      <a class="nav-link" href="server.html">Your own game server</a>
     </div>
   </nav>
 </header>
@@ -116,7 +116,7 @@
       <div class="card">
         <i class="text-brand-red" data-lucide="server"></i>
         <h3 class="mt-4 text-lg font-bold">Servers ready to join</h3>
-        <p class="mt-2 text-muted">Our capture the flag and team deathmatch servers are in the in-game server list. You can also <a class="text-link underline underline-offset-4 hover:text-fg" href="server.html">run your own</a>.</p>
+        <p class="mt-2 text-muted">Our capture the flag and team deathmatch servers are in the in-game server list. You can also <a class="link" href="server.html">run your own</a>.</p>
       </div>
       <div class="card">
         <i class="text-link" data-lucide="shield-check"></i>
@@ -136,7 +136,7 @@
         </li>
         <li class="flex gap-4">
           <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-blue font-bold text-white" aria-hidden="true">2</span>
-          <div><h3 class="text-lg font-bold">Install</h3><p class="mt-1 text-muted">Follow the <a class="text-link underline underline-offset-4 hover:text-fg" href="install.html">install guide</a> for Windows, macOS or Linux.</p></div>
+          <div><h3 class="text-lg font-bold">Install</h3><p class="mt-1 text-muted">Follow the <a class="link" href="install.html">install guide</a> for Windows, macOS or Linux.</p></div>
         </li>
         <li class="flex gap-4">
           <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-red font-bold text-white" aria-hidden="true">3</span>
@@ -147,7 +147,7 @@
   </section>
 
   <section class="mx-auto max-w-site px-4 py-16 md:px-6 md:py-24" id="community">
-    <div class="card flex flex-col gap-8 p-8 md:flex-row md:items-center md:justify-between md:p-12">
+    <div class="card flex flex-col gap-8 p-8 md:p-12 lg:flex-row lg:items-center lg:justify-between">
       <div class="max-w-xl">
         <h2 class="text-3xl font-bold tracking-tight">Find players and follow releases</h2>
         <p class="mt-3 text-lg text-muted">Talk to other players, report bugs and get news about new versions on Discord. Code and issues live on GitHub.</p>
@@ -160,8 +160,8 @@
   </section>
 </main>
 
-<footer class="border-t border-line">
-  <div class="mx-auto flex max-w-site flex-col gap-4 px-4 py-10 text-sm text-muted md:flex-row md:items-center md:justify-between md:px-6">
+<footer class="site-footer">
+  <div>
     <div class="flex flex-wrap gap-2">
       <img alt="GitHub License" src="https://img.shields.io/github/license/Hub-Tansky/RoboViolence2" height="20">
       <img alt="GitHub Created At" src="https://img.shields.io/github/created-at/Hub-Tansky/RoboViolence2" height="20">

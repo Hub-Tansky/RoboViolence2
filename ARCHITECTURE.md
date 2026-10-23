@@ -754,12 +754,12 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | path | purpose |
 |---|---|
 | `website/index.html` | Landing page: hero with the OS-detected download button, features, start steps, community links, status hook, VideoGame JSON-LD (ADR 0029, 0035) |
-| `website/install.html` | Install guide: download button with version and size, original data steps, requirements, downloads list, per-OS steps |
+| `website/install.html` | Install guide: download button with version and size, original data steps, requirements, downloads list, per-OS steps (ADR 0035) |
 | `website/about.html` | What the game is; credits to BaboViolent 2 |
 | `website/privacy.html` | Privacy policy (GDPR): data processed by the game, servers and website, legal basis, hosting, retention, rights (ADR 0034) |
 | `website/server.html` | Hosting your own game server (summary of `docs/ops/runbook.md`) |
 | `website/site.js` | Download button and list from the GitHub releases API, Discord invite constant, mobile menu, icons, `/#install` redirect, contact address assembled from `data-mail` attributes |
-| `website/theme.js` | Tailwind Play CDN theme for every page: palette, layout steps, shared component classes (ADR 0035) |
+| `website/theme.js` | Tailwind Play CDN theme for every page: palette, layout steps, page chrome and shared component classes (ADR 0035) |
 | `website/index.md` | Markdown copy of `index.html` for AI agents, from `tools/website-markdown.mjs` |
 | `website/install.md` | Markdown copy of `install.html` for AI agents, from `tools/website-markdown.mjs` |
 | `website/about.md` | Markdown copy of `about.html` for AI agents, from `tools/website-markdown.mjs` |

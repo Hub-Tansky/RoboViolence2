@@ -1,6 +1,6 @@
 # 0029: The website is static HTML on GitHub Pages; downloads come from the GitHub releases API
 
-- Status: Accepted
+- Status: Accepted, amended by [ADR 0035](0035-website-tailwind-install-page-agent-files.md) (Tailwind CDN instead of `style.css`, install guide page, generated Markdown copies)
 - Date: 2026-10-20
 - Affects: `website/`, `.github/workflows/pages.yml`, Project item "Website on GitHub Pages at roboviolence.com"
 

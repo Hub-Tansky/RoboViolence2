@@ -21,139 +21,140 @@
   <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="img/rv2-icon.png">
   <style>body { background: #12141b; color: #e6e8ef; }</style>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <script src="theme.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/lucide@1.49.0/dist/umd/lucide.min.js"></script>
   <script type="module" src="site.js"></script>
 </head>
-<body class="min-h-screen bg-ink font-sans text-[17px] leading-relaxed text-fg antialiased">
-<header class="sticky top-0 z-20 border-b border-line bg-ink/85 backdrop-blur">
-  <nav class="relative mx-auto flex max-w-site items-center gap-8 px-4 py-3 md:px-6" aria-label="Main">
-    <a class="mr-auto flex items-center gap-3 text-lg font-bold tracking-tight text-fg" href="./"><img class="h-8 w-8 rounded-lg" src="img/rv2-icon.png" width="32" height="32" alt="">Robo Violence 2</a>
-    <button class="inline-flex h-11 w-11 items-center justify-center rounded-lg border border-line text-fg hover:border-link md:hidden" type="button" data-menu-button aria-expanded="false" aria-controls="menu"><i data-lucide="menu"></i><span class="sr-only">Menu</span></button>
-    <div class="absolute inset-x-0 top-full hidden flex-col border-b border-line bg-ink px-4 pb-3 data-[open]:flex md:static md:flex md:flex-row md:items-center md:gap-8 md:border-0 md:bg-transparent md:p-0" id="menu">
-      <a class="nav-link py-3 md:py-0" href="install.html">Download</a>
-      <a class="nav-link py-3 md:py-0" href="about.html">About</a>
-      <a class="nav-link py-3 md:py-0" data-discord href="#">Discord server</a>
-      <a class="nav-link py-3 md:py-0" href="server.html">Your own game server</a>
+<body>
+<header class="site-header">
+  <nav class="site-nav" aria-label="Main">
+    <a class="site-brand" href="./"><img src="img/rv2-icon.png" width="32" height="32" alt="">Robo Violence 2</a>
+    <button class="menu-button" type="button" data-menu-button aria-expanded="false" aria-controls="menu"><i data-lucide="menu"></i><span class="sr-only">Menu</span></button>
+    <div class="menu" id="menu">
+      <a class="nav-link" href="install.html">Download</a>
+      <a class="nav-link" href="about.html">About</a>
+      <a class="nav-link" data-discord href="#">Discord server</a>
+      <a class="nav-link" href="server.html">Your own game server</a>
     </div>
   </nav>
 </header>
 
-<main class="relative">
-  <div class="pointer-events-none absolute inset-x-0 top-0 h-80 bg-grid bg-cell [mask-image:linear-gradient(180deg,#000,transparent)]" aria-hidden="true"></div>
-  <div class="prose-rv relative mx-auto max-w-site px-4 py-12 md:px-6 md:py-20">
-    <section>
-      <h1>Privacy policy</h1>
-      <p>Last updated: 23 October 2026</p>
-      <p>In short: Robo Violence 2 has no accounts, no analytics, no advertising, no telemetry and no crash reporting. To play online, the game servers need your IP address and see the nickname and chat messages you choose. We keep as little of this as possible, for as short as possible, and never sell it.</p>
-    </section>
+<main class="page">
+  <div class="page-body">
+  <div class="prose-rv">
+  <section>
+    <h1>Privacy policy</h1>
+    <p>Last updated: 23 October 2026</p>
+    <p>In short: Robo Violence 2 has no accounts, no analytics, no advertising, no telemetry and no crash reporting. To play online, the game servers need your IP address and see the nickname and chat messages you choose. We keep as little of this as possible, for as short as possible, and never sell it.</p>
+  </section>
 
-    <section id="controller">
-      <h2>1. Who is responsible</h2>
-      <p>This policy explains how the Robo Violence 2 project ("we") processes personal data when you use the game Robo Violence 2 (the "Game"), the official servers at roboviolence.com and this website. We process personal data under the General Data Protection Regulation (EU) 2016/679 (GDPR) and applicable national data protection law.</p>
-      <p>Data controller: Piotr, maintainer of Robo Violence 2.<br>
-        Contact for privacy questions: <a data-mail data-user="floss" data-domain="pelzowski.eu" href="#controller">floss [at] pelzowski [dot] eu</a></p>
-    </section>
+  <section id="controller">
+    <h2>1. Who is responsible</h2>
+    <p>This policy explains how the Robo Violence 2 project ("we") processes personal data when you use the game Robo Violence 2 (the "Game"), the official servers at roboviolence.com and this website. We process personal data under the General Data Protection Regulation (EU) 2016/679 (GDPR) and applicable national data protection law.</p>
+    <p>Data controller: Piotr, maintainer of Robo Violence 2.<br>
+      Contact for privacy questions: <a data-mail data-user="floss" data-domain="pelzowski.eu" href="#controller">floss [at] pelzowski [dot] eu</a></p>
+  </section>
 
-    <section id="data">
-      <h2>2. What data we process</h2>
-      <h3>When you play on an official server</h3>
-      <ul>
-        <li><strong>IP address and port</strong> of your connection. A network game can't work without it. Other players never receive your IP address.</li>
-        <li><strong>Nickname</strong> you choose in the game. You don't need to use your real name.</li>
-        <li><strong>Chat messages</strong> you send in the game.</li>
-        <li><strong>Match data</strong>: team, score, kills, deaths, flag captures, ping. It exists only while you are on the server and is not saved after the round. There is no leaderboard and no player profile.</li>
-      </ul>
-      <h3>Server logs</h3>
-      <p>Each official server writes a technical log: players joining and leaving (by nickname) and chat messages. Some entries also hold a nickname with an IP address: a player kicked, banned or flagged by the anti-cheat checks, a connection dropped for not completing the join, and in-game admin logins and admin commands.</p>
-      <h3>Bans</h3>
-      <p>If a player is banned for cheating or abuse, the server stores the nickname, the IP address and the date of the ban, so the ban can be enforced. To let an administrator ban someone who has already left, each server also keeps the nicknames and IP addresses of its last 50 players in memory only; they are gone when the server restarts. So that bans can be shared between servers, anyone who runs a Robo Violence 2 server, or any program that connects to the master server, can request this list from a public server through the master server.</p>
-      <p>When you join a public server, that server asks the master server whether your IP address is on the shared ban list. The master server only compares it with the list and doesn't store it.</p>
-      <h3>The server list</h3>
-      <p>When you refresh the server list, the Game connects to the master server (master.roboviolence.com), which sees your IP address while it sends you the list. The master server stores IP addresses only in the shared ban list. If you run your own game server and make it public, the master server stores and shows everyone that server's IP address, port, name and player count while the server is online.</p>
-      <h3>Server administration</h3>
-      <p>Requests to the servers' admin interface (admin.roboviolence.com) are logged with the time, the requester's IP address and the command.</p>
-      <h3>This website</h3>
-      <p>This website sets no cookies and uses no analytics or tracking. It is hosted on GitHub Pages; GitHub processes your IP address and request details to deliver the pages. Your browser also loads the page styles from cdn.tailwindcss.com, the icons from cdn.jsdelivr.net, the release list from api.github.com and three badge images from img.shields.io; each of them sees your IP address. Downloads come from GitHub Releases.</p>
-      <h3>On your computer</h3>
-      <p>Your nickname, settings, screenshots and any game server data you create stay on your computer. The Game doesn't send them to us.</p>
-    </section>
+  <section id="data">
+    <h2>2. What data we process</h2>
+    <h3>When you play on an official server</h3>
+    <ul>
+      <li><strong>IP address and port</strong> of your connection. A network game can't work without it. Other players never receive your IP address.</li>
+      <li><strong>Nickname</strong> you choose in the game. You don't need to use your real name.</li>
+      <li><strong>Chat messages</strong> you send in the game.</li>
+      <li><strong>Match data</strong>: team, score, kills, deaths, flag captures, ping. It exists only while you are on the server and is not saved after the round. There is no leaderboard and no player profile.</li>
+    </ul>
+    <h3>Server logs</h3>
+    <p>Each official server writes a technical log: players joining and leaving (by nickname) and chat messages. Some entries also hold a nickname with an IP address: a player kicked, banned or flagged by the anti-cheat checks, a connection dropped for not completing the join, and in-game admin logins and admin commands.</p>
+    <h3>Bans</h3>
+    <p>If a player is banned for cheating or abuse, the server stores the nickname, the IP address and the date of the ban, so the ban can be enforced. To let an administrator ban someone who has already left, each server also keeps the nicknames and IP addresses of its last 50 players in memory only; they are gone when the server restarts. So that bans can be shared between servers, anyone who runs a Robo Violence 2 server, or any program that connects to the master server, can request this list from a public server through the master server.</p>
+    <p>When you join a public server, that server asks the master server whether your IP address is on the shared ban list. The master server only compares it with the list and doesn't store it.</p>
+    <h3>The server list</h3>
+    <p>When you refresh the server list, the Game connects to the master server (master.roboviolence.com), which sees your IP address while it sends you the list. The master server stores IP addresses only in the shared ban list. If you run your own game server and make it public, the master server stores and shows everyone that server's IP address, port, name and player count while the server is online.</p>
+    <h3>Server administration</h3>
+    <p>Requests to the servers' admin interface (admin.roboviolence.com) are logged with the time, the requester's IP address and the command.</p>
+    <h3>This website</h3>
+    <p>This website sets no cookies and uses no analytics or tracking. It is hosted on GitHub Pages; GitHub processes your IP address and request details to deliver the pages. Your browser also loads the page styles from cdn.tailwindcss.com, the icons from cdn.jsdelivr.net, the release list from api.github.com and three badge images from img.shields.io; each of them sees your IP address. Downloads come from GitHub Releases.</p>
+    <h3>On your computer</h3>
+    <p>Your nickname, settings, screenshots and any game server data you create stay on your computer. The Game doesn't send them to us.</p>
+  </section>
 
-    <section id="purposes">
-      <h2>3. Why we process it (legal basis)</h2>
-      <ul>
-        <li><strong>Providing the online game you ask to join</strong> (Art. 6(1)(b) GDPR): connecting you to a server, showing your nickname and chat to other players, sending you the server list.</li>
-        <li><strong>Legitimate interests</strong> (Art. 6(1)(f) GDPR): keeping the servers secure and fair, enforcing bans, finding faults (server logs), protecting the admin interface (audit log), keeping backups, and running this website.</li>
-      </ul>
-      <p>The anti-cheat checks can automatically remove a player from a match. This only affects that match; a ban is always decided by an administrator.</p>
-    </section>
+  <section id="purposes">
+    <h2>3. Why we process it (legal basis)</h2>
+    <ul>
+      <li><strong>Providing the online game you ask to join</strong> (Art. 6(1)(b) GDPR): connecting you to a server, showing your nickname and chat to other players, sending you the server list.</li>
+      <li><strong>Legitimate interests</strong> (Art. 6(1)(f) GDPR): keeping the servers secure and fair, enforcing bans, finding faults (server logs), protecting the admin interface (audit log), keeping backups, and running this website.</li>
+    </ul>
+    <p>The anti-cheat checks can automatically remove a player from a match. This only affects that match; a ban is always decided by an administrator.</p>
+  </section>
 
-    <section id="hosting">
-      <h2>4. Where the data is stored</h2>
-      <p>The official game servers and the master server run on a server rented from netcup GmbH, located in Nuremberg, Germany. Nightly backups of the server data (bans, admin log, server settings) are encrypted on our server before upload and stored with Backblaze in its EU Central region (Netherlands); Backblaze can't read them. Game data is not transferred outside the European Economic Area as part of our own infrastructure.</p>
-      <p>This website is hosted by GitHub, Inc. (USA), which participates in the EU-U.S. Data Privacy Framework.</p>
-    </section>
+  <section id="hosting">
+    <h2>4. Where the data is stored</h2>
+    <p>The official game servers and the master server run on a server rented from netcup GmbH, located in Nuremberg, Germany. Nightly backups of the server data (bans, admin log, server settings) are encrypted on our server before upload and stored with Backblaze in its EU Central region (Netherlands); Backblaze can't read them. Game data is not transferred outside the European Economic Area as part of our own infrastructure.</p>
+    <p>This website is hosted by GitHub, Inc. (USA), which participates in the EU-U.S. Data Privacy Framework.</p>
+  </section>
 
-    <section id="retention">
-      <h2>5. How long we keep it</h2>
-      <ul>
-        <li>IP address, nickname and match data in the game server's memory: until you disconnect or the round ends.</li>
-        <li>Server logs: kept in rotating files of at most 30 MB per server, overwritten as new entries arrive, and deleted whenever the server is updated. In practice this is days, not months.</li>
-        <li>Bans: enforced for 365 days from the ban, then deleted automatically when the server next restarts. Bans on the shared ban list of the master server end when their set duration ends.</li>
-        <li>The last 50 players' nicknames and IP addresses kept for bans: in memory only, until the server restarts.</li>
-        <li>Public game server entries on the master server: removed 60 seconds after the server stops reporting.</li>
-        <li>Admin interface log: 90 days.</li>
-        <li>Backups: 14 daily and 8 weekly copies, so deleted data can remain in a backup for up to 8 more weeks.</li>
-      </ul>
-    </section>
+  <section id="retention">
+    <h2>5. How long we keep it</h2>
+    <ul>
+      <li>IP address, nickname and match data in the game server's memory: until you disconnect or the round ends.</li>
+      <li>Server logs: kept in rotating files of at most 30 MB per server, overwritten as new entries arrive, and deleted whenever the server is updated. In practice this is days, not months.</li>
+      <li>Bans: enforced for 365 days from the ban, then deleted automatically when the server next restarts. Bans on the shared ban list of the master server end when their set duration ends.</li>
+      <li>The last 50 players' nicknames and IP addresses kept for bans: in memory only, until the server restarts.</li>
+      <li>Public game server entries on the master server: removed 60 seconds after the server stops reporting.</li>
+      <li>Admin interface log: 90 days.</li>
+      <li>Backups: 14 daily and 8 weekly copies, so deleted data can remain in a backup for up to 8 more weeks.</li>
+    </ul>
+  </section>
 
-    <section id="recipients">
-      <h2>6. Who receives the data</h2>
-      <p>We do not sell or share your personal data for advertising. Recipients are:</p>
-      <ul>
-        <li><strong>Other players</strong> on the same server see your nickname, chat messages, team and score.</li>
-        <li><strong>Anyone who runs a Robo Violence 2 server</strong>, or any program that connects to the master server, can see the nicknames and IP addresses of a public server's last 50 players; the feature exists to issue shared bans (see section 2, Bans).</li>
-        <li><strong>Our hosting providers</strong>, acting on our behalf: netcup GmbH (game and master servers), Backblaze (encrypted backups), GitHub (website).</li>
-      </ul>
-      <p>Anyone can run their own Robo Violence 2 server. If you join a server that is not run by us, its operator is responsible for the data it processes, and this policy does not cover it.</p>
-      <p>The Robo Violence 2 Discord server is run on Discord, under Discord's own privacy policy. We only link to it.</p>
-    </section>
+  <section id="recipients">
+    <h2>6. Who receives the data</h2>
+    <p>We do not sell or share your personal data for advertising. Recipients are:</p>
+    <ul>
+      <li><strong>Other players</strong> on the same server see your nickname, chat messages, team and score.</li>
+      <li><strong>Anyone who runs a Robo Violence 2 server</strong>, or any program that connects to the master server, can see the nicknames and IP addresses of a public server's last 50 players; the feature exists to issue shared bans (see section 2, Bans).</li>
+      <li><strong>Our hosting providers</strong>, acting on our behalf: netcup GmbH (game and master servers), Backblaze (encrypted backups), GitHub (website).</li>
+    </ul>
+    <p>Anyone can run their own Robo Violence 2 server. If you join a server that is not run by us, its operator is responsible for the data it processes, and this policy does not cover it.</p>
+    <p>The Robo Violence 2 Discord server is run on Discord, under Discord's own privacy policy. We only link to it.</p>
+  </section>
 
-    <section id="choices">
-      <h2>7. Your choices</h2>
-      <p>You can play offline or on a local network without contacting our servers. To stop the Game from contacting our master server, start it with the environment variable <code>BV2_MASTER_SERVERS=none</code>, or put the line <code>cl_masterServers "none"</code> in a <code>.cfg</code> file in the <code>config/local</code> folder of the Game (<a href="https://github.com/Hub-Tansky/RoboViolence2/blob/main/config/README.md">configuration guide</a>). You can then still join servers by address.</p>
-    </section>
+  <section id="choices">
+    <h2>7. Your choices</h2>
+    <p>You can play offline or on a local network without contacting our servers. To stop the Game from contacting our master server, start it with the environment variable <code>BV2_MASTER_SERVERS=none</code>, or put the line <code>cl_masterServers "none"</code> in a <code>.cfg</code> file in the <code>config/local</code> folder of the Game (<a href="https://github.com/Hub-Tansky/RoboViolence2/blob/main/config/README.md">configuration guide</a>). You can then still join servers by address.</p>
+  </section>
 
-    <section id="rights">
-      <h2>8. Your rights</h2>
-      <p>Under the GDPR you have the right to:</p>
-      <ul>
-        <li>access the personal data we hold about you (Art. 15),</li>
-        <li>have inaccurate data corrected (Art. 16),</li>
-        <li>have your data deleted (Art. 17),</li>
-        <li>restrict processing (Art. 18),</li>
-        <li>receive your data in a portable format (Art. 20),</li>
-        <li>object to processing based on legitimate interests (Art. 21).</li>
-      </ul>
-      <p>Because we have no accounts, we can only find your data by the IP address or nickname you used. To exercise a right, write to the contact address in section 1 with that information.</p>
-      <p>You can also lodge a complaint with a data protection supervisory authority, in particular in the EU country where you live, or with the Polish authority, the President of the Personal Data Protection Office (UODO, <a href="https://uodo.gov.pl">uodo.gov.pl</a>).</p>
-    </section>
+  <section id="rights">
+    <h2>8. Your rights</h2>
+    <p>Under the GDPR you have the right to:</p>
+    <ul>
+      <li>access the personal data we hold about you (Art. 15),</li>
+      <li>have inaccurate data corrected (Art. 16),</li>
+      <li>have your data deleted (Art. 17),</li>
+      <li>restrict processing (Art. 18),</li>
+      <li>receive your data in a portable format (Art. 20),</li>
+      <li>object to processing based on legitimate interests (Art. 21).</li>
+    </ul>
+    <p>Because we have no accounts, we can only find your data by the IP address or nickname you used. To exercise a right, write to the contact address in section 1 with that information.</p>
+    <p>You can also lodge a complaint with a data protection supervisory authority, in particular in the EU country where you live, or with the Polish authority, the President of the Personal Data Protection Office (UODO, <a href="https://uodo.gov.pl">uodo.gov.pl</a>).</p>
+  </section>
 
-    <section id="children">
-      <h2>9. Children</h2>
-      <p>The Game does not ask for your age or any identifying information. It is not directed at children under 16. If you are a parent and believe your child's data is stored in a ban or log, contact us and we will delete it.</p>
-    </section>
+  <section id="children">
+    <h2>9. Children</h2>
+    <p>The Game does not ask for your age or any identifying information. It is not directed at children under 16. If you are a parent and believe your child's data is stored in a ban or log, contact us and we will delete it.</p>
+  </section>
 
-    <section id="changes">
-      <h2>10. Changes to this policy</h2>
-      <p>We update this policy when the Game or our servers change how they handle personal data. The date at the top shows the latest version; the full history is in the <a href="https://github.com/Hub-Tansky/RoboViolence2/commits/main/website/privacy.html">project repository</a>.</p>
-    </section>
+  <section id="changes">
+    <h2>10. Changes to this policy</h2>
+    <p>We update this policy when the Game or our servers change how they handle personal data. The date at the top shows the latest version; the full history is in the <a href="https://github.com/Hub-Tansky/RoboViolence2/commits/main/website/privacy.html">project repository</a>.</p>
+  </section>
+  </div>
   </div>
 </main>
 
-<footer class="border-t border-line">
-  <div class="mx-auto flex max-w-site flex-col gap-4 px-4 py-10 text-sm text-muted md:flex-row md:items-center md:justify-between md:px-6">
+<footer class="site-footer">
+  <div>
     <div class="flex flex-wrap gap-2">
       <img alt="GitHub License" src="https://img.shields.io/github/license/Hub-Tansky/RoboViolence2" height="20">
       <img alt="GitHub Created At" src="https://img.shields.io/github/created-at/Hub-Tansky/RoboViolence2" height="20">

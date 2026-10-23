@@ -1,4 +1,4 @@
-// Robo Violence 2 website: download button, download list, Discord link, mobile menu, icons (ADR 0029), contact address.
+// Robo Violence 2 website: download button, download list, Discord link (ADR 0029), mobile menu, icons (ADR 0035), contact address.
 // The exports are for tests/website/site.test.mjs; the DOM part runs only in a browser.
 
 const REPO = 'Hub-Tansky/RoboViolence2';
@@ -128,7 +128,7 @@ function setUpMail() {
 }
 
 async function main() {
-  const moved = document.body.dataset.page === 'home' && movedSection(location.hash);
+  const moved = movedSection(location.hash);
   if (moved) {
     location.replace(moved);
     return;
