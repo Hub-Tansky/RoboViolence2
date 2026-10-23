@@ -73,6 +73,17 @@ int main(int argc, char ** argv)
 	reloaded.load(tsv, legacy, now, 365);
 	CHECK(reloaded.entries().size() == 1);
 
+	// A binary banlist left beside banlist.tsv is deleted unread
+	std::ofstream(legacy, std::ios::binary) << "stale";
+	reloaded.load(tsv, legacy, now, 365);
+	CHECK(!exists(legacy) && reloaded.entries().size() == 1);
+
+	// A save that can't be written keeps nothing half-written
+	retention::BanList unwritable;
+	unwritable.load(dir + "/retention-missing-dir/banlist.tsv", legacy, now, 365);
+	unwritable.add("Griefer", "203.0.113.7", now);
+	CHECK(!exists(dir + "/retention-missing-dir/banlist.tsv") && !exists(dir + "/retention-missing-dir/banlist.tsv.tmp"));
+
 	// Audit lines older than the limit go, newer ones stay in order; the writer's stamp is the one compared
 	CHECK(retention::utcStamp((time_t)now) == "2026-10-14T17:46:40Z");
 	{

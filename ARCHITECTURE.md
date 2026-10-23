@@ -541,7 +541,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/CLobby.h` | Lobby and menu tab host |
 | `game/src/CMainTab.cpp` | Main menu tab |
 | `game/src/CMainTab.h` | Main menu tab |
-| `game/src/CMaster.cpp` | Master-server client: server list, remote admin, account manager packets; ignores remote cache-list requests (ADR 0034) |
+| `game/src/CMaster.cpp` | Master-server client: server list, remote admin, account manager packets |
 | `game/src/CMaster.h` | Master-server client: server list, remote admin, account manager packets |
 | `game/src/CMaterial.cpp` | Material/texture state wrapper |
 | `game/src/CMaterial.h` | Material/texture state wrapper |

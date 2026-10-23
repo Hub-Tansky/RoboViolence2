@@ -29,13 +29,17 @@ namespace retention
 		bool replaceFile(const std::string & path, const std::string & content)
 		{
 			const std::string temporary = path + ".tmp";
-			{
-				std::ofstream out(temporary, std::ios::trunc | std::ios::binary);
-				if (!(out << content)) return false;
-			}
+			std::ofstream out(temporary, std::ios::trunc | std::ios::binary);
+			out << content;
+			out.close(); // the data reaches the disk here: a full disk shows up now, not in the destructor
 			std::error_code error;
-			std::filesystem::rename(temporary, path, error);
-			return !error;
+			if (out) std::filesystem::rename(temporary, path, error);
+			if (!out || error)
+			{
+				std::remove(temporary.c_str());
+				return false;
+			}
+			return true;
 		}
 
 		std::vector<Ban> readTsv(std::ifstream & file)
@@ -75,7 +79,8 @@ namespace retention
 		const size_t before = bans.size();
 		for (size_t i = bans.size(); i-- > 0;)
 			if (expired(bans[i], now, days)) bans.erase(bans.begin() + i);
-		if ((legacy || bans.size() != before) && save() && legacy) std::remove(legacyPath.c_str());
+		if ((legacy || bans.size() != before) && !save()) return;
+		std::remove(legacyPath.c_str()); // moved now, or left over beside banlist.tsv: either way never read again
 	}
 
 	void BanList::add(const std::string & name, const std::string & ip, long long now)

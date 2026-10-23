@@ -489,8 +489,12 @@ void CMaster::recvPacket(const char * buffer, int typeID)
 			break;
 		}
 	case CACHE_LIST_REMOTE:
-		// Ignored: it asked for our recent players' nicks and IPs for another server's admin (ADR 0034)
-		break;
+		{
+			stCacheListRemote clr;
+			memcpy(&clr,buffer,sizeof(stCacheListRemote));
+			sendCacheListToMaster(clr);
+			break;
+		}
 	case ACCOUNT_URL:
 		{
 			unsigned short version=0;
@@ -673,6 +677,54 @@ void CMaster::clearRemoteCacheList()
 		CachedPlayersRemote[i].Valid = false;
 		CachedPlayersRemote[i].NickName[0] = '\0';
 		CachedPlayersRemote[i].IP[0] = '\0';
+	}
+}
+
+void CMaster::sendCacheListToMaster(const stCacheListRemote& info)
+{
+	console->add(" sending req list to master ");
+	if (RunningServer)
+	{
+		CString filter("%s", info.Filter);
+		bool sendThis;
+		for (int i=0;i<50;i++)
+		{
+			if( RunningServer->CachedPlayers[i].Valid )
+			{
+				console->add(" > one player ?");
+				sendThis = false;
+				//if a parameter was entered after the list, onlyshow those who fits
+				if( filter != "" )
+				{
+					filter.toLower();
+					CString name( RunningServer->CachedPlayers[i].NickName );
+					name.toLower();
+
+					if( strstr( name.s , filter.s ) )
+						sendThis = true;
+					else if( strstr( RunningServer->CachedPlayers[i].IP , filter.s ) )
+						sendThis = true;
+				}
+				else
+					sendThis = true;
+				if (sendThis == true)
+				{
+					console->add(" >              yes");
+					stCachePlayer cp;
+					memset(&cp, 0, sizeof(stCachePlayer));
+					cp.FromID = info.FromID;
+					cp.ID = i;
+					memcpy(cp.IP, RunningServer->CachedPlayers[i].IP, 16);
+					memcpy(cp.NickName, RunningServer->CachedPlayers[i].NickName, 32);
+					cp.ReqNum = info.ReqNum;
+					sendPacket( (char*)&cp , sizeof(stCachePlayer) , CACHE_LIST_PLAYER);
+				}
+			}
+		}
+		console->add(" remote req end");
+		stCacheListEnd cle;
+		cle.requestFromID = info.FromID;
+		sendPacket( (char*)&cle , sizeof(stCacheListEnd) , CACHE_LIST_PLAYER_END);
 	}
 }
 
