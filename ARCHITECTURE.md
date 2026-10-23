@@ -320,6 +320,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 
 | path | purpose |
 |---|---|
+| `docs/ops/release.md` | Cutting a release: pick the commit, manual install test per OS, tag, notes header template, production re-pin, Discord publish |
 | `docs/ops/runbook.md` | Hosting the server images: secrets, start, stop, upgrade, logs, console, ports, backups, production (pinned manual deploy, failover) |
 
 ### `engine/babonet`
