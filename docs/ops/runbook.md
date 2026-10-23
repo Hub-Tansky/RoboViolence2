@@ -73,7 +73,7 @@ Each game server's admin API ([ADR 0015](../decisions/0015-admin-http-api-behind
 | Audit log | `docker compose -f packaging/docker/compose.example.yml exec server tail /var/lib/bv2/admin-audit.log` (`exec tdm` for TDM) |
 
 - The reply to a command is the console lines it printed. `restart`, `disconnect`, `host` and `connect` are refused (they rebuild the server). Each source may send 5 requests at once, then 1 a second (429 beyond).
-- `admin-audit.log` (in the server volume): one line per request (also refused, limited, too large and timed-out ones) with UTC time, source, result and command; secrets are masked. A command is logged before it runs.
+- `admin-audit.log` (in the server volume): one line per request (also refused, limited, too large and timed-out ones) with UTC time, source, result and command; secrets are masked. A command is logged before it runs. Lines older than 90 days are dropped (privacy policy, [ADR 0034](../decisions/0034-player-data-retention-and-privacy-policy.md)).
 - The source is the client address Caddy reports; the server believes `X-Forwarded-For` only from `BV2_ADMIN_API_PROXY` (`admin-proxy`).
 - The old UDP remote admin (`RA_*`) was removed in Phase C step 6.
 
@@ -93,7 +93,7 @@ Keep your own copy outside the repository. Mount the folder that holds its `main
 
 ## Backups
 
-The volumes hold all state: back up `master-data` (bans), `server-data` and `tdm-data` (config, `bv2.db`), and `caddy-data` (the admin certificate and its key). For example:
+The volumes hold all state: back up `master-data` (global bans), `server-data` and `tdm-data` (config, `bv2.db`, local bans in `banlist.tsv`, which expire after `sv_banDays`, default 365), and `caddy-data` (the admin certificate and its key). For example:
 
 ```
 docker run --rm -v roboviolence2_master-data:/data -v "$PWD":/backup ubuntu:24.04 tar -czf /backup/master-data.tgz -C /data .
@@ -121,6 +121,8 @@ Install (a new or failover host): the staging README's [By hand](../../tools/sta
 | Fail over to another host | install as above, restore the latest backup into the volumes and `/etc/rv2-prod.env`, set the new `BV2_PUBLIC_ADDRESS`, deploy the same SHA, then point the `master` and `admin` DNS records at it. The restored `caddy-data` carries the admin certificate, so verify passes before DNS moves; if it has expired, point `admin` first and deploy again |
 
 Backups: a nightly job copies `/etc/rv2-prod.env` and every `roboviolence2_*` volume off the host (see [Backups](#backups) for what they hold); restore one snapshot to a scratch folder now and then to prove it works.
+
+Health: install `tools/staging/health-watch.sh` from the same commit as `deploy.sh`, into the same folder (it reads `deploy.sh` beside it), with a cron line for the deploy user: `* * * * * RV2_DEPLOY_LABEL=prod /opt/rv2-prod/health-watch.sh >>/var/lib/rv2-prod/health.log 2>&1`. It sends `RV2 prod unhealthy` with the bad or missing services within about two minutes, and `RV2 prod healthy again` after. An outside monitor still checks the public ports.
 
 ## Without compose
 

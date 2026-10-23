@@ -77,6 +77,7 @@ set(BV2_GAME_SOURCES
   src/Player.cpp
   src/PlayerUpdate.cpp
   src/ReportGen.cpp
+  src/Retention.cpp
   src/Scene.cpp
   src/SceneNet.cpp
   src/Server.cpp
@@ -122,6 +123,7 @@ set(BV2_SERVER_SOURCES
   src/Player.cpp
   src/PlayerUpdate.cpp
   src/ReportGen.cpp
+  src/Retention.cpp
   src/Scene.cpp
   src/SceneNet.cpp
   src/Server.cpp

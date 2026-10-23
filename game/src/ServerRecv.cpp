@@ -334,7 +334,7 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 						net_svcl_player_enum_state playerState;
 						playerState.playerID = (char)i;
 						memcpy(playerState.playerName, game->players[i]->name.s, game->players[i]->name.len() + 1);
-						memcpy(playerState.playerIP, game->players[i]->playerIP, 16);
+						memset(playerState.playerIP, 0, sizeof(playerState.playerIP)); // a player's IP stays on the server (privacy)
                         playerState.kills = (short)game->players[i]->kills;
 						playerState.deaths = (short)game->players[i]->deaths;
 						playerState.score = (short)game->players[i]->score;
@@ -438,6 +438,7 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 				game->players[playerInfo.playerID]->name = playerInfo.playerName;
 				memcpy(playerInfo.playerIP,game->players[playerInfo.playerID]->playerIP, 16);
 				net_clsv_svcl_player_info relayed = playerInfo; // step 10: the account login stays with the server
+				memset(relayed.playerIP, 0, sizeof(relayed.playerIP)); // and so does the IP: other players never see it
 				memset(relayed.username, 0, sizeof(relayed.username));
 				memset(relayed.password, 0, sizeof(relayed.password));
 				bb_serverSend((char*)&relayed, sizeof(net_clsv_svcl_player_info), NET_CLSV_SVCL_PLAYER_INFO, 0);

@@ -1071,14 +1071,13 @@ void Console::sendCommand(CString commandLine, bool isAdmin, unsigned long bbnet
 			{
 				if (scene->client->game->players[i])
 				{
+					// The server never sends other players' IPs: only the server console lists them
 					if(scene->client->game->players[i] != scene->client->game->thisPlayer)
-						add(CString("[%02i] %s - IP:%s", i,
-							scene->client->game->players[i]->name.s,
-							scene->client->game->players[i]->playerIP));
+						add(CString("[%02i] %s", i,
+							scene->client->game->players[i]->name.s));
 					else
-						add(CString("\x9[%02i]\x8 %s - IP:%s", i,
-							scene->client->game->players[i]->name.s,
-							bb_getMyIP()));
+						add(CString("\x9[%02i]\x8 %s", i,
+							scene->client->game->players[i]->name.s));
 				}
 			}
 		}
@@ -2093,11 +2092,11 @@ void Console::sendCommand(CString commandLine, bool isAdmin, unsigned long bbnet
 	{
 		if (scene->server)
 		{
-			for (int i=0;i<(int)scene->server->banList.size();++i)
+			for (int i=0;i<(int)scene->server->bans.entries().size();++i)
 			{
 				add(CString("[%02i] %s \x8- %s", i,
-					scene->server->banList[i].first.s,
-					scene->server->banList[i].second.s), true);
+					scene->server->bans.entries()[i].name.c_str(),
+					scene->server->bans.entries()[i].ip.c_str()), true);
 			}
 		}
 		return;
@@ -2132,7 +2131,7 @@ void Console::sendCommand(CString commandLine, bool isAdmin, unsigned long bbnet
 	if(command == "unban") {
 		unsigned int banID = tokenize.toInt();
 		if(scene->server) {
-			if(banID >= 0 && banID < scene->server->banList.size())
+			if(banID >= 0 && banID < scene->server->bans.entries().size())
 				scene->unban(banID);
 		}
 		return;
