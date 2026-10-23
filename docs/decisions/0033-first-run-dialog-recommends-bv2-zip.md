@@ -10,7 +10,7 @@
 - SDL message boxes can't show clickable links.
 
 ## Decision
-The box strongly recommends downloading that zip, shows its URL, says to choose `BaboViolent2-master` or any folder inside it down to `BaboViolent2/Content/main/`, and that unzipped into Downloads, Desktop or Documents it is found on the next start. Buttons: "Choose folder..." (Enter), "Download BV2 data" (opens the URL with `SDL_OpenURL`, then shows the box again) and "Use placeholders" (Escape; closing the box counts the same). Lines are broken by hand because the X11 box doesn't wrap.
+The box (owner's final copy, 2026-10-23) is marked "[Temporary workaround]", strongly recommends downloading that zip, shows its URL and the Download button as the alternative, says to choose the `BaboViolent2-master` folder (any level down to `main/` still works) or to unzip it into Downloads, Desktop or Documents and restart. Buttons: "Choose folder..." (Enter), "Download BV2 data" (opens the URL with `SDL_OpenURL`, then shows the box again) and "Use placeholders" (Escape; closing the box counts the same). Lines are broken by hand because the X11 box doesn't wrap.
 
 ## Consequences
 - The text stays English only until PNS-21, like the rest of the dialog.
