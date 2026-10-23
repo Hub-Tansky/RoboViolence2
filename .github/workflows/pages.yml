@@ -4,9 +4,9 @@ name: pages
 on:
   push:
     branches: [main]
-    paths: ["website/**", "tests/website/**", ".github/workflows/pages.yml", ".github/workflows/build.yml"]
+    paths: ["website/**", "tests/website/**", "tools/website-markdown.mjs", ".github/workflows/pages.yml", ".github/workflows/build.yml"]
   pull_request:
-    paths: ["website/**", "tests/website/**", ".github/workflows/pages.yml", ".github/workflows/build.yml"]
+    paths: ["website/**", "tests/website/**", "tools/website-markdown.mjs", ".github/workflows/pages.yml", ".github/workflows/build.yml"]
   workflow_dispatch:
 permissions:
   contents: read
