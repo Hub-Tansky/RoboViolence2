@@ -63,14 +63,14 @@ expect "recovery notifies once it holds" "RV2 staging healthy again - Was: docke
 # A deploy holds the lock: not checked. A lock naming any other process is stale: checked.
 ps_lines tdm exited 'Exited (1) 1 minute ago' >"$scratch/ps"
 printf 'sleep 30\n' >"$scratch/deploy.sh"
-bash "$scratch/deploy.sh" & echo $! >"$ROOT/lock"
+bash "$scratch/deploy.sh" >/dev/null 2>&1 & echo $! >"$ROOT/lock" # detached: its sleep would hold ctest's pipe
 watch >/dev/null
 expect "nothing is checked while a deploy runs" "" "$(watch)"
-kill $!
-sleep 30 & echo $! >"$ROOT/lock"
+pkill -P $! 2>/dev/null; kill $!
+sleep 30 >/dev/null 2>&1 & echo $! >"$ROOT/lock"
 watch >/dev/null
 expect "a lock left by another process doesn't silence the watcher" "RV2 staging unhealthy - admin-proxy missing; master missing; server missing; tdm exited" "$(watch)"
-kill $!
+pkill -P $! 2>/dev/null; kill $!
 
 [ $failures -eq 0 ] && echo "all passed"
 exit $failures

@@ -12,7 +12,7 @@ set -u
 readonly REPO=Hub-Tansky/RoboViolence2
 readonly IMAGES="ghcr.io/hub-tansky/roboviolence2-server ghcr.io/hub-tansky/roboviolence2-master"
 readonly PROJECT=roboviolence2 # `name:` in compose.example.yml
-readonly GAME_SERVERS="server: tdm:/tdm" # <compose service>:<admin API path prefix on the proxy> (ADR 0027)
+readonly GAME_SERVERS="server: tdm:/tdm" # <compose service>:<admin API path prefix on the proxy> (ADR 0027); with master and admin-proxy these are every compose service (health-watch.sh)
 # The label names the host in notifications and its state and env file paths; production sets prod (docs/ops/runbook.md)
 readonly LABEL=${RV2_DEPLOY_LABEL:-staging}
 readonly ROOT=${RV2_STAGING_ROOT:-/var/lib/rv2-$LABEL} # the overrides exist for the test
