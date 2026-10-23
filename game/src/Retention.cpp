@@ -73,9 +73,12 @@ namespace retention
 	void BanList::load(const std::string & file, const std::string & legacyPath, long long now, int days)
 	{
 		path = file;
-		std::ifstream tsv(path, std::ios::binary);
-		const bool legacy = !tsv && std::ifstream(legacyPath);
-		bans = legacy ? readLegacy(legacyPath, now) : readTsv(tsv);
+		bool legacy;
+		{
+			std::ifstream tsv(path, std::ios::binary); // closed before save(): Windows can't replace an open file
+			legacy = !tsv && std::ifstream(legacyPath);
+			bans = legacy ? readLegacy(legacyPath, now) : readTsv(tsv);
+		}
 		const size_t before = bans.size();
 		for (size_t i = bans.size(); i-- > 0;)
 			if (expired(bans[i], now, days)) bans.erase(bans.begin() + i);
