@@ -54,7 +54,7 @@ jobs:
           python3 -m venv "$RUNNER_TEMP/dmgbuild"
           "$RUNNER_TEMP/dmgbuild/bin/pip" install --quiet --require-hashes -r packaging/macos/requirements.txt
           echo "$RUNNER_TEMP/dmgbuild/bin" >> "$GITHUB_PATH"
-      # The archive on every OS, plus the installer (Windows) or disk image (macOS); ADR 0020
+      # The archive on every OS, plus the installer (Windows), disk image (macOS) or .deb (Linux); ADR 0020, 0031
       - name: Package
         shell: bash
         env:
@@ -84,12 +84,11 @@ jobs:
           path: out/roboviolence2-${{ matrix.preset }}.${{ runner.os == 'Linux' && 'tar.gz' || 'zip' }}
           archive: false
       - uses: actions/upload-artifact@v7
-        if: runner.os != 'Linux'
         with:
-          path: out/roboviolence2-${{ matrix.preset }}${{ runner.os == 'Windows' && '-setup.exe' || '.dmg' }}
+          path: out/roboviolence2-${{ matrix.preset }}${{ runner.os == 'Windows' && '-setup.exe' || runner.os == 'macOS' && '.dmg' || '.deb' }}
           archive: false
   # A v* tag publishes the installers, the macOS and Linux packages and the source as a GitHub release (ADR 0020;
-  # the macOS .zip carries the servers, which the .dmg leaves out, ADR 0030)
+  # the macOS .zip carries the servers, which the .dmg leaves out, ADR 0030; the .deb, ADR 0031)
   release:
     if: github.ref_type == 'tag' && startsWith(github.ref_name, 'v')
     needs: build
@@ -112,7 +111,8 @@ jobs:
           pre=$([[ "$GITHUB_REF_NAME" == v0.* || "$GITHUB_REF_NAME" == *-* ]] && echo --prerelease || true)
           gh release create "$GITHUB_REF_NAME" --title "Robo Violence 2 $GITHUB_REF_NAME" --generate-notes $pre \
             dist/roboviolence2-win-x64-msvc-setup.exe dist/roboviolence2-macos-arm64.dmg \
-            dist/roboviolence2-macos-arm64.zip dist/roboviolence2-linux-x64.tar.gz "dist/roboviolence2-${GITHUB_REF_NAME}-source.tar.gz"
+            dist/roboviolence2-macos-arm64.zip dist/roboviolence2-linux-x64.tar.gz dist/roboviolence2-linux-x64.deb \
+            "dist/roboviolence2-${GITHUB_REF_NAME}-source.tar.gz"
   package-check:
     name: package-check (clean ubuntu:24.04)
     needs: build
@@ -145,6 +145,37 @@ jobs:
           for i in $(seq 1 20); do (exec 3<>/dev/tcp/127.0.0.1/10207) 2>/dev/null && break; sleep 0.5; done
           (exec 3<>/dev/tcp/127.0.0.1/10207)                      # master listens on 10207
           kill "$pid"
+  # The .deb on the distributions ADR 0031 names: apt resolves its Depends in a clean image, a non-root player starts
+  # the server from the read-only install, and removing it leaves nothing behind
+  deb-check:
+    name: deb-check (${{ matrix.image }})
+    needs: build
+    runs-on: ubuntu-24.04
+    container: ${{ matrix.image }}
+    strategy:
+      fail-fast: false
+      matrix:
+        image: [ubuntu:24.04, debian:13]
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: roboviolence2-linux-x64.deb
+      - name: Install, start the server, remove
+        shell: bash
+        run: |
+          set -euo pipefail
+          apt-get update
+          apt-get install -y --no-install-recommends ./roboviolence2-linux-x64.deb
+          if ldd /usr/games/bv2 /usr/games/bv2dedicated | grep "not found"; then exit 1; fi
+          # Only copyright from /usr/share/doc: the Docker images tell dpkg to skip the rest (ctest make_deb checks it)
+          ls /usr/lib/x86_64-linux-gnu/libGL.so.1 /usr/share/bv2/main/LaunchScript/CTF.cfg \
+            /usr/share/applications/roboviolence2.desktop /usr/share/icons/hicolor/128x128/apps/roboviolence2.png \
+            /usr/share/doc/roboviolence2/copyright > /dev/null
+          useradd -m player
+          printf 'quit\n' | runuser -u player -- /usr/games/bv2dedicated CTF > server.log 2>&1
+          grep "Server Created on port 3333" server.log
+          apt-get remove -y roboviolence2
+          for f in /usr/games/bv2 /usr/games/bv2dedicated /usr/share/bv2; do [ ! -e "$f" ] || { echo "$f left behind"; exit 1; }; done
   # Phase T step 3: the Windows and macOS packages start. Not required until 10 consecutive green runs on main.
   package-smoke:
     name: package-smoke (${{ matrix.preset }})

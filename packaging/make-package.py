@@ -10,8 +10,8 @@ The macOS bundle gets a real Contents/Resources/main instead of the build's syml
 licences, then an ad-hoc signature; the servers read the folder's own main/ (docs/build/macos.md).
 Also writes roboviolence2-<preset>-setup.exe on Windows (Inno Setup, packaging/windows/roboviolence2.iss) and
 roboviolence2-<preset>.dmg on macOS: only "Robo Violence 2.app" and an Applications link, laid out over
-packaging/macos/dmg-background.png (dmgbuild, ADR 0030). <version> (e.g. a v1.2.0 tag or 0.0.0-dev) goes into the
-installer.
+packaging/macos/dmg-background.png (dmgbuild, ADR 0030), and roboviolence2-<preset>.deb on Linux (dpkg-deb, ADR 0031).
+<version> (e.g. a v1.2.0 tag or 0.0.0-dev) goes into the installer and the .deb.
 Fails if the build is not Release, or if anything the package must hold is missing.
 """
 import json
@@ -21,6 +21,8 @@ import sys
 import tempfile
 from pathlib import Path
 from typing import Callable, NamedTuple
+
+from make_deb import build_deb
 
 PACKAGING = Path(__file__).resolve().parent
 SCRIPTS = PACKAGING / "scripts"
@@ -45,7 +47,7 @@ def client_binary(runtime, stage, exe):
     return "bv2" + exe
 
 
-def ship_macos(stage, out, name, version):
+def ship_macos(runtime, stage, out, name, version):
     from dmgbuild import build_dmg  # pip, macOS packaging only (build.yml installs it)
 
     archive, dmg = out / (name + ".zip"), out / (name + ".dmg")
@@ -96,15 +98,16 @@ def check_dmg(dmg):
             run("hdiutil", "detach", "-quiet", mount)
 
 
-def ship_windows(stage, out, name, version):
+def ship_windows(runtime, stage, out, name, version):
     archive = shutil.make_archive(str(out / name), "zip", out, name)
     run(ISCC, "/Q", f"/DSourceDir={stage.resolve()}", f"/DOutputDir={out.resolve()}", f"/DOutputName={name}-setup",
         f"/DAppVersion={version.removeprefix('v')}", PACKAGING / "windows" / "roboviolence2.iss")
     return [archive, out / (name + "-setup.exe")]
 
 
-def ship_linux(stage, out, name, version):
-    return [shutil.make_archive(str(out / name), "gztar", out, name)]  # keeps file modes
+def ship_linux(runtime, stage, out, name, version):
+    archive = shutil.make_archive(str(out / name), "gztar", out, name)  # keeps file modes
+    return [archive, build_deb(runtime.parent, stage / "licenses", out / (name + ".deb"), version)]
 
 
 class Platform(NamedTuple):
@@ -164,7 +167,7 @@ def main():
     if missing:
         sys.exit(f"package {name} is missing: {', '.join(missing)}")
 
-    written = platform.ship(stage, out, name, version)
+    written = platform.ship(runtime, stage, out, name, version)
     shutil.rmtree(stage)
     for f in written:
         print(f)

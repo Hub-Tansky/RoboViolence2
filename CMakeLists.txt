@@ -121,7 +121,8 @@ function(bv2_link_dir src dst)
     message(WARNING "Could not link ${dst} to ${src}; copy it by hand.")
   endif()
 endfunction()
-foreach(entry languages LaunchScript)
+set(BV2_CONTENT_LINKS languages LaunchScript)  # content/ entries runtime/main links to (the install copies them)
+foreach(entry ${BV2_CONTENT_LINKS})
   bv2_link_dir("${CMAKE_SOURCE_DIR}/content/${entry}" "${BV2_DATA_DIR}/${entry}")
 endforeach()
 # Defaults only: the game keeps the user's settings in its pref directory (ADR 0007).
@@ -153,16 +154,28 @@ if(BV2_BUILD_TESTS)
   add_subdirectory(tests)
 endif()
 
-# Install layout (FHS; the game looks for <prefix>/share/bv2/main next to <prefix>/bin). On macOS the bundle
-# holds the content in Contents/Resources instead (packaging is a later phase).
+# Install layout (FHS; the game looks for <prefix>/share/bv2/main next to <prefix>/bin): the binaries and the data root
+# as the build's runtime/main holds it (content/ entries, bv2.example.cfg, generated placeholders). On macOS the bundle
+# holds the content in Contents/Resources instead. The Linux .deb is this install (packaging/make_deb.py, ADR 0031):
+# the default component and icons, without the master (component master).
 include(GNUInstallDirs)
-foreach(tgt bv2 bv2dedicated bv2master)
+foreach(tgt bv2 bv2dedicated)
   if(TARGET ${tgt})
     install(TARGETS ${tgt} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} BUNDLE DESTINATION .)
   endif()
 endforeach()
-install(DIRECTORY content/ DESTINATION ${CMAKE_INSTALL_DATADIR}/bv2/main)
-install(FILES config/bv2.example.cfg DESTINATION ${CMAKE_INSTALL_DATADIR}/bv2/main)
+if(TARGET bv2master)
+  install(TARGETS bv2master RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT master)
+endif()
+# install(DIRECTORY) would copy runtime/main's links to content/ as links: those entries come from content/ itself
+string(REGEX REPLACE "([][+.*()^$?|\\])" "\\\\\\1" bv2_data_dir_regex "${BV2_DATA_DIR}")  # a path with "(x86)" or "+"
+set(bv2_link_excludes "")
+foreach(entry ${BV2_CONTENT_LINKS})
+  list(APPEND bv2_link_excludes REGEX "^${bv2_data_dir_regex}/${entry}$" EXCLUDE)
+endforeach()
+install(DIRECTORY "${BV2_DATA_DIR}/" DESTINATION ${CMAKE_INSTALL_DATADIR}/bv2/main ${bv2_link_excludes})
+list(TRANSFORM BV2_CONTENT_LINKS PREPEND "${CMAKE_SOURCE_DIR}/content/" OUTPUT_VARIABLE bv2_link_sources)
+install(DIRECTORY ${bv2_link_sources} DESTINATION ${CMAKE_INSTALL_DATADIR}/bv2/main)
 if(UNIX AND NOT APPLE)
   install(FILES packaging/linux/roboviolence2.desktop DESTINATION ${CMAKE_INSTALL_DATADIR}/applications)
   install(DIRECTORY packaging/icons/hicolor DESTINATION ${CMAKE_INSTALL_DATADIR}/icons COMPONENT icons)
