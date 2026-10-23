@@ -17,7 +17,7 @@ expect() { # expect <name> <expected> <actual>
 
 ps_lines() { printf '%s\t%s\t%s\n' "$@"; } # ps_lines <service> <state> <status> ...: `docker ps -a` lines
 
-expect "the stack's services come from GAME_SERVERS" "master admin-proxy server tdm" "$(services | tr '\n' ' ' | sed 's/ $//')"
+expect "the stack's services come from GAME_SERVERS" "master admin-proxy server tdm" "$(services)"
 expect "healthy, starting and healthcheck-less running containers are fine" "" "$(ps_lines \
 	master running 'Up 2 hours (healthy)' server running 'Up 5 seconds (health: starting)' admin-proxy running 'Up 2 hours' |
 	problems "master server admin-proxy")"

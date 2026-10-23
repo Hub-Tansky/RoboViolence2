@@ -13,10 +13,10 @@ RV2_DEPLOY_SOURCE_ONLY=1 . "$here/deploy.sh"
 
 # --- Helpers (tests/test_health_watch.sh) ---
 
-services() { # the compose services of the stack: master, the proxy and every game server deploy.sh knows
-	local s
-	echo master admin-proxy
-	for s in $GAME_SERVERS; do echo "${s%%:*}"; done
+services() { # the compose services of the stack on one line (BSD awk refuses a newline in -v): master, the proxy, every game server
+	local s list="master admin-proxy"
+	for s in $GAME_SERVERS; do list="$list ${s%%:*}"; done
+	echo "$list"
 }
 
 problems() { # problems <service...>: `docker ps -a` lines "<service>\t<state>\t<status>" on stdin -> "<service> <problem>" per bad or missing one, joined by "; "
