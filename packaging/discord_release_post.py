@@ -1,11 +1,12 @@
 """Prints the Discord webhook payload that build.yml's release job posts to #announcements (ADR 0032).
 
 One embed: the release title and page, the player downloads and the website. With a role id the message pings that
-role (release-ping, opt-in), and allowed_mentions lets through that role and nothing else, so text in release notes
-can't ping @everyone. Usage: discord_release_post.py <tag> [<role id>]
+role (release-ping, opt-in), and allowed_mentions lets through that role and nothing else, so only that role can be
+pinged even if free text such as release notes is added to the post later. The release job decides whether the tag
+is a pre-release. Usage: discord_release_post.py <tag> [--prerelease] [--role <id>]
 """
+import argparse
 import json
-import sys
 
 REPO = "https://github.com/Hub-Tansky/RoboViolence2"
 WEBSITE = "https://roboviolence.com"
@@ -18,8 +19,7 @@ DOWNLOADS = [
 ]
 
 
-def payload(tag, role_id=""):
-    prerelease = tag.startswith("v0.") or "-" in tag  # same rule as the release job
+def payload(tag, prerelease=False, role_id=""):
     links = "\n".join(f"[{label}]({REPO}/releases/download/{tag}/{name})" for label, name in DOWNLOADS)
     message = {
         "username": "Robo Violence 2",
@@ -37,6 +37,9 @@ def payload(tag, role_id=""):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) not in (2, 3):
-        sys.exit("usage: discord_release_post.py <tag> [<role id>]")
-    print(json.dumps(payload(*sys.argv[1:])))
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument("tag")
+    parser.add_argument("--prerelease", action="store_true")
+    parser.add_argument("--role", default="", help="role id to ping; empty pings no one")
+    args = parser.parse_args()
+    print(json.dumps(payload(args.tag, args.prerelease, args.role)))

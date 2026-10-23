@@ -9,9 +9,9 @@
 - The release is created with `GITHUB_TOKEN`, and events from that token start no other workflow, so an `on: release` workflow would never run.
 
 ## Decision
-- A last step of the release job runs `packaging/discord_release_post.py <tag> <role id>` and posts its JSON to the webhook in the `DISCORD_RELEASE_WEBHOOK` repository secret.
-- The post is one embed: the release title (with "(alpha)" for pre-releases, same rule as the job), the release page, direct links to the four player downloads and the website's install section.
-- The repository variable `DISCORD_RELEASE_ROLE_ID` (not secret) adds a ping of that role. `allowed_mentions` allows that role and nothing else, so release notes can't ping `@everyone`.
+- A last step of the release job runs `packaging/discord_release_post.py <tag> [--prerelease] --role <id>` and posts its JSON once (no retry: a webhook post isn't idempotent) to the webhook in the `DISCORD_RELEASE_WEBHOOK` repository secret.
+- The post is one embed: the release title (with "(alpha)" when the job's own pre-release rule passed `--prerelease`, so the rule lives only in the job), the release page, direct links to the four player downloads and the website's install section.
+- The repository variable `DISCORD_RELEASE_ROLE_ID` (not secret) adds a ping of that role. `allowed_mentions` allows that role and nothing else, so only that role can be pinged even if free text such as release notes is added to the post later.
 - Without the secret the step prints a line and succeeds (forks, and before setup). A failed post fails the job after the release exists; re-running the job would fail on the existing release, so the owner posts by hand.
 
 ## Consequences

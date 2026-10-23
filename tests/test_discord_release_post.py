@@ -26,7 +26,7 @@ for _, name in post.DOWNLOADS:
     check(name in uploaded, f"{name} is not uploaded by build.yml's release job ({sorted(uploaded)})")
 
 # With a role id: the content pings that role only, the embed names the tag and links the release page and the files
-with_role = post.payload("v0.0.2", "123456789012345678")
+with_role = post.payload("v0.0.2", True, "123456789012345678")
 check(with_role["content"] == "<@&123456789012345678>", f"role ping: {with_role.get('content')!r}")
 check(with_role["allowed_mentions"] == {"parse": [], "roles": ["123456789012345678"]},
       f"allowed_mentions: {with_role['allowed_mentions']}")
@@ -37,16 +37,20 @@ for _, name in post.DOWNLOADS:
     check(f"{post.REPO}/releases/download/v0.0.2/{name})" in embed["description"], f"no link to {name}")
 check(len(embed["description"]) <= 4096, "embed description over Discord's 4096 characters")
 
-# Without a role id: no ping at all, and @everyone in any text stays inert
+# Without a role id: no ping at all, and no other mention type is allowed
 no_role = post.payload("v1.0.0")
 check("content" not in no_role, f"content without a role: {no_role.get('content')!r}")
 check(no_role["allowed_mentions"] == {"parse": [], "roles": []}, f"allowed_mentions: {no_role['allowed_mentions']}")
 check(no_role["embeds"][0]["title"] == "Robo Violence 2 v1.0.0 is out", f"release title: {no_role['embeds'][0]['title']!r}")
-check("(alpha)" in post.payload("v1.1.0-rc1")["embeds"][0]["title"], "a -rc tag is a pre-release")
 
-# The command line the workflow runs prints the same JSON; an empty role argument means no role
-cli = subprocess.run([sys.executable, "-I", str(script), "v0.0.2", ""], capture_output=True, text=True, check=True)
-check(json.loads(cli.stdout) == post.payload("v0.0.2"), "CLI output differs from payload()")
+# The command lines the workflow runs print the same JSON; an empty --role means no role
+def cli(*args):
+    run = subprocess.run([sys.executable, "-I", str(script), *args], capture_output=True, text=True, check=True)
+    return json.loads(run.stdout)
+
+
+check(cli("v1.0.0", "--role", "") == post.payload("v1.0.0"), "CLI without pre-release or role differs from payload()")
+check(cli("v0.0.2", "--prerelease", "--role", "123456789012345678") == with_role, "CLI with both differs from payload()")
 
 if failures:
     sys.exit("FAIL " + "\nFAIL ".join(failures))
