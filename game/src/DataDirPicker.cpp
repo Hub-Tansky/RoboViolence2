@@ -55,12 +55,13 @@ namespace
 		};
 		// explicit line breaks: the X11 message box doesn't wrap
 		const std::string text = std::string(
-			"Robo Violence 2 plays with your own copy of the BaboViolent 2 data, which is not included.\n\n"
-			"It is strongly recommended to download the original game from GitHub:\n") + DATA_URL + "\n\n"
-			"Unzip it, then choose the BaboViolent2-master folder,\n"
-			"or any folder inside it down to BaboViolent2-master/BaboViolent2/Content/main/.\n"
-			"Unzipped into Downloads, Desktop or Documents, it is found on the next start.\n\n"
-			"Without it the game starts with placeholder graphics and no music.";
+			"[Temporary workaround] Robo Violence 2 looks better with your own copy of the original\n"
+			"BaboViolent 2 data, which is not included.\n\n"
+			"It is strongly recommended to download the original game from GitHub:\n") + DATA_URL + "\n"
+			"or \"Download BV2 data\" below.\n\n"
+			"Unzip it, then choose the BaboViolent2-master folder. Or after download of BV2 to\n"
+			"Downloads, Desktop or Documents restart Robo2 - it is found on the next start automatically.\n\n"
+			"Without it the game starts with placeholder graphics and no music :(";
 		const SDL_MessageBoxData box = { SDL_MESSAGEBOX_INFORMATION, 0, TITLE, text.c_str(), 3, buttons, 0 };
 		for (;;)
 		{
