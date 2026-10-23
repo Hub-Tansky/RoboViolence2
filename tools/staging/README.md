@@ -58,6 +58,18 @@ Notifications (ntfy): `RV2 staging now on <sha7>` (`RV2_DEPLOY_LABEL`, default `
 
 Files under `/var/lib/rv2-staging/`: `deployed` (running commit), `state.tsv` (commit, result, stage, time), `releases/<sha7>/` (that commit's compose file, Caddyfile and `srv/deployed`, last 5; older releases' images are removed), `waiting`, `deploy.log`.
 
+## Health watcher
+
+[health-watch.sh](health-watch.sh) sends `RV2 <label> unhealthy - <service> <state>` (unhealthy, exited, restarting, missing, or Docker not answering) once a problem holds for two runs, and `RV2 <label> healthy again` once all are well for two runs. It skips while `deploy.sh` runs and writes `health-seen` and `health-notified` to the state folder. Install it beside `deploy.sh` and run it every minute:
+
+```bash
+sudo curl -fsSL https://raw.githubusercontent.com/Hub-Tansky/RoboViolence2/main/tools/staging/health-watch.sh -o /opt/rv2-staging/health-watch.sh && sudo chmod 755 /opt/rv2-staging/health-watch.sh
+```
+
+```
+* * * * * /opt/rv2-staging/health-watch.sh >>/var/lib/rv2-staging/health.log 2>&1
+```
+
 ## Uninstall
 
-Remove the cron line, then `docker compose -f /var/lib/rv2-staging/releases/<sha7>/compose.example.yml --env-file /etc/rv2-staging.env down` (add `-v` to delete the master database and certificates).
+Remove the cron lines, then `docker compose -f /var/lib/rv2-staging/releases/<sha7>/compose.example.yml --env-file /etc/rv2-staging.env down` (add `-v` to delete the master database and certificates).
