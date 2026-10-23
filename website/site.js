@@ -5,8 +5,8 @@ const REPO = 'Hub-Tansky/RoboViolence2';
 export const RELEASES_PAGE = `https://github.com/${REPO}/releases`;
 const RELEASES_API = `https://api.github.com/repos/${REPO}/releases?per_page=10`;
 
-// The invite link, once the Discord server exists ("Discord server setup" item). Empty: the menu entry says "soon".
-const DISCORD_INVITE = '';
+// The Discord invite (never expires, no use limit). Empty: the menu entry says "soon".
+const DISCORD_INVITE = 'https://discord.gg/gRehxx43z';
 
 // The installer each OS gets from the main button; release asset names come from build.yml (release job).
 export const PLATFORMS = {
