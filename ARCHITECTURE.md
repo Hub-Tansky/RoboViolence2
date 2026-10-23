@@ -22,7 +22,7 @@ Robo Violence 2: unofficial fork of BaboViolent 2, a top-down multiplayer shoote
 | Website | `website/`: static pages for roboviolence.com on GitHub Pages (`pages.yml`, [ADR 0029](docs/decisions/0029-static-website-on-github-pages.md)). |
 | Hosting | Server images from `packaging/docker/Dockerfile` (GHCR on `main`), runbook [docs/ops/runbook.md](docs/ops/runbook.md). |
 | Known defects | [docs/analysis/KEY_QUESTIONS.md](https://github.com/Hub-Tansky/RoboViolence2/blob/fc0aff7c5aa946406c7c110e8e7c2d972a7daeb8/docs/analysis/KEY_QUESTIONS.md). |
-| Decisions | [docs/decisions/README.md](docs/decisions/README.md): 0001 Ninja, 0002 libcurl compiled out, 0003 OpenGL 2.1 kept, 0004 project name (superseded by 0008), 0005 `main/` data root, 0006 platform layer, 0007 data root, pref dir and config layers, 0008 display name "Robo Violence 2", 0009 internal renaming, 0010 BV2 asset compatibility and GUI freeze, 0011 gettext PO translations, 0012 Windows 10 22H2 minimum, 0013 rulesets, 0014 libsodium HMAC, 0015 admin HTTP API, 0016 player data lookup and package content, 0017 playtest pull agent, 0018 staging pull deploy, 0019 in-game name and fork credits, 0020 package and release format, 0021 one-argument CString is text, 0022 advertised server address, 0023 step review subagent in the repo, 0024 GitHub Project is the backlog, 0025 client autotest mode, 0026 screenshot goldens, 0029 static website on GitHub Pages, 0033 first-run data dialog recommends the BV2 zip. |
+| Decisions | [docs/decisions/README.md](docs/decisions/README.md): 0001 Ninja, 0002 libcurl compiled out, 0003 OpenGL 2.1 kept, 0004 project name (superseded by 0008), 0005 `main/` data root, 0006 platform layer, 0007 data root, pref dir and config layers, 0008 display name "Robo Violence 2", 0009 internal renaming, 0010 BV2 asset compatibility and GUI freeze, 0011 gettext PO translations, 0012 Windows 10 22H2 minimum, 0013 rulesets, 0014 libsodium HMAC, 0015 admin HTTP API, 0016 player data lookup and package content, 0017 playtest pull agent, 0018 staging pull deploy, 0019 in-game name and fork credits, 0020 package and release format, 0021 one-argument CString is text, 0022 advertised server address, 0023 step review subagent in the repo, 0024 GitHub Project is the backlog, 0025 client autotest mode, 0026 screenshot goldens, 0029 static website on GitHub Pages, 0033 first-run data dialog recommends the BV2 zip, 0034 player data retention and privacy policy. |
 
 ### Open items
 
@@ -68,7 +68,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `packaging/make-package.py` | Builds the per-OS package from a Release `runtime/` (links resolved, macOS bundle re-signed, licences), plus the Windows installer, the macOS `.dmg` with only the app and Applications, or the Linux `.deb` (ADR 0020, 0030, 0031) |
 | `packaging/make_deb.py` | Builds the Linux `.deb` from the build's `cmake --install` (stripped, without the master): client and `bv2dedicated` moved to `/usr/games`, launcher pointed there, licences, copyright and changelog added; Depends from `dpkg-shlibdeps` plus `libgl1` (ADR 0031) |
 | `packaging/discord_release_post.py` | Prints the Discord webhook payload of the release job: one embed with the release page, the player downloads and the website, an optional ping of the opt-in role and no other mention (ADR 0032) |
-| `packaging/windows/roboviolence2.iss` | Inno Setup script for the Windows installer (per-user, unsigned) |
+| `packaging/windows/roboviolence2.iss` | Inno Setup script for the Windows installer (per-user, unsigned); privacy policy link and the opt-out task for the public master (ADR 0034) |
 | `packaging/scripts/run-client.cmd` | Package script: starts the client (Windows) |
 | `packaging/scripts/run-client.sh` | Package script: starts the client (macOS bundle or Linux binary) |
 | `packaging/scripts/run-master.cmd` | Package script: starts the master server (Windows) |
@@ -163,10 +163,12 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/test_lang.cpp` | Step 13: PO parser (entries that change the English printf conversions or whose key English lacks are skipped; raw control bytes rejected), English fallback per key, OS locale matching (`ll_CC`, `ll`, `.po` before `.lang`), PO without glyphs skipped |
 | `tests/test_lang_check.py` | Step 13: `tools/lang-check.py` fails on changed conversions, unknown keys, repeated keywords, tabs and a stale `en.pot`; warns about missing glyphs |
 | `tests/test_join_password.cpp` | Step 10: a client joins a passworded server only with the HMAC over its own challenge; no password or MD5 of it on the wire |
+| `tests/test_player_privacy.cpp` | The player info relayed to everyone and the player list a new client gets carry no IP; the server keeps it (ADR 0034) |
 | `tests/test_join_timeout.cpp` | A connection that never answers the join handshake loses its slot after `Server::JOIN_TIMEOUT`; a client past the handshake keeps it while loading |
 | `tests/test_paths.cpp` | Phase C step 1: package vs data root, `contentFile`, `findDataIn` (upstream layout, `main/` itself), saved folder, auto-detect, `BV2_DATA_DIR`; the built-in master list vs `bv2.cfg`, `BV2_MASTER_SERVERS` and `none` (ADR 0028) |
 | `tests/test_osv_vcpkg.py` | Phase C step 4: `tools/osv-vcpkg.py` maps SPDX download locations to upstream repository and tag (offline) |
 | `tests/test_packet_hygiene.cpp` | Step 4 checks: sender binding (Q-S1), index ranges with controls (Q-S2), map names (Q-S6), skin and sound relay (Q-S7), `SV_CHANGE` filter (Q-S4), the handshake gate, `checkPacket` per message type and size, the client's `checkServerMessage` on values the server sends |
+| `tests/test_retention.cpp` | `banlist.tsv` round trip, the 0.0.1 binary banlist read once, ban expiry by `sv_banDays`, admin log lines older than 90 days dropped (ADR 0034) |
 | `tests/test_replay.cpp` | Replays the corpus through the in-process server: no crash, expected replies; each `crash-*.bin` (none at present) is its own ctest under ASan |
 | `tests/fuzz_server.cpp` | Random-mutation fuzzer for one message type on the in-process server; writes the crashing input to `<out>/<type>/last.bin` (CI job `fuzz`) |
 | `tests/test_server_harness.cpp` | The in-process server starts on the placeholder CTF map, accepts a client and sends it the game state |
@@ -176,7 +178,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/test_staging_deploy.sh` | Phase T step 2: staging deploy helpers: main-only run selection, `/status` player count, CTF and TDM player counts and verify, failures per commit, infrastructure stages, env-file mode and readonly repository (ctest `staging_deploy`) |
 | `tests/test_health_watch.sh` | Container health watcher: which container states are problems, missing services from `GAME_SERVERS`, Docker not answering, two-run confirmation before an alert or recovery, a whole run against a stub `docker`, no check during a deploy but a stale lock ignored (ctest `health_watch`, Unix) |
 | `tests/test_playtest_agent.sh` | Phase T step 1: playtest agent helpers: main-only run selection (fork PR from `main` rejected), artifact digest, attempt limit, env-file mode and no export, launch script map swap (ctest `playtest_agent`, Unix with `jq`) |
-| `tests/website/site.test.mjs` | Website: installer per OS against the asset names in `build.yml`, OS detection, newest release incl. pre-releases, button offer and fallback, install text names the release files, no API call off the landing page, identical menu and footer on every page (`node --test`, `pages.yml`) |
+| `tests/website/site.test.mjs` | Website: installer per OS against the asset names in `build.yml`, OS detection, newest release incl. pre-releases, button offer and fallback, install text names the release files, no API call off the landing page, identical menu and footer on every page, privacy contact assembled in the browser and the policy linked from every footer (`node --test`, `pages.yml`) |
 | `tools/check-content-case.py` | Fails when a literal `main/...` path differs from a real file name only by case |
 | `vcpkg.json` | vcpkg manifest (sqlite3, curl; Step 3 completes it) |
 
@@ -309,6 +311,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/decisions/0031-linux-deb-package.md` | ADR: Linux `.deb` with the client and `bv2dedicated` in `/usr/games`, beside the `.tar.gz`; reverses ADR 0020's rejection |
 | `docs/decisions/0032-discord-release-post.md` | ADR: the release job posts each release to Discord `#announcements` through a webhook secret, pinging only the opt-in role |
 | `docs/decisions/0033-first-run-dialog-recommends-bv2-zip.md` | ADR: the first-run data dialog recommends the original BV2 zip, shows its URL and the folder to choose, and has a Download button (amends 0016) |
+| `docs/decisions/0034-player-data-retention-and-privacy-policy.md` | ADR: the server never relays player IPs, bans (`banlist.tsv`) expire after `sv_banDays`, `admin-audit.log` after 90 days; privacy policy page, installer link and opt-out |
 | `docs/decisions/README.md` | ADR format and index |
 
 ### `docs/ops`
@@ -501,7 +504,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 |---|---|
 | `game/src/AccountManager.cpp` | Account create/login/clan/friend requests over the master connection |
 | `game/src/AccountManager.h` | Account create/login/clan/friend requests over the master connection |
-| `game/src/AdminApi.cpp` | Admin HTTP API: non-blocking listener on the game thread, bearer token, per-source budget, connection cap, refused scene-rebuilding commands, audit log with secrets masked (step 12) |
+| `game/src/AdminApi.cpp` | Admin HTTP API: non-blocking listener on the game thread, bearer token, per-source budget, connection cap, refused scene-rebuilding commands, audit log with secrets masked, pruned after 90 days (step 12, ADR 0034) |
 | `game/src/AdminApi.h` | Admin HTTP API (`POST /command`, `GET /status`) behind a TLS proxy, ADR 0015 |
 | `game/src/Autotest.cpp` | `--autotest` script runner: parse, run commands, waits, `expect-console`, `expect-scene`, result report (ADR 0025) |
 | `game/src/Autotest.h` | Autotest runner API; exit codes 0 pass, 1 fail, 2 timeout |
@@ -657,14 +660,16 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/Quit.h` | Quit confirmation dialog |
 | `game/src/ReportGen.cpp` | XML server report generation |
 | `game/src/ReportGen.h` | XML server report generation |
+| `game/src/Retention.cpp` | Retention of personal data on disk: `banlist.tsv` read and write (with the 0.0.1 binary banlist read once), ban expiry, admin log pruning (ADR 0034) |
+| `game/src/Retention.h` | Retention of personal data on disk: `retention::Ban`, `AUDIT_DAYS` (ADR 0034) |
 | `game/src/Scene.cpp` | Top-level scene: main loop, menus, game and editor switching, rendering setup |
 | `game/src/Scene.h` | Top-level scene: main loop, menus, game and editor switching, rendering setup |
-| `game/src/SceneNet.cpp` | Scene: starts and stops client and server, hosting and joining; kick, ban and the banlist file (48-byte NUL-padded records) |
-| `game/src/Server.cpp` | Authoritative server: connections, joins, tick, map and mode control |
+| `game/src/SceneNet.cpp` | Scene: starts and stops client and server, hosting and joining; kick, ban and unban, saved to `banlist.tsv` through `Server::saveBans` (ADR 0034) |
+| `game/src/Server.cpp` | Authoritative server: connections, joins, tick, map and mode control; bans loaded, expired and matched (`findBan`, ADR 0034) |
 | `game/src/Server.h` | Authoritative server: connections, joins, tick, map and mode control |
 | `game/src/ServerCTF.cpp` | Server: capture-the-flag rules |
 | `game/src/ServerClose.h` | Dialog shown when the server closes the connection |
-| `game/src/ServerRecv.cpp` | Server: handlers for every client-to-server packet, after the pre-dispatch check `Server::checkPacket`; a wrong join password frees the slot |
+| `game/src/ServerRecv.cpp` | Server: handlers for every client-to-server packet, after the pre-dispatch check `Server::checkPacket`; a wrong join password frees the slot; relayed player info and the player list carry no IP (ADR 0034) |
 | `game/src/ServerSnD.cpp` | Server: search-and-destroy rules |
 | `game/src/ServerValidator.cpp` | Server cheat checks: spawn weapon whitelist, speed/frame kick, step 9 rules (weapon, movement, rate limits) with a decaying score |
 | `game/src/ServerValidator.h` | Server cheat checks (`Server::validator`), asked by the `ServerRecv.cpp` handlers |
@@ -747,8 +752,9 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 |---|---|
 | `website/index.html` | Landing page: hero, OS-detected download button, installation instructions, downloads list, status hook (ADR 0029) |
 | `website/about.html` | What the game is; credits to BaboViolent 2 |
+| `website/privacy.html` | Privacy policy (GDPR): data processed by the game, servers and website, legal basis, hosting, retention, rights (ADR 0034) |
 | `website/server.html` | Hosting your own game and master server (summary of `docs/ops/runbook.md`) |
-| `website/site.js` | Download button and list from the GitHub releases API, Discord invite constant |
+| `website/site.js` | Download button and list from the GitHub releases API, Discord invite constant, contact address assembled from `data-mail` attributes |
 | `website/style.css` | Dark theme, layout |
 | `website/img/hero.webp` | Placeholder hero picture |
 | `website/img/favicon.svg` | Site icon |

@@ -23,6 +23,7 @@
 #include "Game.h"
 #include "AdminApi.h"
 #include "Credentials.h"
+#include "Retention.h"
 #include "ServerValidator.h"
 #include <map>
 #include <string>
@@ -91,8 +92,12 @@ public:
 	//A list of all maps + their sizes;
 	std::vector<mapInfo> mapInfoList;
 
-	// Ban list, name & IP
-	std::vector< std::pair<CString,CString> > banList;
+	// Ban list (banlist.tsv in the pref dir): name, IP and date; expires after sv_banDays
+	std::vector<retention::Ban> banList;
+	// Writes banList to banlist.tsv; false when it couldn't
+	bool saveBans();
+	// The unexpired ban of this IP, or null; drops expired bans first
+	const retention::Ban * findBan(const char * ip);
 
 	// 50 Cached players in ram only , so we can ban them eventually
 	int			 CachedIndex; // what index are we going to use for next client

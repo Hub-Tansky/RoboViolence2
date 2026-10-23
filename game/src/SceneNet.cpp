@@ -24,7 +24,7 @@
 #include "CStatus.h"
 #endif
 #include <cstdio>
-#include <fstream>
+#include <ctime>
 
 
 //extern unsigned long masterServerID;
@@ -239,15 +239,6 @@ void Scene::kick(int ID)
 	}
 }
 
-// One banlist record, as Server's constructor reads it: name and IP NUL-padded to 32 and 16 bytes
-static void writeBanEntry(std::ofstream & file, const char * name, const char * ip)
-{
-	char record[48] = {};
-	snprintf(record, 32, "%s", name);
-	snprintf(record + 32, 16, "%s", ip);
-	file.write(record, sizeof(record));
-}
-
 void Scene::ban(CString playerName)
 {
 	if (server)
@@ -273,10 +264,8 @@ void Scene::ban(int ID)
 			if (server->game->players[ID])
 	{
 
-		server->banList.push_back(std::pair<CString,CString>(server->game->players[ID]->name,server->game->players[ID]->playerIP) );
-		
-		std::ofstream file(bv2::userFile("banlist"), std::ios::app | std::ios::binary);
-		writeBanEntry(file, server->game->players[ID]->name.s, server->game->players[ID]->playerIP);
+		server->banList.push_back({server->game->players[ID]->name.s, server->game->players[ID]->playerIP, (long long)time(nullptr)});
+		server->saveBans();
 
 		console->add(CString("\x3> Disconnecting client %s (%s), banned by server", server->game->players[ID]->name.s, server->game->players[ID]->playerIP), true);
 		server->dropSlot(ID, "ban");
@@ -287,11 +276,8 @@ void Scene::banIP(CString playerIP)
 {
 	if (server)
 	{
-		CString playerName("MANUAL-IP-BAN");
-		server->banList.push_back(std::pair<CString,CString>(playerName,playerIP) );
-
-		std::ofstream file(bv2::userFile("banlist"), std::ios::app | std::ios::binary);
-		writeBanEntry(file, playerName.s, playerIP.s);
+		server->banList.push_back({"MANUAL-IP-BAN", playerIP.s, (long long)time(nullptr)});
+		server->saveBans();
 	}
 }
 
@@ -304,9 +290,7 @@ void Scene::unban(int banID)
 		server->banList.erase(server->banList.begin() + banID);
 
 		// Then rewrite file
-		std::ofstream file(bv2::userFile("banlist"), std::ios::trunc | std::ios::binary);
-		for(std::size_t i = 0; i < server->banList.size(); ++i)
-			writeBanEntry(file, server->banList[i].first.s, server->banList[i].second.s);
+		server->saveBans();
 	}
 }
 

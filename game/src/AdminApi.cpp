@@ -9,6 +9,7 @@
 #include "GameVar.h"
 #include "Helper.h"
 #include "Paths.h"
+#include "Retention.h"
 #include "Scene.h"
 #include "Server.h"
 
@@ -92,6 +93,13 @@ namespace
 		char stamp[32];
 		time_t now = time(nullptr);
 		strftime(stamp, sizeof(stamp), "%Y-%m-%dT%H:%M:%SZ", gmtime(&now));
+		// Lines carry the requester's IP: once an hour, the ones past their retention go
+		static time_t pruned = 0;
+		if (now - pruned >= 3600)
+		{
+			retention::expireLog(bv2::userFile("admin-audit.log"), now, retention::AUDIT_DAYS);
+			pruned = now;
+		}
 		if (FILE * f = fopen(bv2::userFile("admin-audit.log").c_str(), "a"))
 		{
 			fprintf(f, "%s %s %s %s\n", stamp, clean(source).c_str(), result.c_str(), clean(masked(what)).c_str());

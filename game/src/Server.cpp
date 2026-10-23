@@ -23,6 +23,7 @@
 #include "CCurl.h"
 #include "ReportGen.h"
 #include <time.h>
+#include <cstdio>
 #include <fstream>
 #include <algorithm>
 #ifdef BV2_PLATFORM_WINDOWS
@@ -60,23 +61,25 @@ Server::Server(Game * pGame): maxTimeOverMaxPing(5.0f)//, maxIdleTime(180.0f)
 		CachedPlayers[i].IP[0] = '\0';
 	}
 
-	// Load banlist
-	std::ifstream file(bv2::userFile("banlist"), std::ios::binary);
-	char name[32], ip[16];
-
-	while(file.is_open() && !file.eof())
-	{
-		file.read(name, sizeof(char)*32);
-		file.read(ip, sizeof(char)*16);
-
-		// Will not hit eof until after first read
-		if(file.eof()) break;
-
-		// Add to ban list
-		banList.push_back( std::pair<CString,CString>(name, ip) );
-
-	}
+	// Load the bans without the expired ones; 0.0.1's binary banlist moves to banlist.tsv, dated today
+	const std::string legacy = bv2::userFile("banlist");
+	banList = retention::readBans(bv2::userFile("banlist.tsv"), legacy, (long long)time(nullptr));
+	retention::expireBans(banList, (long long)time(nullptr), gameVar.sv_banDays);
+	if (saveBans()) std::remove(legacy.c_str());
 	//reportUploadURLs.push_back("http://localhost/index.php");
+}
+
+bool Server::saveBans()
+{
+	return retention::writeBans(bv2::userFile("banlist.tsv"), banList);
+}
+
+const retention::Ban * Server::findBan(const char * ip)
+{
+	if (retention::expireBans(banList, (long long)time(nullptr), gameVar.sv_banDays)) saveBans();
+	for (const retention::Ban & ban : banList)
+		if (ban.ip == ip) return &ban;
+	return nullptr;
 }
 
 
@@ -373,15 +376,11 @@ void Server::updateNet(float delay, bool send)
 			console->add(CString("server> [net] new TCP client babonetID=%i IP=%s (expect GAMEVERSION_ACCEPTED then PLAYER_INFO)", clientID, IPDuGars), true);
 
 		// Check against ban list
-		for(std::size_t i = 0; i < banList.size(); ++i)
+		if (const retention::Ban * ban = findBan(IPDuGars))
 		{
-			if(banList[i].second == IPDuGars)
-			{
-				bb_serverDisconnectClient(clientID);
-				console->add(CString("\x3> Disconnecting banned client, %s. IP: %s",
-								banList[i].first.s, banList[i].second.s), true);
-				return;
-			}
+			bb_serverDisconnectClient(clientID);
+			console->add(CString("\x3> Disconnecting banned client, %s. IP: %s", ban->name.c_str(), ban->ip.c_str()), true);
+			return;
 		}
 
 		// On le cr�A
