@@ -26,7 +26,7 @@ for _, name in post.DOWNLOADS:
     check(name in uploaded, f"{name} is not uploaded by build.yml's release job ({sorted(uploaded)})")
 
 # With a role id: the content pings that role only, the embed names the tag and links the release page and the files
-with_role = post.payload("v0.0.2", True, "123456789012345678")
+with_role = post.payload("v0.0.2", prerelease=True, role_id="123456789012345678")
 check(with_role["content"] == "<@&123456789012345678>", f"role ping: {with_role.get('content')!r}")
 check(with_role["allowed_mentions"] == {"parse": [], "roles": ["123456789012345678"]},
       f"allowed_mentions: {with_role['allowed_mentions']}")

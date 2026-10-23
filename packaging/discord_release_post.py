@@ -19,7 +19,7 @@ DOWNLOADS = [
 ]
 
 
-def payload(tag, prerelease=False, role_id=""):
+def payload(tag, *, prerelease=False, role_id=""):
     links = "\n".join(f"[{label}]({REPO}/releases/download/{tag}/{name})" for label, name in DOWNLOADS)
     message = {
         "username": "Robo Violence 2",
@@ -42,4 +42,4 @@ if __name__ == "__main__":
     parser.add_argument("--prerelease", action="store_true")
     parser.add_argument("--role", default="", help="role id to ping; empty pings no one")
     args = parser.parse_args()
-    print(json.dumps(payload(args.tag, args.prerelease, args.role)))
+    print(json.dumps(payload(args.tag, prerelease=args.prerelease, role_id=args.role)))
