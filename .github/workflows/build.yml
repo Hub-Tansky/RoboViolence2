@@ -109,10 +109,22 @@ jobs:
           git archive --format=tar.gz --prefix="roboviolence2-${GITHUB_REF_NAME}/" -o "dist/roboviolence2-${GITHUB_REF_NAME}-source.tar.gz" HEAD
           # v0.* and v*-<suffix> tags are pre-releases
           pre=$([[ "$GITHUB_REF_NAME" == v0.* || "$GITHUB_REF_NAME" == *-* ]] && echo --prerelease || true)
+          echo "PRERELEASE_FLAG=$pre" >> "$GITHUB_ENV"
           gh release create "$GITHUB_REF_NAME" --title "Robo Violence 2 $GITHUB_REF_NAME" --generate-notes $pre \
             dist/roboviolence2-win-x64-msvc-setup.exe dist/roboviolence2-macos-arm64.dmg \
             dist/roboviolence2-macos-arm64.zip dist/roboviolence2-linux-x64.tar.gz dist/roboviolence2-linux-x64.deb \
             "dist/roboviolence2-${GITHUB_REF_NAME}-source.tar.gz"
+      # The post in Discord #announcements, pinging the opt-in release-ping role (ADR 0032); the owner clicks Publish
+      - name: Discord release post
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_RELEASE_WEBHOOK }}
+          DISCORD_ROLE_ID: ${{ vars.DISCORD_RELEASE_ROLE_ID }}
+        shell: bash
+        run: |
+          if [ -z "$DISCORD_WEBHOOK" ]; then echo "No DISCORD_RELEASE_WEBHOOK secret: no Discord post"; exit 0; fi
+          python3 -I packaging/discord_release_post.py "$GITHUB_REF_NAME" $PRERELEASE_FLAG --role "$DISCORD_ROLE_ID" \
+            > "$RUNNER_TEMP/discord.json"
+          curl -fsS -H "Content-Type: application/json" --data-binary @"$RUNNER_TEMP/discord.json" "$DISCORD_WEBHOOK" -o /dev/null
   package-check:
     name: package-check (clean ubuntu:24.04)
     needs: build
