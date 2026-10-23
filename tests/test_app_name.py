@@ -30,7 +30,7 @@ for key in ("CFBundleName", "CFBundleDisplayName"):
     check(f"<key>{key}</key><string>{NAME}</string>" in plist, f"Info.plist.in: {key} is not {NAME}")
 app = re.search(r'^APP = "([^"]+)"', read("make-package.py"), re.M)
 check(app and app.group(1) == NAME + ".app", f"make-package.py: the bundle is not named {NAME}.app")
-check(f'exec "{NAME}.app/Contents/MacOS/bv2"' in read("scripts/run-client.sh"),
+check(f'app="{NAME}.app/Contents/MacOS/bv2"' in read("scripts/run-client.sh"),
       f"run-client.sh does not start {NAME}.app")
 
 rc = read("windows/bv2.rc.in")
@@ -41,7 +41,7 @@ check(re.search(rf"^AppName={NAME}$", read("windows/roboviolence2.iss"), re.M), 
 desktop = read("linux/roboviolence2.desktop")
 check(re.search(rf"^Name={NAME}$", desktop, re.M), f"roboviolence2.desktop: Name is not {NAME}")
 wm_class = re.search(r"^StartupWMClass=(.+)$", desktop, re.M)
-app_id = re.search(r'SDL_SetHint\(SDL_HINT_APP_ID, "([^"]+)"\)', (root / "engine/zeven/src/dkw.cpp").read_text())
+app_id = re.search(r'SDL_SetHint\(SDL_HINT_APP_ID, "([^"]+)"\)', (root / "engine/zeven/src/dkw.cpp").read_text(encoding="utf-8"))
 check(wm_class and app_id and wm_class.group(1) == app_id.group(1),
       "roboviolence2.desktop: StartupWMClass differs from the SDL app id in dkw.cpp")
 

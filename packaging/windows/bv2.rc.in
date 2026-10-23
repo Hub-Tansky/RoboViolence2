@@ -3,7 +3,8 @@
 
 101 ICON "@BV2_ICONS@/roboviolence2.ico"
 
-// FileDescription is the name Task Manager, the taskbar's jump list and "Open with" show instead of "bv2.exe"
+// FileDescription is the name Task Manager, the taskbar's jump list and "Open with" show instead of "bv2.exe".
+// No version fields: the release version is known only to make-package.py (ADR 0020), not to the build.
 VS_VERSION_INFO VERSIONINFO
 FILEOS VOS_NT_WINDOWS32
 FILETYPE VFT_APP
