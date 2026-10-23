@@ -23,7 +23,6 @@
 #include "CCurl.h"
 #include "ReportGen.h"
 #include <time.h>
-#include <cstdio>
 #include <fstream>
 #include <algorithm>
 #ifdef BV2_PLATFORM_WINDOWS
@@ -62,24 +61,8 @@ Server::Server(Game * pGame): maxTimeOverMaxPing(5.0f)//, maxIdleTime(180.0f)
 	}
 
 	// Load the bans without the expired ones; 0.0.1's binary banlist moves to banlist.tsv, dated today
-	const std::string legacy = bv2::userFile("banlist");
-	banList = retention::readBans(bv2::userFile("banlist.tsv"), legacy, (long long)time(nullptr));
-	retention::expireBans(banList, (long long)time(nullptr), gameVar.sv_banDays);
-	if (saveBans()) std::remove(legacy.c_str());
+	bans.load(bv2::userFile("banlist.tsv"), bv2::userFile("banlist"), (long long)time(nullptr), gameVar.sv_banDays);
 	//reportUploadURLs.push_back("http://localhost/index.php");
-}
-
-bool Server::saveBans()
-{
-	return retention::writeBans(bv2::userFile("banlist.tsv"), banList);
-}
-
-const retention::Ban * Server::findBan(const char * ip)
-{
-	if (retention::expireBans(banList, (long long)time(nullptr), gameVar.sv_banDays)) saveBans();
-	for (const retention::Ban & ban : banList)
-		if (ban.ip == ip) return &ban;
-	return nullptr;
 }
 
 
@@ -94,7 +77,6 @@ Server::~Server()
 	if (master) master->RunningServer = 0;
 
     mapList.clear();
-	banList.clear();
 #ifndef CONSOLE
 	dkfDeleteFont(&font);
 #endif
@@ -376,7 +358,7 @@ void Server::updateNet(float delay, bool send)
 			console->add(CString("server> [net] new TCP client babonetID=%i IP=%s (expect GAMEVERSION_ACCEPTED then PLAYER_INFO)", clientID, IPDuGars), true);
 
 		// Check against ban list
-		if (const retention::Ban * ban = findBan(IPDuGars))
+		if (const retention::Ban * ban = bans.match(IPDuGars, (long long)time(nullptr), gameVar.sv_banDays))
 		{
 			bb_serverDisconnectClient(clientID);
 			console->add(CString("\x3> Disconnecting banned client, %s. IP: %s", ban->name.c_str(), ban->ip.c_str()), true);

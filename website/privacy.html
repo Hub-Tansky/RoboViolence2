@@ -46,11 +46,12 @@
       <li><strong>Match data</strong>: team, score, kills, deaths, flag captures, ping. It exists only while you are on the server and is not saved after the round. There is no leaderboard and no player profile.</li>
     </ul>
     <h3>Server logs</h3>
-    <p>Each official server writes a technical log: players joining and leaving (by nickname), chat messages, and, when a player is kicked, banned or flagged by the anti-cheat checks, that player's nickname and IP address.</p>
+    <p>Each official server writes a technical log: players joining and leaving (by nickname) and chat messages. Some entries also hold a nickname with an IP address: a player kicked, banned or flagged by the anti-cheat checks, a connection dropped for not completing the join, and in-game admin logins and admin commands.</p>
     <h3>Bans</h3>
-    <p>If a player is banned for cheating or abuse, the server stores the nickname, the IP address and the date of the ban, so the ban can be enforced.</p>
+    <p>If a player is banned for cheating or abuse, the server stores the nickname, the IP address and the date of the ban, so the ban can be enforced. To let an administrator ban someone who has already left, each server also keeps the nicknames and IP addresses of its last 50 players in memory only; they are gone when the server restarts.</p>
+    <p>When you join a public server, that server asks the master server whether your IP address is on the shared ban list. The master server only compares it with the list and doesn't store it.</p>
     <h3>The server list</h3>
-    <p>When you refresh the server list, the Game connects to the master server (master.roboviolence.com), which sees your IP address while it sends you the list. The master server does not store it. If you run your own game server and make it public, the master server stores and shows everyone that server's IP address, port, name and player count while the server is online.</p>
+    <p>When you refresh the server list, the Game connects to the master server (master.roboviolence.com), which sees your IP address while it sends you the list. The master server stores IP addresses only in the shared ban list. If you run your own game server and make it public, the master server stores and shows everyone that server's IP address, port, name and player count while the server is online.</p>
     <h3>Server administration</h3>
     <p>Requests to the servers' admin interface (admin.roboviolence.com) are logged with the time, the requester's IP address and the command.</p>
     <h3>This website</h3>
@@ -79,7 +80,8 @@
     <ul>
       <li>IP address, nickname and match data in the game server's memory: until you disconnect or the round ends.</li>
       <li>Server logs: kept in rotating files of at most 30 MB per server, overwritten as new entries arrive, and deleted whenever the server is updated. In practice this is days, not months.</li>
-      <li>Bans: 365 days from the ban, then deleted automatically. Bans issued through the master server end when their set duration ends.</li>
+      <li>Bans: 365 days from the ban, then deleted automatically. Bans on the shared ban list of the master server end when their set duration ends.</li>
+      <li>The last 50 players' nicknames and IP addresses kept for bans: in memory only, until the server restarts.</li>
       <li>Public game server entries on the master server: removed 60 seconds after the server stops reporting.</li>
       <li>Admin interface log: 90 days.</li>
       <li>Backups: 14 daily and 8 weekly copies, so deleted data can remain in a backup for up to 8 more weeks.</li>

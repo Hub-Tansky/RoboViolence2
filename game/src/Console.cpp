@@ -2092,11 +2092,11 @@ void Console::sendCommand(CString commandLine, bool isAdmin, unsigned long bbnet
 	{
 		if (scene->server)
 		{
-			for (int i=0;i<(int)scene->server->banList.size();++i)
+			for (int i=0;i<(int)scene->server->bans.entries().size();++i)
 			{
 				add(CString("[%02i] %s \x8- %s", i,
-					scene->server->banList[i].name.c_str(),
-					scene->server->banList[i].ip.c_str()), true);
+					scene->server->bans.entries()[i].name.c_str(),
+					scene->server->bans.entries()[i].ip.c_str()), true);
 			}
 		}
 		return;
@@ -2131,7 +2131,7 @@ void Console::sendCommand(CString commandLine, bool isAdmin, unsigned long bbnet
 	if(command == "unban") {
 		unsigned int banID = tokenize.toInt();
 		if(scene->server) {
-			if(banID >= 0 && banID < scene->server->banList.size())
+			if(banID >= 0 && banID < scene->server->bans.entries().size())
 				scene->unban(banID);
 		}
 		return;

@@ -163,12 +163,13 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/test_lang.cpp` | Step 13: PO parser (entries that change the English printf conversions or whose key English lacks are skipped; raw control bytes rejected), English fallback per key, OS locale matching (`ll_CC`, `ll`, `.po` before `.lang`), PO without glyphs skipped |
 | `tests/test_lang_check.py` | Step 13: `tools/lang-check.py` fails on changed conversions, unknown keys, repeated keywords, tabs and a stale `en.pot`; warns about missing glyphs |
 | `tests/test_join_password.cpp` | Step 10: a client joins a passworded server only with the HMAC over its own challenge; no password or MD5 of it on the wire |
+| `tests/test_bans.cpp` | Server bans: 0.0.1's binary banlist moves to `banlist.tsv` and still refuses the IP; a ban past `sv_banDays` lets it in and stays in the file (ADR 0034) |
 | `tests/test_player_privacy.cpp` | The player info relayed to everyone and the player list a new client gets carry no IP; the server keeps it (ADR 0034) |
 | `tests/test_join_timeout.cpp` | A connection that never answers the join handshake loses its slot after `Server::JOIN_TIMEOUT`; a client past the handshake keeps it while loading |
 | `tests/test_paths.cpp` | Phase C step 1: package vs data root, `contentFile`, `findDataIn` (upstream layout, `main/` itself), saved folder, auto-detect, `BV2_DATA_DIR`; the built-in master list vs `bv2.cfg`, `BV2_MASTER_SERVERS` and `none` (ADR 0028) |
 | `tests/test_osv_vcpkg.py` | Phase C step 4: `tools/osv-vcpkg.py` maps SPDX download locations to upstream repository and tag (offline) |
 | `tests/test_packet_hygiene.cpp` | Step 4 checks: sender binding (Q-S1), index ranges with controls (Q-S2), map names (Q-S6), skin and sound relay (Q-S7), `SV_CHANGE` filter (Q-S4), the handshake gate, `checkPacket` per message type and size, the client's `checkServerMessage` on values the server sends |
-| `tests/test_retention.cpp` | `banlist.tsv` round trip, the 0.0.1 binary banlist read once, ban expiry by `sv_banDays`, admin log lines older than 90 days dropped (ADR 0034) |
+| `tests/test_retention.cpp` | `BanList`: binary banlist moved once, saved on every change, line format, matching by age without dropping, expired bans dropped on load; admin log lines older than 90 days dropped (ADR 0034) |
 | `tests/test_replay.cpp` | Replays the corpus through the in-process server: no crash, expected replies; each `crash-*.bin` (none at present) is its own ctest under ASan |
 | `tests/fuzz_server.cpp` | Random-mutation fuzzer for one message type on the in-process server; writes the crashing input to `<out>/<type>/last.bin` (CI job `fuzz`) |
 | `tests/test_server_harness.cpp` | The in-process server starts on the placeholder CTF map, accepts a client and sends it the game state |
@@ -504,7 +505,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 |---|---|
 | `game/src/AccountManager.cpp` | Account create/login/clan/friend requests over the master connection |
 | `game/src/AccountManager.h` | Account create/login/clan/friend requests over the master connection |
-| `game/src/AdminApi.cpp` | Admin HTTP API: non-blocking listener on the game thread, bearer token, per-source budget, connection cap, refused scene-rebuilding commands, audit log with secrets masked, pruned after 90 days (step 12, ADR 0034) |
+| `game/src/AdminApi.cpp` | Admin HTTP API: non-blocking listener on the game thread, bearer token, per-source budget, connection cap, refused scene-rebuilding commands, audit log with secrets masked, pruned hourly to 90 days (step 12, ADR 0034) |
 | `game/src/AdminApi.h` | Admin HTTP API (`POST /command`, `GET /status`) behind a TLS proxy, ADR 0015 |
 | `game/src/Autotest.cpp` | `--autotest` script runner: parse, run commands, waits, `expect-console`, `expect-scene`, result report (ADR 0025) |
 | `game/src/Autotest.h` | Autotest runner API; exit codes 0 pass, 1 fail, 2 timeout |
@@ -540,7 +541,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/CLobby.h` | Lobby and menu tab host |
 | `game/src/CMainTab.cpp` | Main menu tab |
 | `game/src/CMainTab.h` | Main menu tab |
-| `game/src/CMaster.cpp` | Master-server client: server list, remote admin, account manager packets |
+| `game/src/CMaster.cpp` | Master-server client: server list, remote admin, account manager packets; ignores remote cache-list requests (ADR 0034) |
 | `game/src/CMaster.h` | Master-server client: server list, remote admin, account manager packets |
 | `game/src/CMaterial.cpp` | Material/texture state wrapper |
 | `game/src/CMaterial.h` | Material/texture state wrapper |
@@ -660,12 +661,12 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/Quit.h` | Quit confirmation dialog |
 | `game/src/ReportGen.cpp` | XML server report generation |
 | `game/src/ReportGen.h` | XML server report generation |
-| `game/src/Retention.cpp` | Retention of personal data on disk: `banlist.tsv` read and write (with the 0.0.1 binary banlist read once), ban expiry, admin log pruning (ADR 0034) |
-| `game/src/Retention.h` | Retention of personal data on disk: `retention::Ban`, `AUDIT_DAYS` (ADR 0034) |
+| `game/src/Retention.cpp` | Retention of personal data on disk: `BanList` (load with the 0.0.1 binary banlist moved once, add, remove, match by `sv_banDays`, atomic save), admin log stamp and pruning (ADR 0034) |
+| `game/src/Retention.h` | Retention of personal data on disk: `retention::BanList`, `utcStamp`, `expireLog`, `AUDIT_DAYS` (ADR 0034) |
 | `game/src/Scene.cpp` | Top-level scene: main loop, menus, game and editor switching, rendering setup |
 | `game/src/Scene.h` | Top-level scene: main loop, menus, game and editor switching, rendering setup |
-| `game/src/SceneNet.cpp` | Scene: starts and stops client and server, hosting and joining; kick, ban and unban, saved to `banlist.tsv` through `Server::saveBans` (ADR 0034) |
-| `game/src/Server.cpp` | Authoritative server: connections, joins, tick, map and mode control; bans loaded, expired and matched (`findBan`, ADR 0034) |
+| `game/src/SceneNet.cpp` | Scene: starts and stops client and server, hosting and joining; kick, ban and unban through `Server::bans` (ADR 0034) |
+| `game/src/Server.cpp` | Authoritative server: connections, joins, tick, map and mode control; bans in `Server::bans` (`retention::BanList`, ADR 0034) |
 | `game/src/Server.h` | Authoritative server: connections, joins, tick, map and mode control |
 | `game/src/ServerCTF.cpp` | Server: capture-the-flag rules |
 | `game/src/ServerClose.h` | Dialog shown when the server closes the connection |

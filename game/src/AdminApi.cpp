@@ -90,19 +90,9 @@ namespace
 
 	void audit(const std::string & source, const std::string & result, const std::string & what)
 	{
-		char stamp[32];
-		time_t now = time(nullptr);
-		strftime(stamp, sizeof(stamp), "%Y-%m-%dT%H:%M:%SZ", gmtime(&now));
-		// Lines carry the requester's IP: once an hour, the ones past their retention go
-		static time_t pruned = 0;
-		if (now - pruned >= 3600)
-		{
-			retention::expireLog(bv2::userFile("admin-audit.log"), now, retention::AUDIT_DAYS);
-			pruned = now;
-		}
 		if (FILE * f = fopen(bv2::userFile("admin-audit.log").c_str(), "a"))
 		{
-			fprintf(f, "%s %s %s %s\n", stamp, clean(source).c_str(), result.c_str(), clean(masked(what)).c_str());
+			fprintf(f, "%s %s %s %s\n", retention::utcStamp(time(nullptr)).c_str(), clean(source).c_str(), result.c_str(), clean(masked(what)).c_str());
 			fclose(f);
 		}
 	}
@@ -178,6 +168,13 @@ void AdminApi::update(float delay)
 		wantedAddress = address;
 		close();
 		if (port > 0) listen(port, address);
+	}
+	// The audit log names requesters' IPs: hourly, its lines past retention go
+	const time_t now = time(nullptr);
+	if (now - auditPruned >= 3600)
+	{
+		retention::expireLog(bv2::userFile("admin-audit.log"), now, retention::AUDIT_DAYS);
+		auditPruned = now;
 	}
 	if (!listening) return;
 

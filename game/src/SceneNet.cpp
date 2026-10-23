@@ -264,8 +264,7 @@ void Scene::ban(int ID)
 			if (server->game->players[ID])
 	{
 
-		server->banList.push_back({server->game->players[ID]->name.s, server->game->players[ID]->playerIP, (long long)time(nullptr)});
-		server->saveBans();
+		server->bans.add(server->game->players[ID]->name.s, server->game->players[ID]->playerIP, (long long)time(nullptr));
 
 		console->add(CString("\x3> Disconnecting client %s (%s), banned by server", server->game->players[ID]->name.s, server->game->players[ID]->playerIP), true);
 		server->dropSlot(ID, "ban");
@@ -276,8 +275,7 @@ void Scene::banIP(CString playerIP)
 {
 	if (server)
 	{
-		server->banList.push_back({"MANUAL-IP-BAN", playerIP.s, (long long)time(nullptr)});
-		server->saveBans();
+		server->bans.add("MANUAL-IP-BAN", playerIP.s, (long long)time(nullptr));
 	}
 }
 
@@ -286,11 +284,7 @@ void Scene::unban(int banID)
 	if(server)
 		if (server->game)
 	{
-		// First, remove entry
-		server->banList.erase(server->banList.begin() + banID);
-
-		// Then rewrite file
-		server->saveBans();
+		server->bans.remove(banID);
 	}
 }
 

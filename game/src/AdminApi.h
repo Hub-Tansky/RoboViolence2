@@ -5,6 +5,7 @@
 // admin-audit.log in the pref dir, kept retention::AUDIT_DAYS.
 #pragma once
 #include <cstdint>
+#include <ctime>
 #include <map>
 #include <string>
 #include <vector>
@@ -33,6 +34,7 @@ private:
 	std::string wantedAddress;
 	std::vector<Connection> connections;
 	std::map<std::string, float> budget; // per source: requests left (burst 5, 1 per second); absent = full
+	std::time_t auditPruned = 0; // when admin-audit.log last lost its lines past retention::AUDIT_DAYS
 
 	void listen(int port, const std::string & address);
 	void close();

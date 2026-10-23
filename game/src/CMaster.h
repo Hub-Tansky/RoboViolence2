@@ -163,7 +163,6 @@ private:
 
 	void clearRemoteCacheList();
 
-	void sendCacheListToMaster(const stCacheListRemote& info);
 
 public:
 	AccountManagerClient AccountManager;
