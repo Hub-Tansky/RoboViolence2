@@ -22,7 +22,7 @@ readonly MAX_ATTEMPTS=3 WAIT_NOTIFY_SECONDS=21600 KEEP=5
 # wait-empty fails only when the server runs but /status doesn't answer: never deploy over a game we can't see.
 readonly INFRA_STAGES=" env select fetch pull wait-empty "
 
-# --- Helpers (tests/test_staging_deploy.sh) ---
+# --- Helpers, also sourced by health-watch.sh with RV2_DEPLOY_SOURCE_ONLY (tests: test_staging_deploy.sh, test_health_watch.sh) ---
 
 # pick_run [sha prefix]: workflow-runs JSON on stdin -> "<run id> <sha>" of the newest successful push to main of REPO.
 # The same filter as tools/playtest/agent.sh: head_repository excludes fork pull requests from a branch named main.
@@ -99,7 +99,11 @@ load_env() { # sourced, not exported; compose reads the same file with --env-fil
 	[ -n "${BV2_ADMIN_PASS:-}" ] || { echo "BV2_ADMIN_PASS is not set in $ENV_FILE"; return 1; }
 }
 
-# say and notify are shared with health-watch.sh
+deploy_running() { # the lock names a running deploy.sh; any other pid (a reboot reused it, a killed run left it) is stale
+	local p; p=$(cat "$ROOT/lock" 2>/dev/null) || return 1
+	ps -p "$p" -o command= 2>/dev/null | grep -qE 'bash ([^ ]*/)?deploy\.sh( |$)'
+}
+
 say() { printf '%s %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$*"; }
 
 notify() { # notify <title> <message>: ntfy only (a server has no desktop); the topic goes to curl on stdin
@@ -149,10 +153,9 @@ wait_for() { # wait_for <seconds> <command...>: true once the command succeeds
 	done
 }
 
-lock() { # one run at a time; a lock whose pid is not a running deploy.sh is stale
+lock() { # one run at a time (deploy_running)
 	{ mkdir -p "$ROOT" && chmod 700 "$ROOT" && [ -w "$ROOT" ]; } || { say "FAIL: $ROOT is not writable by $(id -un)"; exit 1; }
-	local p; p=$(cat "$ROOT/lock" 2>/dev/null)
-	ps -p "$p" -o command= 2>/dev/null | grep -qE 'bash ([^ ]*/)?deploy\.sh( |$)' || rm -f "$ROOT/lock"
+	deploy_running || rm -f "$ROOT/lock"
 	(set -C; echo $$ >"$ROOT/lock") 2>/dev/null || { say "locked by pid $(cat "$ROOT/lock" 2>/dev/null); skipped"; exit 0; }
 	LOCKED=1
 }

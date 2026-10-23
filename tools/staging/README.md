@@ -60,7 +60,7 @@ Files under `/var/lib/rv2-staging/`: `deployed` (running commit), `state.tsv` (c
 
 ## Health watcher
 
-[health-watch.sh](health-watch.sh) sends `RV2 <label> unhealthy - <service> <state>` (unhealthy, exited, restarting, or no containers, or Docker not answering) once a problem holds for two runs, and `RV2 <label> healthy again` once all are well for two runs. It skips while `deploy.sh` runs and writes `health-seen` and `health-notified` to the state folder. Install it beside `deploy.sh` and run it every minute:
+[health-watch.sh](health-watch.sh) sends `RV2 <label> unhealthy - <service> <state>` (unhealthy, exited, restarting, missing, or Docker not answering) once a problem holds for two runs, and `RV2 <label> healthy again` once all are well for two runs. It skips while `deploy.sh` runs and writes `health-seen` and `health-notified` to the state folder. Install it beside `deploy.sh` and run it every minute:
 
 ```bash
 sudo curl -fsSL https://raw.githubusercontent.com/Hub-Tansky/RoboViolence2/main/tools/staging/health-watch.sh -o /opt/rv2-staging/health-watch.sh && sudo chmod 755 /opt/rv2-staging/health-watch.sh

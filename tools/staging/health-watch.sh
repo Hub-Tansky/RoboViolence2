@@ -1,5 +1,5 @@
 #!/bin/bash
-# Container health watcher: ntfy when a container of the compose stack is unhealthy, stopped or restarting, and again when all are well.
+# Container health watcher: ntfy when a container of the compose stack is unhealthy, stopped, restarting or missing, and again when all are well.
 # Runs every minute from cron beside deploy.sh, with the same RV2_DEPLOY_LABEL (production: docs/ops/runbook.md#production).
 # Usage: health-watch.sh   no arguments; logs only changes
 # A state must be seen on two runs in a row before it notifies, so a container recreated by a deploy or a slow start doesn't alert.
@@ -7,14 +7,21 @@
 set -u
 
 here=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-# LABEL, ROOT, ENV_FILE, PROJECT, load_env, say, notify
+# LABEL, ROOT, ENV_FILE, PROJECT, GAME_SERVERS, load_env, deploy_running, say, notify
 # shellcheck source=deploy.sh
 RV2_DEPLOY_SOURCE_ONLY=1 . "$here/deploy.sh"
 
 # --- Helpers (tests/test_health_watch.sh) ---
 
-problems() { # `docker ps -a` lines "<service>\t<state>\t<status>" on stdin -> "<service> <problem>" per bad container, joined by "; "
-	awk -F'\t' 'NF { if ($2 != "running") print $1, $2; else if ($3 ~ /\(unhealthy\)/) print $1, "unhealthy" }' |
+services() { # the compose services of the stack: master, the proxy and every game server deploy.sh knows
+	local s
+	echo master admin-proxy
+	for s in $GAME_SERVERS; do echo "${s%%:*}"; done
+}
+
+problems() { # problems <service...>: `docker ps -a` lines "<service>\t<state>\t<status>" on stdin -> "<service> <problem>" per bad or missing one, joined by "; "
+	awk -F'\t' -v want="$*" 'NF { seen[$1] = 1; if ($2 != "running") print $1, $2; else if ($3 ~ /\(unhealthy\)/) print $1, "unhealthy" }
+		END { n = split(want, w, " "); for (i = 1; i <= n; i++) if (!(w[i] in seen)) print w[i], "missing" }' |
 		sort | paste -sd ';' - | sed 's/;/; /g'
 }
 
@@ -26,12 +33,12 @@ health_step() { # health_step <now> <previous run> <last notified>: alert, recov
 [ -n "${RV2_HEALTH_SOURCE_ONLY:-}" ] && return 0
 
 load_env || exit 1 # the reason goes to the log; without the env file there is no ntfy topic
-pid=$(cat "$ROOT/lock" 2>/dev/null) && kill -0 "$pid" 2>/dev/null && exit 0 # a deploy is running
+mkdir -p -m 700 "$ROOT" || exit 1 # the state folder; deploy.sh makes it too, but cron may start this first
+deploy_running && exit 0
 
 if lines=$(docker ps -a -f "label=com.docker.compose.project=$PROJECT" \
 	--format '{{.Label "com.docker.compose.service"}}{{"\t"}}{{.State}}{{"\t"}}{{.Status}}'); then
-	now=$(printf '%s\n' "$lines" | problems)
-	[ -n "$lines" ] || now="no containers"
+	now=$(printf '%s\n' "$lines" | problems "$(services)")
 else
 	now="docker does not answer"
 fi
