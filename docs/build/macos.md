@@ -37,7 +37,7 @@ Terminal tabs and the run scripts now use your data. Starting the app by double-
 
 3. In that folder, run each in its own Terminal tab: `./run-server.sh`, then `./run-client.sh connect 127.0.0.1`. Add `./run-master.sh` only for the server browser ([README](README.md#playing-a-local-game)).
 
-The package's own `main/` copies (one in `bv2.app/Contents/Resources/` for the client, one in the folder for the servers) hold placeholders, launch scripts and languages; your data replaces the placeholders.
+The package's own `main/` copies (one in `Robo Violence 2.app/Contents/Resources/` for the client, one in the folder for the servers) hold placeholders, launch scripts and languages; your data replaces the placeholders.
 
 ## Build from source
 

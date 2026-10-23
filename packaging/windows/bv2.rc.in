@@ -1,2 +1,27 @@
 // Windows resources for bv2. The icon is packaging/icons/roboviolence2.ico (ADR 0030).
+#include <winver.h>
+
 101 ICON "@BV2_ICONS@/roboviolence2.ico"
+
+// FileDescription is the name Task Manager, the taskbar's jump list and "Open with" show instead of "bv2.exe"
+VS_VERSION_INFO VERSIONINFO
+FILEOS VOS_NT_WINDOWS32
+FILETYPE VFT_APP
+BEGIN
+	BLOCK "StringFileInfo"
+	BEGIN
+		BLOCK "040904B0"
+		BEGIN
+			VALUE "CompanyName", "Robo Violence 2 contributors"
+			VALUE "FileDescription", "Robo Violence 2"
+			VALUE "InternalName", "bv2"
+			VALUE "LegalCopyright", "GNU GPL v3"
+			VALUE "OriginalFilename", "bv2.exe"
+			VALUE "ProductName", "Robo Violence 2"
+		END
+	END
+	BLOCK "VarFileInfo"
+	BEGIN
+		VALUE "Translation", 0x409, 1200
+	END
+END
