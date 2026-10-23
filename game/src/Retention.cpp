@@ -31,7 +31,7 @@ namespace retention
 			const std::string temporary = path + ".tmp";
 			std::ofstream out(temporary, std::ios::trunc | std::ios::binary);
 			out << content;
-			out.close(); // the data reaches the disk here: a full disk shows up now, not in the destructor
+			out.close(); // the buffered data is written here: a full disk shows up now, not in the destructor
 			std::error_code error;
 			if (out) std::filesystem::rename(temporary, path, error);
 			if (!out || error)

@@ -48,7 +48,7 @@
     <h3>Server logs</h3>
     <p>Each official server writes a technical log: players joining and leaving (by nickname) and chat messages. Some entries also hold a nickname with an IP address: a player kicked, banned or flagged by the anti-cheat checks, a connection dropped for not completing the join, and in-game admin logins and admin commands.</p>
     <h3>Bans</h3>
-    <p>If a player is banned for cheating or abuse, the server stores the nickname, the IP address and the date of the ban, so the ban can be enforced. To let an administrator ban someone who has already left, each server also keeps the nicknames and IP addresses of its last 50 players in memory only; they are gone when the server restarts. So that bans can be shared between servers, administrators of other public Robo Violence 2 servers can request this list from a public server through the master server.</p>
+    <p>If a player is banned for cheating or abuse, the server stores the nickname, the IP address and the date of the ban, so the ban can be enforced. To let an administrator ban someone who has already left, each server also keeps the nicknames and IP addresses of its last 50 players in memory only; they are gone when the server restarts. So that bans can be shared between servers, anyone who runs a Robo Violence 2 server, or any program that connects to the master server, can request this list from a public server through the master server.</p>
     <p>When you join a public server, that server asks the master server whether your IP address is on the shared ban list. The master server only compares it with the list and doesn't store it.</p>
     <h3>The server list</h3>
     <p>When you refresh the server list, the Game connects to the master server (master.roboviolence.com), which sees your IP address while it sends you the list. The master server stores IP addresses only in the shared ban list. If you run your own game server and make it public, the master server stores and shows everyone that server's IP address, port, name and player count while the server is online.</p>
@@ -93,7 +93,7 @@
     <p>We do not sell or share your personal data for advertising. Recipients are:</p>
     <ul>
       <li><strong>Other players</strong> on the same server see your nickname, chat messages, team and score.</li>
-      <li><strong>Administrators of other public Robo Violence 2 servers</strong> can see the nicknames and IP addresses of a public server's last 50 players, to issue shared bans (see section 2, Bans).</li>
+      <li><strong>Anyone who runs a Robo Violence 2 server</strong>, or any program that connects to the master server, can see the nicknames and IP addresses of a public server's last 50 players; the feature exists to issue shared bans (see section 2, Bans).</li>
       <li><strong>Our hosting providers</strong>, acting on our behalf: netcup GmbH (game and master servers), Backblaze (encrypted backups), GitHub (website).</li>
     </ul>
     <p>Anyone can run their own Robo Violence 2 server. If you join a server that is not run by us, its operator is responsible for the data it processes, and this policy does not cover it.</p>

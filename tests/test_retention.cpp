@@ -3,6 +3,7 @@
 #include "Retention.h"
 
 #include <cstdio>
+#include <filesystem>
 #include <fstream>
 #include <sstream>
 #include <string>
@@ -78,11 +79,14 @@ int main(int argc, char ** argv)
 	reloaded.load(tsv, legacy, now, 365);
 	CHECK(!exists(legacy) && reloaded.entries().size() == 1);
 
-	// A save that can't be written keeps nothing half-written
+	// A save whose rename fails (here: a non-empty folder in the way) leaves no temporary file with nicks and IPs
+	const std::string blocked = dir + "/retention-blocked.tsv";
+	std::filesystem::create_directories(blocked + "/x");
 	retention::BanList unwritable;
-	unwritable.load(dir + "/retention-missing-dir/banlist.tsv", legacy, now, 365);
+	unwritable.load(blocked, legacy, now, 365);
 	unwritable.add("Griefer", "203.0.113.7", now);
-	CHECK(!exists(dir + "/retention-missing-dir/banlist.tsv") && !exists(dir + "/retention-missing-dir/banlist.tsv.tmp"));
+	CHECK(!exists(blocked + ".tmp"));
+	std::filesystem::remove_all(blocked);
 
 	// Audit lines older than the limit go, newer ones stay in order; the writer's stamp is the one compared
 	CHECK(retention::utcStamp((time_t)now) == "2026-10-14T17:46:40Z");

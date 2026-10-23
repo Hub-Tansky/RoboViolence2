@@ -20,7 +20,8 @@ namespace retention
 	{
 	public:
 		// Reads `path`, or without it the binary `legacyPath` of 0.0.1 (name and IP NUL-padded to 32 and 16 bytes,
-		// dated `now`, deleted once moved). Drops the bans older than `days` (0: bans never expire).
+		// dated `now`, deleted once moved; deleted unread when `path` exists). Drops the bans older than `days`
+		// (0: bans never expire).
 		void load(const std::string & path, const std::string & legacyPath, long long now, int days);
 		void add(const std::string & name, const std::string & ip, long long now);
 		void remove(size_t index);
