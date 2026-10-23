@@ -24,20 +24,20 @@ Image for amd64 and arm64: `ghcr.io/hub-tansky/roboviolence2-server`. One captur
 
 ```
 docker run -dit --name rv2-ctf --restart unless-stopped \
-    -p 3333:3333 -v rv2-ctf:/var/lib/bv2 \
-    --env-file ~/rv2-server.env \
-    ghcr.io/hub-tansky/roboviolence2-server
+  -p 3333:3333 -v rv2-ctf:/var/lib/bv2 \
+  --env-file ~/rv2-server.env \
+  ghcr.io/hub-tansky/roboviolence2-server
 ```
 
 Keep settings and secrets in that env file:
 
 ```
 # join password, empty for none
-  BV2_SV_PASSWORD=
-  # admin login password
-  BV2_ADMIN_PASS=
-  # your public IPv4, so the server list shows a reachable address
-  BV2_PUBLIC_ADDRESS=
+BV2_SV_PASSWORD=
+# admin login password
+BV2_ADMIN_PASS=
+# your public IPv4, so the server list shows a reachable address
+BV2_PUBLIC_ADDRESS=
 ```
 
 For team deathmatch, add `TDM` after the image name, publish `3334:3334` instead and add `-e BV2_HEALTH_PORT=3334` so the container health check watches that port. `docker attach rv2-ctf` opens the server console; `Ctrl-P` `Ctrl-Q` leaves it running. To use your BaboViolent 2 maps, mount the folder that holds `main/` read-only and point `BV2_DATA_DIR` at it:

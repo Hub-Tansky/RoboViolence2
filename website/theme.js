@@ -44,7 +44,6 @@
           link: c.link,
           brand: { red: c.red, blue: c.blue },
         },
-        maxWidth: { site: '1200px' },
         fontFamily: { sans: ['system-ui', '-apple-system', '"Segoe UI"', 'Roboto', 'sans-serif'] },
         backgroundImage: {
           hero:
@@ -76,7 +75,7 @@
         addComponents({
           // The 1200 px content column with its side gutter, for the chrome and every page section
           '.site-container': {
-            maxWidth: theme('maxWidth.site'),
+            maxWidth: '1200px',
             marginLeft: 'auto',
             marginRight: 'auto',
             paddingLeft: '1rem',

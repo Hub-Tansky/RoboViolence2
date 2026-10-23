@@ -156,6 +156,8 @@ test('every page has a current Markdown copy, linked from the page and from llms
     assert.ok(llms.includes(`(https://roboviolence.com/${md})`), `llms.txt links ${md}`);
   }
   assert.ok(llms.includes(`(${DISCORD_INVITE})`), 'llms.txt has the current Discord invite');
+  // Code blocks keep their text exactly: the env-file lines start in column 0, ready to paste
+  assert.match(read('website/server.md'), /\n# join password, empty for none\nBV2_SV_PASSWORD=\n# admin login password\nBV2_ADMIN_PASS=\n/);
 });
 
 test('toMarkdown maps the pages\' HTML: own pages to .md, other sites unchanged', () => {
