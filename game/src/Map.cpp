@@ -1183,10 +1183,8 @@ void Map::update(float delay, Player * thisPlayer)
 	// Snipers should be able to scope at map edges
 	if (isEditor || (thisPlayer && thisPlayer->weapon && thisPlayer->weapon->weaponID != WEAPON_SNIPER) || (thisPlayer && thisPlayer->teamID == PLAYER_TEAM_SPECTATOR))
 	{
-		CVector2i res = dkwGetResolution();
-		camLookAt[0] = view::clampCameraX(camLookAt[0], (float)size[0], view::aspect(res[0], res[1], gameVar.r_widescreen));
-		if (camLookAt[1] < 4) camLookAt[1] = 4;
-		if (camLookAt[1] > (float)size[1]-4) camLookAt[1] = (float)size[1]-4;
+		camLookAt[0] = view::clampCameraX(camLookAt[0], (float)size[0], view::aspect(view::current()));
+		camLookAt[1] = view::clampCameraY(camLookAt[1], (float)size[1]);
 	}
 
 	camDest = camLookAt + CVector3f(0, 0, 7);

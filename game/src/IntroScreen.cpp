@@ -75,9 +75,9 @@ CVector2i IntroScreen::beginFrame()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	CVector2i res = dkwGetResolution();
 
-	view::Rect v = view::rect(res[0], res[1], gameVar.r_widescreen);
+	view::Rect v = view::current();
 	glViewport(v.x, 0, v.w, v.h);
-	dkglSetProjection(60, 1, 50, (float)v.w, (float)v.h);
+	dkglSetProjection(60, 1, 50, view::aspect(v), 1);
 
 	// Per-frame default state
 	glEnable(GL_DEPTH_TEST);
@@ -85,6 +85,14 @@ CVector2i IntroScreen::beginFrame()
 	glDisable(GL_TEXTURE_2D);
 	glColor3f(1,1,1);
 	return res;
+}
+
+
+
+view::Rect view::current()
+{
+	CVector2i res = dkwGetResolution();
+	return view::rect(res[0], res[1], gameVar.r_widescreen);
 }
 
 

@@ -70,8 +70,7 @@ void Game::render()
 				{
 					if (thisPlayer->scopeMode == true)
 					{
-						CVector2i res = dkwGetResolution();
-						dkglSetProjection(80, .1f, 50, view::aspect(res[0], res[1], gameVar.r_widescreen), 1);
+						dkglSetProjection(80, .1f, 50, view::aspect(view::current()), 1);
 						gluLookAt(
 							thisPlayer->currentCF.position[0], 
 							thisPlayer->currentCF.position[1], 
@@ -85,8 +84,7 @@ void Game::render()
 			}
 			if (map->introAnim < map->introAnimLenght && map->dko_cam)
 			{
-				CVector2i res = dkwGetResolution();
-				dkglSetProjection(50, .1f, 1000, view::aspect(res[0], res[1], gameVar.r_widescreen), 1);
+				dkglSetProjection(50, .1f, 1000, view::aspect(view::current()), 1);
 				CVector3f camPos;
 				CVector3f camTarget;
 				dkoGetDummyPosition("dum_cam", map->dko_cam, camPos.s, (short)map->introAnim);
@@ -582,7 +580,7 @@ void Game::render()
 		renderMiniMap();
 
 		CVector2i res = dkwGetResolution();
-		res[0] = view::rect(res[0], res[1], gameVar.r_widescreen).w;
+		res[0] = view::current().w;
 		dkglPushOrtho((float)res[0], (float)res[1]);
 			glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT);
 				glEnable(GL_TEXTURE_2D);
@@ -604,7 +602,7 @@ void Game::render()
 	if (voting.votingInProgress)
 	{
 		CVector2i res = dkwGetResolution();
-		res[0] = view::rect(res[0], res[1], gameVar.r_widescreen).w;
+		res[0] = view::current().w;
 		dkglPushOrtho((float)res[0], (float)res[1]);
 			glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT);
 				glEnable(GL_TEXTURE_2D);

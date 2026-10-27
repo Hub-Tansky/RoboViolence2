@@ -7,6 +7,11 @@ namespace view
 	const int WIDESCREEN_BARS = 2;
 	const float ASPECT_4_3 = 1.333f;
 
+	// How far the camera stays from the map's edges so the void past them stays off screen: 4 units top and bottom,
+	// 5 left and right at 4:3, wider with the view
+	const float CAMERA_MARGIN_X_4_3 = 5;
+	const float CAMERA_MARGIN_Y = 4;
+
 	// The 3D viewport inside a window of resW x resH: x is its left edge, w x h its size
 	struct Rect { int x, w, h; };
 
@@ -20,22 +25,31 @@ namespace view
 		return Rect{ 0, resW, resH };
 	}
 
-	// Width over height of that viewport, the aspect every 3D projection must use; 4:3 for an empty window
-	inline float aspect(int resW, int resH, int widescreen)
+	// This frame's viewport, from the window resolution and r_widescreen (client only, defined in IntroScreen.cpp)
+	Rect current();
+
+	// Width over height of a viewport, the aspect every 3D projection uses; 4:3 for an empty window
+	inline float aspect(const Rect & r)
 	{
-		Rect r = rect(resW, resH, widescreen);
 		return (r.w > 0 && r.h > 0) ? static_cast<float>(r.w) / static_cast<float>(r.h) : ASPECT_4_3;
 	}
 
-	// How far the camera stays from the map's left and right edges so the void past them stays off screen:
-	// 5 units at 4:3, wider with the view. A map narrower than both margins centres the camera.
+	// Keeps v at least margin inside [0, extent]; an extent narrower than both margins centres it
+	inline float clampAxis(float v, float extent, float margin)
+	{
+		if (extent <= 2 * margin) return extent / 2;
+		if (v < margin) return margin;
+		if (v > extent - margin) return extent - margin;
+		return v;
+	}
+
 	inline float clampCameraX(float x, float mapWidth, float viewAspect)
 	{
-		const float marginPerAspect = 5 / ASPECT_4_3;
-		float margin = marginPerAspect * viewAspect;
-		if (mapWidth <= 2 * margin) return mapWidth / 2;
-		if (x < margin) return margin;
-		if (x > mapWidth - margin) return mapWidth - margin;
-		return x;
+		return clampAxis(x, mapWidth, CAMERA_MARGIN_X_4_3 / ASPECT_4_3 * viewAspect);
+	}
+
+	inline float clampCameraY(float y, float mapHeight)
+	{
+		return clampAxis(y, mapHeight, CAMERA_MARGIN_Y);
 	}
 }

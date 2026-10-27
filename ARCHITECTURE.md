@@ -150,7 +150,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/test_babonet_ping.cpp` | PNS-56: a server-browser ping to a game server on this host is answered within 1 s while another process holds babonet's LAN port |
 | `tests/test_browsable_game.cpp` | A server browser row owns a copy of its lobby game's row (the lobby frees its own) |
 | `tests/test_cstring.cpp` | Phase C step 5: one-argument `CString` is text (arrays, `char*`, literals, direct and implicit); two or more arguments format (ADR 0021) |
-| `tests/test_view_geometry.cpp` | Widescreen (Stretch) projects at the window's own aspect, Bars at 4:3; camera margin at the map edges widens with the view and centres on a narrow map |
+| `tests/test_view_geometry.cpp` | Widescreen (Stretch) projects at the window's own aspect, Bars at 4:3; the camera's side margin widens with the view, and a narrow or short map centres it |
 | `tests/test_config.cpp` | dksvar config layering, transient values not saved, secrets masked, `dksvarGetValue` |
 | `tests/test_credentials.cpp` | Step 10: the credential HMAC against RFC 4231; proofs check only with their own password, label and nonce |
 | `tests/test_crash_fixes.cpp` | Steps 5 and 7: one check per fixed defect (KEY_QUESTIONS Part D) on the in-process server |
@@ -628,7 +628,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/Host.h` | Host-game settings struct |
 | `game/src/IncorrectName.h` | Dialog: invalid player name |
 | `game/src/IncorrectPassword.h` | Dialog: wrong server password |
-| `game/src/IntroScreen.cpp` | "LOADING" splash after start-up (ADR 0019), the loading frame Scene and Map present, and the per-frame set-up `Scene::render` starts with |
+| `game/src/IntroScreen.cpp` | "LOADING" splash after start-up (ADR 0019), the loading frame Scene and Map present, the per-frame set-up `Scene::render` starts with, and `view::current` |
 | `game/src/IntroScreen.h` | Interface of `IntroScreen.cpp`; `presentLoadingFrame` is the one "LOADING" frame Scene and Map show while they load; `beginFrame` is the shared clear/viewport/projection set-up |
 | `game/src/JoinGame.h` | Join-game screen |
 | `game/src/Key.cpp` | Key binding entry |
@@ -676,7 +676,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/ServerValidator.cpp` | Server cheat checks: spawn weapon whitelist, speed/frame kick, step 9 rules (weapon, movement, rate limits) with a decaying score |
 | `game/src/ServerValidator.h` | Server cheat checks (`Server::validator`), asked by the `ServerRecv.cpp` handlers |
 | `game/src/SqlStatement.h` | Prepared SQLite statement with bound parameters (the game's copy) |
-| `game/src/ViewGeometry.h` | The 3D viewport inside the window (`view::rect`: whole window, or 4:3 between bars), the aspect every 3D projection uses, and the camera's horizontal margin at the map edges |
+| `game/src/ViewGeometry.h` | The 3D viewport inside the window (`view::rect`: whole window, or 4:3 between bars; `view::current` for this frame, defined in `IntroScreen.cpp`), the aspect every 3D projection uses, and the camera's margins at the map edges |
 | `game/src/Weapon.cpp` | Weapon definitions and stats |
 | `game/src/Weapon.h` | Weapon definitions and stats |
 | `game/src/Write.cpp` | Chat input widget |
