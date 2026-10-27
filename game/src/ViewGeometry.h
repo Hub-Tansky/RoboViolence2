@@ -1,4 +1,5 @@
-// Where the 3D view sits in the window and how wide it is. Plain C++: tests/test_view_geometry.cpp drives it without a window.
+// Where the 3D view sits in the window and how wide it is (ADR 0039: Stretch shows more map sideways, Bars stays 4:3).
+// Plain C++: tests/test_view_geometry.cpp drives it without a window.
 #pragma once
 
 namespace view

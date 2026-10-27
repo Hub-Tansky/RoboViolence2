@@ -70,3 +70,4 @@ What we do, in one or two sentences.
 | [0035](https://github.com/Hub-Tansky/rv2-website/blob/main/docs/decisions/0035-website-tailwind-install-page-agent-files.md) | The website uses Tailwind from its CDN, has a separate install guide and publishes files for AI agents | Moved to rv2-website (0036) |
 | [0036](0036-website-in-rv2-website-repository.md) | The website lives in Hub-Tansky/rv2-website | Accepted |
 | [0037](0037-review-rubric-single-repo-copy.md) | The review rubric has one repo copy, and the gate checks its hash | Accepted |
+| [0039](0039-widescreen-stretch-shows-more-map.md) | Widescreen (Stretch) shows more map sideways instead of stretching a 4:3 view | Accepted |
