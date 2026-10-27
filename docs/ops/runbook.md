@@ -103,7 +103,7 @@ Restore by extracting into the volume before `up`.
 
 ## Production
 
-Production runs the same compose file and the same deploy agent as staging ([tools/staging/](../../tools/staging/README.md)), by hand. The host's address, provider and access stay in the owner's private Obsidian vault (`RoboViolence2/prv_wiki/docs_restricted/prod/`), never in the repo.
+Releases pin production as one step of [Cutting a release](release.md). Production runs the same compose file and the same deploy agent as staging ([tools/staging/](../../tools/staging/README.md)), by hand. The host's address, provider and access stay in the owner's private Obsidian vault (`RoboViolence2/prv_wiki/docs_restricted/prod/`), never in the repo.
 
 - **Pinned, by hand.** No cron. The owner deploys one `main` commit (a release commit once releases carry server images) with `--sha <full sha>`, which pins the images and the compose file to it. Rolls back on failure like staging.
 - **Never over a game, and no retry.** While anyone plays on any game server, a run deploys nothing and exits 0 (the log line says `waits`); without cron nothing retries. Run it again later, or add `--force` for an urgent fix or rollback. `/deployed` is the only success signal: check it after every run.
