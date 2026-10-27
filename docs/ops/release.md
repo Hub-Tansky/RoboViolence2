@@ -43,6 +43,8 @@ Then check what was published:
 - The installer from the release page shows the release version in Apps & features.
 - Website: on each OS, https://roboviolence.com's main button names that OS and links this release's file (`-setup.exe`, `.dmg`, `-linux-x64.tar.gz`).
 
+If one fails, don't publish the Discord post (step 6): fix it on `main` and release the next patch version. Never move a published tag.
+
 ## 4. Release notes
 
 Put this header above the generated list (edit the release on GitHub, or `gh release edit vX.Y.Z --notes-file notes.md`, with the generated part pasted at the end):
@@ -71,7 +73,7 @@ Bugs: the #bug-reports forum on Discord, or https://github.com/Hub-Tansky/RoboVi
 
 ## 5. Production
 
-Deploy the tag's full SHA as in [runbook: Production](runbook.md#production) ("Deploy a commit"), unless `/deployed` already shows it. On the current host the wrapper is `rv2-prod-deploy --sha <full sha>`.
+Deploy the tag's full SHA as in [runbook: Production](runbook.md#production) ("Deploy a commit"), unless `/deployed` already shows it.
 
 ## 6. Discord
 
