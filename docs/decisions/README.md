@@ -7,6 +7,7 @@ One file per non-obvious decision: `NNNN-kebab-title.md`, numbered in order, nev
 - An accepted ADR is never edited except for its **Status** line. To change a decision, write a new ADR and mark the old one `Superseded by NNNN`.
 - Keep it under one screen. Cite code as `path:line`; link the Project item, issue, PR or file it affects.
 - Add every new ADR to the index below and to the `ARCHITECTURE.md` inventory.
+- An ADR moved to another repository keeps its number here: its index row links the file there with status `Moved to <repo> (NNNN)`, NNNN being the ADR that moved it.
 
 ## Format
 
