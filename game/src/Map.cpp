@@ -26,6 +26,7 @@
 #include "CMenuManager.h"
 
 #ifndef CONSOLE
+#include "IntroScreen.h"
 #include "CRain.h"
 #include "CSnow.h"
 #include "CLava.h"
@@ -62,40 +63,8 @@ Map::Map(CString mapFilename, Game * _game, unsigned int font, bool editor, int 
 {
 	aStar = 0;
     int i, j, gtnum;
-	//-- On print le loading screen! (new)
-		// On clear les buffers, on init la camera, etc
 #ifndef CONSOLE
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		CVector2i res = dkwGetResolution();
-
-		if(gameVar.r_widescreen > 1)
-			glViewport( (GLint)((res[0] - res[1]*1.333f)/2.0f) , 0, (GLsizei)(res[1]*1.333f), (GLsizei)res[1]);
-		else
-			glViewport(0, 0, res[0], res[1]);
-		dkglSetProjection(60, 1, 50, (float)res[1]*1.333f, (float)res[1]);
-
-		// Truc par default à enabeler
-		glEnable(GL_DEPTH_TEST);
-		glEnable(GL_CULL_FACE);
-		glDisable(GL_TEXTURE_2D);
-		glColor3f(1,1,1);
-
-		dkglPushOrtho(800, 600);
-
-		// Print au millieu
-		glColor3f(1,1,1);
-		dkfBindFont(font);
-		glEnable(GL_BLEND);
-		
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		printCenterText(400, 268, 64, CString("LOADING"));
-
-		dkglPopOrtho();
-
-		// On swap les buffers
-		dkglSwapBuffers();
-#endif
-#ifndef CONSOLE
+	IntroScreen::presentLoadingFrame(font);
 	dko_map = 0;
 	dko_cam = 0;
 	zoom = 0;
