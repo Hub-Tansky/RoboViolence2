@@ -14,7 +14,7 @@ Run `tools/review.sh` while working, and `tools/review.sh --full <preset>` befor
 | secrets | gitleaks finds a secret in `merge-base..HEAD` (skipped locally if gitleaks is missing; CI `secret-scan` runs it) |
 | scope | a changed file is outside the PR's **Allowed paths** row (from the PR description: `REVIEW_PR_BODY` in CI, `gh pr view` locally, or `--scope <file>`) |
 | anti-gaming | an added line switches a check off: `#pragma warning`/`diagnostic`, `NOLINT`, `-Wno-`, `DISABLED_`, `--no-verify`, `continue-on-error: true`. A justified line carries `review: allow <reason>` |
-| review gate | a ready (non-draft) PR with an Allowed paths row has no `## Review record` naming a fresh-context reviewer, has a finding still `pending`, has a `deferred` finding without a Project item or issue link, or lacks the raw report (`<details>` with the `Rubric:` line of the head's rubric and no `Rubric: NOT LOADED`) |
+| review gate | a ready (non-draft) PR with an Allowed paths row has no `## Review record` naming a fresh-context reviewer, has a finding still `pending`, has a `deferred` finding without a Project item or issue link, or lacks the raw report (`<details>` with the `Rubric:` line of the head's rubric on a line of its own, and no line starting `Rubric: NOT LOADED`) |
 | rubric | the `Rubric:` line in `.claude/skills/rv2-thermo-nuclear-review/SKILL.md` doesn't match the file's hash (the message prints the right line) |
 | `--full` | configure, build (warnings are errors) or `ctest` fails |
 

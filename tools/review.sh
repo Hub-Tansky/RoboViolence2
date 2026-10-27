@@ -107,7 +107,7 @@ if row and not draft:
         problems.append("review gate: the record lacks 'Reviewer: fresh-context subagent' or '### Findings'")
     elif re.search(r"\|\s*pending\s*\|", rec):
         problems.append("review gate: the record still has pending findings")
-    elif rubric not in rec or "Rubric: NOT LOADED" in rec:
+    elif not re.search(rf"^[ \t]*{re.escape(rubric)}[ \t]*$", rec, re.M) or re.search(r"^[ \t]*Rubric: NOT LOADED", rec, re.M):
         problems.append(f"review gate: the raw reviewer report lacks '{rubric}' (the repo rubric at this head), or says NOT LOADED")
     else:
         for r in re.findall(r"^\|.*\bdeferred\b.*\|\s*$", rec, re.M):
