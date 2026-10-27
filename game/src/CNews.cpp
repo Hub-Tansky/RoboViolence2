@@ -19,6 +19,37 @@
 #ifndef CONSOLE
 
 #include "CNews.h"
+#include <string>
+
+namespace
+{
+	// Greedy word wrap of text to width pixels at size with the bound font, keeping its own line breaks
+	std::string wrapText(float size, const char * text, float width)
+	{
+		std::string wrapped, line, word;
+		for (const char * c = text; ; ++c)
+		{
+			if (*c != ' ' && *c != '\n' && *c != '\0')
+			{
+				word += *c;
+				continue;
+			}
+			std::string candidate = line.empty() ? word : line + " " + word;
+			if (!line.empty() && dkfGetStringWidth(size, &candidate[0]) > width)
+			{
+				wrapped += line + "\n";
+				candidate = word;
+			}
+			line = candidate;
+			word.clear();
+			if (*c == ' ') continue;
+			wrapped += line;
+			if (*c == '\0') return wrapped;
+			wrapped += "\n";
+			line.clear();
+		}
+	}
+}
 
 CNews::CNews(CControl * in_parent, CControl * in_alignTo)
 {
@@ -32,10 +63,7 @@ CNews::CNews(CControl * in_parent, CControl * in_alignTo)
 	//instance->texture = dktCreateTextureFromFile("main/textures/Menu3Back.tga", DKT_FILTER_LINEAR);
 	//instance->borderColor.set(1,.5f,.25f);
 
-	btn_refresh = new CControl(instance, CVector2i(10,10),CVector2i(120,25),"Refresh",this,"BUTTON");
-	btn_refresh->toolTips = "Refresh the news";
-
-	lst_news = new CControl(instance, CVector2i(0,0), CVector2i(716,460), "", this, "LISTBOX", btn_refresh, CONTROL_SNAP_BOTTOM, 5);
+	lst_news = new CControl(instance, CVector2i(10,10), CVector2i(716,486), "", this, "LISTBOX");
 	lst_news->texture = dktCreateTextureFromFile("main/textures/Menu2Back.tga", DKT_FILTER_LINEAR);
 
 	instance->backColor.set(0,.3f,.7f);
@@ -47,7 +75,15 @@ CNews::CNews(CControl * in_parent, CControl * in_alignTo)
 	animY = 0;
 	velY = 0;
 	originalY = instance->localPos[1];
-	AddNews("Testing News", "by cnik", "lalalal lala bah\nkamamamamamba", "10/08/2008");
+	AddNews("Robo Violence 2 is now available", "The #1 Robo",
+		"The first public version of Robo Violence 2 is here! A free, top-down multiplayer arena shooter for Windows, macOS and Linux.\n"
+		"\n"
+		"Fan-made revival of BaboViolent 2, Robo Violence 2 brings its fast-paced arena action back for longtime fans and new players alike.\n"
+		"\n"
+		"Please note that this is an alpha release, not a finished remake. The first version achieved the foundation for the game's future development: a modern technology stack, support for all three major desktop platforms, and improvements to reliability and server-side performance.\n"
+		"\n"
+		"The arena is open again. See you in-game!",
+		"29.10.2026");
 }
 
 CNews::~CNews()
@@ -82,10 +118,6 @@ void CNews::Click(CControl * control)
 	{
 		dksPlaySound(m_sfxClic, -1, 200);
 	}
-	if (control == btn_refresh)
-	{
-		//refresh news
-	}
 }
 void CNews::Validate(CControl * control)
 {
@@ -97,15 +129,23 @@ void CNews::Validate(CControl * control)
 
 void CNews::AddNews(const CString& title, const CString& author, const CString& content, const CString& date)
 {
-	CControl* newsRow = new CControl(lst_news, CVector2i(10, 10), CVector2i(676,200), "", this, "LABEL");
+	const int width = 676;
+	const int bodySize = 20;
+	dkfBindFont(lst_news->font);
+	std::string body = wrapText((float)bodySize, content.s, (float)(width - 6)); // labels pad 3 px on each side
+	int bodyHeight = (int)dkfGetStringHeight((float)bodySize, &body[0]) + 6;
 
-	CControl* Title = new CControl(newsRow, CVector2i(0, 5), CVector2i(350,35), title, this, "LABEL");
+	CControl* newsRow = new CControl(lst_news, CVector2i(10, 10), CVector2i(width, 45 + bodyHeight + 50), "", this, "LABEL");
+
+	CControl* Title = new CControl(newsRow, CVector2i(0, 5), CVector2i(width,35), title, this, "LABEL");
 	Title->textSize = 35;
-	Title->textAlign = CONTROL_TEXTALIGN_TOPCENTER;
-	CControl* Content = new CControl(newsRow, CVector2i(0, 40), CVector2i(350,80), content, this, "LABEL");//, Title);
-	CControl* Author = new CControl(newsRow, CVector2i(0, 135), CVector2i(350,15), author, this, "LABEL");//, Content);
+	Title->textAlign = CONTROL_TEXTALIGN_TOPLEFT;
+	CControl* Content = new CControl(newsRow, CVector2i(0, 45), CVector2i(width,bodyHeight), body.c_str(), this, "LABEL");
+	Content->textSize = bodySize;
+	Content->textAlign = CONTROL_TEXTALIGN_TOPLEFT;
+	CControl* Author = new CControl(newsRow, CVector2i(0, 45 + bodyHeight + 5), CVector2i(width,20), CString("by %s", author.s), this, "LABEL");
 	Author->textSize = 20;
-	CControl* Date = new CControl(newsRow, CVector2i(0, 145), CVector2i(350,20), date, this, "LABEL");//, Content);
+	CControl* Date = new CControl(newsRow, CVector2i(0, 45 + bodyHeight + 25), CVector2i(width,20), date, this, "LABEL");
 	Date->textSize = 20;
 }
 
