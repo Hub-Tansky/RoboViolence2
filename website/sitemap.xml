@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!-- Every page of the site; tests/website/site.test.mjs fails when a page is missing here. -->
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://roboviolence.com/</loc></url>
-  <url><loc>https://roboviolence.com/install.html</loc></url>
-  <url><loc>https://roboviolence.com/server.html</loc></url>
-  <url><loc>https://roboviolence.com/about.html</loc></url>
-  <url><loc>https://roboviolence.com/privacy.html</loc></url>
-</urlset>
