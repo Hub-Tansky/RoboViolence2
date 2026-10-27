@@ -69,7 +69,7 @@ void IntroScreen::renderLoading(unsigned int font, float brightness)
 
 
 
-void IntroScreen::beginFrame()
+CVector2i IntroScreen::beginFrame()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	CVector2i res = dkwGetResolution();
@@ -85,6 +85,7 @@ void IntroScreen::beginFrame()
 	glEnable(GL_CULL_FACE);
 	glDisable(GL_TEXTURE_2D);
 	glColor3f(1,1,1);
+	return res;
 }
 
 

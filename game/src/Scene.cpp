@@ -227,8 +227,7 @@ void Scene::update(float delay)
 //
 void Scene::render()
 {
-	IntroScreen::beginFrame();
-	CVector2i res = dkwGetResolution();
+	CVector2i res = IntroScreen::beginFrame();
 
 	if (introScreen)
 	{
