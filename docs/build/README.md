@@ -28,7 +28,7 @@ Pick your OS: [macOS](macos.md), [Linux](linux.md), [Windows](windows.md). Each 
 
 ## Playing a local game
 
-Run each program from its folder (a package folder, or `build/<preset>/runtime/`). Ports: game server TCP 3333, master TCP 10207.
+Run each program from its folder (a package folder, or `build/<preset>/runtime/`). Ports: game server TCP 3333 (and UDP 3333 for the server browser's ping), master TCP 10207.
 
 | Program | Package | Arguments |
 |---|---|---|

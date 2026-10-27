@@ -74,6 +74,32 @@ jobs:
           done
           echo "listed: $listed"
           [ "$listed" = "$want" ]
+      # PNS-56: the server browser pings each game port over UDP (babonet peer, game/src/CPing.cpp). A babonet peer
+      # request (system interface, packet 1, TYPE_DEMAND carrying a 4-byte id) must come back as TYPE_CONFIRM
+      - name: Both game servers answer the browser's UDP ping (3333, 3334)
+        run: |
+          python3 - <<'PY'
+          import socket, struct
+          for port in (3333, 3334):
+              s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+              s.settimeout(1)
+              confirmed = False
+              for attempt in range(10):
+                  s.sendto(struct.pack('<BIHHI', 0, 1, 2, 4, 7), ('127.0.0.1', port))
+                  try:
+                      data = s.recv(1024)
+                  except socket.timeout:
+                      continue
+                  n = 0
+                  while n + 9 <= len(data):
+                      interface, _, type_id, size = struct.unpack_from('<BIHH', data, n)
+                      confirmed |= interface == 0 and type_id == 3 and data[n + 9:n + 9 + size] == struct.pack('<I', 7)
+                      n += 9 + size
+                  if confirmed:
+                      break
+              print(port, 'confirmed' if confirmed else 'no answer')
+              assert confirmed
+          PY
       # Step 12: the admin API through the TLS proxy (Caddy's own CA for localhost, hence -k)
       - name: Remote status and a command over TLS
         run: |

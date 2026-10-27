@@ -134,15 +134,13 @@ int cPeer2Peer::PrepareSockets()
     ipAdress.sin_port			=	htons(BB_BROADCAST_PORT);
     memset(&(ipAdress.sin_zero), '\0', 8);
 
-	if (bind(BCfd, (sockaddr *)&ipAdress, sizeof(sockaddr_in)) == -1)
-	{
-		//int i = WSAGetLastError();//sprintf(LastError,"Error : Problem on bind()ing the UDPfd UDP");
-		return 1;
-    }
+	// Another babonet process on this host (a local server or client) may hold the LAN port. Then only LAN discovery
+	// is lost: the unicast socket still sends and answers server-browser pings (PNS-56)
+	bool lanBound = bind(BCfd, (sockaddr *)&ipAdress, sizeof(sockaddr_in)) == 0;
 
 	FD_ZERO(&master);
     FD_SET((unsigned int)(UDPfd),&master);
-    FD_SET((unsigned int)(BCfd),&master);
+	if (lanBound) FD_SET((unsigned int)(BCfd),&master);
 
 	fdmax = amax(UDPfd,BCfd);
 

@@ -1,7 +1,8 @@
 #cloud-config
 # Staging host bootstrap (tools/staging/README.md), Ubuntu 24.04 with a public IPv4 at first boot.
-# Paste as the VM's cloud-init user data. Installs Docker, curl, jq and deploy.sh. Open TCP 443, 3333, 3334, 10207 in the
-# provider's firewall; the host's iptables INPUT chain doesn't apply, since Docker forwards published ports itself.
+# Paste as the VM's cloud-init user data. Installs Docker, curl, jq and deploy.sh. Open TCP 443, 3333, 3334, 10207 and
+# UDP 3333, 3334 in the provider's firewall; the host's iptables INPUT chain doesn't apply, since Docker forwards
+# published ports itself.
 # No secrets here: the admin password is generated on the host by rv2-staging-setup (run once after DNS works).
 package_update: true
 packages: [docker.io, docker-compose-v2, curl, jq]
