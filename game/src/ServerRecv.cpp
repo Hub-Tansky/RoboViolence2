@@ -282,7 +282,7 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 						console->add(CString("\x4> Admin login from %s refused: locked after failed logins", sender->playerIP), true);
 					else if (long long lock = adminLockout.failed(sender->playerIP, now))
 						console->add(CString("\x4> Admin logins from %s locked for %lld s", sender->playerIP, lock), true);
-					if (++adminFails[slot] >= 5)
+					if (++adminFails[slot] >= AdminLockout::FREE_FAILURES)
 					{
 						console->add(CString("\x4> Too many admin login attempts, disconnecting %s", sender->playerIP), true);
 						dropSlot(slot, "admin_fails");

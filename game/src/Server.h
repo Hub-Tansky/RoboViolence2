@@ -51,7 +51,8 @@ struct cachedPlayer
 };
 
 // Per IP, across reconnects: from the 5th failed admin login, that IP's admin logins are refused for 60 s, doubling
-// with each further failure up to an hour (rate limiting per NIST SP 800-63B-4, ADR 0038). `now` is Unix seconds.
+// with each failure after a lock up to an hour (rate limiting per NIST SP 800-63B-4, ADR 0038). An IP is forgotten
+// after MAX_LOCK without failures or lock. Attempts while locked are refused, not counted. `now` is Unix seconds.
 class AdminLockout
 {
 public:
@@ -66,18 +67,19 @@ public:
 	// Returns the seconds the IP is now locked for, 0 if not
 	long long failed(const std::string & ip, long long now)
 	{
-		for (auto it = entries.begin(); it != entries.end();) // forget IPs whose lock ran out
-			it = it->second.until != 0 && it->second.until <= now ? entries.erase(it) : std::next(it);
+		for (auto it = entries.begin(); it != entries.end();) // forget IPs quiet for MAX_LOCK
+			it = now - it->second.quietFrom > MAX_LOCK ? entries.erase(it) : std::next(it);
 		Entry & e = entries[ip];
+		e.quietFrom = now;
 		if (++e.fails < FREE_FAILURES) return 0;
 		const long long lock = std::min(FIRST_LOCK << std::min(e.fails - FREE_FAILURES, 6), MAX_LOCK);
-		e.until = now + lock;
+		e.until = e.quietFrom = now + lock;
 		return lock;
 	}
 	void succeeded(const std::string & ip) { entries.erase(ip); }
 
 private:
-	struct Entry { int fails = 0; long long until = 0; };
+	struct Entry { int fails = 0; long long until = 0, quietFrom = 0; };
 	std::map<std::string, Entry> entries;
 };
 

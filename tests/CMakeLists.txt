@@ -1,5 +1,6 @@
 add_executable(test_netpacket test_netpacket.cpp)
-target_include_directories(test_netpacket PRIVATE ${CMAKE_SOURCE_DIR}/game/src ${CMAKE_SOURCE_DIR}/engine/babonet/include ${CMAKE_SOURCE_DIR}/engine/credentials/include)
+target_include_directories(test_netpacket PRIVATE ${CMAKE_SOURCE_DIR}/game/src ${CMAKE_SOURCE_DIR}/engine/babonet/include)
+target_link_libraries(test_netpacket PRIVATE credentials)
 bv2_target_defaults(test_netpacket)
 add_test(NAME netpacket COMMAND test_netpacket)
 
@@ -110,7 +111,8 @@ if(TARGET bv2server_lib)
 
   # Corpus (tests/corpus/<type>/*.bin): gen_corpus writes valid.bin per type; replay runs every file except crash-*.
   add_executable(gen_corpus gen_corpus.cpp)
-  target_include_directories(gen_corpus PRIVATE ${CMAKE_SOURCE_DIR}/game/src ${CMAKE_SOURCE_DIR}/engine/babonet/include ${CMAKE_SOURCE_DIR}/engine/credentials/include)
+  target_include_directories(gen_corpus PRIVATE ${CMAKE_SOURCE_DIR}/game/src ${CMAKE_SOURCE_DIR}/engine/babonet/include)
+  target_link_libraries(gen_corpus PRIVATE credentials)
   bv2_target_defaults(gen_corpus)
   add_executable(test_replay test_replay.cpp)
   target_link_libraries(test_replay PRIVATE bv2_server_harness)

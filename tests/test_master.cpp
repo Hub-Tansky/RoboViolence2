@@ -41,7 +41,7 @@ static int failures = 0;
 
 static const char * BAN_PASS = "b4nTest-long-enough";
 
-// As game/src/Console.cpp signs bans
+// The ban protocol as game/src/Console.cpp stamps and signs it, spelled out here on purpose so the test pins it
 template <class Packet> static void sign(Packet & packet, const char * password, uint32_t time)
 {
 	packet.Time = time;

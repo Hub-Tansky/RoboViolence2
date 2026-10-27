@@ -96,7 +96,8 @@ int main(int, char ** argv)
 	harness::tick();
 	CHECK(!accepted(d));
 
-	// The backoff with a fake clock: 4 free failures, then 60 s doubling per failure up to an hour; expired IPs go
+	// The backoff with a fake clock, as the server drives it (no failed() while locked): 4 free failures, then 60 s,
+	// and each failure after a lock doubles it up to an hour; an hour without failures forgets the IP
 	AdminLockout lockout;
 	long long now = 1000;
 	for (int i = 0; i < 4; ++i) CHECK(lockout.failed("192.0.2.1", now) == 0);
@@ -104,9 +105,15 @@ int main(int, char ** argv)
 	for (long long expected : {60, 120, 240, 480, 960, 1920, 3600, 3600})
 	{
 		CHECK(lockout.failed("192.0.2.1", now) == expected);
-		CHECK(lockout.locked("192.0.2.1", now + expected - 1) && !lockout.locked("192.0.2.1", now + expected));
+		CHECK(lockout.locked("192.0.2.1", now + expected - 1));
+		now += expected;
+		CHECK(!lockout.locked("192.0.2.1", now));
 	}
 	CHECK(!lockout.locked("192.0.2.2", now));
+	now += AdminLockout::MAX_LOCK + 1;
+	CHECK(lockout.failed("192.0.2.1", now) == 0); // forgotten: free failures again
+	for (int i = 0; i < 3; ++i) lockout.failed("192.0.2.1", now);
+	CHECK(lockout.failed("192.0.2.1", now) == 60);
 	lockout.succeeded("192.0.2.1");
 	CHECK(!lockout.locked("192.0.2.1", now));
 
