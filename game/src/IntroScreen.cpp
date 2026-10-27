@@ -78,7 +78,7 @@ CVector2i IntroScreen::beginFrame()
 		glViewport((GLint)((res[0] - res[1]*1.333f)/2.0f), 0, (GLsizei)(res[1]*1.333f), (GLsizei)res[1]);
 	else
 		glViewport(0, 0, res[0], res[1]);
-	dkglSetProjection(60, 1, 50, (float)res[1]*1.333f, (float)res[1]);
+	dkglSetProjection(60, 1, 50, viewAspect(), 1);
 
 	// Per-frame default state
 	glEnable(GL_DEPTH_TEST);
@@ -86,6 +86,16 @@ CVector2i IntroScreen::beginFrame()
 	glDisable(GL_TEXTURE_2D);
 	glColor3f(1,1,1);
 	return res;
+}
+
+
+
+float IntroScreen::viewAspect()
+{
+	CVector2i res = dkwGetResolution();
+	if (gameVar.r_widescreen > 1 || res[1] <= 0)
+		return 1.333f;
+	return (float)res[0] / (float)res[1];
 }
 
 

@@ -69,8 +69,7 @@ void Game::render()
 				{
 					if (thisPlayer->scopeMode == true)
 					{
-						CVector2i res = dkwGetResolution();
-						dkglSetProjection(80, .1f, 50, (float)res[1]*1.333f, (float)res[1]);
+						dkglSetProjection(80, .1f, 50, IntroScreen::viewAspect(), 1);
 						gluLookAt(
 							thisPlayer->currentCF.position[0], 
 							thisPlayer->currentCF.position[1], 
@@ -84,8 +83,7 @@ void Game::render()
 			}
 			if (map->introAnim < map->introAnimLenght && map->dko_cam)
 			{
-				CVector2i res = dkwGetResolution();
-				dkglSetProjection(50, .1f, 1000, (float)res[0], (float)res[1]);
+				dkglSetProjection(50, .1f, 1000, IntroScreen::viewAspect(), 1);
 				CVector3f camPos;
 				CVector3f camTarget;
 				dkoGetDummyPosition("dum_cam", map->dko_cam, camPos.s, (short)map->introAnim);
