@@ -1,5 +1,5 @@
 // A player's IP stays on the server: the player info relayed to everyone and the player list a new client gets carry
-// no IP (website/privacy.html), while the server keeps it for bans.
+// no IP (https://roboviolence.com/privacy.html), while the server keeps it for bans.
 #include "server_harness.h"
 
 #include "Game.h"
