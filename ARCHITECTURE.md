@@ -55,8 +55,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `AGENTS.md` | Canonical agent and contributor instructions; work tracking in the GitHub Project |
 | `ARCHITECTURE.md` | This file: summary and file inventory |
 | `CMakeLists.txt` | Root CMake project: options, runtime layout, placeholder content, subdirectories, install layout (binaries, `share/bv2/main` as `runtime/main` holds it, `.desktop`, icons; `bv2master` in component `master`), which the `.deb` packages |
-| `CMakePresets.json` | Presets: linux-x64, macos-arm64, win-x64-msvc (Debug), -asan and -release variants (Ninja); macOS uses the overlay triplet in `triplets/` |
-| `triplets/arm64-osx.cmake` | vcpkg overlay triplet: macOS arm64 ports built for macOS 12 (PNS-26) |
+| `CMakePresets.json` | Presets: linux-x64, macos-arm64, win-x64-msvc (Debug), -asan and -release variants (Ninja); macOS uses the overlay triplet in `tools/vcpkg-triplets/` |
 | `LICENSE.txt` | GPLv3 text (code only) |
 | `README.md` | Project overview, fork and asset-removal statement |
 | `REVIEW.md` | Definition of done: `tools/review.sh` checks, reviewer checklist, defined terms, forbidden shortcuts, fresh-context PR review (`.claude/agents/`) and its record in the PR description |
@@ -96,7 +95,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `packaging/docker/compose.example.yml` | Compose example: master, CTF (3333) and TDM (3334) game servers and the admin TLS proxy on one host, secrets from an env file outside the repo; `BV2_IMAGE_TAG` pins both images to a commit |
 | `packaging/windows/bv2.manifest` | Windows manifest for `bv2`, `bv2dedicated` and `bv2master`: PerMonitorV2 DPI, UTF-8 code page, Windows 10/11 |
 | `packaging/windows/bv2.rc.in` | Windows resource script template: embeds `packaging/icons/roboviolence2.ico` |
-| `tests/CMakeLists.txt` | ctest targets: netPacket, config, fileio, credentials, join password, admin login, admin API, babonet large message, the two `SqlStatement.h` copies identical, crash fixes, validator, missing music (client builds), app icon files and wiring, the built-in window icon (Linux client builds), the hicolor install (Linux), the `.deb` build (Linux), dedicated-server smoke, in-process server harness (`bv2server_lib` + fake babonet), packet hygiene, corpus replay, crash-input tests for `crash-*.bin` under ASan (none at present), master server, autotest runner and (with Xvfb on Linux, or on macOS) the client on autotest scripts; with Xvfb on Linux the e2e scenarios (`e2e_*`) and screenshots (`screenshot_*`); on Windows also the non-ASCII install path smoke and the no-VC++-runtime-DLL check |
+| `tests/CMakeLists.txt` | ctest targets: netPacket, config, fileio, credentials, join password, admin login, admin API, babonet large message, babonet ping with the LAN port taken, the two `SqlStatement.h` copies identical, crash fixes, validator, missing music (client builds), app icon files and wiring, the built-in window icon (Linux client builds), the hicolor install (Linux), the `.deb` build (Linux), dedicated-server smoke, in-process server harness (`bv2server_lib` + fake babonet), packet hygiene, corpus replay, crash-input tests for `crash-*.bin` under ASan (none at present), master server, autotest runner and (with Xvfb on Linux, or on macOS) the client on autotest scripts; with Xvfb on Linux the e2e scenarios (`e2e_*`) and screenshots (`screenshot_*`); on Windows also the non-ASCII install path smoke and the no-VC++-runtime-DLL check |
 | `tests/check_windows_deps.py` | Windows: fails if `bv2`, `bv2dedicated` or `bv2master` needs a Visual C++ runtime DLL |
 | `tests/corpus/clsv_admin_request/valid.bin` | Replay corpus: valid `clsv_admin_request` payload (`gen_corpus`) |
 | `tests/corpus/clsv_gameversion_accepted/valid.bin` | Replay corpus: valid `clsv_gameversion_accepted` payload (`gen_corpus`) |
@@ -148,6 +147,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/test_admin_login.cpp` | Step 10: admin login only with HMACs over the connection's challenge; no user, password or MD5 on the wire |
 | `tests/test_autotest.cpp` | Phase T3: autotest runner without a window: parsing, commands, waits, one match per expect, fail, timeout and early-quit reports (ADR 0025) |
 | `tests/test_babonet.cpp` | R7: a 10000-byte message over a loopback babonet connection arrives over several reads and intact |
+| `tests/test_babonet_ping.cpp` | PNS-56: a server-browser ping to a game server on this host is answered within 1 s while another process holds babonet's LAN port |
 | `tests/test_browsable_game.cpp` | A server browser row owns a copy of its lobby game's row (the lobby frees its own) |
 | `tests/test_cstring.cpp` | Phase C step 5: one-argument `CString` is text (arrays, `char*`, literals, direct and implicit); two or more arguments format (ADR 0021) |
 | `tests/test_config.cpp` | dksvar config layering, transient values not saved, secrets masked, `dksvarGetValue` |
@@ -223,7 +223,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `.github/workflows/codeql.yml` | CodeQL: `c-cpp` (manual linux-x64 build of the three executables) and `actions`; push, PR, weekly; alerts under `build/` (vcpkg headers) filtered out |
 | `.github/workflows/dependency-graph.yml` | Submits resolved vcpkg ports to the dependency graph on push to `main` |
 | `.github/workflows/osv-vcpkg.yml` | Weekly OSV check of the vcpkg ports by upstream commit (`tools/osv-vcpkg.py`); not required |
-| `.github/workflows/containers.yml` | CI: builds both server images, checks non-root, runs the compose example (healthy, both passworded servers listed by the master under one `BV2_PUBLIC_ADDRESS`), checks a remote `status` of CTF and TDM over TLS and `/deployed`, pushes multi-arch `:<sha>` and `:latest` to GHCR from `main` and weekly |
+| `.github/workflows/containers.yml` | CI: builds both server images, checks non-root, runs the compose example (healthy, both passworded servers listed by the master under one `BV2_PUBLIC_ADDRESS`), checks both answer the server browser's UDP ping, checks a remote `status` of CTF and TDM over TLS and `/deployed`, pushes multi-arch `:<sha>` and `:latest` to GHCR from `main` and weekly |
 
 ### `config`
 
@@ -745,4 +745,5 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tools/review.sh` | Review gate (REVIEW.md section 1): all checks, scope against the PR's Allowed paths, anti-gaming, review gate on the PR's review record; `--full` builds and tests |
 | `tools/setup-dev.ps1` | Activates hooks, checks tools (Windows) |
 | `tools/setup-dev.sh` | Activates hooks, checks tools (Unix); prints the apt line for building and the package names for running a package |
+| `tools/vcpkg-triplets/arm64-osx.cmake` | vcpkg overlay triplet: macOS arm64 ports built for macOS 12 (PNS-26) |
 

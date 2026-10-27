@@ -8,11 +8,11 @@ The host's address, provider and access go in the owner's private Obsidian vault
 
 ## Needs
 
-Linux (amd64 or arm64) with Docker and the compose plugin, `curl`, `jq`; inbound TCP 3333, 3334, 10207 and the admin port. For the Mac agent's `staging-connect` the host needs a public DNS name (a free dynamic-DNS name works) and `BV2_ADMIN_PORT=443`, so Caddy gets a real certificate. No GitHub token: the repo, its Actions API and the images are public.
+Linux (amd64 or arm64) with Docker and the compose plugin, `curl`, `jq`; inbound TCP 3333, 3334, 10207 and the admin port, and UDP 3333, 3334 (server browser ping). For the Mac agent's `staging-connect` the host needs a public DNS name (a free dynamic-DNS name works) and `BV2_ADMIN_PORT=443`, so Caddy gets a real certificate. No GitHub token: the repo, its Actions API and the images are public.
 
 ## Install
 
-On a fresh Ubuntu 24.04 VM, paste [cloud-init.yml](cloud-init.yml) as the user data. The VM needs a public IPv4 at first boot, or the install has no network. It does the steps below except the env file and cron; once the DNS name points at the host, `sudo rv2-staging-setup <public name>` writes the env file (generated password, the host's public IP as `BV2_PUBLIC_ADDRESS`), installs the cron line and runs the first deploy. Open TCP 443, 3333, 3334 and 10207 in the provider's firewall.
+On a fresh Ubuntu 24.04 VM, paste [cloud-init.yml](cloud-init.yml) as the user data. The VM needs a public IPv4 at first boot, or the install has no network. It does the steps below except the env file and cron; once the DNS name points at the host, `sudo rv2-staging-setup <public name>` writes the env file (generated password, the host's public IP as `BV2_PUBLIC_ADDRESS`), installs the cron line and runs the first deploy. Open TCP 443, 3333, 3334, 10207 and UDP 3333, 3334 in the provider's firewall.
 
 By hand:
 

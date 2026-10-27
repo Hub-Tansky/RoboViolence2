@@ -174,6 +174,12 @@ bv2_target_defaults(test_babonet)
 add_test(NAME babonet_large_message COMMAND test_babonet)
 set_tests_properties(babonet_large_message PROPERTIES TIMEOUT 60)
 
+add_executable(test_babonet_ping test_babonet_ping.cpp)
+target_link_libraries(test_babonet_ping PRIVATE babonet)
+bv2_target_defaults(test_babonet_ping)
+add_test(NAME babonet_ping_lan_port_taken COMMAND test_babonet_ping)
+set_tests_properties(babonet_ping_lan_port_taken PROPERTIES TIMEOUT 60 SKIP_RETURN_CODE 77)
+
 add_executable(test_credentials test_credentials.cpp ${CMAKE_SOURCE_DIR}/game/src/Credentials.cpp)
 target_include_directories(test_credentials PRIVATE ${CMAKE_SOURCE_DIR}/game/src)
 target_link_libraries(test_credentials PRIVATE unofficial-sodium::sodium)

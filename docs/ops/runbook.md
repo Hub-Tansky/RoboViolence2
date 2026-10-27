@@ -6,7 +6,7 @@ Hosting the game server and the master server as containers (Phase B step 11). I
 
 | Image | Process | Port | Volume |
 |---|---|---|---|
-| `ghcr.io/hub-tansky/roboviolence2-server` | `bv2dedicated CTF` (service `server`), `bv2dedicated TDM` (service `tdm`) | TCP 3333 (CTF), 3334 (TDM) | `/var/lib/bv2`: saved config, `bv2.db`, logs, downloaded maps; one volume per server (`server-data`, `tdm-data`) |
+| `ghcr.io/hub-tansky/roboviolence2-server` | `bv2dedicated CTF` (service `server`), `bv2dedicated TDM` (service `tdm`) | TCP and UDP 3333 (CTF), 3334 (TDM) | `/var/lib/bv2`: saved config, `bv2.db`, logs, downloaded maps; one volume per server (`server-data`, `tdm-data`) |
 | `ghcr.io/hub-tansky/roboviolence2-master` | `bv2master` | TCP 10207 | `/var/lib/bv2`: `master.db` (bans), `web.db` (game list), seeded on first start |
 
 - CI pushes multi-arch (amd64, arm64) `latest` and the commit SHA from `main`. GHCR packages start private: make them public, or `docker login ghcr.io` with a token that can read packages.
@@ -56,7 +56,7 @@ From the repository root (or the folder holding the compose file):
 
 ## Ports
 
-Open inbound TCP 3333 (CTF), TCP 3334 (TDM) and TCP 10207 (master) on the host firewall; TCP `BV2_ADMIN_PORT` only for remote admins (8443; 443 for a public name). All game traffic is TCP. Never publish the admin API port (8080).
+Open inbound TCP and UDP 3333 (CTF), TCP and UDP 3334 (TDM) and TCP 10207 (master) on the host firewall; TCP `BV2_ADMIN_PORT` only for remote admins (8443; 443 for a public name). Game traffic is TCP; UDP on the game port only answers the server browser's ping (without it the browser shows `???`). Never publish the admin API port (8080).
 
 ## Remote admin
 
@@ -111,7 +111,7 @@ Production runs the same compose file and the same deploy agent as staging ([too
 - **Env file.** As for staging, plus `BV2_MASTER_BAN_PASS`; `BV2_ADMIN_HOST` is the public admin name and `BV2_ADMIN_PORT=443`; `BV2_PUBLIC_ADDRESS` is the host's IPv4. Mode 600, only on the host.
 - **The agent itself** is the `deploy.sh` downloaded at install. Update it deliberately (download it again from the commit you deploy) when `tools/staging/deploy.sh` changes.
 
-Install (a new or failover host): the staging README's [By hand](../../tools/staging/README.md#install) steps with `rv2-prod` in place of `rv2-staging` in every path, `<full sha>` in place of `main` in the download URL, and no cron line (no `cloud-init.yml`, no `rv2-staging-setup`: both install cron and deploy the newest `main`). Open TCP 443, 3333, 3334 and 10207. Deploy with `RV2_DEPLOY_LABEL=prod /opt/rv2-prod/deploy.sh --sha <full sha>` (a one-line wrapper holding that prefix is fine).
+Install (a new or failover host): the staging README's [By hand](../../tools/staging/README.md#install) steps with `rv2-prod` in place of `rv2-staging` in every path, `<full sha>` in place of `main` in the download URL, and no cron line (no `cloud-init.yml`, no `rv2-staging-setup`: both install cron and deploy the newest `main`). Open TCP 443, 3333, 3334, 10207 and UDP 3333, 3334. Deploy with `RV2_DEPLOY_LABEL=prod /opt/rv2-prod/deploy.sh --sha <full sha>` (a one-line wrapper holding that prefix is fine).
 
 | Task | Do |
 |---|---|
@@ -126,4 +126,4 @@ Health: install `tools/staging/health-watch.sh` from the same commit as `deploy.
 
 ## Without compose
 
-`docker run` needs `--init` (stop signals) and `-it` (the console): `docker run -d -it --init -p 3333:3333 -v bv2-server:/var/lib/bv2 ghcr.io/hub-tansky/roboviolence2-server`.
+`docker run` needs `--init` (stop signals) and `-it` (the console): `docker run -d -it --init -p 3333:3333 -p 3333:3333/udp -v bv2-server:/var/lib/bv2 ghcr.io/hub-tansky/roboviolence2-server`.
