@@ -110,6 +110,7 @@ jobs:
           # v0.* and v*-<suffix> tags are pre-releases
           pre=$([[ "$GITHUB_REF_NAME" == v0.* || "$GITHUB_REF_NAME" == *-* ]] && echo --prerelease || true)
           echo "PRERELEASE_FLAG=$pre" >> "$GITHUB_ENV"
+          # Asset names are read by Hub-Tansky/rv2-website (site.js, install.html; ADR 0036) and packaging/discord_release_post.py
           gh release create "$GITHUB_REF_NAME" --title "Robo Violence 2 $GITHUB_REF_NAME" --generate-notes $pre \
             dist/roboviolence2-win-x64-msvc-setup.exe dist/roboviolence2-macos-arm64.dmg \
             dist/roboviolence2-macos-arm64.zip dist/roboviolence2-linux-x64.tar.gz dist/roboviolence2-linux-x64.deb \

@@ -1,4 +1,4 @@
-// Personal data on a server's disk expires (website/privacy.html, ADR 0034): bans after sv_banDays, with 0.0.1's
+// Personal data on a server's disk expires (https://roboviolence.com/privacy.html, ADR 0034): bans after sv_banDays, with 0.0.1's
 // binary banlist moved once, and admin-audit.log lines after AUDIT_DAYS.
 #include "Retention.h"
 

@@ -7,6 +7,7 @@ One file per non-obvious decision: `NNNN-kebab-title.md`, numbered in order, nev
 - An accepted ADR is never edited except for its **Status** line. To change a decision, write a new ADR and mark the old one `Superseded by NNNN`.
 - Keep it under one screen. Cite code as `path:line`; link the Project item, issue, PR or file it affects.
 - Add every new ADR to the index below and to the `ARCHITECTURE.md` inventory.
+- An ADR moved to another repository keeps its number here: its index row links the file there with status `Moved to <repo> (NNNN)`, NNNN being the ADR that moved it.
 
 ## Format
 
@@ -60,9 +61,11 @@ What we do, in one or two sentences.
 | [0026](0026-screenshot-goldens.md) | Screenshot goldens are Linux llvmpipe frames compared within a tolerance | Accepted |
 | [0027](0027-several-game-servers-per-host.md) | Several game servers on one host share one image, one env file and one admin proxy | Accepted |
 | [0028](0028-built-in-public-master.md) | The client and server ship with the public master built in | Accepted |
-| [0029](0029-static-website-on-github-pages.md) | The website is static HTML on GitHub Pages; downloads come from the GitHub releases API | Accepted |
+| [0029](https://github.com/Hub-Tansky/rv2-website/blob/main/docs/decisions/0029-static-website-on-github-pages.md) | The website is static HTML on GitHub Pages; downloads come from the GitHub releases API | Moved to rv2-website (0036) |
 | [0030](0030-app-icon-and-dmg-layout.md) | One committed application icon for every OS; the .dmg shows only the app and Applications | Accepted |
 | [0031](0031-linux-deb-package.md) | A .deb with the client and bv2dedicated beside the Linux .tar.gz | Accepted |
 | [0032](0032-discord-release-post.md) | The release job posts each release to Discord through a webhook | Accepted |
 | [0033](0033-first-run-dialog-recommends-bv2-zip.md) | The first-run data dialog recommends the original BV2 zip and can open it | Accepted |
 | [0034](0034-player-data-retention-and-privacy-policy.md) | Player IPs stay on the server, personal data on disk expires, and a privacy policy says so | Accepted |
+| [0035](https://github.com/Hub-Tansky/rv2-website/blob/main/docs/decisions/0035-website-tailwind-install-page-agent-files.md) | The website uses Tailwind from its CDN, has a separate install guide and publishes files for AI agents | Moved to rv2-website (0036) |
+| [0036](0036-website-in-rv2-website-repository.md) | The website lives in Hub-Tansky/rv2-website | Accepted |

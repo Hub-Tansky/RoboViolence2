@@ -19,10 +19,10 @@ Robo Violence 2: unofficial fork of BaboViolent 2, a top-down multiplayer shoote
 | Assets | The original assets are removed and blocked by hash (`tools/check-original-assets.py`). Only `content/languages/` (English strings, template, guide) and `content/LaunchScript/` remain; the build generates placeholders (`tools/gen-placeholder-content.py`). |
 | Encoding | UTF-8 without BOM, LF; `tools/check-encoding.py`. Some comments hold U+FFFD where upstream lost accents. |
 | Supply chain | Dependency graph fed by vcpkg (`dependency-graph.yml`, on push to `main`); Dependabot alerts and security updates on; Dependabot version updates for GitHub Actions (`.github/dependabot.yml`); CodeQL `c-cpp` and `actions` (`codeql.yml`, not required). Dependabot and OSV can't read vcpkg purls; `osv-vcpkg.yml` (weekly) queries OSV by each port's upstream commit (`tools/osv-vcpkg.py`). Bump the vcpkg baseline monthly, or sooner when it reports a port. |
-| Website | `website/`: static pages for roboviolence.com on GitHub Pages (`pages.yml`, [ADR 0029](docs/decisions/0029-static-website-on-github-pages.md)). |
+| Website | roboviolence.com is built and deployed from [Hub-Tansky/rv2-website](https://github.com/Hub-Tansky/rv2-website) ([ADR 0036](docs/decisions/0036-website-in-rv2-website-repository.md)); its tests read the release file names from `build.yml`. |
 | Hosting | Server images from `packaging/docker/Dockerfile` (GHCR on `main`), runbook [docs/ops/runbook.md](docs/ops/runbook.md). |
 | Known defects | [docs/analysis/KEY_QUESTIONS.md](https://github.com/Hub-Tansky/RoboViolence2/blob/fc0aff7c5aa946406c7c110e8e7c2d972a7daeb8/docs/analysis/KEY_QUESTIONS.md). |
-| Decisions | [docs/decisions/README.md](docs/decisions/README.md): 0001 Ninja, 0002 libcurl compiled out, 0003 OpenGL 2.1 kept, 0004 project name (superseded by 0008), 0005 `main/` data root, 0006 platform layer, 0007 data root, pref dir and config layers, 0008 display name "Robo Violence 2", 0009 internal renaming, 0010 BV2 asset compatibility and GUI freeze, 0011 gettext PO translations, 0012 Windows 10 22H2 minimum, 0013 rulesets, 0014 libsodium HMAC, 0015 admin HTTP API, 0016 player data lookup and package content, 0017 playtest pull agent, 0018 staging pull deploy, 0019 in-game name and fork credits, 0020 package and release format, 0021 one-argument CString is text, 0022 advertised server address, 0023 step review subagent in the repo, 0024 GitHub Project is the backlog, 0025 client autotest mode, 0026 screenshot goldens, 0029 static website on GitHub Pages, 0033 first-run data dialog recommends the BV2 zip, 0034 player data retention and privacy policy. |
+| Decisions | [docs/decisions/README.md](docs/decisions/README.md): 0001 Ninja, 0002 libcurl compiled out, 0003 OpenGL 2.1 kept, 0004 project name (superseded by 0008), 0005 `main/` data root, 0006 platform layer, 0007 data root, pref dir and config layers, 0008 display name "Robo Violence 2", 0009 internal renaming, 0010 BV2 asset compatibility and GUI freeze, 0011 gettext PO translations, 0012 Windows 10 22H2 minimum, 0013 rulesets, 0014 libsodium HMAC, 0015 admin HTTP API, 0016 player data lookup and package content, 0017 playtest pull agent, 0018 staging pull deploy, 0019 in-game name and fork credits, 0020 package and release format, 0021 one-argument CString is text, 0022 advertised server address, 0023 step review subagent in the repo, 0024 GitHub Project is the backlog, 0025 client autotest mode, 0026 screenshot goldens, 0029 static website (moved to rv2-website), 0033 first-run data dialog recommends the BV2 zip, 0034 player data retention and privacy policy, 0035 website Tailwind and agent files (moved to rv2-website), 0036 website in rv2-website. |
 
 ### Open items
 
@@ -179,7 +179,6 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/test_staging_deploy.sh` | Phase T step 2: staging deploy helpers: main-only run selection, `/status` player count, CTF and TDM player counts and verify, failures per commit, infrastructure stages, env-file mode and readonly repository (ctest `staging_deploy`) |
 | `tests/test_health_watch.sh` | Container health watcher: which container states are problems, missing services from `GAME_SERVERS`, Docker not answering, two-run confirmation before an alert or recovery, a whole run against a stub `docker`, no check during a deploy but a stale lock ignored (ctest `health_watch`, Unix) |
 | `tests/test_playtest_agent.sh` | Phase T step 1: playtest agent helpers: main-only run selection (fork PR from `main` rejected), artifact digest, attempt limit, env-file mode and no export, launch script map swap (ctest `playtest_agent`, Unix with `jq`) |
-| `tests/website/site.test.mjs` | Website: installer per OS against the asset names in `build.yml`, OS detection, newest release incl. pre-releases, button offer and fallback, install text names the release files, no API call off the landing page, identical menu and footer on every page, privacy contact assembled in the browser and the policy linked from every footer (`node --test`, `pages.yml`) |
 | `tools/check-content-case.py` | Fails when a literal `main/...` path differs from a real file name only by case |
 | `vcpkg.json` | vcpkg manifest (sqlite3, curl; Step 3 completes it) |
 
@@ -224,7 +223,6 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `.github/workflows/dependency-graph.yml` | Submits resolved vcpkg ports to the dependency graph on push to `main` |
 | `.github/workflows/osv-vcpkg.yml` | Weekly OSV check of the vcpkg ports by upstream commit (`tools/osv-vcpkg.py`); not required |
 | `.github/workflows/containers.yml` | CI: builds both server images, checks non-root, runs the compose example (healthy, both passworded servers listed by the master under one `BV2_PUBLIC_ADDRESS`), checks a remote `status` of CTF and TDM over TLS and `/deployed`, pushes multi-arch `:<sha>` and `:latest` to GHCR from `main` and weekly |
-| `.github/workflows/pages.yml` | Website: `node --test tests/website/site.test.mjs` on PRs touching `website/` or `build.yml`; deploys `website/` to GitHub Pages from `main` (ADR 0029) |
 
 ### `config`
 
@@ -307,12 +305,12 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/decisions/0026-screenshot-goldens.md` | ADR: Linux llvmpipe screenshot goldens compared within a tolerance; the `screenshot`, `menutab` and `scoreboard` commands |
 | `docs/decisions/0027-several-game-servers-per-host.md` | ADR: several game servers per host (CTF, TDM): one image, `BV2_HEALTH_PORT`, one env file, admin APIs at `/` and `/tdm/`, deploy waits for both |
 | `docs/decisions/0028-built-in-public-master.md` | ADR: `cl_masterServers` defaults to `master.roboviolence.com:10207`; `bv2.cfg` neither saves nor sets it; `none` turns it off |
-| `docs/decisions/0029-static-website-on-github-pages.md` | ADR: website is static HTML on GitHub Pages; OS-detected download from the GitHub releases API, pre-releases included |
 | `docs/decisions/0030-app-icon-and-dmg-layout.md` | ADR: committed application icon per OS (exe, bundle, Linux window icon); `.dmg` with only the app and Applications |
 | `docs/decisions/0031-linux-deb-package.md` | ADR: Linux `.deb` with the client and `bv2dedicated` in `/usr/games`, beside the `.tar.gz`; reverses ADR 0020's rejection |
 | `docs/decisions/0032-discord-release-post.md` | ADR: the release job posts each release to Discord `#announcements` through a webhook secret, pinging only the opt-in role |
 | `docs/decisions/0033-first-run-dialog-recommends-bv2-zip.md` | ADR: the first-run data dialog recommends the original BV2 zip, shows its URL and the folder to choose, and has a Download button (amends 0016) |
 | `docs/decisions/0034-player-data-retention-and-privacy-policy.md` | ADR: the server never relays player IPs, bans (`banlist.tsv`) expire after `sv_banDays`, `admin-audit.log` after 90 days; privacy policy page, installer link and opt-out |
+| `docs/decisions/0036-website-in-rv2-website-repository.md` | ADR: the website, its tests, tooling and Pages workflow live in Hub-Tansky/rv2-website; its tests read `build.yml` from here |
 | `docs/decisions/README.md` | ADR format and index |
 
 ### `docs/ops`
@@ -748,15 +746,3 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tools/setup-dev.sh` | Activates hooks, checks tools (Unix); prints the apt line for building and the package names for running a package |
 | `tools/vcpkg-triplets/arm64-osx.cmake` | vcpkg overlay triplet: macOS arm64 ports built for macOS 12 (PNS-26) |
 
-### `website`
-
-| path | purpose |
-|---|---|
-| `website/index.html` | Landing page: hero, OS-detected download button, installation instructions, downloads list, status hook (ADR 0029) |
-| `website/about.html` | What the game is; credits to BaboViolent 2 |
-| `website/privacy.html` | Privacy policy (GDPR): data processed by the game, servers and website, legal basis, hosting, retention, rights (ADR 0034) |
-| `website/server.html` | Hosting your own game and master server (summary of `docs/ops/runbook.md`) |
-| `website/site.js` | Download button and list from the GitHub releases API, Discord invite constant, contact address assembled from `data-mail` attributes |
-| `website/style.css` | Dark theme, layout |
-| `website/img/hero.webp` | Placeholder hero picture |
-| `website/img/favicon.svg` | Site icon |
