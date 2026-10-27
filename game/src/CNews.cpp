@@ -20,33 +20,39 @@
 
 #include "CNews.h"
 #include <string>
+#include <vector>
 
 namespace
 {
-	// Greedy word wrap of text to width pixels at size with the bound font, keeping its own line breaks
-	std::string wrapText(float size, const char * text, float width)
+	// Greedy word wrap of text to width pixels at size in font, one entry per line; the text's own line breaks stay
+	std::vector<std::string> wrapText(unsigned int font, float size, const std::string & text, float width)
 	{
-		std::string wrapped, line, word;
-		for (const char * c = text; ; ++c)
+		dkfBindFont(font);
+		std::vector<std::string> lines;
+		size_t start = 0;
+		while (true)
 		{
-			if (*c != ' ' && *c != '\n' && *c != '\0')
+			size_t end = text.find('\n', start);
+			std::string paragraph = text.substr(start, end == std::string::npos ? std::string::npos : end - start);
+			std::string line;
+			size_t wordStart = 0;
+			while (wordStart <= paragraph.size())
 			{
-				word += *c;
-				continue;
+				size_t wordEnd = paragraph.find(' ', wordStart);
+				if (wordEnd == std::string::npos) wordEnd = paragraph.size();
+				std::string word = paragraph.substr(wordStart, wordEnd - wordStart);
+				std::string candidate = line.empty() ? word : line + " " + word;
+				if (!line.empty() && dkfGetStringWidth(size, &candidate[0]) > width)
+				{
+					lines.push_back(line);
+					candidate = word;
+				}
+				line = candidate;
+				wordStart = wordEnd + 1;
 			}
-			std::string candidate = line.empty() ? word : line + " " + word;
-			if (!line.empty() && dkfGetStringWidth(size, &candidate[0]) > width)
-			{
-				wrapped += line + "\n";
-				candidate = word;
-			}
-			line = candidate;
-			word.clear();
-			if (*c == ' ') continue;
-			wrapped += line;
-			if (*c == '\0') return wrapped;
-			wrapped += "\n";
-			line.clear();
+			lines.push_back(line);
+			if (end == std::string::npos) return lines;
+			start = end + 1;
 		}
 	}
 }
@@ -130,23 +136,32 @@ void CNews::Validate(CControl * control)
 void CNews::AddNews(const CString& title, const CString& author, const CString& content, const CString& date)
 {
 	const int width = 676;
+	const int labelInset = 3; // CControl::render draws text 3 px in from each side
 	const int bodySize = 20;
-	dkfBindFont(lst_news->font);
-	std::string body = wrapText((float)bodySize, content.s, (float)(width - 6)); // labels pad 3 px on each side
-	int bodyHeight = (int)dkfGetStringHeight((float)bodySize, &body[0]) + 6;
 
-	CControl* newsRow = new CControl(lst_news, CVector2i(10, 10), CVector2i(width, 45 + bodyHeight + 50), "", this, "LABEL");
+	CControl* newsRow = new CControl(lst_news, CVector2i(10, 10), CVector2i(width, 0), "", this, "LABEL");
+	int y = 5;
 
-	CControl* Title = new CControl(newsRow, CVector2i(0, 5), CVector2i(width,35), title, this, "LABEL");
+	CControl* Title = new CControl(newsRow, CVector2i(0, y), CVector2i(width,35), title, this, "LABEL");
 	Title->textSize = 35;
-	Title->textAlign = CONTROL_TEXTALIGN_TOPLEFT;
-	CControl* Content = new CControl(newsRow, CVector2i(0, 45), CVector2i(width,bodyHeight), body.c_str(), this, "LABEL");
-	Content->textSize = bodySize;
-	Content->textAlign = CONTROL_TEXTALIGN_TOPLEFT;
-	CControl* Author = new CControl(newsRow, CVector2i(0, 45 + bodyHeight + 5), CVector2i(width,20), CString("by %s", author.s), this, "LABEL");
+	Title->textAlign = CONTROL_TEXTALIGN_TOPCENTER;
+	y += 40;
+	// One label per line: a label's text goes through textColorLess, which holds 512 bytes
+	for (const std::string & line : wrapText(lst_news->font, (float)bodySize, content.s, (float)(width - 2 * labelInset)))
+	{
+		CControl* Line = new CControl(newsRow, CVector2i(0, y), CVector2i(width,bodySize), line.c_str(), this, "LABEL");
+		Line->textSize = bodySize;
+		y += bodySize;
+	}
+	y += 5;
+	CControl* Author = new CControl(newsRow, CVector2i(0, y), CVector2i(width,20), CString("by %s", author.s), this, "LABEL");
 	Author->textSize = 20;
-	CControl* Date = new CControl(newsRow, CVector2i(0, 45 + bodyHeight + 25), CVector2i(width,20), date, this, "LABEL");
+	y += 20;
+	CControl* Date = new CControl(newsRow, CVector2i(0, y), CVector2i(width,20), date, this, "LABEL");
 	Date->textSize = 20;
+	y += 25;
+
+	newsRow->size[1] = y;
 }
 
 #endif
