@@ -16,7 +16,7 @@ jobs:
       matrix:
         include:
           - { os: windows-2025, preset: win-x64-msvc }  # pinned (PNS-27): ADR 0012 names this image
-          - { os: macos-14, preset: macos-arm64 }
+          - { os: macos-15, preset: macos-arm64 }
           - { os: ubuntu-24.04, preset: linux-x64 }
     steps:
       - uses: actions/checkout@v7
@@ -199,7 +199,7 @@ jobs:
       matrix:
         include:
           - { os: windows-2025, preset: win-x64-msvc }
-          - { os: macos-14, preset: macos-arm64 }
+          - { os: macos-15, preset: macos-arm64 }
     defaults:
       run:
         shell: bash
