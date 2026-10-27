@@ -33,7 +33,7 @@ services:
   server: # CTF (the image's default launch script); its admin API at / on the proxy
     <<: *game-server
     build: { context: ../.., dockerfile: packaging/docker/Dockerfile, target: server }
-    ports: ["3333:3333/tcp"]
+    ports: ["3333:3333/tcp", "3333:3333/udp"] # UDP: the server browser's ping
     volumes: ["server-data:/var/lib/bv2"]
   tdm: # its admin API at /tdm/ on the proxy
     <<: *game-server
@@ -41,7 +41,7 @@ services:
     environment:
       <<: *game-env
       BV2_HEALTH_PORT: "3334" # sv_port in content/LaunchScript/TDM.cfg
-    ports: ["3334:3334/tcp"]
+    ports: ["3334:3334/tcp", "3334:3334/udp"]
     volumes: ["tdm-data:/var/lib/bv2"]
   admin-proxy:
     <<: *common
