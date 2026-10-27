@@ -9,11 +9,11 @@ Robo Violence 2: unofficial fork of BaboViolent 2, a top-down multiplayer shoote
 | Deliverables | `bv2` (client), `bv2dedicated` (headless server, `CONSOLE`) and `bv2master`. CI builds and tests all three on Windows, macOS and Linux; the client runs 10 s under xvfb (ASan). Real games on each OS: not yet verified (Phase B step 2). |
 | Build | CMake 3.25+, Ninja presets (`CMakePresets.json`), vcpkg manifest. Output in `build/<preset>/runtime/` ([ADR 0005](docs/decisions/0005-runtime-main-data-root.md)). |
 | Platforms | Targets: Linux x64, macOS 12+ arm64, Windows 10 22H2 or later x64 ([ADR 0012](docs/decisions/0012-windows-10-22h2-minimum.md)); Windows API level pinned to Windows 10 20H1 (`NTDDI_VERSION`). `engine/zeven/include/platform.h` defines `BV2_PLATFORM_*`, `BV2_POSIX`; CMake force-includes it. |
-| Modules | `game` (client, server, editor); `engine/babonet` networking (`bb_*`, `CThread` on `std::thread`); `engine/zeven` utilities (`zeven_core`: `dkc dksvar` + `CString/CVector/CMatrix`; `zeven_console`: no-op `dkt` for the server; `zeven_client`: `dkw dki dkgl dkt dkf dkp dks`); `engine/dko` model loader; `masterserver`. |
+| Modules | `game` (client, server, editor); `engine/babonet` networking (`bb_*`, `CThread` on `std::thread`); `engine/zeven` utilities (`zeven_core`: `dkc dksvar` + `CString/CVector/CMatrix`; `zeven_console`: no-op `dkt` for the server; `zeven_client`: `dkw dki dkgl dkt dkf dkp dks`); `engine/dko` model loader; `engine/credentials` password HMAC proofs (libsodium); `masterserver`. |
 | Dependencies | vcpkg (`vcpkg.json`, pinned baseline): sqlite3, libsodium (ADR 0014); feature `client`: sdl3, miniaudio, stb; feature `http`: curl (off, ADR 0002). Generated, committed: glad GL 2.1 (`engine/zeven/third_party/glad`). System: GLU. No libcurl or OpenSSL is linked by default. |
 | Platform layer | SDL3 window and input (`dkw`, `dki`), miniaudio (`dks`), glad ([ADR 0006](docs/decisions/0006-sdl3-miniaudio-glad-platform-layer.md)). One client `main()` for all OSes. |
 | Tick | Fixed 30 Hz: every `update(float delay)` gets `1/30`; "frames" are a time unit (30 = 1 s). |
-| Network | TCP, raw structs `memcpy`'d from `game/src/netPacket.h`. The server is authoritative for hits, damage, spawns, projectiles and flags; clients for their own movement. `playerID` (slot) differs from `babonetID` (connection). Protocol `GAME_VERSION_SV/CL` = 22100 (`game/src/Server.h:35`). Join and admin passwords are HMAC proofs over a per-connection challenge (`game/src/Credentials.h`, ADR 0014). |
+| Network | TCP, raw structs `memcpy`'d from `game/src/netPacket.h`. The server is authoritative for hits, damage, spawns, projectiles and flags; clients for their own movement. `playerID` (slot) differs from `babonetID` (connection). Protocol `GAME_VERSION_SV/CL` = 22100 (`game/src/Server.h:35`). Join and admin passwords are HMAC proofs over a per-connection challenge; master bans are HMAC-signed packets (`engine/credentials/include/Credentials.h`, ADR 0014, 0038). |
 | Variants | `CONSOLE` = headless server (explicit file list in `game/CMakeLists.txt`). Direct3D, non-Pro and VLD code were removed in Step 1. |
 | Config and secrets | Tracked: `config/*.example.cfg` with empty secrets, `content-seed/*.sql` for generated DBs. Real values stay local; gitleaks, hooks and CI enforce it ([config/README.md](config/README.md)). |
 | Assets | The original assets are removed and blocked by hash (`tools/check-original-assets.py`). Only `content/languages/` (English strings, template, guide) and `content/LaunchScript/` remain; the build generates placeholders (`tools/gen-placeholder-content.py`). |
@@ -371,6 +371,25 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `engine/babonet/src/md5class.cpp` | CMD5: MD5 hex-digest wrapper |
 | `engine/babonet/src/socket_compat.h` | send() with EINTR retry; SIGPIPE is ignored in bb_init |
 
+### `engine/credentials`
+
+| path | purpose |
+|---|---|
+| `engine/credentials/CMakeLists.txt` | Target credentials |
+| `engine/credentials/README.md` | Module README: credentials |
+
+### `engine/credentials/include`
+
+| path | purpose |
+|---|---|
+| `engine/credentials/include/Credentials.h` | Credential proofs: HMAC(password, label + nonce) for join and admin, signed packets for master bans, `MIN_SECRET_LENGTH` |
+
+### `engine/credentials/src`
+
+| path | purpose |
+|---|---|
+| `engine/credentials/src/Credentials.cpp` | HMAC-SHA256, nonces and constant-time checks (libsodium, ADR 0014, 0038) |
+
 ### `engine/dko`
 
 | path | purpose |
@@ -593,8 +612,6 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/ConnectFailed.h` | Dialog: connection failed |
 | `game/src/Console.cpp` | In-game console: commands, log, remote console; feeds console lines to a running autotest; `refreshgames` asks the master for the game list; `screenshot`, `menutab` and `scoreboard` for screenshot tests (ADR 0026) |
 | `game/src/Console.h` | In-game console: commands, log, remote console |
-| `game/src/Credentials.cpp` | HMAC-SHA256, nonces and constant-time checks for the join and admin passwords (libsodium, ADR 0014) |
-| `game/src/Credentials.h` | Credential proofs: the client answers the server's nonce with HMAC(password, label + nonce) |
 | `game/src/Control.cpp` | Menu control base class |
 | `game/src/Control.h` | Menu control base class |
 | `game/src/ControlListener.cpp` | Menu control listener interface |

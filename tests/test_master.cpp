@@ -3,7 +3,7 @@
 #include "SqlStatement.h"
 #include "cNetManager.h"
 
-#include <sodium.h>
+#include "Credentials.h"
 
 #ifdef _WIN32
 #include <winsock2.h>
@@ -41,15 +41,11 @@ static int failures = 0;
 
 static const char * BAN_PASS = "b4nTest-long-enough";
 
-// As game/src/Console.cpp signs bans: HMAC-SHA256 keyed by the ban password over the packet with Proof zeroed
+// As game/src/Console.cpp signs bans
 template <class Packet> static void sign(Packet & packet, const char * password, uint32_t time)
 {
 	packet.Time = time;
-	std::memset(packet.Proof, 0, sizeof(packet.Proof));
-	crypto_auth_hmacsha256_state state;
-	crypto_auth_hmacsha256_init(&state, (const unsigned char *)password, std::strlen(password));
-	crypto_auth_hmacsha256_update(&state, (const unsigned char *)&packet, sizeof(packet));
-	crypto_auth_hmacsha256_final(&state, packet.Proof);
+	credentials::signPacket(password, packet);
 }
 
 // Runs the master and the clients for about `frames` frames of 1/30 s.

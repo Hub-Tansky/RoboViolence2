@@ -242,10 +242,10 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 			memcpy(&adminRequest, buffer, sizeof(net_clsv_admin_request));
 
 			// A short password falls to offline guessing from one captured proof (PNS-42)
-			if (gameVar.zsv_adminPass.len() > 0 && gameVar.zsv_adminPass.len() < 15)
+			if (gameVar.zsv_adminPass.len() > 0 && (size_t)gameVar.zsv_adminPass.len() < credentials::MIN_SECRET_LENGTH)
 			{
 				static bool told = false; // once: a client can repeat the request
-				if (!told) console->add("\x4> Admin login refused: zsv_adminPass is shorter than 15 characters", true);
+				if (!told) console->add(CString("\x4> Admin login refused: zsv_adminPass is shorter than %zu characters", credentials::MIN_SECRET_LENGTH), true);
 				told = true;
 				break;
 			}

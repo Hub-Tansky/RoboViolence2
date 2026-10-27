@@ -1,33 +1,22 @@
 #include "cNetManager.h"
 #include "SqlStatement.h"
 
-#include <sodium.h>
+#include "Credentials.h"
 
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
 
-// Bans and unbans carry an HMAC keyed by BV2_MASTER_BAN_PASS (15 characters or more; unset refuses them), so the
-// password never crosses the wire (PNS-43, ADR 0038). A proof must be within BAN_PROOF_WINDOW of the master's clock.
-static const size_t BAN_PASS_MIN = 15;
+// Bans and unbans carry an HMAC keyed by BV2_MASTER_BAN_PASS (credentials::MIN_SECRET_LENGTH or more; unset refuses
+// them), so the password never crosses the wire (PNS-43, ADR 0038). A proof must be within BAN_PROOF_WINDOW of the
+// master's clock.
 static const long long BAN_PROOF_WINDOW = 300; // seconds of clock skew and replay accepted
 
-template <class Packet> static bool banProofMatches(Packet packet)
+template <class Packet> static bool banProofMatches(const Packet & packet)
 {
 	const char * secret = std::getenv("BV2_MASTER_BAN_PASS");
-	const long long now = (long long)std::time(nullptr);
-	if (!secret || std::strlen(secret) < BAN_PASS_MIN || std::llabs(now - (long long)packet.Time) > BAN_PROOF_WINDOW ||
-		sodium_init() < 0)
-		return false;
-
-	uint8_t proof[sizeof(packet.Proof)], expected[crypto_auth_hmacsha256_BYTES];
-	std::memcpy(proof, packet.Proof, sizeof(proof));
-	std::memset(packet.Proof, 0, sizeof(packet.Proof));
-	crypto_auth_hmacsha256_state state;
-	crypto_auth_hmacsha256_init(&state, reinterpret_cast<const unsigned char *>(secret), std::strlen(secret));
-	crypto_auth_hmacsha256_update(&state, reinterpret_cast<const unsigned char *>(&packet), sizeof(packet));
-	crypto_auth_hmacsha256_final(&state, expected);
-	return sodium_memcmp(expected, proof, sizeof(proof)) == 0;
+	return secret && std::strlen(secret) >= credentials::MIN_SECRET_LENGTH &&
+		std::llabs((long long)std::time(nullptr) - (long long)packet.Time) <= BAN_PROOF_WINDOW && credentials::checkPacket(secret, packet);
 }
 
 // The wire size of each packet the master reads: anything else is refused before its memcpy (an older game's ban
@@ -61,7 +50,7 @@ void cNetManager::Init()
 {
 	const char * banPass = std::getenv("BV2_MASTER_BAN_PASS");
 	if (!banPass || !banPass[0]) printf("BV2_MASTER_BAN_PASS is unset: bans and unbans are refused\n");
-	else if (std::strlen(banPass) < BAN_PASS_MIN) printf("BV2_MASTER_BAN_PASS is shorter than %zu characters: bans and unbans are refused\n", BAN_PASS_MIN);
+	else if (std::strlen(banPass) < credentials::MIN_SECRET_LENGTH) printf("BV2_MASTER_BAN_PASS is shorter than %zu characters: bans and unbans are refused\n", credentials::MIN_SECRET_LENGTH);
 	if(bb_init())
 	{
 		printf("Error Loading BaboNet");

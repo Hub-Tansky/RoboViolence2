@@ -10,7 +10,7 @@
 - PNS-14 (accounts) will need a password KDF later.
 
 ## Decision
-Link vcpkg `libsodium` (static on every triplet) and use `crypto_auth_hmacsha256_*`, `randombytes_buf` and `sodium_memcmp`, behind `game/src/Credentials.h`.
+Link vcpkg `libsodium` (static on every triplet) and use `crypto_auth_hmacsha256_*`, `randombytes_buf` and `sodium_memcmp`, behind `game/src/Credentials.h` (now `engine/credentials/include/Credentials.h`, ADR 0038).
 
 ## Consequences
 - One small dependency on every target; its `crypto_pwhash` covers PNS-14's KDF.

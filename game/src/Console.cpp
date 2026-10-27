@@ -53,8 +53,7 @@ void dkwForceQuit();
 template <class Packet> static void signForMaster(Packet & packet, const char * password)
 {
 	packet.Time = (uint32_t)time(nullptr);
-	memset(packet.Proof, 0, sizeof(packet.Proof));
-	credentials::hmac(password, &packet, sizeof(packet), packet.Proof);
+	credentials::signPacket(password, packet);
 }
 
 

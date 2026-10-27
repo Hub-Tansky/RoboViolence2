@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-10-27
-- Affects: `game/src/CProfile.cpp`, `CMainTab.cpp`, `ClientRecv.cpp`, `ServerRecv.cpp`, `Server.h`, `Console.cpp`, `masterserver/src/cNetManager.cpp`, both `cMSstruct.h`; amends [0010](0010-bv2-asset-compat-and-gui-freeze.md) (owner-approved [GUI] exception) and [0014](0014-libsodium-hmac-for-credentials.md)
+- Affects: `game/src/CProfile.cpp`, `CMainTab.cpp`, `ClientRecv.cpp`, `ServerRecv.cpp`, `Server.h`, `Console.cpp`, `masterserver/src/cNetManager.cpp`, both `cMSstruct.h`, `engine/credentials/` (moved from `game/src/Credentials.*`); amends [0010](0010-bv2-asset-compat-and-gui-freeze.md) (owner-approved [GUI] exception) and [0014](0014-libsodium-hmac-for-credentials.md)
 
 ## Context
 - Player accounts don't work: the master has no account handlers and never sends `CLIENT_HASH`, so `CMaster::hasValidHashSeed()` is false and nothing is sent. The client would hash with unsalted MD5, cap passwords at 16 characters and set no minimum. The Profile tab still offered My Account, Friends, Players, Statistics, Register Clan and Clans; only the Babo appearance page works.
@@ -14,6 +14,7 @@
 - Owner-approved [GUI] exception (2026-10-27, project thread "Check account password rules vs 2026 standards"): hide the Profile sub-tab row and rename the tab "Appearance" (Host narrows from 90 to 80 so the row keeps its width); keep the account code for a later, safe rewrite (Project item "Player accounts - restore tab and functions, make it safe"). The client sends zeros instead of the password MD5.
 - `zsv_adminPass` needs 15 characters for in-game admin login. From the 5th failure from one IP, that IP's admin logins are refused for 60 s, doubling per failure up to an hour, across reconnects.
 - `cacheban`, `cachebanremote` and `cacheunban` send `Time` and an HMAC-SHA256 keyed by `BV2_MASTER_BAN_PASS` over the packet with the proof zeroed. The master needs a 15+ character secret and a proof within 5 minutes of its clock. Every packet the master reads must have its exact wire size.
+- `Credentials.*` moves from `game/src` to the module `engine/credentials`, so the game, the master and the tests sign and check bans with one `credentials::signPacket`/`checkPacket`, and both secrets share `credentials::MIN_SECRET_LENGTH`.
 
 ## Consequences
 - `stCacheBan` grows from 68 to 96 bytes and `stCacheUnban` from 12 to 38: a hard cut for bans between old game servers and a new master, which refuses the old sizes. Bans come only from the owner's servers.
