@@ -43,7 +43,7 @@ Then check what was published:
 - The installer from the release page shows the release version in Apps & features.
 - Website: on each OS, https://roboviolence.com's main button names that OS and links this release's file (`-setup.exe`, `.dmg`, `-linux-x64.tar.gz`).
 
-If one fails, don't publish the Discord post (step 6): fix it on `main` and release the next patch version. Never move a published tag.
+If one fails: mark the release as a draft (`gh release edit vX.Y.Z --draft=true`) so the website falls back to the previous release, delete the Discord post instead of publishing it (step 6), skip step 5, fix it on `main` and release the next patch version. Never move a published tag; a draft keeps the tag and its files.
 
 ## 4. Release notes
 
