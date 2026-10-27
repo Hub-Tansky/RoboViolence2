@@ -4,7 +4,7 @@ Robo Violence 2, an unofficial fork of BaboViolent 2 ([ADR 0008](docs/decisions/
 
 ## Layout
 
-- `engine/babonet/`: networking (`bb_*` API); `engine/zeven/`: engine utilities (`dkc`, `dksvar`, `CString`/`CVector`/`CMatrix`; client modules `dkw dki dkgl dkt dkf dkp dks` on SDL3, miniaudio and glad); `engine/dko/`: `.DKO` model loader. Each has `include/` (public), `src/`, `README.md`.
+- `engine/babonet/`: networking (`bb_*` API); `engine/zeven/`: engine utilities (`dkc`, `dksvar`, `CString`/`CVector`/`CMatrix`; client modules `dkw dki dkgl dkt dkf dkp dks` on SDL3, miniaudio and glad); `engine/dko/`: `.DKO` model loader; `engine/credentials/`: password HMAC proofs (libsodium). Each has `include/` (public), `src/`, `README.md`.
 - `game/src/`: game: client, listen/dedicated server, map editor (one codebase; `CONSOLE` selects the headless server).
 - `masterserver/src/`: standalone master server (SQLite).
 - `content/`: `languages/`, `LaunchScript/` (`main/` at runtime). `config/`, `content-seed/`: example configs and SQL seeds. `tools/`: checks, generators, setup scripts.

@@ -16,13 +16,13 @@ jobs:
       matrix:
         include:
           - { os: windows-2025, preset: win-x64-msvc }  # pinned (PNS-27): ADR 0012 names this image
-          - { os: macos-14, preset: macos-arm64 }
+          - { os: macos-15, preset: macos-arm64 }
           - { os: ubuntu-24.04, preset: linux-x64 }
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/setup-vcpkg
         with:
-          cache-key: ${{ matrix.preset }}
+          cache-key: ${{ matrix.os }}-${{ matrix.preset }}  # image in the key: a new image (new compiler) must not exact-hit a cache it cannot use
       - name: MSVC environment
         if: runner.os == 'Windows'
         uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
@@ -199,7 +199,7 @@ jobs:
       matrix:
         include:
           - { os: windows-2025, preset: win-x64-msvc }
-          - { os: macos-14, preset: macos-arm64 }
+          - { os: macos-15, preset: macos-arm64 }
     defaults:
       run:
         shell: bash
