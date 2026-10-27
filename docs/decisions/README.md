@@ -55,7 +55,7 @@ What we do, in one or two sentences.
 | [0020](0020-package-and-release-format.md) | Package and release format; engine-only public releases | Accepted |
 | [0021](0021-cstring-one-argument-is-text.md) | A one-argument CString is text; formatting needs arguments | Accepted |
 | [0022](0022-advertised-server-address.md) | The master lists an advertised address only from private sources | Accepted |
-| [0023](0023-step-review-subagent-in-repo.md) | The step-closing review subagent and its rubric live in the repo | Accepted |
+| [0023](0023-step-review-subagent-in-repo.md) | The step-closing review subagent and its rubric live in the repo | Superseded by 0037 |
 | [0024](0024-github-project-is-the-backlog.md) | The private GitHub Project is the backlog; no roadmap files in the repo | Accepted |
 | [0025](0025-client-autotest-mode.md) | Test the real client through a scripted autotest mode | Accepted |
 | [0026](0026-screenshot-goldens.md) | Screenshot goldens are Linux llvmpipe frames compared within a tolerance | Accepted |
@@ -69,3 +69,4 @@ What we do, in one or two sentences.
 | [0034](0034-player-data-retention-and-privacy-policy.md) | Player IPs stay on the server, personal data on disk expires, and a privacy policy says so | Accepted |
 | [0035](https://github.com/Hub-Tansky/rv2-website/blob/main/docs/decisions/0035-website-tailwind-install-page-agent-files.md) | The website uses Tailwind from its CDN, has a separate install guide and publishes files for AI agents | Moved to rv2-website (0036) |
 | [0036](0036-website-in-rv2-website-repository.md) | The website lives in Hub-Tansky/rv2-website | Accepted |
+| [0037](0037-review-rubric-single-repo-copy.md) | The review rubric has one repo copy, and the gate checks its hash | Accepted |

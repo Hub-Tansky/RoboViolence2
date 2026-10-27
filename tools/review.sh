@@ -52,7 +52,7 @@ fi
 
 # Scope, anti-gaming and review gate: one Python pass over the diff.
 check diff-rules env REVIEW_BASE="$mb" REVIEW_BODY="$body" REVIEW_DRAFT="${REVIEW_PR_DRAFT:-true}" python3 - <<'EOF'
-import os, re, subprocess, sys
+import hashlib, os, re, subprocess, sys
 
 base, body, draft = os.environ["REVIEW_BASE"], os.environ["REVIEW_BODY"].replace("\r\n", "\n"), os.environ["REVIEW_DRAFT"] == "true"
 git = lambda *a: subprocess.run(["git", *a], capture_output=True, text=True, check=True).stdout
@@ -90,6 +90,14 @@ for line in git("diff", "-U0", "--src-prefix=a/", "--dst-prefix=b/", base).split
         if BANNED.search(line) and "review: allow" not in line:
             problems.append(f"anti-gaming: {file}: {line[1:].strip()[:120]}")
 
+# Rubric hash (ADR 0037): sha256 of the repo's only rubric copy without its "Rubric:" line, first 12 hex digits.
+# Same as: grep -v '^Rubric: ' .claude/skills/rv2-thermo-nuclear-review/SKILL.md | sha256sum | cut -c1-12
+skill = open(".claude/skills/rv2-thermo-nuclear-review/SKILL.md", encoding="utf-8").read()
+rubric = "Rubric: rv2-thermo-nuclear-review " + hashlib.sha256("".join(
+    l for l in skill.splitlines(True) if not l.startswith("Rubric: ")).encode()).hexdigest()[:12]
+if rubric not in skill.splitlines():
+    problems.append(f"rubric: the skill's Rubric line is stale; set it to '{rubric}'")
+
 # Review gate: a ready PR with Allowed paths needs its fresh-context review record in the description.
 if row and not draft:
     rec = body.split("## Review record", 1)[1] if "## Review record" in body else ""
@@ -99,8 +107,8 @@ if row and not draft:
         problems.append("review gate: the record lacks 'Reviewer: fresh-context subagent' or '### Findings'")
     elif re.search(r"\|\s*pending\s*\|", rec):
         problems.append("review gate: the record still has pending findings")
-    elif "SKILL: Launching skill: thermo-nuclear-code-quality-review" not in rec or "SKILL: NOT LOADED" in rec:
-        problems.append("review gate: the raw reviewer report lacks the skill's load line, or says NOT LOADED")
+    elif not re.search(rf"^[ \t]*{re.escape(rubric)}[ \t]*$", rec, re.M) or re.search(r"^[ \t]*Rubric: NOT LOADED", rec, re.M):
+        problems.append(f"review gate: the raw reviewer report lacks '{rubric}' (the repo rubric at this head), or says NOT LOADED")
     else:
         for r in re.findall(r"^\|.*\bdeferred\b.*\|\s*$", rec, re.M):
             if not re.search(r"#\d+|github\.com/(users/Hub-Tansky/projects/1|Hub-Tansky/RoboViolence2/issues/)", r):

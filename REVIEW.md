@@ -14,7 +14,8 @@ Run `tools/review.sh` while working, and `tools/review.sh --full <preset>` befor
 | secrets | gitleaks finds a secret in `merge-base..HEAD` (skipped locally if gitleaks is missing; CI `secret-scan` runs it) |
 | scope | a changed file is outside the PR's **Allowed paths** row (from the PR description: `REVIEW_PR_BODY` in CI, `gh pr view` locally, or `--scope <file>`) |
 | anti-gaming | an added line switches a check off: `#pragma warning`/`diagnostic`, `NOLINT`, `-Wno-`, `DISABLED_`, `--no-verify`, `continue-on-error: true`. A justified line carries `review: allow <reason>` |
-| review gate | a ready (non-draft) PR with an Allowed paths row has no `## Review record` naming a fresh-context reviewer, has a finding still `pending`, has a `deferred` finding without a Project item or issue link, or lacks the raw report (`<details>` with the skill's load line and no `SKILL: NOT LOADED`) |
+| review gate | a ready (non-draft) PR with an Allowed paths row has no `## Review record` naming a fresh-context reviewer, has a finding still `pending`, has a `deferred` finding without a Project item or issue link, or lacks the raw report (`<details>` with the `Rubric:` line of the head's rubric on a line of its own, and no line starting `Rubric: NOT LOADED`) |
+| rubric | the `Rubric:` line in `.claude/skills/rv2-thermo-nuclear-review/SKILL.md` doesn't match the file's hash (the message prints the right line) |
 | `--full` | configure, build (warnings are errors) or `ctest` fails |
 
 In a PR without an Allowed paths row, changes to guard files (`tools/check-*`, `tools/review.sh`, `.githooks/`, `.github/`, `.gitleaks.toml`, `.gitignore`, this file) print a NOTE: the owner must approve them.
@@ -50,7 +51,7 @@ In a PR without an Allowed paths row, changes to guard files (`tools/check-*`, `
 Required for every PR with an Allowed paths row, and for an architecture-changing PR (new or moved modules, libraries or interfaces, changed ownership or data flow, protocol or file-format changes).
 
 1. `tools/review.sh --full <preset>` passes.
-2. Spawn the **`thermo-nuclear-code-quality-review` subagent** (Agent tool, `.claude/agents/`). Its prompt holds only the PR number (or the scope text), the merge-base and links to earlier review records it must not contradict. It loads the `thermo-nuclear-code-quality-review` skill (`.claude/skills/`), starts its report with the tool's load line (or `SKILL: NOT LOADED – <reason>`), reviews `git diff <merge-base>..HEAD` against the skill and section 2, and doesn't re-raise findings earlier records rejected or deferred. The author doesn't pre-filter its findings. If the subagent or skill isn't available, stop and tell the owner.
+2. Spawn the **`rv2-thermo-nuclear-review` subagent** (Agent tool, `.claude/agents/`). Its prompt holds only the PR number (or the scope text), the merge-base and links to earlier review records it must not contradict. If the session doesn't offer that agent type (it started outside this repo), spawn a general-purpose agent whose prompt is "Follow `.claude/agents/rv2-thermo-nuclear-review.md` in this repository as your instructions" plus the same inputs. The subagent loads the rubric from `.claude/skills/rv2-thermo-nuclear-review/SKILL.md`, the only copy (Skill tool, or a Read of the file), starts its report with the rubric's `Rubric: rv2-thermo-nuclear-review <hash>` line (or `Rubric: NOT LOADED – <reason>`), reviews `git diff <merge-base>..HEAD` against the skill and section 2, and doesn't re-raise findings earlier records rejected or deferred. The author doesn't pre-filter its findings. If the subagent or skill isn't available, stop and tell the owner.
    Paste the report unedited into the PR description inside `<details><summary>Raw reviewer report</summary> … </details>` (later rounds appended under `Round k`). It is evidence, not proof: the author could forge it, so the owner may spot-check it against the session.
 3. Act on every finding:
 
@@ -63,14 +64,14 @@ Required for every PR with an Allowed paths row, and for an architecture-changin
 
    Fixes go in their own commits (`<kind>: review: <summary>`). A finding left for later becomes a Proposed draft item in the [Project](https://github.com/users/Hub-Tansky/projects/1) (or an issue) and the outcome `deferred → <item or issue link>`. Ask the owner all open questions in one message, each with the finding, the proposed change and a recommendation.
 4. Write the `## Review record` section of the PR description from the template below.
-5. Mark the PR ready only after the last review round covers every commit and `--full` passed on the final head. `tools/review.sh` checks the record and the report.
+5. Mark the PR ready only after the last review round covers every commit and `--full` passed on the final head. `tools/review.sh` checks the record and that the report's `Rubric:` line matches the skill file at the PR head; a PR that changes the rubric needs a review run on the changed rubric.
 
 ## Review record template
 
 ```markdown
 ## Review record
 
-Reviewer: fresh-context subagent thermo-nuclear-code-quality-review, YYYY-MM-DD
+Reviewer: fresh-context subagent rv2-thermo-nuclear-review, YYYY-MM-DD
 Diff: <merge-base>..<head>
 
 ### review.sh
