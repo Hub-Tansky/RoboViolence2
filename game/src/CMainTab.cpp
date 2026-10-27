@@ -85,13 +85,13 @@ CMainTab::CMainTab(CControl * in_parent)
 	//btn_userLogin->toolTips = "User login information and stats.";
 	btn_news = new CControl(parent, CVector2i(32,32),CVector2i(100,25),"News",this,"BUTTON");
 	btn_news->toolTips = "News from Babo World.";
-	btn_profile = new CControl(parent, CVector2i(32,32),CVector2i(100,25),"Profile",this,"BUTTON", btn_news, CONTROL_SNAP_RIGHT);
-	btn_profile->toolTips = "User login information and stats.";
+	btn_profile = new CControl(parent, CVector2i(32,32),CVector2i(110,25),"Appearance",this,"BUTTON", btn_news, CONTROL_SNAP_RIGHT);
+	btn_profile->toolTips = "Customize your Babo.";
 	btn_browser = new CControl(parent, CVector2i(32,32),CVector2i(100,25),"Game Browser",this,"BUTTON", btn_profile, CONTROL_SNAP_RIGHT);
 	btn_browser->toolTips = "Browse games over the Internet or on a local network.";
 	//btn_friends = new CControl(parent, CVector2i(32,32),CVector2i(100,25),"Friends",this,"BUTTON", btn_browser, CONTROL_SNAP_RIGHT);
 	//btn_friends->toolTips = "Find out where your friends are playing.";
-	btn_create = new CControl(parent, CVector2i(32,32),CVector2i(90,25),"Host",this,"BUTTON", btn_browser, CONTROL_SNAP_RIGHT);
+	btn_create = new CControl(parent, CVector2i(32,32),CVector2i(80,25),"Host",this,"BUTTON", btn_browser, CONTROL_SNAP_RIGHT);
 	btn_create->toolTips = "Host a game and play in it.\nSee CTF.cfg for more informations about dedicating a server.";
 	btn_editor = new CControl(parent, CVector2i(32,32),CVector2i(100,25),"Map Editor",this,"BUTTON", btn_create, CONTROL_SNAP_RIGHT);
 	btn_editor->toolTips = "Edit or create a new map.";

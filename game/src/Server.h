@@ -64,6 +64,10 @@ public:
 	uint8_t joinNonce[MAX_PLAYER][credentials::NONCE_SIZE] = {};
 	// Per slot: failed admin logins on this connection; the 5th disconnects it (PNS-42)
 	int adminFails[MAX_PLAYER] = {};
+	// Per IP, across reconnects: from the 5th failed admin login, that IP's admin requests are refused for 60 s,
+	// doubling with each further failure up to an hour (rate limiting per NIST SP 800-63B-4, ADR 0038)
+	struct AdminLock { int fails = 0; long long until = 0; };
+	std::map<std::string, AdminLock> adminLocks;
 	// Per slot: seconds since the TCP connect while the join handshake is pending; past JOIN_TIMEOUT it is dropped
 	float joinWait[MAX_PLAYER] = {};
 	static constexpr float JOIN_TIMEOUT = 10.0f;

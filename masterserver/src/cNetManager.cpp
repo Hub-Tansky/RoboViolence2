@@ -1,14 +1,36 @@
 #include "cNetManager.h"
 #include "SqlStatement.h"
 
+#include <sodium.h>
+
 #include <cstdlib>
 #include <cstring>
+#include <ctime>
 
-// Bans and unbans need BV2_MASTER_BAN_PASS (at most 7 characters: the game's wire field); unset refuses them (PNS-43)
-static bool banPasswordMatches(const char * pass)
+// Bans and unbans carry an HMAC keyed by BV2_MASTER_BAN_PASS (15 characters or more; unset refuses them), so the
+// password never crosses the wire (PNS-43, ADR 0038). A proof must be fresh, and a wrong one stops the next for a second.
+static const size_t BAN_PASS_MIN = 15;
+static const long long BAN_PROOF_WINDOW = 300; // seconds of clock skew and replay accepted
+
+template <class Packet> static bool banProofMatches(Packet packet)
 {
+	static long long lastFailure = 0;
 	const char * secret = std::getenv("BV2_MASTER_BAN_PASS");
-	return secret && secret[0] && std::strncmp(pass, secret, 7) == 0 && std::strlen(secret) <= 7;
+	const long long now = (long long)std::time(nullptr);
+	if (!secret || std::strlen(secret) < BAN_PASS_MIN || now == lastFailure || std::llabs(now - (long long)packet.Time) > BAN_PROOF_WINDOW ||
+		sodium_init() < 0)
+		return false;
+
+	uint8_t proof[sizeof(packet.Proof)], expected[crypto_auth_hmacsha256_BYTES];
+	std::memcpy(proof, packet.Proof, sizeof(proof));
+	std::memset(packet.Proof, 0, sizeof(packet.Proof));
+	crypto_auth_hmacsha256_state state;
+	crypto_auth_hmacsha256_init(&state, reinterpret_cast<const unsigned char *>(secret), std::strlen(secret));
+	crypto_auth_hmacsha256_update(&state, reinterpret_cast<const unsigned char *>(&packet), sizeof(packet));
+	crypto_auth_hmacsha256_final(&state, expected);
+	if (sodium_memcmp(expected, proof, sizeof(proof)) == 0) return true;
+	lastFailure = now;
+	return false;
 }
 
 
@@ -22,7 +44,7 @@ void cNetManager::Init()
 {
 	const char * banPass = std::getenv("BV2_MASTER_BAN_PASS");
 	if (!banPass || !banPass[0]) printf("BV2_MASTER_BAN_PASS is unset: bans and unbans are refused\n");
-	else if (std::strlen(banPass) > 7) printf("BV2_MASTER_BAN_PASS is longer than 7 characters: bans and unbans are refused\n");
+	else if (std::strlen(banPass) < BAN_PASS_MIN) printf("BV2_MASTER_BAN_PASS is shorter than 15 characters: bans and unbans are refused\n");
 	if(bb_init())
 	{
 		printf("Error Loading BaboNet");
@@ -85,13 +107,15 @@ void cNetManager::RetreiveData()
 	int			typeID=0;
 	UINT4		fromID=0;
 	
-	while((buffer=bb_serverReceive(fromID,typeID)))
+	int			size=0;
+	
+	while((buffer=bb_serverReceive(fromID,typeID,&size)))
 	{
-		ReceiveServerPacket(buffer,typeID,fromID);
+		ReceiveServerPacket(buffer,typeID,fromID,size);
 	}
 }
 
-void cNetManager::ReceiveServerPacket(char *data,int typeID,UINT4 fromID)
+void cNetManager::ReceiveServerPacket(char *data,int typeID,UINT4 fromID,int size)
 {
 
 	//Console->AddText("Receiving packet with TypeID : %i",typeID);
@@ -230,10 +254,10 @@ void cNetManager::ReceiveServerPacket(char *data,int typeID,UINT4 fromID)
 		case CACHE_BAN:
 		{
 			stCacheBan cb;
+			if (size != (int)sizeof(stCacheBan)) return; // an older game's ban (password in clear): refused
 			memcpy(&cb,data,sizeof(stCacheBan));
-			cb.Nick[sizeof(cb.Nick) - 1] = cb.IP[sizeof(cb.IP) - 1] = cb.Pass[sizeof(cb.Pass) - 1] = '\0';
-
-			if (!banPasswordMatches(cb.Pass)) return;
+			if (!banProofMatches(cb)) return;
+			cb.Nick[sizeof(cb.Nick) - 1] = cb.IP[sizeof(cb.IP) - 1] = '\0';
 
 			Server->AddBan( cb.Nick , cb.IP , cb.Duration );
 			return;
@@ -242,9 +266,9 @@ void cNetManager::ReceiveServerPacket(char *data,int typeID,UINT4 fromID)
 		case CACHE_UNBAN:
 		{
 			stCacheUnban cb;
+			if (size != (int)sizeof(stCacheUnban)) return;
 			memcpy(&cb,data,sizeof(stCacheUnban));
-
-			if (!banPasswordMatches(cb.Pass)) return;
+			if (!banProofMatches(cb)) return;
 
 			Server->Unban( cb.ID );
 			return;

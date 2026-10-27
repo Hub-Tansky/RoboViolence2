@@ -19,6 +19,7 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <ctime>
 #include <set>
 #include "Server.h"
 #include "PacketCheck.h"
@@ -241,23 +242,28 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 			memcpy(&adminRequest, buffer, sizeof(net_clsv_admin_request));
 
 			// A short password falls to offline guessing from one captured proof (PNS-42)
-			if (gameVar.zsv_adminPass.len() > 0 && gameVar.zsv_adminPass.len() < 12)
+			if (gameVar.zsv_adminPass.len() > 0 && gameVar.zsv_adminPass.len() < 15)
 			{
 				static bool told = false; // once: a client can repeat the request
-				if (!told) console->add("\x4> Admin login refused: zsv_adminPass is shorter than 12 characters", true);
+				if (!told) console->add("\x4> Admin login refused: zsv_adminPass is shorter than 15 characters", true);
 				told = true;
 				break;
 			}
 			if (!gameVar.zsv_adminPass.isNull() &&
 				!gameVar.zsv_adminUser.isNull())
 			{
+				AdminLock & lock = adminLocks[sender->playerIP];
+				const long long now = (long long)time(nullptr);
+				const bool locked = now < lock.until;
 				// Step 10: proofs over this connection's challenge
-				if (credentials::check(gameVar.zsv_adminUser.s, "admin user", joinNonce[slot], adminRequest.login) &&
+				if (!locked &&
+					credentials::check(gameVar.zsv_adminUser.s, "admin user", joinNonce[slot], adminRequest.login) &&
 					credentials::check(gameVar.zsv_adminPass.s, "admin password", joinNonce[slot], adminRequest.password))
 				{
 					//--- Admin accepted !!
 					bb_serverSend(0, 0, NET_SVCL_ADMIN_ACCEPTED, bbnetID);
 					sender->isAdmin = true;
+					adminLocks.erase(sender->playerIP);
 					CString logInName = "Admin name: ";
 					CString logInIP = "Admin IP: ";
 					logInName += sender->name;
@@ -273,6 +279,10 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 					logInIP += sender->playerIP;
 					console->add(logInName);
 					console->add(logInIP);
+					if (locked)
+						console->add(CString("\x4> Admin login from %s refused for %lld s", sender->playerIP, lock.until - now), true);
+					else if (++lock.fails >= 5)
+						lock.until = now + std::min(60LL << std::min(lock.fails - 5, 6), 3600LL);
 					if (++adminFails[slot] >= 5)
 					{
 						console->add(CString("\x4> Too many admin login attempts, disconnecting %s", sender->playerIP), true);
