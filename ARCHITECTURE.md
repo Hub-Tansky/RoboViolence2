@@ -22,7 +22,7 @@ Robo Violence 2: unofficial fork of BaboViolent 2, a top-down multiplayer shoote
 | Website | roboviolence.com is built and deployed from [Hub-Tansky/rv2-website](https://github.com/Hub-Tansky/rv2-website) ([ADR 0036](docs/decisions/0036-website-in-rv2-website-repository.md)); its tests read the release file names from `build.yml`. |
 | Hosting | Server images from `packaging/docker/Dockerfile` (GHCR on `main`), runbook [docs/ops/runbook.md](docs/ops/runbook.md). |
 | Known defects | [docs/analysis/KEY_QUESTIONS.md](https://github.com/Hub-Tansky/RoboViolence2/blob/fc0aff7c5aa946406c7c110e8e7c2d972a7daeb8/docs/analysis/KEY_QUESTIONS.md). |
-| Decisions | [docs/decisions/README.md](docs/decisions/README.md): 0001 Ninja, 0002 libcurl compiled out, 0003 OpenGL 2.1 kept, 0004 project name (superseded by 0008), 0005 `main/` data root, 0006 platform layer, 0007 data root, pref dir and config layers, 0008 display name "Robo Violence 2", 0009 internal renaming, 0010 BV2 asset compatibility and GUI freeze, 0011 gettext PO translations, 0012 Windows 10 22H2 minimum, 0013 rulesets, 0014 libsodium HMAC, 0015 admin HTTP API, 0016 player data lookup and package content, 0017 playtest pull agent, 0018 staging pull deploy, 0019 in-game name and fork credits, 0020 package and release format, 0021 one-argument CString is text, 0022 advertised server address, 0023 step review subagent in the repo, 0024 GitHub Project is the backlog, 0025 client autotest mode, 0026 screenshot goldens, 0029 static website (moved to rv2-website), 0033 first-run data dialog recommends the BV2 zip, 0034 player data retention and privacy policy, 0035 website Tailwind and agent files (moved to rv2-website), 0036 website in rv2-website. |
+| Decisions | [docs/decisions/README.md](docs/decisions/README.md): 0001 Ninja, 0002 libcurl compiled out, 0003 OpenGL 2.1 kept, 0004 project name (superseded by 0008), 0005 `main/` data root, 0006 platform layer, 0007 data root, pref dir and config layers, 0008 display name "Robo Violence 2", 0009 internal renaming, 0010 BV2 asset compatibility and GUI freeze, 0011 gettext PO translations, 0012 Windows 10 22H2 minimum, 0013 rulesets, 0014 libsodium HMAC, 0015 admin HTTP API, 0016 player data lookup and package content, 0017 playtest pull agent, 0018 staging pull deploy, 0019 in-game name and fork credits, 0020 package and release format, 0021 one-argument CString is text, 0022 advertised server address, 0023 step review subagent in the repo (superseded by 0037), 0024 GitHub Project is the backlog, 0025 client autotest mode, 0026 screenshot goldens, 0029 static website (moved to rv2-website), 0033 first-run data dialog recommends the BV2 zip, 0034 player data retention and privacy policy, 0035 website Tailwind and agent files (moved to rv2-website), 0036 website in rv2-website, 0037 review rubric single repo copy. |
 
 ### Open items
 
@@ -203,8 +203,8 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 
 | path | purpose |
 |---|---|
-| `.claude/agents/rv2-thermo-nuclear-review.md` | Claude Code subagent: fresh-context step-closing review (REVIEW.md section 5) |
-| `.claude/skills/rv2-thermo-nuclear-review/SKILL.md` | Claude Code skill: maintainability rubric the review subagent loads |
+| `.claude/agents/rv2-thermo-nuclear-review.md` | Claude Code subagent: fresh-context PR-closing review (REVIEW.md section 5) |
+| `.claude/skills/rv2-thermo-nuclear-review/SKILL.md` | Claude Code skill: the only copy of the maintainability rubric the review subagent loads; its `Rubric:` hash line is checked by `tools/review.sh` ([ADR 0037](docs/decisions/0037-review-rubric-single-repo-copy.md)) |
 
 ### `.github/actions/setup-vcpkg`
 
@@ -312,6 +312,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/decisions/0033-first-run-dialog-recommends-bv2-zip.md` | ADR: the first-run data dialog recommends the original BV2 zip, shows its URL and the folder to choose, and has a Download button (amends 0016) |
 | `docs/decisions/0034-player-data-retention-and-privacy-policy.md` | ADR: the server never relays player IPs, bans (`banlist.tsv`) expire after `sv_banDays`, `admin-audit.log` after 90 days; privacy policy page, installer link and opt-out |
 | `docs/decisions/0036-website-in-rv2-website-repository.md` | ADR: the website, its tests, tooling and Pages workflow live in Hub-Tansky/rv2-website; its tests read `build.yml` from here |
+| `docs/decisions/0037-review-rubric-single-repo-copy.md` | ADR: the review rubric has one repo copy with a unique name; the gate checks its hash |
 | `docs/decisions/README.md` | ADR format and index |
 
 ### `docs/ops`
