@@ -20,6 +20,7 @@
 #include "Console.h"
 #include "FileIO.h"
 #include "CMaster.h"
+#include "Credentials.h"
 #ifndef CONSOLE
 #include "Autotest.h"
 #include "KeyManager.h"
@@ -32,6 +33,7 @@ extern roboviolence2::Autotest * autotest; // main.cpp: the running --autotest, 
 #include "screengrab.h"
 #endif
 #include <algorithm>
+#include <ctime>
 #include <string>
 
 
@@ -46,6 +48,13 @@ extern Scene * scene;
 #ifdef CONSOLE
 void dkwForceQuit();
 #endif
+
+// Bans and unbans prove BV2_MASTER_BAN_PASS with an HMAC over the packet and the time; the password stays here (ADR 0038)
+template <class Packet> static void signForMaster(Packet & packet, const char * password)
+{
+	packet.Time = (uint32_t)time(nullptr);
+	credentials::signPacket(password, packet);
+}
 
 
 
@@ -2187,7 +2196,7 @@ void Console::sendCommand(CString commandLine, bool isAdmin, unsigned long bbnet
 	{
 		if (scene->server)
 		{
-			CString strPass = tokenize.getFirstToken(' '); // checked by the master (BV2_MASTER_BAN_PASS)
+			CString strPass = tokenize.getFirstToken(' '); // the master checks an HMAC keyed by it (BV2_MASTER_BAN_PASS)
 			CString strID = tokenize.getFirstToken(' ');
 			if( strID == "" )
 			{
@@ -2208,13 +2217,12 @@ void Console::sendCommand(CString commandLine, bool isAdmin, unsigned long bbnet
 				if( duration < 0 ) duration = 1;
 			}
 
-			stCacheBan cb;
+			stCacheBan cb = {};
 			cb.Duration		=	duration;
 			cb.ID			=	ID;
 			snprintf(cb.IP, sizeof(cb.IP), "%s", scene->server->CachedPlayers[ID].IP);
 			snprintf(cb.Nick, sizeof(cb.Nick), "%s", scene->server->CachedPlayers[ID].NickName);
-			memcpy( cb.Pass, strPass.s, 7 );
-			cb.Pass[7] = '\0';
+			signForMaster( cb, strPass.s );
 			
 			// we have everything, tell the master server to ban him!
 			master->sendPacket( (char*)&cb , sizeof(stCacheBan) , CACHE_BAN );
@@ -2262,10 +2270,9 @@ void Console::sendCommand(CString commandLine, bool isAdmin, unsigned long bbnet
 			}
 			short ID = strID.toInt();
 
-			stCacheUnban cu;
+			stCacheUnban cu = {};
 			cu.ID	=	ID;
-			memcpy( cu.Pass, strPass.s, 7 );
-			cu.Pass[7] = '\0';
+			signForMaster( cu, strPass.s );
 			
 			// we have everything, tell the master server to unban this guy
 			master->sendPacket( (char*)&cu , sizeof(stCacheUnban) , CACHE_UNBAN );
@@ -2318,13 +2325,12 @@ void Console::sendCommand(CString commandLine, bool isAdmin, unsigned long bbnet
 				if( duration < 0 ) duration = 1;
 			}
 
-			stCacheBan cb;
+			stCacheBan cb = {};
 			cb.Duration		=	duration;
 			cb.ID			=	ID;
 			snprintf(cb.IP, sizeof(cb.IP), "%s", master->CachedPlayersRemote[ID].IP);
 			snprintf(cb.Nick, sizeof(cb.Nick), "%s", master->CachedPlayersRemote[ID].NickName);
-			memcpy( cb.Pass, strPass.s, 7 );
-			cb.Pass[7] = '\0';
+			signForMaster( cb, strPass.s );
 			
 			// we have everything, tell the master server to ban him!
 			master->sendPacket( (char*)&cb , sizeof(stCacheBan) , CACHE_BAN );

@@ -1,5 +1,6 @@
 add_executable(test_netpacket test_netpacket.cpp)
 target_include_directories(test_netpacket PRIVATE ${CMAKE_SOURCE_DIR}/game/src ${CMAKE_SOURCE_DIR}/engine/babonet/include)
+target_link_libraries(test_netpacket PRIVATE credentials)
 bv2_target_defaults(test_netpacket)
 add_test(NAME netpacket COMMAND test_netpacket)
 
@@ -111,6 +112,7 @@ if(TARGET bv2server_lib)
   # Corpus (tests/corpus/<type>/*.bin): gen_corpus writes valid.bin per type; replay runs every file except crash-*.
   add_executable(gen_corpus gen_corpus.cpp)
   target_include_directories(gen_corpus PRIVATE ${CMAKE_SOURCE_DIR}/game/src ${CMAKE_SOURCE_DIR}/engine/babonet/include)
+  target_link_libraries(gen_corpus PRIVATE credentials)
   bv2_target_defaults(gen_corpus)
   add_executable(test_replay test_replay.cpp)
   target_link_libraries(test_replay PRIVATE bv2_server_harness)
@@ -180,9 +182,8 @@ bv2_target_defaults(test_babonet_ping)
 add_test(NAME babonet_ping_lan_port_taken COMMAND test_babonet_ping)
 set_tests_properties(babonet_ping_lan_port_taken PROPERTIES TIMEOUT 60 SKIP_RETURN_CODE 77)
 
-add_executable(test_credentials test_credentials.cpp ${CMAKE_SOURCE_DIR}/game/src/Credentials.cpp)
-target_include_directories(test_credentials PRIVATE ${CMAKE_SOURCE_DIR}/game/src)
-target_link_libraries(test_credentials PRIVATE unofficial-sodium::sodium)
+add_executable(test_credentials test_credentials.cpp)
+target_link_libraries(test_credentials PRIVATE credentials)
 bv2_target_defaults(test_credentials)
 add_test(NAME credentials COMMAND test_credentials)
 

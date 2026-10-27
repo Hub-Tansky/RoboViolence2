@@ -24,7 +24,6 @@
 #include "netPacket.h"
 #include "Console.h"
 #include "Scene.h"
-#include "md5class.h"
 #include "CStatus.h"
 
 extern Scene * scene;
@@ -46,8 +45,8 @@ void Client::sendJoinHandshake()
 	gameVar.cl_accountUsername.resize(20);
 	memcpy(playerInfo.username, gameVar.cl_accountUsername.s, gameVar.cl_accountUsername.len() + 1);
 
-	CMD5 pw(gameVar.cl_accountPassword.s);
-	memcpy(playerInfo.password, pw.getMD5Digest(), 32);
+	// No account service checks it (ADR 0038): an unsalted MD5 of the account password must not reach every server
+	memset(playerInfo.password, 0, sizeof(playerInfo.password));
 
 	bb_clientSend(uniqueClientID, (char*)&playerInfo, sizeof(net_clsv_svcl_player_info), NET_CLSV_SVCL_PLAYER_INFO);
 

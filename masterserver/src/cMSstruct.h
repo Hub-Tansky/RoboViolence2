@@ -50,7 +50,8 @@
 		char	IP[16];
 		char	Duration;
 		char	Date[9];
-		char	Pass[8];
+		uint32_t	Time;		// sender's Unix time: the master accepts it within 5 minutes of its own clock
+		uint8_t	Proof[32];	// HMAC-SHA256 keyed by BV2_MASTER_BAN_PASS over this packet with Proof zeroed (ADR 0038)
 	};
 
 	//CACHE BANLIST
@@ -73,7 +74,8 @@
 	struct stCacheUnban
 	{
 		short	ID;
-		char	Pass[10];
+		uint32_t	Time;		// as stCacheBan
+		uint8_t	Proof[32];
 	};
 
 	//CACHE_BANNED		1013
@@ -260,10 +262,10 @@
 
 
 
-static_assert(sizeof(stCacheBan) == 68, "stCacheBan wire size (as engine/babonet/include/cMSstruct.h)");
+static_assert(sizeof(stCacheBan) == 96, "stCacheBan wire size (as engine/babonet/include/cMSstruct.h)");
 static_assert(sizeof(stCacheList) == 32, "stCacheList wire size (as engine/babonet/include/cMSstruct.h)");
 static_assert(sizeof(stCacheListRemote) == 60, "stCacheListRemote wire size (as engine/babonet/include/cMSstruct.h)");
-static_assert(sizeof(stCacheUnban) == 12, "stCacheUnban wire size (as engine/babonet/include/cMSstruct.h)");
+static_assert(sizeof(stCacheUnban) == 38, "stCacheUnban wire size (as engine/babonet/include/cMSstruct.h)");
 static_assert(sizeof(stCacheBanned) == 18, "stCacheBanned wire size (as engine/babonet/include/cMSstruct.h)");
 static_assert(sizeof(stCacheAnswer) == 3, "stCacheAnswer wire size (as engine/babonet/include/cMSstruct.h)");
 static_assert(sizeof(stCachePlayer) == 56, "stCachePlayer wire size (as engine/babonet/include/cMSstruct.h)");
