@@ -80,21 +80,26 @@ jobs:
         run: |
           python3 - <<'PY'
           import socket, struct
+          HEADER = '<BIHH'  # interface, packet id, type, payload size (ExtractPacket in engine/babonet/src/cPeer2Peer.cpp)
+          INTERFACE_SYSTEM, TYPE_DEMAND, TYPE_CONFIRM = 0, 2, 3  # engine/babonet/src/cUDPpacket.h
+          FIRST_PACKET, REQUEST_ID = 1, struct.pack('<I', 7)
           for port in (3333, 3334):
               s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
               s.settimeout(1)
               confirmed = False
               for attempt in range(10):
-                  s.sendto(struct.pack('<BIHHI', 0, 1, 2, 4, 7), ('127.0.0.1', port))
+                  s.sendto(struct.pack(HEADER, INTERFACE_SYSTEM, FIRST_PACKET, TYPE_DEMAND, len(REQUEST_ID)) + REQUEST_ID, ('127.0.0.1', port))
                   try:
                       data = s.recv(1024)
                   except socket.timeout:
                       continue
                   n = 0
-                  while n + 9 <= len(data):
-                      interface, _, type_id, size = struct.unpack_from('<BIHH', data, n)
-                      confirmed |= interface == 0 and type_id == 3 and data[n + 9:n + 9 + size] == struct.pack('<I', 7)
-                      n += 9 + size
+                  head = struct.calcsize(HEADER)
+                  while n + head <= len(data):
+                      interface, _, type_id, size = struct.unpack_from(HEADER, data, n)
+                      payload = data[n + head:n + head + size]
+                      confirmed |= interface == INTERFACE_SYSTEM and type_id == TYPE_CONFIRM and payload == REQUEST_ID
+                      n += head + size
                   if confirmed:
                       break
               print(port, 'confirmed' if confirmed else 'no answer')

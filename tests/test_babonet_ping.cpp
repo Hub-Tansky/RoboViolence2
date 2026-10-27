@@ -5,9 +5,12 @@
 
 #ifdef _WIN32
 #include <winsock2.h>
+#define closesocket_ closesocket
 #else
 #include <netinet/in.h>
 #include <sys/socket.h>
+#include <unistd.h>
+#define closesocket_ close
 #endif
 
 #include <chrono>
@@ -20,6 +23,7 @@
 static const unsigned short PORT = 10209;
 static const unsigned short LAN_PORT = 11111; // BB_BROADCAST_PORT in engine/babonet/src/cPeer2Peer.h
 static const int FPS = 30;
+static const int SKIP = 77; // SKIP_RETURN_CODE in tests/CMakeLists.txt
 static const std::chrono::milliseconds FRAME(1000 / FPS);
 
 static int serve()
@@ -62,19 +66,29 @@ int main(int argc, char ** argv)
 
 	bb_init();
 	int lanHolder = (int)socket(AF_INET, SOCK_DGRAM, 0); // no SO_REUSEADDR: babonet's own bind of the port fails
+#ifdef _WIN32
+	BOOL exclusive = TRUE; // else babonet's SO_REUSEADDR takes the port over
+	setsockopt(lanHolder, SOL_SOCKET, SO_EXCLUSIVEADDRUSE, (const char *)&exclusive, sizeof(exclusive));
+#endif
 	sockaddr_in lan;
 	std::memset(&lan, 0, sizeof(lan));
 	lan.sin_family = AF_INET;
 	lan.sin_addr.s_addr = htonl(INADDR_ANY);
 	lan.sin_port = htons(LAN_PORT);
 	if (bind(lanHolder, (sockaddr *)&lan, sizeof(lan)))
-		std::printf("note: LAN port %d already held by another process\n", LAN_PORT);
+	{
+		std::printf("SKIP: LAN port %d already held by another process\n", LAN_PORT);
+		return SKIP;
+	}
+	char query[1] = {0};
+	bb_peerSend(-1, query, 1, sizeof(query)); // a LAN query with the port taken is dropped, not queued forever
 
 	std::string server = std::string("\"") + argv[0] + "\" --serve";
 	std::thread serverThread([&] { std::system(server.c_str()); });
 	bool answered = false;
 	for (int attempt = 0; attempt < 5 && !answered; ++attempt) answered = ping(); // the first ones may beat its bind
 	serverThread.join();
+	closesocket_(lanHolder);
 	if (!answered)
 	{
 		std::printf("FAIL: no ping answer within 1 s\n");

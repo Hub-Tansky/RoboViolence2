@@ -136,7 +136,9 @@ int cPeer2Peer::PrepareSockets()
 
 	// Another babonet process on this host (a local server or client) may hold the LAN port. Then only LAN discovery
 	// is lost: the unicast socket still sends and answers server-browser pings (PNS-56)
+	// The LAN socket is in `master` only when bound; SendTo(-1) reads that
 	bool lanBound = bind(BCfd, (sockaddr *)&ipAdress, sizeof(sockaddr_in)) == 0;
+	if (!lanBound) snprintf(LastError, sizeof(LastError), "LAN port %d in use: LAN discovery off", BB_BROADCAST_PORT);
 
 	FD_ZERO(&master);
     FD_SET((unsigned int)(UDPfd),&master);
@@ -286,6 +288,11 @@ int cPeer2Peer::SendTo(INT4 peerID,cUDPpacket *newPacket,UINT4 exception)
 
 	if(peerID==-1) //est-ce qu'on est en presence d'un send de broadcast ?
 	{
+		if (!FD_ISSET(BCfd, &master)) // LAN port not bound (PrepareSockets): never sent, so never freed; drop it
+		{
+			delete newPacket;
+			return 0;
+		}
         if(!BCPeer)
 		{
 			sockaddr_in newIp;
