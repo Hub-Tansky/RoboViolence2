@@ -626,8 +626,8 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/Host.h` | Host-game settings struct |
 | `game/src/IncorrectName.h` | Dialog: invalid player name |
 | `game/src/IncorrectPassword.h` | Dialog: wrong server password |
-| `game/src/IntroScreen.cpp` | "LOADING" splash after start-up (ADR 0019) |
-| `game/src/IntroScreen.h` | Interface of `IntroScreen.cpp`; `presentLoadingFrame` is the one "LOADING" frame Scene and Map show while they load |
+| `game/src/IntroScreen.cpp` | "LOADING" splash after start-up (ADR 0019), the loading frame Scene and Map present, and the per-frame set-up `Scene::render` starts with |
+| `game/src/IntroScreen.h` | Interface of `IntroScreen.cpp`; `presentLoadingFrame` is the one "LOADING" frame Scene and Map show while they load; `beginFrame` is the shared clear/viewport/projection set-up |
 | `game/src/JoinGame.h` | Join-game screen |
 | `game/src/Key.cpp` | Key binding entry |
 | `game/src/Key.h` | Key binding entry |

@@ -24,9 +24,9 @@
 #include "Game.h"
 #include "Scene.h"
 #include "CMenuManager.h"
-#include "IntroScreen.h"
 
 #ifndef CONSOLE
+#include "IntroScreen.h"
 #include "CRain.h"
 #include "CSnow.h"
 #include "CLava.h"
