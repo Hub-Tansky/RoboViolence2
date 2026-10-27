@@ -314,7 +314,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/decisions/0034-player-data-retention-and-privacy-policy.md` | ADR: the server never relays player IPs, bans (`banlist.tsv`) expire after `sv_banDays`, `admin-audit.log` after 90 days; privacy policy page, installer link and opt-out |
 | `docs/decisions/0036-website-in-rv2-website-repository.md` | ADR: the website, its tests, tooling and Pages workflow live in Hub-Tansky/rv2-website; its tests read `build.yml` from here |
 | `docs/decisions/0037-review-rubric-single-repo-copy.md` | ADR: the review rubric has one repo copy with a unique name; the gate checks its hash |
-| `docs/decisions/0039-widescreen-stretch-shows-more-map.md` | ADR: every 3D projection uses its viewport's aspect; Stretch shows more map sideways (Hor+), Bars stays 4:3 |
+| `docs/decisions/0039-widescreen-stretch-shows-more-map.md` | ADR: the gameplay, scope and intro projections use their viewport's aspect; Stretch shows more map sideways (Hor+), Bars stays 4:3 |
 | `docs/decisions/README.md` | ADR format and index |
 
 ### `docs/ops`
