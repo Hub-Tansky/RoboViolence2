@@ -97,7 +97,7 @@ int main(int, char ** argv)
 	CHECK(!accepted(d));
 
 	// The backoff with a fake clock, as the server drives it (no failed() while locked): 4 free failures, then 60 s,
-	// and each failure after a lock doubles it up to an hour; an hour without failures forgets the IP
+	// and each failure after a lock doubles it up to an hour; an IP is forgotten an hour after its last failure or lock end
 	AdminLockout lockout;
 	long long now = 1000;
 	for (int i = 0; i < 4; ++i) CHECK(lockout.failed("192.0.2.1", now) == 0);
@@ -110,7 +110,10 @@ int main(int, char ** argv)
 		CHECK(!lockout.locked("192.0.2.1", now));
 	}
 	CHECK(!lockout.locked("192.0.2.2", now));
-	now += AdminLockout::MAX_LOCK + 1;
+	// Within an hour of the last lock's end (but over an hour after the failure that set it) it is still remembered
+	now += AdminLockout::MAX_LOCK - 1;
+	CHECK(lockout.failed("192.0.2.1", now) == 3600);
+	now += 3600 + AdminLockout::MAX_LOCK + 1;
 	CHECK(lockout.failed("192.0.2.1", now) == 0); // forgotten: free failures again
 	for (int i = 0; i < 3; ++i) lockout.failed("192.0.2.1", now);
 	CHECK(lockout.failed("192.0.2.1", now) == 60);
