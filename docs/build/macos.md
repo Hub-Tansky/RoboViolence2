@@ -18,7 +18,7 @@ Check it in the new tab; this must list `.bvm` map files (if you pointed it at `
 ls "$BV2_DATA_DIR/main/maps"
 ```
 
-Terminal tabs and the run scripts now use your data. Starting the app by double-click or `open bv2.app` doesn't read `~/.zshrc`: run `launchctl setenv BV2_DATA_DIR "$BV2_DATA_DIR"` once per login for that.
+Terminal tabs and the run scripts now use your data. Starting the app by double-click or `open "Robo Violence 2.app"` (`open bv2.app` in a build) doesn't read `~/.zshrc`: run `launchctl setenv BV2_DATA_DIR "$BV2_DATA_DIR"` once per login for that.
 
 ## Install from a release
 
@@ -37,7 +37,7 @@ Terminal tabs and the run scripts now use your data. Starting the app by double-
 
 3. In that folder, run each in its own Terminal tab: `./run-server.sh`, then `./run-client.sh connect 127.0.0.1`. Add `./run-master.sh` only for the server browser ([README](README.md#playing-a-local-game)).
 
-The package's own `main/` copies (one in `bv2.app/Contents/Resources/` for the client, one in the folder for the servers) hold placeholders, launch scripts and languages; your data replaces the placeholders.
+The package's own `main/` copies (one in `Robo Violence 2.app/Contents/Resources/` for the client, one in the folder for the servers) hold placeholders, launch scripts and languages; your data replaces the placeholders.
 
 ## Build from source
 
