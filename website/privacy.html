@@ -5,24 +5,44 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Privacy policy - Robo Violence 2</title>
   <meta name="description" content="What personal data Robo Violence 2, its servers and this website process, why, for how long, and your rights under the GDPR.">
+  <link rel="canonical" href="https://roboviolence.com/privacy.html">
+  <link rel="alternate" type="text/markdown" href="privacy.md">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Robo Violence 2">
+  <meta property="og:title" content="Privacy policy - Robo Violence 2">
+  <meta property="og:description" content="What personal data Robo Violence 2, its servers and this website process, why, for how long, and your rights under the GDPR.">
+  <meta property="og:url" content="https://roboviolence.com/privacy.html">
+  <meta property="og:image" content="https://roboviolence.com/img/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Robo Violence 2: a blue and a red player shooting at each other in a top-down arena">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="theme-color" content="#2f7df6">
   <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="style.css">
+  <link rel="apple-touch-icon" href="img/rv2-icon.png">
+  <style>body { background: #12141b; color: #e6e8ef; }</style>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="theme.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/lucide@1.49.0/dist/umd/lucide.min.js"></script>
   <script type="module" src="site.js"></script>
 </head>
 <body>
-<header>
-  <div class="wrap">
-    <nav>
-      <a class="brand" href="./">Robo Violence 2</a>
-      <a href="./#install">Download</a>
-      <a href="about.html">About</a>
-      <a data-discord href="#">Discord server</a>
-      <a href="server.html">Your own game server</a>
-    </nav>
-  </div>
+<header class="site-header">
+  <nav class="site-nav site-container" aria-label="Main">
+    <a class="site-brand" href="./"><img src="img/rv2-icon.png" width="32" height="32" alt="">Robo Violence 2</a>
+    <button class="menu-button" type="button" data-menu-button aria-expanded="false" aria-controls="menu"><i data-lucide="menu"></i><span class="sr-only">Menu</span></button>
+    <div class="menu" id="menu">
+      <a class="nav-link" href="install.html">Download</a>
+      <a class="nav-link" href="about.html">About</a>
+      <a class="nav-link" data-discord href="#">Discord server</a>
+      <a class="nav-link" href="server.html">Your own game server</a>
+    </div>
+  </nav>
 </header>
 
-<main class="wrap">
+<main class="page">
+  <div class="page-body site-container">
+    <div class="prose-rv">
   <section>
     <h1>Privacy policy</h1>
     <p>Last updated: 23 October 2026</p>
@@ -55,7 +75,7 @@
     <h3>Server administration</h3>
     <p>Requests to the servers' admin interface (admin.roboviolence.com) are logged with the time, the requester's IP address and the command.</p>
     <h3>This website</h3>
-    <p>This website sets no cookies and uses no analytics or tracking. It is hosted on GitHub Pages; GitHub processes your IP address and request details to deliver the pages. Your browser also loads the release list from api.github.com and two badge images from img.shields.io, which see your IP address. Downloads come from GitHub Releases.</p>
+    <p>This website sets no cookies and uses no analytics or tracking. It is hosted on GitHub Pages; GitHub processes your IP address and request details to deliver the pages. Your browser also loads the page styles from cdn.tailwindcss.com, the icons from cdn.jsdelivr.net, the release list from api.github.com and three badge images from img.shields.io; each of them sees your IP address. Downloads come from GitHub Releases.</p>
     <h3>On your computer</h3>
     <p>Your nickname, settings, screenshots and any game server data you create stay on your computer. The Game doesn't send them to us.</p>
   </section>
@@ -129,15 +149,18 @@
     <h2>10. Changes to this policy</h2>
     <p>We update this policy when the Game or our servers change how they handle personal data. The date at the top shows the latest version; the full history is in the <a href="https://github.com/Hub-Tansky/RoboViolence2/commits/main/website/privacy.html">project repository</a>.</p>
   </section>
+    </div>
+  </div>
 </main>
 
-<footer>
-  <div class="wrap">
-    <div class="badges">
-      <img alt="GitHub Created At" src="https://img.shields.io/github/created-at/Hub-Tansky/RoboViolence2">
-      <img alt="GitHub Release Date" src="https://img.shields.io/github/release-date-pre/Hub-Tansky/RoboViolence2">
+<footer class="site-footer">
+  <div class="site-footer-inner site-container">
+    <div class="flex flex-wrap gap-2">
+      <img alt="GitHub License" src="https://img.shields.io/github/license/Hub-Tansky/RoboViolence2" height="20">
+      <img alt="GitHub Created At" src="https://img.shields.io/github/created-at/Hub-Tansky/RoboViolence2" height="20">
+      <img alt="GitHub Release Date" src="https://img.shields.io/github/release-date-pre/Hub-Tansky/RoboViolence2" height="20">
     </div>
-    <p>Unofficial fork of BaboViolent 2 by bitHeads / RndLabs, not endorsed by them. Code under GPLv3 on <a href="https://github.com/Hub-Tansky/RoboViolence2">GitHub</a>. <a href="privacy.html">Privacy policy</a>.</p>
+    <p><a class="footer-link" href="privacy.html">Privacy policy</a></p>
   </div>
 </footer>
 </body>
