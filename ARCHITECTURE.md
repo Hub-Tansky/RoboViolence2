@@ -203,8 +203,8 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 
 | path | purpose |
 |---|---|
-| `.claude/agents/thermo-nuclear-code-quality-review.md` | Claude Code subagent: fresh-context step-closing review (REVIEW.md section 5) |
-| `.claude/skills/thermo-nuclear-code-quality-review/SKILL.md` | Claude Code skill: maintainability rubric the review subagent loads |
+| `.claude/agents/rv2-thermo-nuclear-review.md` | Claude Code subagent: fresh-context step-closing review (REVIEW.md section 5) |
+| `.claude/skills/rv2-thermo-nuclear-review/SKILL.md` | Claude Code skill: maintainability rubric the review subagent loads |
 
 ### `.github/actions/setup-vcpkg`
 

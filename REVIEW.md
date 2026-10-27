@@ -50,7 +50,7 @@ In a PR without an Allowed paths row, changes to guard files (`tools/check-*`, `
 Required for every PR with an Allowed paths row, and for an architecture-changing PR (new or moved modules, libraries or interfaces, changed ownership or data flow, protocol or file-format changes).
 
 1. `tools/review.sh --full <preset>` passes.
-2. Spawn the **`thermo-nuclear-code-quality-review` subagent** (Agent tool, `.claude/agents/`). Its prompt holds only the PR number (or the scope text), the merge-base and links to earlier review records it must not contradict. It loads the `thermo-nuclear-code-quality-review` skill (`.claude/skills/`), starts its report with the tool's load line (or `SKILL: NOT LOADED – <reason>`), reviews `git diff <merge-base>..HEAD` against the skill and section 2, and doesn't re-raise findings earlier records rejected or deferred. The author doesn't pre-filter its findings. If the subagent or skill isn't available, stop and tell the owner.
+2. Spawn the **`rv2-thermo-nuclear-review` subagent** (Agent tool, `.claude/agents/`). Its prompt holds only the PR number (or the scope text), the merge-base and links to earlier review records it must not contradict. It loads the `rv2-thermo-nuclear-review` skill (`.claude/skills/`), starts its report with the tool's load line (or `SKILL: NOT LOADED – <reason>`), reviews `git diff <merge-base>..HEAD` against the skill and section 2, and doesn't re-raise findings earlier records rejected or deferred. The author doesn't pre-filter its findings. If the subagent or skill isn't available, stop and tell the owner.
    Paste the report unedited into the PR description inside `<details><summary>Raw reviewer report</summary> … </details>` (later rounds appended under `Round k`). It is evidence, not proof: the author could forge it, so the owner may spot-check it against the session.
 3. Act on every finding:
 
@@ -70,7 +70,7 @@ Required for every PR with an Allowed paths row, and for an architecture-changin
 ```markdown
 ## Review record
 
-Reviewer: fresh-context subagent thermo-nuclear-code-quality-review, YYYY-MM-DD
+Reviewer: fresh-context subagent rv2-thermo-nuclear-review, YYYY-MM-DD
 Diff: <merge-base>..<head>
 
 ### review.sh

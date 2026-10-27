@@ -99,7 +99,7 @@ if row and not draft:
         problems.append("review gate: the record lacks 'Reviewer: fresh-context subagent' or '### Findings'")
     elif re.search(r"\|\s*pending\s*\|", rec):
         problems.append("review gate: the record still has pending findings")
-    elif "SKILL: Launching skill: thermo-nuclear-code-quality-review" not in rec or "SKILL: NOT LOADED" in rec:
+    elif "SKILL: Launching skill: rv2-thermo-nuclear-review" not in rec or "SKILL: NOT LOADED" in rec:
         problems.append("review gate: the raw reviewer report lacks the skill's load line, or says NOT LOADED")
     else:
         for r in re.findall(r"^\|.*\bdeferred\b.*\|\s*$", rec, re.M):
