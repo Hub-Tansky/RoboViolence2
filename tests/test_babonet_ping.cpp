@@ -81,7 +81,7 @@ int main(int argc, char ** argv)
 		return SKIP;
 	}
 	char query[1] = {0};
-	bb_peerSend(-1, query, 1, sizeof(query)); // a LAN query with the port taken is dropped, not queued forever
+	bb_peerSend(-1, query, 1, sizeof(query)); // runs SendTo(-1) with the LAN port unbound; baboNet.h can't observe the drop
 
 	std::string server = std::string("\"") + argv[0] + "\" --serve";
 	std::thread serverThread([&] { std::system(server.c_str()); });

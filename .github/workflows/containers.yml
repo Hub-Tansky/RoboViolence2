@@ -81,6 +81,7 @@ jobs:
           python3 - <<'PY'
           import socket, struct
           HEADER = '<BIHH'  # interface, packet id, type, payload size (ExtractPacket in engine/babonet/src/cPeer2Peer.cpp)
+          HEADER_SIZE = struct.calcsize(HEADER)  # 9 bytes
           INTERFACE_SYSTEM, TYPE_DEMAND, TYPE_CONFIRM = 0, 2, 3  # engine/babonet/src/cUDPpacket.h
           FIRST_PACKET, REQUEST_ID = 1, struct.pack('<I', 7)
           for port in (3333, 3334):
@@ -94,12 +95,11 @@ jobs:
                   except socket.timeout:
                       continue
                   n = 0
-                  head = struct.calcsize(HEADER)
-                  while n + head <= len(data):
+                  while n + HEADER_SIZE <= len(data):
                       interface, _, type_id, size = struct.unpack_from(HEADER, data, n)
-                      payload = data[n + head:n + head + size]
+                      payload = data[n + HEADER_SIZE:n + HEADER_SIZE + size]
                       confirmed |= interface == INTERFACE_SYSTEM and type_id == TYPE_CONFIRM and payload == REQUEST_ID
-                      n += head + size
+                      n += HEADER_SIZE + size
                   if confirmed:
                       break
               print(port, 'confirmed' if confirmed else 'no answer')
