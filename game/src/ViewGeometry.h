@@ -29,7 +29,7 @@ namespace view
 	// This frame's viewport, from the window resolution and r_widescreen (client only, defined in IntroScreen.cpp)
 	Rect current();
 
-	// Width over height of a viewport, the aspect every 3D projection uses; 4:3 for an empty window
+	// Width over height of a viewport, the aspect the gameplay, scope and intro projections use; 4:3 for an empty window
 	inline float aspect(const Rect & r)
 	{
 		return (r.w > 0 && r.h > 0) ? static_cast<float>(r.w) / static_cast<float>(r.h) : ASPECT_4_3;

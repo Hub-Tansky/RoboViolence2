@@ -5,7 +5,7 @@
 - Affects: `game/src/ViewGeometry.h`, `IntroScreen::beginFrame`, `Game::render`, the camera clamp in `Map::update` (PR #113)
 
 ## Context
-- The camera sits 7 units above the player (`game/src/Map.cpp:1190`; higher only for the sniper and spectators) with a 60° vertical field of view (`game/src/IntroScreen.cpp:78`), and the HUD is laid out on a virtual 800x600 canvas (`game/src/ClientRender.cpp:65`, `game/src/CMenuManager.cpp:139`), so every resolution shows the same part of the map. A higher resolution is only sharper (BV2 design).
+- The camera sits 7 units above a living player (`game/src/Map.cpp:1190`; the sniper's 5-12 and the spectator's and editor's zoomable `14 + zoom` aside) with a 60° vertical field of view (`game/src/IntroScreen.cpp:78`), and the HUD is laid out on a virtual 800x600 canvas (`game/src/ClientRender.cpp:65`, `game/src/CMenuManager.cpp:139`), so every resolution shows the same part of the map. A higher resolution is only sharper (BV2 design).
 - "Widescreen (Stretch)" (`r_widescreen 1`, `game/src/GameVar.cpp:697`) drew that 4:3 view through a 4:3 projection into the whole 16:10 or 16:9 window, so every model was 20-33% wider than tall. The owner reported it at 1920x1200 on 2026-10-27 ("big balls, big walls").
 
 ## Decision
