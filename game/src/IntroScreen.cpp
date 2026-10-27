@@ -73,8 +73,6 @@ void IntroScreen::renderLoading(unsigned int font, float brightness)
 CVector2i IntroScreen::beginFrame()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	CVector2i res = dkwGetResolution();
-
 	view::Rect v = view::current();
 	glViewport(v.x, 0, v.w, v.h);
 	dkglSetProjection(60, 1, 50, view::aspect(v), 1);
@@ -84,7 +82,7 @@ CVector2i IntroScreen::beginFrame()
 	glEnable(GL_CULL_FACE);
 	glDisable(GL_TEXTURE_2D);
 	glColor3f(1,1,1);
-	return res;
+	return dkwGetResolution();
 }
 
 
