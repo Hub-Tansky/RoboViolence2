@@ -20,6 +20,7 @@
 #include "IntroScreen.h"
 #include "GameVar.h"
 #include "Helper.h"
+#include "ViewGeometry.h"
 
 
 
@@ -74,11 +75,9 @@ CVector2i IntroScreen::beginFrame()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	CVector2i res = dkwGetResolution();
 
-	if(gameVar.r_widescreen > 1)
-		glViewport((GLint)((res[0] - res[1]*1.333f)/2.0f), 0, (GLsizei)(res[1]*1.333f), (GLsizei)res[1]);
-	else
-		glViewport(0, 0, res[0], res[1]);
-	dkglSetProjection(60, 1, 50, viewAspect(), 1);
+	view::Rect v = view::rect(res[0], res[1], gameVar.r_widescreen);
+	glViewport(v.x, 0, v.w, v.h);
+	dkglSetProjection(60, 1, 50, (float)v.w, (float)v.h);
 
 	// Per-frame default state
 	glEnable(GL_DEPTH_TEST);
@@ -86,16 +85,6 @@ CVector2i IntroScreen::beginFrame()
 	glDisable(GL_TEXTURE_2D);
 	glColor3f(1,1,1);
 	return res;
-}
-
-
-
-float IntroScreen::viewAspect()
-{
-	CVector2i res = dkwGetResolution();
-	if (gameVar.r_widescreen > 1 || res[1] <= 0)
-		return 1.333f;
-	return (float)res[0] / (float)res[1];
 }
 
 

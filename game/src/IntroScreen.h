@@ -45,9 +45,6 @@ public:
 	// Clears the screen and sets the viewport, projection and default GL state of every frame; returns the window resolution
 	static CVector2i beginFrame();
 
-	// Width/height of the 3D viewport: 4:3 with bars (r_widescreen 2), the window's own shape otherwise
-	static float viewAspect();
-
 	// Clears the screen, draws "LOADING" and swaps: the frame Scene and Map show while they load
 	static void presentLoadingFrame(unsigned int font);
 

@@ -27,6 +27,7 @@
 
 #ifndef CONSOLE
 #include "IntroScreen.h"
+#include "ViewGeometry.h"
 #include "CRain.h"
 #include "CSnow.h"
 #include "CLava.h"
@@ -1182,10 +1183,8 @@ void Map::update(float delay, Player * thisPlayer)
 	// Snipers should be able to scope at map edges
 	if (isEditor || (thisPlayer && thisPlayer->weapon && thisPlayer->weapon->weaponID != WEAPON_SNIPER) || (thisPlayer && thisPlayer->teamID == PLAYER_TEAM_SPECTATOR))
 	{
-		// 5 suits a 4:3 view; a wider view needs a wider margin to keep the void past the edge off screen
-		float marginX = 5 * IntroScreen::viewAspect() / 1.333f;
-		if (camLookAt[0] < marginX) camLookAt[0] = marginX;
-		if (camLookAt[0] > (float)size[0]-marginX) camLookAt[0] = (float)size[0]-marginX;
+		CVector2i res = dkwGetResolution();
+		camLookAt[0] = view::clampCameraX(camLookAt[0], (float)size[0], view::aspect(res[0], res[1], gameVar.r_widescreen));
 		if (camLookAt[1] < 4) camLookAt[1] = 4;
 		if (camLookAt[1] > (float)size[1]-4) camLookAt[1] = (float)size[1]-4;
 	}
