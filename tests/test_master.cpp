@@ -14,6 +14,7 @@
 #include <unistd.h>
 #endif
 #include <chrono>
+#include <cstddef>
 #include <cstdint>
 #include <cstring>
 #include <ctime>
@@ -230,11 +231,16 @@ int main(int argc, char ** argv)
 	stCacheBan ban = {};
 	strcpy(ban.Nick, "Nick'--;%");
 	strcpy(ban.IP, "1';--%");
-	// Refused (ADR 0038): an older game's 68-byte ban with the password in clear, and a proof an hour old
+	// Refused (ADR 0038): an older game's 68-byte ban with the password in clear, a valid ban with trailing bytes
+	// (the master checks the size, not only the proof), and a proof an hour old
 	char oldBan[68] = {};
-	std::memcpy(oldBan, &ban, 60);
-	std::strcpy(oldBan + 60, "roxbabo");
+	std::memcpy(oldBan, &ban, offsetof(stCacheBan, Time));
+	std::strcpy(oldBan + offsetof(stCacheBan, Time), "roxbabo");
 	bb_clientSend(game, oldBan, sizeof(oldBan), CACHE_BAN);
+	sign(ban, BAN_PASS, (uint32_t)std::time(nullptr));
+	char longBan[sizeof(ban) + 4] = {};
+	std::memcpy(longBan, &ban, sizeof(ban));
+	bb_clientSend(game, longBan, sizeof(longBan), CACHE_BAN);
 	sign(ban, BAN_PASS, (uint32_t)std::time(nullptr) - 3600);
 	bb_clientSend(game, (char *)&ban, sizeof(ban), CACHE_BAN);
 	pump({game});
@@ -283,7 +289,7 @@ int main(int argc, char ** argv)
 			}
 		CHECK(listed || std::printf("  filter \"%s\"\n", filter) < 0);
 	}
-	// An unban signed with the wrong password leaves the ban
+	// An unban signed with the wrong password leaves the ban,
 	stCacheUnban unban = {};
 	sqlite3_open("master.db", &db);
 	{
@@ -299,6 +305,15 @@ int main(int argc, char ** argv)
 		SqlStatement bans(db, "Select ID From BanList Where IP = ?;");
 		bans.bindText(1, ban.IP);
 		CHECK(bans.row());
+	}
+	// and the right one removes it
+	sign(unban, BAN_PASS, (uint32_t)std::time(nullptr));
+	bb_clientSend(game, (char *)&unban, sizeof(unban), CACHE_UNBAN);
+	pump({game});
+	{
+		SqlStatement bans(db, "Select ID From BanList Where IP = ?;");
+		bans.bindText(1, ban.IP);
+		CHECK(!bans.row());
 	}
 	sqlite3_close(db);
 	bb_clientDisconnect(game);

@@ -25,6 +25,8 @@
 #include "Credentials.h"
 #include "Retention.h"
 #include "ServerValidator.h"
+#include <algorithm>
+#include <iterator>
 #include <map>
 #include <string>
 
@@ -48,6 +50,37 @@ struct cachedPlayer
 	char IP[16];
 };
 
+// Per IP, across reconnects: from the 5th failed admin login, that IP's admin logins are refused for 60 s, doubling
+// with each further failure up to an hour (rate limiting per NIST SP 800-63B-4, ADR 0038). `now` is Unix seconds.
+class AdminLockout
+{
+public:
+	static constexpr int FREE_FAILURES = 5;
+	static constexpr long long FIRST_LOCK = 60, MAX_LOCK = 3600;
+
+	bool locked(const std::string & ip, long long now) const
+	{
+		auto it = entries.find(ip);
+		return it != entries.end() && now < it->second.until;
+	}
+	// Returns the seconds the IP is now locked for, 0 if not
+	long long failed(const std::string & ip, long long now)
+	{
+		for (auto it = entries.begin(); it != entries.end();) // forget IPs whose lock ran out
+			it = it->second.until != 0 && it->second.until <= now ? entries.erase(it) : std::next(it);
+		Entry & e = entries[ip];
+		if (++e.fails < FREE_FAILURES) return 0;
+		const long long lock = std::min(FIRST_LOCK << std::min(e.fails - FREE_FAILURES, 6), MAX_LOCK);
+		e.until = now + lock;
+		return lock;
+	}
+	void succeeded(const std::string & ip) { entries.erase(ip); }
+
+private:
+	struct Entry { int fails = 0; long long until = 0; };
+	std::map<std::string, Entry> entries;
+};
+
 class Server
 {
 public:
@@ -64,10 +97,7 @@ public:
 	uint8_t joinNonce[MAX_PLAYER][credentials::NONCE_SIZE] = {};
 	// Per slot: failed admin logins on this connection; the 5th disconnects it (PNS-42)
 	int adminFails[MAX_PLAYER] = {};
-	// Per IP, across reconnects: from the 5th failed admin login, that IP's admin requests are refused for 60 s,
-	// doubling with each further failure up to an hour (rate limiting per NIST SP 800-63B-4, ADR 0038)
-	struct AdminLock { int fails = 0; long long until = 0; };
-	std::map<std::string, AdminLock> adminLocks;
+	AdminLockout adminLockout;
 	// Per slot: seconds since the TCP connect while the join handshake is pending; past JOIN_TIMEOUT it is dropped
 	float joinWait[MAX_PLAYER] = {};
 	static constexpr float JOIN_TIMEOUT = 10.0f;

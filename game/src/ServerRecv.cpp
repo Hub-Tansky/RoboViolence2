@@ -252,9 +252,8 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 			if (!gameVar.zsv_adminPass.isNull() &&
 				!gameVar.zsv_adminUser.isNull())
 			{
-				AdminLock & lock = adminLocks[sender->playerIP];
 				const long long now = (long long)time(nullptr);
-				const bool locked = now < lock.until;
+				const bool locked = adminLockout.locked(sender->playerIP, now);
 				// Step 10: proofs over this connection's challenge
 				if (!locked &&
 					credentials::check(gameVar.zsv_adminUser.s, "admin user", joinNonce[slot], adminRequest.login) &&
@@ -263,7 +262,7 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 					//--- Admin accepted !!
 					bb_serverSend(0, 0, NET_SVCL_ADMIN_ACCEPTED, bbnetID);
 					sender->isAdmin = true;
-					adminLocks.erase(sender->playerIP);
+					adminLockout.succeeded(sender->playerIP);
 					CString logInName = "Admin name: ";
 					CString logInIP = "Admin IP: ";
 					logInName += sender->name;
@@ -280,9 +279,9 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 					console->add(logInName);
 					console->add(logInIP);
 					if (locked)
-						console->add(CString("\x4> Admin login from %s refused for %lld s", sender->playerIP, lock.until - now), true);
-					else if (++lock.fails >= 5)
-						lock.until = now + std::min(60LL << std::min(lock.fails - 5, 6), 3600LL);
+						console->add(CString("\x4> Admin login from %s refused: locked after failed logins", sender->playerIP), true);
+					else if (long long lock = adminLockout.failed(sender->playerIP, now))
+						console->add(CString("\x4> Admin logins from %s locked for %lld s", sender->playerIP, lock), true);
 					if (++adminFails[slot] >= 5)
 					{
 						console->add(CString("\x4> Too many admin login attempts, disconnecting %s", sender->playerIP), true);

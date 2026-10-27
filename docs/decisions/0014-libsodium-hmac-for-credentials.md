@@ -1,6 +1,6 @@
 # 0014: Use libsodium for the credential HMAC and nonces
 
-- Status: Accepted
+- Status: Accepted; amended by [0038](0038-dead-accounts-hidden-admin-and-ban-secrets-hardened.md)
 - Date: 2026-10-12
 - Affects: [step 10](https://github.com/Hub-Tansky/RoboViolence2/blob/58c91b2a660db2b290b0b5f504381980a6aedba2/docs/roadmap/phase-b-security-infrastructure-anti-cheat/step10-server-credentials.md) §10.1
 
