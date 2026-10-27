@@ -52,7 +52,7 @@ struct cachedPlayer
 
 // Per IP, across reconnects: from the 5th failed admin login, that IP's admin logins are refused for 60 s, doubling
 // with each failure after a lock up to an hour (rate limiting per NIST SP 800-63B-4, ADR 0038). An IP is forgotten
-// after MAX_LOCK without failures or lock. Attempts while locked are refused, not counted. `now` is Unix seconds.
+// MAX_LOCK after its last failure or lock end. Attempts while locked are refused, not counted. `now` is Unix seconds.
 class AdminLockout
 {
 public:
@@ -67,19 +67,17 @@ public:
 	// Returns the seconds the IP is now locked for, 0 if not
 	long long failed(const std::string & ip, long long now)
 	{
-		for (auto it = entries.begin(); it != entries.end();) // forget IPs quiet for MAX_LOCK
-			it = now - it->second.quietFrom > MAX_LOCK ? entries.erase(it) : std::next(it);
+		for (auto it = entries.begin(); it != entries.end();) // forget IPs MAX_LOCK after their last failure or lock end
+			it = now - it->second.until > MAX_LOCK ? entries.erase(it) : std::next(it);
 		Entry & e = entries[ip];
-		e.quietFrom = now;
-		if (++e.fails < FREE_FAILURES) return 0;
-		const long long lock = std::min(FIRST_LOCK << std::min(e.fails - FREE_FAILURES, 6), MAX_LOCK);
-		e.until = e.quietFrom = now + lock;
+		const long long lock = ++e.fails < FREE_FAILURES ? 0 : std::min(FIRST_LOCK << std::min(e.fails - FREE_FAILURES, 6), MAX_LOCK);
+		e.until = now + lock; // a free failure "locks" until now: not locked, but remembered
 		return lock;
 	}
 	void succeeded(const std::string & ip) { entries.erase(ip); }
 
 private:
-	struct Entry { int fails = 0; long long until = 0, quietFrom = 0; };
+	struct Entry { int fails = 0; long long until = 0; };
 	std::map<std::string, Entry> entries;
 };
 

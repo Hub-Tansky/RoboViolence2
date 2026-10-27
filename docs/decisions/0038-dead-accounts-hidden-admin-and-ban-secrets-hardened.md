@@ -12,7 +12,7 @@
 
 ## Decision
 - Owner-approved [GUI] exception (2026-10-27, project thread "Check account password rules vs 2026 standards"): hide the Profile sub-tab row and rename the tab "Appearance" (Host narrows from 90 to 80 so the row keeps its width); keep the account code for a later, safe rewrite (Project item "Player accounts - restore tab and functions, make it safe"). The client sends zeros instead of the password MD5.
-- `zsv_adminPass` needs 15 characters for in-game admin login. From the 5th failure from one IP, that IP's admin logins are refused for 60 s, doubling with each failure after a lock up to an hour, across reconnects; an IP is forgotten after an hour without failures.
+- `zsv_adminPass` needs 15 characters for in-game admin login. From the 5th failure from one IP, that IP's admin logins are refused for 60 s, doubling with each failure after a lock up to an hour, across reconnects; an IP is forgotten an hour after its last failure or lock ends.
 - `cacheban`, `cachebanremote` and `cacheunban` send `Time` and an HMAC-SHA256 keyed by `BV2_MASTER_BAN_PASS` over the packet with the proof zeroed. The master needs a 15+ character secret and a proof within 5 minutes of its clock. Every packet the master reads must have its exact wire size.
 - `Credentials.*` moves from `game/src` to the module `engine/credentials`, so the game, the master and the tests sign and check bans with one `credentials::signPacket`/`checkPacket`, and both secrets share `credentials::MIN_SECRET_LENGTH`.
 
