@@ -42,7 +42,11 @@ public:
 	// Render
 	void render();
 
-	// "LOADING" in the big menu font, as Scene shows while it loads
+	// Clears the screen, draws "LOADING" and swaps: the frame Scene and Map show while they load
+	static void presentLoadingFrame(unsigned int font);
+
+private:
+	// "LOADING" in the big menu font
 	static void renderLoading(unsigned int font, float brightness);
 };
 

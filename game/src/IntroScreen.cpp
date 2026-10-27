@@ -66,5 +66,29 @@ void IntroScreen::renderLoading(unsigned int font, float brightness)
 		glPopAttrib();
 	dkglPopOrtho();
 }
+
+
+
+void IntroScreen::presentLoadingFrame(unsigned int font)
+{
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	CVector2i res = dkwGetResolution();
+
+	if(gameVar.r_widescreen > 1)
+		glViewport((GLint)((res[0] - res[1]*1.333f)/2.0f), 0, (GLsizei)(res[1]*1.333f), (GLsizei)res[1]);
+	else
+		glViewport(0, 0, res[0], res[1]);
+	dkglSetProjection(60, 1, 50, (float)res[1]*1.333f, (float)res[1]);
+
+	// Default state the loaders expect
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
+	glDisable(GL_TEXTURE_2D);
+	glColor3f(1,1,1);
+
+	renderLoading(font, 1);
+
+	dkglSwapBuffers();
+}
 #endif
 
