@@ -102,6 +102,7 @@ jobs:
           path: dist
           pattern: roboviolence2-*
           merge-multiple: true
+          skip-decompress: true  # the macOS .zip is a release file: keep it, don't extract it into dist/
       - name: Source tarball and release
         env:
           GH_TOKEN: ${{ github.token }}
