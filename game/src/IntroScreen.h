@@ -42,7 +42,14 @@ public:
 	// Render
 	void render();
 
-	// "LOADING" in the big menu font, as Scene shows while it loads
+	// Clears the screen and sets the viewport, projection and default GL state of every frame; returns the window resolution
+	static CVector2i beginFrame();
+
+	// Clears the screen, draws "LOADING" and swaps: the frame Scene and Map show while they load
+	static void presentLoadingFrame(unsigned int font);
+
+private:
+	// "LOADING" in the big menu font
 	static void renderLoading(unsigned int font, float brightness);
 };
 

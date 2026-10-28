@@ -374,7 +374,7 @@ GameVar::GameVar()
 	sv_port = 3333;
 	dksvarRegister(CString("sv_port [int : valid port (default 3333)]"), &sv_port, 1024, 65536,
 		LIMIT_MIN | LIMIT_MAX, true);
-	sv_banDays = 365; // a ban's nick and IP are personal data: kept a year (website/privacy.html)
+	sv_banDays = 365; // a ban's nick and IP are personal data: kept a year (https://roboviolence.com/privacy.html)
 	dksvarRegister(CString("sv_banDays [int : days a ban lasts, 0 forever (default 365)]"), &sv_banDays, 0, 3650, LIMIT_MIN | LIMIT_MAX, true);
 	sv_maxPlayer = 16; // Max player in the game
 	dksvarRegister(CString("sv_maxPlayer [int : 1 to 32 (default 16)]"), &sv_maxPlayer, 1, 32,

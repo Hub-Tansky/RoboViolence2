@@ -9,20 +9,20 @@ Robo Violence 2: unofficial fork of BaboViolent 2, a top-down multiplayer shoote
 | Deliverables | `bv2` (client), `bv2dedicated` (headless server, `CONSOLE`) and `bv2master`. CI builds and tests all three on Windows, macOS and Linux; the client runs 10 s under xvfb (ASan). Real games on each OS: not yet verified (Phase B step 2). |
 | Build | CMake 3.25+, Ninja presets (`CMakePresets.json`), vcpkg manifest. Output in `build/<preset>/runtime/` ([ADR 0005](docs/decisions/0005-runtime-main-data-root.md)). |
 | Platforms | Targets: Linux x64, macOS 12+ arm64, Windows 10 22H2 or later x64 ([ADR 0012](docs/decisions/0012-windows-10-22h2-minimum.md)); Windows API level pinned to Windows 10 20H1 (`NTDDI_VERSION`). `engine/zeven/include/platform.h` defines `BV2_PLATFORM_*`, `BV2_POSIX`; CMake force-includes it. |
-| Modules | `game` (client, server, editor); `engine/babonet` networking (`bb_*`, `CThread` on `std::thread`); `engine/zeven` utilities (`zeven_core`: `dkc dksvar` + `CString/CVector/CMatrix`; `zeven_console`: no-op `dkt` for the server; `zeven_client`: `dkw dki dkgl dkt dkf dkp dks`); `engine/dko` model loader; `masterserver`. |
+| Modules | `game` (client, server, editor); `engine/babonet` networking (`bb_*`, `CThread` on `std::thread`); `engine/zeven` utilities (`zeven_core`: `dkc dksvar` + `CString/CVector/CMatrix`; `zeven_console`: no-op `dkt` for the server; `zeven_client`: `dkw dki dkgl dkt dkf dkp dks`); `engine/dko` model loader; `engine/credentials` password HMAC proofs (libsodium); `masterserver`. |
 | Dependencies | vcpkg (`vcpkg.json`, pinned baseline): sqlite3, libsodium (ADR 0014); feature `client`: sdl3, miniaudio, stb; feature `http`: curl (off, ADR 0002). Generated, committed: glad GL 2.1 (`engine/zeven/third_party/glad`). System: GLU. No libcurl or OpenSSL is linked by default. |
 | Platform layer | SDL3 window and input (`dkw`, `dki`), miniaudio (`dks`), glad ([ADR 0006](docs/decisions/0006-sdl3-miniaudio-glad-platform-layer.md)). One client `main()` for all OSes. |
 | Tick | Fixed 30 Hz: every `update(float delay)` gets `1/30`; "frames" are a time unit (30 = 1 s). |
-| Network | TCP, raw structs `memcpy`'d from `game/src/netPacket.h`. The server is authoritative for hits, damage, spawns, projectiles and flags; clients for their own movement. `playerID` (slot) differs from `babonetID` (connection). Protocol `GAME_VERSION_SV/CL` = 22100 (`game/src/Server.h:35`). Join and admin passwords are HMAC proofs over a per-connection challenge (`game/src/Credentials.h`, ADR 0014). |
+| Network | TCP, raw structs `memcpy`'d from `game/src/netPacket.h`. The server is authoritative for hits, damage, spawns, projectiles and flags; clients for their own movement. `playerID` (slot) differs from `babonetID` (connection). Protocol `GAME_VERSION_SV/CL` = 22100 (`game/src/Server.h:35`). Join and admin passwords are HMAC proofs over a per-connection challenge; master bans are HMAC-signed packets (`engine/credentials/include/Credentials.h`, ADR 0014, 0038). |
 | Variants | `CONSOLE` = headless server (explicit file list in `game/CMakeLists.txt`). Direct3D, non-Pro and VLD code were removed in Step 1. |
 | Config and secrets | Tracked: `config/*.example.cfg` with empty secrets, `content-seed/*.sql` for generated DBs. Real values stay local; gitleaks, hooks and CI enforce it ([config/README.md](config/README.md)). |
 | Assets | The original assets are removed and blocked by hash (`tools/check-original-assets.py`). Only `content/languages/` (English strings, template, guide) and `content/LaunchScript/` remain; the build generates placeholders (`tools/gen-placeholder-content.py`). |
 | Encoding | UTF-8 without BOM, LF; `tools/check-encoding.py`. Some comments hold U+FFFD where upstream lost accents. |
 | Supply chain | Dependency graph fed by vcpkg (`dependency-graph.yml`, on push to `main`); Dependabot alerts and security updates on; Dependabot version updates for GitHub Actions (`.github/dependabot.yml`); CodeQL `c-cpp` and `actions` (`codeql.yml`, not required). Dependabot and OSV can't read vcpkg purls; `osv-vcpkg.yml` (weekly) queries OSV by each port's upstream commit (`tools/osv-vcpkg.py`). Bump the vcpkg baseline monthly, or sooner when it reports a port. |
-| Website | `website/`: static pages for roboviolence.com on GitHub Pages (`pages.yml`, [ADR 0029](docs/decisions/0029-static-website-on-github-pages.md)). |
+| Website | roboviolence.com is built and deployed from [Hub-Tansky/rv2-website](https://github.com/Hub-Tansky/rv2-website) ([ADR 0036](docs/decisions/0036-website-in-rv2-website-repository.md)); its tests read the release file names from `build.yml`. |
 | Hosting | Server images from `packaging/docker/Dockerfile` (GHCR on `main`), runbook [docs/ops/runbook.md](docs/ops/runbook.md). |
 | Known defects | [docs/analysis/KEY_QUESTIONS.md](https://github.com/Hub-Tansky/RoboViolence2/blob/fc0aff7c5aa946406c7c110e8e7c2d972a7daeb8/docs/analysis/KEY_QUESTIONS.md). |
-| Decisions | [docs/decisions/README.md](docs/decisions/README.md): 0001 Ninja, 0002 libcurl compiled out, 0003 OpenGL 2.1 kept, 0004 project name (superseded by 0008), 0005 `main/` data root, 0006 platform layer, 0007 data root, pref dir and config layers, 0008 display name "Robo Violence 2", 0009 internal renaming, 0010 BV2 asset compatibility and GUI freeze, 0011 gettext PO translations, 0012 Windows 10 22H2 minimum, 0013 rulesets, 0014 libsodium HMAC, 0015 admin HTTP API, 0016 player data lookup and package content, 0017 playtest pull agent, 0018 staging pull deploy, 0019 in-game name and fork credits, 0020 package and release format, 0021 one-argument CString is text, 0022 advertised server address, 0023 step review subagent in the repo, 0024 GitHub Project is the backlog, 0025 client autotest mode, 0026 screenshot goldens, 0029 static website on GitHub Pages, 0033 first-run data dialog recommends the BV2 zip, 0034 player data retention and privacy policy. |
+| Decisions | [docs/decisions/README.md](docs/decisions/README.md): 0001 Ninja, 0002 libcurl compiled out, 0003 OpenGL 2.1 kept, 0004 project name (superseded by 0008), 0005 `main/` data root, 0006 platform layer, 0007 data root, pref dir and config layers, 0008 display name "Robo Violence 2", 0009 internal renaming, 0010 BV2 asset compatibility and GUI freeze, 0011 gettext PO translations, 0012 Windows 10 22H2 minimum, 0013 rulesets, 0014 libsodium HMAC, 0015 admin HTTP API, 0016 player data lookup and package content, 0017 playtest pull agent, 0018 staging pull deploy, 0019 in-game name and fork credits, 0020 package and release format, 0021 one-argument CString is text, 0022 advertised server address, 0023 step review subagent in the repo (superseded by 0037), 0024 GitHub Project is the backlog, 0025 client autotest mode, 0026 screenshot goldens, 0029 static website (moved to rv2-website), 0033 first-run data dialog recommends the BV2 zip, 0034 player data retention and privacy policy, 0035 website Tailwind and agent files (moved to rv2-website), 0036 website in rv2-website, 0037 review rubric single repo copy, 0038 dead account pages hidden, admin and ban secrets hardened, 0039 Widescreen (Stretch) shows more map. |
 
 ### Open items
 
@@ -55,8 +55,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `AGENTS.md` | Canonical agent and contributor instructions; work tracking in the GitHub Project |
 | `ARCHITECTURE.md` | This file: summary and file inventory |
 | `CMakeLists.txt` | Root CMake project: options, runtime layout, placeholder content, subdirectories, install layout (binaries, `share/bv2/main` as `runtime/main` holds it, `.desktop`, icons; `bv2master` in component `master`), which the `.deb` packages |
-| `CMakePresets.json` | Presets: linux-x64, macos-arm64, win-x64-msvc (Debug), -asan and -release variants (Ninja); macOS uses the overlay triplet in `triplets/` |
-| `triplets/arm64-osx.cmake` | vcpkg overlay triplet: macOS arm64 ports built for macOS 12 (PNS-26) |
+| `CMakePresets.json` | Presets: linux-x64, macos-arm64, win-x64-msvc (Debug), -asan and -release variants (Ninja); macOS uses the overlay triplet in `tools/vcpkg-triplets/` |
 | `LICENSE.txt` | GPLv3 text (code only) |
 | `README.md` | Project overview, fork and asset-removal statement |
 | `REVIEW.md` | Definition of done: `tools/review.sh` checks, reviewer checklist, defined terms, forbidden shortcuts, fresh-context PR review (`.claude/agents/`) and its record in the PR description |
@@ -96,7 +95,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `packaging/docker/compose.example.yml` | Compose example: master, CTF (3333) and TDM (3334) game servers and the admin TLS proxy on one host, secrets from an env file outside the repo; `BV2_IMAGE_TAG` pins both images to a commit |
 | `packaging/windows/bv2.manifest` | Windows manifest for `bv2`, `bv2dedicated` and `bv2master`: PerMonitorV2 DPI, UTF-8 code page, Windows 10/11 |
 | `packaging/windows/bv2.rc.in` | Windows resource script template: embeds `packaging/icons/roboviolence2.ico` |
-| `tests/CMakeLists.txt` | ctest targets: netPacket, config, fileio, credentials, join password, admin login, admin API, babonet large message, the two `SqlStatement.h` copies identical, crash fixes, validator, missing music (client builds), app icon files and wiring, the built-in window icon (Linux client builds), the hicolor install (Linux), the `.deb` build (Linux), dedicated-server smoke, in-process server harness (`bv2server_lib` + fake babonet), packet hygiene, corpus replay, crash-input tests for `crash-*.bin` under ASan (none at present), master server, autotest runner and (with Xvfb on Linux, or on macOS) the client on autotest scripts; with Xvfb on Linux the e2e scenarios (`e2e_*`) and screenshots (`screenshot_*`); on Windows also the non-ASCII install path smoke and the no-VC++-runtime-DLL check |
+| `tests/CMakeLists.txt` | ctest targets: netPacket, config, fileio, credentials, join password, admin login, admin API, babonet large message, babonet ping with the LAN port taken, the two `SqlStatement.h` copies identical, crash fixes, validator, missing music (client builds), app icon files and wiring, the built-in window icon (Linux client builds), the hicolor install (Linux), the `.deb` build (Linux), dedicated-server smoke, in-process server harness (`bv2server_lib` + fake babonet), packet hygiene, corpus replay, crash-input tests for `crash-*.bin` under ASan (none at present), master server, autotest runner and (with Xvfb on Linux, or on macOS) the client on autotest scripts; with Xvfb on Linux the e2e scenarios (`e2e_*`) and screenshots (`screenshot_*`); on Windows also the non-ASCII install path smoke and the no-VC++-runtime-DLL check |
 | `tests/check_windows_deps.py` | Windows: fails if `bv2`, `bv2dedicated` or `bv2master` needs a Visual C++ runtime DLL |
 | `tests/corpus/clsv_admin_request/valid.bin` | Replay corpus: valid `clsv_admin_request` payload (`gen_corpus`) |
 | `tests/corpus/clsv_gameversion_accepted/valid.bin` | Replay corpus: valid `clsv_gameversion_accepted` payload (`gen_corpus`) |
@@ -148,8 +147,10 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/test_admin_login.cpp` | Step 10: admin login only with HMACs over the connection's challenge; no user, password or MD5 on the wire |
 | `tests/test_autotest.cpp` | Phase T3: autotest runner without a window: parsing, commands, waits, one match per expect, fail, timeout and early-quit reports (ADR 0025) |
 | `tests/test_babonet.cpp` | R7: a 10000-byte message over a loopback babonet connection arrives over several reads and intact |
+| `tests/test_babonet_ping.cpp` | PNS-56: a server-browser ping to a game server on this host is answered within 1 s while another process holds babonet's LAN port |
 | `tests/test_browsable_game.cpp` | A server browser row owns a copy of its lobby game's row (the lobby frees its own) |
 | `tests/test_cstring.cpp` | Phase C step 5: one-argument `CString` is text (arrays, `char*`, literals, direct and implicit); two or more arguments format (ADR 0021) |
+| `tests/test_view_geometry.cpp` | Widescreen (Stretch) projects at the window's own aspect, Bars at 4:3; the camera's side margin widens with the view, and a narrow or short map centres it |
 | `tests/test_config.cpp` | dksvar config layering, transient values not saved, secrets masked, `dksvarGetValue` |
 | `tests/test_credentials.cpp` | Step 10: the credential HMAC against RFC 4231; proofs check only with their own password, label and nonce |
 | `tests/test_crash_fixes.cpp` | Steps 5 and 7: one check per fixed defect (KEY_QUESTIONS Part D) on the in-process server |
@@ -180,7 +181,6 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/test_staging_deploy.sh` | Phase T step 2: staging deploy helpers: main-only run selection, `/status` player count, CTF and TDM player counts and verify, failures per commit, infrastructure stages, env-file mode and readonly repository (ctest `staging_deploy`) |
 | `tests/test_health_watch.sh` | Container health watcher: which container states are problems, missing services from `GAME_SERVERS`, Docker not answering, two-run confirmation before an alert or recovery, a whole run against a stub `docker`, no check during a deploy but a stale lock ignored (ctest `health_watch`, Unix) |
 | `tests/test_playtest_agent.sh` | Phase T step 1: playtest agent helpers: main-only run selection (fork PR from `main` rejected), artifact digest, attempt limit, env-file mode and no export, launch script map swap (ctest `playtest_agent`, Unix with `jq`) |
-| `tests/website/site.test.mjs` | Website: installer per OS against the asset names in `build.yml`, OS detection, newest release incl. pre-releases, button offer and fallback, install text names the release files, no API call off the landing page, identical menu and footer on every page, privacy contact assembled in the browser and the policy linked from every footer (`node --test`, `pages.yml`) |
 | `tools/check-content-case.py` | Fails when a literal `main/...` path differs from a real file name only by case |
 | `vcpkg.json` | vcpkg manifest (sqlite3, curl; Step 3 completes it) |
 
@@ -204,8 +204,8 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 
 | path | purpose |
 |---|---|
-| `.claude/agents/thermo-nuclear-code-quality-review.md` | Claude Code subagent: fresh-context step-closing review (REVIEW.md section 5) |
-| `.claude/skills/thermo-nuclear-code-quality-review/SKILL.md` | Claude Code skill: maintainability rubric the review subagent loads |
+| `.claude/agents/rv2-thermo-nuclear-review.md` | Claude Code subagent: fresh-context PR-closing review (REVIEW.md section 5) |
+| `.claude/skills/rv2-thermo-nuclear-review/SKILL.md` | Claude Code skill: the only copy of the maintainability rubric the review subagent loads; its `Rubric:` hash line is checked by `tools/review.sh` ([ADR 0037](docs/decisions/0037-review-rubric-single-repo-copy.md)) |
 
 ### `.github/actions/setup-vcpkg`
 
@@ -224,8 +224,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `.github/workflows/codeql.yml` | CodeQL: `c-cpp` (manual linux-x64 build of the three executables) and `actions`; push, PR, weekly; alerts under `build/` (vcpkg headers) filtered out |
 | `.github/workflows/dependency-graph.yml` | Submits resolved vcpkg ports to the dependency graph on push to `main` |
 | `.github/workflows/osv-vcpkg.yml` | Weekly OSV check of the vcpkg ports by upstream commit (`tools/osv-vcpkg.py`); not required |
-| `.github/workflows/containers.yml` | CI: builds both server images, checks non-root, runs the compose example (healthy, both passworded servers listed by the master under one `BV2_PUBLIC_ADDRESS`), checks a remote `status` of CTF and TDM over TLS and `/deployed`, pushes multi-arch `:<sha>` and `:latest` to GHCR from `main` and weekly |
-| `.github/workflows/pages.yml` | Website: `node --test tests/website/site.test.mjs` on PRs touching `website/` or `build.yml`; deploys `website/` to GitHub Pages from `main` (ADR 0029) |
+| `.github/workflows/containers.yml` | CI: builds both server images, checks non-root, runs the compose example (healthy, both passworded servers listed by the master under one `BV2_PUBLIC_ADDRESS`), checks both answer the server browser's UDP ping, checks a remote `status` of CTF and TDM over TLS and `/deployed`, pushes multi-arch `:<sha>` and `:latest` to GHCR from `main` and weekly |
 
 ### `config`
 
@@ -308,12 +307,15 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/decisions/0026-screenshot-goldens.md` | ADR: Linux llvmpipe screenshot goldens compared within a tolerance; the `screenshot`, `menutab` and `scoreboard` commands |
 | `docs/decisions/0027-several-game-servers-per-host.md` | ADR: several game servers per host (CTF, TDM): one image, `BV2_HEALTH_PORT`, one env file, admin APIs at `/` and `/tdm/`, deploy waits for both |
 | `docs/decisions/0028-built-in-public-master.md` | ADR: `cl_masterServers` defaults to `master.roboviolence.com:10207`; `bv2.cfg` neither saves nor sets it; `none` turns it off |
-| `docs/decisions/0029-static-website-on-github-pages.md` | ADR: website is static HTML on GitHub Pages; OS-detected download from the GitHub releases API, pre-releases included |
 | `docs/decisions/0030-app-icon-and-dmg-layout.md` | ADR: committed application icon per OS (exe, bundle, Linux window icon); `.dmg` with only the app and Applications |
 | `docs/decisions/0031-linux-deb-package.md` | ADR: Linux `.deb` with the client and `bv2dedicated` in `/usr/games`, beside the `.tar.gz`; reverses ADR 0020's rejection |
 | `docs/decisions/0032-discord-release-post.md` | ADR: the release job posts each release to Discord `#announcements` through a webhook secret, pinging only the opt-in role |
 | `docs/decisions/0033-first-run-dialog-recommends-bv2-zip.md` | ADR: the first-run data dialog recommends the original BV2 zip, shows its URL and the folder to choose, and has a Download button (amends 0016) |
 | `docs/decisions/0034-player-data-retention-and-privacy-policy.md` | ADR: the server never relays player IPs, bans (`banlist.tsv`) expire after `sv_banDays`, `admin-audit.log` after 90 days; privacy policy page, installer link and opt-out |
+| `docs/decisions/0036-website-in-rv2-website-repository.md` | ADR: the website, its tests, tooling and Pages workflow live in Hub-Tansky/rv2-website; its tests read `build.yml` from here |
+| `docs/decisions/0037-review-rubric-single-repo-copy.md` | ADR: the review rubric has one repo copy with a unique name; the gate checks its hash |
+| `docs/decisions/0038-dead-accounts-hidden-admin-and-ban-secrets-hardened.md` | ADR: dead account pages hidden; 15-character admin and master ban secrets, per-IP admin lockout, HMAC-signed master bans |
+| `docs/decisions/0039-widescreen-stretch-shows-more-map.md` | ADR: the gameplay, scope and intro projections use their viewport's aspect; Stretch shows more map sideways (Hor+), Bars stays 4:3 |
 | `docs/decisions/README.md` | ADR format and index |
 
 ### `docs/ops`
@@ -371,6 +373,25 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `engine/babonet/src/md5c.c` | RFC 1321 MD5 implementation |
 | `engine/babonet/src/md5class.cpp` | CMD5: MD5 hex-digest wrapper |
 | `engine/babonet/src/socket_compat.h` | send() with EINTR retry; SIGPIPE is ignored in bb_init |
+
+### `engine/credentials`
+
+| path | purpose |
+|---|---|
+| `engine/credentials/CMakeLists.txt` | Target credentials |
+| `engine/credentials/README.md` | Module README: credentials |
+
+### `engine/credentials/include`
+
+| path | purpose |
+|---|---|
+| `engine/credentials/include/Credentials.h` | Credential proofs: HMAC(password, label + nonce) for join and admin, signed packets for master bans, `MIN_SECRET_LENGTH` |
+
+### `engine/credentials/src`
+
+| path | purpose |
+|---|---|
+| `engine/credentials/src/Credentials.cpp` | HMAC-SHA256, nonces and constant-time checks (libsodium, ADR 0014, 0038) |
 
 ### `engine/dko`
 
@@ -516,8 +537,8 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/CAStar.cpp` | A* path finding grid |
 | `game/src/CAStar.h` | A* path finding grid |
 | `game/src/CAStar_FindPath.cpp` | A* search routine |
-| `game/src/CAccount.cpp` | Account UI tab |
-| `game/src/CAccount.h` | Account UI tab |
+| `game/src/CAccount.cpp` | Account UI tab (hidden, ADR 0038) |
+| `game/src/CAccount.h` | Account UI tab (hidden, ADR 0038) |
 | `game/src/CBrowser.cpp` | Server browser UI |
 | `game/src/CBrowser.h` | Server browser UI |
 | `game/src/CClans.cpp` | Clans UI tab |
@@ -564,8 +585,8 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/CPing.h` | Server ping measurement |
 | `game/src/CPlayers.cpp` | Players list UI |
 | `game/src/CPlayers.h` | Players list UI |
-| `game/src/CProfile.cpp` | Profile UI tab |
-| `game/src/CProfile.h` | Profile UI tab |
+| `game/src/CProfile.cpp` | Appearance UI tab (its sub-tab row is hidden, ADR 0038) |
+| `game/src/CProfile.h` | Appearance UI tab |
 | `game/src/CRain.cpp` | Rain weather effect |
 | `game/src/CRain.h` | Rain weather effect |
 | `game/src/CRegisterClan.cpp` | Clan registration UI |
@@ -594,8 +615,6 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/ConnectFailed.h` | Dialog: connection failed |
 | `game/src/Console.cpp` | In-game console: commands, log, remote console; feeds console lines to a running autotest; `refreshgames` asks the master for the game list; `screenshot`, `menutab` and `scoreboard` for screenshot tests (ADR 0026) |
 | `game/src/Console.h` | In-game console: commands, log, remote console |
-| `game/src/Credentials.cpp` | HMAC-SHA256, nonces and constant-time checks for the join and admin passwords (libsodium, ADR 0014) |
-| `game/src/Credentials.h` | Credential proofs: the client answers the server's nonce with HMAC(password, label + nonce) |
 | `game/src/Control.cpp` | Menu control base class |
 | `game/src/Control.h` | Menu control base class |
 | `game/src/ControlListener.cpp` | Menu control listener interface |
@@ -629,8 +648,8 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/Host.h` | Host-game settings struct |
 | `game/src/IncorrectName.h` | Dialog: invalid player name |
 | `game/src/IncorrectPassword.h` | Dialog: wrong server password |
-| `game/src/IntroScreen.cpp` | "LOADING" splash after start-up (ADR 0019) |
-| `game/src/IntroScreen.h` | Interface of `IntroScreen.cpp`; `renderLoading` also draws Scene's loading frame |
+| `game/src/IntroScreen.cpp` | "LOADING" splash after start-up (ADR 0019), the loading frame Scene and Map present, the per-frame set-up `Scene::render` starts with, and `view::current` |
+| `game/src/IntroScreen.h` | Interface of `IntroScreen.cpp`; `presentLoadingFrame` is the one "LOADING" frame Scene and Map show while they load; `beginFrame` is the shared clear/viewport/projection set-up |
 | `game/src/JoinGame.h` | Join-game screen |
 | `game/src/Key.cpp` | Key binding entry |
 | `game/src/Key.h` | Key binding entry |
@@ -677,6 +696,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/ServerValidator.cpp` | Server cheat checks: spawn weapon whitelist, speed/frame kick, step 9 rules (weapon, movement, rate limits) with a decaying score |
 | `game/src/ServerValidator.h` | Server cheat checks (`Server::validator`), asked by the `ServerRecv.cpp` handlers |
 | `game/src/SqlStatement.h` | Prepared SQLite statement with bound parameters (the game's copy) |
+| `game/src/ViewGeometry.h` | ([ADR 0039](docs/decisions/0039-widescreen-stretch-shows-more-map.md)) The 3D viewport inside the window (`view::rect`: whole window, or 4:3 between bars; `view::current` for this frame, defined in `IntroScreen.cpp`), the aspect the gameplay, scope and intro projections use, and the camera's margins at the map edges |
 | `game/src/Weapon.cpp` | Weapon definitions and stats |
 | `game/src/Weapon.h` | Weapon definitions and stats |
 | `game/src/Write.cpp` | Chat input widget |
@@ -748,16 +768,5 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tools/review.sh` | Review gate (REVIEW.md section 1): all checks, scope against the PR's Allowed paths, anti-gaming, review gate on the PR's review record; `--full` builds and tests |
 | `tools/setup-dev.ps1` | Activates hooks, checks tools (Windows) |
 | `tools/setup-dev.sh` | Activates hooks, checks tools (Unix); prints the apt line for building and the package names for running a package |
+| `tools/vcpkg-triplets/arm64-osx.cmake` | vcpkg overlay triplet: macOS arm64 ports built for macOS 12 (PNS-26) |
 
-### `website`
-
-| path | purpose |
-|---|---|
-| `website/index.html` | Landing page: hero, OS-detected download button, installation instructions, downloads list, status hook (ADR 0029) |
-| `website/about.html` | What the game is; credits to BaboViolent 2 |
-| `website/privacy.html` | Privacy policy (GDPR): data processed by the game, servers and website, legal basis, hosting, retention, rights (ADR 0034) |
-| `website/server.html` | Hosting your own game and master server (summary of `docs/ops/runbook.md`) |
-| `website/site.js` | Download button and list from the GitHub releases API, Discord invite constant, contact address assembled from `data-mail` attributes |
-| `website/style.css` | Dark theme, layout |
-| `website/img/hero.webp` | Placeholder hero picture |
-| `website/img/favicon.svg` | Site icon |

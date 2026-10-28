@@ -41,7 +41,6 @@ main/textures	Cross01.tga	TGA 32×32×32
 main/textures	CrossHit.tga	TGA 32×32×32
 main/textures	ExplosionMark.tga	TGA 64×64×32
 main/textures	GrenadeIcon.tga	TGA 64×64×32
-main/textures	HeadGames.tga	TGA 512×512×24
 main/textures	Icones.tga	TGA 32×32×24
 main/textures	Menu.tga	TGA 64×64×32
 main/textures	Menu1Back.tga	TGA 256×256×24
@@ -53,7 +52,6 @@ main/textures	MenuCursor.tga	TGA 32×32×32
 main/textures	MiniMapAllied.tga	TGA 16×16×32
 main/textures	MiniMapEnemy.tga	TGA 16×16×32
 main/textures	RedFlag.tga	TGA 64×64×32
-main/textures	RnDLabs.tga	TGA 512×512×24
 main/textures	Smoke1.tga	TGA 128×128×32
 main/textures	Smoke2.tga	TGA 128×128×32
 main/textures	blood01.tga	TGA 64×64×32
@@ -209,4 +207,3 @@ main/sounds	shotgunReload.wav	WAV 1ch 8000 Hz 16-bit 0.17 s
 main/sounds	wind.wav	WAV 1ch 8013 Hz 8-bit 4.04 s
 main/textures	sky.tga	TGA 256×256×24
 main/textures	sniperScope.tga	TGA 256×256×32
-main/textures	RnDLabsGlow.tga	TGA 128×128×32

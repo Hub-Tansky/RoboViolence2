@@ -51,7 +51,12 @@ namespace credentials
 	{
 		uint8_t expected[MAC_SIZE];
 		prove(password, label, nonce, expected);
+		return equal(expected, mac);
+	}
+
+	bool equal(const uint8_t a[MAC_SIZE], const uint8_t b[MAC_SIZE])
+	{
 		ready();
-		return sodium_memcmp(expected, mac, MAC_SIZE) == 0;
+		return sodium_memcmp(a, b, MAC_SIZE) == 0;
 	}
 }

@@ -16,13 +16,13 @@ jobs:
       matrix:
         include:
           - { os: windows-2025, preset: win-x64-msvc }  # pinned (PNS-27): ADR 0012 names this image
-          - { os: macos-14, preset: macos-arm64 }
+          - { os: macos-15, preset: macos-arm64 }
           - { os: ubuntu-24.04, preset: linux-x64 }
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/setup-vcpkg
         with:
-          cache-key: ${{ matrix.preset }}
+          cache-key: ${{ matrix.os }}-${{ matrix.preset }}  # image in the key: a new image (new compiler) must not exact-hit a cache it cannot use
       - name: MSVC environment
         if: runner.os == 'Windows'
         uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
@@ -110,6 +110,7 @@ jobs:
           # v0.* and v*-<suffix> tags are pre-releases
           pre=$([[ "$GITHUB_REF_NAME" == v0.* || "$GITHUB_REF_NAME" == *-* ]] && echo --prerelease || true)
           echo "PRERELEASE_FLAG=$pre" >> "$GITHUB_ENV"
+          # Asset names are read by Hub-Tansky/rv2-website (site.js, install.html; ADR 0036) and packaging/discord_release_post.py
           gh release create "$GITHUB_REF_NAME" --title "Robo Violence 2 $GITHUB_REF_NAME" --generate-notes $pre \
             dist/roboviolence2-win-x64-msvc-setup.exe dist/roboviolence2-macos-arm64.dmg \
             dist/roboviolence2-macos-arm64.zip dist/roboviolence2-linux-x64.tar.gz dist/roboviolence2-linux-x64.deb \
@@ -198,7 +199,7 @@ jobs:
       matrix:
         include:
           - { os: windows-2025, preset: win-x64-msvc }
-          - { os: macos-14, preset: macos-arm64 }
+          - { os: macos-15, preset: macos-arm64 }
     defaults:
       run:
         shell: bash

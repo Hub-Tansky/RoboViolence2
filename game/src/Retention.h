@@ -1,4 +1,4 @@
-// How long a server keeps personal data on disk (website/privacy.html, ADR 0034): a ban (nick and IP) lasts
+// How long a server keeps personal data on disk (https://roboviolence.com/privacy.html, ADR 0034): a ban (nick and IP) lasts
 // sv_banDays, an admin-audit.log line (with the requester's IP) AUDIT_DAYS.
 #pragma once
 #include <ctime>

@@ -20,6 +20,7 @@
 #include "IntroScreen.h"
 #include "GameVar.h"
 #include "Helper.h"
+#include "ViewGeometry.h"
 
 
 
@@ -65,6 +66,40 @@ void IntroScreen::renderLoading(unsigned int font, float brightness)
 			printCenterText(400, 268, 64, CString("LOADING"));
 		glPopAttrib();
 	dkglPopOrtho();
+}
+
+
+
+CVector2i IntroScreen::beginFrame()
+{
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	view::Rect v = view::current();
+	glViewport(v.x, 0, v.w, v.h);
+	dkglSetProjection(60, 1, 50, view::aspect(v), 1);
+
+	// Per-frame default state
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
+	glDisable(GL_TEXTURE_2D);
+	glColor3f(1,1,1);
+	return dkwGetResolution();
+}
+
+
+
+view::Rect view::current()
+{
+	CVector2i res = dkwGetResolution();
+	return view::rect(res[0], res[1], gameVar.r_widescreen);
+}
+
+
+
+void IntroScreen::presentLoadingFrame(unsigned int font)
+{
+	beginFrame();
+	renderLoading(font, 1);
+	dkglSwapBuffers();
 }
 #endif
 

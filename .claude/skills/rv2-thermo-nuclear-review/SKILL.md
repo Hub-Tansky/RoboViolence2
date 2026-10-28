@@ -1,9 +1,13 @@
 ---
-name: thermo-nuclear-code-quality-review
-description: Run an extremely strict maintainability review for abstraction quality, giant files, and spaghetti-condition growth. Use for a thermo-nuclear code quality review, thermonuclear review, deep code quality audit, or especially harsh maintainability review.
+name: rv2-thermo-nuclear-review
+description: Robo Violence 2's PR review rubric (REVIEW.md section 5). Run an extremely strict maintainability review for abstraction quality, giant files, and spaghetti-condition growth. Use for a thermo-nuclear code quality review, thermonuclear review, deep code quality audit, or especially harsh maintainability review.
 ---
 
 # Thermo-Nuclear Code Quality Review
+
+Rubric: rv2-thermo-nuclear-review 7896880304e6
+
+Start your review report with the `Rubric:` line above, verbatim. This file is the only copy of the rubric; `tools/review.sh` accepts only its hash at the reviewed head.
 
 Use this skill for an unusually strict review focused on implementation quality, maintainability, abstraction quality, and codebase health.
 

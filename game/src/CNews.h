@@ -35,7 +35,6 @@ public:
 	// Le son pour quand on passe au dessus
 	DksSound * m_sfxOver;
 
-	CControl * btn_refresh;
 	CControl * lst_news;
 
 public:

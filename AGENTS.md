@@ -4,7 +4,7 @@ Robo Violence 2, an unofficial fork of BaboViolent 2 ([ADR 0008](docs/decisions/
 
 ## Layout
 
-- `engine/babonet/`: networking (`bb_*` API); `engine/zeven/`: engine utilities (`dkc`, `dksvar`, `CString`/`CVector`/`CMatrix`; client modules `dkw dki dkgl dkt dkf dkp dks` on SDL3, miniaudio and glad); `engine/dko/`: `.DKO` model loader. Each has `include/` (public), `src/`, `README.md`.
+- `engine/babonet/`: networking (`bb_*` API); `engine/zeven/`: engine utilities (`dkc`, `dksvar`, `CString`/`CVector`/`CMatrix`; client modules `dkw dki dkgl dkt dkf dkp dks` on SDL3, miniaudio and glad); `engine/dko/`: `.DKO` model loader; `engine/credentials/`: password HMAC proofs (libsodium). Each has `include/` (public), `src/`, `README.md`.
 - `game/src/`: game: client, listen/dedicated server, map editor (one codebase; `CONSOLE` selects the headless server).
 - `masterserver/src/`: standalone master server (SQLite).
 - `content/`: `languages/`, `LaunchScript/` (`main/` at runtime). `config/`, `content-seed/`: example configs and SQL seeds. `tools/`: checks, generators, setup scripts.
@@ -57,7 +57,7 @@ cmake --build --preset <preset> --target bv2dedicated bv2master
 - Never commit secrets, real hosts or IPs. Never use `--no-verify`.
 - Finish every PR by updating `ARCHITECTURE.md` (inventory and changed facts) and running `tools/check-architecture.sh`.
 - Record non-obvious decisions as ADRs in `docs/decisions/`.
-- Work is done only per [REVIEW.md](REVIEW.md): `tools/review.sh` passes (CI `review` check), and a scoped PR is ready only with a review by the `thermo-nuclear-code-quality-review` subagent (`.claude/agents/`, rubric in `.claude/skills/thermo-nuclear-code-quality-review/`), which any session can spawn, recorded in the PR description. Its stop rule and forbidden shortcuts apply to every change.
+- Work is done only per [REVIEW.md](REVIEW.md): `tools/review.sh` passes (CI `review` check), and a scoped PR is ready only with a review by the `rv2-thermo-nuclear-review` subagent (`.claude/agents/`, rubric in `.claude/skills/rv2-thermo-nuclear-review/`, the only copy), which any session can spawn, recorded in the PR description. Its stop rule and forbidden shortcuts apply to every change.
 - Don't mix mechanical rewrites (encoding, renames, formatting) with functional changes in one commit.
 
 ## Ground rules

@@ -72,6 +72,11 @@ CProfile::CProfile(CControl * in_parent, CControl * in_alignTo)
 	stats->setVisible(false);
 	lastButtonPressed = btn_baboProfile;
 	lastButtonPressed->enable = false;
+
+	// Only the Babo appearance works: the account, friends, players, stats and clan pages have no service behind them,
+	// so the row is hidden and the tab is "Appearance" (ADR 0038)
+	for (CControl * btn : {btn_baboProfile, btn_account, btn_friends, btn_players, btn_stats, btn_registerClan, btn_clans})
+		btn->visible = false;
 }
 
 CProfile::~CProfile()

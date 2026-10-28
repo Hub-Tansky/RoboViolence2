@@ -50,7 +50,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends libgl1 libglu1-
 COPY --from=build /out/bv2dedicated /opt/bv2/
 COPY --from=build /out/main /opt/bv2/main
 USER bv2
-EXPOSE 3333/tcp 3334/tcp
+EXPOSE 3333/tcp 3333/udp 3334/tcp 3334/udp
 # A listening socket, not a connection: a connection would join the game as a player. BV2_HEALTH_PORT: the launch
 # script's sv_port (3333 for CTF, 3334 for TDM); it only tells the healthcheck where to look
 ENV BV2_HEALTH_PORT=3333

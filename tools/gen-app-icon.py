@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Render the application icons and the macOS disk image background into packaging/ (ADR 0030).
 
-The icon is the website favicon (website/img/favicon.svg) grown up: a dark rounded tile, a blue ball bottom-left
+The icon is the website favicon (Hub-Tansky/rv2-website, website/img/favicon.svg) grown up: a dark rounded tile, a blue ball bottom-left
 and a red ball top-right, shooting at each other (muzzle flashes and two side-by-side tracers). Large sizes add
 sphere shading and a light edge that keeps the tile visible on dark docks and taskbars; 16, 24 and 32 px drop the
 shading and the tracers so they stay sharp.

@@ -1,6 +1,6 @@
 # 0023: The step-closing review subagent and its rubric live in the repo
 
-- Status: Accepted
+- Status: Superseded by 0037
 - Date: 2026-10-17
 - Affects: [REVIEW.md](../../REVIEW.md) section 5
 

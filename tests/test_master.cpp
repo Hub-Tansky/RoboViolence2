@@ -3,6 +3,8 @@
 #include "SqlStatement.h"
 #include "cNetManager.h"
 
+#include "Credentials.h"
+
 #ifdef _WIN32
 #include <winsock2.h>
 #else
@@ -12,6 +14,10 @@
 #include <unistd.h>
 #endif
 #include <chrono>
+#include <cstddef>
+#include <cstdint>
+#include <cstring>
+#include <ctime>
 #include <cstdio>
 #include <filesystem>
 #include <string>
@@ -32,6 +38,15 @@ static int failures = 0;
 			++failures;                                                \
 		}                                                              \
 	} while (0)
+
+static const char * BAN_PASS = "b4nTest-long-enough";
+
+// The ban protocol as game/src/Console.cpp stamps and signs it, spelled out here on purpose so the test pins it
+template <class Packet> static void sign(Packet & packet, const char * password, uint32_t time)
+{
+	packet.Time = time;
+	credentials::signPacket(password, packet);
+}
 
 // Runs the master and the clients for about `frames` frames of 1/30 s.
 static void pump(const std::vector<UINT4> & clients, int frames = 30)
@@ -111,9 +126,9 @@ int main(int argc, char ** argv)
 		fs::copy_file(fs::path(argv[1]) / db, fs::path(argv[2]) / db, fs::copy_options::overwrite_existing);
 	fs::current_path(argv[2]); // the master opens master.db and web.db in its working directory
 #ifdef _WIN32
-	_putenv_s("BV2_MASTER_BAN_PASS", "b4nTest");
+	_putenv_s("BV2_MASTER_BAN_PASS", BAN_PASS);
 #else
-	setenv("BV2_MASTER_BAN_PASS", "b4nTest", 1);
+	setenv("BV2_MASTER_BAN_PASS", BAN_PASS, 1);
 #endif
 
 	master = new cNetManager();
@@ -212,7 +227,17 @@ int main(int argc, char ** argv)
 	stCacheBan ban = {};
 	strcpy(ban.Nick, "Nick'--;%");
 	strcpy(ban.IP, "1';--%");
-	strcpy(ban.Pass, "roxbabo"); // the old built-in password: refused (PNS-43)
+	// Refused (ADR 0038): an older game's 68-byte ban with the password in clear, a valid ban with trailing bytes
+	// (the master checks the size, not only the proof), and a proof an hour old
+	char oldBan[68] = {};
+	std::memcpy(oldBan, &ban, offsetof(stCacheBan, Time));
+	std::strcpy(oldBan + offsetof(stCacheBan, Time), "roxbabo");
+	bb_clientSend(game, oldBan, sizeof(oldBan), CACHE_BAN);
+	sign(ban, BAN_PASS, (uint32_t)std::time(nullptr));
+	char longBan[sizeof(ban) + 4] = {};
+	std::memcpy(longBan, &ban, sizeof(ban));
+	bb_clientSend(game, longBan, sizeof(longBan), CACHE_BAN);
+	sign(ban, BAN_PASS, (uint32_t)std::time(nullptr) - 3600);
 	bb_clientSend(game, (char *)&ban, sizeof(ban), CACHE_BAN);
 	pump({game});
 	{
@@ -223,7 +248,7 @@ int main(int argc, char ** argv)
 		CHECK(!bans.row());
 		sqlite3_close(db);
 	}
-	strcpy(ban.Pass, "b4nTest"); // BV2_MASTER_BAN_PASS, set before the master started
+	sign(ban, BAN_PASS, (uint32_t)std::time(nullptr)); // BV2_MASTER_BAN_PASS, set before the master started
 	bb_clientSend(game, (char *)&ban, sizeof(ban), CACHE_BAN);
 	pump({game});
 	stCacheBanned query = {};
@@ -260,8 +285,35 @@ int main(int argc, char ** argv)
 			}
 		CHECK(listed || std::printf("  filter \"%s\"\n", filter) < 0);
 	}
+	// An unban signed with the wrong password leaves the ban,
+	stCacheUnban unban = {};
+	sqlite3_open("master.db", &db);
+	{
+		SqlStatement bans(db, "Select ID From BanList Where IP = ?;");
+		bans.bindText(1, ban.IP);
+		CHECK(bans.row());
+		unban.ID = (int16_t)bans.integer(0);
+	}
+	sign(unban, "not-the-ban-password", (uint32_t)std::time(nullptr));
+	bb_clientSend(game, (char *)&unban, sizeof(unban), CACHE_UNBAN);
+	pump({game});
+	{
+		SqlStatement bans(db, "Select ID From BanList Where IP = ?;");
+		bans.bindText(1, ban.IP);
+		CHECK(bans.row());
+	}
+	// and the right one removes it
+	sign(unban, BAN_PASS, (uint32_t)std::time(nullptr));
+	bb_clientSend(game, (char *)&unban, sizeof(unban), CACHE_UNBAN);
+	pump({game});
+	{
+		SqlStatement bans(db, "Select ID From BanList Where IP = ?;");
+		bans.bindText(1, ban.IP);
+		CHECK(!bans.row());
+	}
+	sqlite3_close(db);
 	bb_clientDisconnect(game);
 
-	if (failures == 0) std::printf("ok: master register, list, timeout, removal, SQL injection\n");
+	if (failures == 0) std::printf("ok: master register, list, timeout, removal, SQL injection, signed bans\n");
 	return failures ? 1 : 0;
 }
