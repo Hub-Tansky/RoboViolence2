@@ -218,7 +218,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | path | purpose |
 |---|---|
 | `.github/workflows/secret-scan.yml` | CI: gitleaks over commits after the fork point and original-asset check |
-| `.github/workflows/build.yml` | CI: Debug and Release build and ctest, Release package on Windows, macOS, Linux (`roboviolence2-<preset>` artifacts); `package-check` of the Linux package in a clean `ubuntu:24.04`; `deb-check`: the `.deb` installs with apt, a non-root user starts the server and removal leaves nothing, in clean `ubuntu:24.04` and `debian:13`; `package-smoke` (not required): Windows and macOS packages start server, master and client (Mesa llvmpipe on Windows); ASan smoke job with client under xvfb; Linux jobs upload the actual and diff PNGs of failed `screenshot_*` tests (`screenshots-<preset>`); `release` job on `v*` tags (GitHub release, pre-release for `v0.*` and `v*-*`); `fuzz` job (not required, pushes to main): 2 min per client message type, uploads crash inputs |
+| `.github/workflows/build.yml` | CI: Debug and Release build and ctest, Release package on Windows, macOS, Linux (`roboviolence2-<preset>` artifacts); `package-check` of the Linux package in a clean `ubuntu:24.04`; `deb-check`: the `.deb` installs with apt, a non-root user starts the server and removal leaves nothing, in clean `ubuntu:24.04` and `debian:13`; `package-smoke` (not required): Windows and macOS packages start server, master and client (Mesa llvmpipe on Windows); ASan smoke job with client under xvfb; Linux jobs upload the actual and diff PNGs of failed `screenshot_*` tests (`screenshots-<preset>`); `release` job: every run checks the release files are there; a `v*` tag publishes them (GitHub release, pre-release for `v0.*` and `v*-*`) and posts to Discord; `fuzz` job (not required, pushes to main): 2 min per client message type, uploads crash inputs |
 | `.github/workflows/hygiene.yml` | CI: ARCHITECTURE.md inventory, repository hygiene, content case; `review` (`tools/review.sh`, given the PR description) on PRs, rerun on description edits |
 | `.github/pull_request_template.md` | PR description: item, goal, out of scope, Allowed paths (read by `tools/review.sh`), tests |
 | `.github/workflows/codeql.yml` | CodeQL: `c-cpp` (manual linux-x64 build of the three executables) and `actions`; push, PR, weekly; alerts under `build/` (vcpkg headers) filtered out |
@@ -322,6 +322,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 
 | path | purpose |
 |---|---|
+| `docs/ops/release.md` | Cutting a release: pick the commit, manual install test per OS, tag, notes header template, production re-pin, Discord publish |
 | `docs/ops/runbook.md` | Hosting the server images: secrets, start, stop, upgrade, logs, console, ports, backups, production (pinned manual deploy, failover) |
 
 ### `engine/babonet`

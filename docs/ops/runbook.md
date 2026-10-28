@@ -103,7 +103,7 @@ Restore by extracting into the volume before `up`.
 
 ## Production
 
-Production runs the same compose file and the same deploy agent as staging ([tools/staging/](../../tools/staging/README.md)), by hand. The host's address, provider and access stay in the owner's private Obsidian vault (`RoboViolence2/prv_wiki/docs_restricted/prod/`), never in the repo.
+Releases pin production as one step of [Cutting a release](release.md). Production runs the same compose file and the same deploy agent as staging ([tools/staging/](../../tools/staging/README.md)), by hand. The host's address, provider and access stay in the owner's private Obsidian vault (`RoboViolence2/prv_wiki/docs_restricted/prod/`), never in the repo.
 
 - **Pinned, by hand.** No cron. The owner deploys one `main` commit (a release commit once releases carry server images) with `--sha <full sha>`, which pins the images and the compose file to it. Rolls back on failure like staging.
 - **Never over a game, and no retry.** While anyone plays on any game server, a run deploys nothing and exits 0 (the log line says `waits`); without cron nothing retries. Run it again later, or add `--force` for an urgent fix or rollback. `/deployed` is the only success signal: check it after every run.
@@ -111,7 +111,7 @@ Production runs the same compose file and the same deploy agent as staging ([too
 - **Env file.** As for staging, plus `BV2_MASTER_BAN_PASS`; `BV2_ADMIN_HOST` is the public admin name and `BV2_ADMIN_PORT=443`; `BV2_PUBLIC_ADDRESS` is the host's IPv4. Mode 600, only on the host.
 - **The agent itself** is the `deploy.sh` downloaded at install. Update it deliberately (download it again from the commit you deploy) when `tools/staging/deploy.sh` changes.
 
-Install (a new or failover host): the staging README's [By hand](../../tools/staging/README.md#install) steps with `rv2-prod` in place of `rv2-staging` in every path, `<full sha>` in place of `main` in the download URL, and no cron line (no `cloud-init.yml`, no `rv2-staging-setup`: both install cron and deploy the newest `main`). Open TCP 443, 3333, 3334, 10207 and UDP 3333, 3334. Deploy with `RV2_DEPLOY_LABEL=prod /opt/rv2-prod/deploy.sh --sha <full sha>` (a one-line wrapper holding that prefix is fine).
+Install (a new or failover host): the staging README's [By hand](../../tools/staging/README.md#install) steps with `rv2-prod` in place of `rv2-staging` in every path, `<full sha>` in place of `main` in the download URL, and no cron line (no `cloud-init.yml`, no `rv2-staging-setup`: both install cron and deploy the newest `main`). Open TCP 443, 3333, 3334, 10207 and UDP 3333, 3334. Deploy with `RV2_DEPLOY_LABEL=prod /opt/rv2-prod/deploy.sh --sha <full sha>` (a one-line wrapper holding that prefix is fine; on the current host it is `rv2-prod-deploy`).
 
 | Task | Do |
 |---|---|
