@@ -4,7 +4,7 @@ How a `v*` tag becomes a public release: the gate before the tag, the tag, the n
 
 ## 1. Pick the commit
 
-- One `main` commit whose `build` run is green, including `package-check`, `deb-check`, `package-smoke` and `release` (on `main` it only checks that every release file is there). Look at the run on `main` itself: the tag run's `release` job needs only `build`, so those three don't stop a release.
+- One `main` commit whose `build` run is green, including `package-check`, `deb-check`, `package-smoke` and `release` (on `main` it only checks that every release file is there). Look at the run on `main` itself: the tag run's `release` job needs only `build`, so `package-check`, `deb-check` and `package-smoke` don't stop a release.
 - Nothing open that the release needs. Merge it first and wait for that merge's run.
 - Download that run's artifacts for the manual test (step 2). They are built from the same source as the release, but a `main` run stamps version `0.0.0-dev` (installer `AppVersion`, `.deb` version); only the tag run stamps the release version.
 
@@ -45,7 +45,7 @@ Then check what was published:
 
 If one fails: mark the release as a draft (`gh release edit vX.Y.Z --draft=true`) so the website falls back to the previous release, delete the Discord post instead of publishing it (step 6), skip step 5, fix it on `main` and release the next patch version. Never move a published tag; a draft keeps the tag and its files.
 
-If the `release` job fails before a release exists (no release page, no Discord post), nothing was published: fix it on `main`, wait for a green run, then delete the tag (`git push origin :refs/tags/vX.Y.Z` and `git tag -d vX.Y.Z`) and tag the fixed commit with the same version. Re-running the job can't help: it runs the tagged commit's own `build.yml`.
+If the `release` job fails before a release is published (no release page, no Discord post), nothing reached players: check `gh release list` and delete a leftover draft with `gh release delete vX.Y.Z` (keep the tag until the step below), then fix it on `main`, wait for a green run, then delete the tag (`git push origin :refs/tags/vX.Y.Z` and `git tag -d vX.Y.Z`) and tag the fixed commit with the same version. Re-running the job can't help: it runs the tagged commit's own `build.yml`. If the fix touched only CI, the step 2 test of the earlier commit still holds; otherwise repeat step 2.
 
 ## 4. Release notes
 
