@@ -23,6 +23,7 @@
 #include "GameVar.h"
 #include "Console.h"
 #include "CStatus.h"
+#include "Paths.h"
 
 
 CUserLogin::CUserLogin(CControl * in_parent, CControl * in_alignTo)
@@ -86,8 +87,15 @@ CUserLogin::CUserLogin(CControl * in_parent, CControl * in_alignTo)
 	separator = new CControl(instance, CVector2i(10,20), CVector2i(200,25),"Appearance", this, "SEPARATOR", btn_createAccount, CONTROL_SNAP_BOTTOM, 15);*/
 	CControl * separator = new CControl(instance, CVector2i(10,20), CVector2i(200,25),"Appearance", this, "SEPARATOR");
 
+	//--- Player name (issue #117): saved on Enter or when the field loses focus
+	CControl * lbl_playerName = new CControl(instance, CVector2i(20,20), CVector2i(130,25),"Player name:", this, "LABEL", separator, CONTROL_SNAP_BOTTOM, 5);
+	lbl_playerName->textAlign = CONTROL_TEXTALIGN_TOPLEFT;
+	lbl_playerName->toolTips = "Your player name visible to other players in game.";
+	txt_playerName = new CControl(instance, CVector2i(20,20), CVector2i(250,25),gameVar.cl_playerName, this, "EDIT", lbl_playerName, CONTROL_SNAP_RIGHT, 5);
+	txt_playerName->SetMaxCarac(24);
+
 	//--- Stats view : Perso config
-	pic_babo = new CControl(instance, CVector2i(64,32),CVector2i(256,256),"",this,"FRAME", separator, CONTROL_SNAP_BOTTOM, 10);
+	pic_babo = new CControl(instance, CVector2i(64,32),CVector2i(256,256),"",this,"FRAME", lbl_playerName, CONTROL_SNAP_BOTTOM, 10);
 	pic_babo->frame3D = false;
 	pic_babo->frame2D = true;
 
@@ -298,6 +306,7 @@ void CUserLogin::Validate(CControl * control)
 		if (control == txt_playerName)
 		{
 			gameVar.cl_playerName = txt_playerName->text;
+			dksvarSaveConfig((char *)bv2::configFile().c_str());
 		}
 	}
 	else

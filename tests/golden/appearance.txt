@@ -1,0 +1,6 @@
+# Appearance tab of the main menu: the Player name field above the skin (issue #117)
+expect-scene menu
+menutab profile
+wait 2
+screenshot appearance
+wait 1

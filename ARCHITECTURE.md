@@ -135,6 +135,8 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/golden/options.png` | Golden for `screenshot_options` |
 | `tests/golden/scoreboard.txt` | Screenshot script: host the placeholder map, hold the scoreboard (ctest `screenshot_scoreboard`) |
 | `tests/golden/scoreboard.png` | Golden for `screenshot_scoreboard` |
+| `tests/golden/appearance.txt` | Screenshot script: main menu, Appearance tab with the Player name field (ctest `screenshot_appearance`) |
+| `tests/golden/appearance.png` | Golden for `screenshot_appearance` |
 | `tests/autotest_client.py` | Shared by `run_autotest.py`, `screenshots.py` and `e2e/e2e.py`: starts Xvfb with `-displayfd`, builds the `bv2 --autotest` command line and env, and runs a client with a fresh pref dir (`run_client`) |
 | `tests/autotest/fail.txt` | Autotest script that never passes: the client exits 1 (ctest `autotest_fail`) |
 | `tests/autotest/menu-host.txt` | Autotest script: menu, `help` output, host and join the placeholder map (ctest `autotest_menu_host`) |
@@ -598,8 +600,8 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/CStatus.cpp` | Online status reporting |
 | `game/src/CStatus.h` | Online status reporting |
 | `game/src/CUrlData.cpp` | URL-encoded request bodies (MD5/base64 fields), shared by both CCurl builds |
-| `game/src/CUserLogin.cpp` | Account login UI |
-| `game/src/CUserLogin.h` | Account login UI |
+| `game/src/CUserLogin.cpp` | Appearance tab: player name, skin and colours |
+| `game/src/CUserLogin.h` | Appearance tab: player name, skin and colours |
 | `game/src/CVertexBuffer.cpp` | Vertex buffer wrapper |
 | `game/src/CVertexBuffer.h` | Vertex buffer wrapper |
 | `game/src/CWeather.cpp` | Weather selection and rendering |
