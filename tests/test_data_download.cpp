@@ -64,6 +64,20 @@ int main(int argc, char ** argv)
 	check(!fs::exists(original / "main" / "stale.txt"), "an old install is replaced");
 	check(bv2::detectDataDir() == fs::weakly_canonical(original).generic_string() + "/", "auto-detect finds the install");
 
+	// The extract command and the hash paths agree: main/ lands in extractedDataDir, the hashes are relative to it
+	const std::string partial = (base / "partial2").string();
+	const std::vector<std::string> extract = bv2::extractArgs("bv2.zip", partial);
+	const fs::path dataDir(bv2::extractedDataDir(partial));
+	check(dataDir.filename() == "Content" && dataDir.parent_path().filename() == "BaboViolent2", "extracted data is Content/");
+	bool namesMain = false;
+	for (size_t i = 0; i < extract.size(); ++i)
+		namesMain |= extract[i].rfind(fs::relative(dataDir / "main", partial).generic_string(), 0) == 0;
+	check(namesMain, "extract names the zip's main/ folder");
+	std::vector<std::string> download = bv2::downloadArgs("bv2.zip");
+	check(download.back() == bv2::ORIGINAL_ZIP_URL && dataDir.parent_path().parent_path().filename().string()
+		== "BaboViolent2-" + std::string(bv2::ORIGINAL_ZIP_URL).substr(std::strlen("https://github.com/Daivuk/BaboViolent2/archive/"), 40),
+		"the zip's top folder names the pinned commit");
+
 	const std::vector<bv2::AssetHash> & hashes = bv2::originalMainHashes();
 	check(hashes.size() == 324 && std::strncmp(hashes[0].path, "main/", 5) == 0 && std::strlen(hashes[0].sha256) == 64,
 		"the generated list holds the 324 Content/main hashes");

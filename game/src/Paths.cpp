@@ -258,6 +258,7 @@ namespace bv2
 
 	std::string originalDataDir()
 	{
+		// g_prefDir is ".../BaboViolent2/bv2/": the first parent_path drops the trailing '/', the second leaves bv2
 		return (fs::path(g_prefDir).parent_path().parent_path() / "original").generic_string();
 	}
 

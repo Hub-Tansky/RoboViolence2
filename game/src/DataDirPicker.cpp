@@ -9,7 +9,6 @@
 
 #include <algorithm>
 #include <cstdint>
-#include <cstdlib>
 #include <cstring>
 #include <filesystem>
 #include <string>
@@ -21,37 +20,9 @@ namespace
 {
 	const char * TITLE = "Robo Violence 2";
 
-	// One upstream commit, so every player gets the data tools/original-assets.sha256 describes (ADR 0040)
-#define BV2_UPSTREAM_COMMIT "7171c84d9b4d02bb74e846d5617fbb527bfba358"
-	const char * ZIP_URL = "https://github.com/Daivuk/BaboViolent2/archive/" BV2_UPSTREAM_COMMIT ".zip";
-	const char * ZIP_MAIN = "BaboViolent2-" BV2_UPSTREAM_COMMIT "/BaboViolent2/Content/main";
 	const double ZIP_BYTES = 17.0e6; // for the progress bar only
 	// The browser fallback keeps the name auto-detect looks for in Downloads (BaboViolent2-master)
 	const char * BROWSER_URL = "https://github.com/Daivuk/BaboViolent2/archive/refs/heads/master.zip";
-
-	std::vector<std::string> downloadArgs(const std::string & zip)
-	{
-#ifdef BV2_PLATFORM_WINDOWS
-		const char * root = std::getenv("SystemRoot");
-		std::string curl = std::string(root ? root : "C:\\Windows") + "\\System32\\curl.exe";
-#else
-		std::string curl = "/usr/bin/curl";
-#endif
-		return { curl, "-fsSL", "--retry", "2", "-o", zip, ZIP_URL };
-	}
-
-	std::vector<std::string> extractArgs(const std::string & zip, const std::string & dir)
-	{
-#ifdef BV2_PLATFORM_WINDOWS
-		const char * root = std::getenv("SystemRoot");
-		std::string tar = std::string(root ? root : "C:\\Windows") + "\\System32\\tar.exe"; // bsdtar: reads .zip
-		return { tar, "-xf", zip, "-C", dir, ZIP_MAIN };
-#elif defined(BV2_PLATFORM_MACOS)
-		return { "/usr/bin/tar", "-xf", zip, "-C", dir, ZIP_MAIN };
-#else
-		return { "/usr/bin/unzip", "-q", "-o", zip, std::string(ZIP_MAIN) + "/*", "-d", dir };
-#endif
-	}
 
 	// A small window with a progress bar; closing it cancels
 	struct Progress
@@ -134,48 +105,38 @@ namespace
 	}
 
 	// Downloads the pinned upstream zip, extracts main/ and installs it at originalDataDir() (ADR 0040).
-	// "" on success, else why it failed; cancelled is set when the player closed the progress window.
-	std::string downloadData(bool & cancelled)
+	// On Windows the tools report no exit code (background process), so the hash check is the verdict there.
+	Step downloadData(std::string & error)
 	{
-		cancelled = false;
 		const fs::path partial = bv2::originalDataDir() + ".partial";
 		std::error_code ec;
 		fs::remove_all(partial, ec);
 		fs::create_directories(partial, ec);
 		const std::string zip = (partial / "bv2.zip").string();
-		std::string error;
 		Step step;
 		{
 			Progress ui;
-			step = runStep(ui, downloadArgs(zip), "Downloading BaboViolent 2 data", zip, error);
-			const uintmax_t got = fs::file_size(fs::path(zip), ec);
-			if (step == STEP_OK && (ec || got == 0)) // Windows reports no exit code (background process)
-			{
-				error = "nothing was downloaded from github.com";
-				step = STEP_FAILED;
-			}
+			step = runStep(ui, bv2::downloadArgs(zip), "Downloading BaboViolent 2 data", zip, error);
 			if (step == STEP_OK)
-				step = runStep(ui, extractArgs(zip, partial.string()), "Unpacking BaboViolent 2 data", "", error);
+				step = runStep(ui, bv2::extractArgs(zip, partial.string()), "Unpacking BaboViolent 2 data", "", error);
 			if (step == STEP_OK)
 			{
 				ui.show("Checking BaboViolent 2 data", 1.0);
-				std::string bad = bv2::installOriginalData((partial / ZIP_MAIN).parent_path().string(), bv2::originalMainHashes());
+				std::string bad = bv2::installOriginalData(bv2::extractedDataDir(partial.string()), bv2::originalMainHashes());
 				if (!bad.empty())
 				{
-					error = "check failed: " + bad;
+					error = "the download or unpacking failed (" + bad + " missing or wrong)";
 					step = STEP_FAILED;
 				}
 			}
 		}
 		fs::remove_all(partial, ec);
-		cancelled = step == STEP_CANCELLED;
-		return step == STEP_OK ? "" : error;
+		return step;
 	}
 
 	enum Button { PLACEHOLDERS, DOWNLOAD, BROWSER };
 
-	// The folder the data was installed in; "" when the player picks placeholders
-	std::string askDataDir()
+	int firstRunBox()
 	{
 		const SDL_MessageBoxButtonData buttons[2] = {
 			{ SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT, DOWNLOAD, "Download and play" },
@@ -190,39 +151,41 @@ namespace
 			"For now we recommend using your own original BaboViolent 2 data.\n\n"
 			"\"Download and play\" downloads it (about 17 MB) from github.com/Daivuk/BaboViolent2.";
 		const SDL_MessageBoxData box = { SDL_MESSAGEBOX_INFORMATION, 0, TITLE, text, 2, buttons, 0 };
+		int button = PLACEHOLDERS;
+		return SDL_ShowMessageBox(&box, &button) ? button : PLACEHOLDERS; // closing the box (-1) counts as placeholders
+	}
 
-		const SDL_MessageBoxButtonData retryButtons[3] = {
+	int retryBox(const std::string & error)
+	{
+		const SDL_MessageBoxButtonData buttons[3] = {
 			{ SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT, DOWNLOAD, "Try again" },
 			{ 0, BROWSER, "Open in browser" },
 			{ SDL_MESSAGEBOX_BUTTON_ESCAPEKEY_DEFAULT, PLACEHOLDERS, "Use placeholders" },
 		};
-		bool ask = true;
-		for (;;)
+		const std::string text = "Downloading the BaboViolent 2 data failed:\n" + error + "\n\n"
+			"Try again, or download it in your browser, unzip it into Downloads and restart Robo Violence 2.";
+		const SDL_MessageBoxData box = { SDL_MESSAGEBOX_WARNING, 0, TITLE, text.c_str(), 3, buttons, 0 };
+		int button = PLACEHOLDERS;
+		return SDL_ShowMessageBox(&box, &button) ? button : PLACEHOLDERS;
+	}
+
+	// The folder the data was installed in; "" when the player picks placeholders or the browser
+	std::string askDataDir()
+	{
+		int next = firstRunBox();
+		while (next == DOWNLOAD)
 		{
-			int button = PLACEHOLDERS;
-			if (ask && (!SDL_ShowMessageBox(&box, &button) || button != DOWNLOAD)) // closing the box (-1) counts as placeholders
-				return "";
-			bool cancelled = false;
-			std::string error = downloadData(cancelled);
-			if (error.empty())
+			std::string error;
+			Step step = downloadData(error);
+			if (step == STEP_OK)
 				return bv2::originalDataDir();
-			ask = cancelled;
-			if (cancelled)
-				continue;
-			const std::string failed = "Downloading the BaboViolent 2 data failed:\n" + error + "\n\n"
-				"Try again, or download it in your browser, unzip it into Downloads and restart Robo Violence 2.";
-			const SDL_MessageBoxData retry = { SDL_MESSAGEBOX_WARNING, 0, TITLE, failed.c_str(), 3, retryButtons, 0 };
-			if (!SDL_ShowMessageBox(&retry, &button) || button == PLACEHOLDERS)
-				return "";
-			if (button == BROWSER)
-			{
-				SDL_OpenURL(BROWSER_URL);
-				return "";
-			}
+			next = step == STEP_CANCELLED ? firstRunBox() : retryBox(error);
 		}
+		if (next == BROWSER)
+			SDL_OpenURL(BROWSER_URL);
+		return "";
 	}
 }
-
 namespace bv2
 {
 	void chooseDataDir(int argc, char ** argv)
