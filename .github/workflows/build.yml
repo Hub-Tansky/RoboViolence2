@@ -1,6 +1,8 @@
 name: build
 on:
-  push:
+  push:  # branches only through their PR: a push and a pull_request run per commit doubled the scarce macOS jobs (ADR 0040)
+    branches: [main]
+    tags: ['v*']
   pull_request:
 concurrency:
   group: build-${{ github.ref }}

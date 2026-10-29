@@ -1,0 +1,36 @@
+name: ci-retry
+# A hosted job GitHub never gives a runner is cancelled after about 15 min with the annotation below (macOS arm64
+# capacity, ADR 0040). Re-run such a build run's failed jobs, at most twice, while it is still its branch's latest commit.
+on:
+  workflow_run:
+    workflows: [build]
+    types: [completed]
+permissions:
+  actions: write  # re-run
+  checks: read    # job annotations
+jobs:
+  rerun:
+    if: >-
+      contains(fromJSON('["cancelled", "failure"]'), github.event.workflow_run.conclusion) &&
+      github.event.workflow_run.run_attempt < 3 &&
+      github.event.workflow_run.head_repository.full_name == github.repository
+    runs-on: ubuntu-24.04
+    steps:
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RUN: ${{ github.event.workflow_run.id }}
+          ATTEMPT: ${{ github.event.workflow_run.run_attempt }}
+          SHA: ${{ github.event.workflow_run.head_sha }}
+          BRANCH: ${{ github.event.workflow_run.head_branch }}
+        run: |
+          # A newer commit has its own run; re-running this one would cancel it (build.yml concurrency).
+          [ "$(gh api "repos/$GH_REPO/commits/$BRANCH" -q .sha)" = "$SHA" ] || { echo "superseded by a newer commit"; exit 0; }
+          for job in $(gh api "repos/$GH_REPO/actions/runs/$RUN/attempts/$ATTEMPT/jobs?per_page=100" -q '.jobs[] | select(.conclusion == "cancelled") | .id'); do
+            if gh api "repos/$GH_REPO/check-runs/$job/annotations" -q '.[].message' | grep -q 'was not acquired by Runner'; then
+              echo "job $job never got a runner: re-running the failed jobs of run $RUN"
+              gh run rerun "$RUN" --failed
+              exit 0
+            fi
+          done
+          echo "no job without a runner: nothing to re-run"
