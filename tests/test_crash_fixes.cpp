@@ -245,7 +245,7 @@ static void r15()
 	CHECK(p->avgPing == 10);
 }
 
-// A known command never ends with "Unkown command", and "?" lists every command (cachebanremote is the last one)
+// A successful cachebanremote no longer ends with "Unkown command"; "?" lists the dedicated-only commands too; sv_baboStats is gone
 static bool printed(size_t from, const char * text)
 {
 	for (size_t i = from; i < console->events().size(); ++i)
@@ -264,6 +264,7 @@ static void consoleCommands()
 	from = console->events().size();
 	console->sendCommand("?");
 	CHECK(printed(from, "cachebanremote"));
+	CHECK(printed(from, "listredspawns"));
 	from = console->events().size();
 	console->sendCommand("set sv_baboStats false");
 	CHECK(printed(from, "Unknown variable"));

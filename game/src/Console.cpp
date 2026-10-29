@@ -681,17 +681,21 @@ void Console::sendCommand(CString commandLine, bool isAdmin, unsigned long bbnet
 	// On fait un if sur toute les commandes possibles
 	if (command == "help" || command == "?")
 	{
-		add("help ? execute admin info remoteAdmin - set quit host refreshgames");
-		add("menutab scoreboard screenshot dedicate voteon novote addmap");
-		add("playerlist move moveid nukeall nuke nukeid allwatch addreporturl");
-		add("removereporturl removeallreporturls listreporturls approveall");
-		add("approveplayer rejectplayer rejectallplayers listapprovedplayers");
-		add("savemap savemapforce vote maplist maplistall removemap changemap");
-		add("connect disconnect sayall sayid sayteam edit playerinfo playersinfo");
-		add("forceplayerspawn blueTeamScore redTeamScore redFlagReturn");
-		add("blueFlagReturn mapinfos listbluespawns listredspawns rebuildmap");
-		add("restart kick kickid banlist ban banip banid unban cachelist cacheban");
-		add("cachebanned cacheunban cachelistremote cachebanremote");
+		add("help ? execute admin info - set quit dedicate voteon novote");
+		add("playerlist maplist addmap removemap changemap maplistall disconnect");
+		add("sayall restart kick kickid move moveid allwatch nuke nukeid nukeall");
+		add("banlist ban banid banip unban approveall approveplayer rejectplayer");
+		add("rejectallplayers listapprovedplayers addreporturl removereporturl");
+		add("removeallreporturls listreporturls cachelist cacheban cachebanned");
+		add("cacheunban cachelistremote cachebanremote");
+#ifdef CONSOLE
+		add("sayid playerinfo playersinfo forceplayerspawn mapinfos");
+		add("blueTeamScore redTeamScore blueFlagReturn redFlagReturn");
+		add("listbluespawns listredspawns");
+#else
+		add("connect remoteAdmin host edit sayteam vote savemap savemapforce");
+		add("rebuildmap refreshgames menutab scoreboard screenshot");
+#endif
 		return;
 	}
 
@@ -2342,8 +2346,8 @@ void Console::sendCommand(CString commandLine, bool isAdmin, unsigned long bbnet
 			
 			// we have everything, tell the master server to ban him!
 			master->sendPacket( (char*)&cb , sizeof(stCacheBan) , CACHE_BAN );
+			return;
 		}
-		return;
 	}
 
 #ifdef _DEBUG
