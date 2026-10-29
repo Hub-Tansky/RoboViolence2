@@ -20,6 +20,7 @@
 #include "Game.h"
 #include "Console.h"
 #include "Scene.h"
+#include "ViewGeometry.h"
 
 
 extern Scene * scene;
@@ -69,8 +70,7 @@ void Game::render()
 				{
 					if (thisPlayer->scopeMode == true)
 					{
-						CVector2i res = dkwGetResolution();
-						dkglSetProjection(80, .1f, 50, (float)res[1]*1.333f, (float)res[1]);
+						dkglSetProjection(80, .1f, 50, view::aspect(view::current()), 1);
 						gluLookAt(
 							thisPlayer->currentCF.position[0], 
 							thisPlayer->currentCF.position[1], 
@@ -84,8 +84,7 @@ void Game::render()
 			}
 			if (map->introAnim < map->introAnimLenght && map->dko_cam)
 			{
-				CVector2i res = dkwGetResolution();
-				dkglSetProjection(50, .1f, 1000, (float)res[0], (float)res[1]);
+				dkglSetProjection(50, .1f, 1000, view::aspect(view::current()), 1);
 				CVector3f camPos;
 				CVector3f camTarget;
 				dkoGetDummyPosition("dum_cam", map->dko_cam, camPos.s, (short)map->introAnim);
@@ -274,8 +273,9 @@ void Game::render()
 					CVector2i res = dkwGetResolution();
 					CVector2i mousePos = dkwGetCursorPos_main();
 
-					if(gameVar.r_widescreen > 1)
-						mousePos[0] = static_cast<int>(mousePos[0] * res[1]*1.333f / res[0] + (res[0] - res[1]*1.333f)/2); 
+					// The cursor spans the window; the 3D view may be the 4:3 part between the bars
+					view::Rect v = view::current();
+					mousePos[0] = static_cast<int>(mousePos[0] * (float)v.w / res[0] + (res[0] - v.w) / 2.0f);
 
 					mousePos[1] = res[1] - mousePos[1];
 					CVector3f nearMouse = dkglUnProject(mousePos, 0.0f);
@@ -580,9 +580,8 @@ void Game::render()
 		#endif
 		renderMiniMap();
 
-		CVector2i res = dkwGetResolution();
-		if(gameVar.r_widescreen > 1) res[0] = static_cast<int>(res[1]*1.333f);
-		dkglPushOrtho((float)res[0], (float)res[1]);
+		view::Rect v = view::current();
+		dkglPushOrtho((float)v.w, (float)v.h);
 			glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT);
 				glEnable(GL_TEXTURE_2D);
 				glEnable(GL_BLEND);
@@ -602,9 +601,8 @@ void Game::render()
 	//--- On render le voting
 	if (voting.votingInProgress)
 	{
-		CVector2i res = dkwGetResolution();
-		if(gameVar.r_widescreen > 1) res[0] = static_cast<int>(res[1]*1.333f);
-		dkglPushOrtho((float)res[0], (float)res[1]);
+		view::Rect v = view::current();
+		dkglPushOrtho((float)v.w, (float)v.h);
 			glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT);
 				glEnable(GL_TEXTURE_2D);
 				glEnable(GL_BLEND);
@@ -612,11 +610,11 @@ void Game::render()
 				//--- Render le vote à l'écran
 				if (voting.votingInProgress)
 				{
-					if (scene->client->blink <= .25f) printRightText((float)res[0] - 10, 10, 30, CString("\x9VOTING : %i", (int)(voting.remaining)));
+					if (scene->client->blink <= .25f) printRightText((float)v.w - 10, 10, 30, CString("\x9VOTING : %i", (int)(voting.remaining)));
 					if (voting.voted)
 					{
 						//--- Draw the vote bla bla bla
-						printRightText((float)res[0] - 10, 40, 30, CString(
+						printRightText((float)v.w - 10, 40, 30, CString(
 							"\x9%s casted a vote:\n\x8\"%s\"\n\x2Yes: %i\n\x4No: %i",
 							voting.votingFrom.s,
 							voting.votingWhat.s,
@@ -627,7 +625,7 @@ void Game::render()
 					else
 					{
 						//--- Draw the vote bla bla bla
-						printRightText((float)res[0] - 10, 40, 30, CString(
+						printRightText((float)v.w - 10, 40, 30, CString(
 							"\x9%s casted a vote:\n\x8\"%s\"\n\x2[F1] Yes: %i\n\x4[F2] No: %i",
 							voting.votingFrom.s,
 							voting.votingWhat.s,

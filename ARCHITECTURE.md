@@ -9,11 +9,11 @@ Robo Violence 2: unofficial fork of BaboViolent 2, a top-down multiplayer shoote
 | Deliverables | `bv2` (client), `bv2dedicated` (headless server, `CONSOLE`) and `bv2master`. CI builds and tests all three on Windows, macOS and Linux; the client runs 10 s under xvfb (ASan). Real games on each OS: not yet verified (Phase B step 2). |
 | Build | CMake 3.25+, Ninja presets (`CMakePresets.json`), vcpkg manifest. Output in `build/<preset>/runtime/` ([ADR 0005](docs/decisions/0005-runtime-main-data-root.md)). |
 | Platforms | Targets: Linux x64, macOS 12+ arm64, Windows 10 22H2 or later x64 ([ADR 0012](docs/decisions/0012-windows-10-22h2-minimum.md)); Windows API level pinned to Windows 10 20H1 (`NTDDI_VERSION`). `engine/zeven/include/platform.h` defines `BV2_PLATFORM_*`, `BV2_POSIX`; CMake force-includes it. |
-| Modules | `game` (client, server, editor); `engine/babonet` networking (`bb_*`, `CThread` on `std::thread`); `engine/zeven` utilities (`zeven_core`: `dkc dksvar` + `CString/CVector/CMatrix`; `zeven_console`: no-op `dkt` for the server; `zeven_client`: `dkw dki dkgl dkt dkf dkp dks`); `engine/dko` model loader; `masterserver`. |
+| Modules | `game` (client, server, editor); `engine/babonet` networking (`bb_*`, `CThread` on `std::thread`); `engine/zeven` utilities (`zeven_core`: `dkc dksvar` + `CString/CVector/CMatrix`; `zeven_console`: no-op `dkt` for the server; `zeven_client`: `dkw dki dkgl dkt dkf dkp dks`); `engine/dko` model loader; `engine/credentials` password HMAC proofs (libsodium); `masterserver`. |
 | Dependencies | vcpkg (`vcpkg.json`, pinned baseline): sqlite3, libsodium (ADR 0014); feature `client`: sdl3, miniaudio, stb; feature `http`: curl (off, ADR 0002). Generated, committed: glad GL 2.1 (`engine/zeven/third_party/glad`). System: GLU. No libcurl or OpenSSL is linked by default. |
 | Platform layer | SDL3 window and input (`dkw`, `dki`), miniaudio (`dks`), glad ([ADR 0006](docs/decisions/0006-sdl3-miniaudio-glad-platform-layer.md)). One client `main()` for all OSes. |
 | Tick | Fixed 30 Hz: every `update(float delay)` gets `1/30`; "frames" are a time unit (30 = 1 s). |
-| Network | TCP, raw structs `memcpy`'d from `game/src/netPacket.h`. The server is authoritative for hits, damage, spawns, projectiles and flags; clients for their own movement. `playerID` (slot) differs from `babonetID` (connection). Protocol `GAME_VERSION_SV/CL` = 22100 (`game/src/Server.h:35`). Join and admin passwords are HMAC proofs over a per-connection challenge (`game/src/Credentials.h`, ADR 0014). |
+| Network | TCP, raw structs `memcpy`'d from `game/src/netPacket.h`. The server is authoritative for hits, damage, spawns, projectiles and flags; clients for their own movement. `playerID` (slot) differs from `babonetID` (connection). Protocol `GAME_VERSION_SV/CL` = 22100 (`game/src/Server.h:35`). Join and admin passwords are HMAC proofs over a per-connection challenge; master bans are HMAC-signed packets (`engine/credentials/include/Credentials.h`, ADR 0014, 0038). |
 | Variants | `CONSOLE` = headless server (explicit file list in `game/CMakeLists.txt`). Direct3D, non-Pro and VLD code were removed in Step 1. |
 | Config and secrets | Tracked: `config/*.example.cfg` with empty secrets, `content-seed/*.sql` for generated DBs. Real values stay local; gitleaks, hooks and CI enforce it ([config/README.md](config/README.md)). |
 | Assets | The original assets are removed and blocked by hash (`tools/check-original-assets.py`). Only `content/languages/` (English strings, template, guide) and `content/LaunchScript/` remain; the build generates placeholders (`tools/gen-placeholder-content.py`). |
@@ -22,7 +22,7 @@ Robo Violence 2: unofficial fork of BaboViolent 2, a top-down multiplayer shoote
 | Website | roboviolence.com is built and deployed from [Hub-Tansky/rv2-website](https://github.com/Hub-Tansky/rv2-website) ([ADR 0036](docs/decisions/0036-website-in-rv2-website-repository.md)); its tests read the release file names from `build.yml`. |
 | Hosting | Server images from `packaging/docker/Dockerfile` (GHCR on `main`), runbook [docs/ops/runbook.md](docs/ops/runbook.md). |
 | Known defects | [docs/analysis/KEY_QUESTIONS.md](https://github.com/Hub-Tansky/RoboViolence2/blob/fc0aff7c5aa946406c7c110e8e7c2d972a7daeb8/docs/analysis/KEY_QUESTIONS.md). |
-| Decisions | [docs/decisions/README.md](docs/decisions/README.md): 0001 Ninja, 0002 libcurl compiled out, 0003 OpenGL 2.1 kept, 0004 project name (superseded by 0008), 0005 `main/` data root, 0006 platform layer, 0007 data root, pref dir and config layers, 0008 display name "Robo Violence 2", 0009 internal renaming, 0010 BV2 asset compatibility and GUI freeze, 0011 gettext PO translations, 0012 Windows 10 22H2 minimum, 0013 rulesets, 0014 libsodium HMAC, 0015 admin HTTP API, 0016 player data lookup and package content, 0017 playtest pull agent, 0018 staging pull deploy, 0019 in-game name and fork credits, 0020 package and release format, 0021 one-argument CString is text, 0022 advertised server address, 0023 step review subagent in the repo (superseded by 0037), 0024 GitHub Project is the backlog, 0025 client autotest mode, 0026 screenshot goldens, 0029 static website (moved to rv2-website), 0033 first-run data dialog recommends the BV2 zip, 0034 player data retention and privacy policy, 0035 website Tailwind and agent files (moved to rv2-website), 0036 website in rv2-website, 0037 review rubric single repo copy. |
+| Decisions | [docs/decisions/README.md](docs/decisions/README.md): 0001 Ninja, 0002 libcurl compiled out, 0003 OpenGL 2.1 kept, 0004 project name (superseded by 0008), 0005 `main/` data root, 0006 platform layer, 0007 data root, pref dir and config layers, 0008 display name "Robo Violence 2", 0009 internal renaming, 0010 BV2 asset compatibility and GUI freeze, 0011 gettext PO translations, 0012 Windows 10 22H2 minimum, 0013 rulesets, 0014 libsodium HMAC, 0015 admin HTTP API, 0016 player data lookup and package content, 0017 playtest pull agent, 0018 staging pull deploy, 0019 in-game name and fork credits, 0020 package and release format, 0021 one-argument CString is text, 0022 advertised server address, 0023 step review subagent in the repo (superseded by 0037), 0024 GitHub Project is the backlog, 0025 client autotest mode, 0026 screenshot goldens, 0029 static website (moved to rv2-website), 0033 first-run data dialog recommends the BV2 zip, 0034 player data retention and privacy policy, 0035 website Tailwind and agent files (moved to rv2-website), 0036 website in rv2-website, 0037 review rubric single repo copy, 0038 dead account pages hidden, admin and ban secrets hardened, 0039 Widescreen (Stretch) shows more map. |
 
 ### Open items
 
@@ -150,6 +150,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/test_babonet_ping.cpp` | PNS-56: a server-browser ping to a game server on this host is answered within 1 s while another process holds babonet's LAN port |
 | `tests/test_browsable_game.cpp` | A server browser row owns a copy of its lobby game's row (the lobby frees its own) |
 | `tests/test_cstring.cpp` | Phase C step 5: one-argument `CString` is text (arrays, `char*`, literals, direct and implicit); two or more arguments format (ADR 0021) |
+| `tests/test_view_geometry.cpp` | Widescreen (Stretch) projects at the window's own aspect, Bars at 4:3; the camera's side margin widens with the view, and a narrow or short map centres it |
 | `tests/test_config.cpp` | dksvar config layering, transient values not saved, secrets masked, `dksvarGetValue` |
 | `tests/test_credentials.cpp` | Step 10: the credential HMAC against RFC 4231; proofs check only with their own password, label and nonce |
 | `tests/test_crash_fixes.cpp` | Steps 5 and 7: one check per fixed defect (KEY_QUESTIONS Part D) on the in-process server |
@@ -218,7 +219,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | path | purpose |
 |---|---|
 | `.github/workflows/secret-scan.yml` | CI: gitleaks over commits after the fork point and original-asset check |
-| `.github/workflows/build.yml` | CI: Debug and Release build and ctest, Release package on Windows, macOS, Linux (`roboviolence2-<preset>` artifacts); `package-check` of the Linux package in a clean `ubuntu:24.04`; `deb-check`: the `.deb` installs with apt, a non-root user starts the server and removal leaves nothing, in clean `ubuntu:24.04` and `debian:13`; `package-smoke` (not required): Windows and macOS packages start server, master and client (Mesa llvmpipe on Windows); ASan smoke job with client under xvfb; Linux jobs upload the actual and diff PNGs of failed `screenshot_*` tests (`screenshots-<preset>`); `release` job on `v*` tags (GitHub release, pre-release for `v0.*` and `v*-*`); `fuzz` job (not required, pushes to main): 2 min per client message type, uploads crash inputs |
+| `.github/workflows/build.yml` | CI: Debug and Release build and ctest, Release package on Windows, macOS, Linux (`roboviolence2-<preset>` artifacts); `package-check` of the Linux package in a clean `ubuntu:24.04`; `deb-check`: the `.deb` installs with apt, a non-root user starts the server and removal leaves nothing, in clean `ubuntu:24.04` and `debian:13`; `package-smoke` (not required): Windows and macOS packages start server, master and client (Mesa llvmpipe on Windows); ASan smoke job with client under xvfb; Linux jobs upload the actual and diff PNGs of failed `screenshot_*` tests (`screenshots-<preset>`); `release` job: every run checks the release files are there; a `v*` tag publishes them (GitHub release, pre-release for `v0.*` and `v*-*`) and posts to Discord; `fuzz` job (not required, pushes to main): 2 min per client message type, uploads crash inputs |
 | `.github/workflows/hygiene.yml` | CI: ARCHITECTURE.md inventory, repository hygiene, content case; `review` (`tools/review.sh`, given the PR description) on PRs, rerun on description edits |
 | `.github/pull_request_template.md` | PR description: item, goal, out of scope, Allowed paths (read by `tools/review.sh`), tests |
 | `.github/workflows/codeql.yml` | CodeQL: `c-cpp` (manual linux-x64 build of the three executables) and `actions`; push, PR, weekly; alerts under `build/` (vcpkg headers) filtered out |
@@ -314,12 +315,15 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/decisions/0034-player-data-retention-and-privacy-policy.md` | ADR: the server never relays player IPs, bans (`banlist.tsv`) expire after `sv_banDays`, `admin-audit.log` after 90 days; privacy policy page, installer link and opt-out |
 | `docs/decisions/0036-website-in-rv2-website-repository.md` | ADR: the website, its tests, tooling and Pages workflow live in Hub-Tansky/rv2-website; its tests read `build.yml` from here |
 | `docs/decisions/0037-review-rubric-single-repo-copy.md` | ADR: the review rubric has one repo copy with a unique name; the gate checks its hash |
+| `docs/decisions/0038-dead-accounts-hidden-admin-and-ban-secrets-hardened.md` | ADR: dead account pages hidden; 15-character admin and master ban secrets, per-IP admin lockout, HMAC-signed master bans |
+| `docs/decisions/0039-widescreen-stretch-shows-more-map.md` | ADR: the gameplay, scope and intro projections use their viewport's aspect; Stretch shows more map sideways (Hor+), Bars stays 4:3 |
 | `docs/decisions/README.md` | ADR format and index |
 
 ### `docs/ops`
 
 | path | purpose |
 |---|---|
+| `docs/ops/release.md` | Cutting a release: pick the commit, manual install test per OS, tag, notes header template, production re-pin, Discord publish |
 | `docs/ops/runbook.md` | Hosting the server images: secrets, start, stop, upgrade, logs, console, ports, backups, production (pinned manual deploy, failover) |
 
 ### `engine/babonet`
@@ -370,6 +374,25 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `engine/babonet/src/md5c.c` | RFC 1321 MD5 implementation |
 | `engine/babonet/src/md5class.cpp` | CMD5: MD5 hex-digest wrapper |
 | `engine/babonet/src/socket_compat.h` | send() with EINTR retry; SIGPIPE is ignored in bb_init |
+
+### `engine/credentials`
+
+| path | purpose |
+|---|---|
+| `engine/credentials/CMakeLists.txt` | Target credentials |
+| `engine/credentials/README.md` | Module README: credentials |
+
+### `engine/credentials/include`
+
+| path | purpose |
+|---|---|
+| `engine/credentials/include/Credentials.h` | Credential proofs: HMAC(password, label + nonce) for join and admin, signed packets for master bans, `MIN_SECRET_LENGTH` |
+
+### `engine/credentials/src`
+
+| path | purpose |
+|---|---|
+| `engine/credentials/src/Credentials.cpp` | HMAC-SHA256, nonces and constant-time checks (libsodium, ADR 0014, 0038) |
 
 ### `engine/dko`
 
@@ -515,8 +538,8 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/CAStar.cpp` | A* path finding grid |
 | `game/src/CAStar.h` | A* path finding grid |
 | `game/src/CAStar_FindPath.cpp` | A* search routine |
-| `game/src/CAccount.cpp` | Account UI tab |
-| `game/src/CAccount.h` | Account UI tab |
+| `game/src/CAccount.cpp` | Account UI tab (hidden, ADR 0038) |
+| `game/src/CAccount.h` | Account UI tab (hidden, ADR 0038) |
 | `game/src/CBrowser.cpp` | Server browser UI |
 | `game/src/CBrowser.h` | Server browser UI |
 | `game/src/CClans.cpp` | Clans UI tab |
@@ -563,8 +586,8 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/CPing.h` | Server ping measurement |
 | `game/src/CPlayers.cpp` | Players list UI |
 | `game/src/CPlayers.h` | Players list UI |
-| `game/src/CProfile.cpp` | Profile UI tab |
-| `game/src/CProfile.h` | Profile UI tab |
+| `game/src/CProfile.cpp` | Appearance UI tab (its sub-tab row is hidden, ADR 0038) |
+| `game/src/CProfile.h` | Appearance UI tab |
 | `game/src/CRain.cpp` | Rain weather effect |
 | `game/src/CRain.h` | Rain weather effect |
 | `game/src/CRegisterClan.cpp` | Clan registration UI |
@@ -593,8 +616,6 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/ConnectFailed.h` | Dialog: connection failed |
 | `game/src/Console.cpp` | In-game console: commands, log, remote console; feeds console lines to a running autotest; `refreshgames` asks the master for the game list; `screenshot`, `menutab` and `scoreboard` for screenshot tests (ADR 0026) |
 | `game/src/Console.h` | In-game console: commands, log, remote console |
-| `game/src/Credentials.cpp` | HMAC-SHA256, nonces and constant-time checks for the join and admin passwords (libsodium, ADR 0014) |
-| `game/src/Credentials.h` | Credential proofs: the client answers the server's nonce with HMAC(password, label + nonce) |
 | `game/src/Control.cpp` | Menu control base class |
 | `game/src/Control.h` | Menu control base class |
 | `game/src/ControlListener.cpp` | Menu control listener interface |
@@ -628,7 +649,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/Host.h` | Host-game settings struct |
 | `game/src/IncorrectName.h` | Dialog: invalid player name |
 | `game/src/IncorrectPassword.h` | Dialog: wrong server password |
-| `game/src/IntroScreen.cpp` | "LOADING" splash after start-up (ADR 0019), the loading frame Scene and Map present, and the per-frame set-up `Scene::render` starts with |
+| `game/src/IntroScreen.cpp` | "LOADING" splash after start-up (ADR 0019), the loading frame Scene and Map present, the per-frame set-up `Scene::render` starts with, and `view::current` |
 | `game/src/IntroScreen.h` | Interface of `IntroScreen.cpp`; `presentLoadingFrame` is the one "LOADING" frame Scene and Map show while they load; `beginFrame` is the shared clear/viewport/projection set-up |
 | `game/src/JoinGame.h` | Join-game screen |
 | `game/src/Key.cpp` | Key binding entry |
@@ -676,6 +697,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/ServerValidator.cpp` | Server cheat checks: spawn weapon whitelist, speed/frame kick, step 9 rules (weapon, movement, rate limits) with a decaying score |
 | `game/src/ServerValidator.h` | Server cheat checks (`Server::validator`), asked by the `ServerRecv.cpp` handlers |
 | `game/src/SqlStatement.h` | Prepared SQLite statement with bound parameters (the game's copy) |
+| `game/src/ViewGeometry.h` | ([ADR 0039](docs/decisions/0039-widescreen-stretch-shows-more-map.md)) The 3D viewport inside the window (`view::rect`: whole window, or 4:3 between bars; `view::current` for this frame, defined in `IntroScreen.cpp`), the aspect the gameplay, scope and intro projections use, and the camera's margins at the map edges |
 | `game/src/Weapon.cpp` | Weapon definitions and stats |
 | `game/src/Weapon.h` | Weapon definitions and stats |
 | `game/src/Write.cpp` | Chat input widget |

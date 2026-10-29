@@ -45,7 +45,6 @@ set(BV2_GAME_SOURCES
   src/ClientRender.cpp
   src/ConfirmPass.cpp
   src/Console.cpp
-  src/Credentials.cpp
   src/Control.cpp
   src/ControlListener.cpp
   src/Dialog.cpp
@@ -107,7 +106,6 @@ set(BV2_SERVER_SOURCES
   src/CPing.cpp
   src/CStatus.cpp
   src/Console.cpp
-  src/Credentials.cpp
   src/FileIO.cpp
   src/Game.cpp
   src/GameProjectile.cpp
@@ -142,7 +140,7 @@ set(BV2_SERVER_SOURCES
 # includes and libraries
 function(bv2_game_target target visibility)
   target_include_directories(${target} ${visibility} src)
-  target_link_libraries(${target} ${visibility} babonet dko zeven_core ${BV2_SQLITE_TARGET} unofficial-sodium::sodium Threads::Threads)
+  target_link_libraries(${target} ${visibility} babonet credentials dko zeven_core ${BV2_SQLITE_TARGET} Threads::Threads)
   if(BV2_WITH_HTTP)
     target_sources(${target} PRIVATE src/CCurl.cpp)
     target_compile_definitions(${target} PRIVATE BV2_WITH_HTTP)

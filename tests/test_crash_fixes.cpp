@@ -245,6 +245,31 @@ static void r15()
 	CHECK(p->avgPing == 10);
 }
 
+// A successful cachebanremote no longer ends with "Unkown command"; "?" lists the dedicated-only commands too; sv_baboStats is gone
+static bool printed(size_t from, const char * text)
+{
+	for (size_t i = from; i < console->events().size(); ++i)
+		if (std::strstr(console->events()[i].s, text)) return true;
+	return false;
+}
+
+static void consoleCommands()
+{
+	master->CachedPlayersRemote[0].Valid = true; // as if a cachelistremote answer listed one player
+	std::snprintf(master->CachedPlayersRemote[0].IP, sizeof(master->CachedPlayersRemote[0].IP), "203.0.113.7");
+	size_t from = console->events().size();
+	console->sendCommand("cachebanremote pass 0");
+	CHECK(!printed(from, "Unkown command"));
+	master->CachedPlayersRemote[0].Valid = false;
+	from = console->events().size();
+	console->sendCommand("?");
+	CHECK(printed(from, "cachebanremote"));
+	CHECK(printed(from, "listredspawns"));
+	from = console->events().size();
+	console->sendCommand("set sv_baboStats false");
+	CHECK(printed(from, "Unknown variable"));
+}
+
 int main(int, char ** argv)
 {
 	if (!harness::start(argv[0])) return 1;
@@ -260,6 +285,7 @@ int main(int, char ** argv)
 	r15();
 	r18(bv2::userFile("").c_str());
 	r29(bv2::userFile("").c_str());
+	consoleCommands();
 	harness::stop();
 	if (harness::failures() == 0) std::printf("ok: crash fixes\n");
 	return harness::failures() ? 1 : 0;

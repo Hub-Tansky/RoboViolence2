@@ -47,7 +47,7 @@ public:
 	//void	Connect(char* ip,unsigned short port);
 
 	void	RetreiveData();
-	void	ReceiveServerPacket(char *data,int typeID,UINT4 fromID);
+	void	ReceiveServerPacket(char *data,int typeID,UINT4 fromID,int size);
 
 	bool	Update(float elapsed);	//permet de donner du temps a la network
 

@@ -1,6 +1,7 @@
 // Phase B step 10: an admin login is accepted only with HMACs of the admin user and password over the connection's
 // challenge, and neither the user, the password nor their MD5 crosses the wire. Phase C step 6 (PNS-42): a password
-// under 12 characters disables admin login; the 5th failure on a connection disconnects it.
+// under 15 characters disables admin login (ADR 0038, was 12); the 5th failure on a connection disconnects it, and
+// from the 5th failure from one IP that IP's admin logins are refused for a while, even on a new connection.
 #include "server_harness.h"
 
 #include "Console.h"
@@ -54,11 +55,11 @@ int main(int, char ** argv)
 {
 	if (!harness::start(argv[0])) return 1;
 	console->sendCommand("set zsv_adminUser boss");
-	console->sendCommand("set zsv_adminPass short3cret");
+	console->sendCommand("set zsv_adminPass fourteen-chars");
 	UINT4 a = harness::join(), b = harness::join(), c = harness::join();
-	login(a, "boss", "short3cret", nonceFor(a));
+	login(a, "boss", "fourteen-chars", nonceFor(a));
 	harness::tick();
-	CHECK(!accepted(a)); // 10 characters: admin login is off
+	CHECK(!accepted(a)); // 14 characters: admin login is off
 	console->sendCommand("set zsv_adminPass s3cret-long-enough");
 
 
@@ -88,6 +89,36 @@ int main(int, char ** argv)
 	login(c, "boss", "guess", nonceFor(c));
 	harness::tick(2);
 	CHECK(harness::slotOf(c) < 0);
+
+	// The same IP (every harness client is 127.0.0.1) reconnects: the right password is refused while it is locked
+	UINT4 d = harness::join();
+	login(d, "boss", "s3cret-long-enough", nonceFor(d));
+	harness::tick();
+	CHECK(!accepted(d));
+
+	// The backoff with a fake clock, as the server drives it (no failed() while locked): 4 free failures, then 60 s,
+	// and each failure after a lock doubles it up to an hour; an IP is forgotten an hour after its last failure or lock end
+	AdminLockout lockout;
+	long long now = 1000;
+	for (int i = 0; i < 4; ++i) CHECK(lockout.failed("192.0.2.1", now) == 0);
+	CHECK(!lockout.locked("192.0.2.1", now));
+	for (long long expected : {60, 120, 240, 480, 960, 1920, 3600, 3600})
+	{
+		CHECK(lockout.failed("192.0.2.1", now) == expected);
+		CHECK(lockout.locked("192.0.2.1", now + expected - 1));
+		now += expected;
+		CHECK(!lockout.locked("192.0.2.1", now));
+	}
+	CHECK(!lockout.locked("192.0.2.2", now));
+	// Within an hour of the last lock's end (but over an hour after the failure that set it) it is still remembered
+	now += AdminLockout::MAX_LOCK - 1;
+	CHECK(lockout.failed("192.0.2.1", now) == 3600);
+	now += 3600 + AdminLockout::MAX_LOCK + 1;
+	CHECK(lockout.failed("192.0.2.1", now) == 0); // forgotten: free failures again
+	for (int i = 0; i < 3; ++i) lockout.failed("192.0.2.1", now);
+	CHECK(lockout.failed("192.0.2.1", now) == 60);
+	lockout.succeeded("192.0.2.1");
+	CHECK(!lockout.locked("192.0.2.1", now));
 
 	harness::stop();
 	if (harness::failures() == 0) std::printf("ok: admin login\n");

@@ -334,8 +334,6 @@ GameVar::GameVar()
 		LIMIT_MIN | LIMIT_MAX, true);
 	sv_forceRespawn = false;
 	dksvarRegister(CString("sv_forceRespawn [bool : (default false)]"), &sv_forceRespawn, true);
-	sv_baboStats = false;
-	dksvarRegister(CString("sv_baboStats [bool : (default false)]"), &sv_baboStats, true);
 	sv_roundTimeLimit = 3*60;
 	dksvarRegister(CString("sv_roundTimeLimit [float : 0 = unlimited (default 180)]"), &sv_roundTimeLimit,
 		0, 0, LIMIT_MIN, true);
@@ -820,7 +818,6 @@ void GameVar::sendSVVar(UINT4 babonetID)
 	sendOne("sv_topView", babonetID);
 	sendOne("sv_minSendInterval", babonetID);
 	sendOne("sv_forceRespawn", babonetID);
-	sendOne("sv_baboStats", babonetID);
 	sendOne("sv_roundTimeLimit", babonetID);
 	sendOne("sv_gameTimeLimit", babonetID);
 	sendOne("sv_scoreLimit", babonetID);

@@ -1,5 +1,5 @@
 // Phase B step 10: the credential HMAC is HMAC-SHA256 (RFC 4231 test case 2), and a proof checks only against its
-// own password, label and nonce.
+// own password, label and nonce. A signed packet (ADR 0038) is HMAC over the packet with its Proof zeroed.
 #include "Credentials.h"
 
 #include <cstdio>
@@ -27,6 +27,18 @@ int main()
 	check(!credentials::check("Secret", "join", nonce, mac), "another password");
 	check(!credentials::check("secret", "admin password", nonce, mac), "another label");
 	check(!credentials::check("secret", "join", other, mac), "another nonce (a replay)");
+
+	// Known answer: HMAC-SHA256("ban-password-long", "abcd" + 32 zero bytes)
+	struct Packet { char Text[4]; uint8_t Proof[credentials::MAC_SIZE]; } packet = {{'a', 'b', 'c', 'd'}, {}};
+	const uint8_t signedAbcd[credentials::MAC_SIZE] = {0x4b, 0xaf, 0xf8, 0x26, 0xa5, 0xab, 0xd7, 0x34, 0x03, 0x06, 0x67,
+		0x15, 0xad, 0x04, 0x14, 0xec, 0xb5, 0x0c, 0x63, 0xce, 0xde, 0x5e, 0xd5, 0x0d, 0xc2, 0x15, 0x58, 0xfb, 0x02, 0x1b,
+		0x24, 0x76};
+	credentials::signPacket("ban-password-long", packet);
+	check(memcmp(packet.Proof, signedAbcd, sizeof(signedAbcd)) == 0, "signed packet known answer");
+	check(credentials::checkPacket("ban-password-long", packet), "a signed packet checks");
+	check(!credentials::checkPacket("ban-password-lonG", packet), "another password");
+	packet.Text[0] = 'A';
+	check(!credentials::checkPacket("ban-password-long", packet), "a changed packet");
 
 	if (!failures) std::printf("ok: credentials\n");
 	return failures ? 1 : 0;

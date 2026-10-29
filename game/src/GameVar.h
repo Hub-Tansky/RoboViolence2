@@ -87,7 +87,6 @@ public:
 	bool sv_topView;
 	int sv_minSendInterval;
 	bool sv_forceRespawn;
-	bool sv_baboStats;
 	float sv_roundTimeLimit;
 	float sv_gameTimeLimit;
 	int sv_scoreLimit;

@@ -1,42 +1,28 @@
 # Robo Violence 2
-Robo Violence 2 is an unofficial fork of BaboViolent 2 by bitHeads / RndLabs
-(GPLv3 source release): <https://github.com/Daivuk/BaboViolent2>
-Not affiliated with or endorsed by the original authors.
+Robo Violence 2 is a free top-down multiplayer arena shooter. Players drive armed balls through small arenas and play deathmatch, team deathmatch and capture the flag against each other. 
+
+We continue the story of BaboViolent 2 on a modern base, with one codebase for Windows, macOS and Linux, plus game servers hosted by us or other players.
 
 Robots will use this repo as a staging ground before winning AI war ;-)
 
 ## Original assets removed
-The original game assets (maps, models, textures, skins, fonts, sounds, music,
-source art), the non-English translations and the RndLabs EULA are NOT in this
-repository. The GPL covers code only; no grant exists for them, so they are not
-redistributed. Replacements will be created by this project.
-- `tools/check-original-assets.py`: fails if an original file is committed again
+Robo Violence 2 is a fork of **BaboViolent 2** built on its GPLv3 source release: [github.com/Daivuk/BaboViolent2](https://github.com/Daivuk/BaboViolent2). Big thanks to authors and to everyone who made BaboViolent 2 possible.
 
-Upstream history still contains the originals; this fork's `main` does not.
-
-## Running without the original assets - temporary
-The game needs a data directory `main/` next to the executable.
-
-- If you own the original game, keep its data **outside** the repo (for example
-  `~/Games/bv2-data/main/`). The client asks for the folder on first start; the
-  server reads `BV2_DATA_DIR` ([docs/build/](docs/build/README.md#game-data-required)).
-  Never commit it; `.gitignore` blocks the original asset folders.
-- Without the original data (CI, contributors), generated placeholder content is
-  used.
-
-Only `languages/en.lang` and `LaunchScript/` remain in `content/`.
+The GPL covers the code only. The original assets (maps, models, textures, sounds, music, fonts),  the non-English translations and the name "BaboViolent 2" are not part of this project and are not redistributed here. Replacements will be created by this project later.
 
 ## License
 Code: GPLv3 ([LICENSE.txt](LICENSE.txt)). 
 
-Assets and the name "BaboViolent 2" are not covered.
-
 ## Platforms and build
 
-Targets: Windows 10 22H2 or later (x64), macOS 12+ (arm64) and Linux x64, built with CMake, Ninja and vcpkg. Download a package from CI or build from source: [docs/build/](docs/build/README.md) ([macOS](docs/build/macos.md), [Linux](docs/build/linux.md), [Windows](docs/build/windows.md)).
+- Windows 10 22H2 or later (x64)
+- macOS 12 or later with Apple Silicon (M1 or newer).
+- Linux x64 with glibc 2.39 or newer: Linux Mint 22, Ubuntu 24.04, Debian 13 or later.
+
+Built with CMake, Ninja and vcpkg. Download a package from CI or build from source: [docs/build/](docs/build/README.md) ([macOS](docs/build/macos.md), [Linux](docs/build/linux.md), [Windows](docs/build/windows.md)).
 
 ## Where to read more
 - [AGENTS.md](AGENTS.md): project rules for fellow robots, agents and even human contributors
+- [Issues](https://github.com/Hub-Tansky/RoboViolence2/issues): bug reports, ideas and public work items; the backlog and roadmap live in the private GitHub Project items for now
 - [ARCHITECTURE.md](ARCHITECTURE.md): architecture index
-- [Issues](https://github.com/Hub-Tansky/RoboViolence2/issues): bug reports and public work items; the backlog and roadmap live in the maintainer's GitHub Project
-- [Original bv2 code analysis v1](https://github.com/Hub-Tansky/RoboViolence2/blob/fc0aff7c5aa946406c7c110e8e7c2d972a7daeb8/docs/analysis/README.md) (archived)
+- Community channel for direct feedback: https://discord.gg/gRehxx43z 

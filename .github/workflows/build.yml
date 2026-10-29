@@ -16,13 +16,13 @@ jobs:
       matrix:
         include:
           - { os: windows-2025, preset: win-x64-msvc }  # pinned (PNS-27): ADR 0012 names this image
-          - { os: macos-14, preset: macos-arm64 }
+          - { os: macos-15, preset: macos-arm64 }
           - { os: ubuntu-24.04, preset: linux-x64 }
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/setup-vcpkg
         with:
-          cache-key: ${{ matrix.preset }}
+          cache-key: ${{ matrix.os }}-${{ matrix.preset }}  # image in the key: a new image (new compiler) must not exact-hit a cache it cannot use
       - name: MSVC environment
         if: runner.os == 'Windows'
         uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
@@ -87,14 +87,18 @@ jobs:
         with:
           path: out/roboviolence2-${{ matrix.preset }}${{ runner.os == 'Windows' && '-setup.exe' || runner.os == 'macOS' && '.dmg' || '.deb' }}
           archive: false
-  # A v* tag publishes the installers, the macOS and Linux packages and the source as a GitHub release (ADR 0020;
+  # Every run checks the release files are there; a v* tag publishes the installers, the macOS and Linux packages and the source as a GitHub release (ADR 0020;
   # the macOS .zip carries the servers, which the .dmg leaves out, ADR 0030; the .deb, ADR 0031)
   release:
-    if: github.ref_type == 'tag' && startsWith(github.ref_name, 'v')
     needs: build
     runs-on: ubuntu-24.04
     permissions:
       contents: write
+    env:
+      # Asset names are read by Hub-Tansky/rv2-website (site.js, install.html; ADR 0036) and packaging/discord_release_post.py
+      RELEASE_FILES: >-
+        dist/roboviolence2-win-x64-msvc-setup.exe dist/roboviolence2-macos-arm64.dmg
+        dist/roboviolence2-macos-arm64.zip dist/roboviolence2-linux-x64.tar.gz dist/roboviolence2-linux-x64.deb
     steps:
       - uses: actions/checkout@v7
       - uses: actions/download-artifact@v8
@@ -102,7 +106,14 @@ jobs:
           path: dist
           pattern: roboviolence2-*
           merge-multiple: true
+          skip-decompress: true  # the macOS .zip is a release file: keep it, don't extract it into dist/
+      # Every run checks the files a tag would publish, so a broken list shows up on main, not after the tag
+      - name: Release files are all there
+        shell: bash
+        run: ls -l $RELEASE_FILES  # unquoted: one name per word
       - name: Source tarball and release
+        if: github.ref_type == 'tag' && startsWith(github.ref_name, 'v')
+        shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -110,13 +121,11 @@ jobs:
           # v0.* and v*-<suffix> tags are pre-releases
           pre=$([[ "$GITHUB_REF_NAME" == v0.* || "$GITHUB_REF_NAME" == *-* ]] && echo --prerelease || true)
           echo "PRERELEASE_FLAG=$pre" >> "$GITHUB_ENV"
-          # Asset names are read by Hub-Tansky/rv2-website (site.js, install.html; ADR 0036) and packaging/discord_release_post.py
           gh release create "$GITHUB_REF_NAME" --title "Robo Violence 2 $GITHUB_REF_NAME" --generate-notes $pre \
-            dist/roboviolence2-win-x64-msvc-setup.exe dist/roboviolence2-macos-arm64.dmg \
-            dist/roboviolence2-macos-arm64.zip dist/roboviolence2-linux-x64.tar.gz dist/roboviolence2-linux-x64.deb \
-            "dist/roboviolence2-${GITHUB_REF_NAME}-source.tar.gz"
+            $RELEASE_FILES "dist/roboviolence2-${GITHUB_REF_NAME}-source.tar.gz"
       # The post in Discord #announcements, pinging the opt-in release-ping role (ADR 0032); the owner clicks Publish
       - name: Discord release post
+        if: github.ref_type == 'tag' && startsWith(github.ref_name, 'v')
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_RELEASE_WEBHOOK }}
           DISCORD_ROLE_ID: ${{ vars.DISCORD_RELEASE_ROLE_ID }}
@@ -199,7 +208,7 @@ jobs:
       matrix:
         include:
           - { os: windows-2025, preset: win-x64-msvc }
-          - { os: macos-14, preset: macos-arm64 }
+          - { os: macos-15, preset: macos-arm64 }
     defaults:
       run:
         shell: bash
