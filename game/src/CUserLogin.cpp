@@ -86,7 +86,7 @@ CUserLogin::CUserLogin(CControl * in_parent, CControl * in_alignTo)
 	separator = new CControl(instance, CVector2i(10,20), CVector2i(200,25),"Appearance", this, "SEPARATOR", btn_createAccount, CONTROL_SNAP_BOTTOM, 15);*/
 	CControl * separator = new CControl(instance, CVector2i(10,20), CVector2i(200,25),"Appearance", this, "SEPARATOR");
 
-	//--- Player name (issue #117): saved on Enter or when the field loses focus
+	//--- Player name (issue #117): taken on Enter or when the field loses focus; saved with the config on exit
 	CControl * lbl_playerName = new CControl(instance, CVector2i(20,20), CVector2i(130,25),"Player name:", this, "LABEL", separator, CONTROL_SNAP_BOTTOM, 5);
 	lbl_playerName->textAlign = CONTROL_TEXTALIGN_TOPLEFT;
 	lbl_playerName->toolTips = "Your player name visible to other players in game.";
