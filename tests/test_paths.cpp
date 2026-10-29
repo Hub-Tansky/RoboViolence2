@@ -76,6 +76,13 @@ int main(int argc, char ** argv)
 	check(bv2::findDataIn((content / "main").string()) == root(content), "main/ itself");
 	check(bv2::findDataIn(pkg.string()).empty(), "no main/textures: not BV2 data");
 	check(bv2::detectDataDir() == root(content), "auto-detect in ~/Downloads");
+	{
+		// Windows Extract All of BaboViolent2-master.zip with its default target: the zip's own folder inside a folder of the same name
+		const fs::path nested = home / "Desktop" / "BaboViolent2-master" / "BaboViolent2-master" / "BaboViolent2" / "Content";
+		touch(nested / "main" / "textures" / "a.tga");
+		check(bv2::findDataIn((home / "Desktop" / "BaboViolent2-master").string()) == root(nested), "Extract All nesting");
+		fs::remove_all(home / "Desktop");
+	}
 
 	check(bv2::savedDataDir().empty(), "nothing saved yet");
 	bv2::saveDataDir(root(content));

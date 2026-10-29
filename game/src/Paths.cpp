@@ -88,8 +88,8 @@ namespace
 
 	bool g_dataFromEnv = false;
 
-	// The first folder holding main/textures/ among dir, its parent when dir is main/, dir/Content and
-	// dir/BaboViolent2/Content (the upstream repository); "" when none
+	// The first folder holding main/textures/ among dir, its parent when dir is main/, dir/Content,
+	// dir/BaboViolent2/Content (the upstream repository) and dir/<dir's name>/BaboViolent2/Content; "" when none
 	fs::path findRoot(const std::string & dir)
 	{
 		if (dir.empty())
@@ -102,6 +102,7 @@ namespace
 			tries.push_back(p.parent_path());
 		tries.push_back(p / "Content");
 		tries.push_back(p / "BaboViolent2" / "Content");
+		tries.push_back(p / p.filename() / "BaboViolent2" / "Content"); // Windows Extract All: the zip's folder inside one of the same name
 		for (size_t i = 0; i < tries.size(); ++i)
 		{
 			std::error_code ec;

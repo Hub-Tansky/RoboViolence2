@@ -19,7 +19,7 @@ On each OS, in this order:
 1. **Install.** Windows: run the installer and leave "Don't contact the public server list" unticked. macOS: drag the app from the `.dmg` to Applications, then Open Anyway in System Settings → Privacy & Security. Linux `.deb`: `sudo apt install ./roboviolence2-linux-x64.deb`. Linux `.tar.gz`: unpack it and run `./run-client.sh`.
 2. **First-run download.** Start the game. The box offers "Download and play" and "Use placeholders". Click "Download and play": a progress window, then the menu with the original art and music. `data-dir.txt` in the pref dir points at `original` beside it ([ADR 0040](../decisions/0040-first-run-downloads-original-data.md)).
 3. **Data is kept.** Quit and start again: no box, original art.
-   Then the fallback: quit, delete `original` and `data-dir.txt`, go offline and start. "Download and play" ends in the failure box; "Open in browser" opens the `master.zip` download (finish it online). Unzip it into Downloads (Windows Extract All: set the target to `Downloads`, since its default adds a second `BaboViolent2-master` level), start again: no box, original art.
+   Then the fallback: quit, delete `original` and `data-dir.txt`, go offline and start. "Download and play" ends in the failure box; "Open in browser" opens the `master.zip` download (finish it online). Unzip it into Downloads (on Windows: Extract All with its default target), start again: no box, original art.
 4. **Server browser.** Open the server list. It shows both production servers (CTF on port 3333 and TDM on 3334), served by `master.roboviolence.com`.
 5. **Play.** Join one server and play one full round (to the round-end scoreboard).
 

@@ -50,8 +50,9 @@ namespace bv2
 	// else rel (relative to the data root)
 	std::string contentFile(const std::string & rel);
 
-	// The folder holding BV2 data (main/textures/) at dir, at its parent when dir is main/, at dir/Content or at
-	// dir/BaboViolent2/Content (the upstream repository); "" when none
+	// The folder holding BV2 data (main/textures/) at dir, at its parent when dir is main/, at dir/Content, at
+	// dir/BaboViolent2/Content (the upstream repository) or one level deeper in a folder of dir's own name
+	// (Windows Extract All); "" when none
 	std::string findDataIn(const std::string & dir);
 
 	// The player's data folder saved in prefDir()/data-dir.txt; "" when unset or it no longer holds data
