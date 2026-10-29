@@ -15,5 +15,6 @@
 ## Consequences
 - Half the macOS jobs per PR commit, and a capacity drop no longer needs a manual re-run. A real build failure still fails: it is only re-run when a runner-less job sits in the same run, and fails again.
 - A branch without a PR gets no `build` run; open a (draft) PR for CI.
+- `ci-retry` fails on an API error, except the branch-head lookup: its failure is read as a deleted (merged) branch and skips the re-run.
 - `workflow_run` workflows run from `main`'s copy, so `ci-retry` only works after merge. If GitHub does not start `workflow_run` for a re-run made with `GITHUB_TOKEN`, a run gets one automatic retry, not two.
 - Rejected: raising `timeout-minutes` (the cancelled jobs never started; the timeout counts running time only). Paid or larger runners and external CI (cost; not approved). `macos-15-intel` (x86_64 package, not the shipped arm64 one). Merging `package-smoke` into `build` (one fewer macOS queue wait, but a larger change to the release jobs).
