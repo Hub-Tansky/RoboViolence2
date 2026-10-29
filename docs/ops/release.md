@@ -17,8 +17,8 @@ Check that no `BV2_*` variable is set (`set BV2_` on Windows, `env | grep BV2_` 
 On each OS, in this order:
 
 1. **Install.** Windows: run the installer and leave "Don't contact the public server list" unticked. macOS: drag the app from the `.dmg` to Applications, then Open Anyway in System Settings → Privacy & Security. Linux `.deb`: `sudo apt install ./roboviolence2-linux-x64.deb`. Linux `.tar.gz`: unpack it and run `./run-client.sh`.
-2. **First-run dialog.** Start the game. The dialog appears with the zip URL. Click "Download BV2 data": the browser downloads `BaboViolent2-master.zip` and the dialog comes back. Click "Use placeholders": the menu opens with placeholder art. Quit.
-3. **Data in Downloads is found.** Unzip the zip so the data ends up at `Downloads/BaboViolent2-master/BaboViolent2/Content/main/` (Windows Extract All: set the target to `Downloads`, since its default adds a second `BaboViolent2-master` level). Start again: no dialog, and the menu shows the original art and plays music. `data-dir.txt` now exists in the pref dir.
+2. **First-run download.** Start the game. The box offers "Download and play" and "Use placeholders". Click "Download and play": a progress window, then the menu with the original art and music. `data-dir.txt` in the pref dir points at `original` beside it ([ADR 0040](../decisions/0040-first-run-downloads-original-data.md)).
+3. **Data is kept.** Quit and start again: no box, original art.
 4. **Server browser.** Open the server list. It shows both production servers (CTF on port 3333 and TDM on 3334), served by `master.roboviolence.com`.
 5. **Play.** Join one server and play one full round (to the round-end scoreboard).
 
@@ -65,8 +65,8 @@ otherwise "Recommended" and why>
 ## Platforms and data
 Windows 10 22H2+ x64, macOS 12+ on Apple Silicon, Linux x64 (Ubuntu 24.04, Mint 22, Debian 13 or newer).
 Installers are unsigned: see https://roboviolence.com/install.html for the SmartScreen and Gatekeeper steps.
-The game ships with placeholder art. For the real look, use the original BaboViolent 2 data:
-https://github.com/Daivuk/BaboViolent2/archive/refs/heads/master.zip, unzipped into Downloads.
+The game ships with placeholder art. On first start, "Download and play" fetches the original BaboViolent 2 data
+from https://github.com/Daivuk/BaboViolent2 for the real look.
 
 ## Community
 Discord: <the invite in README.md>

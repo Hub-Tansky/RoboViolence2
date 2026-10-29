@@ -65,10 +65,11 @@ What we do, in one or two sentences.
 | [0030](0030-app-icon-and-dmg-layout.md) | One committed application icon for every OS; the .dmg shows only the app and Applications | Accepted |
 | [0031](0031-linux-deb-package.md) | A .deb with the client and bv2dedicated beside the Linux .tar.gz | Accepted |
 | [0032](0032-discord-release-post.md) | The release job posts each release to Discord through a webhook | Accepted |
-| [0033](0033-first-run-dialog-recommends-bv2-zip.md) | The first-run data dialog recommends the original BV2 zip and can open it | Accepted |
+| [0033](0033-first-run-dialog-recommends-bv2-zip.md) | The first-run data dialog recommends the original BV2 zip and can open it | Superseded by 0040 |
 | [0034](0034-player-data-retention-and-privacy-policy.md) | Player IPs stay on the server, personal data on disk expires, and a privacy policy says so | Accepted |
 | [0035](https://github.com/Hub-Tansky/rv2-website/blob/main/docs/decisions/0035-website-tailwind-install-page-agent-files.md) | The website uses Tailwind from its CDN, has a separate install guide and publishes files for AI agents | Moved to rv2-website (0036) |
 | [0036](0036-website-in-rv2-website-repository.md) | The website lives in Hub-Tansky/rv2-website | Accepted |
 | [0037](0037-review-rubric-single-repo-copy.md) | The review rubric has one repo copy, and the gate checks its hash | Accepted |
 | [0038](0038-dead-accounts-hidden-admin-and-ban-secrets-hardened.md) | Dead account pages are hidden; admin and master ban secrets meet NIST SP 800-63B-4 | Accepted |
 | [0039](0039-widescreen-stretch-shows-more-map.md) | Widescreen (Stretch) shows more map sideways instead of stretching a 4:3 view | Accepted |
+| [0040](0040-first-run-downloads-original-data.md) | The first-run box downloads the original BV2 data with the OS's own curl and unzip tools | Accepted |

@@ -1,0 +1,73 @@
+// ADR 0040: the first-run download is installed only when every hash matches, at originalDataDir(), where
+// auto-detect finds it on the next start.
+#include "DataDownload.h"
+#include "Paths.h"
+
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <filesystem>
+#include <fstream>
+#include <string>
+
+namespace fs = std::filesystem;
+
+static void setEnv(const char * name, const std::string & value)
+{
+#ifdef _WIN32
+	_putenv_s(name, value.c_str());
+#else
+	setenv(name, value.c_str(), 1);
+#endif
+}
+
+static void write(const fs::path & file, const char * text)
+{
+	fs::create_directories(file.parent_path());
+	std::ofstream(file, std::ios::binary) << text;
+}
+
+int main(int argc, char ** argv)
+{
+	int failures = 0;
+	auto check = [&](bool ok, const char * what) { if (!ok) std::printf("FAIL %s\n", what), ++failures; };
+	if (argc < 2) { std::printf("usage: test_data_download <scratch dir>\n"); return 2; }
+	const fs::path base = fs::absolute(fs::path(argv[1]) / "data_download");
+	fs::remove_all(base);
+	const fs::path home = base / "home", original = base / "BaboViolent2" / "original";
+	fs::create_directories(home);
+	setEnv("HOME", home.string());
+	setEnv("BV2_DATA_DIR", (base / "nowhere").string());
+	setEnv("ProgramFiles", (base / "nowhere").string()); // detectDataDir must not find a real install (Windows)
+	setEnv("ProgramFiles(x86)", (base / "nowhere").string());
+	setEnv("BV2_PREF_DIR", (base / "BaboViolent2" / "bv2").string());
+	bv2::pathsInit(argv[0]);
+	check(fs::path(bv2::originalDataDir()) == original, "originalDataDir is beside the pref dir");
+
+	const char * X = "73cb3858a687a8494ca3323053016282f3dad39d42cf62ca4e79dda2aac7d9ac"; // sha256 of "x\n"
+	const fs::path got = base / "partial" / "Content";
+	write(got / "main" / "textures" / "a.tga", "x\n");
+	write(got / "main" / "sounds" / "b.wav", "y\n");
+	check(bv2::sha256File((got / "main" / "textures" / "a.tga").string()) == X, "sha256File");
+
+	const std::vector<bv2::AssetHash> wrong = { { X, "main/textures/a.tga" }, { X, "main/sounds/b.wav" } };
+	check(bv2::installOriginalData(got.string(), wrong) == "main/sounds/b.wav", "a wrong hash names the file");
+	const std::vector<bv2::AssetHash> missing = { { X, "main/textures/none.tga" } };
+	check(bv2::installOriginalData(got.string(), missing) == "main/textures/none.tga", "a missing file fails");
+	check(!fs::exists(original) && fs::exists(got), "nothing installed after a failed check");
+	check(bv2::detectDataDir().empty(), "no data before the install");
+
+	write(original / "main" / "stale.txt", "old\n");
+	const std::vector<bv2::AssetHash> right = { { X, "main/textures/a.tga" } };
+	check(bv2::installOriginalData(got.string(), right).empty(), "matching hashes install");
+	check(fs::exists(original / "main" / "textures" / "a.tga") && !fs::exists(got), "data moved to originalDataDir");
+	check(!fs::exists(original / "main" / "stale.txt"), "an old install is replaced");
+	check(bv2::detectDataDir() == fs::weakly_canonical(original).generic_string() + "/", "auto-detect finds the install");
+
+	const std::vector<bv2::AssetHash> & hashes = bv2::originalMainHashes();
+	check(hashes.size() == 324 && std::strncmp(hashes[0].path, "main/", 5) == 0 && std::strlen(hashes[0].sha256) == 64,
+		"the generated list holds the 324 Content/main hashes");
+
+	if (!failures) std::printf("ok: data download\n");
+	return failures ? 1 : 0;
+}

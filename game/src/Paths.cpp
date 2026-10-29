@@ -256,9 +256,14 @@ namespace bv2
 		out << dir << "\n";
 	}
 
+	std::string originalDataDir()
+	{
+		return (fs::path(g_prefDir).parent_path().parent_path() / "original").generic_string();
+	}
+
 	std::string detectDataDir()
 	{
-		std::vector<fs::path> places;
+		std::vector<fs::path> places(1, fs::path(originalDataDir()));
 		std::string home = getEnv("HOME");
 #ifdef BV2_PLATFORM_WINDOWS
 		if (home.empty())

@@ -218,6 +218,15 @@ foreach(cfg DEBUG RELEASE RELWITHDEBINFO MINSIZEREL)
 endforeach()
 add_test(NAME paths COMMAND test_paths "${BV2_TEST_SCRATCH}")
 
+if(TARGET bv2_original_hashes)
+  add_executable(test_data_download test_data_download.cpp ${CMAKE_SOURCE_DIR}/game/src/DataDownload.cpp
+    ${CMAKE_SOURCE_DIR}/game/src/Paths.cpp)
+  target_include_directories(test_data_download PRIVATE ${CMAKE_SOURCE_DIR}/game/src)
+  target_link_libraries(test_data_download PRIVATE zeven_core credentials bv2_original_hashes ${BV2_SQLITE_TARGET})
+  bv2_target_defaults(test_data_download)
+  add_test(NAME data_download COMMAND test_data_download "${BV2_TEST_SCRATCH}")
+endif()
+
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
 add_test(NAME example_cfg COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test_example_cfg.py)
 add_test(NAME app_icon COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test_app_icon.py)

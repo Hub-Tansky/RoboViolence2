@@ -61,11 +61,11 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `REVIEW.md` | Definition of done: `tools/review.sh` checks, reviewer checklist, defined terms, forbidden shortcuts, fresh-context PR review (`.claude/agents/`) and its record in the PR description |
 | `SECURITY.md` | Security policy: supported versions, private vulnerability reporting, response timeline |
 | `docs/decisions/0007-data-root-pref-dir-config-layers.md` | ADR 0007 |
-| `game/src/Paths.cpp` | Package and data roots (`contentFile` for the package's own content), saved and detected BV2 data folder, per-user pref dir, layered config loading (release settings like the master list skip `bv2.cfg`, ADR 0028), map and DB path helpers (ADR 0016) |
+| `game/src/Paths.cpp` | Package and data roots (`contentFile` for the package's own content), saved and detected BV2 data folder (`originalDataDir` first), per-user pref dir, layered config loading (release settings like the master list skip `bv2.cfg`, ADR 0028), map and DB path helpers (ADR 0016) |
 | `game/src/Paths.h` | Interface of `Paths.cpp` (namespace `bv2`) |
 | `packaging/linux/roboviolence2.desktop` | Linux desktop entry |
 | `packaging/make-package.py` | Builds the per-OS package from a Release `runtime/` (links resolved, macOS bundle re-signed, licences), plus the Windows installer, the macOS `.dmg` with only the app and Applications, or the Linux `.deb` (ADR 0020, 0030, 0031) |
-| `packaging/make_deb.py` | Builds the Linux `.deb` from the build's `cmake --install` (stripped, without the master): client and `bv2dedicated` moved to `/usr/games`, launcher pointed there, licences, copyright and changelog added; Depends from `dpkg-shlibdeps` plus `libgl1` (ADR 0031) |
+| `packaging/make_deb.py` | Builds the Linux `.deb` from the build's `cmake --install` (stripped, without the master): client and `bv2dedicated` moved to `/usr/games`, launcher pointed there, licences, copyright and changelog added; Depends from `dpkg-shlibdeps` plus `libgl1`, `curl` and `unzip` (ADR 0031, 0040) |
 | `packaging/discord_release_post.py` | Prints the Discord webhook payload of the release job: one embed with the release page, the player downloads and the website, an optional ping of the opt-in role and no other mention (ADR 0032) |
 | `packaging/windows/roboviolence2.iss` | Inno Setup script for the Windows installer (per-user, unsigned); privacy policy link and the opt-out task for the public master (ADR 0034) |
 | `packaging/scripts/run-client.cmd` | Package script: starts the client (Windows) |
@@ -168,6 +168,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/test_bans.cpp` | Server bans: 0.0.1's binary banlist moves to `banlist.tsv` and still refuses the IP; a ban past `sv_banDays` lets it in and stays in the file (ADR 0034) |
 | `tests/test_player_privacy.cpp` | The player info relayed to everyone and the player list a new client gets carry no IP; the server keeps it (ADR 0034) |
 | `tests/test_join_timeout.cpp` | A connection that never answers the join handshake loses its slot after `Server::JOIN_TIMEOUT`; a client past the handshake keeps it while loading |
+| `tests/test_data_download.cpp` | ADR 0040: `installOriginalData` installs only when every hash matches (wrong or missing file named, nothing moved), replaces an old install at `originalDataDir`, which auto-detect then finds; the generated list holds the 324 `Content/main` hashes (ctest `data_download`, client builds) |
 | `tests/test_paths.cpp` | Phase C step 1: package vs data root, `contentFile`, `findDataIn` (upstream layout, `main/` itself), saved folder, auto-detect, `BV2_DATA_DIR`; the built-in master list vs `bv2.cfg`, `BV2_MASTER_SERVERS` and `none` (ADR 0028) |
 | `tests/test_osv_vcpkg.py` | Phase C step 4: `tools/osv-vcpkg.py` maps SPDX download locations to upstream repository and tag (offline) |
 | `tests/test_packet_hygiene.cpp` | Step 4 checks: sender binding (Q-S1), index ranges with controls (Q-S2), map names (Q-S6), skin and sound relay (Q-S7), `SV_CHANGE` filter (Q-S4), the handshake gate, `checkPacket` per message type and size, the client's `checkServerMessage` on values the server sends |
@@ -316,6 +317,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/decisions/0037-review-rubric-single-repo-copy.md` | ADR: the review rubric has one repo copy with a unique name; the gate checks its hash |
 | `docs/decisions/0038-dead-accounts-hidden-admin-and-ban-secrets-hardened.md` | ADR: dead account pages hidden; 15-character admin and master ban secrets, per-IP admin lockout, HMAC-signed master bans |
 | `docs/decisions/0039-widescreen-stretch-shows-more-map.md` | ADR: the gameplay, scope and intro projections use their viewport's aspect; Stretch shows more map sideways (Hor+), Bars stays 4:3 |
+| `docs/decisions/0040-first-run-downloads-original-data.md` | ADR: the first-run box downloads the original data of a pinned upstream commit with the OS's curl and tar/unzip, checks the hashes and installs it in `original` beside the pref dir; supersedes 0033 |
 | `docs/decisions/README.md` | ADR format and index |
 
 ### `docs/ops`
@@ -519,7 +521,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 
 | path | purpose |
 |---|---|
-| `game/CMakeLists.txt` | Targets `bv2server_lib` (the CONSOLE file list without `main.cpp`; also linked by the tests), bv2dedicated (`main.cpp` + `bv2server_lib`) and bv2 (client, with the per-OS application icon; on Linux `bv2_app_icon` generates `AppIcon.h`) |
+| `game/CMakeLists.txt` | Targets `bv2server_lib` (the CONSOLE file list without `main.cpp`; also linked by the tests), bv2dedicated (`main.cpp` + `bv2server_lib`) and bv2 (client, with the per-OS application icon; on Linux `bv2_app_icon` generates `AppIcon.h`); `bv2_original_hashes` generates `OriginalHashes.h` from `tools/original-assets.sha256` (ADR 0040) |
 | `game/README.md` | Module README: game |
 
 ### `game/src`
@@ -621,8 +623,10 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/ControlListener.h` | Menu control listener interface |
 | `game/src/CreateGame.h` | Create-game screen |
 | `game/src/Credits.h` | Credits screen |
-| `game/src/DataDirPicker.cpp` | Client start-up: saved or detected BV2 data folder, else a first-run message box (recommends and opens the original BV2 zip) and OS folder dialog (ADR 0016, 0033) |
+| `game/src/DataDirPicker.cpp` | Client start-up: saved or detected BV2 data folder, else a first-run message box: "Download and play" runs the OS's `curl` and `tar`/`unzip` (`SDL_CreateProcess`) with a progress window, or placeholders; a failure box offers retry, the browser or placeholders (ADR 0016, 0040) |
 | `game/src/DataDirPicker.h` | Interface of `DataDirPicker.cpp` |
+| `game/src/DataDownload.cpp` | First-run download without SDL: SHA-256 of a file (libsodium), hash check of the extracted `main/` against the compiled-in list and rename to `originalDataDir` (ADR 0040) |
+| `game/src/DataDownload.h` | Interface of `DataDownload.cpp`; `AssetHash` |
 | `game/src/Dialog.cpp` | Menu dialog base |
 | `game/src/Dialog.h` | Menu dialog base |
 | `game/src/Editor.cpp` | Map editor core |
@@ -749,7 +753,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tools/check-architecture.sh` | Fails if ARCHITECTURE.md and the tracked files disagree (Unix) |
 | `tools/check-encoding.py` | Fails on non-UTF-8, BOM or CR in tracked text files |
 | `tools/check-original-assets.py` | Fails if a tracked file matches an original-asset hash |
-| `tools/original-assets.sha256` | SHA-256 of every removed original file |
+| `tools/original-assets.sha256` | SHA-256 of every removed original file; its `Content/main` entries are compiled into the client as `OriginalHashes.h` (ADR 0040) |
 | `tools/convert-encoding.py` | One-off UTF-8/LF converter used in step 1.4 |
 | `tools/placeholder-manifest.tsv` | Files the game loads at startup and their formats, for the placeholder generator |
 | `tools/gen-placeholder-content.py` | Writes placeholder maps, textures, a readable font atlas, sounds and models for dev and CI |
