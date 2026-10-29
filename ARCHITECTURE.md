@@ -64,10 +64,10 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/Paths.cpp` | Package and data roots (`contentFile` for the package's own content), saved and detected BV2 data folder (`originalDataDir` first), per-user pref dir, layered config loading (release settings like the master list skip `bv2.cfg`, ADR 0028), map and DB path helpers (ADR 0016) |
 | `game/src/Paths.h` | Interface of `Paths.cpp` (namespace `bv2`) |
 | `packaging/linux/roboviolence2.desktop` | Linux desktop entry |
-| `packaging/make-package.py` | Builds the per-OS package from a Release `runtime/` (links resolved, macOS bundle re-signed, licences), plus the Windows installer, the macOS `.dmg` with only the app and Applications, or the Linux `.deb` (ADR 0020, 0030, 0031) |
+| `packaging/make-package.py` | Builds the per-OS package from a Release `runtime/` (links resolved, macOS bundle re-signed, licences), plus the Windows installer (showing `LICENSE.txt` reflowed one paragraph per line), the macOS `.dmg` with only the app and Applications, or the Linux `.deb` (ADR 0020, 0030, 0031) |
 | `packaging/make_deb.py` | Builds the Linux `.deb` from the build's `cmake --install` (stripped, without the master): client and `bv2dedicated` moved to `/usr/games`, launcher pointed there, licences, copyright and changelog added; Depends from `dpkg-shlibdeps` plus `libgl1`, `curl` and `unzip` (ADR 0031, 0040) |
 | `packaging/discord_release_post.py` | Prints the Discord webhook payload of the release job: one embed with the release page, the player downloads and the website, an optional ping of the opt-in role and no other mention (ADR 0032) |
-| `packaging/windows/roboviolence2.iss` | Inno Setup script for the Windows installer (per-user, unsigned); privacy policy link and the opt-out task for the public master (ADR 0034) |
+| `packaging/windows/roboviolence2.iss` | Inno Setup script for the Windows installer (per-user, unsigned); shows the reflowed licence from `make-package.py`; privacy policy link and the opt-out task for the public master (ADR 0034) |
 | `packaging/scripts/run-client.cmd` | Package script: starts the client (Windows) |
 | `packaging/scripts/run-client.sh` | Package script: starts the client (macOS bundle or Linux binary) |
 | `packaging/scripts/run-master.cmd` | Package script: starts the master server (Windows) |
@@ -158,6 +158,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/test_example_cfg.py` | `config/bv2.example.cfg` names a new player as `GameVar.cpp` does |
 | `tests/test_window_icon.cpp` | `dkwSetWindowIcon` accepts the Linux client's compiled-in icon (`AppIcon.h`) and refuses bytes that aren't a PNG |
 | `tests/test_make_deb.py` | `make_deb.py` builds an installable `.deb` from the build's install: `share/bv2/main` equals `runtime/main`, layout, modes, root ownership, no master, version mapping (`-rc1` sorts before the release), Depends, launcher path (ctest `make_deb`, Linux client builds with dpkg-dev) |
+| `tests/test_installer_licence.py` | The Windows installer's reflowed licence keeps every word and paragraph of `LICENSE.txt`, one line per paragraph except centred headings (ctest `installer_licence`) |
 | `tests/test_discord_release_post.py` | The release post links only files the release job uploads, pings the given role and nothing else, marks a pre-release when the job says so (ctest `discord_release_post`) |
 | `tests/test_app_icon.py` | The icon files hold every size each OS needs; the exe, installer, bundle, `.desktop` and `.dmg` layout point at them |
 | `tests/test_app_name.py` | The menu bar, Finder/Dock bundle name, exe description, installer and `.desktop` entry all say "Robo Violence 2" |
