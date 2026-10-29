@@ -21,8 +21,6 @@ namespace
 	const char * TITLE = "Robo Violence 2";
 
 	const double ZIP_BYTES = 17.0e6; // for the progress bar only
-	// The browser fallback keeps the name auto-detect looks for in Downloads (BaboViolent2-master)
-	const char * BROWSER_URL = "https://github.com/Daivuk/BaboViolent2/archive/refs/heads/master.zip";
 
 	// A small window with a progress bar; closing it cancels
 	struct Progress
@@ -122,12 +120,14 @@ namespace
 			if (step == STEP_OK)
 			{
 				ui.show("Checking BaboViolent 2 data", 1.0);
-				std::string bad = bv2::installOriginalData(bv2::extractedDataDir(partial.string()), bv2::originalMainHashes());
+				const std::string data = bv2::extractedDataDir(partial.string());
+				std::string bad = bv2::firstMismatch(data, bv2::originalMainHashes());
 				if (!bad.empty())
-				{
 					error = "the download or unpacking failed (" + bad + " missing or wrong)";
+				else if (!(bad = bv2::replaceDir(data, bv2::originalDataDir())).empty())
+					error = "could not install into " + bv2::originalDataDir() + ": " + bad;
+				if (!error.empty())
 					step = STEP_FAILED;
-				}
 			}
 		}
 		fs::remove_all(partial, ec);
@@ -136,7 +136,7 @@ namespace
 
 	enum Button { PLACEHOLDERS, DOWNLOAD, BROWSER };
 
-	int firstRunBox()
+	Button firstRunBox()
 	{
 		const SDL_MessageBoxButtonData buttons[2] = {
 			{ SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT, DOWNLOAD, "Download and play" },
@@ -152,10 +152,10 @@ namespace
 			"\"Download and play\" downloads it (about 17 MB) from github.com/Daivuk/BaboViolent2.";
 		const SDL_MessageBoxData box = { SDL_MESSAGEBOX_INFORMATION, 0, TITLE, text, 2, buttons, 0 };
 		int button = PLACEHOLDERS;
-		return SDL_ShowMessageBox(&box, &button) ? button : PLACEHOLDERS; // closing the box (-1) counts as placeholders
+		return SDL_ShowMessageBox(&box, &button) ? (Button)button : PLACEHOLDERS; // closing the box (-1) counts as placeholders
 	}
 
-	int retryBox(const std::string & error)
+	Button retryBox(const std::string & error)
 	{
 		const SDL_MessageBoxButtonData buttons[3] = {
 			{ SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT, DOWNLOAD, "Try again" },
@@ -166,13 +166,13 @@ namespace
 			"Try again, or download it in your browser, unzip it into Downloads and restart Robo Violence 2.";
 		const SDL_MessageBoxData box = { SDL_MESSAGEBOX_WARNING, 0, TITLE, text.c_str(), 3, buttons, 0 };
 		int button = PLACEHOLDERS;
-		return SDL_ShowMessageBox(&box, &button) ? button : PLACEHOLDERS;
+		return SDL_ShowMessageBox(&box, &button) ? (Button)button : PLACEHOLDERS;
 	}
 
 	// The folder the data was installed in; "" when the player picks placeholders or the browser
 	std::string askDataDir()
 	{
-		int next = firstRunBox();
+		Button next = firstRunBox();
 		while (next == DOWNLOAD)
 		{
 			std::string error;
@@ -182,7 +182,7 @@ namespace
 			next = step == STEP_CANCELLED ? firstRunBox() : retryBox(error);
 		}
 		if (next == BROWSER)
-			SDL_OpenURL(BROWSER_URL);
+			SDL_OpenURL(bv2::BROWSER_ZIP_URL);
 		return "";
 	}
 }

@@ -1,6 +1,5 @@
-// First-run data download, the part without SDL: hash check and install (ADR 0040).
+// First-run data download, the part without SDL (ADR 0040).
 #include "DataDownload.h"
-#include "Paths.h"
 
 #include <sodium.h>
 
@@ -13,10 +12,11 @@
 
 namespace fs = std::filesystem;
 
+// Must match tools/original-assets.sha256 (test_data_download checks the layout, the hashes check the data)
+#define BV2_UPSTREAM_COMMIT "7171c84d9b4d02bb74e846d5617fbb527bfba358"
+
 namespace
 {
-	// Must match tools/original-assets.sha256 (test_data_download checks the layout, the hashes check the data)
-#define BV2_UPSTREAM_COMMIT "7171c84d9b4d02bb74e846d5617fbb527bfba358"
 	const char * ZIP_MAIN = "BaboViolent2-" BV2_UPSTREAM_COMMIT "/BaboViolent2/Content/main";
 
 	std::string tool(const char * name)
@@ -32,7 +32,9 @@ namespace
 
 namespace bv2
 {
+	const char * const ORIGINAL_COMMIT = BV2_UPSTREAM_COMMIT;
 	const char * const ORIGINAL_ZIP_URL = "https://github.com/Daivuk/BaboViolent2/archive/" BV2_UPSTREAM_COMMIT ".zip";
+	const char * const BROWSER_ZIP_URL = "https://github.com/Daivuk/BaboViolent2/archive/refs/heads/master.zip";
 
 	std::vector<std::string> downloadArgs(const std::string & zip)
 	{
@@ -76,21 +78,26 @@ namespace bv2
 		return hex;
 	}
 
-	std::string installOriginalData(const std::string & dir, const std::vector<AssetHash> & hashes)
+	std::string firstMismatch(const std::string & dir, const std::vector<AssetHash> & hashes)
 	{
 		for (size_t i = 0; i < hashes.size(); ++i)
 			if (sha256File((fs::path(dir) / hashes[i].path).string()) != hashes[i].sha256)
 				return hashes[i].path;
+		return "";
+	}
+
+	std::string replaceDir(const std::string & from, const std::string & to)
+	{
 		std::error_code ec;
-		const fs::path target(originalDataDir()), old(originalDataDir() + ".old");
+		const fs::path target(to), old(to + ".old");
 		fs::remove_all(old, ec);
 		fs::rename(target, old, ec); // fails harmlessly when there is no old install
-		fs::rename(dir, target, ec);
+		fs::rename(from, target, ec);
 		if (ec)
 		{
 			std::error_code ignored;
 			fs::rename(old, target, ignored);
-			return "move to " + target.string() + ": " + ec.message();
+			return ec.message();
 		}
 		fs::remove_all(old, ec);
 		return "";

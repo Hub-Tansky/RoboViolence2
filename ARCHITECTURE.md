@@ -168,7 +168,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/test_bans.cpp` | Server bans: 0.0.1's binary banlist moves to `banlist.tsv` and still refuses the IP; a ban past `sv_banDays` lets it in and stays in the file (ADR 0034) |
 | `tests/test_player_privacy.cpp` | The player info relayed to everyone and the player list a new client gets carry no IP; the server keeps it (ADR 0034) |
 | `tests/test_join_timeout.cpp` | A connection that never answers the join handshake loses its slot after `Server::JOIN_TIMEOUT`; a client past the handshake keeps it while loading |
-| `tests/test_data_download.cpp` | ADR 0040: `installOriginalData` installs only when every hash matches (wrong or missing file named, nothing moved), replaces an old install at `originalDataDir`, which auto-detect then finds; the extract argv and the hash paths agree on where `main/` lands and the zip's folder names the pinned commit; the generated list holds the 324 `Content/main` hashes (ctest `data_download`, client builds) |
+| `tests/test_data_download.cpp` | ADR 0040: `firstMismatch` names a wrong or missing file; `replaceDir` keeps the old install when the move fails and replaces it otherwise, at `originalDataDir`, which auto-detect then finds; the browser zip's name is one auto-detect knows; the extract argv and the hash paths agree on where `main/` lands and the zip's folder names the pinned commit; the generated list holds the 324 `Content/main` hashes (ctest `data_download`, client builds) |
 | `tests/test_paths.cpp` | Phase C step 1: package vs data root, `contentFile`, `findDataIn` (upstream layout, `main/` itself), saved folder, auto-detect, `BV2_DATA_DIR`; the built-in master list vs `bv2.cfg`, `BV2_MASTER_SERVERS` and `none` (ADR 0028) |
 | `tests/test_osv_vcpkg.py` | Phase C step 4: `tools/osv-vcpkg.py` maps SPDX download locations to upstream repository and tag (offline) |
 | `tests/test_packet_hygiene.cpp` | Step 4 checks: sender binding (Q-S1), index ranges with controls (Q-S2), map names (Q-S6), skin and sound relay (Q-S7), `SV_CHANGE` filter (Q-S4), the handshake gate, `checkPacket` per message type and size, the client's `checkServerMessage` on values the server sends |
@@ -625,7 +625,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/Credits.h` | Credits screen |
 | `game/src/DataDirPicker.cpp` | Client start-up: saved or detected BV2 data folder, else a first-run message box: "Download and play" runs `DataDownload`'s `curl` and `tar`/`unzip` argv (`SDL_CreateProcess`) with a progress window, or placeholders; a failure box offers retry, the browser or placeholders (ADR 0016, 0040) |
 | `game/src/DataDirPicker.h` | Interface of `DataDirPicker.cpp` |
-| `game/src/DataDownload.cpp` | First-run download without SDL: the pinned upstream zip, the per-OS `curl` and `tar`/`unzip` argv and where `main/` lands, SHA-256 of a file (libsodium), hash check against the compiled-in list and rename to `originalDataDir`, keeping an old install if it fails (ADR 0040) |
+| `game/src/DataDownload.cpp` | First-run download without SDL: the pinned upstream zip and the browser fallback URL, the per-OS `curl` and `tar`/`unzip` argv and where `main/` lands, SHA-256 of a file (libsodium), the hash check against the compiled-in list, and a folder swap that keeps the old folder if it fails (ADR 0040) |
 | `game/src/DataDownload.h` | Interface of `DataDownload.cpp`; `AssetHash` |
 | `game/src/Dialog.cpp` | Menu dialog base |
 | `game/src/Dialog.h` | Menu dialog base |

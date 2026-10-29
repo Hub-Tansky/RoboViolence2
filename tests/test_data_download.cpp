@@ -1,5 +1,5 @@
-// ADR 0040: the first-run download is installed only when every hash matches, at originalDataDir(), where
-// auto-detect finds it on the next start.
+// ADR 0040: the first-run download's hash check, its install at originalDataDir() (where auto-detect finds it), and
+// the commands and hash paths agreeing on where main/ lands.
 #include "DataDownload.h"
 #include "Paths.h"
 
@@ -51,17 +51,20 @@ int main(int argc, char ** argv)
 	check(bv2::sha256File((got / "main" / "textures" / "a.tga").string()) == X, "sha256File");
 
 	const std::vector<bv2::AssetHash> wrong = { { X, "main/textures/a.tga" }, { X, "main/sounds/b.wav" } };
-	check(bv2::installOriginalData(got.string(), wrong) == "main/sounds/b.wav", "a wrong hash names the file");
+	check(bv2::firstMismatch(got.string(), wrong) == "main/sounds/b.wav", "a wrong hash names the file");
 	const std::vector<bv2::AssetHash> missing = { { X, "main/textures/none.tga" } };
-	check(bv2::installOriginalData(got.string(), missing) == "main/textures/none.tga", "a missing file fails");
-	check(!fs::exists(original) && fs::exists(got), "nothing installed after a failed check");
+	check(bv2::firstMismatch(got.string(), missing) == "main/textures/none.tga", "a missing file fails");
+	const std::vector<bv2::AssetHash> right = { { X, "main/textures/a.tga" } };
+	check(bv2::firstMismatch(got.string(), right).empty(), "matching hashes pass");
 	check(bv2::detectDataDir().empty(), "no data before the install");
 
 	write(original / "main" / "stale.txt", "old\n");
-	const std::vector<bv2::AssetHash> right = { { X, "main/textures/a.tga" } };
-	check(bv2::installOriginalData(got.string(), right).empty(), "matching hashes install");
+	check(!bv2::replaceDir((base / "nowhere").string(), original.string()).empty(), "a failed move is reported");
+	check(fs::exists(original / "main" / "stale.txt") && !fs::exists(original.string() + ".old"),
+		"a failed move keeps the old install");
+	check(bv2::replaceDir(got.string(), bv2::originalDataDir()).empty(), "the install moves into place");
 	check(fs::exists(original / "main" / "textures" / "a.tga") && !fs::exists(got), "data moved to originalDataDir");
-	check(!fs::exists(original / "main" / "stale.txt"), "an old install is replaced");
+	check(!fs::exists(original / "main" / "stale.txt") && !fs::exists(original.string() + ".old"), "an old install is replaced");
 	check(bv2::detectDataDir() == fs::weakly_canonical(original).generic_string() + "/", "auto-detect finds the install");
 
 	// The extract command and the hash paths agree: main/ lands in extractedDataDir, the hashes are relative to it
@@ -73,10 +76,10 @@ int main(int argc, char ** argv)
 	for (size_t i = 0; i < extract.size(); ++i)
 		namesMain |= extract[i].rfind(fs::relative(dataDir / "main", partial).generic_string(), 0) == 0;
 	check(namesMain, "extract names the zip's main/ folder");
-	std::vector<std::string> download = bv2::downloadArgs("bv2.zip");
-	check(download.back() == bv2::ORIGINAL_ZIP_URL && dataDir.parent_path().parent_path().filename().string()
-		== "BaboViolent2-" + std::string(bv2::ORIGINAL_ZIP_URL).substr(std::strlen("https://github.com/Daivuk/BaboViolent2/archive/"), 40),
+	check(bv2::downloadArgs("bv2.zip").back() == bv2::ORIGINAL_ZIP_URL, "curl fetches the pinned zip");
+	check(dataDir.parent_path().parent_path().filename() == std::string("BaboViolent2-") + bv2::ORIGINAL_COMMIT,
 		"the zip's top folder names the pinned commit");
+	check(fs::path(bv2::BROWSER_ZIP_URL).stem() == "master", "the browser zip unzips to BaboViolent2-master, which auto-detect finds");
 
 	const std::vector<bv2::AssetHash> & hashes = bv2::originalMainHashes();
 	check(hashes.size() == 324 && std::strncmp(hashes[0].path, "main/", 5) == 0 && std::strlen(hashes[0].sha256) == 64,
