@@ -23,7 +23,6 @@
 #include "GameVar.h"
 #include "Console.h"
 #include "CStatus.h"
-#include "Paths.h"
 
 
 CUserLogin::CUserLogin(CControl * in_parent, CControl * in_alignTo)
@@ -218,6 +217,10 @@ void CUserLogin::updateSkin()
 	skinStr.resizeInverse(skinStr.len() - 4);
 	sld_skin->value = skinStr.toInt();
 
+	//--- The name may change from the console too
+	if (!txt_playerName->haveFocus())
+		txt_playerName->text = gameVar.cl_playerName;
+
 	//--- On reload le skin si ça changé
 	dktDeleteTexture(&tex_skinOriginal);
 	tex_skinOriginal = dktCreateTextureFromFile(CString("main/skins/%s.tga", gameVar.cl_skin.s).s, DKT_FILTER_BILINEAR);
@@ -305,8 +308,11 @@ void CUserLogin::Validate(CControl * control)
 		dksPlaySound(m_sfxClic, -1, 200);
 		if (control == txt_playerName)
 		{
-			gameVar.cl_playerName = txt_playerName->text;
-			dksvarSaveConfig((char *)bv2::configFile().c_str());
+			// A blank name is not taken; the field shows the current one again
+			if (txt_playerName->text.isNull())
+				txt_playerName->text = gameVar.cl_playerName;
+			else
+				gameVar.cl_playerName = txt_playerName->text;
 		}
 	}
 	else
