@@ -1,6 +1,6 @@
 name: build
 on:
-  push:  # branches only through their PR: a push and a pull_request run per commit doubled the scarce macOS jobs (ADR 0040)
+  push:  # branches only through their PR: a push and a pull_request run per commit doubled the scarce macOS jobs (ADR 0041)
     branches: [main]
     tags: ['v*']
   pull_request:

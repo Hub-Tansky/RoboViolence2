@@ -1,4 +1,4 @@
-# 0040: Build branches through their PR only, and re-run a build whose job never got a runner
+# 0041: Build branches through their PR only, and re-run a build whose job never got a runner
 
 - Status: Accepted
 - Date: 2026-10-29

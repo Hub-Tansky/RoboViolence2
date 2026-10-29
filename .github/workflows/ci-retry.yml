@@ -1,6 +1,6 @@
 name: ci-retry
 # A hosted job GitHub never gives a runner is cancelled after about 15 min with the annotation below (macOS arm64
-# capacity, ADR 0040). Re-run such a build run's failed jobs, at most twice, while it is still its branch's latest commit.
+# capacity, ADR 0041). Re-run such a build run's failed jobs, at most twice, while it is still its branch's latest commit.
 on:
   workflow_run:
     workflows: [build]
