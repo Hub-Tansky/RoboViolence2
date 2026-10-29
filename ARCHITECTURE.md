@@ -157,7 +157,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/test_example_cfg.py` | `config/bv2.example.cfg` names a new player as `GameVar.cpp` does |
 | `tests/test_window_icon.cpp` | `dkwSetWindowIcon` accepts the Linux client's compiled-in icon (`AppIcon.h`) and refuses bytes that aren't a PNG |
 | `tests/test_make_deb.py` | `make_deb.py` builds an installable `.deb` from the build's install: `share/bv2/main` equals `runtime/main`, layout, modes, root ownership, no master, version mapping (`-rc1` sorts before the release), Depends, launcher path (ctest `make_deb`, Linux client builds with dpkg-dev) |
-| `tests/test_installer_licence.py` | The Windows installer's reflowed licence keeps every word and paragraph of `LICENSE.txt`, one line per paragraph, headings on their own lines (ctest `installer_licence`) |
+| `tests/test_installer_licence.py` | The Windows installer's reflowed licence keeps every word and paragraph of `LICENSE.txt`, one line per paragraph except centred headings (ctest `installer_licence`) |
 | `tests/test_discord_release_post.py` | The release post links only files the release job uploads, pings the given role and nothing else, marks a pre-release when the job says so (ctest `discord_release_post`) |
 | `tests/test_app_icon.py` | The icon files hold every size each OS needs; the exe, installer, bundle, `.desktop` and `.dmg` layout point at them |
 | `tests/test_app_name.py` | The menu bar, Finder/Dock bundle name, exe description, installer and `.desktop` entry all say "Robo Violence 2" |

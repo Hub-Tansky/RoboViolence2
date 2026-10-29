@@ -15,6 +15,7 @@ packaging/macos/dmg-background.png (dmgbuild, ADR 0030), and roboviolence2-<pres
 Fails if the build is not Release, or if anything the package must hold is missing.
 """
 import json
+import re
 import shutil
 import subprocess
 import sys
@@ -99,19 +100,10 @@ def check_dmg(dmg):
 
 
 def reflow_licence(text):
-    """Joins each paragraph's hard-wrapped lines into one, so the installer's text box wraps them to its own width.
-    Centred headings (indented 10+ spaces) keep their own lines."""
-    paragraphs = []
-    for paragraph in text.split("\n\n"):
-        lines = []
-        for line in paragraph.splitlines():
-            heading = line.startswith(" " * 10)
-            if lines and not heading and not lines[-1].startswith(" " * 10):
-                lines[-1] += " " + line.strip()
-            else:
-                lines.append(line.rstrip())
-        paragraphs.append("\n".join(lines))
-    return "\n\n".join(paragraphs)
+    """Each paragraph on one line, so the installer's text box wraps it to its own width; paragraphs of centred
+    headings (indented 10+ spaces) stay as they are. The sample notices in How to Apply are joined too."""
+    return "\n\n".join(p if p.startswith(" " * 10) else re.sub(r" *\n *", " ", p)
+                       for p in text.rstrip("\n").split("\n\n"))
 
 
 def ship_windows(runtime, stage, out, name, version):
