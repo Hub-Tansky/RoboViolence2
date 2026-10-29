@@ -40,9 +40,9 @@ int main(int argc, char ** argv)
 	setEnv("BV2_DATA_DIR", (base / "nowhere").string());
 	setEnv("ProgramFiles", (base / "nowhere").string()); // detectDataDir must not find a real install (Windows)
 	setEnv("ProgramFiles(x86)", (base / "nowhere").string());
-	setEnv("BV2_PREF_DIR", (base / "BaboViolent2" / "bv2").string());
+	setEnv("BV2_PREF_DIR", (base / "BaboViolent2").string());
 	bv2::pathsInit(argv[0]);
-	check(fs::path(bv2::originalDataDir()) == original, "originalDataDir is beside the pref dir");
+	check(fs::path(bv2::originalDataDir()) == original, "with BV2_PREF_DIR, originalDataDir is inside it");
 
 	const char * X = "73cb3858a687a8494ca3323053016282f3dad39d42cf62ca4e79dda2aac7d9ac"; // sha256 of "x\n"
 	const fs::path got = base / "partial" / "Content";

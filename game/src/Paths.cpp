@@ -121,6 +121,9 @@ namespace
 		return s;
 	}
 
+	std::string g_originalDataDir;
+
+	// Also sets g_originalDataDir: "original" beside the pref dir, or inside BV2_PREF_DIR when that overrides it
 	std::string computePrefDir()
 	{
 		std::string over = getEnv("BV2_PREF_DIR");
@@ -128,19 +131,21 @@ namespace
 		if (!over.empty())
 		{
 			base = over;
+			g_originalDataDir = (base / "original").generic_string();
 		}
 		else
 		{
 #ifdef BV2_PLATFORM_WINDOWS
 			std::string appdata = getEnv("APPDATA");
-			base = fs::path(appdata.empty() ? "." : appdata) / "BaboViolent2" / "bv2";
+			fs::path app = fs::path(appdata.empty() ? "." : appdata) / "BaboViolent2";
 #elif defined(BV2_PLATFORM_MACOS)
-			base = fs::path(getEnv("HOME")) / "Library" / "Application Support" / "BaboViolent2" / "bv2";
+			fs::path app = fs::path(getEnv("HOME")) / "Library" / "Application Support" / "BaboViolent2";
 #else
 			std::string xdg = getEnv("XDG_DATA_HOME");
-			base = xdg.empty() ? fs::path(getEnv("HOME")) / ".local" / "share" : fs::path(xdg);
-			base = base / "BaboViolent2" / "bv2";
+			fs::path app = (xdg.empty() ? fs::path(getEnv("HOME")) / ".local" / "share" : fs::path(xdg)) / "BaboViolent2";
 #endif
+			base = app / "bv2";
+			g_originalDataDir = (app / "original").generic_string();
 		}
 		std::error_code ec;
 		fs::create_directories(base, ec);
@@ -256,11 +261,7 @@ namespace bv2
 		out << dir << "\n";
 	}
 
-	std::string originalDataDir()
-	{
-		// g_prefDir is ".../BaboViolent2/bv2/": the first parent_path drops the trailing '/', the second leaves bv2
-		return (fs::path(g_prefDir).parent_path().parent_path() / "original").generic_string();
-	}
+	const std::string & originalDataDir() { return g_originalDataDir; }
 
 	std::string detectDataDir()
 	{

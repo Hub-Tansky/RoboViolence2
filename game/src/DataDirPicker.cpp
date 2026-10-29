@@ -20,7 +20,6 @@ namespace
 {
 	const char * TITLE = "Robo Violence 2";
 
-
 	// A small window with a progress bar; closing it cancels
 	struct Progress
 	{
@@ -195,6 +194,7 @@ namespace
 		return "";
 	}
 }
+
 namespace bv2
 {
 	void chooseDataDir(int argc, char ** argv)

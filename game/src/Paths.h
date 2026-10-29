@@ -58,9 +58,9 @@ namespace bv2
 	std::string savedDataDir();
 	void saveDataDir(const std::string & dir);
 
-	// Where the first-run download installs the original data: "original" beside prefDir()
-	// (%APPDATA%/BaboViolent2/original on Windows), without a trailing '/'
-	std::string originalDataDir();
+	// Where the first-run download installs the original data, without a trailing '/': "original" beside prefDir()
+	// (%APPDATA%/BaboViolent2/original on Windows), or inside it when BV2_PREF_DIR overrides it
+	const std::string & originalDataDir();
 
 	// BV2 data in usual places: originalDataDir(), BaboViolent2-master or BaboViolent2 in ~/Downloads, ~/Desktop, ~/Documents;
 	// on Windows also "BaboViolent 2" or BaboViolent2 in Program Files; "" when none
