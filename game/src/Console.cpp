@@ -681,10 +681,21 @@ void Console::sendCommand(CString commandLine, bool isAdmin, unsigned long bbnet
 	// On fait un if sur toute les commandes possibles
 	if (command == "help" || command == "?")
 	{
-		add("help ? info admin - set quit host dedicate voteon novote");
-		add("playerlist maplist addmap removemap changemap connect");
-		add("disconnect sayall sayteam edit restart kick kickid");
-		add("banlist ban banid banip unban move moveid allwatch");
+		add("help ? execute admin info - set quit dedicate voteon novote");
+		add("playerlist maplist addmap removemap changemap maplistall disconnect");
+		add("sayall restart kick kickid move moveid allwatch nuke nukeid nukeall");
+		add("banlist ban banid banip unban approveall approveplayer rejectplayer");
+		add("rejectallplayers listapprovedplayers addreporturl removereporturl");
+		add("removeallreporturls listreporturls cachelist cacheban cachebanned");
+		add("cacheunban cachelistremote cachebanremote");
+#ifdef CONSOLE
+		add("sayid playerinfo playersinfo forceplayerspawn mapinfos");
+		add("blueTeamScore redTeamScore blueFlagReturn redFlagReturn");
+		add("listbluespawns listredspawns");
+#else
+		add("connect remoteAdmin host edit sayteam vote savemap savemapforce");
+		add("rebuildmap refreshgames menutab scoreboard screenshot");
+#endif
 		return;
 	}
 
@@ -2067,6 +2078,7 @@ void Console::sendCommand(CString commandLine, bool isAdmin, unsigned long bbnet
 		{
 			scene->client->game->map->buildAll();
 		}
+		return;
 	}
 #endif
 
@@ -2334,10 +2346,8 @@ void Console::sendCommand(CString commandLine, bool isAdmin, unsigned long bbnet
 			
 			// we have everything, tell the master server to ban him!
 			master->sendPacket( (char*)&cb , sizeof(stCacheBan) , CACHE_BAN );
+			return;
 		}
-
-		//return;
-		// "Unkown command" ;)
 	}
 
 #ifdef _DEBUG
