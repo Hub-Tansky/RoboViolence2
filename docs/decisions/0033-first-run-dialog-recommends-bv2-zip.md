@@ -1,6 +1,6 @@
 # 0033: The first-run data dialog recommends the original BV2 zip and can open it
 
-- Status: Accepted
+- Status: Superseded by 0040
 - Date: 2026-10-23
 - Affects: `game/src/DataDirPicker.cpp`, Project item "[GUI] First-run data dialog: recommend downloading the original BaboViolent 2 data" (owner-approved **[GUI]**, 2026-10-20); amends ADR 0016
 

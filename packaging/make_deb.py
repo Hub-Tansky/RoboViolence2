@@ -79,8 +79,9 @@ def depends(binaries):
                            capture_output=True, text=True)
     if r.returncode != 0:
         sys.exit(f"dpkg-shlibdeps failed:\n{r.stderr}")
-    # SDL loads libGL.so.1 at run time (glad, no link), so dpkg-shlibdeps can't see it
-    return r.stdout.strip().removeprefix("shlibs:Depends=") + ", libgl1"
+    # SDL loads libGL.so.1 at run time (glad, no link), so dpkg-shlibdeps can't see it; the client runs curl and unzip
+    # for the first-run data download (ADR 0040)
+    return r.stdout.strip().removeprefix("shlibs:Depends=") + ", libgl1, curl, unzip"
 
 
 def point_launcher_at_games(desktop):
