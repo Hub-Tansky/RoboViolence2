@@ -154,10 +154,9 @@ namespace
 		const char * text =
 			"Robo Violence 2 is in alpha stage. This is in-progress experimental version with placeholder art.\n\n"
 			"The GPL covers the code only. The original assets (maps, models, textures, sounds, music, font)\n"
-			"and the non-English translations are not part of this project. Replacements will be created\n"
-			"by this project later.\n\n"
-			"For now we recommend using your own original BaboViolent 2 data.\n\n"
-			"\"Download and play\" downloads it (about 17 MB) from github.com/Daivuk/BaboViolent2."; // ORIGINAL_ZIP_BYTES
+			"and the non-English translations are not part of this project. Replacements will be created later.\n\n"
+			"For now we recommend using original BaboViolent 2 data.\n\n"
+			"\"Download and play\" downloads about 17 MB from github.com BV2 repository. (Recommended)"; // ORIGINAL_ZIP_BYTES
 		const SDL_MessageBoxData box = { SDL_MESSAGEBOX_INFORMATION, 0, TITLE, text, 2, buttons, 0 };
 		int button = PLACEHOLDERS;
 		return SDL_ShowMessageBox(&box, &button) ? (Button)button : PLACEHOLDERS; // closing the box (-1) counts as placeholders
