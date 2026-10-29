@@ -98,10 +98,31 @@ def check_dmg(dmg):
             run("hdiutil", "detach", "-quiet", mount)
 
 
+def reflow_licence(text):
+    """Joins each paragraph's hard-wrapped lines into one, so the installer's text box wraps them to its own width.
+    Centred headings (indented 10+ spaces) keep their own lines."""
+    paragraphs = []
+    for paragraph in text.split("\n\n"):
+        lines = []
+        for line in paragraph.splitlines():
+            heading = line.startswith(" " * 10)
+            if lines and not heading and not lines[-1].startswith(" " * 10):
+                lines[-1] += " " + line.strip()
+            else:
+                lines.append(line.rstrip())
+        paragraphs.append("\n".join(lines))
+    return "\n\n".join(paragraphs)
+
+
 def ship_windows(runtime, stage, out, name, version):
     archive = shutil.make_archive(str(out / name), "zip", out, name)
-    run(ISCC, "/Q", f"/DSourceDir={stage.resolve()}", f"/DOutputDir={out.resolve()}", f"/DOutputName={name}-setup",
-        f"/DAppVersion={version.removeprefix('v')}", PACKAGING / "windows" / "roboviolence2.iss")
+    with tempfile.TemporaryDirectory() as tmp:
+        # The installer shows a reflowed copy; the package keeps LICENSE.txt verbatim
+        info = Path(tmp) / "LICENSE.txt"
+        info.write_text(reflow_licence((stage / "LICENSE.txt").read_text(encoding="utf-8")), encoding="utf-8")
+        run(ISCC, "/Q", f"/DSourceDir={stage.resolve()}", f"/DInfoFile={info}", f"/DOutputDir={out.resolve()}",
+            f"/DOutputName={name}-setup", f"/DAppVersion={version.removeprefix('v')}",
+            PACKAGING / "windows" / "roboviolence2.iss")
     return [archive, out / (name + "-setup.exe")]
 
 
