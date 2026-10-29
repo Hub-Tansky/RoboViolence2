@@ -20,7 +20,6 @@ namespace
 {
 	const char * TITLE = "Robo Violence 2";
 
-	const double ZIP_BYTES = 17.0e6; // for the progress bar only
 
 	// A small window with a progress bar; closing it cancels
 	struct Progress
@@ -51,7 +50,7 @@ namespace
 
 	enum Step { STEP_OK, STEP_FAILED, STEP_CANCELLED };
 
-	// Runs args until it exits; with sizeOf set, the bar follows that file's size against ZIP_BYTES
+	// Runs args until it exits; with sizeOf set, the bar follows that file's size against ORIGINAL_ZIP_BYTES
 	Step runStep(Progress & ui, const std::vector<std::string> & args, const std::string & label,
 		const std::string & sizeOf, std::string & error)
 	{
@@ -81,7 +80,7 @@ namespace
 			{
 				std::error_code ec;
 				uintmax_t bytes = fs::file_size(fs::path(sizeOf), ec);
-				fraction = ec ? 0.0 : std::min(0.99, (double)bytes / ZIP_BYTES);
+				fraction = ec ? 0.0 : std::min(0.99, (double)bytes / bv2::ORIGINAL_ZIP_BYTES);
 				title += " " + std::to_string((int)(fraction * 100)) + "%";
 			}
 			if (!ui.show(title, fraction))
@@ -102,33 +101,43 @@ namespace
 		return result;
 	}
 
-	// Downloads the pinned upstream zip, extracts main/ and installs it at originalDataDir() (ADR 0040).
+	// Downloads the pinned upstream zip into partial, extracts main/ and installs it at originalDataDir() (ADR 0040).
 	// On Windows the tools report no exit code (background process), so the hash check is the verdict there.
+	Step fetchAndInstall(Progress & ui, const fs::path & partial, std::string & error)
+	{
+		const std::string zip = (partial / "bv2.zip").string();
+		Step step = runStep(ui, bv2::downloadArgs(zip), "Downloading BaboViolent 2 data", zip, error);
+		if (step != STEP_OK)
+			return step;
+		step = runStep(ui, bv2::extractArgs(zip, partial.string()), "Unpacking BaboViolent 2 data", "", error);
+		if (step != STEP_OK)
+			return step;
+		ui.show("Checking BaboViolent 2 data", 1.0);
+		const std::string data = bv2::extractedDataDir(partial.string());
+		if (!(error = bv2::firstMismatch(data, bv2::originalMainHashes())).empty())
+		{
+			error = "the download or unpacking failed (" + error + " missing or wrong)";
+			return STEP_FAILED;
+		}
+		if (!(error = bv2::replaceDir(data, bv2::originalDataDir())).empty())
+		{
+			error = "could not install into " + bv2::originalDataDir() + ": " + error;
+			return STEP_FAILED;
+		}
+		return STEP_OK;
+	}
+
+	// fetchAndInstall in a fresh <originalDataDir>.partial folder, removed afterwards
 	Step downloadData(std::string & error)
 	{
 		const fs::path partial = bv2::originalDataDir() + ".partial";
 		std::error_code ec;
 		fs::remove_all(partial, ec);
 		fs::create_directories(partial, ec);
-		const std::string zip = (partial / "bv2.zip").string();
 		Step step;
 		{
 			Progress ui;
-			step = runStep(ui, bv2::downloadArgs(zip), "Downloading BaboViolent 2 data", zip, error);
-			if (step == STEP_OK)
-				step = runStep(ui, bv2::extractArgs(zip, partial.string()), "Unpacking BaboViolent 2 data", "", error);
-			if (step == STEP_OK)
-			{
-				ui.show("Checking BaboViolent 2 data", 1.0);
-				const std::string data = bv2::extractedDataDir(partial.string());
-				std::string bad = bv2::firstMismatch(data, bv2::originalMainHashes());
-				if (!bad.empty())
-					error = "the download or unpacking failed (" + bad + " missing or wrong)";
-				else if (!(bad = bv2::replaceDir(data, bv2::originalDataDir())).empty())
-					error = "could not install into " + bv2::originalDataDir() + ": " + bad;
-				if (!error.empty())
-					step = STEP_FAILED;
-			}
+			step = fetchAndInstall(ui, partial, error);
 		}
 		fs::remove_all(partial, ec);
 		return step;
@@ -149,7 +158,7 @@ namespace
 			"and the non-English translations are not part of this project. Replacements will be created\n"
 			"by this project later.\n\n"
 			"For now we recommend using your own original BaboViolent 2 data.\n\n"
-			"\"Download and play\" downloads it (about 17 MB) from github.com/Daivuk/BaboViolent2.";
+			"\"Download and play\" downloads it (about 17 MB) from github.com/Daivuk/BaboViolent2."; // ORIGINAL_ZIP_BYTES
 		const SDL_MessageBoxData box = { SDL_MESSAGEBOX_INFORMATION, 0, TITLE, text, 2, buttons, 0 };
 		int button = PLACEHOLDERS;
 		return SDL_ShowMessageBox(&box, &button) ? (Button)button : PLACEHOLDERS; // closing the box (-1) counts as placeholders

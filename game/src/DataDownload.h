@@ -16,6 +16,8 @@ namespace bv2
 	// The pinned upstream commit, whose Content/main matches tools/original-assets.sha256, and its zip
 	extern const char * const ORIGINAL_COMMIT;
 	extern const char * const ORIGINAL_ZIP_URL;
+	// Its size, for the progress bar (GitHub sends no length for archives) and the box's "about 17 MB"
+	const double ORIGINAL_ZIP_BYTES = 17.0e6;
 	// The browser fallback: master.zip, which unzips to BaboViolent2-master, a folder detectDataDir looks for
 	extern const char * const BROWSER_ZIP_URL;
 
