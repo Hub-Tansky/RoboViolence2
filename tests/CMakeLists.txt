@@ -223,6 +223,7 @@ add_test(NAME example_cfg COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_D
 add_test(NAME app_icon COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test_app_icon.py)
 add_test(NAME app_name COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test_app_name.py)
 add_test(NAME discord_release_post COMMAND ${Python3_EXECUTABLE} -B ${CMAKE_CURRENT_SOURCE_DIR}/test_discord_release_post.py)
+add_test(NAME installer_licence COMMAND ${Python3_EXECUTABLE} -B ${CMAKE_CURRENT_SOURCE_DIR}/test_installer_licence.py)
 find_program(BV2_DPKG_SHLIBDEPS dpkg-shlibdeps)  # dpkg-dev (build-essential pulls it in)
 if(UNIX AND NOT APPLE AND BV2_DPKG_SHLIBDEPS AND TARGET bv2 AND TARGET bv2dedicated)
   add_test(NAME make_deb COMMAND ${Python3_EXECUTABLE} -B ${CMAKE_CURRENT_SOURCE_DIR}/test_make_deb.py "${CMAKE_BINARY_DIR}" "${BV2_TEST_SCRATCH}")

@@ -15,6 +15,7 @@ packaging/macos/dmg-background.png (dmgbuild, ADR 0030), and roboviolence2-<pres
 Fails if the build is not Release, or if anything the package must hold is missing.
 """
 import json
+import re
 import shutil
 import subprocess
 import sys
@@ -98,10 +99,22 @@ def check_dmg(dmg):
             run("hdiutil", "detach", "-quiet", mount)
 
 
+def reflow_licence(text):
+    """Each paragraph on one line, so the installer's text box wraps it to its own width; paragraphs of centred
+    headings (indented 10+ spaces) stay as they are. The sample notices in How to Apply are joined too."""
+    return "\n\n".join(p if p.startswith(" " * 10) else re.sub(r" *\n *", " ", p)
+                       for p in text.rstrip("\n").split("\n\n"))
+
+
 def ship_windows(runtime, stage, out, name, version):
     archive = shutil.make_archive(str(out / name), "zip", out, name)
-    run(ISCC, "/Q", f"/DSourceDir={stage.resolve()}", f"/DOutputDir={out.resolve()}", f"/DOutputName={name}-setup",
-        f"/DAppVersion={version.removeprefix('v')}", PACKAGING / "windows" / "roboviolence2.iss")
+    with tempfile.TemporaryDirectory() as tmp:
+        # The installer shows a reflowed copy; the package keeps LICENSE.txt verbatim
+        info = Path(tmp) / "LICENSE.txt"
+        info.write_text(reflow_licence((stage / "LICENSE.txt").read_text(encoding="utf-8")), encoding="utf-8")
+        run(ISCC, "/Q", f"/DSourceDir={stage.resolve()}", f"/DInfoFile={info}", f"/DOutputDir={out.resolve()}",
+            f"/DOutputName={name}-setup", f"/DAppVersion={version.removeprefix('v')}",
+            PACKAGING / "windows" / "roboviolence2.iss")
     return [archive, out / (name + "-setup.exe")]
 
 
