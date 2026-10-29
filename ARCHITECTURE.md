@@ -64,10 +64,10 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/Paths.cpp` | Package and data roots (`contentFile` for the package's own content), saved and detected BV2 data folder, per-user pref dir, layered config loading (release settings like the master list skip `bv2.cfg`, ADR 0028), map and DB path helpers (ADR 0016) |
 | `game/src/Paths.h` | Interface of `Paths.cpp` (namespace `bv2`) |
 | `packaging/linux/roboviolence2.desktop` | Linux desktop entry |
-| `packaging/make-package.py` | Builds the per-OS package from a Release `runtime/` (links resolved, macOS bundle re-signed, licences), plus the Windows installer, the macOS `.dmg` with only the app and Applications, or the Linux `.deb` (ADR 0020, 0030, 0031) |
+| `packaging/make-package.py` | Builds the per-OS package from a Release `runtime/` (links resolved, macOS bundle re-signed, licences), plus the Windows installer (showing `LICENSE.txt` reflowed one paragraph per line), the macOS `.dmg` with only the app and Applications, or the Linux `.deb` (ADR 0020, 0030, 0031) |
 | `packaging/make_deb.py` | Builds the Linux `.deb` from the build's `cmake --install` (stripped, without the master): client and `bv2dedicated` moved to `/usr/games`, launcher pointed there, licences, copyright and changelog added; Depends from `dpkg-shlibdeps` plus `libgl1` (ADR 0031) |
 | `packaging/discord_release_post.py` | Prints the Discord webhook payload of the release job: one embed with the release page, the player downloads and the website, an optional ping of the opt-in role and no other mention (ADR 0032) |
-| `packaging/windows/roboviolence2.iss` | Inno Setup script for the Windows installer (per-user, unsigned); shows `LICENSE.txt` reflowed to one line per paragraph so it fills the text box; privacy policy link and the opt-out task for the public master (ADR 0034) |
+| `packaging/windows/roboviolence2.iss` | Inno Setup script for the Windows installer (per-user, unsigned); shows the reflowed licence from `make-package.py`; privacy policy link and the opt-out task for the public master (ADR 0034) |
 | `packaging/scripts/run-client.cmd` | Package script: starts the client (Windows) |
 | `packaging/scripts/run-client.sh` | Package script: starts the client (macOS bundle or Linux binary) |
 | `packaging/scripts/run-master.cmd` | Package script: starts the master server (Windows) |
