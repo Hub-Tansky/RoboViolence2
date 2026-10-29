@@ -68,7 +68,7 @@ check(installed == expected, f"share/bv2/main differs from runtime/main: missing
 check(dpkg_deb("-f", deb, "Package").strip() == "roboviolence2", "Package is not roboviolence2")
 check(dpkg_deb("-f", deb, "Version").strip() == "0.1.0~rc1", "Version is not 0.1.0~rc1")
 depends = dpkg_deb("-f", deb, "Depends")
-check("libc6" in depends and "libgl1" in depends, f"Depends lacks libc6 or libgl1: {depends}")
+check(all(p in depends for p in ("libc6", "libgl1", "curl", "unzip")), f"Depends lacks libc6, libgl1, curl or unzip: {depends}")
 
 unpacked = scratch / "unpacked"
 dpkg_deb("-x", deb, unpacked)

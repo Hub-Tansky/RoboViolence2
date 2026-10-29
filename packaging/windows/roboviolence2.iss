@@ -1,5 +1,5 @@
 ; Windows installer (Inno Setup 6), built by packaging/make-package.py (ADR 0020). Unsigned (PNS-49).
-; ISCC /DSourceDir=<package folder> /DOutputDir=<dir> /DOutputName=<file name> /DAppVersion=<version> roboviolence2.iss
+; ISCC /DSourceDir=<package folder> /DInfoFile=<licence text> /DOutputDir=<dir> /DOutputName=<file name> /DAppVersion=<version> roboviolence2.iss
 
 [Setup]
 ; AppId identifies the installed app for upgrades and uninstall: never change it
@@ -15,8 +15,9 @@ ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 ; Windows 10 22H2 (ADR 0012)
 MinVersion=10.0.19045
-; GPLv3 needs no acceptance to run the program (section 9): shown, not agreed to
-InfoBeforeFile={#SourceDir}\LICENSE.txt
+; GPLv3 needs no acceptance to run the program (section 9): shown, not agreed to. InfoFile is LICENSE.txt with each
+; paragraph on one line (make-package.py reflow_licence), so the text fills the box
+InfoBeforeFile={#InfoFile}
 OutputDir={#OutputDir}
 OutputBaseFilename={#OutputName}
 UninstallDisplayIcon={app}\bv2.exe

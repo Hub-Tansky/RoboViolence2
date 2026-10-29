@@ -1,6 +1,6 @@
 # 0016: The client finds the player's BV2 data; the package supplies its own content
 
-- Status: Accepted
+- Status: Accepted; amended by [0033](0033-first-run-dialog-recommends-bv2-zip.md), [0040](0040-first-run-downloads-original-data.md)
 - Date: 2026-10-14
 - Affects: [Phase C step 1](https://github.com/Hub-Tansky/RoboViolence2/blob/58c91b2a660db2b290b0b5f504381980a6aedba2/docs/roadmap/phase-c-installers-and-fixes/step1-player-data-dir.md); amends [0005](0005-runtime-main-data-root.md) and [0007](0007-data-root-pref-dir-config-layers.md)
 
