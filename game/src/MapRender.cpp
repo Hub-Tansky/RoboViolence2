@@ -333,7 +333,8 @@ void Map::renderGround()
 				farthestBlueSpawn = (float)i;
 			}
 		}
-		for(int i = 0; i < (int)blue_spawns.size(); i++)
+		// Lines from the farthest DM spawn to each team spawn: none without a DM spawn (dm_spawns[0] would read null)
+		for(int i = 0; !dm_spawns.empty() && i < (int)blue_spawns.size(); i++)
 		{
 			glColor3f(1.0,0.0,0.0);
 			glLineWidth(2);
@@ -344,7 +345,7 @@ void Map::renderGround()
 			}
 			glEnd();
 		}
-		for(int i = 0; i < (int)red_spawns.size(); i++)
+		for(int i = 0; !dm_spawns.empty() && i < (int)red_spawns.size(); i++)
 		{
 			glColor3f(0.0,0.0,1.0);
 			glLineWidth(2);
