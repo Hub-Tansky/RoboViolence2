@@ -231,6 +231,21 @@ int cPeer2Peer::CreatePeer(struct sockaddr_in ip,bool *exist)
 
 }
 
+cPeer* cPeer2Peer::broadcastPeer()
+{
+	if(!BCPeer)
+	{
+		sockaddr_in newIp;
+		newIp.sin_family			=	AF_INET;
+		newIp.sin_port				=	htons(BB_BROADCAST_PORT);
+		newIp.sin_addr.s_addr		=	htonl(INADDR_BROADCAST); // limited broadcast: no lookup of our own host name, which can stall the loop ~30 s (macOS)
+		memset(newIp.sin_zero,'\0',8);
+
+		BCPeer = new cPeer(newIp,0);
+	}
+	return BCPeer;
+}
+
 int cPeer2Peer::SendTo(INT4 peerID,cUDPpacket *newPacket,UINT4 exception)
 {
 
@@ -242,19 +257,9 @@ int cPeer2Peer::SendTo(INT4 peerID,cUDPpacket *newPacket,UINT4 exception)
 			delete newPacket;
 			return 0;
 		}
-        if(!BCPeer)
-		{
-			sockaddr_in newIp;
-			newIp.sin_family			=	AF_INET;
-			newIp.sin_port				=	htons(BB_BROADCAST_PORT);
-			newIp.sin_addr.s_addr		=	htonl(INADDR_BROADCAST); // limited broadcast: no lookup of our own host name, which can stall the loop ~30 s (macOS)
-			memset(newIp.sin_zero,'\0',8);
-
-			BCPeer = new cPeer(newIp,0);
-		}
 		newPacket->Safe = false; //on force le broadcast packet a etre unsafe
 		newPacket->InterfaceID	=	INTERFACE_P2P;
-		BCPeer->CreatePacket(newPacket);
+		broadcastPeer()->CreatePacket(newPacket);
 		
 		return 0;
 	}
@@ -398,24 +403,13 @@ int cPeer2Peer::ReceiveFromPeers()
 			}
 			else
 			{
-				if(!BCPeer)
-				{
-					sockaddr_in newIp;
-					newIp.sin_family			=	AF_INET;
-					newIp.sin_port				=	htons(BB_BROADCAST_PORT);
-					newIp.sin_addr.s_addr		=	htonl(INADDR_BROADCAST);
-					memset(newIp.sin_zero,'\0',8);
-
-					BCPeer = new cPeer(newIp,0);
-				}
-
 				int nread=0;
 				while(nread < nbytes) //tant quia du data a lire
 				{
 					cUDPpacket *packet = ExtractPacket(buf,&nread);
 					BytesReceived += packet->Size;
 					
-					BCPeer->AddReceivedPacket(new cUDPpacket(packet));				
+					broadcastPeer()->AddReceivedPacket(new cUDPpacket(packet));				
 
 					delete packet;
 				}

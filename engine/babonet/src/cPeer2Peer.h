@@ -40,6 +40,7 @@ class cPeer2Peer
 private:
 
 	int				PrepareSockets();			//prepare les sockets par defaut
+	cPeer*			broadcastPeer();			//the peer that holds the LAN broadcast packets, created on first use
 
 public:
 
