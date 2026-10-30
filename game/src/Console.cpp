@@ -1754,9 +1754,12 @@ void Console::sendCommand(CString commandLine, bool isAdmin, unsigned long bbnet
 		return;
 	}
 	// Pour modifier ou cr?r une map
-	if (command == "edit")
+	if (command == "edit") // edit <map name without spaces> [width height]; the Editor tab passes names with spaces directly
 	{
-		scene->edit(tokenize);
+		CString mapName = tokenize.getFirstToken(' ');
+		CString w = tokenize.getFirstToken(' ');
+		CString h = tokenize.getFirstToken(' ');
+		scene->edit(mapName, w.isNull() ? 0 : w.toInt(), h.isNull() ? 0 : h.toInt());
 		m_isActive = false;
 		return;
 	}

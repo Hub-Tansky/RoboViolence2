@@ -653,15 +653,18 @@ void Editor2::Open(CString mapName)
 	}
 }
 
-void Editor2::Save(CString mapName)
+bool Editor2::Save(CString mapName)
 {
     int i, j;
+	if (!bv2::isMapName(mapName.s))
+		return false;
 	map->mapName = mapName;
 	// On save la map dans ce cas!
 	FileIO file(CString("%s", bv2::mapFileForWrite(mapName.s).c_str()), "wb");
 	if (!file.isValid())
 	{
 		console->add("\x4> Error saving map");
+		return false;
 	}
 	else
 	{
@@ -757,6 +760,7 @@ void Editor2::Save(CString mapName)
 
 		isDirty = false;
 	}
+	return true;
 }
 
 void Editor2::Click(CControl * control)
@@ -798,16 +802,9 @@ void Editor2::Click(CControl * control)
 	}
 	if (control == btn_save)
 	{
-		if(isDirty)
+		if(isDirty && !Save(map->mapName))
 		{
-			if(bv2::isMapName(map->mapName.s))
-			{
-				Save(map->mapName);
-			}
-			else
-			{
-				activeDialog = new SaveAsMapDialog(this, editorRoot->font, map->author_name, map->mapName);
-			}
+			activeDialog = new SaveAsMapDialog(this, editorRoot->font, map->author_name, map->mapName);
 		}
 		return;
 	}

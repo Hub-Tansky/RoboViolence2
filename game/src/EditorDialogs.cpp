@@ -36,6 +36,15 @@ IEditorDialog::~IEditorDialog()
 {
 }
 
+// Why bv2::isMapName refused a name, for New and Save As
+static MessageDialog * invalidMapNameDialog(unsigned int font)
+{
+	return new MessageDialog(font, ButtonsOK, "Invalid map name!",
+		"1-15 letters, digits, _ - or spaces inside.",
+		"Not CON, PRN, AUX, NUL, COM1-9, LPT1-9.",
+		"Other players can't download other names.");
+}
+
 SaveDirtyDialog::SaveDirtyDialog(Editor2 * editor, unsigned int font, bool closing)
 	:	IEditorDialog(editor, font, "Warning!", CVector2i(300, 100), ButtonsYesNo)
 	,	mustClose(closing)
@@ -258,12 +267,9 @@ void NewMapDialog::Validate(CControl * control)
 
 void NewMapDialog::OnOk()
 {
-	txt_mapName->text.resize(15);
 	if (txt_mapName->text != "" && !bv2::isMapName(txt_mapName->text.s))
 	{
-		subDialog = new MessageDialog(dialogRoot->font, ButtonsOK, "Invalid map name!",
-			"Use letters, digits, _ - and spaces inside.",
-			"Other players can't download other names.");
+		subDialog = invalidMapNameDialog(dialogRoot->font);
 		state = StateNothing;
 		return;
 	}
@@ -587,9 +593,7 @@ void SaveAsMapDialog::OnOk()
 	{
 		state = StateNothing;
 		closeAfterSub = false;
-		subDialog = new MessageDialog(dialogRoot->font, ButtonsOK, "Invalid map name!",
-			"Use letters, digits, _ - and spaces inside.",
-			"Other players can't download other names.");
+		subDialog = invalidMapNameDialog(dialogRoot->font);
 		return;
 	}
 	FileIO file(CString("%s", bv2::mapFileForRead(txt_mapName->text.s).c_str()), "rb");

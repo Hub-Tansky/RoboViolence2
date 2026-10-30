@@ -134,16 +134,8 @@ void Scene::join(CString IPAddress, int port, CString password/*, CString adminR
 
 
 
-void Scene::edit(CString command)
+void Scene::edit(CString mapName, int w, int h)
 {
-	CString mapName = command.getFirstToken(' ');
-	int w,h;
-	CString token = command.getFirstToken(' ');
-	if (token.isNull()) w = 0;
-	else w = token.toInt();
-	token = command.getFirstToken(' ');
-	if (token.isNull()) h = 0;
-	else h = token.toInt();
 	disconnect();
 	console->add("\x3> Creating Editor");
 //	ZEVEN_SAFE_DELETE(menuManager.root);
