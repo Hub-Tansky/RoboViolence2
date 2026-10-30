@@ -19,7 +19,6 @@
 #ifndef CONSOLE
 
 #include "CEditor.h"
-#include "Console.h"
 #include "Scene.h"
 #include "GameVar.h"
 
