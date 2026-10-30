@@ -90,8 +90,12 @@ namespace
 
 	// The first folder holding main/textures/ among dir, its parent when dir is main/, dir/Content,
 	// dir/BaboViolent2/Content (the upstream repository) and dir/<dir's name>/BaboViolent2/Content; "" when none
-	fs::path findRoot(const std::string & dir)
+	fs::path findRoot(std::string dir)
 	{
+		size_t first = dir.find_first_not_of(" \t"), last = dir.find_last_not_of(" \t");
+		dir = first == std::string::npos ? std::string() : dir.substr(first, last - first + 1);
+		if (dir.size() >= 2 && dir.front() == '"' && dir.back() == '"')
+			dir = dir.substr(1, dir.size() - 2); // Windows Explorer's "Copy as path"
 		if (dir.empty())
 			return fs::path();
 		fs::path p(dir);
@@ -191,6 +195,17 @@ namespace
 		if (!v.empty())
 			dksvarSetTransient(varName, v.c_str());
 	}
+
+	const char * const PLACEHOLDERS = "placeholders"; // data-dir.txt's line for the placeholders choice
+
+	// What data-dir.txt holds: a folder, or PLACEHOLDERS
+	std::string savedLine()
+	{
+		std::ifstream in(fs::path(g_prefDir) / "data-dir.txt");
+		std::string line;
+		std::getline(in, line);
+		return line;
+	}
 }
 
 namespace bv2
@@ -250,16 +265,47 @@ namespace bv2
 
 	std::string savedDataDir()
 	{
-		std::ifstream in(fs::path(g_prefDir) / "data-dir.txt");
-		std::string line;
-		std::getline(in, line);
-		return findDataIn(line);
+		return findDataIn(savedLine());
 	}
 
 	void saveDataDir(const std::string & dir)
 	{
 		std::ofstream out(fs::path(userFile("data-dir.txt")), std::ios::trunc);
 		out << dir << "\n";
+	}
+
+	void savePlaceholdersChoice() { saveDataDir(PLACEHOLDERS); }
+
+	bool placeholdersSaved() { return savedLine() == PLACEHOLDERS; }
+
+	std::string playerDataDir()
+	{
+		return dataRoot() != packageRoot() ? dataRoot() : std::string();
+	}
+
+	DataDirField saveDataDirField(const std::string & text)
+	{
+		if (text.empty())
+		{
+			savePlaceholdersChoice();
+			return DataDirField::Placeholders;
+		}
+		std::string data = findDataIn(text);
+		if (data.empty())
+			return DataDirField::NoData;
+		saveDataDir(data);
+		return DataDirField::Saved;
+	}
+
+	StartData startDataDir()
+	{
+		std::string line = savedLine();
+		if (line == PLACEHOLDERS)
+			return StartData{ "", false };
+		std::string dir = findDataIn(line);
+		if (dir.empty())
+			dir = detectDataDir();
+		return StartData{ dir, dir.empty() };
 	}
 
 	const std::string & originalDataDir() { return g_originalDataDir; }
