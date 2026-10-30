@@ -3,8 +3,8 @@
 
 namespace bv2
 {
-	// Unless BV2_DATA_DIR held data or argv has --placeholders: the saved folder, else a detected one, else a box
-	// offering to download the original data into originalDataDir(). A folder found or installed becomes the data
-	// root and is saved. Call after pathsInit().
+	// Unless BV2_DATA_DIR held data or argv has --placeholders: startDataDir(), and when it asks, a box offering to
+	// download the original data into originalDataDir(). A folder found or installed becomes the data root and is
+	// saved. Call after pathsInit().
 	void chooseDataDir(int argc, char ** argv);
 }

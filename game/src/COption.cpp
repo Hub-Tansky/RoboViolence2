@@ -21,6 +21,7 @@
 #include "COption.h"
 #include "GameVar.h"
 #include "KeyManager.h"
+#include "Paths.h"
 #include "Scene.h"
 
 extern Scene * scene;
@@ -601,6 +602,20 @@ COption::COption(CControl * in_parent, CControl * in_alignTo)
 		key_qMsg10 = new CControl(instance, CVector2i(10,10), CVector2i(200, 25), keyManager.getKeyName(gameVar.k_qMsg10), this, "KEY", label1, CONTROL_SNAP_RIGHT);
 		key_qMsg10->selectedIndex = gameVar.k_qMsg10;
 
+	//--- GAME ASSETS (ADR 0042): the BV2 data folder, read before the window opens, so it applies on the next start
+	separator = new CControl(instance, CVector2i(10,20), CVector2i(200,25),"Game assets", this, "SEPARATOR", label1, CONTROL_SNAP_BOTTOM, 15);
+
+		label1 = new CControl(instance, CVector2i(20,10), CVector2i(200,25),"BV2 data folder:", this, "LABEL", separator, CONTROL_SNAP_BOTTOM, 15);
+		label1->textAlign = CONTROL_TEXTALIGN_MIDDLERIGHT;
+		label1->toolTips = "Paste the folder with your original BaboViolent 2 data (it holds main/), then press Enter. Empty: placeholders.";
+		dataDirShown = bv2::playerDataDir();
+		txt_dataDir = new CControl(instance, CVector2i(10,10), CVector2i(480,25), dataDirShown.c_str(), this, "EDIT", label1, CONTROL_SNAP_RIGHT);
+		txt_dataDir->SetMaxCarac(255);
+		label1 = new CControl(instance, CVector2i(20,10), CVector2i(200,25),"", this, "LABEL", label1, CONTROL_SNAP_BOTTOM);
+		lbl_dataDirStatus = new CControl(instance, CVector2i(10,10), CVector2i(480,25),
+			bv2::dataFromEnv() ? "BV2_DATA_DIR is set and wins over this field." : "Restart Robo Violence 2 to apply a change.",
+			this, "LABEL", label1, CONTROL_SNAP_RIGHT);
+
 	//--- FINAL SEPARATOR
 	separator = new CControl(instance, CVector2i(10,20), CVector2i(200,25),"", this, "SEPARATOR",label1, CONTROL_SNAP_BOTTOM, 15);
 
@@ -803,6 +818,21 @@ void COption::Validate(CControl * control)
 	if (control->style == "EDIT" || control->style == "KEY")
 	{
 		dksPlaySound(m_sfxClic, -1, 200);
+	}
+
+	if (control == txt_dataDir)
+	{
+		std::string text = txt_dataDir->text.s;
+		if (text == dataDirShown)
+			return; // the field also validates when it loses focus: only a change is saved
+		switch (bv2::saveDataDirField(text))
+		{
+		case bv2::DataDirField::Placeholders: lbl_dataDirStatus->text = "Placeholders from the next start."; break;
+		case bv2::DataDirField::Saved: lbl_dataDirStatus->text = "Saved. Restart Robo Violence 2 to use it."; break;
+		case bv2::DataDirField::NoData: lbl_dataDirStatus->text = "No BV2 data there (main/textures). Not saved."; return;
+		}
+		dataDirShown = text;
+		return;
 	}
 
 		//--- Save all da settings!
