@@ -94,10 +94,10 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 			net_clsv_map_request request;
 			memcpy(&request, buffer, sizeof(net_clsv_map_request));
 			request.mapName[15] = '\0';
-			if (!request.mapName[0] || strspn(request.mapName, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-") != strlen(request.mapName))
+			if (!request.mapName[0] || strspn(request.mapName, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_- ") != strlen(request.mapName))
 			{
 				logRejected(bbnetID, typeID, "map name");
-				return; // Q-S6: a map name only, never a path
+				return; // Q-S6: a map name only, never a path; spaces allowed, the editor saves names like "Test 1"
 			}
 
 			SMapTransfer mtrans;
