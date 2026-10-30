@@ -2,7 +2,7 @@
 """Phase T4: end-to-end scenarios: bv2dedicated with the admin API, plus bv2 autotest clients under Xvfb.
 
 Usage: e2e.py <runtime dir> <scratch dir> <scenario>
-Scenarios: join_leave, password, chat, kick, ban, master_list, ctf_capture, ghost. Each has one observable: the admin API's
+Scenarios: join_leave, password, chat, kick, ban, master_list, ctf_capture, ghost, user_map. Each has one observable: the admin API's
 `GET /status` player count or score, the server's stdout, or a client's autotest result (ADR 0025). Linux only (Xvfb).
 """
 import os
@@ -60,13 +60,13 @@ class Run:
         self.start([os.path.join(self.runtime, "bv2master")], cwd=home, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
         wait(lambda: port_open(10207), 10, "master listening on 10207")
 
-    def server(self, **env):
+    def server(self, launch=b"execute CTF\n", **env):
         env = {**os.environ, "BV2_MASTER_SERVERS": "none", "BV2_PREF_DIR": os.path.join(self.dir, "server"),  # ADR 0028
                "BV2_ADMIN_PASS": ADMIN_PASS, "BV2_ADMIN_API_PORT": str(ADMIN_PORT), **env}
         p = self.start([os.path.join(self.runtime, "bv2dedicated")], cwd=self.runtime, env=env, stdin=subprocess.PIPE,
                        stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         threading.Thread(target=self.collect, args=(p.stdout, self.server_out), daemon=True).start()
-        p.stdin.write(b"execute CTF\n")
+        p.stdin.write(launch)
         p.stdin.flush()
         wait(lambda: "Server Created on port 3333" in self.server_text(), 30, "server created")
         wait(lambda: self.players() == 0, 10, "admin API answering", API_INTERVAL)
@@ -227,6 +227,19 @@ def ghost(run):
     check("no join handshake" in run.server_text(), "server logs why it dropped the client")
 
 
+def user_map(run):
+    """A map in the pref dir's maps/ (where the editor saves) hosts a game: the server used to look only in main/maps.
+    The name has a space and mixed case, like the editor maps that first showed the bug"""
+    maps = os.path.join(run.dir, "server", "maps")
+    os.makedirs(maps)
+    shutil.copy(os.path.join(run.runtime, "main", "maps", "CTF-Placeholder.bvm"), os.path.join(maps, "My Map 1.bvm"))
+    run.server(launch=b"set sv_gameType 2\nset sv_port 3333\ndedicate My Map 1\n")
+    check("map not found" not in run.server_text(), "server found the user map")
+    client = run.client("e2e-a", JOIN + ["wait 6"])
+    wait(lambda: run.players() == 1, 40, "/status players 1 on the user map", API_INTERVAL)
+    check(run.finished(client) == 0, "client script passed")
+
+
 def master_list(run):
     run.master()
     masters = "127.0.0.1:10207"
@@ -236,7 +249,7 @@ def master_list(run):
     check(run.finished(client) == 0, "client lists the server: Games found : 1")
 
 
-SCENARIOS = {f.__name__: f for f in (join_leave, password, chat, kick, ban, master_list, ctf_capture, ghost)}
+SCENARIOS = {f.__name__: f for f in (join_leave, password, chat, kick, ban, master_list, ctf_capture, ghost, user_map)}
 
 if __name__ == "__main__":
     runtime, scratch, name = sys.argv[1:4]
