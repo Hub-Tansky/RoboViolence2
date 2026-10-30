@@ -68,7 +68,9 @@ class Run:
         threading.Thread(target=self.collect, args=(p.stdout, self.server_out), daemon=True).start()
         p.stdin.write(launch)
         p.stdin.flush()
-        wait(lambda: "Server Created on port 3333" in self.server_text(), 30, "server created")
+        wait(lambda: any(s in self.server_text() for s in ("Server Created on port 3333", "map not found")), 30,
+             "server created")
+        check("map not found" not in self.server_text(), "server found its map")
         wait(lambda: self.players() == 0, 10, "admin API answering", API_INTERVAL)
 
     @staticmethod
@@ -233,8 +235,7 @@ def user_map(run):
     maps = os.path.join(run.dir, "server", "maps")
     os.makedirs(maps)
     shutil.copy(os.path.join(run.runtime, "main", "maps", "CTF-Placeholder.bvm"), os.path.join(maps, "My Map 1.bvm"))
-    run.server(launch=b"set sv_gameType 2\nset sv_port 3333\ndedicate My Map 1\n")
-    check("map not found" not in run.server_text(), "server found the user map")
+    run.server(launch=b"dedicate My Map 1\n")
     client = run.client("e2e-a", JOIN + ["wait 6"])
     wait(lambda: run.players() == 1, 40, "/status players 1 on the user map", API_INTERVAL)
     check(run.finished(client) == 0, "client script passed")

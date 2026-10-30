@@ -252,7 +252,7 @@ void Game::createMap()
 
 	if(scene->server) {
 		//--- Check first is that map exist.
-		CString filename("%s", bv2::mapFileForRead(mapName.s).c_str()); // user maps (editor saves) first, then main/maps
+		CString filename("%s", bv2::mapFileForRead(mapName.s).c_str());
 		FILE* fic = fopen(filename.s, "rb");
 		if (!fic)
 		{
