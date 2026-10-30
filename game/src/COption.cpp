@@ -131,11 +131,11 @@ COption::COption(CControl * in_parent, CControl * in_alignTo)
 		if (gameVar.r_widescreen == 2) lst_viewMode->selectChild(2);
 
 		//--- Screen resolution
-		label1 = new CControl(instance, CVector2i(20,10), CVector2i(200,150),"Screen resolution:", this, "LABEL", label1, CONTROL_SNAP_BOTTOM);
+		label1 = new CControl(instance, CVector2i(20,10), CVector2i(200,170),"Screen resolution:", this, "LABEL", label1, CONTROL_SNAP_BOTTOM);
 		label1->textAlign = CONTROL_TEXTALIGN_MIDDLERIGHT;
 		label1->toolTips = "(Need to reboot the game).";
 
-		lst_resolution = new CControl(instance, CVector2i(10,10), CVector2i(300,150),"", this, "LISTBOX", label1, CONTROL_SNAP_RIGHT);
+		lst_resolution = new CControl(instance, CVector2i(10,10), CVector2i(300,170),"", this, "LISTBOX", label1, CONTROL_SNAP_RIGHT);
 		CControl * row = 0;
 		const Resolution * resolutions = resolutionsFor(gameVar.r_widescreen);
 		lst_resolution->selectChild(-1);

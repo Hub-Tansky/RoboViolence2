@@ -39,7 +39,8 @@ public:
 };
 
 /// Creates the window. width and height are in pixels (the drawable size, also on HiDPI displays).
-/// 0 0 takes the desktop's size: fullscreen without a mode switch, or a maximized window.
+/// Width or height <= 0 (r_resolution 0 0) takes the desktop's size: fullscreen without a mode switch, or a maximized
+/// window.
 /// colorDepth 16 or 32; refreshRate only matters for exclusive fullscreen (-1 = desktop default).
 /// Returns 1 on success, 0 on failure (see dkwGetLastError).
 int				dkwInit(int width, int height, int colorDepth, char *title, CMainLoopInterface *mMainLoopObject, bool fullScreen, int refreshRate = -1);
