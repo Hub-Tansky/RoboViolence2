@@ -231,55 +231,19 @@ int cPeer2Peer::CreatePeer(struct sockaddr_in ip,bool *exist)
 
 }
 
-char* cPeer2Peer::GetBroadcastAdress()
+cPeer* cPeer2Peer::broadcastPeer()
 {
-		
-	struct sockaddr_in ipAdress;
-	struct sockaddr_in NetMask;
-	struct sockaddr_in Subnet;
-	struct sockaddr_in Broadcast;
+	if(!BCPeer)
+	{
+		sockaddr_in newIp;
+		newIp.sin_family			=	AF_INET;
+		newIp.sin_port				=	htons(BB_BROADCAST_PORT);
+		newIp.sin_addr.s_addr		=	htonl(INADDR_BROADCAST); // limited broadcast: no lookup of our own host name, which can stall the loop ~30 s (macOS)
+		memset(newIp.sin_zero,'\0',8);
 
-
-	char buffer[80];
-	gethostname(buffer,sizeof(buffer));
-	hostent *phe = gethostbyname(buffer);
-    memcpy(&ipAdress.sin_addr, phe->h_addr_list[0], sizeof(struct in_addr));
-	
-	//on va checker c quoi le subnet mask
-		char *IP = inet_ntoa(ipAdress.sin_addr);	//pogne le IP
-		char Class[4]; //on va garder les 3 premier chiffres qui definisse la classe du network ici
-
-		//check les 3 premier chiffres
-		int i=0;
-		while(IP[i] != '.')
-		{
-			Class[i] = IP[i];
-			i++;
-		}
-		Class[i] = '\0';
-		int ClassNum = atoi(Class);
-		
-
-		//est-ce que c un reseau de class A
-		if(ClassNum <= 126)
-		{
-			NetMask.sin_addr.s_addr		=	inet_addr("255.0.0.0");
-		}
-		else if(ClassNum <= 191) //class B network
-		{
-			NetMask.sin_addr.s_addr		=	inet_addr("255.255.0.0");
-		}
-		else	//192 en montant, class C network
-		{
-			NetMask.sin_addr.s_addr		=	inet_addr("255.255.255.0");
-		}
-
-		//on va calculer le braodcast adress
-		Subnet.sin_addr.s_addr			=	ipAdress.sin_addr.s_addr & NetMask.sin_addr.s_addr;
-		Broadcast.sin_addr.s_addr		=	Subnet.sin_addr.s_addr | ~NetMask.sin_addr.s_addr;
-
-		return inet_ntoa(Broadcast.sin_addr);
-
+		BCPeer = new cPeer(newIp,0);
+	}
+	return BCPeer;
 }
 
 int cPeer2Peer::SendTo(INT4 peerID,cUDPpacket *newPacket,UINT4 exception)
@@ -293,19 +257,9 @@ int cPeer2Peer::SendTo(INT4 peerID,cUDPpacket *newPacket,UINT4 exception)
 			delete newPacket;
 			return 0;
 		}
-        if(!BCPeer)
-		{
-			sockaddr_in newIp;
-			newIp.sin_family			=	AF_INET;
-			newIp.sin_port				=	htons(BB_BROADCAST_PORT);
-			newIp.sin_addr.s_addr		=	inet_addr(GetBroadcastAdress());
-			memset(newIp.sin_zero,'\0',8);
-
-			BCPeer = new cPeer(newIp,0);
-		}
 		newPacket->Safe = false; //on force le broadcast packet a etre unsafe
 		newPacket->InterfaceID	=	INTERFACE_P2P;
-		BCPeer->CreatePacket(newPacket);
+		broadcastPeer()->CreatePacket(newPacket);
 		
 		return 0;
 	}
@@ -449,24 +403,13 @@ int cPeer2Peer::ReceiveFromPeers()
 			}
 			else
 			{
-				if(!BCPeer)
-				{
-					sockaddr_in newIp;
-					newIp.sin_family			=	AF_INET;
-					newIp.sin_port				=	htons(BB_BROADCAST_PORT);
-					newIp.sin_addr.s_addr		=	inet_addr(GetBroadcastAdress());
-					memset(newIp.sin_zero,'\0',8);
-
-					BCPeer = new cPeer(newIp,0);
-				}
-
 				int nread=0;
 				while(nread < nbytes) //tant quia du data a lire
 				{
 					cUDPpacket *packet = ExtractPacket(buf,&nread);
 					BytesReceived += packet->Size;
 					
-					BCPeer->AddReceivedPacket(new cUDPpacket(packet));				
+					broadcastPeer()->AddReceivedPacket(new cUDPpacket(packet));				
 
 					delete packet;
 				}

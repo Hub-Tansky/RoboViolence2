@@ -1,0 +1,5 @@
+# Fullscreen at the desktop size (r_resolution 0 0, ADR 0043): the frame is the harness's 1280x720 Xvfb screen
+expect-scene menu
+wait 2
+screenshot desktop
+wait 1

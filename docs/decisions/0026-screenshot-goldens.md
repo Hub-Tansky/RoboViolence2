@@ -1,6 +1,6 @@
 # 0026: Screenshot goldens are Linux llvmpipe frames compared within a tolerance
 
-- Status: Accepted
+- Status: Accepted; amended by [0043](0043-first-start-fullscreen-desktop-and-game-browser.md)
 - Date: 2026-10-19
 - Affects: [Project item Phase T7](https://github.com/users/Hub-Tansky/projects/1), `tests/screenshots.py`, `tests/golden/`, `game/src/screengrab.cpp`
 
