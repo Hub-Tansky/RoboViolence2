@@ -136,6 +136,9 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/golden/desktop.cfg` | Config for `screenshot_desktop`: fullscreen at the desktop size, `r_resolution 0 0` (ADR 0043) |
 | `tests/golden/desktop.txt` | Screenshot script: main menu fullscreen at the desktop size (ctest `screenshot_desktop`) |
 | `tests/golden/desktop.png` | Golden for `screenshot_desktop`, the whole 1280x720 Xvfb screen |
+| `tests/golden/options-custom.cfg` | Config for `screenshot_options-custom`: a saved size that is no Options row, `r_resolution 1000 750` (ADR 0043) |
+| `tests/golden/options-custom.txt` | Screenshot script: Options tab with that size, no resolution row selected (ctest `screenshot_options-custom`) |
+| `tests/golden/options-custom.png` | Golden for `screenshot_options-custom` |
 | `tests/golden/scoreboard.txt` | Screenshot script: host the placeholder map, hold the scoreboard (ctest `screenshot_scoreboard`) |
 | `tests/golden/scoreboard.png` | Golden for `screenshot_scoreboard` |
 | `tests/golden/appearance.txt` | Screenshot script: main menu, Appearance tab with the Player name field (ctest `screenshot_appearance`) |
