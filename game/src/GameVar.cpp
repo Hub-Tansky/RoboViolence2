@@ -566,8 +566,8 @@ GameVar::GameVar()
 	dksvarRegister(CString("cl_accountUsername [string : \"\" (default \"\")]"), &cl_accountUsername, true);
 	cl_accountPassword = "";
 	dksvarRegister(CString("cl_accountPassword [string : \"\" (default \"\")]"), &cl_accountPassword, true);
-	cl_playerName = "Unnamed Babo";
-	dksvarRegister(CString("cl_playerName [string : \"\" (default \"Unnamed Babo\")]"), &cl_playerName, true);
+	cl_playerName = "Unnamed Robo";
+	dksvarRegister(CString("cl_playerName [string : \"\" (default \"Unnamed Robo\")]"), &cl_playerName, true);
 	cl_mapAuthorName = "";
 	dksvarRegister(CString("cl_mapAuthorName [string : \"\" (default \"\", max 24 characters)]"), &cl_mapAuthorName, true);
 	cl_cubicMotion = true;

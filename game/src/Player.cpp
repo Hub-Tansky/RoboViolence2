@@ -103,7 +103,7 @@ Player::Player(char pPlayerID, Map * pMap, Game * pGame): pingLogInterval(0.05f)
 	fireFrameDelay = 0;
 	game = pGame;
 	map = pMap;
-	name = "Unnamed Babo";
+	name = "Unnamed Robo";
 	babonetID = 0; // Retreive this from gknet_
 	playerID = pPlayerID;
 	teamID = PLAYER_TEAM_SPECTATOR; // -1 = spectator, 0 = bleu, 1 = rouge

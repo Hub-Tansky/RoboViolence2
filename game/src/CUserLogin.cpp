@@ -86,8 +86,15 @@ CUserLogin::CUserLogin(CControl * in_parent, CControl * in_alignTo)
 	separator = new CControl(instance, CVector2i(10,20), CVector2i(200,25),"Appearance", this, "SEPARATOR", btn_createAccount, CONTROL_SNAP_BOTTOM, 15);*/
 	CControl * separator = new CControl(instance, CVector2i(10,20), CVector2i(200,25),"Appearance", this, "SEPARATOR");
 
+	//--- Player name (issue #117): taken on Enter or when the field loses focus; saved with the config on exit
+	CControl * lbl_playerName = new CControl(instance, CVector2i(20,20), CVector2i(130,25),"Player name:", this, "LABEL", separator, CONTROL_SNAP_BOTTOM, 5);
+	lbl_playerName->textAlign = CONTROL_TEXTALIGN_TOPLEFT;
+	lbl_playerName->toolTips = "Your player name visible to other players in game.";
+	txt_playerName = new CControl(instance, CVector2i(20,20), CVector2i(250,25),gameVar.cl_playerName, this, "EDIT", lbl_playerName, CONTROL_SNAP_RIGHT, 5);
+	txt_playerName->SetMaxCarac(24);
+
 	//--- Stats view : Perso config
-	pic_babo = new CControl(instance, CVector2i(64,32),CVector2i(256,256),"",this,"FRAME", separator, CONTROL_SNAP_BOTTOM, 10);
+	pic_babo = new CControl(instance, CVector2i(64,32),CVector2i(256,256),"",this,"FRAME", lbl_playerName, CONTROL_SNAP_BOTTOM, 10);
 	pic_babo->frame3D = false;
 	pic_babo->frame2D = true;
 
@@ -210,6 +217,10 @@ void CUserLogin::updateSkin()
 	skinStr.resizeInverse(skinStr.len() - 4);
 	sld_skin->value = skinStr.toInt();
 
+	//--- The name may change from the console too
+	if (!txt_playerName->haveFocus())
+		txt_playerName->text = gameVar.cl_playerName;
+
 	//--- On reload le skin si ça changé
 	dktDeleteTexture(&tex_skinOriginal);
 	tex_skinOriginal = dktCreateTextureFromFile(CString("main/skins/%s.tga", gameVar.cl_skin.s).s, DKT_FILTER_BILINEAR);
@@ -297,7 +308,11 @@ void CUserLogin::Validate(CControl * control)
 		dksPlaySound(m_sfxClic, -1, 200);
 		if (control == txt_playerName)
 		{
-			gameVar.cl_playerName = txt_playerName->text;
+			// A blank name is not taken; the field shows the current one again
+			if (txt_playerName->text.isNull())
+				txt_playerName->text = gameVar.cl_playerName;
+			else
+				gameVar.cl_playerName = txt_playerName->text;
 		}
 	}
 	else
