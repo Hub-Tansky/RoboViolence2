@@ -1,0 +1,43 @@
+name: ci-retry
+# A hosted job GitHub never gives a runner is cancelled after about 15 min with the annotation below (macOS arm64
+# capacity, ADR 0041). Re-run such a build run's failed jobs, at most twice, while it is still its branch's latest commit.
+on:
+  workflow_run:
+    workflows: [build]
+    types: [completed]
+permissions:
+  actions: write  # re-run
+  checks: read    # job annotations
+  contents: read  # branch head
+jobs:
+  rerun:
+    if: >-
+      contains(fromJSON('["cancelled", "failure"]'), github.event.workflow_run.conclusion) &&
+      github.event.workflow_run.run_attempt < 3 &&
+      github.event.workflow_run.head_repository.full_name == github.repository
+    runs-on: ubuntu-24.04
+    steps:
+      - shell: bash  # -e -o pipefail
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RUN: ${{ github.event.workflow_run.id }}
+          ATTEMPT: ${{ github.event.workflow_run.run_attempt }}
+          SHA: ${{ github.event.workflow_run.head_sha }}
+          BRANCH: ${{ github.event.workflow_run.head_branch }}
+        run: |
+          # A newer commit has its own run; re-running this one would cancel it (build.yml concurrency).
+          # Assignments, not pipes or loop lists: a failed API call fails the step instead of reading as "nothing to re-run",
+          # except the branch lookup, whose failure counts as a deleted branch (merged PR).
+          head=$(gh api "repos/$GH_REPO/commits/$BRANCH" -q .sha) || { echo "$BRANCH is gone (merged PR): nothing to re-run"; exit 0; }
+          [ "$head" = "$SHA" ] || { echo "superseded by a newer commit"; exit 0; }
+          jobs=$(gh api "repos/$GH_REPO/actions/runs/$RUN/attempts/$ATTEMPT/jobs?per_page=100" -q '.jobs[] | select(.conclusion == "cancelled") | .id')
+          for job in $jobs; do
+            annotations=$(gh api "repos/$GH_REPO/check-runs/$job/annotations" -q '.[].message')
+            if grep -q 'was not acquired by Runner' <<< "$annotations"; then
+              echo "job $job never got a runner: re-running the failed jobs of run $RUN"
+              gh run rerun "$RUN" --failed
+              exit 0
+            fi
+          done
+          echo "no job without a runner: nothing to re-run"
