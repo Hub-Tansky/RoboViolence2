@@ -156,7 +156,7 @@ void NewMapDialog::update(float delay)
 	if(subDialog != 0)
 	{
 		//subDialog->update(delay);
-		if(subDialog->state == StateYes)
+		if(subDialog->state == StateYes || subDialog->state == StateOK) // OK: the name message boxes
 		{
 			menuManager.hideDialog();
 			delete subDialog;
@@ -258,6 +258,15 @@ void NewMapDialog::Validate(CControl * control)
 
 void NewMapDialog::OnOk()
 {
+	txt_mapName->text.resize(15);
+	if (txt_mapName->text != "" && !bv2::isMapName(txt_mapName->text.s))
+	{
+		subDialog = new MessageDialog(dialogRoot->font, ButtonsOK, "Invalid map name!",
+			"Use letters, digits, _ - and spaces inside.",
+			"Other players can't download other names.");
+		state = StateNothing;
+		return;
+	}
 	CString fileName("%s", bv2::mapFileForRead(txt_mapName->text.s).c_str());
 	FileIO f(fileName, "rb");
 	if(!f.isValid())
@@ -572,6 +581,15 @@ void SaveAsMapDialog::OnOk()
 		state = StateNothing;
 		closeAfterSub = false;
 		subDialog = new MessageDialog(dialogRoot->font, ButtonsOK, "Error!", "You forgot to enter the file name.");
+		return;
+	}
+	if(!bv2::isMapName(txt_mapName->text.s))
+	{
+		state = StateNothing;
+		closeAfterSub = false;
+		subDialog = new MessageDialog(dialogRoot->font, ButtonsOK, "Invalid map name!",
+			"Use letters, digits, _ - and spaces inside.",
+			"Other players can't download other names.");
 		return;
 	}
 	FileIO file(CString("%s", bv2::mapFileForRead(txt_mapName->text.s).c_str()), "rb");

@@ -800,7 +800,7 @@ void Editor2::Click(CControl * control)
 	{
 		if(isDirty)
 		{
-			if(map->mapName.len() > 0)
+			if(bv2::isMapName(map->mapName.s))
 			{
 				Save(map->mapName);
 			}
