@@ -272,7 +272,7 @@ endif()
 
 # Phase T7: screenshots against tests/golden/*.png (screenshots.py; Xvfb, so Linux only: goldens are Mesa llvmpipe frames)
 if(TARGET bv2 AND ROBOVIOLENCE2_XVFB AND NOT APPLE)
-  foreach(shot main-menu options scoreboard appearance)
+  foreach(shot main-menu options scoreboard appearance desktop)
     add_test(NAME screenshot_${shot} COMMAND ${Python3_EXECUTABLE} -B ${CMAKE_CURRENT_SOURCE_DIR}/screenshots.py $<TARGET_FILE:bv2> "${BV2_TEST_SCRATCH}/screenshots" ${shot})
     set_tests_properties(screenshot_${shot} PROPERTIES TIMEOUT 180 RESOURCE_LOCK bv2_server_port)
   endforeach()
