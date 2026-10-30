@@ -14,6 +14,11 @@ target_include_directories(test_view_geometry PRIVATE ${CMAKE_SOURCE_DIR}/game/s
 bv2_target_defaults(test_view_geometry)
 add_test(NAME view_geometry COMMAND test_view_geometry)
 
+add_executable(test_spawn_overlay test_spawn_overlay.cpp)
+target_include_directories(test_spawn_overlay PRIVATE ${CMAKE_SOURCE_DIR}/game/src)
+bv2_target_defaults(test_spawn_overlay)
+add_test(NAME spawn_overlay COMMAND test_spawn_overlay)
+
 add_executable(test_config test_config.cpp)
 target_link_libraries(test_config PRIVATE zeven_core)
 bv2_target_defaults(test_config)

@@ -19,6 +19,7 @@
 
 #include "Map.h"
 #include "Game.h"
+#include "SpawnOverlay.h"
 
 
 #ifndef CONSOLE
@@ -304,56 +305,24 @@ void Map::renderGround()
 				glEnd();
 			}
 		}
-		float currentRedDist = 0;
-		float farthestRedSpawn = 0;
-		float currentBlueDist = 0;
-		float farthestBlueSpawn = 0;
-		for (int i = 0; i < (int)dm_spawns.size(); i++)
-		{//draw projected spawn
-			int dist = 1000000;
-			for (int j = 0; j < (int)blue_spawns.size(); j++)
-			{
-				if(distanceSquared(dm_spawns[i],blue_spawns[j]) < dist)
-					dist = (int)distanceSquared(dm_spawns[i],blue_spawns[j]);
-			}
-			if(dist > currentRedDist)
-			{
-				currentRedDist = (float)dist;
-				farthestRedSpawn = (float)i;
-			}
-			dist = 1000000;
-			for (int j = 0; j < (int)red_spawns.size(); j++)
-			{
-				if(distanceSquared(dm_spawns[i],red_spawns[j]) < dist)
-					dist = (int)distanceSquared(dm_spawns[i],red_spawns[j]);
-			}
-			if(dist > currentBlueDist)
-			{
-				currentBlueDist = (float)dist;
-				farthestBlueSpawn = (float)i;
-			}
-		}
-		// Lines from the farthest DM spawn to each team spawn: none without a DM spawn (dm_spawns[0] would read null)
-		for(int i = 0; !dm_spawns.empty() && i < (int)blue_spawns.size(); i++)
+		// A line from the DM spawn farthest from the blue spawns to each blue spawn (red lines), and the same for red
+		int fromBlue = spawns::farthestFrom(dm_spawns, blue_spawns);
+		int fromRed = spawns::farthestFrom(dm_spawns, red_spawns);
+		glLineWidth(2);
+		for (int i = 0; fromBlue >= 0 && i < (int)blue_spawns.size(); i++)
 		{
 			glColor3f(1.0,0.0,0.0);
-			glLineWidth(2);
-			glBegin(GL_LINE_LOOP);
-			{
-				glVertex2f(dm_spawns[(int)farthestRedSpawn][0],dm_spawns[(int)farthestRedSpawn][1]);
+			glBegin(GL_LINES);
+				glVertex2f(dm_spawns[fromBlue][0],dm_spawns[fromBlue][1]);
 				glVertex2f(blue_spawns[i][0],blue_spawns[i][1]);
-			}
 			glEnd();
 		}
-		for(int i = 0; !dm_spawns.empty() && i < (int)red_spawns.size(); i++)
+		for (int i = 0; fromRed >= 0 && i < (int)red_spawns.size(); i++)
 		{
 			glColor3f(0.0,0.0,1.0);
-			glLineWidth(2);
-			glBegin(GL_LINE_LOOP);
-			{
-				glVertex2f(dm_spawns[(int)farthestBlueSpawn][0],dm_spawns[(int)farthestBlueSpawn][1]);
+			glBegin(GL_LINES);
+				glVertex2f(dm_spawns[fromRed][0],dm_spawns[fromRed][1]);
 				glVertex2f(red_spawns[i][0],red_spawns[i][1]);
-			}
 			glEnd();
 		}
 	}
