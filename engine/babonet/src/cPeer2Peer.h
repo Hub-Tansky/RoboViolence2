@@ -40,7 +40,6 @@ class cPeer2Peer
 private:
 
 	int				PrepareSockets();			//prepare les sockets par defaut
-	char*			GetBroadcastAdress();		//retourne le Broadcast adress selon le subnet mask
 
 public:
 
