@@ -612,7 +612,9 @@ COption::COption(CControl * in_parent, CControl * in_alignTo)
 		txt_dataDir = new CControl(instance, CVector2i(10,10), CVector2i(480,25), dataDirShown.c_str(), this, "EDIT", label1, CONTROL_SNAP_RIGHT);
 		txt_dataDir->SetMaxCarac(255);
 		label1 = new CControl(instance, CVector2i(20,10), CVector2i(200,25),"", this, "LABEL", label1, CONTROL_SNAP_BOTTOM);
-		lbl_dataDirStatus = new CControl(instance, CVector2i(10,10), CVector2i(480,25),"Restart Robo Violence 2 to apply a change.", this, "LABEL", label1, CONTROL_SNAP_RIGHT);
+		lbl_dataDirStatus = new CControl(instance, CVector2i(10,10), CVector2i(480,25),
+			bv2::dataFromEnv() ? "BV2_DATA_DIR is set and wins over this field." : "Restart Robo Violence 2 to apply a change.",
+			this, "LABEL", label1, CONTROL_SNAP_RIGHT);
 
 	//--- FINAL SEPARATOR
 	separator = new CControl(instance, CVector2i(10,20), CVector2i(200,25),"", this, "SEPARATOR",label1, CONTROL_SNAP_BOTTOM, 15);
@@ -823,12 +825,13 @@ void COption::Validate(CControl * control)
 		std::string text = txt_dataDir->text.s;
 		if (text == dataDirShown)
 			return; // the field also validates when it loses focus: only a change is saved
-		static const char * const status[] = { "Placeholders from the next start.",
-			"Saved. Restart Robo Violence 2 to use it.", "No BV2 data there (main/textures). Not saved." };
-		bv2::DataDirField saved = bv2::saveDataDirField(text);
-		lbl_dataDirStatus->text = status[(int)saved];
-		if (saved != bv2::DataDirField::NoData)
-			dataDirShown = text;
+		switch (bv2::saveDataDirField(text))
+		{
+		case bv2::DataDirField::Placeholders: lbl_dataDirStatus->text = "Placeholders from the next start."; break;
+		case bv2::DataDirField::Saved: lbl_dataDirStatus->text = "Saved. Restart Robo Violence 2 to use it."; break;
+		case bv2::DataDirField::NoData: lbl_dataDirStatus->text = "No BV2 data there (main/textures). Not saved."; return;
+		}
+		dataDirShown = text;
 		return;
 	}
 

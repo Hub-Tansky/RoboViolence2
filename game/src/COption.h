@@ -122,12 +122,12 @@ public:
 	CControl * txt_qMsg10;
 	CControl * chk_qMsg10;
 	CControl * key_qMsg10;
+#endif
 
 	// Game assets (ADR 0041)
 	CControl * txt_dataDir;
 	CControl * lbl_dataDirStatus;
 	std::string dataDirShown; // the field's text as last saved, or at open
-#endif
 public:
 	COption(CControl * in_parent, CControl * in_alignTo);
 	virtual ~COption();

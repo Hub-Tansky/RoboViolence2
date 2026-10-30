@@ -17,5 +17,6 @@
 
 ## Consequences
 - The field's text goes through the game's Latin-1 text input: a path with characters outside Latin-1 can't be typed or pasted; such players use `BV2_DATA_DIR` or a path without them.
+- With `BV2_DATA_DIR` set, the field shows that folder and says the variable wins; saving still writes `data-dir.txt` for runs without it.
 - A player who chose placeholders and later unzips BV2 data is not switched to it automatically; Options is the way.
 - Rejected: an OS folder dialog in Options (the owner asked for the simplest field); applying the folder without a restart (reloading every texture, model, sound and map).

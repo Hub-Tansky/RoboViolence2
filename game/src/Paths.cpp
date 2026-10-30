@@ -195,6 +195,17 @@ namespace
 		if (!v.empty())
 			dksvarSetTransient(varName, v.c_str());
 	}
+
+	const char * const PLACEHOLDERS = "placeholders"; // data-dir.txt's line for the placeholders choice
+
+	// What data-dir.txt holds: a folder, or PLACEHOLDERS
+	std::string savedLine()
+	{
+		std::ifstream in(fs::path(g_prefDir) / "data-dir.txt");
+		std::string line;
+		std::getline(in, line);
+		return line;
+	}
 }
 
 namespace bv2
@@ -252,17 +263,6 @@ namespace bv2
 		return root.empty() ? std::string() : rootString(root);
 	}
 
-	const char * const PLACEHOLDERS = "placeholders"; // data-dir.txt's line for the placeholders choice
-
-	// What data-dir.txt holds: a folder, or PLACEHOLDERS
-	static std::string savedLine()
-	{
-		std::ifstream in(fs::path(g_prefDir) / "data-dir.txt");
-		std::string line;
-		std::getline(in, line);
-		return line;
-	}
-
 	std::string savedDataDir()
 	{
 		return findDataIn(savedLine());
@@ -299,13 +299,13 @@ namespace bv2
 
 	StartData startDataDir()
 	{
-		StartData start = { savedDataDir(), false };
-		if (start.dir.empty() && !placeholdersSaved())
-		{
-			start.dir = detectDataDir();
-			start.ask = start.dir.empty();
-		}
-		return start;
+		std::string line = savedLine();
+		if (line == PLACEHOLDERS)
+			return StartData{ "", false };
+		std::string dir = findDataIn(line);
+		if (dir.empty())
+			dir = detectDataDir();
+		return StartData{ dir, dir.empty() };
 	}
 
 	const std::string & originalDataDir() { return g_originalDataDir; }
