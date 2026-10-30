@@ -1,0 +1,22 @@
+# 0043: A new player starts fullscreen at the desktop resolution, on the Game Browser tab
+
+- Status: Accepted
+- Date: 2026-10-30
+- Affects: `config/bv2.example.cfg`, `r_resolution` in `game/src/GameVar.cpp`, `dkwInit` in `engine/zeven/src/dkw.cpp`, the resolution list in `game/src/COption.cpp`, the first tab in `game/src/CMainTab.cpp`; owner request in the project thread "Set game startup defaults" (2026-10-30), which is the [GUI] approval (ADR 0010)
+
+## Context
+- The game's built-in default is fullscreen, but the shipped `bv2.example.cfg` (the first config layer, ADR 0007) said `r_fullScreen false` and `r_resolution 1024 768`, so every new player on Windows, macOS and Linux got a small window.
+- None of the fixed resolutions in Options matches most current screens, and an exclusive mode switch to a 4:3 or 16:10 mode on a 16:9 or Retina screen blurs or letterboxes the game.
+- The menu opened on News, a hard-coded post (PR #106); players come to find a game.
+
+## Decision
+- `r_resolution 0 0` means the desktop's size. `dkwInit` then creates the window at the primary display's desktop mode (in screen coordinates, so HiDPI gets its full pixel count) and, in fullscreen, sets no display mode: fullscreen without a mode switch. Windowed with `0 0` opens maximized.
+- `bv2.example.cfg` and the built-in defaults are now `r_fullScreen true` and `r_resolution 0 0`.
+- Options lists "Desktop" first in both resolution lists; an unknown saved size shows as Desktop.
+- The main menu opens on the Game Browser and requests the game list as clicking its button does.
+
+## Consequences
+- Only new players get the change: `bv2.cfg` saves every variable, so an existing config keeps its saved `r_fullScreen` and `r_resolution`; a player can't be told apart from one who chose windowed. To get the new defaults, tick Full screen and pick Desktop in Options, or delete `bv2.cfg`.
+- `r_refreshRate` only applies to a fixed resolution in fullscreen.
+- Test clients (`tests/autotest_client.py`, the playtest agent) pin `r_resolution 1024 768` windowed, so the screenshot goldens keep their size; the main-menu golden now shows the Game Browser, the options golden the Desktop row.
+- Rejected: a first-run-only switch (a marker file) that would also move existing players; we can't tell their choice from the old default.

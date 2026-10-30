@@ -366,6 +366,17 @@ int dkwInit(int width, int height, int colorDepth, char* mTitle, CMainLoopInterf
 	// Windows are sized in screen coordinates; the game works in pixels. Create at the requested size,
 	// then correct it once the display's pixel density is known.
 	SDL_WindowFlags flags = SDL_WINDOW_OPENGL | SDL_WINDOW_HIGH_PIXEL_DENSITY;
+	// No size asked (0 0): the desktop's size, already in screen coordinates; fullscreen keeps the desktop mode,
+	// a window opens maximized
+	bool desktopSize = width <= 0 || height <= 0;
+	if (desktopSize)
+	{
+		const SDL_DisplayMode* desktop = SDL_GetDesktopDisplayMode(SDL_GetPrimaryDisplay());
+		width = desktop ? desktop->w : 1280;
+		height = desktop ? desktop->h : 800;
+		if (!fullScreen)
+			flags |= SDL_WINDOW_MAXIMIZED;
+	}
 	g_window = SDL_CreateWindow(g_title.c_str(), width, height, flags);
 	if (!g_window)
 	{
@@ -377,11 +388,11 @@ int dkwInit(int width, int height, int colorDepth, char* mTitle, CMainLoopInterf
 	{
 		SDL_DisplayID display = SDL_GetDisplayForWindow(g_window);
 		SDL_DisplayMode mode;
-		if (SDL_GetClosestFullscreenDisplayMode(display, width, height, refreshRate > 0 ? (float)refreshRate : 0.0f, true, &mode))
+		if (!desktopSize && SDL_GetClosestFullscreenDisplayMode(display, width, height, refreshRate > 0 ? (float)refreshRate : 0.0f, true, &mode))
 			SDL_SetWindowFullscreenMode(g_window, &mode);
 		SDL_SetWindowFullscreen(g_window, true);
 	}
-	else
+	else if (!desktopSize)
 	{
 		float density = SDL_GetWindowPixelDensity(g_window);
 		if (density > 1.0f)

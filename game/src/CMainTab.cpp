@@ -102,12 +102,13 @@ CMainTab::CMainTab(CControl * in_parent)
 	btn_quit = new CControl(parent, CVector2i(32,32),CVector2i(48,25),"\x4X",this,"BUTTON", btn_credits, CONTROL_SNAP_RIGHT);
 	btn_quit->toolTips = "Quit the game. :(";
 
+	// The menu opens on the Game Browser and lists games right away, as clicking its button does
 	//userLogin->setVisible(true);
-	news->setVisible(true);
+	news->setVisible(false);
 	//btn_userLogin->enable = false;
-	btn_news->enable = false;
+	btn_browser->enable = false;
 	profile->setVisible(false);
-	browser->setVisible(false);
+	browser->setVisible(true);
 	//friends->setVisible(false);
 	host->setVisible(false);
 	editor->setVisible(false);
@@ -115,10 +116,10 @@ CMainTab::CMainTab(CControl * in_parent)
 	option->setVisible(false);
 
 	//current = userLogin;
-	current = news;
-	lastButtonPress = btn_news;//btn_userLogin;
+	current = browser;
+	lastButtonPress = btn_browser;//btn_userLogin;
 
-	timeBrowseDelay = -1;
+	timeBrowseDelay = 2;
 }
 
 
