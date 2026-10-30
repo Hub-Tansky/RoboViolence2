@@ -248,12 +248,23 @@ namespace bv2
 		return root.empty() ? std::string() : rootString(root);
 	}
 
-	std::string savedDataDir()
+	// What data-dir.txt holds: a folder, or PLACEHOLDERS
+	static std::string savedLine()
 	{
 		std::ifstream in(fs::path(g_prefDir) / "data-dir.txt");
 		std::string line;
 		std::getline(in, line);
-		return findDataIn(line);
+		return line;
+	}
+
+	std::string savedDataDir()
+	{
+		return findDataIn(savedLine());
+	}
+
+	bool placeholdersSaved()
+	{
+		return savedLine() == PLACEHOLDERS;
 	}
 
 	void saveDataDir(const std::string & dir)

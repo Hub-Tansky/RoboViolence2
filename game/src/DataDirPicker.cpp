@@ -189,7 +189,9 @@ namespace
 			next = step == STEP_CANCELLED ? firstRunBox() : retryBox(error);
 		}
 		if (next == BROWSER)
-			SDL_OpenURL(bv2::BROWSER_ZIP_URL);
+			SDL_OpenURL(bv2::BROWSER_ZIP_URL); // asked again next start, unless the unzipped data is found
+		else
+			bv2::saveDataDir(bv2::PLACEHOLDERS); // Options > Game assets is the way back (ADR 0041)
 		return "";
 	}
 }
@@ -211,7 +213,7 @@ namespace bv2
 			return;
 		}
 		dir = detectDataDir();
-		if (dir.empty() && SDL_Init(SDL_INIT_VIDEO))
+		if (dir.empty() && !placeholdersSaved() && SDL_Init(SDL_INIT_VIDEO))
 		{
 			dir = askDataDir();
 			SDL_QuitSubSystem(SDL_INIT_VIDEO);

@@ -305,6 +305,14 @@ namespace
 				case SDL_SCANCODE_TAB: g_mainLoop->textWrite(9); break;
 				case SDL_SCANCODE_RETURN:
 				case SDL_SCANCODE_KP_ENTER: g_mainLoop->textWrite(13); break;
+				case SDL_SCANCODE_V: // paste: Ctrl+V, Cmd+V on macOS
+					if (e.key.mod & (SDL_KMOD_CTRL | SDL_KMOD_GUI))
+					{
+						char * clip = SDL_GetClipboardText();
+						textFromUtf8(clip);
+						SDL_free(clip);
+					}
+					break;
 				default: break;
 				}
 			}

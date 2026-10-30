@@ -1,6 +1,6 @@
 # 0040: The first-run box downloads the original BV2 data with the OS's own curl and unzip tools
 
-- Status: Accepted
+- Status: Accepted; amended by [0041](0041-game-assets-option-remembers-placeholders.md)
 - Date: 2026-10-29
 - Affects: `game/src/DataDirPicker.cpp`, `game/src/DataDownload.cpp`, `bv2::originalDataDir` and `detectDataDir` in `game/src/Paths.cpp`, `packaging/make_deb.py`; Project item "First-run: one-click download of original BV2 data" (owner-approved design, 2026-10-29); supersedes [0033](0033-first-run-dialog-recommends-bv2-zip.md), amends [0016](0016-player-data-lookup-and-package-content.md)
 

@@ -85,8 +85,11 @@ int main(int argc, char ** argv)
 	}
 
 	check(bv2::savedDataDir().empty(), "nothing saved yet");
+	check(!bv2::placeholdersSaved(), "no placeholders choice yet");
+	bv2::saveDataDir(bv2::PLACEHOLDERS);
+	check(bv2::placeholdersSaved() && bv2::savedDataDir().empty(), "the placeholders choice is remembered (ADR 0041)");
 	bv2::saveDataDir(root(content));
-	check(bv2::savedDataDir() == root(content), "saved folder read back");
+	check(bv2::savedDataDir() == root(content) && !bv2::placeholdersSaved(), "saved folder read back");
 
 	check(bv2::setDataRoot(root(content)) && bv2::dataRoot() == root(content), "setDataRoot");
 	check(fs::equivalent(fs::current_path(), content), "setDataRoot changes into it");

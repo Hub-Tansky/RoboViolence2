@@ -57,7 +57,11 @@ namespace bv2
 
 	// The player's data folder saved in prefDir()/data-dir.txt; "" when unset or it no longer holds data
 	std::string savedDataDir();
+	// Saves dir, or PLACEHOLDERS for the player's choice to play without BV2 data (ADR 0041)
 	void saveDataDir(const std::string & dir);
+	const char * const PLACEHOLDERS = "placeholders";
+	// True when data-dir.txt holds PLACEHOLDERS
+	bool placeholdersSaved();
 
 	// Where the first-run download installs the original data, without a trailing '/': "original" beside prefDir()
 	// (%APPDATA%/BaboViolent2/original on Windows), or inside it when BV2_PREF_DIR overrides it

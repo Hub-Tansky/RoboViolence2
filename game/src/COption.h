@@ -121,6 +121,10 @@ public:
 	CControl * txt_qMsg10;
 	CControl * chk_qMsg10;
 	CControl * key_qMsg10;
+
+	// Game assets (ADR 0041)
+	CControl * txt_dataDir;
+	CControl * lbl_dataDirStatus;
 #endif
 public:
 	COption(CControl * in_parent, CControl * in_alignTo);
