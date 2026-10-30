@@ -22,7 +22,7 @@ Robo Violence 2: unofficial fork of BaboViolent 2, a top-down multiplayer shoote
 | Website | roboviolence.com is built and deployed from [Hub-Tansky/rv2-website](https://github.com/Hub-Tansky/rv2-website) ([ADR 0036](docs/decisions/0036-website-in-rv2-website-repository.md)); its tests read the release file names from `build.yml`. |
 | Hosting | Server images from `packaging/docker/Dockerfile` (GHCR on `main`), runbook [docs/ops/runbook.md](docs/ops/runbook.md). |
 | Known defects | [docs/analysis/KEY_QUESTIONS.md](https://github.com/Hub-Tansky/RoboViolence2/blob/fc0aff7c5aa946406c7c110e8e7c2d972a7daeb8/docs/analysis/KEY_QUESTIONS.md). |
-| Decisions | [docs/decisions/README.md](docs/decisions/README.md): 0001 Ninja, 0002 libcurl compiled out, 0003 OpenGL 2.1 kept, 0004 project name (superseded by 0008), 0005 `main/` data root, 0006 platform layer, 0007 data root, pref dir and config layers, 0008 display name "Robo Violence 2", 0009 internal renaming, 0010 BV2 asset compatibility and GUI freeze, 0011 gettext PO translations, 0012 Windows 10 22H2 minimum, 0013 rulesets, 0014 libsodium HMAC, 0015 admin HTTP API, 0016 player data lookup and package content, 0017 playtest pull agent, 0018 staging pull deploy, 0019 in-game name and fork credits, 0020 package and release format, 0021 one-argument CString is text, 0022 advertised server address, 0023 step review subagent in the repo (superseded by 0037), 0024 GitHub Project is the backlog, 0025 client autotest mode, 0026 screenshot goldens, 0029 static website (moved to rv2-website), 0033 first-run data dialog recommends the BV2 zip (superseded by 0040), 0034 player data retention and privacy policy, 0035 website Tailwind and agent files (moved to rv2-website), 0036 website in rv2-website, 0037 review rubric single repo copy, 0038 dead account pages hidden, admin and ban secrets hardened, 0039 Widescreen (Stretch) shows more map, 0040 first-run download of the original data, 0041 Options "Game assets" and remembered placeholders. |
+| Decisions | [docs/decisions/README.md](docs/decisions/README.md): 0001 Ninja, 0002 libcurl compiled out, 0003 OpenGL 2.1 kept, 0004 project name (superseded by 0008), 0005 `main/` data root, 0006 platform layer, 0007 data root, pref dir and config layers, 0008 display name "Robo Violence 2", 0009 internal renaming, 0010 BV2 asset compatibility and GUI freeze, 0011 gettext PO translations, 0012 Windows 10 22H2 minimum, 0013 rulesets, 0014 libsodium HMAC, 0015 admin HTTP API, 0016 player data lookup and package content, 0017 playtest pull agent, 0018 staging pull deploy, 0019 in-game name and fork credits, 0020 package and release format, 0021 one-argument CString is text, 0022 advertised server address, 0023 step review subagent in the repo (superseded by 0037), 0024 GitHub Project is the backlog, 0025 client autotest mode, 0026 screenshot goldens, 0029 static website (moved to rv2-website), 0033 first-run data dialog recommends the BV2 zip (superseded by 0040), 0034 player data retention and privacy policy, 0035 website Tailwind and agent files (moved to rv2-website), 0036 website in rv2-website, 0037 review rubric single repo copy, 0038 dead account pages hidden, admin and ban secrets hardened, 0039 Widescreen (Stretch) shows more map, 0040 first-run download of the original data, 0042 Options "Game assets" and remembered placeholders. |
 
 ### Open items
 
@@ -170,7 +170,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/test_player_privacy.cpp` | The player info relayed to everyone and the player list a new client gets carry no IP; the server keeps it (ADR 0034) |
 | `tests/test_join_timeout.cpp` | A connection that never answers the join handshake loses its slot after `Server::JOIN_TIMEOUT`; a client past the handshake keeps it while loading |
 | `tests/test_data_download.cpp` | ADR 0040: `firstMismatch` names a wrong or missing file; `replaceDir` keeps the old install when the move fails and replaces it otherwise, at `originalDataDir`, which auto-detect then finds; the browser zip's name is one auto-detect knows; the extract argv and the hash paths agree on where `main/` lands and the zip's folder names the pinned commit; the generated list holds the 324 `Content/main` hashes (ctest `data_download`, client builds) |
-| `tests/test_paths.cpp` | Phase C step 1: package vs data root, `contentFile`, `findDataIn` (upstream layout, `main/` itself, Windows Extract All nesting), saved folder, the Options field (quoted paths, refused folders) and the start order with the placeholders choice (ADR 0041), auto-detect, `BV2_DATA_DIR`; the built-in master list vs `bv2.cfg`, `BV2_MASTER_SERVERS` and `none` (ADR 0028) |
+| `tests/test_paths.cpp` | Phase C step 1: package vs data root, `contentFile`, `findDataIn` (upstream layout, `main/` itself, Windows Extract All nesting), saved folder, the Options field (quoted paths, refused folders) and the start order with the placeholders choice (ADR 0042), auto-detect, `BV2_DATA_DIR`; the built-in master list vs `bv2.cfg`, `BV2_MASTER_SERVERS` and `none` (ADR 0028) |
 | `tests/test_osv_vcpkg.py` | Phase C step 4: `tools/osv-vcpkg.py` maps SPDX download locations to upstream repository and tag (offline) |
 | `tests/test_packet_hygiene.cpp` | Step 4 checks: sender binding (Q-S1), index ranges with controls (Q-S2), map names (Q-S6), skin and sound relay (Q-S7), `SV_CHANGE` filter (Q-S4), the handshake gate, `checkPacket` per message type and size, the client's `checkServerMessage` on values the server sends |
 | `tests/test_retention.cpp` | `BanList`: binary banlist moved once, saved on every change, line format, matching by age without dropping, expired bans dropped on load; admin log lines older than 90 days dropped (ADR 0034) |
@@ -319,7 +319,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/decisions/0038-dead-accounts-hidden-admin-and-ban-secrets-hardened.md` | ADR: dead account pages hidden; 15-character admin and master ban secrets, per-IP admin lockout, HMAC-signed master bans |
 | `docs/decisions/0039-widescreen-stretch-shows-more-map.md` | ADR: the gameplay, scope and intro projections use their viewport's aspect; Stretch shows more map sideways (Hor+), Bars stays 4:3 |
 | `docs/decisions/0040-first-run-downloads-original-data.md` | ADR: the first-run box downloads the original data of a pinned upstream commit with the OS's curl and tar/unzip, checks the hashes and installs it in `original` beside the pref dir; supersedes 0033 |
-| `docs/decisions/0041-game-assets-option-remembers-placeholders.md` | ADR: Options "Game assets" text field sets the BV2 data folder, "Use placeholders" is remembered and wins over auto-detect, Ctrl/Cmd+V paste, the Extract All lookup candidate; amends 0016 and 0040 |
+| `docs/decisions/0042-game-assets-option-remembers-placeholders.md` | ADR: Options "Game assets" text field sets the BV2 data folder, "Use placeholders" is remembered and wins over auto-detect, Ctrl/Cmd+V paste, the Extract All lookup candidate; amends 0016 and 0040 |
 | `docs/decisions/README.md` | ADR format and index |
 
 ### `docs/ops`
@@ -493,7 +493,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `engine/zeven/src/dkt.cpp` | dkt: texture loading (TGA) and binding |
 | `engine/zeven/src/dkt_console.cpp` | No-op dkt for the headless server |
 | `engine/zeven/src/dkti.h` | Internal header of the matching dk module |
-| `engine/zeven/src/dkw.cpp` | dkw: window creation and events, window icon, Ctrl/Cmd+V paste into text fields (ADR 0041) |
+| `engine/zeven/src/dkw.cpp` | dkw: window creation and events, window icon, Ctrl/Cmd+V paste into text fields (ADR 0042) |
 
 ### `engine/zeven/third_party/glad`
 
@@ -580,7 +580,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/CMeshBuilder.h` | Mesh builder |
 | `game/src/CNews.cpp` | News feed UI |
 | `game/src/CNews.h` | News feed UI |
-| `game/src/COption.cpp` | Options UI; "Game assets" field saves the BV2 data folder or placeholders (ADR 0041) |
+| `game/src/COption.cpp` | Options UI; "Game assets" field saves the BV2 data folder or placeholders (ADR 0042) |
 | `game/src/COption.h` | Options UI |
 | `game/src/CPanel.h` | UI panel container |
 | `game/src/CPathNode.cpp` | Path node for A* |

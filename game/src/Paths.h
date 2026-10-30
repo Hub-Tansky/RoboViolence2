@@ -58,19 +58,19 @@ namespace bv2
 	// The player's data folder saved in prefDir()/data-dir.txt; "" when unset or it no longer holds data
 	std::string savedDataDir();
 	void saveDataDir(const std::string & dir);
-	// The player's choice to play without BV2 data, saved in data-dir.txt instead of a folder (ADR 0041)
+	// The player's choice to play without BV2 data, saved in data-dir.txt instead of a folder (ADR 0042)
 	void savePlaceholdersChoice();
 	bool placeholdersSaved();
 
 	// The data root when it is the player's BV2 data, "" when the game runs on the package's placeholders
 	std::string playerDataDir();
 
-	// Options > Game assets (ADR 0041): empty text saves the placeholders choice, a folder with BV2 data is saved,
+	// Options > Game assets (ADR 0042): empty text saves the placeholders choice, a folder with BV2 data is saved,
 	// anything else is not
 	enum class DataDirField { Placeholders, Saved, NoData };
 	DataDirField saveDataDirField(const std::string & text);
 
-	// What the client starts on, BV2_DATA_DIR and --placeholders aside (ADR 0041): the saved folder; nothing when
+	// What the client starts on, BV2_DATA_DIR and --placeholders aside (ADR 0042): the saved folder; nothing when
 	// placeholders were chosen; else a detected folder; else nothing, and ask is true (the first-run box)
 	struct StartData
 	{

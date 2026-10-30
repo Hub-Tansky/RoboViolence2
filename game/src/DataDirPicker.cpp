@@ -191,7 +191,7 @@ namespace
 		if (next == BROWSER)
 			SDL_OpenURL(bv2::BROWSER_ZIP_URL); // asked again next start, unless the unzipped data is found
 		else
-			bv2::savePlaceholdersChoice(); // Options > Game assets is the way back (ADR 0041)
+			bv2::savePlaceholdersChoice(); // Options > Game assets is the way back (ADR 0042)
 		return "";
 	}
 }

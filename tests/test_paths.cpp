@@ -1,5 +1,5 @@
 // Phase C step 1 (ADR 0016): package root vs data root, contentFile, findDataIn, the saved folder and auto-detect;
-// the Options field and the start order with the placeholders choice (ADR 0041).
+// the Options field and the start order with the placeholders choice (ADR 0042).
 #include "Paths.h"
 #include "dksvar.h"
 
@@ -89,7 +89,7 @@ int main(int argc, char ** argv)
 	check(bv2::startDataDir().dir == root(content) && !bv2::startDataDir().ask, "nothing saved: start on detected data");
 	check(bv2::playerDataDir().empty(), "on the package's placeholders there is no player data folder");
 
-	// Options > Game assets (ADR 0041)
+	// Options > Game assets (ADR 0042)
 	check(bv2::saveDataDirField("") == bv2::DataDirField::Placeholders && bv2::placeholdersSaved(), "empty field saves placeholders");
 	check(bv2::startDataDir().dir.empty() && !bv2::startDataDir().ask, "placeholders win over detected data, without the box");
 	check(bv2::saveDataDirField((base / "nowhere").string()) == bv2::DataDirField::NoData && bv2::placeholdersSaved(),

@@ -1,4 +1,4 @@
-# 0041: Options "Game assets" sets the BV2 data folder, and "Use placeholders" is remembered
+# 0042: Options "Game assets" sets the BV2 data folder, and "Use placeholders" is remembered
 
 - Status: Accepted
 - Date: 2026-10-29

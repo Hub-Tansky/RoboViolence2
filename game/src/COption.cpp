@@ -602,7 +602,7 @@ COption::COption(CControl * in_parent, CControl * in_alignTo)
 		key_qMsg10 = new CControl(instance, CVector2i(10,10), CVector2i(200, 25), keyManager.getKeyName(gameVar.k_qMsg10), this, "KEY", label1, CONTROL_SNAP_RIGHT);
 		key_qMsg10->selectedIndex = gameVar.k_qMsg10;
 
-	//--- GAME ASSETS (ADR 0041): the BV2 data folder, read before the window opens, so it applies on the next start
+	//--- GAME ASSETS (ADR 0042): the BV2 data folder, read before the window opens, so it applies on the next start
 	separator = new CControl(instance, CVector2i(10,20), CVector2i(200,25),"Game assets", this, "SEPARATOR", label1, CONTROL_SNAP_BOTTOM, 15);
 
 		label1 = new CControl(instance, CVector2i(20,10), CVector2i(200,25),"BV2 data folder:", this, "LABEL", separator, CONTROL_SNAP_BOTTOM, 15);
