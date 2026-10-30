@@ -191,7 +191,7 @@ namespace
 		if (next == BROWSER)
 			SDL_OpenURL(bv2::BROWSER_ZIP_URL); // asked again next start, unless the unzipped data is found
 		else
-			bv2::saveDataDir(bv2::PLACEHOLDERS); // Options > Game assets is the way back (ADR 0041)
+			bv2::savePlaceholdersChoice(); // Options > Game assets is the way back (ADR 0041)
 		return "";
 	}
 }
@@ -206,14 +206,9 @@ namespace bv2
 			if (std::strcmp(argv[i], "--placeholders") == 0)
 				return;
 
-		std::string dir = savedDataDir();
-		if (!dir.empty())
-		{
-			setDataRoot(dir);
-			return;
-		}
-		dir = detectDataDir();
-		if (dir.empty() && !placeholdersSaved() && SDL_Init(SDL_INIT_VIDEO))
+		StartData start = startDataDir();
+		std::string dir = start.dir;
+		if (start.ask && SDL_Init(SDL_INIT_VIDEO))
 		{
 			dir = askDataDir();
 			SDL_QuitSubSystem(SDL_INIT_VIDEO);

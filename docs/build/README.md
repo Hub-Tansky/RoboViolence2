@@ -12,9 +12,9 @@ Pick your OS: [macOS](macos.md), [Linux](linux.md), [Windows](windows.md). Each 
 - Playing needs your own copy of the original BaboViolent 2 data: the folder that contains `main/` (with `maps/`, `textures/`, `sounds/`, `fonts/`). It is never in this repository or the packages. Building and the tests work without it.
 - The client finds it in this order ([ADR 0016](../decisions/0016-player-data-lookup-and-package-content.md)):
   1. `BV2_DATA_DIR` (the folder or its `main/`).
-  2. The folder saved on an earlier start (`data-dir.txt` in the pref dir).
+  2. The folder saved on an earlier start (`data-dir.txt` in the pref dir), or the saved placeholders choice, which skips steps 3 and 4.
   3. `original` beside the pref dir (installed by step 4), then `BaboViolent2-master` or `BaboViolent2` (the upstream repository, unzipped, also with the extra level Windows Extract All adds) in `Downloads`, `Desktop` or `Documents`; on Windows also `BaboViolent 2` or `BaboViolent2` in Program Files.
-  4. On first start, a box offers "Download and play": the OS's `curl` and `tar`/`unzip` fetch the upstream data, which is checked against `tools/original-assets.sha256` and saved ([ADR 0040](../decisions/0040-first-run-downloads-original-data.md)). "Use placeholders" is remembered ([ADR 0041](../decisions/0041-game-assets-option-remembers-placeholders.md)); `--placeholders` skips it for one run.
+  4. On first start, a box offers "Download and play": the OS's `curl` and `tar`/`unzip` fetch the upstream data, which is checked against `tools/original-assets.sha256` and saved ([ADR 0040](../decisions/0040-first-run-downloads-original-data.md)). "Use placeholders" is remembered, also over data found later ([ADR 0041](../decisions/0041-game-assets-option-remembers-placeholders.md)); `--placeholders` skips it for one run.
   5. Options → Game assets: paste a data folder (or empty for placeholders), press Enter, restart.
 - The game server reads only `BV2_DATA_DIR`: it loads its maps from there and sends missing maps to clients.
 - Launch scripts, language files and `bv2.example.cfg` always come from the package's own `main/`.

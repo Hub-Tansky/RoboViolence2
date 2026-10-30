@@ -52,16 +52,32 @@ namespace bv2
 
 	// The folder holding BV2 data (main/textures/) at dir, at its parent when dir is main/, at dir/Content, at
 	// dir/BaboViolent2/Content (the upstream repository) or one level deeper in a folder of dir's own name
-	// (Windows Extract All); "" when none
+	// (Windows Extract All); "" when none. Surrounding spaces and one pair of quotes ("Copy as path") are ignored.
 	std::string findDataIn(const std::string & dir);
 
 	// The player's data folder saved in prefDir()/data-dir.txt; "" when unset or it no longer holds data
 	std::string savedDataDir();
-	// Saves dir, or PLACEHOLDERS for the player's choice to play without BV2 data (ADR 0041)
 	void saveDataDir(const std::string & dir);
-	const char * const PLACEHOLDERS = "placeholders";
-	// True when data-dir.txt holds PLACEHOLDERS
+	// The player's choice to play without BV2 data, saved in data-dir.txt instead of a folder (ADR 0041)
+	void savePlaceholdersChoice();
 	bool placeholdersSaved();
+
+	// The data root when it is the player's BV2 data, "" when the game runs on the package's placeholders
+	std::string playerDataDir();
+
+	// Options > Game assets (ADR 0041): empty text saves the placeholders choice, a folder with BV2 data is saved,
+	// anything else is not
+	enum class DataDirField { Placeholders, Saved, NoData };
+	DataDirField saveDataDirField(const std::string & text);
+
+	// What the client starts on, BV2_DATA_DIR and --placeholders aside (ADR 0041): the saved folder; nothing when
+	// placeholders were chosen; else a detected folder; else nothing, and ask is true (the first-run box)
+	struct StartData
+	{
+		std::string dir;
+		bool ask;
+	};
+	StartData startDataDir();
 
 	// Where the first-run download installs the original data, without a trailing '/': "original" beside prefDir()
 	// (%APPDATA%/BaboViolent2/original on Windows), or inside it when BV2_PREF_DIR overrides it

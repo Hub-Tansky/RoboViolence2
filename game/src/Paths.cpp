@@ -90,8 +90,12 @@ namespace
 
 	// The first folder holding main/textures/ among dir, its parent when dir is main/, dir/Content,
 	// dir/BaboViolent2/Content (the upstream repository) and dir/<dir's name>/BaboViolent2/Content; "" when none
-	fs::path findRoot(const std::string & dir)
+	fs::path findRoot(std::string dir)
 	{
+		size_t first = dir.find_first_not_of(" \t"), last = dir.find_last_not_of(" \t");
+		dir = first == std::string::npos ? std::string() : dir.substr(first, last - first + 1);
+		if (dir.size() >= 2 && dir.front() == '"' && dir.back() == '"')
+			dir = dir.substr(1, dir.size() - 2); // Windows Explorer's "Copy as path"
 		if (dir.empty())
 			return fs::path();
 		fs::path p(dir);
@@ -248,6 +252,8 @@ namespace bv2
 		return root.empty() ? std::string() : rootString(root);
 	}
 
+	const char * const PLACEHOLDERS = "placeholders"; // data-dir.txt's line for the placeholders choice
+
 	// What data-dir.txt holds: a folder, or PLACEHOLDERS
 	static std::string savedLine()
 	{
@@ -262,15 +268,44 @@ namespace bv2
 		return findDataIn(savedLine());
 	}
 
-	bool placeholdersSaved()
-	{
-		return savedLine() == PLACEHOLDERS;
-	}
-
 	void saveDataDir(const std::string & dir)
 	{
 		std::ofstream out(fs::path(userFile("data-dir.txt")), std::ios::trunc);
 		out << dir << "\n";
+	}
+
+	void savePlaceholdersChoice() { saveDataDir(PLACEHOLDERS); }
+
+	bool placeholdersSaved() { return savedLine() == PLACEHOLDERS; }
+
+	std::string playerDataDir()
+	{
+		return dataRoot() != packageRoot() ? dataRoot() : std::string();
+	}
+
+	DataDirField saveDataDirField(const std::string & text)
+	{
+		if (text.empty())
+		{
+			savePlaceholdersChoice();
+			return DataDirField::Placeholders;
+		}
+		std::string data = findDataIn(text);
+		if (data.empty())
+			return DataDirField::NoData;
+		saveDataDir(data);
+		return DataDirField::Saved;
+	}
+
+	StartData startDataDir()
+	{
+		StartData start = { savedDataDir(), false };
+		if (start.dir.empty() && !placeholdersSaved())
+		{
+			start.dir = detectDataDir();
+			start.ask = start.dir.empty();
+		}
+		return start;
 	}
 
 	const std::string & originalDataDir() { return g_originalDataDir; }

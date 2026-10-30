@@ -608,8 +608,8 @@ COption::COption(CControl * in_parent, CControl * in_alignTo)
 		label1 = new CControl(instance, CVector2i(20,10), CVector2i(200,25),"BV2 data folder:", this, "LABEL", separator, CONTROL_SNAP_BOTTOM, 15);
 		label1->textAlign = CONTROL_TEXTALIGN_MIDDLERIGHT;
 		label1->toolTips = "Paste the folder with your original BaboViolent 2 data (it holds main/), then press Enter. Empty: placeholders.";
-		txt_dataDir = new CControl(instance, CVector2i(10,10), CVector2i(480,25),
-			bv2::dataRoot() != bv2::packageRoot() ? bv2::dataRoot().c_str() : "", this, "EDIT", label1, CONTROL_SNAP_RIGHT);
+		dataDirShown = bv2::playerDataDir();
+		txt_dataDir = new CControl(instance, CVector2i(10,10), CVector2i(480,25), dataDirShown.c_str(), this, "EDIT", label1, CONTROL_SNAP_RIGHT);
 		txt_dataDir->SetMaxCarac(255);
 		label1 = new CControl(instance, CVector2i(20,10), CVector2i(200,25),"", this, "LABEL", label1, CONTROL_SNAP_BOTTOM);
 		lbl_dataDirStatus = new CControl(instance, CVector2i(10,10), CVector2i(480,25),"Restart Robo Violence 2 to apply a change.", this, "LABEL", label1, CONTROL_SNAP_RIGHT);
@@ -820,15 +820,15 @@ void COption::Validate(CControl * control)
 
 	if (control == txt_dataDir)
 	{
-		std::string path = txt_dataDir->text.s;
-		std::string data = bv2::findDataIn(path);
-		if (path.empty())
-			bv2::saveDataDir(bv2::PLACEHOLDERS);
-		else if (!data.empty())
-			bv2::saveDataDir(data);
-		lbl_dataDirStatus->text = path.empty() ? "Placeholders from the next start."
-			: !data.empty() ? "Saved. Restart Robo Violence 2 to use it."
-			: "No BV2 data there (main/textures). Not saved.";
+		std::string text = txt_dataDir->text.s;
+		if (text == dataDirShown)
+			return; // the field also validates when it loses focus: only a change is saved
+		static const char * const status[] = { "Placeholders from the next start.",
+			"Saved. Restart Robo Violence 2 to use it.", "No BV2 data there (main/textures). Not saved." };
+		bv2::DataDirField saved = bv2::saveDataDirField(text);
+		lbl_dataDirStatus->text = status[(int)saved];
+		if (saved != bv2::DataDirField::NoData)
+			dataDirShown = text;
 		return;
 	}
 

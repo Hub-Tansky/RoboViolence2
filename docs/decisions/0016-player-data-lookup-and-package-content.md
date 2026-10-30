@@ -10,7 +10,7 @@
 
 ## Decision
 - Two roots: the **data root** (the player's BV2 data; the process `chdir`s into it, assets load as `main/...`) and the **package root** (the folder with the executable's own `main/`). `bv2::contentFile` reads launch scripts, `bv2.example.cfg` and a saved `languageFile` from the package when present; languages are picked from the package first, then the data root. `config/local/*.cfg` is read beside the package only.
-- One rule finds a data folder under a path, for `BV2_DATA_DIR`, the saved folder, auto-detect and the dialog: the first of the path, its parent when it is `main/`, `Content`, `BaboViolent2/Content` (the upstream repository) that holds `main/textures/`.
+- One rule finds a data folder under a path, for `BV2_DATA_DIR`, the saved folder, auto-detect and the dialog: the first of the path, its parent when it is `main/`, `Content`, `BaboViolent2/Content` (the upstream repository) and, since [0041](0041-game-assets-option-remembers-placeholders.md), `<name>/BaboViolent2/Content` (Windows Extract All) that holds `main/textures/`.
 - The client looks for data in this order: `BV2_DATA_DIR`, the saved folder (`<prefDir>/data-dir.txt`), the upstream repository unzipped in `Downloads`, `Desktop` or `Documents` (and `BaboViolent 2` in Program Files on Windows), then a first-run native message box and OS folder dialog (owner-approved **[GUI]**). A found or chosen folder is saved. `--placeholders` skips the lookup (CI smoke run).
 - The dedicated server reads only `BV2_DATA_DIR`; a saved or detected folder must not change test or container behaviour.
 

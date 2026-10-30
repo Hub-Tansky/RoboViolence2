@@ -1,4 +1,5 @@
-// Phase C step 1 (ADR 0016): package root vs data root, contentFile, findDataIn, the saved folder and auto-detect.
+// Phase C step 1 (ADR 0016): package root vs data root, contentFile, findDataIn, the saved folder and auto-detect;
+// the Options field and the start order with the placeholders choice (ADR 0041).
 #include "Paths.h"
 #include "dksvar.h"
 
@@ -84,15 +85,22 @@ int main(int argc, char ** argv)
 		fs::remove_all(home / "Desktop");
 	}
 
-	check(bv2::savedDataDir().empty(), "nothing saved yet");
-	check(!bv2::placeholdersSaved(), "no placeholders choice yet");
-	bv2::saveDataDir(bv2::PLACEHOLDERS);
-	check(bv2::placeholdersSaved() && bv2::savedDataDir().empty(), "the placeholders choice is remembered (ADR 0041)");
-	bv2::saveDataDir(root(content));
-	check(bv2::savedDataDir() == root(content) && !bv2::placeholdersSaved(), "saved folder read back");
+	check(bv2::savedDataDir().empty() && !bv2::placeholdersSaved(), "nothing saved yet");
+	check(bv2::startDataDir().dir == root(content) && !bv2::startDataDir().ask, "nothing saved: start on detected data");
+	check(bv2::playerDataDir().empty(), "on the package's placeholders there is no player data folder");
+
+	// Options > Game assets (ADR 0041)
+	check(bv2::saveDataDirField("") == bv2::DataDirField::Placeholders && bv2::placeholdersSaved(), "empty field saves placeholders");
+	check(bv2::startDataDir().dir.empty() && !bv2::startDataDir().ask, "placeholders win over detected data, without the box");
+	check(bv2::saveDataDirField((base / "nowhere").string()) == bv2::DataDirField::NoData && bv2::placeholdersSaved(),
+		"a folder without data is not saved");
+	const std::string copied = " \"" + (home / "Downloads" / "BaboViolent2-master").string() + "\" ";
+	check(bv2::saveDataDirField(copied) == bv2::DataDirField::Saved && !bv2::placeholdersSaved(), "a quoted, padded path is saved");
+	check(bv2::savedDataDir() == root(content) && bv2::startDataDir().dir == root(content), "saved folder read back");
 
 	check(bv2::setDataRoot(root(content)) && bv2::dataRoot() == root(content), "setDataRoot");
 	check(fs::equivalent(fs::current_path(), content), "setDataRoot changes into it");
+	check(bv2::playerDataDir() == root(content), "the player's data folder");
 	check(bv2::contentFile("main/LaunchScript/CTF.cfg") == root(pkg) + "main/LaunchScript/CTF.cfg", "launch script from the package");
 	check(bv2::contentFile("main/textures/a.tga") == "main/textures/a.tga", "assets from the data root");
 	check(bv2::contentFile("main/LaunchScript/TDM.cfg") == "main/LaunchScript/TDM.cfg", "a script only the data has");
@@ -144,6 +152,7 @@ int main(int argc, char ** argv)
 
 	fs::remove_all(content);
 	check(bv2::savedDataDir().empty(), "a saved folder that no longer holds data is ignored");
+	check(bv2::startDataDir().dir.empty() && bv2::startDataDir().ask, "no data anywhere: the first-run box");
 
 	if (!failures) std::printf("ok: paths\n");
 	return failures ? 1 : 0;
