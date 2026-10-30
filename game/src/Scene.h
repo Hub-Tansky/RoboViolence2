@@ -102,7 +102,7 @@ public:
 	void join(CString IPAddress, int port, CString password = "");
 #endif
 	void disconnect();
-	void edit(CString command);
+	void edit(CString mapName, int w, int h);
 	void kick(CString playerName);
 	void kick(int ID);
 	void ban(CString playerName);

@@ -22,6 +22,7 @@
 #include <sqlite3.h>
 
 #include <algorithm>
+#include <cctype>
 #include <cstdlib>
 #include <cstring>
 #include <filesystem>
@@ -358,6 +359,21 @@ namespace bv2
 		return p.generic_string();
 	}
 
+	bool isMapName(const std::string & name)
+	{
+		if (name.empty() || name.size() > 15 || name.front() == ' ' || name.back() == ' ')
+			return false;
+		if (name.find_first_not_of("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_- ") != std::string::npos)
+			return false;
+		std::string upper = name;
+		std::transform(upper.begin(), upper.end(), upper.begin(), [](unsigned char c) { return (char)std::toupper(c); });
+		if (upper == "CON" || upper == "PRN" || upper == "AUX" || upper == "NUL")
+			return false;
+		if (upper.size() == 4 && (upper.compare(0, 3, "COM") == 0 || upper.compare(0, 3, "LPT") == 0) && upper[3] >= '1' && upper[3] <= '9')
+			return false;
+		return true;
+	}
+
 	std::vector<std::string> listMapNames()
 	{
 		std::vector<std::string> names;
@@ -370,7 +386,7 @@ namespace bv2
 				const fs::path & p = it->path();
 				std::string ext = p.extension().string();
 				std::transform(ext.begin(), ext.end(), ext.begin(), [](unsigned char c) { return (char)std::tolower(c); });
-				if (ext == ".bvm")
+				if (ext == ".bvm" && isMapName(p.stem().string()))
 					names.push_back(p.stem().string());
 			}
 		}

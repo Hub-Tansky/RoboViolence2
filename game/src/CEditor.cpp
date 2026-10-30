@@ -19,8 +19,10 @@
 #ifndef CONSOLE
 
 #include "CEditor.h"
-#include "Console.h"
+#include "Scene.h"
 #include "GameVar.h"
+
+extern Scene * scene;
 
 CEditor::CEditor(CControl * in_parent, CControl * in_alignTo)
 {
@@ -173,8 +175,7 @@ void CEditor::Click(CControl * control)
 		name.trim(' ');
 		if (name.isNull()) return;
 
-		CString command("edit %s %i %i", name.s, txt_width->value, txt_height->value);
-		console->sendCommand(command);
+		scene->edit(name, txt_width->value, txt_height->value); // not the console's edit command: it splits names at spaces
 	}
 }
 void CEditor::Validate(CControl * control)

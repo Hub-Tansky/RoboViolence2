@@ -9,6 +9,7 @@
 #include <fstream>
 #include <iterator>
 #include <string>
+#include <vector>
 
 namespace fs = std::filesystem;
 
@@ -149,6 +150,19 @@ int main(int argc, char ** argv)
 	setEnv("BV2_DATA_DIR", (base / "nowhere").string());
 	fs::current_path(pkg);
 	check(bv2::pathsInit(argv[0]) && bv2::dataRoot() == root(pkg), "invalid BV2_DATA_DIR falls back to the package");
+
+	// Map names: one rule for the editor, the Host list and the server's map request (Q-S6)
+	for (const char * ok : {"TEst", "TEst 1", "CTF-Daivuk", "a_b", "123456789012345", "CONSOLE", "COM0", "LPT10"})
+		check(bv2::isMapName(ok), ok);
+	for (const char * bad : {"", " a", "a ", " ", "../bv2.cfg", "a.b", "a/b", "a\\b", "C:x", "Bob's map", "map(2)", "\xc3\xa9t\xc3\xa9",
+	                         "1234567890123456", "CON", "con", "Nul", "PRN", "AUX", "COM1", "com9", "LPT1", "lpt9"})
+		check(!bv2::isMapName(bad), (std::string("refused: '") + bad + "'").c_str());
+	touch(pkg / "main" / "maps" / "CTF-A.bvm");
+	touch(base / "pref" / "maps" / "TEst 1.bvm");
+	touch(base / "pref" / "maps" / "Bob's map.bvm");
+	touch(base / "pref" / "maps" / "notes.txt");
+	fs::current_path(pkg);
+	check(bv2::listMapNames() == std::vector<std::string>{"CTF-A", "TEst 1"}, "listMapNames: both folders, valid names only");
 
 	fs::remove_all(content);
 	check(bv2::savedDataDir().empty(), "a saved folder that no longer holds data is ignored");

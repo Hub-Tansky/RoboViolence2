@@ -14,6 +14,11 @@ target_include_directories(test_view_geometry PRIVATE ${CMAKE_SOURCE_DIR}/game/s
 bv2_target_defaults(test_view_geometry)
 add_test(NAME view_geometry COMMAND test_view_geometry)
 
+add_executable(test_spawn_overlay test_spawn_overlay.cpp)
+target_include_directories(test_spawn_overlay PRIVATE ${CMAKE_SOURCE_DIR}/game/src)
+bv2_target_defaults(test_spawn_overlay)
+add_test(NAME spawn_overlay COMMAND test_spawn_overlay)
+
 add_executable(test_config test_config.cpp)
 target_link_libraries(test_config PRIVATE zeven_core)
 bv2_target_defaults(test_config)
@@ -259,7 +264,7 @@ endif()
 
 # Phase T4: server, master and autotest clients together (tests/e2e/e2e.py; Xvfb, so Linux only)
 if(TARGET bv2 AND TARGET bv2dedicated AND TARGET bv2master AND ROBOVIOLENCE2_XVFB AND NOT APPLE)
-  foreach(scenario join_leave password chat kick ban master_list ctf_capture ghost)
+  foreach(scenario join_leave password chat kick ban master_list ctf_capture ghost user_map)
     add_test(NAME e2e_${scenario} COMMAND ${Python3_EXECUTABLE} -B ${CMAKE_CURRENT_SOURCE_DIR}/e2e/e2e.py "${BV2_RUNTIME_DIR}" "${BV2_TEST_SCRATCH}/e2e" ${scenario})
     set_tests_properties(e2e_${scenario} PROPERTIES TIMEOUT 300 RESOURCE_LOCK "bv2_server_port;bv2_master_port")
   endforeach()

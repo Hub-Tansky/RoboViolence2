@@ -61,7 +61,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `REVIEW.md` | Definition of done: `tools/review.sh` checks, reviewer checklist, defined terms, forbidden shortcuts, fresh-context PR review (`.claude/agents/`) and its record in the PR description |
 | `SECURITY.md` | Security policy: supported versions, private vulnerability reporting, response timeline |
 | `docs/decisions/0007-data-root-pref-dir-config-layers.md` | ADR 0007 |
-| `game/src/Paths.cpp` | Package and data roots (`contentFile` for the package's own content), saved and detected BV2 data folder (`originalDataDir` first) or the saved placeholders choice and the start order (`startDataDir`), the Options field's save rule (`saveDataDirField`), per-user pref dir, layered config loading (release settings like the master list skip `bv2.cfg`, ADR 0028), map and DB path helpers (ADR 0016) |
+| `game/src/Paths.cpp` | Package and data roots (`contentFile` for the package's own content), saved and detected BV2 data folder (`originalDataDir` first) or the saved placeholders choice and the start order (`startDataDir`), the Options field's save rule (`saveDataDirField`), per-user pref dir, layered config loading (release settings like the master list skip `bv2.cfg`, ADR 0028), map and DB path helpers (ADR 0016), the one map-name rule `isMapName` (editor save, Host list, Q-S6 map request) |
 | `game/src/Paths.h` | Interface of `Paths.cpp` (namespace `bv2`) |
 | `packaging/linux/roboviolence2.desktop` | Linux desktop entry |
 | `packaging/make-package.py` | Builds the per-OS package from a Release `runtime/` (links resolved, macOS bundle re-signed, licences), plus the Windows installer (showing `LICENSE.txt` reflowed one paragraph per line), the macOS `.dmg` with only the app and Applications, or the Linux `.deb` (ADR 0020, 0030, 0031) |
@@ -127,7 +127,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/harness/fake_babonet.cpp` | Test `bb_*` API: queued connects and messages in, captured sends out, client disconnects queued by the test (a server-side `bb_serverDisconnectClient` raises no event, like babonet); an object file, so it wins over babonet's `baboNet.cpp` |
 | `tests/harness/server_harness.cpp` | In-process dedicated server for tests: start, connect, join, deliver, tick |
 | `tests/harness/server_harness.h` | Harness API |
-| `tests/e2e/e2e.py` | E2E scenarios (Phase T4): `bv2dedicated` with the admin API, `bv2master` and `bv2 --autotest` clients under its own Xvfb; join/leave, password, chat, kick, ban, master list, CTF capture, a silent connection dropped by the join timeout (ctest `e2e_<scenario>`) |
+| `tests/e2e/e2e.py` | E2E scenarios (Phase T4): `bv2dedicated` with the admin API, `bv2master` and `bv2 --autotest` clients under its own Xvfb; join/leave, password, chat, kick, ban, master list, CTF capture, a silent connection dropped by the join timeout, a pref-dir map named with a space hosted by `dedicate` and downloaded by a client (ctest `e2e_<scenario>`) |
 | `tests/screenshots.py` | Phase T7: runs `tests/golden/<name>.txt` and compares the frame with `<name>.png` within a tolerance; keeps actual and diff PNGs on failure, `--update` writes the golden (ADR 0026) |
 | `tests/golden/main-menu.txt` | Screenshot script: main menu, news tab (ctest `screenshot_main-menu`) |
 | `tests/golden/main-menu.png` | Golden for `screenshot_main-menu` |
@@ -152,6 +152,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/test_babonet_ping.cpp` | PNS-56: a server-browser ping to a game server on this host is answered within 1 s while another process holds babonet's LAN port |
 | `tests/test_browsable_game.cpp` | A server browser row owns a copy of its lobby game's row (the lobby frees its own) |
 | `tests/test_cstring.cpp` | Phase C step 5: one-argument `CString` is text (arrays, `char*`, literals, direct and implicit); two or more arguments format (ADR 0021) |
+| `tests/test_spawn_overlay.cpp` | `spawns::farthestFrom`: no DM spawn gives no line origin (the editor crash), the farthest of several, ties, nearest team spawn |
 | `tests/test_view_geometry.cpp` | Widescreen (Stretch) projects at the window's own aspect, Bars at 4:3; the camera's side margin widens with the view, and a narrow or short map centres it |
 | `tests/test_config.cpp` | dksvar config layering, transient values not saved, secrets masked, `dksvarGetValue` |
 | `tests/test_credentials.cpp` | Step 10: the credential HMAC against RFC 4231; proofs check only with their own password, label and nonce |
@@ -172,7 +173,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/test_player_privacy.cpp` | The player info relayed to everyone and the player list a new client gets carry no IP; the server keeps it (ADR 0034) |
 | `tests/test_join_timeout.cpp` | A connection that never answers the join handshake loses its slot after `Server::JOIN_TIMEOUT`; a client past the handshake keeps it while loading |
 | `tests/test_data_download.cpp` | ADR 0040: `firstMismatch` names a wrong or missing file; `replaceDir` keeps the old install when the move fails and replaces it otherwise, at `originalDataDir`, which auto-detect then finds; the browser zip's name is one auto-detect knows; the extract argv and the hash paths agree on where `main/` lands and the zip's folder names the pinned commit; the generated list holds the 324 `Content/main` hashes (ctest `data_download`, client builds) |
-| `tests/test_paths.cpp` | Phase C step 1: package vs data root, `contentFile`, `findDataIn` (upstream layout, `main/` itself, Windows Extract All nesting), saved folder, the Options field (quoted paths, refused folders) and the start order with the placeholders choice (ADR 0042), auto-detect, `BV2_DATA_DIR`; the built-in master list vs `bv2.cfg`, `BV2_MASTER_SERVERS` and `none` (ADR 0028) |
+| `tests/test_paths.cpp` | Phase C step 1: package vs data root, `contentFile`, `findDataIn` (upstream layout, `main/` itself, Windows Extract All nesting), saved folder, the Options field (quoted paths, refused folders) and the start order with the placeholders choice (ADR 0042), auto-detect, `BV2_DATA_DIR`; the built-in master list vs `bv2.cfg`, `BV2_MASTER_SERVERS` and `none` (ADR 0028); `isMapName` and `listMapNames` |
 | `tests/test_osv_vcpkg.py` | Phase C step 4: `tools/osv-vcpkg.py` maps SPDX download locations to upstream repository and tag (offline) |
 | `tests/test_packet_hygiene.cpp` | Step 4 checks: sender binding (Q-S1), index ranges with controls (Q-S2), map names (Q-S6), skin and sound relay (Q-S7), `SV_CHANGE` filter (Q-S4), the handshake gate, `checkPacket` per message type and size, the client's `checkServerMessage` on values the server sends |
 | `tests/test_retention.cpp` | `BanList`: binary banlist moved once, saved on every change, line format, matching by age without dropping, expired bans dropped on load; admin log lines older than 90 days dropped (ADR 0034) |
@@ -706,6 +707,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/ServerValidator.cpp` | Server cheat checks: spawn weapon whitelist, speed/frame kick, step 9 rules (weapon, movement, rate limits) with a decaying score |
 | `game/src/ServerValidator.h` | Server cheat checks (`Server::validator`), asked by the `ServerRecv.cpp` handlers |
 | `game/src/SqlStatement.h` | Prepared SQLite statement with bound parameters (the game's copy) |
+| `game/src/SpawnOverlay.h` | The editor spawn overlay's line origin (`spawns::farthestFrom`): the DM spawn farthest from a team's spawns, -1 when there is none |
 | `game/src/ViewGeometry.h` | ([ADR 0039](docs/decisions/0039-widescreen-stretch-shows-more-map.md)) The 3D viewport inside the window (`view::rect`: whole window, or 4:3 between bars; `view::current` for this frame, defined in `IntroScreen.cpp`), the aspect the gameplay, scope and intro projections use, and the camera's margins at the map edges |
 | `game/src/Weapon.cpp` | Weapon definitions and stats |
 | `game/src/Weapon.h` | Weapon definitions and stats |

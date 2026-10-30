@@ -93,7 +93,11 @@ namespace bv2
 	// prefDir() + name, creating missing parent directories
 	std::string userFile(const std::string & name);
 
-	// Files with the given extension (".bvm") in main/maps and prefDir()/maps, names without extension, sorted
+	// A map name the editor may save, the Host tab lists and a client may request (Q-S6): 1 to 15 of A-Z a-z 0-9 _ - and
+	// inner spaces, and not a Windows device name (CON, PRN, AUX, NUL, COM1-9, LPT1-9, any case)
+	bool isMapName(const std::string & name);
+
+	// .bvm files in main/maps and prefDir()/maps whose stem isMapName, names without extension, sorted
 	std::vector<std::string> listMapNames();
 
 	// Path of a map to read: prefDir()/maps/<name>.bvm when it exists, else main/maps/<name>.bvm
