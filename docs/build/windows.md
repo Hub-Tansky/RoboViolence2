@@ -92,4 +92,4 @@ build\win-x64-msvc\runtime\bv2.exe
 | "Windows protected your PC" | SmartScreen: **More info → Run anyway** |
 | "running scripts is disabled on this system" | Windows blocks `.ps1` files by default: use the `-ExecutionPolicy Bypass -File` form above |
 | Garbled text, flicker, window ignores clicks | No OpenGL 2.1 driver: install the GPU vendor's driver (see the requirement above) |
-| Placeholder graphics | "Use placeholders" was chosen: restart to be asked again. To pick another folder, delete `data-dir.txt` in the pref dir; a set `BV2_DATA_DIR` must contain `main\` |
+| Placeholder graphics | "Use placeholders" was chosen, which is remembered: paste the BV2 data folder in Options → Game assets, press Enter and restart; a set `BV2_DATA_DIR` must contain `main\` |

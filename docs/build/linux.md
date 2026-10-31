@@ -114,4 +114,4 @@ SDL3 picks Wayland or X11 automatically; force one with `SDL_VIDEODRIVER=x11` or
 | `error while loading shared libraries: libGLU.so.1` | Install the runtime packages above |
 | vcpkg port fails to build (autoconf, libtool) | Install the full `--linux-packages` line |
 | No window under Wayland | Try `SDL_VIDEODRIVER=x11` |
-| Placeholder graphics | "Use placeholders" was chosen: restart to be asked again. To pick another folder, delete `data-dir.txt` in the pref dir; a set `BV2_DATA_DIR` must contain `main/` |
+| Placeholder graphics | "Use placeholders" was chosen, which is remembered: paste the BV2 data folder in Options → Game assets, press Enter and restart; a set `BV2_DATA_DIR` must contain `main/` |

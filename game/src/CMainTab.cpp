@@ -102,10 +102,8 @@ CMainTab::CMainTab(CControl * in_parent)
 	btn_quit = new CControl(parent, CVector2i(32,32),CVector2i(48,25),"\x4X",this,"BUTTON", btn_credits, CONTROL_SNAP_RIGHT);
 	btn_quit->toolTips = "Quit the game. :(";
 
-	//userLogin->setVisible(true);
-	news->setVisible(true);
-	//btn_userLogin->enable = false;
-	btn_news->enable = false;
+	//userLogin->setVisible(false);
+	news->setVisible(false);
 	profile->setVisible(false);
 	browser->setVisible(false);
 	//friends->setVisible(false);
@@ -114,11 +112,32 @@ CMainTab::CMainTab(CControl * in_parent)
 	credit->setVisible(false);
 	option->setVisible(false);
 
-	//current = userLogin;
-	current = news;
-	lastButtonPress = btn_news;//btn_userLogin;
-
+	current = 0;
+	lastButtonPress = 0;
 	timeBrowseDelay = -1;
+	showBrowser(); // the menu opens on the Game Browser (ADR 0043)
+}
+
+
+void CMainTab::showTab(CControl * button, CListener * tab)
+{
+	if (current) current->setVisible(false);
+	current = tab;
+	if (lastButtonPress) lastButtonPress->enable = true;
+	button->enable = false;
+	lastButtonPress = button;
+	current->setVisible(true);
+}
+
+
+void CMainTab::showBrowser()
+{
+	showTab(btn_browser, browser);
+	//--- If first time, browse
+	if (timeBrowseDelay == -1)
+	{
+		timeBrowseDelay = 2;
+	}
 }
 
 
@@ -165,47 +184,20 @@ void CMainTab::Click(CControl * control)
 	}*/
 	if (control == btn_news)
 	{
-		if (current) current->setVisible(false);
-		current = news;
-		lastButtonPress->enable = true;
-		control->enable = false;
-		lastButtonPress = control;
-		current->setVisible(true);
+		showTab(control, news);
 	}
 	if (control == btn_profile)
 	{
-		if (current) current->setVisible(false);
-		current = profile;
-		//friends->updateList();
-		lastButtonPress->enable = true;
-		control->enable = false;
-		lastButtonPress = control;
-		current->setVisible(true);
+		showTab(control, profile);
 		profile->current->setVisible(true);
 	}
 	if (control == btn_browser)
 	{
-		//--- If first time, browse
-		if (current) current->setVisible(false);
-		current = browser;
-		lastButtonPress->enable = true;
-		control->enable = false;
-		lastButtonPress = control;
-		current->setVisible(true);
-
-		if (timeBrowseDelay == -1)
-		{
-			timeBrowseDelay = 2;
-		}
+		showBrowser();
 	}
 	if (control == btn_create)
 	{
-		if (current) current->setVisible(false);
-		current = host;
-		lastButtonPress->enable = true;
-		control->enable = false;
-		lastButtonPress = control;
-		current->setVisible(true);
+		showTab(control, host);
 	}
 	/*if (control == btn_friends)
 	{
@@ -219,30 +211,15 @@ void CMainTab::Click(CControl * control)
 	}*/
 	if (control == btn_editor)
 	{
-		if (current) current->setVisible(false);
-		current = editor;
-		lastButtonPress->enable = true;
-		control->enable = false;
-		lastButtonPress = control;
-		current->setVisible(true);
+		showTab(control, editor);
 	}
 	if (control == btn_option)
 	{
-		if (current) current->setVisible(false);
-		current = option;
-		lastButtonPress->enable = true;
-		control->enable = false;
-		lastButtonPress = control;
-		current->setVisible(true);
+		showTab(control, option);
 	}
 	if (control == btn_credits)
 	{
-		if (current) current->setVisible(false);
-		current = credit;
-		lastButtonPress->enable = true;
-		control->enable = false;
-		lastButtonPress = control;
-		current->setVisible(true);
+		showTab(control, credit);
 	}
 	if (control == btn_quit)
 	{

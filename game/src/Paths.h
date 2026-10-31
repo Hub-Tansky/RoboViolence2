@@ -50,13 +50,34 @@ namespace bv2
 	// else rel (relative to the data root)
 	std::string contentFile(const std::string & rel);
 
-	// The folder holding BV2 data (main/textures/) at dir, at its parent when dir is main/, at dir/Content or at
-	// dir/BaboViolent2/Content (the upstream repository); "" when none
+	// The folder holding BV2 data (main/textures/) at dir, at its parent when dir is main/, at dir/Content, at
+	// dir/BaboViolent2/Content (the upstream repository) or one level deeper in a folder of dir's own name
+	// (Windows Extract All); "" when none. Surrounding spaces and one pair of quotes ("Copy as path") are ignored.
 	std::string findDataIn(const std::string & dir);
 
 	// The player's data folder saved in prefDir()/data-dir.txt; "" when unset or it no longer holds data
 	std::string savedDataDir();
 	void saveDataDir(const std::string & dir);
+	// The player's choice to play without BV2 data, saved in data-dir.txt instead of a folder (ADR 0042)
+	void savePlaceholdersChoice();
+	bool placeholdersSaved();
+
+	// The data root when it is the player's BV2 data, "" when the game runs on the package's placeholders
+	std::string playerDataDir();
+
+	// Options > Game assets (ADR 0042): empty text saves the placeholders choice, a folder with BV2 data is saved,
+	// anything else is not
+	enum class DataDirField { Placeholders, Saved, NoData };
+	DataDirField saveDataDirField(const std::string & text);
+
+	// What the client starts on, BV2_DATA_DIR and --placeholders aside (ADR 0042): the saved folder; nothing when
+	// placeholders were chosen; else a detected folder; else nothing, and ask is true (the first-run box)
+	struct StartData
+	{
+		std::string dir;
+		bool ask;
+	};
+	StartData startDataDir();
 
 	// Where the first-run download installs the original data, without a trailing '/': "original" beside prefDir()
 	// (%APPDATA%/BaboViolent2/original on Windows), or inside it when BV2_PREF_DIR overrides it
@@ -72,7 +93,11 @@ namespace bv2
 	// prefDir() + name, creating missing parent directories
 	std::string userFile(const std::string & name);
 
-	// Files with the given extension (".bvm") in main/maps and prefDir()/maps, names without extension, sorted
+	// A map name the editor may save, the Host tab lists and a client may request (Q-S6): 1 to 15 of A-Z a-z 0-9 _ - and
+	// inner spaces, and not a Windows device name (CON, PRN, AUX, NUL, COM1-9, LPT1-9, any case)
+	bool isMapName(const std::string & name);
+
+	// .bvm files in main/maps and prefDir()/maps whose stem isMapName, names without extension, sorted
 	std::vector<std::string> listMapNames();
 
 	// Path of a map to read: prefDir()/maps/<name>.bvm when it exists, else main/maps/<name>.bvm

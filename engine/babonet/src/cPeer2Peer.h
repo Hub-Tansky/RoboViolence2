@@ -40,7 +40,7 @@ class cPeer2Peer
 private:
 
 	int				PrepareSockets();			//prepare les sockets par defaut
-	char*			GetBroadcastAdress();		//retourne le Broadcast adress selon le subnet mask
+	cPeer*			broadcastPeer();			//the peer that holds the LAN broadcast packets, created on first use
 
 public:
 

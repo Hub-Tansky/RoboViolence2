@@ -1,4 +1,5 @@
-// Phase C step 1 (ADR 0016): package root vs data root, contentFile, findDataIn, the saved folder and auto-detect.
+// Phase C step 1 (ADR 0016): package root vs data root, contentFile, findDataIn, the saved folder and auto-detect;
+// the Options field and the start order with the placeholders choice (ADR 0042).
 #include "Paths.h"
 #include "dksvar.h"
 
@@ -8,6 +9,7 @@
 #include <fstream>
 #include <iterator>
 #include <string>
+#include <vector>
 
 namespace fs = std::filesystem;
 
@@ -76,13 +78,30 @@ int main(int argc, char ** argv)
 	check(bv2::findDataIn((content / "main").string()) == root(content), "main/ itself");
 	check(bv2::findDataIn(pkg.string()).empty(), "no main/textures: not BV2 data");
 	check(bv2::detectDataDir() == root(content), "auto-detect in ~/Downloads");
+	{
+		// Windows Extract All of BaboViolent2-master.zip with its default target: the zip's own folder inside a folder of the same name
+		const fs::path nested = home / "Desktop" / "BaboViolent2-master" / "BaboViolent2-master" / "BaboViolent2" / "Content";
+		touch(nested / "main" / "textures" / "a.tga");
+		check(bv2::findDataIn((home / "Desktop" / "BaboViolent2-master").string()) == root(nested), "Extract All nesting");
+		fs::remove_all(home / "Desktop");
+	}
 
-	check(bv2::savedDataDir().empty(), "nothing saved yet");
-	bv2::saveDataDir(root(content));
-	check(bv2::savedDataDir() == root(content), "saved folder read back");
+	check(bv2::savedDataDir().empty() && !bv2::placeholdersSaved(), "nothing saved yet");
+	check(bv2::startDataDir().dir == root(content) && !bv2::startDataDir().ask, "nothing saved: start on detected data");
+	check(bv2::playerDataDir().empty(), "on the package's placeholders there is no player data folder");
+
+	// Options > Game assets (ADR 0042)
+	check(bv2::saveDataDirField("") == bv2::DataDirField::Placeholders && bv2::placeholdersSaved(), "empty field saves placeholders");
+	check(bv2::startDataDir().dir.empty() && !bv2::startDataDir().ask, "placeholders win over detected data, without the box");
+	check(bv2::saveDataDirField((base / "nowhere").string()) == bv2::DataDirField::NoData && bv2::placeholdersSaved(),
+		"a folder without data is not saved");
+	const std::string copied = " \"" + (home / "Downloads" / "BaboViolent2-master").string() + "\" ";
+	check(bv2::saveDataDirField(copied) == bv2::DataDirField::Saved && !bv2::placeholdersSaved(), "a quoted, padded path is saved");
+	check(bv2::savedDataDir() == root(content) && bv2::startDataDir().dir == root(content), "saved folder read back");
 
 	check(bv2::setDataRoot(root(content)) && bv2::dataRoot() == root(content), "setDataRoot");
 	check(fs::equivalent(fs::current_path(), content), "setDataRoot changes into it");
+	check(bv2::playerDataDir() == root(content), "the player's data folder");
 	check(bv2::contentFile("main/LaunchScript/CTF.cfg") == root(pkg) + "main/LaunchScript/CTF.cfg", "launch script from the package");
 	check(bv2::contentFile("main/textures/a.tga") == "main/textures/a.tga", "assets from the data root");
 	check(bv2::contentFile("main/LaunchScript/TDM.cfg") == "main/LaunchScript/TDM.cfg", "a script only the data has");
@@ -132,8 +151,22 @@ int main(int argc, char ** argv)
 	fs::current_path(pkg);
 	check(bv2::pathsInit(argv[0]) && bv2::dataRoot() == root(pkg), "invalid BV2_DATA_DIR falls back to the package");
 
+	// Map names: one rule for the editor, the Host list and the server's map request (Q-S6)
+	for (const char * ok : {"TEst", "TEst 1", "CTF-Daivuk", "a_b", "123456789012345", "CONSOLE", "COM0", "LPT10"})
+		check(bv2::isMapName(ok), ok);
+	for (const char * bad : {"", " a", "a ", " ", "../bv2.cfg", "a.b", "a/b", "a\\b", "C:x", "Bob's map", "map(2)", "\xc3\xa9t\xc3\xa9",
+	                         "1234567890123456", "CON", "con", "Nul", "PRN", "AUX", "COM1", "com9", "LPT1", "lpt9"})
+		check(!bv2::isMapName(bad), (std::string("refused: '") + bad + "'").c_str());
+	touch(pkg / "main" / "maps" / "CTF-A.bvm");
+	touch(base / "pref" / "maps" / "TEst 1.bvm");
+	touch(base / "pref" / "maps" / "Bob's map.bvm");
+	touch(base / "pref" / "maps" / "notes.txt");
+	fs::current_path(pkg);
+	check(bv2::listMapNames() == std::vector<std::string>{"CTF-A", "TEst 1"}, "listMapNames: both folders, valid names only");
+
 	fs::remove_all(content);
 	check(bv2::savedDataDir().empty(), "a saved folder that no longer holds data is ignored");
+	check(bv2::startDataDir().dir.empty() && bv2::startDataDir().ask, "no data anywhere: the first-run box");
 
 	if (!failures) std::printf("ok: paths\n");
 	return failures ? 1 : 0;

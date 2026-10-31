@@ -21,9 +21,38 @@
 #include "COption.h"
 #include "GameVar.h"
 #include "KeyManager.h"
+#include "Paths.h"
 #include "Scene.h"
 
 extern Scene * scene;
+
+namespace
+{
+	// The Screen resolution rows per view mode (Standard, then both widescreen modes); 0 0 is the desktop size (ADR 0043)
+	struct Resolution { const char * label; int w, h; };
+	const int RESOLUTION_ROWS = 6;
+	const Resolution RESOLUTIONS_4_3[RESOLUTION_ROWS] = {
+		{"Desktop", 0, 0}, {"640 x 480", 640, 480}, {"800 x 600", 800, 600},
+		{"1024 x 768", 1024, 768}, {"1280 x 960", 1280, 960}, {"1600 x 1200", 1600, 1200}};
+	const Resolution RESOLUTIONS_WIDE[RESOLUTION_ROWS] = {
+		{"Desktop", 0, 0}, {"960 x 600", 960, 600}, {"1280 x 800", 1280, 800},
+		{"1440 x 900", 1440, 900}, {"1680 x 1050", 1680, 1050}, {"1920 x 1200", 1920, 1200}};
+
+	const Resolution * resolutionsFor(int widescreen)
+	{
+		return widescreen ? RESOLUTIONS_WIDE : RESOLUTIONS_4_3;
+	}
+
+	// Writes the selected row to r_resolution; no selection (a saved size that is no row) keeps the saved size
+	void applyResolution(const CControl * list, int widescreen)
+	{
+		if (list->selectedIndex >= 0 && list->selectedIndex < RESOLUTION_ROWS)
+		{
+			const Resolution & r = resolutionsFor(widescreen)[list->selectedIndex];
+			gameVar.r_resolution.set(r.w, r.h);
+		}
+	}
+}
 
 
 
@@ -102,37 +131,18 @@ COption::COption(CControl * in_parent, CControl * in_alignTo)
 		if (gameVar.r_widescreen == 2) lst_viewMode->selectChild(2);
 
 		//--- Screen resolution
-		label1 = new CControl(instance, CVector2i(20,10), CVector2i(200,150),"Screen resolution:", this, "LABEL", label1, CONTROL_SNAP_BOTTOM);
+		label1 = new CControl(instance, CVector2i(20,10), CVector2i(200,170),"Screen resolution:", this, "LABEL", label1, CONTROL_SNAP_BOTTOM);
 		label1->textAlign = CONTROL_TEXTALIGN_MIDDLERIGHT;
 		label1->toolTips = "(Need to reboot the game).";
 
-		if(gameVar.r_widescreen)
+		lst_resolution = new CControl(instance, CVector2i(10,10), CVector2i(300,170),"", this, "LISTBOX", label1, CONTROL_SNAP_RIGHT);
+		CControl * row = 0;
+		const Resolution * resolutions = resolutionsFor(gameVar.r_widescreen);
+		lst_resolution->selectChild(-1);
+		for (int i = 0; i < RESOLUTION_ROWS; ++i)
 		{
-			lst_resolution = new CControl(instance, CVector2i(10,10), CVector2i(300,150),"", this, "LISTBOX", label1, CONTROL_SNAP_RIGHT);
-			CControl * item = new CControl(lst_resolution, CVector2i(10,10), CVector2i(150,20),"960 x 600", this, "LABEL");
-			item = new CControl(lst_resolution, CVector2i(10,10), CVector2i(150,20),"1280 x 800", this, "LABEL", item, CONTROL_SNAP_BOTTOM);
-			item = new CControl(lst_resolution, CVector2i(10,10), CVector2i(150,20),"1440 x 900", this, "LABEL", item, CONTROL_SNAP_BOTTOM);
-			item = new CControl(lst_resolution, CVector2i(10,10), CVector2i(150,20),"1680 x 1050", this, "LABEL", item, CONTROL_SNAP_BOTTOM);
-			item = new CControl(lst_resolution, CVector2i(10,10), CVector2i(150,20),"1920 x 1200", this, "LABEL", item, CONTROL_SNAP_BOTTOM);
-			if (gameVar.r_resolution == CVector2i(960, 600)) lst_resolution->selectChild(0);
-			if (gameVar.r_resolution == CVector2i(1280, 800)) lst_resolution->selectChild(1);
-			if (gameVar.r_resolution == CVector2i(1440, 900)) lst_resolution->selectChild(2);
-			if (gameVar.r_resolution == CVector2i(1680, 1050)) lst_resolution->selectChild(3);
-			if (gameVar.r_resolution == CVector2i(1920, 1200)) lst_resolution->selectChild(4);
-		}
-		else
-		{
-			lst_resolution = new CControl(instance, CVector2i(10,10), CVector2i(300,150),"", this, "LISTBOX", label1, CONTROL_SNAP_RIGHT);
-			CControl * item = new CControl(lst_resolution, CVector2i(10,10), CVector2i(150,20),"640 x 480", this, "LABEL");
-			item = new CControl(lst_resolution, CVector2i(10,10), CVector2i(150,20),"800 x 600", this, "LABEL", item, CONTROL_SNAP_BOTTOM);
-			item = new CControl(lst_resolution, CVector2i(10,10), CVector2i(150,20),"1024 x 768", this, "LABEL", item, CONTROL_SNAP_BOTTOM);
-			item = new CControl(lst_resolution, CVector2i(10,10), CVector2i(150,20),"1280 x 960", this, "LABEL", item, CONTROL_SNAP_BOTTOM);
-			item = new CControl(lst_resolution, CVector2i(10,10), CVector2i(150,20),"1600 x 1200", this, "LABEL", item, CONTROL_SNAP_BOTTOM);
-			if (gameVar.r_resolution == CVector2i(640, 480)) lst_resolution->selectChild(0);
-			if (gameVar.r_resolution == CVector2i(800, 600)) lst_resolution->selectChild(1);
-			if (gameVar.r_resolution == CVector2i(1024, 768)) lst_resolution->selectChild(2);
-			if (gameVar.r_resolution == CVector2i(1280, 960)) lst_resolution->selectChild(3);
-			if (gameVar.r_resolution == CVector2i(1600, 1200)) lst_resolution->selectChild(4);
+			row = new CControl(lst_resolution, CVector2i(10,10), CVector2i(150,20), resolutions[i].label, this, "LABEL", row, CONTROL_SNAP_BOTTOM);
+			if (gameVar.r_resolution == CVector2i(resolutions[i].w, resolutions[i].h)) lst_resolution->selectChild(i);
 		}
 		
 
@@ -601,6 +611,20 @@ COption::COption(CControl * in_parent, CControl * in_alignTo)
 		key_qMsg10 = new CControl(instance, CVector2i(10,10), CVector2i(200, 25), keyManager.getKeyName(gameVar.k_qMsg10), this, "KEY", label1, CONTROL_SNAP_RIGHT);
 		key_qMsg10->selectedIndex = gameVar.k_qMsg10;
 
+	//--- GAME ASSETS (ADR 0042): the BV2 data folder, read before the window opens, so it applies on the next start
+	separator = new CControl(instance, CVector2i(10,20), CVector2i(200,25),"Game assets", this, "SEPARATOR", label1, CONTROL_SNAP_BOTTOM, 15);
+
+		label1 = new CControl(instance, CVector2i(20,10), CVector2i(200,25),"BV2 data folder:", this, "LABEL", separator, CONTROL_SNAP_BOTTOM, 15);
+		label1->textAlign = CONTROL_TEXTALIGN_MIDDLERIGHT;
+		label1->toolTips = "Paste the folder with your original BaboViolent 2 data (it holds main/), then press Enter. Empty: placeholders.";
+		dataDirShown = bv2::playerDataDir();
+		txt_dataDir = new CControl(instance, CVector2i(10,10), CVector2i(480,25), dataDirShown.c_str(), this, "EDIT", label1, CONTROL_SNAP_RIGHT);
+		txt_dataDir->SetMaxCarac(255);
+		label1 = new CControl(instance, CVector2i(20,10), CVector2i(200,25),"", this, "LABEL", label1, CONTROL_SNAP_BOTTOM);
+		lbl_dataDirStatus = new CControl(instance, CVector2i(10,10), CVector2i(480,25),
+			bv2::dataFromEnv() ? "BV2_DATA_DIR is set and wins over this field." : "Restart Robo Violence 2 to apply a change.",
+			this, "LABEL", label1, CONTROL_SNAP_RIGHT);
+
 	//--- FINAL SEPARATOR
 	separator = new CControl(instance, CVector2i(10,20), CVector2i(200,25),"", this, "SEPARATOR",label1, CONTROL_SNAP_BOTTOM, 15);
 
@@ -659,49 +683,12 @@ void COption::Click(CControl * control)
 
 		if(lst_viewMode->selectedIndex != gameVar.r_widescreen)
 		{
-			if(lst_viewMode->selectedIndex > 0)
-			{
-				lst_resolution->children[2]->text = "960 x 600";
-				lst_resolution->children[3]->text = "1280 x 800";
-				lst_resolution->children[4]->text = "1440 x 900";
-				lst_resolution->children[5]->text = "1680 x 1050";
-				lst_resolution->children[6]->text = "1920 x 1200";		
-			}
-			else
-			{
-				lst_resolution->children[2]->text = "640 x 480";
-				lst_resolution->children[3]->text = "800 x 600";
-				lst_resolution->children[4]->text = "1024 x 768";
-				lst_resolution->children[5]->text = "1280 x 960";
-				lst_resolution->children[6]->text = "1600 x 1200";
-			}
+			const Resolution * resolutions = resolutionsFor(lst_viewMode->selectedIndex);
+			for (int i = 0; i < RESOLUTION_ROWS; ++i)
+				lst_resolution->children[i + 2]->text = resolutions[i].label; // a listbox's rows start after its 2 scroll parts
 		}
 		gameVar.r_widescreen = lst_viewMode->selectedIndex;
-
-		if(gameVar.r_widescreen > 0)
-		{
-			switch (lst_resolution->selectedIndex)
-			{
-			case 0: gameVar.r_resolution.set(960, 600); break;
-			case 1: gameVar.r_resolution.set(1280, 800); break;
-			case 2: gameVar.r_resolution.set(1440, 900); break;
-			case 3: gameVar.r_resolution.set(1680, 1050); break;
-			case 4: gameVar.r_resolution.set(1920, 1200); break;
-			default: gameVar.r_resolution.set(1280, 800); break;
-			}
-		}
-		else
-		{
-			switch (lst_resolution->selectedIndex)
-			{
-			case 0: gameVar.r_resolution.set(640, 480); break;
-			case 1: gameVar.r_resolution.set(800, 600); break;
-			case 2: gameVar.r_resolution.set(1024, 768); break;
-			case 3: gameVar.r_resolution.set(1280, 960); break;
-			case 4: gameVar.r_resolution.set(1600, 1200); break;
-			default: gameVar.r_resolution.set(800, 600); break;
-			}
-		}
+		applyResolution(lst_resolution, gameVar.r_widescreen);
 
 		switch (lst_bitDepth->selectedIndex)
 		{
@@ -805,6 +792,21 @@ void COption::Validate(CControl * control)
 		dksPlaySound(m_sfxClic, -1, 200);
 	}
 
+	if (control == txt_dataDir)
+	{
+		std::string text = txt_dataDir->text.s;
+		if (text == dataDirShown)
+			return; // the field also validates when it loses focus: only a change is saved
+		switch (bv2::saveDataDirField(text))
+		{
+		case bv2::DataDirField::Placeholders: lbl_dataDirStatus->text = "Placeholders from the next start."; break;
+		case bv2::DataDirField::Saved: lbl_dataDirStatus->text = "Saved. Restart Robo Violence 2 to use it."; break;
+		case bv2::DataDirField::NoData: lbl_dataDirStatus->text = "No BV2 data there (main/textures). Not saved."; return;
+		}
+		dataDirShown = text;
+		return;
+	}
+
 		//--- Save all da settings!
 
 		//gameVar.cl_playerName = txt_playerName->text;
@@ -815,30 +817,7 @@ void COption::Validate(CControl * control)
 		gameVar.r_fullScreen = chk_fullScreen->check;
 		gameVar.r_widescreen = lst_viewMode->selectedIndex;
 		gameVar.cl_preciseCursor = chk_preciseCursor->check;
-		if(gameVar.r_widescreen > 0)
-		{
-			switch (lst_resolution->selectedIndex)
-			{
-			case 0: gameVar.r_resolution.set(960, 600); break;
-			case 1: gameVar.r_resolution.set(1280, 800); break;
-			case 2: gameVar.r_resolution.set(1440, 900); break;
-			case 3: gameVar.r_resolution.set(1680, 1050); break;
-			case 4: gameVar.r_resolution.set(1920, 1200); break;
-			default: gameVar.r_resolution.set(1280, 800); break;
-			}
-		}
-		else
-		{
-			switch (lst_resolution->selectedIndex)
-			{
-			case 0: gameVar.r_resolution.set(640, 480); break;
-			case 1: gameVar.r_resolution.set(800, 600); break;
-			case 2: gameVar.r_resolution.set(1024, 768); break;
-			case 3: gameVar.r_resolution.set(1280, 960); break;
-			case 4: gameVar.r_resolution.set(1600, 1200); break;
-			default: gameVar.r_resolution.set(800, 600); break;
-			}
-		}
+		applyResolution(lst_resolution, gameVar.r_widescreen);
 		switch (lst_bitDepth->selectedIndex)
 		{
 		case 0: gameVar.r_bitdepth = 16; break;

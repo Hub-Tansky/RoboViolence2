@@ -305,6 +305,14 @@ namespace
 				case SDL_SCANCODE_TAB: g_mainLoop->textWrite(9); break;
 				case SDL_SCANCODE_RETURN:
 				case SDL_SCANCODE_KP_ENTER: g_mainLoop->textWrite(13); break;
+				case SDL_SCANCODE_V: // paste: Ctrl+V, Cmd+V on macOS
+					if (e.key.mod & (SDL_KMOD_CTRL | SDL_KMOD_GUI))
+					{
+						char * clip = SDL_GetClipboardText();
+						textFromUtf8(clip);
+						SDL_free(clip);
+					}
+					break;
 				default: break;
 				}
 			}
@@ -325,6 +333,53 @@ namespace
 		SDL_Event e;
 		while (SDL_PollEvent(&e))
 			handleEvent(e);
+	}
+}
+
+namespace
+{
+	// No size asked (0 0): the desktop's size, already in screen coordinates. Fullscreen keeps the desktop mode (no
+	// mode switch); a window opens maximized, restoring to 3/4 of the desktop, centred by SDL_CreateWindow. Without a
+	// desktop mode (no display reported) fall back to 1280x800.
+	SDL_Window* createDesktopWindow(SDL_WindowFlags flags, bool fullScreen)
+	{
+		const SDL_DisplayMode* desktop = SDL_GetDesktopDisplayMode(SDL_GetPrimaryDisplay());
+		int w = desktop ? desktop->w : 1280;
+		int h = desktop ? desktop->h : 800;
+		if (fullScreen)
+			flags |= SDL_WINDOW_FULLSCREEN;
+		else
+		{
+			w = w * 3 / 4;
+			h = h * 3 / 4;
+			flags |= SDL_WINDOW_MAXIMIZED;
+		}
+		return SDL_CreateWindow(g_title.c_str(), w, h, flags);
+	}
+
+	// A fixed size is in pixels. Windows are sized in screen coordinates: fullscreen switches to the closest display
+	// mode, a window shrinks by the display's pixel density and is centred.
+	SDL_Window* createFixedWindow(SDL_WindowFlags flags, int width, int height, bool fullScreen, int refreshRate)
+	{
+		SDL_Window* window = SDL_CreateWindow(g_title.c_str(), width, height, flags);
+		if (!window)
+			return nullptr;
+		if (fullScreen)
+		{
+			SDL_DisplayID display = SDL_GetDisplayForWindow(window);
+			SDL_DisplayMode mode;
+			if (SDL_GetClosestFullscreenDisplayMode(display, width, height, refreshRate > 0 ? (float)refreshRate : 0.0f, true, &mode))
+				SDL_SetWindowFullscreenMode(window, &mode);
+			SDL_SetWindowFullscreen(window, true);
+		}
+		else
+		{
+			float density = SDL_GetWindowPixelDensity(window);
+			if (density > 1.0f)
+				SDL_SetWindowSize(window, (int)(width / density + 0.5f), (int)(height / density + 0.5f));
+			SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+		}
+		return window;
 	}
 }
 
@@ -355,30 +410,13 @@ int dkwInit(int width, int height, int colorDepth, char* mTitle, CMainLoopInterf
 	SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, colorDepth > 16 ? 8 : 0);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 
-	// Windows are sized in screen coordinates; the game works in pixels. Create at the requested size,
-	// then correct it once the display's pixel density is known.
 	SDL_WindowFlags flags = SDL_WINDOW_OPENGL | SDL_WINDOW_HIGH_PIXEL_DENSITY;
-	g_window = SDL_CreateWindow(g_title.c_str(), width, height, flags);
+	g_window = (width <= 0 || height <= 0) ? createDesktopWindow(flags, fullScreen)
+	                                       : createFixedWindow(flags, width, height, fullScreen, refreshRate);
 	if (!g_window)
 	{
 		setError(SDL_GetError());
 		return 0;
-	}
-
-	if (fullScreen)
-	{
-		SDL_DisplayID display = SDL_GetDisplayForWindow(g_window);
-		SDL_DisplayMode mode;
-		if (SDL_GetClosestFullscreenDisplayMode(display, width, height, refreshRate > 0 ? (float)refreshRate : 0.0f, true, &mode))
-			SDL_SetWindowFullscreenMode(g_window, &mode);
-		SDL_SetWindowFullscreen(g_window, true);
-	}
-	else
-	{
-		float density = SDL_GetWindowPixelDensity(g_window);
-		if (density > 1.0f)
-			SDL_SetWindowSize(g_window, (int)(width / density + 0.5f), (int)(height / density + 0.5f));
-		SDL_SetWindowPosition(g_window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
 	}
 
 	SDL_HideCursor();

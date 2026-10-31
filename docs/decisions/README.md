@@ -48,7 +48,7 @@ What we do, in one or two sentences.
 | [0013](0013-r3-restore-normal-and-pro-rulesets.md) | Restore the Normal and Pro rulesets (fix R3) | Accepted |
 | [0014](0014-libsodium-hmac-for-credentials.md) | Use libsodium for the credential HMAC and nonces | Accepted (amended by 0038) |
 | [0015](0015-admin-http-api-behind-tls-proxy.md) | Remote admin is an HTTP API behind a TLS reverse proxy | Accepted |
-| [0016](0016-player-data-lookup-and-package-content.md) | The client finds the player's BV2 data; the package supplies its own content | Accepted (amended by 0033, 0040) |
+| [0016](0016-player-data-lookup-and-package-content.md) | The client finds the player's BV2 data; the package supplies its own content | Accepted (amended by 0033, 0040, 0042) |
 | [0017](0017-playtest-pull-agent.md) | Test main builds on the owner's Mac with a pull agent | Accepted |
 | [0018](0018-staging-pull-deploy.md) | Staging deploys itself by pull, pinned to a commit, only when empty | Accepted |
 | [0019](0019-in-game-name-and-fork-credits.md) | The game shows its own name and credits the original as an unofficial fork | Accepted |
@@ -58,7 +58,7 @@ What we do, in one or two sentences.
 | [0023](0023-step-review-subagent-in-repo.md) | The step-closing review subagent and its rubric live in the repo | Superseded by 0037 |
 | [0024](0024-github-project-is-the-backlog.md) | The private GitHub Project is the backlog; no roadmap files in the repo | Accepted |
 | [0025](0025-client-autotest-mode.md) | Test the real client through a scripted autotest mode | Accepted |
-| [0026](0026-screenshot-goldens.md) | Screenshot goldens are Linux llvmpipe frames compared within a tolerance | Accepted |
+| [0026](0026-screenshot-goldens.md) | Screenshot goldens are Linux llvmpipe frames compared within a tolerance | Accepted (amended by 0043) |
 | [0027](0027-several-game-servers-per-host.md) | Several game servers on one host share one image, one env file and one admin proxy | Accepted |
 | [0028](0028-built-in-public-master.md) | The client and server ship with the public master built in | Accepted |
 | [0029](https://github.com/Hub-Tansky/rv2-website/blob/main/docs/decisions/0029-static-website-on-github-pages.md) | The website is static HTML on GitHub Pages; downloads come from the GitHub releases API | Moved to rv2-website (0036) |
@@ -72,5 +72,7 @@ What we do, in one or two sentences.
 | [0037](0037-review-rubric-single-repo-copy.md) | The review rubric has one repo copy, and the gate checks its hash | Accepted |
 | [0038](0038-dead-accounts-hidden-admin-and-ban-secrets-hardened.md) | Dead account pages are hidden; admin and master ban secrets meet NIST SP 800-63B-4 | Accepted |
 | [0039](0039-widescreen-stretch-shows-more-map.md) | Widescreen (Stretch) shows more map sideways instead of stretching a 4:3 view | Accepted |
-| [0040](0040-first-run-downloads-original-data.md) | The first-run box downloads the original BV2 data with the OS's own curl and unzip tools | Accepted |
+| [0040](0040-first-run-downloads-original-data.md) | The first-run box downloads the original BV2 data with the OS's own curl and unzip tools | Accepted (amended by 0042) |
 | [0041](0041-macos-ci-runner-not-acquired-retry.md) | Build branches through their PR only, and re-run a build whose job never got a runner | Accepted |
+| [0042](0042-game-assets-option-remembers-placeholders.md) | Options "Game assets" sets the BV2 data folder, and "Use placeholders" is remembered | Accepted |
+| [0043](0043-first-start-fullscreen-desktop-and-game-browser.md) | A new player starts fullscreen at the desktop resolution, on the Game Browser tab | Accepted |

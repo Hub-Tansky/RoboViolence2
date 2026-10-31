@@ -138,7 +138,7 @@ public:
 	void Open(CString mapName);
 
 	// Save the map (moved here from Map::~Map)
-	void Save(CString mapName);
+	bool Save(CString mapName); // false when the name is not bv2::isMapName or the file cannot be written
 
 	// Performs an action when one of the buttons is clicked
 	void Click(CControl * control);

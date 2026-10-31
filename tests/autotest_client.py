@@ -16,11 +16,11 @@ def start_xvfb():
 
 
 def client_command(exe, pref, script, config_lines=""):
-    """Command line and env for `exe --autotest script` with pref dir `pref`, windowed, on the placeholder data, with no
+    """Command line and env for `exe --autotest script` with pref dir `pref`, windowed (1024 x 768), on placeholders, with no
     master (BV2_MASTER_SERVERS=none, ADR 0028; the caller may replace it in the env)"""
     config = os.path.join(pref, "autotest.cfg")
     with open(config, "w") as f:
-        f.write("r_fullScreen false\n" + config_lines)
+        f.write("r_fullScreen false\nr_resolution 1024 768\n" + config_lines)  # the goldens are 1024 x 768 frames
     cmd = [exe, "--placeholders", "--config", config, "--autotest", script]
     return cmd, dict(os.environ, BV2_PREF_DIR=pref, SDL_AUDIODRIVER="dummy", BV2_MASTER_SERVERS="none")
 

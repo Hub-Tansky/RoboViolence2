@@ -1,0 +1,7 @@
+# Options tab with a saved size that is no row (r_resolution 1000 750): no Screen resolution row is selected, so the
+# size is kept (ADR 0043)
+expect-scene menu
+menutab options
+wait 2
+screenshot options-custom
+wait 1

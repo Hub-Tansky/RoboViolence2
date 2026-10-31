@@ -22,6 +22,7 @@
 
 
 #include "CPanel.h"
+#include <string>
 
 
 class COption : public CPanel
@@ -122,6 +123,11 @@ public:
 	CControl * chk_qMsg10;
 	CControl * key_qMsg10;
 #endif
+
+	// Game assets (ADR 0042)
+	CControl * txt_dataDir;
+	CControl * lbl_dataDirStatus;
+	std::string dataDirShown; // the field's text as last saved, or at open
 public:
 	COption(CControl * in_parent, CControl * in_alignTo);
 	virtual ~COption();
