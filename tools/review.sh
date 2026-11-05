@@ -111,7 +111,7 @@ if row and not draft:
         problems.append(f"review gate: the raw reviewer report lacks '{rubric}' (the repo rubric at this head), or says NOT LOADED")
     else:
         for r in re.findall(r"^\|.*\bdeferred\b.*\|\s*$", rec, re.M):
-            if not re.search(r"\bROBO-\d{3}\b|#\d+|github\.com/Hub-Tansky/RoboViolence2/issues/", r):
+            if not re.search(r"deferred\s*(?:→|->)\s*\[?(?:ROBO-\d{3}\b|#\d+|https://github\.com/Hub-Tansky/RoboViolence2/issues/\d+)", r):
                 problems.append(f"review gate: deferred finding without a ROBO-NNN item or issue link: {r.strip()[:100]}")
 
 print(f"scope: {'PR Allowed paths' if row else 'none (no Allowed paths row)'}; {len(changed)} changed files")

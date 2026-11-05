@@ -45,7 +45,7 @@ cmake --build --preset <preset> --target bv2dedicated bv2master
 - Work discovered while doing something else becomes a new item in `20-proposed/`, never part of the current diff.
 - Moving an item: to `30-inprogress/` (status In progress) when you start, status Testing when the PR waits for tests, to `90-done/` when the PR merges. A move is a commit in rv2-docs.
 - GitHub issues are the public intake for bugs and requests. An accepted issue gets a scope item whose `issue:` links it.
-- Durable knowledge stays Markdown in this repo: `ARCHITECTURE.md`, ADRs, module READMEs, build guides.
+- Durable knowledge about the code stays Markdown in this repo: `ARCHITECTURE.md`, ADRs, module READMEs, build guides, `docs/ops/runbook.md`. Product and release notes (the release procedure: `20-product/releases/release.md`) and player docs (`10-public/`) live in rv2-docs (ADR 0044).
 
 ## Agent rules
 
@@ -53,7 +53,7 @@ cmake --build --preset <preset> --target bv2dedicated bv2master
 - Propose Minimal Changes: Provide only the simplest, most direct code or solution required to make the item work or fix the bug.
 - Ignore Corner Cases: Do not write defensive code for rare edge cases, scale considerations, or downstream exceptions.
 - Deliverables: Your output must reflect a "Minimum Viable Product" mindset for scope of item or bug. Keep the diff or response as small and readable as possible.
-- Branch `<kind>/<slug>` with kind `feat`, `fix`, `refactor`, `ci`, `docs` or `chore` (e.g. `fix/master-ban-wire-format`); one commit per task (`<kind>: <summary>`); one PR per item, with `Closes #n` when the item is an issue.
+- Branch `<kind>/<slug>` with kind `feat`, `fix`, `refactor`, `ci`, `docs` or `chore` (e.g. `fix/master-ban-wire-format`); one commit per task (`<kind>: <summary>`); one PR per item, with `Closes #n` when the scope item's `issue:` links one.
 - Never commit secrets, real hosts or IPs. Never use `--no-verify`.
 - Finish every PR by updating `ARCHITECTURE.md` (inventory and changed facts) and running `tools/check-architecture.sh`.
 - Record non-obvious decisions as ADRs in `docs/decisions/`.
