@@ -4,7 +4,7 @@ Set-Location (Join-Path $PSScriptRoot '..')
 git config core.hooksPath .githooks
 git config blame.ignoreRevsFile .git-blame-ignore-revs
 $missing = $false
-foreach ($t in 'gitleaks', 'cmake', 'ninja', 'python') {
+foreach ($t in 'gitleaks', 'pre-commit', 'cmake', 'ninja', 'python') {
   if (-not (Get-Command $t -ErrorAction SilentlyContinue)) { Write-Error "missing: $t" -ErrorAction Continue; $missing = $true }
 }
 if (-not $env:VCPKG_ROOT) { Write-Warning 'VCPKG_ROOT is not set (the presets use it)' }

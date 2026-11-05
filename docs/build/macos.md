@@ -44,7 +44,7 @@ The package's own `main/` copies (one in `Robo Violence 2.app/Contents/Resources
 Prerequisites, with [Homebrew](https://brew.sh):
 
 ```bash
-brew install cmake ninja autoconf autoconf-archive automake libtool pkg-config
+brew install cmake ninja autoconf autoconf-archive automake libtool pkg-config pre-commit
 ```
 
 vcpkg, once (any folder works; `VCPKG_ROOT` must point to it):
@@ -73,7 +73,7 @@ cmake --preset macos-arm64
 cmake --build --preset macos-arm64
 ```
 
-`tools/setup-dev.sh` runs once per clone and activates the commit hooks.
+`tools/setup-dev.sh` runs once per clone and activates the commit hooks. The hooks run `pre-commit` (`.pre-commit-config.yaml`); don't run `pre-commit install`, it refuses because `core.hooksPath` is set.
 
 ## Output
 

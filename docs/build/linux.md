@@ -63,7 +63,7 @@ apt installs the libraries it needs. Start **Robo Violence 2** from the applicat
 
 ## Build from source
 
-Prerequisites: print the apt line with `tools/setup-dev.sh --linux-packages`, then run it. It installs the compiler, Ninja, autotools (for vcpkg ports) and the X11, Wayland, GL and audio headers SDL3 needs. Also install CMake 3.25+ and Python 3 (Ubuntu 24.04's packages are recent enough).
+Prerequisites: print the apt line with `tools/setup-dev.sh --linux-packages`, then run it. It installs the compiler, Ninja, autotools (for vcpkg ports) and the X11, Wayland, GL and audio headers SDL3 needs. Also install CMake 3.25+ and Python 3 (Ubuntu 24.04's packages are recent enough), and for commits `pipx install pre-commit` (the commit hooks run it).
 
 vcpkg, once:
 

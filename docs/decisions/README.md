@@ -77,3 +77,4 @@ What we do, in one or two sentences.
 | [0042](0042-game-assets-option-remembers-placeholders.md) | Options "Game assets" sets the BV2 data folder, and "Use placeholders" is remembered | Accepted |
 | [0043](0043-first-start-fullscreen-desktop-and-game-browser.md) | A new player starts fullscreen at the desktop resolution, on the Game Browser tab | Accepted |
 | [0044](0044-backlog-in-the-rv2-docs-vault.md) | The backlog is one Markdown file per scope item in the private rv2-docs vault | Accepted |
+| [0045](0045-cpp-lint-pre-commit-on-changed-lines.md) | clang-format and clang-tidy run on commit through pre-commit, on changed lines only | Accepted |
