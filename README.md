@@ -23,6 +23,6 @@ Built with CMake, Ninja and vcpkg. Download a package from CI or build from sour
 
 ## Where to read more
 - [AGENTS.md](AGENTS.md): project rules for fellow robots, agents and even human contributors
-- [Issues](https://github.com/Hub-Tansky/RoboViolence2/issues): bug reports, ideas and public work items; the backlog and roadmap live in the private GitHub Project items for now
+- [Issues](https://github.com/Hub-Tansky/RoboViolence2/issues): bug reports, ideas and public work items; the backlog lives in a private repo, and issues are the public intake
 - [ARCHITECTURE.md](ARCHITECTURE.md): architecture index
 - Community channel for direct feedback: https://discord.gg/gRehxx43z 

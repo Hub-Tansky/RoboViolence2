@@ -2,7 +2,7 @@
 
 Work is done when `tools/review.sh` passes and, for a scoped PR, its review record is in the PR description. A claim without that evidence doesn't count.
 
-**Stop rule:** if any item below can't be met, stop. Don't mark the PR ready or move its Project item to Done. Write what's missing under **Not done / unsure** in the review record and tell the owner.
+**Stop rule:** if any item below can't be met, stop. Don't mark the PR ready or move its scope item to Done. Write what's missing under **Not done / unsure** in the review record and tell the owner.
 
 ## 1. Mechanical checks: `tools/review.sh`
 
@@ -14,7 +14,7 @@ Run `tools/review.sh` while working, and `tools/review.sh --full <preset>` befor
 | secrets | gitleaks finds a secret in `merge-base..HEAD` (skipped locally if gitleaks is missing; CI `secret-scan` runs it) |
 | scope | a changed file is outside the PR's **Allowed paths** row (from the PR description: `REVIEW_PR_BODY` in CI, `gh pr view` locally, or `--scope <file>`) |
 | anti-gaming | an added line switches a check off: `#pragma warning`/`diagnostic`, `NOLINT`, `-Wno-`, `DISABLED_`, `--no-verify`, `continue-on-error: true`. A justified line carries `review: allow <reason>` |
-| review gate | a ready (non-draft) PR with an Allowed paths row has no `## Review record` naming a fresh-context reviewer, has a finding still `pending`, has a `deferred` finding without a Project item or issue link, or lacks the raw report (`<details>` with the `Rubric:` line of the head's rubric on a line of its own, and no line starting `Rubric: NOT LOADED`) |
+| review gate | a ready (non-draft) PR with an Allowed paths row has no `## Review record` naming a fresh-context reviewer, has a finding still `pending`, has a finding whose Outcome cell (in `### Findings`) says `deferred` but doesn't name a `ROBO-NNN` scope item, `#n` or issue URL right after `deferred →`, or lacks the raw report (`<details>` with the `Rubric:` line of the head's rubric on a line of its own, and no line starting `Rubric: NOT LOADED`) |
 | rubric | the `Rubric:` line in `.claude/skills/rv2-thermo-nuclear-review/SKILL.md` doesn't match the file's hash (the message prints the right line) |
 | `--full` | configure, build (warnings are errors) or `ctest` fails |
 
@@ -59,10 +59,10 @@ Required for every PR with an Allowed paths row, and for an architecture-changin
    |---|---|
    | Inside the PR's scope and Allowed paths | Outside the scope or Allowed paths |
    | Fixes a real defect, or removes duplication or dead code without changing behaviour | Changes gameplay, protocol, file formats or anything the player sees (**[GUI]**) |
-   | Doesn't contradict an ADR or the Project item | Reverses or bends an ADR or the item, or needs a new ADR |
+   | Doesn't contradict an ADR or the scope item | Reverses or bends an ADR or the item, or needs a new ADR |
    | Small and verifiable with existing checks and tests | Large rewrite, new dependency, or a matter of taste with no clear gain |
 
-   Fixes go in their own commits (`<kind>: review: <summary>`). A finding left for later becomes a Proposed draft item in the [Project](https://github.com/users/Hub-Tansky/projects/1) (or an issue) and the outcome `deferred → <item or issue link>`. Ask the owner all open questions in one message, each with the finding, the proposed change and a recommendation.
+   Fixes go in their own commits (`<kind>: review: <summary>`). A finding left for later becomes a Proposed scope item in [rv2-docs](https://github.com/Hub-Tansky/rv2-docs) `40-backlog/20-proposed/` (or an issue) and the outcome `deferred → ROBO-NNN` (or the issue link). Ask the owner all open questions in one message, each with the finding, the proposed change and a recommendation.
 4. Write the `## Review record` section of the PR description from the template below.
 5. Mark the PR ready only after the last review round covers every commit and `--full` passed on the final head. `tools/review.sh` checks the record and that the report's `Rubric:` line matches the skill file at the PR head; a PR that changes the rubric needs a review run on the changed rubric.
 
@@ -82,7 +82,7 @@ Diff: <merge-base>..<head>
 
 | # | Finding | Outcome |
 |---|---|---|
-| 1 | <finding> | fixed in <commit> / confirmed with owner: <decision> / deferred → <Project item or issue link> / rejected: <reason> |
+| 1 | <finding> | fixed in <commit> / confirmed with owner: <decision> / deferred → <ROBO-NNN or issue link> / rejected: <reason> |
 
 ### Fix proof
 
