@@ -110,8 +110,12 @@ if row and not draft:
     elif not re.search(rf"^[ \t]*{re.escape(rubric)}[ \t]*$", rec, re.M) or re.search(r"^[ \t]*Rubric: NOT LOADED", rec, re.M):
         problems.append(f"review gate: the raw reviewer report lacks '{rubric}' (the repo rubric at this head), or says NOT LOADED")
     else:
-        for r in re.findall(r"^\|.*\bdeferred\b.*\|\s*$", rec, re.M):
-            if not re.search(r"deferred\s*(?:→|->)\s*\[?(?:ROBO-\d{3}\b|#\d+|https://github\.com/Hub-Tansky/RoboViolence2/issues/\d+)", r):
+        # Only the Outcome cell (last column) of the ### Findings table; finding text and raw reports may say "deferred".
+        findings = rec.split("### Findings", 1)[1].split("\n###", 1)[0]
+        for r in re.findall(r"^\|.*\|[ \t]*$", findings, re.M):
+            outcome = r.strip().strip("|").split("|")[-1]
+            if re.search(r"(?i)\bdeferred\b", outcome) and not re.search(
+                r"(?i)deferred\s*(?:→|->)\s*\[?(?:ROBO-\d{3}\b|#\d+|https://github\.com/Hub-Tansky/RoboViolence2/issues/\d+)", outcome):
                 problems.append(f"review gate: deferred finding without a ROBO-NNN item or issue link: {r.strip()[:100]}")
 
 print(f"scope: {'PR Allowed paths' if row else 'none (no Allowed paths row)'}; {len(changed)} changed files")

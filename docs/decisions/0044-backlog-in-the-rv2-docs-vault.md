@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-11-05
-- Affects: [AGENTS.md](../../AGENTS.md) "Work tracking", [REVIEW.md](../../REVIEW.md), `tools/review.sh`, `.github/pull_request_template.md`, `docs/ops/release.md` (moved), `README.md`; supersedes [0024](0024-github-project-is-the-backlog.md)
+- Affects: [AGENTS.md](../../AGENTS.md) "Work tracking", [REVIEW.md](../../REVIEW.md), `tools/review.sh`, `.github/pull_request_template.md`, `docs/ops/release.md` (moved), `docs/ops/runbook.md`, `README.md`; supersedes [0024](0024-github-project-is-the-backlog.md)
 
 ## Context
 - The private GitHub Project held 154 items (2026-11-05). Cloud sessions can't call its GraphQL API, so every read or move went through a dispatched workflow in a helper repo with a stored PAT.

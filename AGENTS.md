@@ -45,7 +45,7 @@ cmake --build --preset <preset> --target bv2dedicated bv2master
 - Work discovered while doing something else becomes a new item in `20-proposed/`, never part of the current diff.
 - Moving an item: to `30-inprogress/` (status In progress) when you start, status Testing when the PR waits for tests, to `90-done/` when the PR merges. A move is a commit in rv2-docs.
 - GitHub issues are the public intake for bugs and requests. An accepted issue gets a scope item whose `issue:` links it.
-- Durable knowledge about the code stays Markdown in this repo: `ARCHITECTURE.md`, ADRs, module READMEs, build guides, `docs/ops/runbook.md`. Product and release notes (the release procedure: `20-product/releases/release.md`) and player docs (`10-public/`) live in rv2-docs (ADR 0044).
+- Durable knowledge about the code stays Markdown in this repo: `ARCHITECTURE.md`, ADRs, module READMEs, build guides, `docs/ops/runbook.md`. The release procedure (`20-product/releases/release.md`) lives in rv2-docs (ADR 0044), and so do player docs (`10-public/`, published by rv2-website, its ADR 0004).
 
 ## Agent rules
 
