@@ -1,6 +1,6 @@
 # 0024: The private GitHub Project is the backlog; no roadmap files in the repo
 
-- Status: Accepted
+- Status: Superseded by [0044](0044-backlog-in-the-rv2-docs-vault.md)
 - Date: 2026-10-18
 - Affects: [AGENTS.md](../../AGENTS.md) "Work tracking", [REVIEW.md](../../REVIEW.md), `tools/review.sh`, `.github/pull_request_template.md`
 

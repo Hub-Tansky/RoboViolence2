@@ -39,17 +39,17 @@ cmake --build --preset <preset> --target bv2dedicated bv2master
 
 ## Work tracking
 
-- The private GitHub Project [Robo Violence 2](https://github.com/users/Hub-Tansky/projects/1) is the only source of truth for backlog, next steps, bugs, features and proposed scope ([ADR 0024](docs/decisions/0024-github-project-is-the-backlog.md)). Never create `step*.md`, `NEXT_STEPS.md`, roadmap, task-list or scope files. If the Project can't be reached, say so and stop; no Markdown fallback.
-- Statuses: **Proposed** (ideas, discovered or accepted-but-unscheduled work) → **Next** → **In progress** (also when blocked: the item body then starts with `Blocked by: <what>`) → **Testing** (implemented, awaiting tests before review or merge) → **Done**.
-- New ideas and private plans are **draft items**. Convert a draft to a public issue only when the work is ready to expose or collaborate on. Issues are public.
-- Every new item: a clear title, context (where it was found, evidence as `path:line` or a link), and an **Acceptance criteria** checklist. Set Phase, Category and Priority when known. Former PNS IDs live in the Source field.
-- Work discovered while doing something else goes to the Project as a new Proposed draft item, never into the current diff.
-- Moving an item: In progress when you start; Testing when the PR is up and waits for tests; Done comes from the PR merge or issue close. Run `gh` for the Project as below; it needs the `project` scope.
-- Durable knowledge stays Markdown in the repo: `ARCHITECTURE.md`, ADRs, module READMEs, build guides.
+- The backlog is the private repo [Hub-Tansky/rv2-docs](https://github.com/Hub-Tansky/rv2-docs) (the owner's Obsidian vault), folder `40-backlog/`: one file per scope item, `ROBO-NNN <Title>.md` ([ADR 0044](docs/decisions/0044-backlog-in-the-rv2-docs-vault.md)). Its [AGENTS.md](https://github.com/Hub-Tansky/rv2-docs/blob/main/AGENTS.md) has the folders, fields and who moves what. Never create `step*.md`, `NEXT_STEPS.md`, roadmap, task-list or scope files in this repo. If rv2-docs can't be reached, say so and stop.
+- Statuses and folders: **Proposed** `20-proposed/` → **Next** `10-next/` (the owner moves items there) → **In progress** / **Testing** `30-inprogress/` (blocked work stays there with `blocked_by`) → **Done** `90-done/`.
+- Every new item: a clear title, context (where it was found, evidence as `path:line` or a link) and an **Acceptance criteria** checklist, from `40-backlog/_templates/scope.md`. Former PNS-n ids live in `aliases`.
+- Work discovered while doing something else becomes a new item in `20-proposed/`, never part of the current diff.
+- Moving an item: to `30-inprogress/` (status In progress) when you start, status Testing when the PR waits for tests, to `90-done/` when the PR merges. A move is a commit in rv2-docs.
+- GitHub issues are the public intake for bugs and requests. An accepted issue gets a scope item whose `issue:` links it.
+- Durable knowledge stays Markdown in this repo: `ARCHITECTURE.md`, ADRs, module READMEs, build guides.
 
 ## Agent rules
 
-- Work one Project item at a time. The PR description holds its scope from [the PR template](.github/pull_request_template.md): goal, item link, out of scope and **Allowed paths**. Stay inside the Allowed paths; record out-of-scope work as a new draft item instead of doing it.
+- Work one scope item at a time. The PR description holds its scope from [the PR template](.github/pull_request_template.md): goal, item (`ROBO-NNN`), out of scope and **Allowed paths**. Stay inside the Allowed paths; record out-of-scope work as a new Proposed item instead of doing it.
 - Propose Minimal Changes: Provide only the simplest, most direct code or solution required to make the item work or fix the bug.
 - Ignore Corner Cases: Do not write defensive code for rare edge cases, scale considerations, or downstream exceptions.
 - Deliverables: Your output must reflect a "Minimum Viable Product" mindset for scope of item or bug. Keep the diff or response as small and readable as possible.
@@ -63,11 +63,11 @@ cmake --build --preset <preset> --target bv2dedicated bv2master
 ## Ground rules
 
 1. **BV2 asset compatibility** ([ADR 0010](docs/decisions/0010-bv2-asset-compat-and-gui-freeze.md)). Until replacement assets ship (PNS-20, H.1), the game runs on original BV2 data (`BV2_DATA_DIR`) unchanged: same file formats (`.DKO`, `.bvm`, textures, sounds, fonts, `.lang`), names and paths under `main/`, and map download sends `.bvm` unchanged. New formats are added beside old ones, never instead. A PR touching a loader is tested locally with original data; CI keeps using placeholders.
-2. **GUI freeze** (same ADR). Menus, HUD, layout, fonts and visible text stay as in BV2. Work marked **[GUI]** changes what the player sees and needs the owner's explicit approval, noted on its Project item, before work starts. If unmarked work turns out to change the interface, stop and ask.
+2. **GUI freeze** (same ADR). Menus, HUD, layout, fonts and visible text stay as in BV2. Work marked **[GUI]** changes what the player sees and needs the owner's explicit approval, noted in its scope item (`gui: true`), before work starts. If unmarked work turns out to change the interface, stop and ask.
 3. **Internal renaming** ([ADR 0009](docs/decisions/0009-rename-internal-identifiers-continuously.md)). Replace `bv2`/`babo` with `roboviolence2` in code symbols, namespaces, source file and class names, internal CMake targets and variables, and comments, in files a PR already touches. Binaries (`bv2`, `bv2dedicated`, `bv2master`), `BV2_*` env vars and CMake options, cvars, config and pref paths, `bv2.db`, file formats, protocol and master-server IDs, and visible strings wait for the rebrand (PNS-20, H.7). Renames are separate mechanical commits; tests stay green.
 4. **Touch-and-improve** (PNS-19). In files a PR already touches, replace raw `sprintf`/`strcpy`/`strcat` with `snprintf` or `std::string`, and use `std::unique_ptr` where ownership is clear. Add a test with each fix.
 
-PNS-n names a Project item by its Source field.
+PNS-n is an old id: scope item ROBO-0nn carries it in `aliases`.
 
 ## Deprecated, to be removed
 
@@ -98,7 +98,7 @@ Kept only for compatibility; remove once the trigger holds, each removal with an
 - The server is authoritative for hits, damage, spawns, projectiles and flags. Clients are authoritative for their own movement.
 - Server variables (`sv_*`) are registered in `game/src/GameVar.cpp` via `dksvarRegister` and pushed to clients.
 - Decisions are ADRs in `docs/decisions/` (format and index in its README). Read them before reversing a choice; write one for any non-obvious new choice.
-- Known defects up to Phase C are in [KEY_QUESTIONS.md](https://github.com/Hub-Tansky/RoboViolence2/blob/fc0aff7c5aa946406c7c110e8e7c2d972a7daeb8/docs/analysis/KEY_QUESTIONS.md) (R/Q ids); new ones are Project items with Category Bug. Check both before "fixing" odd behaviour, since some of it is load-bearing.
+- Known defects up to Phase C are in [KEY_QUESTIONS.md](https://github.com/Hub-Tansky/RoboViolence2/blob/fc0aff7c5aa946406c7c110e8e7c2d972a7daeb8/docs/analysis/KEY_QUESTIONS.md) (R/Q ids); new ones are scope items with `kind: bug`. Check both before "fixing" odd behaviour, since some of it is load-bearing.
 
 ## Writing documentation
 

@@ -1,6 +1,6 @@
 # Architecture
 
-Robo Violence 2: unofficial fork of BaboViolent 2, a top-down multiplayer shooter (C++, GPLv3). State: Phases A and B done; Phase C done, first release pending; Phase T steps 1–3 done. Backlog, roadmap and bugs: the [GitHub Project](https://github.com/users/Hub-Tansky/projects/1) (private) and [issues](https://github.com/Hub-Tansky/RoboViolence2/issues).
+Robo Violence 2: unofficial fork of BaboViolent 2, a top-down multiplayer shooter (C++, GPLv3). State: Phases A and B done; Phase C done, first release pending; Phase T steps 1–3 done. Backlog: `40-backlog/` in the private vault repo [rv2-docs](https://github.com/Hub-Tansky/rv2-docs) (ADR 0044); public bug intake: [issues](https://github.com/Hub-Tansky/RoboViolence2/issues).
 
 ## Summary
 
@@ -22,7 +22,7 @@ Robo Violence 2: unofficial fork of BaboViolent 2, a top-down multiplayer shoote
 | Website | roboviolence.com is built and deployed from [Hub-Tansky/rv2-website](https://github.com/Hub-Tansky/rv2-website) ([ADR 0036](docs/decisions/0036-website-in-rv2-website-repository.md)); its tests read the release file names from `build.yml`. |
 | Hosting | Server images from `packaging/docker/Dockerfile` (GHCR on `main`), runbook [docs/ops/runbook.md](docs/ops/runbook.md). |
 | Known defects | [docs/analysis/KEY_QUESTIONS.md](https://github.com/Hub-Tansky/RoboViolence2/blob/fc0aff7c5aa946406c7c110e8e7c2d972a7daeb8/docs/analysis/KEY_QUESTIONS.md). |
-| Decisions | [docs/decisions/README.md](docs/decisions/README.md): 0001 Ninja, 0002 libcurl compiled out, 0003 OpenGL 2.1 kept, 0004 project name (superseded by 0008), 0005 `main/` data root, 0006 platform layer, 0007 data root, pref dir and config layers, 0008 display name "Robo Violence 2", 0009 internal renaming, 0010 BV2 asset compatibility and GUI freeze, 0011 gettext PO translations, 0012 Windows 10 22H2 minimum, 0013 rulesets, 0014 libsodium HMAC, 0015 admin HTTP API, 0016 player data lookup and package content, 0017 playtest pull agent, 0018 staging pull deploy, 0019 in-game name and fork credits, 0020 package and release format, 0021 one-argument CString is text, 0022 advertised server address, 0023 step review subagent in the repo (superseded by 0037), 0024 GitHub Project is the backlog, 0025 client autotest mode, 0026 screenshot goldens, 0029 static website (moved to rv2-website), 0033 first-run data dialog recommends the BV2 zip (superseded by 0040), 0034 player data retention and privacy policy, 0035 website Tailwind and agent files (moved to rv2-website), 0036 website in rv2-website, 0037 review rubric single repo copy, 0038 dead account pages hidden, admin and ban secrets hardened, 0039 Widescreen (Stretch) shows more map, 0040 first-run download of the original data, 0041 build on PRs, `main` and tags; re-run a build whose job never got a runner, 0042 Options "Game assets" and remembered placeholders, 0043 first start fullscreen at the desktop resolution on the Game Browser tab. |
+| Decisions | [docs/decisions/README.md](docs/decisions/README.md): 0001 Ninja, 0002 libcurl compiled out, 0003 OpenGL 2.1 kept, 0004 project name (superseded by 0008), 0005 `main/` data root, 0006 platform layer, 0007 data root, pref dir and config layers, 0008 display name "Robo Violence 2", 0009 internal renaming, 0010 BV2 asset compatibility and GUI freeze, 0011 gettext PO translations, 0012 Windows 10 22H2 minimum, 0013 rulesets, 0014 libsodium HMAC, 0015 admin HTTP API, 0016 player data lookup and package content, 0017 playtest pull agent, 0018 staging pull deploy, 0019 in-game name and fork credits, 0020 package and release format, 0021 one-argument CString is text, 0022 advertised server address, 0023 step review subagent in the repo (superseded by 0037), 0024 GitHub Project is the backlog (superseded by 0044), 0025 client autotest mode, 0026 screenshot goldens, 0029 static website (moved to rv2-website), 0033 first-run data dialog recommends the BV2 zip (superseded by 0040), 0034 player data retention and privacy policy, 0035 website Tailwind and agent files (moved to rv2-website), 0036 website in rv2-website, 0037 review rubric single repo copy, 0038 dead account pages hidden, admin and ban secrets hardened, 0039 Widescreen (Stretch) shows more map, 0040 first-run download of the original data, 0041 build on PRs, `main` and tags; re-run a build whose job never got a runner, 0042 Options "Game assets" and remembered placeholders, 0043 first start fullscreen at the desktop resolution on the Game Browser tab, 0044 backlog in the rv2-docs vault. |
 
 ### Open items
 
@@ -52,7 +52,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `.gitignore` | Ignore rules (OS, editors, builds, secrets, original assets) |
 | `.gitleaks.toml` | gitleaks rules: default plus config secrets, public IPs, master-server rows, hosts |
 | `.dockerignore` | Docker build context: sources only (no `.git`, builds, docs) |
-| `AGENTS.md` | Canonical agent and contributor instructions; work tracking in the GitHub Project |
+| `AGENTS.md` | Canonical agent and contributor instructions; work tracking in the rv2-docs vault |
 | `ARCHITECTURE.md` | This file: summary and file inventory |
 | `CMakeLists.txt` | Root CMake project: options, runtime layout, placeholder content, subdirectories, install layout (binaries, `share/bv2/main` as `runtime/main` holds it, `.desktop`, icons; `bv2master` in component `master`), which the `.deb` packages |
 | `CMakePresets.json` | Presets: linux-x64, macos-arm64, win-x64-msvc (Debug), -asan and -release variants (Ninja); macOS uses the overlay triplet in `tools/vcpkg-triplets/` |
@@ -314,7 +314,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/decisions/0021-cstring-one-argument-is-text.md` | ADR: one-argument `CString` copies text; two or more arguments format (Phase C step 5) |
 | `docs/decisions/0022-advertised-server-address.md` | ADR: the master lists `sv_publicAddress` only from private sources; `KILL_SERV` by connection (Phase C step 6) |
 | `docs/decisions/0023-step-review-subagent-in-repo.md` | ADR: step-closing review subagent and rubric tracked in `.claude/` |
-| `docs/decisions/0024-github-project-is-the-backlog.md` | ADR: the private GitHub Project is the backlog; roadmap files removed; PR carries scope and review record |
+| `docs/decisions/0024-github-project-is-the-backlog.md` | ADR (superseded by 0044): the private GitHub Project was the backlog; roadmap files removed; PR carries scope and review record |
 | `docs/decisions/0025-client-autotest-mode.md` | ADR: the client runs scripted console commands and expectations (`--autotest`) with exit codes 0/1/2 and a watchdog |
 | `docs/decisions/0026-screenshot-goldens.md` | ADR: Linux llvmpipe screenshot goldens compared within a tolerance; the `screenshot`, `menutab` and `scoreboard` commands |
 | `docs/decisions/0027-several-game-servers-per-host.md` | ADR: several game servers per host (CTF, TDM): one image, `BV2_HEALTH_PORT`, one env file, admin APIs at `/` and `/tdm/`, deploy waits for both |
@@ -332,13 +332,13 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/decisions/0041-macos-ci-runner-not-acquired-retry.md` | ADR: `build` runs on PRs, pushes to `main` and `v*` tags; `ci-retry` re-runs a build whose job GitHub never gave a runner (macOS arm64 capacity) |
 | `docs/decisions/0042-game-assets-option-remembers-placeholders.md` | ADR: Options "Game assets" text field sets the BV2 data folder, "Use placeholders" is remembered and wins over auto-detect, Ctrl/Cmd+V paste, the Extract All lookup candidate; amends 0016 and 0040 |
 | `docs/decisions/0043-first-start-fullscreen-desktop-and-game-browser.md` | ADR: `r_resolution 0 0` is the desktop size (fullscreen without a mode switch, or a maximized window), the new defaults, "Desktop" in Options, the menu opens on the Game Browser; existing configs keep their choice |
+| `docs/decisions/0044-backlog-in-the-rv2-docs-vault.md` | ADR: the backlog is one `ROBO-NNN` Markdown file per scope item in the private rv2-docs vault; supersedes 0024 |
 | `docs/decisions/README.md` | ADR format and index |
 
 ### `docs/ops`
 
 | path | purpose |
 |---|---|
-| `docs/ops/release.md` | Cutting a release: pick the commit, manual install test per OS, tag, notes header template, production re-pin, Discord publish |
 | `docs/ops/runbook.md` | Hosting the server images: secrets, start, stop, upgrade, logs, console, ports, backups, production (pinned manual deploy, failover) |
 
 ### `engine/babonet`

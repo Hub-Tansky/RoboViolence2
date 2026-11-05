@@ -2,9 +2,9 @@
 
 | Field | Value |
 |---|---|
-| Item | <Project item or issue link; `Closes #n` for an issue> |
+| Item | <ROBO-NNN scope item; `Closes #n` for an issue> |
 | Goal | <one sentence: what is true after this PR> |
-| Out of scope | <tempting work left out, with its Project item> |
+| Out of scope | <tempting work left out, with its ROBO-NNN item> |
 | Allowed paths | <globs in backticks, e.g. `game/src/Server*.cpp` `tests/**` `ARCHITECTURE.md`> |
 
 Before:

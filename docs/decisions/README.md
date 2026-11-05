@@ -5,7 +5,7 @@ One file per non-obvious decision: `NNNN-kebab-title.md`, numbered in order, nev
 ## Rules
 
 - An accepted ADR is never edited except for its **Status** line. To change a decision, write a new ADR and mark the old one `Superseded by NNNN`.
-- Keep it under one screen. Cite code as `path:line`; link the Project item, issue, PR or file it affects.
+- Keep it under one screen. Cite code as `path:line`; link the scope item (ROBO-NNN), issue, PR or file it affects.
 - Add every new ADR to the index below and to the `ARCHITECTURE.md` inventory.
 - An ADR moved to another repository keeps its number here: its index row links the file there with status `Moved to <repo> (NNNN)`, NNNN being the ADR that moved it.
 
@@ -16,7 +16,7 @@ One file per non-obvious decision: `NNNN-kebab-title.md`, numbered in order, nev
 
 - Status: Accepted | Superseded by NNNN | Deprecated
 - Date: YYYY-MM-DD
-- Affects: <Project item, issue, PR or file>
+- Affects: <scope item, issue, PR or file>
 
 ## Context
 Facts that force the decision, with `path:line` citations. 2–5 bullets.
@@ -56,7 +56,7 @@ What we do, in one or two sentences.
 | [0021](0021-cstring-one-argument-is-text.md) | A one-argument CString is text; formatting needs arguments | Accepted |
 | [0022](0022-advertised-server-address.md) | The master lists an advertised address only from private sources | Accepted |
 | [0023](0023-step-review-subagent-in-repo.md) | The step-closing review subagent and its rubric live in the repo | Superseded by 0037 |
-| [0024](0024-github-project-is-the-backlog.md) | The private GitHub Project is the backlog; no roadmap files in the repo | Accepted |
+| [0024](0024-github-project-is-the-backlog.md) | The private GitHub Project is the backlog; no roadmap files in the repo | Superseded by 0044 |
 | [0025](0025-client-autotest-mode.md) | Test the real client through a scripted autotest mode | Accepted |
 | [0026](0026-screenshot-goldens.md) | Screenshot goldens are Linux llvmpipe frames compared within a tolerance | Accepted (amended by 0043) |
 | [0027](0027-several-game-servers-per-host.md) | Several game servers on one host share one image, one env file and one admin proxy | Accepted |
@@ -76,3 +76,4 @@ What we do, in one or two sentences.
 | [0041](0041-macos-ci-runner-not-acquired-retry.md) | Build branches through their PR only, and re-run a build whose job never got a runner | Accepted |
 | [0042](0042-game-assets-option-remembers-placeholders.md) | Options "Game assets" sets the BV2 data folder, and "Use placeholders" is remembered | Accepted |
 | [0043](0043-first-start-fullscreen-desktop-and-game-browser.md) | A new player starts fullscreen at the desktop resolution, on the Game Browser tab | Accepted |
+| [0044](0044-backlog-in-the-rv2-docs-vault.md) | The backlog is one Markdown file per scope item in the private rv2-docs vault | Accepted |
