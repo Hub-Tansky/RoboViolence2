@@ -24,4 +24,4 @@
 - The five menu goldens were regenerated on Linux in this PR (ADR 0026); owner's choice.
 - Rejected: reusing the old key with a string (undefined behaviour on original `.lang` files).
 - Rejected: `git describe` or a hash (the source tarball has no `.git`, and an untagged build shows `0.0.0-dev`).
-- Rejected: a compile definition (it recompiles every source of `bv2`, and string quoting differs per generator).
+- Rejected: a target-wide compile definition (it recompiles every source of `bv2`, and string quoting differs per generator).
