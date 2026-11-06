@@ -14,10 +14,11 @@ repos:
       - id: clang-format
         args: [--style=file, --version=23.1.5]
         stages: [manual]
-      # Reports only problems on lines the commit adds or changes. Needs a configured preset
-      # (build/<preset>/compile_commands.json, newest one wins); skips with a note when none exists.
+      # Reports only problems on lines the commit adds or changes. Uses the macos-arm64 preset's
+      # compile database (run `cmake --preset macos-arm64` first); fails when it is missing.
+      # Elsewhere: SKIP=clang-tidy git commit ...
       - id: clang-tidy
-        args: [--version=23.1.4]
+        args: [--version=23.1.4, --compile-commands=build/macos-arm64]
         files: ^(engine/[^/]+/src|game/src|masterserver/src)/.*\.cpp$
   - repo: local
     hooks:

@@ -14,12 +14,12 @@
 - `.githooks/pre-commit` runs `pre-commit run` after its own checks and fails when `pre-commit` is missing. Nobody runs `pre-commit install`.
 - Formatting on commit is a local hook running `git-clang-format HEAD` from the `clang-format` wheel: only lines the commit changes are formatted. If it changes anything the commit stops and the result is reviewed and staged.
 - cpp-linter-hooks `clang-format` (whole file) stays as a `manual` stage at the owner's request; new files are already formatted in full by the changed-lines hook, and it is never run on legacy files.
-- cpp-linter-hooks `clang-tidy` runs on `engine/*/src`, `game/src` and `masterserver/src` sources (the CI `tidy` set) and reports only changed lines. It uses the newest `build/*/compile_commands.json` and skips with a note when no preset is configured.
+- cpp-linter-hooks `clang-tidy` runs on `engine/*/src`, `game/src` and `masterserver/src` sources (the CI `tidy` set) and reports only changed lines. It uses `build/macos-arm64/compile_commands.json` (the owner's preset; 2026-11-06, the default "newest `build/*` wins" picked a stale database) and fails when that file is missing.
 - `third_party/` is excluded. clang-format 23.1.5 and clang-tidy 23.1.4 (the newest clang-tidy wheel on PyPI) are pinned so every machine formats and lints alike.
 
 ## Consequences
 - A commit touching a legacy file gets a small, reviewable format diff, never a whole-file rewrite.
-- A fresh clone without a configured preset commits without clang-tidy; CI `tidy` still runs, but with Ubuntu's apt clang-tidy 18, so its findings can differ from the commit hook's.
+- A clone without a configured `macos-arm64` preset (Linux, Windows, fresh clones) fails C++ commits until it is configured, or commits with `SKIP=clang-tidy`; CI `tidy` still runs, but with Ubuntu's apt clang-tidy 18, so its findings can differ from the commit hook's.
 - clang-tidy analyses the whole translation unit, so a commit touching large game files can take tens of seconds.
 - Headers aren't clang-tidy'd on commit (no compile command of their own); their problems show up through the sources in CI.
 - Rejected: the cpp-linter-hooks `clang-format` hook on commit as suggested in its README (whole-file `-i`: mass reformat of every touched file). Rejected: a one-time mass reformat plus a blame-ignore entry (hides the BV2 history the port depends on, collides with every open branch). Rejected: unsetting `core.hooksPath` to let `pre-commit install` own the hooks (moves the identity, secret and asset checks into a second system).
