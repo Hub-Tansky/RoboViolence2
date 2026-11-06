@@ -98,7 +98,7 @@ Kept only for compatibility; remove once the trigger holds, each removal with an
 - The server is authoritative for hits, damage, spawns, projectiles and flags. Clients are authoritative for their own movement.
 - Server variables (`sv_*`) are registered in `game/src/GameVar.cpp` via `dksvarRegister` and pushed to clients.
 - Decisions are ADRs in `docs/decisions/` (format and index in its README). Read them before reversing a choice; write one for any non-obvious new choice.
-- Known defects up to Phase C are in [KEY_QUESTIONS.md](https://github.com/Hub-Tansky/RoboViolence2/blob/fc0aff7c5aa946406c7c110e8e7c2d972a7daeb8/docs/analysis/KEY_QUESTIONS.md) (R/Q ids); new ones are scope items with `kind: bug`. Check both before "fixing" odd behaviour, since some of it is load-bearing.
+- Known defects are in the backlog: items in `40-backlog/` with `kind: bug` (see [Work tracking](#work-tracking)). Check them before "fixing" odd behaviour, since some of it is load-bearing.
 
 ## Writing documentation
 
