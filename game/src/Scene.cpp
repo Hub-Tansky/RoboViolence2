@@ -302,7 +302,7 @@ void Scene::render()
 				// On affiche la version du jeu
 				if (!editor && !client)
 				{
-					printRightText((float)res[0] - 5, (float)res[1] - 32 - 5, 32, CString("version: %s", g_releaseVersion));
+					printRightText((float)res[0] - 5, (float)res[1] - 32 - 5, 32, CString(gameVar.lang_version.s, g_releaseVersion));
 
 					//--- Copyrights (replaced by head games logo)
 				//	printRightText((float)res[0]-5, (float)res[1]-100-5, 16, CString("Copyright (c) RndLabs Inc. 2006-2007"));

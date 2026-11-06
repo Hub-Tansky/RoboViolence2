@@ -136,8 +136,7 @@ GameVar::GameVar()
 
 	langs.push_back(SLangText("lang_friendlyFire", &lang_friendlyFire));
 
-	langs.push_back(SLangText("lang_serverVersion", &lang_serverVersion));
-	langs.push_back(SLangText("lang_clientVersion", &lang_clientVersion));
+	langs.push_back(SLangText("lang_version", &lang_version));
 
 	langs.push_back(SLangText("lang_connectionFailed", &lang_connectionFailed));
 	langs.push_back(SLangText("lang_back", &lang_back));
