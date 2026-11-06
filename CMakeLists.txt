@@ -27,6 +27,14 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 option(BV2_SANITIZE "Build with AddressSanitizer and UBSan" OFF)
 
+# Release shown on the main menu (ADR 0046): CI passes the v* tag in the environment; any other build shows 0.0.0-dev.
+# The environment seeds the cache on the first configure only; later use -DBV2_VERSION=... or -UBV2_VERSION.
+set(BV2_VERSION "$ENV{BV2_VERSION}" CACHE STRING "Release shown on the main menu: a v* tag or a version")
+if(BV2_VERSION STREQUAL "")
+  set(BV2_VERSION 0.0.0-dev)
+endif()
+string(REGEX REPLACE "^v" "" ROBOVIOLENCE2_VERSION_TEXT "${BV2_VERSION}")
+
 find_package(Threads REQUIRED)
 # GL entry points come from glad; GLU (headers and library) is still the system's (see ARCHITECTURE.md).
 find_package(OpenGL REQUIRED COMPONENTS OpenGL OPTIONAL_COMPONENTS GLU)

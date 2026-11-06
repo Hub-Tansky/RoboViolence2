@@ -25,6 +25,7 @@
 #include "CStatus.h"
 #ifndef CONSOLE
 	#include "JoinGame.h"
+#	include "ReleaseVersion.h"
 #endif
 
 
@@ -301,14 +302,7 @@ void Scene::render()
 				// On affiche la version du jeu
 				if (!editor && !client)
 				{
-					if (server)
-					{
-						printRightText((float)res[0]-5, (float)res[1]-32-5, 32, CString(gameVar.lang_serverVersion.s, (int)GAME_VERSION_SV/10000, (int)(GAME_VERSION_SV%10000)/100, ((int)GAME_VERSION_SV%100)));
-					}
-					else
-					{
-						printRightText((float)res[0]-5, (float)res[1]-32-5, 32, CString(gameVar.lang_clientVersion.s, (int)GAME_VERSION_CL/10000, (int)(GAME_VERSION_CL%10000)/100, ((int)GAME_VERSION_CL%100)));
-					}
+					printRightText((float)res[0] - 5, (float)res[1] - 32 - 5, 32, CString("version: %s", g_releaseVersion));
 
 					//--- Copyrights (replaced by head games logo)
 				//	printRightText((float)res[0]-5, (float)res[1]-100-5, 16, CString("Copyright (c) RndLabs Inc. 2006-2007"));
