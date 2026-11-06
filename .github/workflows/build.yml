@@ -62,9 +62,7 @@ jobs:
       # The archive on every OS, plus the installer (Windows), disk image (macOS) or .deb (Linux); ADR 0020, 0031
       - name: Package
         shell: bash
-        env:
-          VERSION: ${{ github.ref_type == 'tag' && github.ref_name || '0.0.0-dev' }}
-        run: ${{ runner.os == 'Windows' && 'python' || 'python3' }} packaging/make-package.py build/${{ matrix.preset }}-release/runtime ${{ matrix.preset }} out "$VERSION"
+        run: ${{ runner.os == 'Windows' && 'python' || 'python3' }} packaging/make-package.py build/${{ matrix.preset }}-release/runtime ${{ matrix.preset }} out "$BV2_VERSION"
       # Install, upgrade over it (the master's databases stay), uninstall (they stay too); ADR 0020
       - name: The installer installs, upgrades and uninstalls silently
         if: runner.os == 'Windows'
