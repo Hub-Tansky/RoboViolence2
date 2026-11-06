@@ -1,0 +1,33 @@
+# C/C++ lint hooks (cpp-linter-hooks). Runs from .githooks/pre-commit, because core.hooksPath is set
+# and `pre-commit install` refuses to run then. One-time setup: `brew install pre-commit` (or
+# `pipx install pre-commit`), then `tools/setup-dev.sh`. Run by hand: `pre-commit run`.
+# Most legacy files do not match .clang-format, so commits format only the lines they change (AGENTS.md).
+exclude: (^|/)third_party/
+# clang-tidy must run before the formatter: once the working tree differs from the index,
+# cpp-linter-hooks checks every line of a file instead of only the changed ones.
+repos:
+  - repo: https://github.com/cpp-linter/cpp-linter-hooks
+    rev: v1.8.4
+    hooks:
+      # Whole-file format, manual only: pre-commit run clang-format --hook-stage manual --files <file>.
+      # New files are already formatted in full by the changed-lines hook; never run it on legacy files.
+      - id: clang-format
+        args: [--style=file, --version=23.1.5]
+        stages: [manual]
+      # Reports only problems on lines the commit adds or changes. Needs a configured preset
+      # (build/<preset>/compile_commands.json, newest one wins); skips with a note when none exists.
+      - id: clang-tidy
+        args: [--version=23.1.4]
+        files: ^(engine/[^/]+/src|game/src|masterserver/src)/.*\.cpp$
+  - repo: local
+    hooks:
+      # Formats only the changed lines of staged files with .clang-format; fails if it changed any,
+      # so review and `git add` the result.
+      - id: clang-format-changed-lines
+        name: clang-format (changed lines)
+        language: python
+        additional_dependencies: [clang-format==23.1.5]
+        entry: git-clang-format HEAD --style=file --
+        types_or: [c++, c]
+        # git-clang-format uses one fixed temporary index; parallel batches fail on its lock.
+        require_serial: true

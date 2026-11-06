@@ -26,7 +26,7 @@ fi
 git config core.hooksPath .githooks
 git config blame.ignoreRevsFile .git-blame-ignore-revs
 missing=0
-for t in gitleaks cmake ninja python3; do
+for t in gitleaks pre-commit cmake ninja python3; do
   command -v "$t" >/dev/null 2>&1 || { echo "missing: $t" >&2; missing=1; }
 done
 [ -n "$VCPKG_ROOT" ] || echo "note: VCPKG_ROOT is not set (the presets use \$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake)" >&2

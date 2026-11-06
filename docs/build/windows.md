@@ -41,6 +41,7 @@ Prerequisites:
 
 - Visual Studio 2022 Build Tools with **Desktop development with C++** (MSVC, Windows SDK).
 - CMake 3.25+, Ninja and Python 3, for example `winget install Kitware.CMake Ninja-build.Ninja Python.Python.3.12`.
+- For commits: `pip install pre-commit` (the commit hooks run it).
 - Git.
 
 vcpkg, once, in PowerShell:

@@ -1,5 +1,6 @@
 #!/bin/sh
 # RoboViolence2 pre-commit: identity, secrets, original assets, encoding. Never bypass with --no-verify.
+# Then C/C++ lint: pre-commit run (.pre-commit-config.yaml, ADR 0045).
 set -e
 root=$(git rev-parse --show-toplevel)
 cd "$root"
@@ -16,4 +17,8 @@ gitleaks git --pre-commit --staged --redact --config .gitleaks.toml
 
 python3 tools/check-original-assets.py --staged
 [ -f tools/check-encoding.py ] && python3 tools/check-encoding.py --staged
+
+# core.hooksPath stops `pre-commit install`, so the framework runs from here.
+command -v pre-commit >/dev/null 2>&1 || { echo "pre-commit: pre-commit not installed (brew install pre-commit, or pipx install pre-commit)" >&2; exit 1; }
+pre-commit run
 exit 0
