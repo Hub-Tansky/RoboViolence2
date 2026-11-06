@@ -13,7 +13,7 @@
 ## Decision
 - `.githooks/pre-commit` runs `pre-commit run` after its own checks and fails when `pre-commit` is missing. Nobody runs `pre-commit install`.
 - Formatting on commit is a local hook running `git-clang-format HEAD` from the `clang-format` wheel: only lines the commit changes are formatted. If it changes anything the commit stops and the result is reviewed and staged.
-- cpp-linter-hooks `clang-format` (whole file) is a `manual` stage, for new files.
+- cpp-linter-hooks `clang-format` (whole file) stays as a `manual` stage at the owner's request; new files are already formatted in full by the changed-lines hook, and it is never run on legacy files.
 - cpp-linter-hooks `clang-tidy` runs on `engine/*/src`, `game/src` and `masterserver/src` sources (the CI `tidy` set) and reports only changed lines. It uses the newest `build/*/compile_commands.json` and skips with a note when no preset is configured.
 - `third_party/` is excluded. clang-format 23.1.5 and clang-tidy 23.1.4 (the newest clang-tidy wheel on PyPI) are pinned so every machine formats and lints alike.
 

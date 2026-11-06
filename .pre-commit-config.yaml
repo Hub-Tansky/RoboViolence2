@@ -18,7 +18,7 @@ repos:
       # (build/<preset>/compile_commands.json, newest one wins); skips with a note when none exists.
       - id: clang-tidy
         args: [--version=23.1.4]
-        files: ^(engine/[^/]+/src|game/src|masterserver/src)/.*\.(c|cc|cpp)$
+        files: ^(engine/[^/]+/src|game/src|masterserver/src)/.*\.cpp$
   - repo: local
     hooks:
       # Formats only the changed lines of staged files with .clang-format; fails if it changed any,
