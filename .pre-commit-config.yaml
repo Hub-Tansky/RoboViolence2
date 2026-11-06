@@ -2,14 +2,15 @@
 # and `pre-commit install` refuses to run then. One-time setup: `brew install pre-commit` (or
 # `pipx install pre-commit`), then `tools/setup-dev.sh`. Run by hand: `pre-commit run`.
 # Most legacy files do not match .clang-format, so commits format only the lines they change (AGENTS.md).
-default_install_hook_types: [pre-commit]
 exclude: (^|/)third_party/
+# clang-tidy must run before the formatter: once the working tree differs from the index,
+# cpp-linter-hooks checks every line of a file instead of only the changed ones.
 repos:
   - repo: https://github.com/cpp-linter/cpp-linter-hooks
     rev: v1.8.4
     hooks:
-      # Whole-file format. Manual only, e.g. for a new file:
-      #   pre-commit run clang-format --hook-stage manual --files path/to/new.cpp
+      # Whole-file format, manual only: pre-commit run clang-format --hook-stage manual --files <file>.
+      # New files are already formatted in full by the changed-lines hook; never run it on legacy files.
       - id: clang-format
         args: [--style=file, --version=23.1.5]
         stages: [manual]
@@ -28,3 +29,5 @@ repos:
         additional_dependencies: [clang-format==23.1.5]
         entry: git-clang-format HEAD --style=file --
         types_or: [c++, c]
+        # git-clang-format uses one fixed temporary index; parallel batches fail on its lock.
+        require_serial: true

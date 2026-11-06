@@ -200,7 +200,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 
 | path | purpose |
 |---|---|
-| `.githooks/pre-commit` | Pre-commit: identity, gitleaks, original-asset and encoding checks |
+| `.githooks/pre-commit` | Pre-commit: identity, gitleaks, original-asset and encoding checks, then `pre-commit run` (`.pre-commit-config.yaml`, ADR 0045) |
 | `.githooks/pre-push` | Pre-push: remote and author identity check |
 
 ### `.github`
