@@ -35,7 +35,7 @@ cmake --build --preset <preset> --target bv2dedicated bv2master
 - Saved config, `bv2.db`, logs and maps go to the pref dir (`BV2_PREF_DIR` overrides; [ADR 0007](docs/decisions/0007-data-root-pref-dir-config-layers.md)). Env `BV2_MASTER_SERVERS`, `BV2_ACCOUNT_URL`, `BV2_SV_PASSWORD`, `BV2_ADMIN_PASS`, `BV2_ADMIN_API_PORT`/`_BIND`/`_PROXY`, `BV2_PUBLIC_ADDRESS` and `--config <file>` override config and are never saved. The master reads `BV2_MASTER_BAN_PASS`. `cl_masterServers` defaults to the public master and is never saved; tests start servers and clients with `none` ([ADR 0028](docs/decisions/0028-built-in-public-master.md)).
 - Tracked config is `config/*.example.cfg` with empty placeholders; real values stay local. Policy: [config/README.md](config/README.md).
 - Databases are generated from `content-seed/*.sql`, never committed.
-- Run `tools/setup-dev.sh` (or `.ps1`) once: it activates `.githooks` (identity, gitleaks, original-asset and encoding checks, then `pre-commit` for clang-format and clang-tidy on changed lines, [ADR 0045](docs/decisions/0045-cpp-lint-pre-commit-on-changed-lines.md)).
+- Run `tools/setup-dev.sh` (or `.ps1`) once: it activates `.githooks` (identity, gitleaks, original-asset and encoding checks, then `pre-commit` for clang-format and clang-tidy on changed lines, [ADR 0045](docs/decisions/0045-cpp-lint-pre-commit-on-changed-lines.md)). clang-tidy needs `cmake --preset macos-arm64`; on other OSes commit with `SKIP=clang-tidy`.
 
 ## Work tracking
 
