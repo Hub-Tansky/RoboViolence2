@@ -6,7 +6,7 @@ root=$(git rev-parse --show-toplevel)
 cd "$root"
 
 expected="337104978+Hub-Tansky@users.noreply.github.com"
-email=$(git config user.email)
+email=$(git config user.email || true)
 if [ "$email" != "$expected" ]; then
   echo "pre-commit: user.email is '$email', expected '$expected' (Hub-Tansky)." >&2
   exit 1
