@@ -19,7 +19,7 @@
 
 ## Consequences
 - A commit touching a legacy file gets a small, reviewable format diff, never a whole-file rewrite.
-- A clone without a configured `macos-arm64` preset (Linux, Windows, fresh clones) fails commits that touch an `engine/*/src`, `game/src` or `masterserver/src` `.cpp` until it is configured, or commits with `SKIP=clang-tidy`; CI `tidy` still runs, but with Ubuntu's apt clang-tidy 18, so its findings can differ from the commit hook's.
+- A clone without `build/macos-arm64` fails commits that touch an `engine/*/src`, `game/src` or `masterserver/src` `.cpp`. On macOS, run `cmake --preset macos-arm64` first; the preset is Darwin-only, so Linux and Windows commit with `SKIP=clang-tidy`. CI `tidy` still runs, but with Ubuntu's apt clang-tidy 18, so its findings can differ from the commit hook's.
 - clang-tidy analyses the whole translation unit, so a commit touching large game files can take tens of seconds.
 - Headers aren't clang-tidy'd on commit (no compile command of their own); their problems show up through the sources in CI.
 - Rejected: the cpp-linter-hooks `clang-format` hook on commit as suggested in its README (whole-file `-i`: mass reformat of every touched file). Rejected: a one-time mass reformat plus a blame-ignore entry (hides the BV2 history the port depends on, collides with every open branch). Rejected: unsetting `core.hooksPath` to let `pre-commit install` own the hooks (moves the identity, secret and asset checks into a second system).
