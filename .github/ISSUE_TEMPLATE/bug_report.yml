@@ -61,3 +61,8 @@ body:
       label: Logs
       description: "Console output or log files from the pref directory: Windows `%APPDATA%\\BaboViolent2\\bv2`, macOS `~/Library/Application Support/BaboViolent2/bv2`, Linux `~/.local/share/BaboViolent2/bv2`. Remove passwords and IP addresses."
       render: text
+  - type: textarea
+    id: crash
+    attributes:
+      label: Crash report
+      description: "If the client crashed, drag the newest `crash-<date>-<time>.txt` from the same pref directory here. It holds the game version and a stack trace, and may show your user folder name in file paths."

@@ -19,12 +19,18 @@ target_include_directories(test_spawn_overlay PRIVATE ${CMAKE_SOURCE_DIR}/game/s
 bv2_target_defaults(test_spawn_overlay)
 add_test(NAME spawn_overlay COMMAND test_spawn_overlay)
 
+add_executable(test_crash_report test_crash_report.cpp ${CMAKE_SOURCE_DIR}/game/src/CrashReport.cpp)
+target_include_directories(test_crash_report PRIVATE ${CMAKE_SOURCE_DIR}/game/src)
+target_link_libraries(test_crash_report PRIVATE zeven_core)  # platform.h
+bv2_target_defaults(test_crash_report)
+
 add_executable(test_config test_config.cpp)
 target_link_libraries(test_config PRIVATE zeven_core)
 bv2_target_defaults(test_config)
 set(BV2_TEST_SCRATCH "${CMAKE_BINARY_DIR}/test-scratch")
 file(MAKE_DIRECTORY "${BV2_TEST_SCRATCH}")
 add_test(NAME config COMMAND test_config "${BV2_TEST_SCRATCH}")
+add_test(NAME crash_report COMMAND test_crash_report "${BV2_TEST_SCRATCH}/crash-report")
 
 if(BV2_BUILD_SERVER)
   find_package(Python3 REQUIRED COMPONENTS Interpreter)

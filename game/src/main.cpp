@@ -28,6 +28,10 @@
 #include "CMaster.h"
 #include "Paths.h"
 #include "DataDirPicker.h"
+#ifndef CONSOLE
+#	include "CrashReport.h"
+#	include "ReleaseVersion.h"
+#endif
 #ifdef BV2_APP_ICON_PNG
 #include "AppIcon.h"
 #endif
@@ -524,6 +528,7 @@ int main(int argc, char* argv[])
 {
 	// PREMIERE CHOSE A FAIRE, on load les config
 	bv2::pathsInit(argv[0]);
+	crashreport::install(bv2::prefDir(), g_releaseVersion); // ROBO-186, ADR 0048
 	if (!autotestStart(argc, argv)) return exitCode;
 	bv2::chooseDataDir(argc, argv);
 	dksvarInit(&stringInterface);
