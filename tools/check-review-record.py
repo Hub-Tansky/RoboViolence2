@@ -115,7 +115,7 @@ def check_spec_matrix(report, outcomes):
         status = r[-1].lower()
         if status == "partial":
             if not any(o["axis"] == "Spec" and r[0] in o["finding"] and re.match(OWNER, o["outcome"], re.I) for o in outcomes):
-                problems.append(f"review gate: partial criterion needs 'confirmed with owner' in Outcomes: {r[0][:80]}")
+                problems.append(f"review gate: partial criterion needs an Outcome starting 'confirmed with owner:': {r[0][:80]}")
         elif status != "pass":
             problems.append(f"review gate: Spec says '{r[-1]}' for: {r[0][:80]}")
     return problems
