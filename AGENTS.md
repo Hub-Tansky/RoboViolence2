@@ -60,6 +60,22 @@ cmake --build --preset <preset> --target bv2dedicated bv2master
 - Work is done only per [REVIEW.md](REVIEW.md): `tools/review.sh` passes (CI `review` check), and a scoped PR is ready only with a review by the `rv2-thermo-nuclear-review` subagent (`.claude/agents/`, rubric in `.claude/skills/rv2-thermo-nuclear-review/`, the only copy), which any session can spawn, recorded in the PR description. Its stop rule and forbidden shortcuts apply to every change.
 - Don't mix mechanical rewrites (encoding, renames, formatting) with functional changes in one commit.
 
+## Agent skills
+
+Configuration for the mattpocock engineering skills.
+
+### Issue tracker
+
+Scope items `ROBO-NNN` in rv2-docs `40-backlog/`; GitHub issues are intake only. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default labels on GitHub issues; accepted issues become Proposed scope items. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: root `CONTEXT.md` (created lazily), ADRs in `docs/decisions/`. See `docs/agents/domain.md`.
+
 ## Ground rules
 
 1. **BV2 asset compatibility** ([ADR 0010](docs/decisions/0010-bv2-asset-compat-and-gui-freeze.md)). Until replacement assets ship (PNS-20, H.1), the game runs on original BV2 data (`BV2_DATA_DIR`) unchanged: same file formats (`.DKO`, `.bvm`, textures, sounds, fonts, `.lang`), names and paths under `main/`, and map download sends `.bvm` unchanged. New formats are added beside old ones, never instead. A PR touching a loader is tested locally with original data; CI keeps using placeholders.
