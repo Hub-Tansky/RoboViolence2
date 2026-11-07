@@ -95,12 +95,12 @@ Servers only: add `-DBV2_BUILD_CLIENT=OFF` to the configure command.
 
 ## Without vcpkg (cloud sessions)
 
-When vcpkg can't download its ports (for example a proxy that blocks the gnu.org mirrors the autotools ports need), build against system packages and a hand-built SDL3. This is how agents in cloud sessions run client, e2e and screenshot tests without waiting for CI. Checked on Ubuntu 24.04 at 34d73aa (2026-11-07): build plus `ctest -R screenshot_`, about 10 minutes.
+When vcpkg can't download its ports (for example a proxy that blocks the gnu.org mirrors the autotools ports need), build against system packages and a hand-built SDL3. The SDL3 and miniaudio versions below are the `sdl3` and `miniaudio` ports at the `vcpkg.json` `builtin-baseline`; update them when the baseline moves. Checked on Ubuntu 24.04 at 34d73aa (2026-11-07): build plus `ctest -R screenshot_`, about 10 minutes.
 
 1. Packages:
 
    ```bash
-   sudo apt-get install libsodium-dev libsqlite3-dev libstb-dev libgl-dev libglu1-mesa-dev libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxi-dev libxss-dev libxfixes-dev libxtst-dev libgl1-mesa-dri xauth xvfb
+   sudo apt-get install build-essential cmake ninja-build python3 git libsodium-dev libsqlite3-dev libstb-dev libgl-dev libglu1-mesa-dev libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxi-dev libxss-dev libxfixes-dev libxtst-dev libgl1-mesa-dri xauth xvfb
    ```
 
 2. SDL3 at the tag that matches the vcpkg baseline, into a prefix (here `/opt/rv2deps`):
@@ -139,7 +139,7 @@ When vcpkg can't download its ports (for example a proxy that blocks the gnu.org
 
 ### Regenerate a screenshot golden
 
-Goldens (`tests/golden/<name>.png`, [ADR 0026](../decisions/0026-screenshot-goldens.md)) are Mesa llvmpipe frames from Linux. With the build above:
+Goldens: `tests/golden/<name>.png` ([ADR 0026](../decisions/0026-screenshot-goldens.md)). With the build above:
 
 ```bash
 python3 -B tests/screenshots.py "$PWD/build/local/runtime/bv2" "$PWD/build/local/shots" <name> --update
