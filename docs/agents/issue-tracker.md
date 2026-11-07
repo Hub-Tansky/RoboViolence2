@@ -16,16 +16,16 @@ Read `40-backlog/*/ROBO-NNN *.md` in rv2-docs. `#n` is the intake issue; its sco
 
 ## Wayfinding operations
 
-Used by `/wayfinder`. Map and tickets are scope items in rv2-docs `40-backlog/`; nothing goes in this repo or `.scratch/`. Frontmatter keys `wayfinder` and `map` replace the skill's labels and parent link.
+Used by `/wayfinder`. Map and tickets are scope items in rv2-docs `40-backlog/`; nothing goes in this repo or `.scratch/`. Frontmatter keys `wayfinder` and `map` replace the skill's labels and parent link. Exception to rv2-docs `AGENTS.md` § Backlog (canonical entry: ROBO-180): tickets move to `90-done/` when resolved or ruled out of scope, without a PR.
 
 - **Map**: a scope item with `kind: research`, `wayfinder: map`, kept in `30-inprogress/` while open. Its body has the skill's sections (Destination, Notes, Decisions so far, Not yet specified, Out of scope); Acceptance criteria is "Destination reached, no open tickets".
-- **Ticket**: a Proposed scope item with `wayfinder: <research|prototype|grilling|task>`, `map: ROBO-NNN` and a `## Question` section. Refer to tickets by title, linked to their file.
-- **Blocking**: `blocked_by: [ROBO-NNN]`, added in a second pass once the numbers exist.
-- **Frontier**: items in `20-proposed/` with this `map:` whose `blocked_by` items are all in `90-done/`; lowest number first.
+- **Ticket**: a Proposed scope item, `kind: research`, with `wayfinder: <research|prototype|grilling|task>`, `map: ROBO-NNN` and `## Question` in place of Context and Acceptance criteria.
+- **Blocking**: `blocked_by: [ROBO-NNN]`, written at creation. If a push forces a renumber, update every `map:` and `blocked_by` citing the old number in the same commit.
+- **Frontier**: items in `10-next/` or `20-proposed/` with this `map:` whose `blocked_by` items are all in `90-done/`; `10-next/` first, then lowest number.
 - **Claim**: move the ticket to `30-inprogress/` (status In progress) and push before any work. A rejected push means another session moved first: pull and pick again.
 - **Resolve**: add `## Answer`, move the ticket to `90-done/`, and append a linked one-line gist to the map's Decisions so far, in one commit.
 - **Out of scope**: add `## Out of scope` with the reason, move the ticket to `90-done/`, and add one line to the map's Out of scope section.
-- **Research branches**: `research/<name>` in this repo, linked from the ticket; never merged.
+- **Research findings**: in the ticket's `## Answer`, or, when long, a `type: research` note in rv2-docs `20-product/` linked from it. This replaces the skill's `research/<name>` branch and the research skill's in-repo file.
 
 ## PRs as a request surface
 
