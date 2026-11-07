@@ -93,6 +93,60 @@ cmake --build --preset linux-x64
 
 Servers only: add `-DBV2_BUILD_CLIENT=OFF` to the configure command.
 
+## Without vcpkg (cloud sessions)
+
+When vcpkg can't download its ports (for example a proxy that blocks the gnu.org mirrors the autotools ports need), build against system packages and a hand-built SDL3. The SDL3 and miniaudio versions below are the `sdl3` and `miniaudio` ports at the `vcpkg.json` `builtin-baseline`; update them when the baseline moves. Checked on Ubuntu 24.04 at 34d73aa (2026-11-07): build plus `ctest -R screenshot_`, about 10 minutes.
+
+1. Packages:
+
+   ```bash
+   sudo apt-get install build-essential cmake ninja-build python3 git libsodium-dev libsqlite3-dev libstb-dev libgl-dev libglu1-mesa-dev libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxi-dev libxss-dev libxfixes-dev libxtst-dev libgl1-mesa-dri xauth xvfb
+   ```
+
+2. SDL3 at the tag that matches the vcpkg baseline, into a prefix (here `/opt/rv2deps`):
+
+   ```bash
+   git clone --depth 1 -b release-3.4.16 https://github.com/libsdl-org/SDL.git
+   cmake -S SDL -B SDL/build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/opt/rv2deps -DSDL_TESTS=OFF -DSDL_WAYLAND=OFF -DSDL_PIPEWIRE=OFF -DSDL_PULSEAUDIO=OFF
+   cmake --build SDL/build && cmake --install SDL/build
+   ```
+
+3. miniaudio 0.11.25, header and source only:
+
+   ```bash
+   git clone --depth 1 -b 0.11.25 https://github.com/mackron/miniaudio.git
+   mkdir -p /opt/rv2deps/include/miniaudio && cp miniaudio/miniaudio.h miniaudio/miniaudio.c /opt/rv2deps/include/miniaudio/
+   ```
+
+4. A stand-in for vcpkg's `unofficial-sodium` package, in `/opt/rv2deps/share/unofficial-sodium/unofficial-sodiumConfig.cmake`:
+
+   ```cmake
+   find_library(SODIUM_LIB sodium REQUIRED)
+   find_path(SODIUM_INC sodium.h REQUIRED)
+   if(NOT TARGET unofficial-sodium::sodium)
+     add_library(unofficial-sodium::sodium UNKNOWN IMPORTED)
+     set_target_properties(unofficial-sodium::sodium PROPERTIES IMPORTED_LOCATION "${SODIUM_LIB}" INTERFACE_INCLUDE_DIRECTORIES "${SODIUM_INC}")
+   endif()
+   ```
+
+5. Configure without a preset, build, test:
+
+   ```bash
+   cmake -S . -B build/local -G Ninja -DCMAKE_PREFIX_PATH=/opt/rv2deps
+   cmake --build build/local
+   ctest --test-dir build/local -R screenshot_ --output-on-failure
+   ```
+
+### Regenerate a screenshot golden
+
+Goldens: `tests/golden/<name>.png` ([ADR 0026](../decisions/0026-screenshot-goldens.md)). With the build above:
+
+```bash
+python3 -B tests/screenshots.py "$PWD/build/local/runtime/bv2" "$PWD/build/local/shots" <name> --update
+```
+
+Then run `ctest --test-dir build/local -R screenshot_<name>` about 10 times: a golden that differs between runs fails CI at random. Placeholder data has no skins, so a frame that shows the Appearance ball needs `set cl_redDecal 0 0 0` (and green, blue) in its script, as `tests/golden/appearance.txt` does. Cvars in these scripts need the `set` prefix.
+
 ## Output and run
 
 `build/linux-x64/runtime/` holds `bv2`, `bv2dedicated`, `bv2master` and `main/`.

@@ -296,7 +296,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | path | purpose |
 |---|---|
 | `docs/build/README.md` | Download vs build, game data, playing a local game, tests |
-| `docs/build/linux.md` | Linux build and run guide |
+| `docs/build/linux.md` | Linux build and run guide; build without vcpkg and screenshot golden regeneration |
 | `docs/build/macos.md` | macOS build and run guide |
 | `docs/build/windows.md` | Windows build and run guide |
 
