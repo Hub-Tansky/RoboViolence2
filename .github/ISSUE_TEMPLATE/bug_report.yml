@@ -64,5 +64,7 @@ body:
   - type: textarea
     id: crash
     attributes:
-      label: Crash report
-      description: "If the client crashed, drag the newest `crash-<date>-<time>.txt` from the same pref directory here. It holds the game version and a stack trace, and may show your user folder name in file paths."
+      label: Crash dump
+      description: "If the client created a crash dump in the [pref directory](https://roboviolence.com/docs/faq.html#where-are-my-settings-logs-and-crash-dumps) (`crash-<date>-<time>.txt`), attach it here. Dumps can contain in-memory game, system, and network data. Do not attach one to a public issue if that is a concern; use [private vulnerability reporting](https://github.com/Hub-Tansky/RoboViolence2/security/advisories/new) instead."
+    validations:
+      required: false
