@@ -3,7 +3,8 @@
 ._*
 .AppleDouble
 .LSOverride
-Icon?
+# Finder custom-icon file "Icon\r". Not "Icon?": with core.ignorecase (macOS default) that hits packaging/icons/ (ROBO-172).
+Icon[! -~]
 .Spotlight-V100/
 .Trashes
 .fseventsd/
