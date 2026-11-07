@@ -23,6 +23,13 @@ namespace
 	const int MAX_FRAMES = 64;
 
 #ifdef BV2_PLATFORM_WINDOWS
+	LPTOP_LEVEL_EXCEPTION_FILTER g_previous = NULL; // e.g. the MSVC ASan runtime's
+
+	LONG passOn(EXCEPTION_POINTERS* info)
+	{
+		return g_previous ? g_previous(info) : EXCEPTION_CONTINUE_SEARCH;
+	}
+
 	void writeText(HANDLE file, const char* text)
 	{
 		DWORD written;
@@ -46,7 +53,7 @@ namespace
 	{
 		HANDLE file = CreateFileA(g_path, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 		if (file == INVALID_HANDLE_VALUE)
-			return EXCEPTION_CONTINUE_SEARCH;
+			return passOn(info);
 		char line[64];
 		writeText(file, g_header);
 		snprintf(line, sizeof(line), "exception 0x%08lx at ", info->ExceptionRecord->ExceptionCode);
@@ -56,7 +63,7 @@ namespace
 		for (USHORT i = 0; i < count; ++i)
 			writeFrame(file, "", frames[i]);
 		CloseHandle(file);
-		return EXCEPTION_CONTINUE_SEARCH; // Windows error reporting runs as before
+		return passOn(info); // the previous filter or Windows error reporting runs as before
 	}
 #else
 	const int SIGNALS[] = {SIGSEGV, SIGABRT, SIGFPE, SIGILL, SIGBUS};
@@ -115,7 +122,7 @@ namespace crashreport
 		snprintf(g_path, sizeof(g_path), "%s", path.c_str());
 		snprintf(g_header, sizeof(g_header), "Robo Violence 2 %s crash report, started %s\n", version, stamp);
 #ifdef BV2_PLATFORM_WINDOWS
-		SetUnhandledExceptionFilter(onException);
+		g_previous = SetUnhandledExceptionFilter(onException);
 #else
 		void* frames[1];
 		backtrace(frames, 1);
