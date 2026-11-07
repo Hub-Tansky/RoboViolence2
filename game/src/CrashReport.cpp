@@ -89,7 +89,7 @@ namespace
 	}
 
 	// Only async-signal-safe calls, plus backtrace (loaded by install, so it doesn't allocate here)
-	void onSignal(int sig)
+	void onSignal(int sig, siginfo_t* info, void*)
 	{
 		int fd = open(g_path, O_WRONLY | O_CREAT | O_TRUNC, 0644);
 		if (fd >= 0)
@@ -101,12 +101,14 @@ namespace
 			backtrace_symbols_fd(frames, backtrace(frames, MAX_FRAMES), fd);
 			close(fd);
 		}
-		// Hand the signal to the handler that was there before (the default action, or ASan's report): it runs once this
-		// handler returns, so the process dies as without the crash report
+		// Hand the signal to the handler that was there before (the default action, or ASan's report), so the process
+		// dies as without the crash report. A fault (si_code > 0) happens again when this handler returns, with its own
+		// siginfo; a sent signal (raise, abort, kill) is sent again and runs once this handler returns.
 		for (size_t i = 0; i < sizeof(SIGNALS) / sizeof(SIGNALS[0]); ++i)
 			if (SIGNALS[i] == sig)
 				sigaction(sig, &g_previous[i], nullptr);
-		raise(sig);
+		if (info->si_code <= 0)
+			raise(sig);
 	}
 #endif
 }
@@ -127,7 +129,8 @@ namespace crashreport
 		void* frames[1];
 		backtrace(frames, 1);
 		struct sigaction action = {};
-		action.sa_handler = onSignal;
+		action.sa_sigaction = onSignal;
+		action.sa_flags = SA_SIGINFO | SA_ONSTACK; // SA_ONSTACK: a stack overflow runs on ASan's alternate stack, if any
 		sigemptyset(&action.sa_mask);
 		for (size_t i = 0; i < sizeof(SIGNALS) / sizeof(SIGNALS[0]); ++i)
 			sigaction(SIGNALS[i], &action, &g_previous[i]);

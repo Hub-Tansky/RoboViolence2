@@ -5,6 +5,10 @@
 #include <cstdio>
 #ifdef _WIN32
 #	include <windows.h>
+#else
+#	include <csignal>
+#	include <sys/wait.h>
+#	include <unistd.h>
 #endif
 #include <cstdlib>
 #include <filesystem>
@@ -15,6 +19,20 @@
 namespace fs = std::filesystem;
 
 static int failures = 0;
+
+// The handler that was there before the crash report (the default action, ASan's): it must still run, seen as exit 42
+const int PREVIOUS_HANDLER_EXIT = 42;
+#ifdef _WIN32
+static LONG WINAPI previousFilter(EXCEPTION_POINTERS*)
+{
+	ExitProcess(PREVIOUS_HANDLER_EXIT);
+}
+#else
+static void previousHandler(int)
+{
+	_exit(PREVIOUS_HANDLER_EXIT);
+}
+#endif
 
 static void check(bool ok, const char* what)
 {
@@ -31,6 +49,9 @@ int main(int argc, char* argv[])
 	{
 #ifdef _WIN32
 		SetErrorMode(SEM_NOGPFAULTERRORBOX); // no Windows error dialog to block CI after the report
+		SetUnhandledExceptionFilter(previousFilter);
+#else
+		signal(SIGSEGV, previousHandler);
 #endif
 		crashreport::install(argv[2], "9.9.9-test");
 		crashreport::forceCrash();
@@ -51,7 +72,10 @@ int main(int argc, char* argv[])
 	command = "\"" + command + "\""; // cmd.exe strips the outer quotes
 #endif
 	int status = std::system(command.c_str());
-	check(status != 0, "the child crashed");
+#ifndef _WIN32
+	status = WIFEXITED(status) ? WEXITSTATUS(status) : -1;
+#endif
+	check(status == PREVIOUS_HANDLER_EXIT, "the previous handler ran after the report");
 
 	std::string report;
 	int reports = 0;
