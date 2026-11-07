@@ -41,14 +41,17 @@ else
 fi
 
 # PR description: --scope file, CI's REVIEW_PR_BODY, or this branch's open PR via gh. Empty outside a PR.
-# The lookup names the repo (origin, or $REVIEW_REPO) and the branch: a bare `gh pr view` resolves the
+# The lookup names the repo (origin, or $REVIEW_REPO) and owner:branch: a bare `gh pr view` resolves the
 # `upstream` remote (Daivuk/BaboViolent2) first and follows the branch's tracking ref (often main).
+# `head=owner:branch` skips fork PRs that reuse the branch name. REST, not `gh pr list`: Claude Code
+# cloud sessions get HTTP 403 on GraphQL.
 if [ -n "$scope" ]; then
   body=$(cat "$scope")
 elif [ -n "${REVIEW_PR_BODY+x}" ]; then
   body=$REVIEW_PR_BODY
 else
   body=""
+  tmp=$(mktemp -d) && trap 'rm -rf "$tmp"' EXIT
   branch=$(git symbolic-ref -q --short HEAD || true)
   repo=${REVIEW_REPO:-$(git remote get-url origin 2>/dev/null | sed -nE 's#^(https://|ssh://)?([^@/]*@)?github\.com[:/]([^/]+/[^/]+)$#\3#p' | sed 's#\.git$##')}
   if ! command -v gh >/dev/null 2>&1; then
@@ -57,15 +60,13 @@ else
     why="HEAD is detached"
   elif [ -z "$repo" ]; then
     why="origin is not a github.com remote (set REVIEW_REPO=owner/name)"
-  elif ! pr=$(gh pr list -R "$repo" --head "$branch" --state open --limit 20 --json number,isDraft,author,headRepositoryOwner,body 2>&1); then
-    why="gh pr list -R $repo failed: $(printf '%s\n' "$pr" | head -n 1)"
+  elif ! pr=$(gh api -X GET "repos/$repo/pulls" -f state=open -f head="${repo%%/*}:$branch" 2>"$tmp/gh.err"); then
+    why="gh api repos/$repo/pulls failed: $(head -n 1 "$tmp/gh.err")"
   elif ! pr=$(printf '%s' "$pr" | python3 -c 'import json, sys  # first line: number draft bot; then the body and a "." sentinel
-owner = sys.argv[1].lower()
-p = next((p for p in json.loads(sys.stdin.read()) if (p.get("headRepositoryOwner") or {}).get("login", "").lower() == owner), None)
-if p:
-    print(p["number"], str(p["isDraft"]).lower(), str((p.get("author") or {}).get("is_bot", False)).lower())
-    sys.stdout.write((p["body"] or "").rstrip("\n") + ".")' "${repo%%/*}" 2>&1); then
-    why="could not parse gh pr list output: $(printf '%s\n' "$pr" | tail -n 1)"
+for p in json.loads(sys.stdin.read())[:1]:
+    print(p["number"], str(p["draft"]).lower(), str(p["user"]["type"] == "Bot").lower())
+    sys.stdout.write((p["body"] or "").rstrip("\n") + ".")' 2>&1); then
+    why="could not parse the gh api answer: $(printf '%s\n' "$pr" | tail -n 1)"
   elif [ -z "$pr" ]; then
     why="$repo has no open PR from its branch $branch"
   else
