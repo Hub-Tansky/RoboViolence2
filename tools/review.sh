@@ -2,7 +2,8 @@
 # Mechanical review gate (REVIEW.md section 1). Exit 0 only if every check passed.
 # Usage: tools/review.sh [--base <ref>] [--scope <file>] [--full <preset>]
 #   --base   compare against this ref (default origin/main); the diff is merge-base...HEAD
-#   --scope  file holding the PR description (default: $REVIEW_PR_BODY in CI, else `gh pr view` of this branch)
+#   --scope  file holding the PR description (default: $REVIEW_PR_BODY in CI, else this branch's open PR in origin
+#            or $REVIEW_REPO=owner/name, via gh)
 #   --full   also configure, build and ctest this preset (green required CI on the PR head counts as this)
 set -u
 cd "$(dirname "$0")/.."
@@ -13,7 +14,7 @@ while [ $# -gt 0 ]; do
     --base) base=$2; shift 2 ;;
     --scope) scope=$2; shift 2 ;;
     --full) full=$2; shift 2 ;;
-    *) sed -n '2,6p' "$0" >&2; exit 2 ;;
+    *) sed -n '2,7p' "$0" >&2; exit 2 ;;
   esac
 done
 
@@ -39,17 +40,45 @@ else
   echo "SKIP secrets: gitleaks not installed (CI secret-scan runs it)"
 fi
 
-# PR description: --scope file, CI's REVIEW_PR_BODY, or this branch's PR via gh. Empty outside a PR.
+# PR description: --scope file, CI's REVIEW_PR_BODY, or this branch's open PR via gh. Empty outside a PR.
+# The lookup names the repo (origin, or $REVIEW_REPO) and owner:branch: a bare `gh pr view` resolves the
+# `upstream` remote (Daivuk/BaboViolent2) first and follows the branch's tracking ref (often main).
+# `head=owner:branch` skips fork PRs that reuse the branch name. REST, not `gh pr list`: Claude Code
+# cloud sessions get HTTP 403 on GraphQL.
 if [ -n "$scope" ]; then
   body=$(cat "$scope")
 elif [ -n "${REVIEW_PR_BODY+x}" ]; then
   body=$REVIEW_PR_BODY
-elif command -v gh >/dev/null 2>&1; then
-  body=$(gh pr view --json body -q .body 2>/dev/null || true)
-  [ -n "${REVIEW_PR_DRAFT:-}" ] || REVIEW_PR_DRAFT=$(gh pr view --json isDraft -q .isDraft 2>/dev/null || echo true)
-  [ -n "${REVIEW_PR_BOT:-}" ] || REVIEW_PR_BOT=$(gh pr view --json author -q .author.is_bot 2>/dev/null || echo false)
 else
   body=""
+  tmp=$(mktemp -d) && trap 'rm -rf "$tmp"' EXIT
+  branch=$(git symbolic-ref -q --short HEAD || true)
+  repo=${REVIEW_REPO:-$(git remote get-url origin 2>/dev/null | sed -nE 's#^(https://|ssh://)?([^@/]*@)?github\.com[:/]([^/]+/[^/]+)$#\3#p' | sed 's#\.git$##')}
+  if ! command -v gh >/dev/null 2>&1; then
+    why="gh is not installed"
+  elif [ -z "$branch" ]; then
+    why="HEAD is detached"
+  elif [ -z "$repo" ]; then
+    why="origin is not a github.com remote (set REVIEW_REPO=owner/name)"
+  elif ! pr=$(gh api -X GET "repos/$repo/pulls" -f state=open -f head="${repo%%/*}:$branch" 2>"$tmp/gh.err"); then
+    why="gh api repos/$repo/pulls failed: $(head -n 1 "$tmp/gh.err")"
+  elif ! pr=$(printf '%s' "$pr" | python3 -c 'import json, sys  # first line: number draft bot; then the body and a "." sentinel
+for p in json.loads(sys.stdin.read())[:1]:
+    print(p["number"], str(p["draft"]).lower(), str(p["user"]["type"] == "Bot").lower())
+    sys.stdout.write((p["body"] or "").rstrip("\n") + ".")' 2>&1); then
+    why="could not parse the gh api answer: $(printf '%s\n' "$pr" | tail -n 1)"
+  elif [ -z "$pr" ]; then
+    why="$repo has no open PR from its branch $branch"
+  else
+    why=""
+    read -r number draft bot <<<"${pr%%$'\n'*}"
+    body=${pr#*$'\n'}
+    body=${body%.}
+    [ -n "${REVIEW_PR_DRAFT:-}" ] || REVIEW_PR_DRAFT=$draft
+    [ -n "${REVIEW_PR_BOT:-}" ] || REVIEW_PR_BOT=$bot
+    echo "INFO PR description: $repo#$number (draft: $draft)"
+  fi
+  [ -z "$why" ] || echo "NOTE no PR description read: $why; scope and review-record checks run as for a draft without one (pass --scope <file> to give it)"
 fi
 
 # Protocol hash and review record of a ready PR. CI's HEAD is a merge commit, so it passes the real PR head.
