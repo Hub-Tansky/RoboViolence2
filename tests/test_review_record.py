@@ -74,6 +74,9 @@ CASES = [
     ("suggestion not taken", body(outcomes=row(severity="suggestion", outcome="not taken")), CODE, None),
     ("blocker not taken", body(outcomes=row(outcome="not taken")), CODE, "blocker without a valid outcome"),
     ("suggestion rejected without evidence", body(outcomes=row(severity="suggestion", outcome="rejected: disagree")), CODE, "suggestion without a valid outcome"),
+    ("blocker not yet confirmed", body(outcomes=row(outcome="not confirmed with owner yet")), CODE, "blocker without a valid outcome"),
+    ("blocker confirmed without a decision", body(outcomes=row(outcome="confirmed with owner")), CODE, "blocker without a valid outcome"),
+    ("blocker not fixed", body(outcomes=row(outcome="not fixed in abc1234")), CODE, "blocker without a valid outcome"),
     ("unknown severity", body(outcomes=row(severity="major")), CODE, "severity must be"),
     ("deferred without item", body(outcomes=row(severity="suggestion", outcome="not taken, deferred")), CODE, "deferred finding"),
     ("deferred with item", body(outcomes=row(severity="suggestion", outcome="deferred → ROBO-123")), CODE, None),
@@ -178,6 +181,22 @@ if os.name != "nt" and os.path.exists(os.path.join(ROOT, ".git")):
     if "review gate:" in run_review("true"):
         failed += 1
         print("FAIL review.sh: REVIEW_PR_BOT must skip the record checks")
+
+    # The dirty-tree NOTE, in a clone so this checkout stays clean.
+    clone = tempfile.mkdtemp()
+    try:
+        git(clone, "clone", "-q", ROOT, ".")
+        def dirty_note():
+            return "working tree is dirty" in subprocess.run(["bash", "tools/review.sh", "--base", "HEAD", "--scope", os.devnull],
+                                                             cwd=clone, capture_output=True, text=True).stdout
+        clean = dirty_note()
+        with open(os.path.join(clone, "untracked.txt"), "w", encoding="utf-8") as f:
+            f.write("x\n")
+        if clean or not dirty_note():
+            failed += 1
+            print("FAIL review.sh: the dirty-tree NOTE must show only on a dirty tree")
+    finally:
+        shutil.rmtree(clone, ignore_errors=True)
 
 print("review record: FAILED" if failed else "review record: ok")
 sys.exit(1 if failed else 0)

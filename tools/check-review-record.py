@@ -18,7 +18,7 @@ RISK_PATHS = re.compile(r"^(game/src/(netPacket\.h|ServerRecv\.cpp|ClientRecv\.c
 SPEC_SOURCE = re.compile(r"^Spec source: (ROBO-\d{3}) rv2-docs@[0-9a-f]{7,40} blob:[0-9a-f]{12}( \(uncommitted\))?[ \t]*$", re.M)
 DIFF = re.compile(r"^Diff: [0-9a-f]{7,40}\.\.\.([0-9a-f]{7,40})[ \t]*$", re.M)
 FIXED = r"fixed in `?[0-9a-f]{7,40}"
-OWNER = r"confirmed with owner"
+OWNER = r"confirmed with owner:\s*\S"
 DEFERRED = r"deferred\s*(?:→|->)\s*\[?(?:ROBO-\d{3}\b|#\d+|https://github\.com/Hub-Tansky/RoboViolence2/issues/\d+)"
 REJECTED_WITH_EVIDENCE = r"rejected:.*(?:[\w./-]+:\d+|https?://)"
 BLOCKER_OUTCOME = re.compile(f"(?i){FIXED}|{OWNER}|{DEFERRED}|{REJECTED_WITH_EVIDENCE}")
@@ -97,7 +97,7 @@ def check_outcomes(section):
         rows.append(row)
         if row["severity"] not in ("blocker", "suggestion"):
             problems.append(f"review gate: severity must be blocker or suggestion: {r[3][:40]}")
-        elif not (BLOCKER_OUTCOME if row["severity"] == "blocker" else SUGGESTION_OUTCOME).search(row["outcome"]):
+        elif not (BLOCKER_OUTCOME if row["severity"] == "blocker" else SUGGESTION_OUTCOME).match(row["outcome"]):
             problems.append(f"review gate: {row['severity']} without a valid outcome: {r[2][:80]}")
         elif re.search(r"(?i)\bdeferred\b", row["outcome"]) and not re.search(f"(?i){DEFERRED}", row["outcome"]):
             problems.append(f"review gate: deferred finding without a ROBO-NNN item or issue link: {r[2][:80]}")
