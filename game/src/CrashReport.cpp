@@ -4,6 +4,7 @@
 #include <cstdio>
 #include <cstring>
 #include <ctime>
+#include <filesystem>
 
 #ifdef BV2_PLATFORM_WINDOWS
 #	include <windows.h>
@@ -28,32 +29,39 @@ namespace
 		WriteFile(file, text, (DWORD)strlen(text), &written, NULL);
 	}
 
+	// "module.exe+0x1234": the matching build's .pdb resolves the offset
+	void writeFrame(HANDLE file, const char* prefix, void* address)
+	{
+		HMODULE module = NULL;
+		char name[MAX_PATH] = "?";
+		if (GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT, (LPCSTR)address, &module))
+			GetModuleFileNameA(module, name, MAX_PATH);
+		const char* base = strrchr(name, '\\');
+		char line[MAX_PATH + 64];
+		snprintf(line, sizeof(line), "%s%s+0x%llx\n", prefix, base ? base + 1 : name, (unsigned long long)((char*)address - (char*)module));
+		writeText(file, line);
+	}
+
 	LONG WINAPI onException(EXCEPTION_POINTERS* info)
 	{
 		HANDLE file = CreateFileA(g_path, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 		if (file == INVALID_HANDLE_VALUE)
-			return EXCEPTION_EXECUTE_HANDLER;
-		char line[1200];
+			return EXCEPTION_CONTINUE_SEARCH;
+		char line[64];
 		writeText(file, g_header);
-		snprintf(line, sizeof(line), "exception 0x%08lx at %p\n", info->ExceptionRecord->ExceptionCode, info->ExceptionRecord->ExceptionAddress);
-		writeText(file, line);
-		// One frame per line: module file name + offset, which the matching build's .pdb resolves
+		snprintf(line, sizeof(line), "exception 0x%08lx at ", info->ExceptionRecord->ExceptionCode);
+		writeFrame(file, line, info->ExceptionRecord->ExceptionAddress);
 		void* frames[MAX_FRAMES];
 		USHORT count = CaptureStackBackTrace(0, MAX_FRAMES, frames, NULL);
 		for (USHORT i = 0; i < count; ++i)
-		{
-			HMODULE module = NULL;
-			char name[MAX_PATH] = "?";
-			if (GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT, (LPCSTR)frames[i], &module))
-				GetModuleFileNameA(module, name, MAX_PATH);
-			const char* base = strrchr(name, '\\');
-			snprintf(line, sizeof(line), "%s+0x%llx\n", base ? base + 1 : name, (unsigned long long)((char*)frames[i] - (char*)module));
-			writeText(file, line);
-		}
+			writeFrame(file, "", frames[i]);
 		CloseHandle(file);
-		return EXCEPTION_EXECUTE_HANDLER; // ends the process without the Windows error dialog
+		return EXCEPTION_CONTINUE_SEARCH; // Windows error reporting runs as before
 	}
 #else
+	const int SIGNALS[] = {SIGSEGV, SIGABRT, SIGFPE, SIGILL, SIGBUS};
+	struct sigaction g_previous[sizeof(SIGNALS) / sizeof(SIGNALS[0])];
+
 	const char* signalName(int sig)
 	{
 		switch (sig)
@@ -86,7 +94,12 @@ namespace
 			backtrace_symbols_fd(frames, backtrace(frames, MAX_FRAMES), fd);
 			close(fd);
 		}
-		raise(sig); // SA_RESETHAND restored the default action: the process dies as without the handler
+		// Hand the signal to the handler that was there before (the default action, or ASan's report): it runs once this
+		// handler returns, so the process dies as without the crash report
+		for (size_t i = 0; i < sizeof(SIGNALS) / sizeof(SIGNALS[0]); ++i)
+			if (SIGNALS[i] == sig)
+				sigaction(sig, &g_previous[i], nullptr);
+		raise(sig);
 	}
 #endif
 }
@@ -98,7 +111,8 @@ namespace crashreport
 		char stamp[32];
 		std::time_t now = std::time(nullptr);
 		std::strftime(stamp, sizeof(stamp), "%Y%m%d-%H%M%S", std::localtime(&now));
-		snprintf(g_path, sizeof(g_path), "%s/crash-%s.txt", dir.c_str(), stamp);
+		std::string path = (std::filesystem::path(dir) / ("crash-" + std::string(stamp) + ".txt")).string();
+		snprintf(g_path, sizeof(g_path), "%s", path.c_str());
 		snprintf(g_header, sizeof(g_header), "Robo Violence 2 %s crash report, started %s\n", version, stamp);
 #ifdef BV2_PLATFORM_WINDOWS
 		SetUnhandledExceptionFilter(onException);
@@ -107,10 +121,9 @@ namespace crashreport
 		backtrace(frames, 1);
 		struct sigaction action = {};
 		action.sa_handler = onSignal;
-		action.sa_flags = SA_RESETHAND;
 		sigemptyset(&action.sa_mask);
-		for (int sig : {SIGSEGV, SIGABRT, SIGFPE, SIGILL, SIGBUS})
-			sigaction(sig, &action, nullptr);
+		for (size_t i = 0; i < sizeof(SIGNALS) / sizeof(SIGNALS[0]); ++i)
+			sigaction(SIGNALS[i], &action, &g_previous[i]);
 #endif
 		return g_path;
 	}

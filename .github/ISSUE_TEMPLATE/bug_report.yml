@@ -65,6 +65,6 @@ body:
     id: crash
     attributes:
       label: Crash dump
-      description: "If the client created a crash dump in the [pref directory](https://roboviolence.com/docs/faq.html#where-are-my-settings-logs-and-crash-dumps) (`crash-<date>-<time>.txt`), attach it here. Dumps can contain in-memory game, system, and network data. Do not attach one to a public issue if that is a concern; use [private vulnerability reporting](https://github.com/Hub-Tansky/RoboViolence2/security/advisories/new) instead."
+      description: "If the client created a crash dump in the [pref directory](https://roboviolence.com/docs/faq.html#where-are-my-settings-logs-and-crash-dumps) (`crash-<date>-<time>.txt`; Windows `%APPDATA%\\BaboViolent2\\bv2`, macOS `~/Library/Application Support/BaboViolent2/bv2`, Linux `~/.local/share/BaboViolent2/bv2`), attach it here. Dumps can contain in-memory game, system, and network data. Do not attach one to a public issue if that is a concern; use [private vulnerability reporting](https://github.com/Hub-Tansky/RoboViolence2/security/advisories/new) instead."
     validations:
       required: false

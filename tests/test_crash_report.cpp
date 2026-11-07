@@ -3,6 +3,9 @@
 #include "CrashReport.h"
 
 #include <cstdio>
+#ifdef _WIN32
+#	include <windows.h>
+#endif
 #include <cstdlib>
 #include <filesystem>
 #include <fstream>
@@ -26,6 +29,9 @@ int main(int argc, char* argv[])
 {
 	if (argc == 3 && std::string(argv[1]) == "crash")
 	{
+#ifdef _WIN32
+		SetErrorMode(SEM_NOGPFAULTERRORBOX); // no Windows error dialog to block CI after the report
+#endif
 		crashreport::install(argv[2], "9.9.9-test");
 		crashreport::forceCrash();
 		return 0; // not reached
@@ -64,7 +70,7 @@ int main(int argc, char* argv[])
 	check(reports == 1, "one crash-*.txt in the dir");
 	check(report.find("Robo Violence 2 9.9.9-test crash report") == 0, "report starts with the version line");
 #ifdef _WIN32
-	check(report.find("exception 0xc0000005") != std::string::npos, "report names the exception");
+	check(report.find("exception 0xc0000005 at test_crash_report.exe+0x") != std::string::npos, "report names the exception and where");
 	check(report.find("test_crash_report.exe+0x") != std::string::npos, "report has a stack frame");
 #else
 	check(report.find("signal SIGSEGV") != std::string::npos, "report names the signal");
