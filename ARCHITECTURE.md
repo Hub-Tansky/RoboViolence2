@@ -788,7 +788,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tools/placeholder-manifest.tsv` | Files the game loads at startup and their formats, for the placeholder generator |
 | `tools/gen-placeholder-content.py` | Writes placeholder maps, textures, a readable font atlas, sounds and models for dev and CI |
 | `tools/gen-app-icon.py` | Renders the application icons and the `.dmg` background into `packaging/` (by hand; numpy, Pillow) |
-| `tools/check-hygiene.py` | Fails on spaces in paths, tracked ignored files, files over 5 MB, bad encoding, failed translation check |
+| `tools/check-hygiene.py` | Fails on spaces in paths, tracked files ignored by .gitignore (checked case-insensitively, as on macOS), files over 5 MB, bad encoding, failed translation check |
 | `tools/check-review-record.py` | Review tier from changed paths, `Protocol:` hash, and the review record of a ready PR (REVIEW.md section 5) |
 | `tools/lang-check.py` | Fails when `en.pot` is stale, a `.po` is invalid, has unknown keys or changes printf conversions; warns about missing glyphs; lists untranslated keys |
 | `tools/lang-to-pot.py` | Generates `content/languages/en.pot` from `en.lang` |
