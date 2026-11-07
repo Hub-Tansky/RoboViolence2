@@ -232,12 +232,8 @@ msgctxt "lang_friendlyFire"
 msgid "Friendly Fire"
 msgstr ""
 
-msgctxt "lang_serverVersion"
-msgid "server version %01i.%02i.%02i"
-msgstr ""
-
-msgctxt "lang_clientVersion"
-msgid "client version %01i.%02i.%02i"
+msgctxt "lang_version"
+msgid "version: %s"
 msgstr ""
 
 msgctxt "lang_connectionFailed"

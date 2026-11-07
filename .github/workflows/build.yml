@@ -13,6 +13,9 @@ jobs:
   build:
     name: build (${{ matrix.preset }})
     runs-on: ${{ matrix.os }}
+    # The release version: menu text, its check and the package (ADR 0046)
+    env:
+      BV2_VERSION: ${{ github.ref_type == 'tag' && github.ref_name || '0.0.0-dev' }}
     strategy:
       fail-fast: false
       matrix:
@@ -42,6 +45,13 @@ jobs:
           cmake --preset ${{ matrix.preset }}-release
           cmake --build --preset ${{ matrix.preset }}-release -- -k 0
           ctest --test-dir build/${{ matrix.preset }}-release --output-on-failure
+      # The job's BV2_VERSION, not CMake's copy of it, reaches the Release binary: ctest client_version cannot tell (ADR 0046)
+      - name: The release binary holds this run's version
+        shell: bash
+        run: |
+          dir=build/${{ matrix.preset }}-release/runtime
+          for f in bv2 bv2.exe bv2.app/Contents/MacOS/bv2; do [ -f "$dir/$f" ] && B="$dir/$f"; done
+          ${{ runner.os == 'Windows' && 'python' || 'python3' }} tests/test_client_version.py "$B" "${BV2_VERSION#v}"
       # Screenshot regression (T7, ADR 0026): the frame and diff of each failed screenshot_* test, Debug and Release
       - uses: actions/upload-artifact@v7
         if: failure() && runner.os == 'Linux'
@@ -59,9 +69,7 @@ jobs:
       # The archive on every OS, plus the installer (Windows), disk image (macOS) or .deb (Linux); ADR 0020, 0031
       - name: Package
         shell: bash
-        env:
-          VERSION: ${{ github.ref_type == 'tag' && github.ref_name || '0.0.0-dev' }}
-        run: ${{ runner.os == 'Windows' && 'python' || 'python3' }} packaging/make-package.py build/${{ matrix.preset }}-release/runtime ${{ matrix.preset }} out "$VERSION"
+        run: ${{ runner.os == 'Windows' && 'python' || 'python3' }} packaging/make-package.py build/${{ matrix.preset }}-release/runtime ${{ matrix.preset }} out "$BV2_VERSION"
       # Install, upgrade over it (the master's databases stay), uninstall (they stay too); ADR 0020
       - name: The installer installs, upgrades and uninstalls silently
         if: runner.os == 'Windows'

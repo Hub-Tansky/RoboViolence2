@@ -419,8 +419,7 @@ public:
 
 	CString lang_friendlyFire;
 
-	CString lang_serverVersion;
-	CString lang_clientVersion;
+	CString lang_version;
 
 	CString lang_connectionFailed;
 	CString lang_back;

@@ -71,8 +71,7 @@ lang_laggerC						*LAGGER*
 
 lang_friendlyFire					Friendly Fire
 
-lang_serverVersion					server version %01i.%02i.%02i
-lang_clientVersion					client version %01i.%02i.%02i
+lang_version					version: %s
 
 lang_connectionFailed				\x4 Connection Failed! \x8 Check IP Address
 lang_back							<- Back
