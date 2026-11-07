@@ -16,7 +16,16 @@ Read `40-backlog/*/ROBO-NNN *.md` in rv2-docs. `#n` is the intake issue; its sco
 
 ## Wayfinding operations
 
-Off. Don't create maps or `.scratch/` files; plan as Proposed scope items linked with `blocked_by`.
+Used by `/wayfinder`. Map and tickets are scope items in rv2-docs `40-backlog/`; nothing goes in this repo or `.scratch/`. Frontmatter keys `wayfinder` and `map` replace the skill's labels and parent link.
+
+- **Map**: a scope item with `kind: research`, `wayfinder: map`, kept in `30-inprogress/` while open. Its body has the skill's sections (Destination, Notes, Decisions so far, Not yet specified, Out of scope); Acceptance criteria is "Destination reached, no open tickets".
+- **Ticket**: a Proposed scope item with `wayfinder: <research|prototype|grilling|task>`, `map: ROBO-NNN` and a `## Question` section. Refer to tickets by title, linked to their file.
+- **Blocking**: `blocked_by: [ROBO-NNN]`, added in a second pass once the numbers exist.
+- **Frontier**: items in `20-proposed/` with this `map:` whose `blocked_by` items are all in `90-done/`; lowest number first.
+- **Claim**: move the ticket to `30-inprogress/` (status In progress) and push before any work. A rejected push means another session moved first: pull and pick again.
+- **Resolve**: add `## Answer`, move the ticket to `90-done/`, and append a linked one-line gist to the map's Decisions so far, in one commit.
+- **Out of scope**: add `## Out of scope` with the reason, move the ticket to `90-done/`, and add one line to the map's Out of scope section.
+- **Research branches**: `research/<name>` in this repo, linked from the ticket; never merged.
 
 ## PRs as a request surface
 
