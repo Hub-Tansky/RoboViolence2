@@ -39,6 +39,18 @@ Terminal tabs and the run scripts now use your data. Starting the app by double-
 
 The package's own `main/` copies (one in `Robo Violence 2.app/Contents/Resources/` for the client, one in the folder for the servers) hold placeholders, launch scripts and languages; your data replaces the placeholders.
 
+## Test a pull request's build
+
+Each `build` run uploads `roboviolence2-macos-arm64.dmg` and `.zip` as artifacts. `gh run download` can't fetch them (they are uploaded unzipped, `archive: false`); fetch one through the API instead:
+
+```bash
+gh api repos/Hub-Tansky/RoboViolence2/actions/runs/<run id>/artifacts --jq '.artifacts[] | "\(.id) \(.name)"'
+gh api repos/Hub-Tansky/RoboViolence2/actions/artifacts/<artifact id>/zip > roboviolence2-macos-arm64.dmg
+xattr -dr com.apple.quarantine roboviolence2-macos-arm64.dmg
+```
+
+Run the app from the mounted image or a folder of its own; copying it to `/Applications` replaces your installed version.
+
 ## Build from source
 
 Prerequisites, with [Homebrew](https://brew.sh):
