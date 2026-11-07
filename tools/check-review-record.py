@@ -27,8 +27,10 @@ SUGGESTION_OUTCOME = re.compile(f"(?i){FIXED}|{OWNER}|{DEFERRED}|{REJECTED}|not 
 
 
 def protocol_line(skill_text):
-    """The line SKILL.md must carry: sha256 of the file without that line, first 12 hex digits."""
-    kept = "".join(l for l in skill_text.splitlines(True) if not l.startswith("Protocol: "))
+    """The line SKILL.md must carry: sha256 of the file without its first Protocol line, first 12 hex digits."""
+    lines = skill_text.splitlines(True)
+    first = next((i for i, l in enumerate(lines) if l.startswith("Protocol: ")), len(lines))
+    kept = "".join(lines[:first] + lines[first + 1:])
     return "Protocol: rv2-code-review " + hashlib.sha256(kept.encode()).hexdigest()[:12]
 
 

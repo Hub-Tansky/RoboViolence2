@@ -6,7 +6,7 @@
 
 ## Context
 - One reviewer judged maintainability, rules and scope together, with a rubric that asked for ambitious restructuring. PR 133, docs only, took five rounds and 12 findings.
-- `tools/review.sh` checked the working tree while the record claimed `merge-base..HEAD`. The gate didn't validate the `<details>` wrapper or the reviewed head, and skipped any PR without an Allowed paths row.
+- `tools/review.sh:59-60` (at 9255151) checked the working tree while the record claimed `merge-base..HEAD`. The gate didn't validate the `<details>` wrapper or the reviewed head, and skipped any PR without an Allowed paths row.
 - Upstream `code-review` separates the axes, but its name collides with other installed skills and it skips Spec when no spec is found.
 - CI's token can't read private rv2-docs, and the local vault is often ahead of GitHub.
 

@@ -5,7 +5,7 @@ description: Robo Violence 2's PR review workflow (REVIEW.md section 5). Pins th
 
 # rv2-code-review
 
-Protocol: rv2-code-review 4f8cf28349d9
+Protocol: rv2-code-review 0c8a5a57ab37
 
 Adapted from `skills/engineering/code-review` in [mattpocock/skills](https://github.com/mattpocock/skills) at `4ae2317ddb22b046e26455e4f9c9b3aaaf62212d` (MIT; notice in `UPSTREAM-LICENSE`). Changes: a missing spec blocks instead of skipping the axis, no smell baseline, a matrix for Spec, a Risk worker, and the record in REVIEW.md. Upgrade only by a reviewed PR that updates this SHA.
 

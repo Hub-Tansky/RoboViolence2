@@ -6,7 +6,7 @@ Work is done when `tools/review.sh` passes and a ready PR has a review record fo
 
 ## 1. Mechanical checks: `tools/review.sh`
 
-Run `tools/review.sh` while working and before the PR is ready. CI runs it on every PR (required `review` check). Every check reads committed changes, `<merge-base>...HEAD`; a dirty tree prints a NOTE. Green required CI on the PR head counts as `--full <preset>`, which stays available locally.
+Run `tools/review.sh` while working and before the PR is ready. CI runs it on every PR (required `review` check). Scope, anti-gaming, secrets and the tier read committed changes (`<merge-base>...HEAD`); the whole-tree checks read the working tree, so a dirty tree prints a NOTE. Green required CI on the PR head counts as `--full <preset>`, which stays available locally.
 
 | Check | Fails when |
 |---|---|

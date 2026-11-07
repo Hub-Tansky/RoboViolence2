@@ -18,7 +18,7 @@ while [ $# -gt 0 ]; do
 done
 
 mb=$(git merge-base "$base" HEAD 2>/dev/null) || { echo "FAIL base: '$base' not found (git fetch origin main)"; exit 1; }
-[ -z "$(git status --porcelain)" ] || echo "NOTE working tree is dirty: only committed changes are checked"
+[ -z "$(git status --porcelain)" ] || echo "NOTE working tree is dirty: diff checks read only commits; whole-tree checks read it as is"
 fail=0
 check() { # check <name> <command...>: run it, print PASS/FAIL; indent its output on failure, its NOTEs always
   local name=$1 out; shift
