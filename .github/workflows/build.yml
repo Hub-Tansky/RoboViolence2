@@ -13,7 +13,7 @@ jobs:
   build:
     name: build (${{ matrix.preset }})
     runs-on: ${{ matrix.os }}
-    # The menu's release text, read by both configure steps (ADR 0046)
+    # The release version: menu text, its check and the package (ADR 0046)
     env:
       BV2_VERSION: ${{ github.ref_type == 'tag' && github.ref_name || '0.0.0-dev' }}
     strategy:

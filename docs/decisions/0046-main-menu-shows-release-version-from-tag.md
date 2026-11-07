@@ -20,7 +20,7 @@
 - Players see the number drop from 2.21.00 to 0.0.x. The join console lines (`game/src/ClientRecv.cpp:294,307`) still print the protocol number, which is correct.
 - A build from the source tarball shows `0.0.0-dev` unless given `-DBV2_VERSION=...`. The environment seeds the cache on the first configure only.
 - Old `.lang` files still load, because unregistered keys are ignored. A `.po` carrying the old keys fails `tools/lang-check.py`.
-- The screenshot tolerance is larger than the whole line, so two checks cover the text. `ctest client_version` covers CMake to binary: the header and its expected value come from the same variable. The `build` job step `The release binary holds this run's version` covers the job's `BV2_VERSION` to the Release binary, with the leading `v` removed; it runs on every build, with `0.0.0-dev` off a tag.
+- The screenshot tolerance is larger than the whole line, so two checks cover the release number. They do not cover the `version: ` label or the `lang_version` key; only the manual frames do. `ctest client_version` covers CMake to binary: the header and its expected value come from the same variable. The `build` job step `The release binary holds this run's version` covers the job's `BV2_VERSION` to the Release binary, with the leading `v` removed; it runs on every build, with `0.0.0-dev` off a tag.
 - A real `v*` tag run first happens at the next release.
 - The five menu goldens were regenerated on Linux in this PR (ADR 0026); owner's choice.
 - Rejected: reusing the old key with a string (undefined behaviour on original `.lang` files).
