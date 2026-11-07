@@ -17,7 +17,7 @@ Hosting the game server and the master server as containers (Phase B step 11). I
 
 The compose example runs two game servers from the same image and the same env file: `server` (CTF, `content/LaunchScript/CTF.cfg`) and `tdm` (TDM, `content/LaunchScript/TDM.cfg`). They differ only in the launch script, the port and the volume. Both register with the master; with `BV2_PUBLIC_ADDRESS` set, the master lists both under that address, told apart by port.
 
-- Another mode or a second server of one mode: copy the `tdm` service (it builds on the `x-game-server` anchor), give it its own launch script (with its own `sv_port`), port, volume and `BV2_HEALTH_PORT`, add a `handle_path` route for its admin API to the Caddyfile and an entry to `GAME_SERVERS` in `tools/staging/deploy.sh`.
+- Another mode or a second server of one mode: copy the `tdm` service (it builds on the `x-game-server` anchor), give it its own launch script (with its own `sv_port`), port, volume and `BV2_HEALTH_PORT`, add a `handle_path` route for its admin API to the Caddyfile and an entry to `GAME_SERVERS` in `tools/staging/deploy.sh`. Open its TCP and UDP port on the host firewall and the provider's firewall, on staging and production ([Ports](#ports)), and add an uptime monitor for its TCP port.
 - `BV2_HEALTH_PORT` (default 3333) only tells the image's healthcheck which port to watch: set it to the launch script's `sv_port`, or the container stays unhealthy.
 
 ## Secrets
@@ -117,7 +117,7 @@ Install (a new or failover host): the staging README's [By hand](../../tools/sta
 |---|---|
 | Deploy a commit | `RV2_DEPLOY_LABEL=prod /opt/rv2-prod/deploy.sh --sha <full sha>`, then check `https://<admin host>/deployed` and that the master lists every game server |
 | Roll back | the same with the previous full SHA: the second-to-last `pass` row of `/var/lib/rv2-prod/state.tsv` (`deployed` holds the running one); `--force` if players are on |
-| Add a game server | as in [Game servers](#game-servers); open its port in the host firewall and add an external monitor for it |
+| Add a game server | as in [Game servers](#game-servers) |
 | Fail over to another host | install as above, restore the latest backup into the volumes and `/etc/rv2-prod.env`, set the new `BV2_PUBLIC_ADDRESS`, deploy the same SHA, then point the `master` and `admin` DNS records at it. The restored `caddy-data` carries the admin certificate, so verify passes before DNS moves; if it has expired, point `admin` first and deploy again |
 
 Backups: a nightly job copies `/etc/rv2-prod.env` and every `roboviolence2_*` volume off the host (see [Backups](#backups) for what they hold); restore one snapshot to a scratch folder now and then to prove it works.
