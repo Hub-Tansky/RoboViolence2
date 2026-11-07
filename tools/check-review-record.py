@@ -20,10 +20,9 @@ DIFF = re.compile(r"^Diff: [0-9a-f]{7,40}\.\.\.([0-9a-f]{7,40})[ \t]*$", re.M)
 FIXED = r"fixed in `?[0-9a-f]{7,40}"
 OWNER = r"confirmed with owner"
 DEFERRED = r"deferred\s*(?:→|->)\s*\[?(?:ROBO-\d{3}\b|#\d+|https://github\.com/Hub-Tansky/RoboViolence2/issues/\d+)"
-REJECTED = r"rejected:"
 REJECTED_WITH_EVIDENCE = r"rejected:.*(?:[\w./-]+:\d+|https?://)"
 BLOCKER_OUTCOME = re.compile(f"(?i){FIXED}|{OWNER}|{DEFERRED}|{REJECTED_WITH_EVIDENCE}")
-SUGGESTION_OUTCOME = re.compile(f"(?i){FIXED}|{OWNER}|{DEFERRED}|{REJECTED}|not taken")
+SUGGESTION_OUTCOME = re.compile(f"(?i){FIXED}|{OWNER}|{DEFERRED}|{REJECTED_WITH_EVIDENCE}|not taken")
 
 
 def protocol_line(skill_text):

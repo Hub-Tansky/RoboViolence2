@@ -73,6 +73,7 @@ CASES = [
     ("blocker rejected with evidence", body(outcomes=row(outcome="rejected: see game/src/Game.cpp:12")), CODE, None),
     ("suggestion not taken", body(outcomes=row(severity="suggestion", outcome="not taken")), CODE, None),
     ("blocker not taken", body(outcomes=row(outcome="not taken")), CODE, "blocker without a valid outcome"),
+    ("suggestion rejected without evidence", body(outcomes=row(severity="suggestion", outcome="rejected: disagree")), CODE, "suggestion without a valid outcome"),
     ("unknown severity", body(outcomes=row(severity="major")), CODE, "severity must be"),
     ("deferred without item", body(outcomes=row(severity="suggestion", outcome="not taken, deferred")), CODE, "deferred finding"),
     ("deferred with item", body(outcomes=row(severity="suggestion", outcome="deferred → ROBO-123")), CODE, None),
@@ -163,6 +164,20 @@ try:
         print(f"FAIL script stale skill: {result.returncode} {result.stdout} {result.stderr}")
 finally:
     shutil.rmtree(repo, ignore_errors=True)
+
+# tools/review.sh passes the PR's head and bot flag to the script. Other checks can fail here, so read only the gate's lines.
+if os.name != "nt" and os.path.isdir(os.path.join(ROOT, ".git")):
+    sentinel = "f" * 40
+    def run_review(bot):
+        env = dict(os.environ, REVIEW_PR_BODY=body(), REVIEW_PR_DRAFT="false", REVIEW_PR_HEAD=sentinel, REVIEW_PR_BOT=bot)
+        return subprocess.run(["bash", os.path.join(ROOT, "tools", "review.sh"), "--base", "HEAD"],
+                              cwd=ROOT, env=env, capture_output=True, text=True).stdout
+    if f"the PR head is {sentinel}" not in run_review("false"):
+        failed += 1
+        print("FAIL review.sh: REVIEW_PR_HEAD must reach the head check")
+    if "review gate:" in run_review("true"):
+        failed += 1
+        print("FAIL review.sh: REVIEW_PR_BOT must skip the record checks")
 
 print("review record: FAILED" if failed else "review record: ok")
 sys.exit(1 if failed else 0)

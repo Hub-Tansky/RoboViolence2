@@ -19,7 +19,7 @@
 ## Consequences
 - Every new commit makes the record stale, so reviews run last. A description edit reruns the gate without a new commit.
 - Structural review shrinks to two suggestion-level rules in REVIEW.md. If maintainability slips, add documented rules, not a broader reviewer.
-- CI checks the Spec source's format, not its content. The `Protocol:` hash detects drift but doesn't prove a review ran, so the owner's spot-check stays.
+- CI checks the Spec source's format, not its content. The gate's finding count is a lower bound, since Outcomes keeps earlier rounds' rows. The `Protocol:` hash detects drift but doesn't prove a review ran, so the owner's spot-check stays.
 - Rejected: using the skill live from GitHub. It is mutable, so reviews could change without a PR.
 - Rejected: custom agent types. Cloud sessions don't always load them (ADR 0037).
 - Rejected: a PAT for CI to read rv2-docs. It adds a secret, and CI would still miss uncommitted items.
