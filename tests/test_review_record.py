@@ -166,7 +166,7 @@ finally:
     shutil.rmtree(repo, ignore_errors=True)
 
 # tools/review.sh passes the PR's head and bot flag to the script. Other checks can fail here, so read only the gate's lines.
-if os.name != "nt" and os.path.isdir(os.path.join(ROOT, ".git")):
+if os.name != "nt" and os.path.exists(os.path.join(ROOT, ".git")):
     sentinel = "f" * 40
     def run_review(bot):
         env = dict(os.environ, REVIEW_PR_BODY=body(), REVIEW_PR_DRAFT="false", REVIEW_PR_HEAD=sentinel, REVIEW_PR_BOT=bot)
