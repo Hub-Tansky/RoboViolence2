@@ -2,7 +2,8 @@
 # Mechanical review gate (REVIEW.md section 1). Exit 0 only if every check passed.
 # Usage: tools/review.sh [--base <ref>] [--scope <file>] [--full <preset>]
 #   --base   compare against this ref (default origin/main); the diff is merge-base...HEAD
-#   --scope  file holding the PR description (default: $REVIEW_PR_BODY in CI, else this branch's open PR via gh)
+#   --scope  file holding the PR description (default: $REVIEW_PR_BODY in CI, else this branch's open PR in origin
+#            or $REVIEW_REPO=owner/name, via gh)
 #   --full   also configure, build and ctest this preset (green required CI on the PR head counts as this)
 set -u
 cd "$(dirname "$0")/.."
@@ -13,7 +14,7 @@ while [ $# -gt 0 ]; do
     --base) base=$2; shift 2 ;;
     --scope) scope=$2; shift 2 ;;
     --full) full=$2; shift 2 ;;
-    *) sed -n '2,6p' "$0" >&2; exit 2 ;;
+    *) sed -n '2,7p' "$0" >&2; exit 2 ;;
   esac
 done
 
@@ -56,15 +57,19 @@ else
     why="HEAD is detached"
   elif [ -z "$repo" ]; then
     why="origin is not a github.com remote (set REVIEW_REPO=owner/name)"
-  elif ! pr=$(gh pr list -R "$repo" --head "$branch" --state open --limit 1 --json number,isDraft,author,body 2>/dev/null); then
-    why="gh pr list -R $repo failed: $(gh pr list -R "$repo" --head "$branch" --limit 1 2>&1 >/dev/null | head -n 1)"
-  elif [ "$pr" = "[]" ]; then
-    why="$repo has no open PR from branch $branch"
+  elif ! pr=$(gh pr list -R "$repo" --head "$branch" --state open --limit 20 --json number,isDraft,author,headRepositoryOwner,body 2>&1); then
+    why="gh pr list -R $repo failed: $(printf '%s\n' "$pr" | head -n 1)"
+  elif ! pr=$(printf '%s' "$pr" | python3 -c 'import json, sys  # first line: number draft bot; then the body and a "." sentinel
+owner = sys.argv[1].lower()
+p = next((p for p in json.loads(sys.stdin.read()) if (p.get("headRepositoryOwner") or {}).get("login", "").lower() == owner), None)
+if p:
+    print(p["number"], str(p["isDraft"]).lower(), str((p.get("author") or {}).get("is_bot", False)).lower())
+    sys.stdout.write((p["body"] or "").rstrip("\n") + ".")' "${repo%%/*}" 2>&1); then
+    why="could not parse gh pr list output: $(printf '%s\n' "$pr" | tail -n 1)"
+  elif [ -z "$pr" ]; then
+    why="$repo has no open PR from its branch $branch"
   else
     why=""
-    pr=$(printf '%s' "$pr" | python3 -c 'import json, sys; p = json.load(sys.stdin)[0]
-print(p["number"], str(p["isDraft"]).lower(), str((p.get("author") or {}).get("is_bot", False)).lower())
-sys.stdout.write((p["body"] or "").rstrip("\n") + ".")')
     read -r number draft bot <<<"${pr%%$'\n'*}"
     body=${pr#*$'\n'}
     body=${body%.}

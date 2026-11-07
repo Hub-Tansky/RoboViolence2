@@ -12,7 +12,7 @@ Run `tools/review.sh` while working and before the PR is ready. CI runs it on ev
 |---|---|
 | architecture, hygiene, content-case, original-assets | the existing `tools/check-*` scripts fail |
 | secrets | gitleaks finds a secret in `merge-base..HEAD` (skipped locally if gitleaks is missing; CI `secret-scan` runs it) |
-| scope | a changed file is outside the PR's **Allowed paths** row (from the PR description: `REVIEW_PR_BODY` in CI, locally the open PR of this branch in `origin` via `gh pr list`, with a NOTE when it can't be read, or `--scope <file>`) |
+| scope | a changed file is outside the PR's **Allowed paths** row (from the PR description: `REVIEW_PR_BODY` in CI, locally the open PR of this branch in `origin` (or `REVIEW_REPO=owner/name`) via `gh pr list`, with a NOTE when it can't be read, or `--scope <file>`) |
 | anti-gaming | an added line switches a check off: `#pragma warning`/`diagnostic`, `NOLINT`, `-Wno-`, `DISABLED_`, `--no-verify`, `continue-on-error: true`. A justified line carries `review: allow <reason>` |
 | protocol | the `Protocol:` line in `.claude/skills/rv2-code-review/SKILL.md` doesn't match the file's hash (the message prints the right line) |
 | review record | a ready non-bot PR has no Allowed paths row, or its record breaks section 5 (`tools/check-review-record.py`) |
