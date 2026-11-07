@@ -107,7 +107,7 @@ namespace
 		for (size_t i = 0; i < sizeof(SIGNALS) / sizeof(SIGNALS[0]); ++i)
 			if (SIGNALS[i] == sig)
 				sigaction(sig, &g_previous[i], nullptr);
-		if (info->si_code <= 0)
+		if (info->si_code <= 0 || info->si_code == SI_USER) // SI_USER is 0 on Linux, 0x10001 on macOS
 			raise(sig);
 	}
 #endif
@@ -141,7 +141,7 @@ namespace crashreport
 	void forceCrash()
 	{
 #ifdef BV2_PLATFORM_WINDOWS
-		RaiseException(EXCEPTION_ACCESS_VIOLATION, 0, 0, NULL);
+		*static_cast<volatile int*>(nullptr) = 0; // a real fault: RaiseException would report KernelBase.dll as the address
 #else
 		raise(SIGSEGV);
 #endif
