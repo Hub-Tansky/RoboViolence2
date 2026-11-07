@@ -117,7 +117,7 @@ Install (a new or failover host): the staging README's [By hand](../../tools/sta
 |---|---|
 | Deploy a commit | `RV2_DEPLOY_LABEL=prod /opt/rv2-prod/deploy.sh --sha <full sha>`, then check `https://<admin host>/deployed` and that the master lists every game server |
 | Roll back | the same with the previous full SHA: the second-to-last `pass` row of `/var/lib/rv2-prod/state.tsv` (`deployed` holds the running one); `--force` if players are on |
-| Add a game server | as in [Game servers](#game-servers); open its port in the host firewall and add an external monitor for it |
+| Add a game server | as in [Game servers](#game-servers) |
 | Fail over to another host | install as above, restore the latest backup into the volumes and `/etc/rv2-prod.env`, set the new `BV2_PUBLIC_ADDRESS`, deploy the same SHA, then point the `master` and `admin` DNS records at it. The restored `caddy-data` carries the admin certificate, so verify passes before DNS moves; if it has expired, point `admin` first and deploy again |
 
 Backups: a nightly job copies `/etc/rv2-prod.env` and every `roboviolence2_*` volume off the host (see [Backups](#backups) for what they hold); restore one snapshot to a scratch folder now and then to prove it works.

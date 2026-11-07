@@ -46,10 +46,9 @@ Each `build` run uploads `roboviolence2-macos-arm64.dmg` and `.zip` as artifacts
 ```bash
 gh api repos/Hub-Tansky/RoboViolence2/actions/runs/<run id>/artifacts --jq '.artifacts[] | "\(.id) \(.name)"'
 gh api repos/Hub-Tansky/RoboViolence2/actions/artifacts/<artifact id>/zip > roboviolence2-macos-arm64.dmg
-xattr -dr com.apple.quarantine roboviolence2-macos-arm64.dmg
 ```
 
-Run the app from the mounted image or a folder of its own; copying it to `/Applications` replaces your installed version.
+For the servers, fetch the `.zip` artifact the same way into `roboviolence2-macos-arm64.zip` and follow [Use a downloaded package](#use-a-downloaded-package). Run the app from the mounted image or a folder of its own; copying it to `/Applications` replaces your installed version.
 
 ## Build from source
 
