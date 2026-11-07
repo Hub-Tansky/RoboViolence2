@@ -1,4 +1,4 @@
-<!-- Scope: REVIEW.md section 5 and AGENTS.md "Agent rules". tools/review.sh reads the Allowed paths row and the review record below. -->
+<!-- Scope: REVIEW.md section 5 and AGENTS.md "Agent rules". tools/review.sh reads the Item and Allowed paths rows and the review record below. -->
 
 | Field | Value |
 |---|---|

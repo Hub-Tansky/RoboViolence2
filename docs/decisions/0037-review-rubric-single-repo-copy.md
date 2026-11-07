@@ -1,6 +1,6 @@
 # 0037: The review rubric has one repo copy, and the gate checks its hash
 
-- Status: Accepted
+- Status: Superseded by [0047](0047-two-axis-review-replaces-thermo-nuclear.md)
 - Date: 2026-10-27
 - Affects: [REVIEW.md](../../REVIEW.md) section 5, `tools/review.sh`, `.claude/`; supersedes [0023](0023-step-review-subagent-in-repo.md)
 

@@ -57,7 +57,7 @@ cmake --build --preset <preset> --target bv2dedicated bv2master
 - Never commit secrets, real hosts or IPs. Never use `--no-verify`.
 - Finish every PR by updating `ARCHITECTURE.md` (inventory and changed facts) and running `tools/check-architecture.sh`.
 - Record non-obvious decisions as ADRs in `docs/decisions/`.
-- Work is done only per [REVIEW.md](REVIEW.md): `tools/review.sh` passes (CI `review` check), and a scoped PR is ready only with a review by the `rv2-thermo-nuclear-review` subagent (`.claude/agents/`, rubric in `.claude/skills/rv2-thermo-nuclear-review/`, the only copy), which any session can spawn, recorded in the PR description. Its stop rule and forbidden shortcuts apply to every change.
+- Work is done only per [REVIEW.md](REVIEW.md): `tools/review.sh` passes (CI `review` check), and a ready PR has a review record from the `rv2-code-review` workflow (`.claude/skills/rv2-code-review/`, section 5), for its head. Its stop rule and forbidden shortcuts apply to every change.
 - Don't mix mechanical rewrites (encoding, renames, formatting) with functional changes in one commit.
 
 ## Agent skills
@@ -74,7 +74,7 @@ Default labels on GitHub issues; accepted issues become Proposed scope items. Se
 
 ### Domain docs
 
-Single-context: root `CONTEXT.md` (created lazily), ADRs in `docs/decisions/`. See `docs/agents/domain.md`.
+Single-context: root `CONTEXT.md`, ADRs in `docs/decisions/`. See `docs/agents/domain.md`.
 
 ## Ground rules
 
