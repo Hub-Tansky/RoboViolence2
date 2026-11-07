@@ -27,4 +27,6 @@ jobs:
         env:
           REVIEW_PR_BODY: ${{ github.event.pull_request.body }}
           REVIEW_PR_DRAFT: ${{ github.event.pull_request.draft }}  # empty on push: treated as draft
+          REVIEW_PR_HEAD: ${{ github.event.pull_request.head.sha }}  # HEAD here is the merge commit
+          REVIEW_PR_BOT: ${{ github.event.pull_request.user.type == 'Bot' }}
         run: tools/review.sh --base origin/${{ github.base_ref || 'main' }}  # pushes compare against main, so no skipped run can mask a failure

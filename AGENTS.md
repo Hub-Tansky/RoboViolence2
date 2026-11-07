@@ -22,7 +22,7 @@ cmake --build --preset <preset> --target bv2dedicated bv2master
 - Output: `build/<preset>/runtime/` (executables, `main/`, `master.db`, `web.db`). Run the server from there ([ADR 0005](docs/decisions/0005-runtime-main-data-root.md)). CI packages it per OS with `packaging/make-package.py`.
 - `bv2` (client) needs the vcpkg `client` feature (SDL3, miniaudio, stb); `-DBV2_BUILD_CLIENT=OFF` builds the servers only. `-DBV2_WITH_HTTP=ON` adds libcurl (off by default, ADR 0002).
 - Tests: `ctest --test-dir build/<preset> --output-on-failure` (`tests/`: netPacket layout, config layering and secret mask, dedicated-server smoke).
-- CI (`.github/workflows/`), all required: `build` (Windows, macOS, Linux; Debug and `-release` presets; uploads the Release `roboviolence2-<preset>` packages, the Windows installer and the macOS `.dmg`; `release` checks on every run that the release files are there and publishes them on a `v*` tag, ADR 0020), `smoke` (Linux ASan: ctest and a 10 s client run under xvfb), `secret-scan`, `architecture`, `hygiene` (paths, ignored files, size, encoding, content case), `review` (`tools/review.sh` on PRs: scope, anti-gaming, DONE gate). Not required: `codeql`, `clang-tidy`, `package-check` (Linux package in a clean `ubuntu:24.04`), `package-smoke` (Windows and macOS packages: server, master, and client for 10 s; Mesa llvmpipe on Windows), `containers` (server images and the compose example; pushes to GHCR from `main`). `ci-retry` re-runs a `build` whose job never got a hosted runner ([ADR 0041](docs/decisions/0041-macos-ci-runner-not-acquired-retry.md)). On `main`: `dependency-graph`. Weekly: `osv-vcpkg` (OSV check of the vcpkg ports, `tools/osv-vcpkg.py`). Bump the vcpkg baseline monthly, or when `osv-vcpkg` reports a port. Run them locally with `tools/review.sh` (`--full <preset>` adds build and ctest).
+- CI (`.github/workflows/`), all required: `build` (Windows, macOS, Linux; Debug and `-release` presets; uploads the Release `roboviolence2-<preset>` packages, the Windows installer and the macOS `.dmg`; `release` checks on every run that the release files are there and publishes them on a `v*` tag, ADR 0020), `smoke` (Linux ASan: ctest and a 10 s client run under xvfb), `secret-scan`, `architecture`, `hygiene` (paths, ignored files, size, encoding, content case), `review` (`tools/review.sh` on PRs: scope, anti-gaming, protocol, review record). Not required: `codeql`, `clang-tidy`, `package-check` (Linux package in a clean `ubuntu:24.04`), `package-smoke` (Windows and macOS packages: server, master, and client for 10 s; Mesa llvmpipe on Windows), `containers` (server images and the compose example; pushes to GHCR from `main`). `ci-retry` re-runs a `build` whose job never got a hosted runner ([ADR 0041](docs/decisions/0041-macos-ci-runner-not-acquired-retry.md)). On `main`: `dependency-graph`. Weekly: `osv-vcpkg` (OSV check of the vcpkg ports, `tools/osv-vcpkg.py`). Bump the vcpkg baseline monthly, or when `osv-vcpkg` reports a port. Run them locally with `tools/review.sh` (`--full <preset>` adds build and ctest).
 - Warnings are errors (`bv2_target_strict`) on `babonet`, `dko`, `zeven_core`; add a target once it is clean. Format only touched lines with `git clang-format`; never mass-reformat.
 
 ## Assets
@@ -57,7 +57,7 @@ cmake --build --preset <preset> --target bv2dedicated bv2master
 - Never commit secrets, real hosts or IPs. Never use `--no-verify`.
 - Finish every PR by updating `ARCHITECTURE.md` (inventory and changed facts) and running `tools/check-architecture.sh`.
 - Record non-obvious decisions as ADRs in `docs/decisions/`.
-- Work is done only per [REVIEW.md](REVIEW.md): `tools/review.sh` passes (CI `review` check), and a scoped PR is ready only with a review by the `rv2-thermo-nuclear-review` subagent (`.claude/agents/`, rubric in `.claude/skills/rv2-thermo-nuclear-review/`, the only copy), which any session can spawn, recorded in the PR description. Its stop rule and forbidden shortcuts apply to every change.
+- Work is done only per [REVIEW.md](REVIEW.md): `tools/review.sh` passes (CI `review` check), and a ready PR has a review record from the `rv2-code-review` workflow (`.claude/skills/rv2-code-review/`, section 5), for its head. Its stop rule and forbidden shortcuts apply to every change.
 - Don't mix mechanical rewrites (encoding, renames, formatting) with functional changes in one commit.
 
 ## Agent skills
@@ -74,7 +74,7 @@ Default labels on GitHub issues; accepted issues become Proposed scope items. Se
 
 ### Domain docs
 
-Single-context: root `CONTEXT.md` (created lazily), ADRs in `docs/decisions/`. See `docs/agents/domain.md`.
+Single-context: root `CONTEXT.md`, ADRs in `docs/decisions/`. See `docs/agents/domain.md`.
 
 ## Ground rules
 

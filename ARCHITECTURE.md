@@ -22,7 +22,7 @@ Robo Violence 2: unofficial fork of BaboViolent 2, a top-down multiplayer shoote
 | Website | roboviolence.com is built and deployed from [Hub-Tansky/rv2-website](https://github.com/Hub-Tansky/rv2-website) ([ADR 0036](docs/decisions/0036-website-in-rv2-website-repository.md)); its tests read the release file names from `build.yml`. |
 | Hosting | Server images from `packaging/docker/Dockerfile` (GHCR on `main`), runbook [docs/ops/runbook.md](docs/ops/runbook.md). |
 | Known defects | Backlog items with `kind: bug`: `40-backlog/` in [Hub-Tansky/rv2-docs](https://github.com/Hub-Tansky/rv2-docs) ([ADR 0044](docs/decisions/0044-backlog-in-the-rv2-docs-vault.md)). |
-| Decisions | [docs/decisions/README.md](docs/decisions/README.md): 0001 Ninja, 0002 libcurl compiled out, 0003 OpenGL 2.1 kept, 0004 project name (superseded by 0008), 0005 `main/` data root, 0006 platform layer, 0007 data root, pref dir and config layers, 0008 display name "Robo Violence 2", 0009 internal renaming, 0010 BV2 asset compatibility and GUI freeze, 0011 gettext PO translations, 0012 Windows 10 22H2 minimum, 0013 rulesets, 0014 libsodium HMAC, 0015 admin HTTP API, 0016 player data lookup and package content, 0017 playtest pull agent, 0018 staging pull deploy, 0019 in-game name and fork credits, 0020 package and release format, 0021 one-argument CString is text, 0022 advertised server address, 0023 step review subagent in the repo (superseded by 0037), 0024 GitHub Project is the backlog (superseded by 0044), 0025 client autotest mode, 0026 screenshot goldens, 0029 static website (moved to rv2-website), 0033 first-run data dialog recommends the BV2 zip (superseded by 0040), 0034 player data retention and privacy policy, 0035 website Tailwind and agent files (moved to rv2-website), 0036 website in rv2-website, 0037 review rubric single repo copy, 0038 dead account pages hidden, admin and ban secrets hardened, 0039 Widescreen (Stretch) shows more map, 0040 first-run download of the original data, 0041 build on PRs, `main` and tags; re-run a build whose job never got a runner, 0042 Options "Game assets" and remembered placeholders, 0043 first start fullscreen at the desktop resolution on the Game Browser tab, 0044 backlog in the rv2-docs vault, 0045 clang-format and clang-tidy on changed lines through pre-commit, 0046 main menu shows the release version from the tag. |
+| Decisions | [docs/decisions/README.md](docs/decisions/README.md): 0001 Ninja, 0002 libcurl compiled out, 0003 OpenGL 2.1 kept, 0004 project name (superseded by 0008), 0005 `main/` data root, 0006 platform layer, 0007 data root, pref dir and config layers, 0008 display name "Robo Violence 2", 0009 internal renaming, 0010 BV2 asset compatibility and GUI freeze, 0011 gettext PO translations, 0012 Windows 10 22H2 minimum, 0013 rulesets, 0014 libsodium HMAC, 0015 admin HTTP API, 0016 player data lookup and package content, 0017 playtest pull agent, 0018 staging pull deploy, 0019 in-game name and fork credits, 0020 package and release format, 0021 one-argument CString is text, 0022 advertised server address, 0023 step review subagent in the repo (superseded by 0037), 0024 GitHub Project is the backlog (superseded by 0044), 0025 client autotest mode, 0026 screenshot goldens, 0029 static website (moved to rv2-website), 0033 first-run data dialog recommends the BV2 zip (superseded by 0040), 0034 player data retention and privacy policy, 0035 website Tailwind and agent files (moved to rv2-website), 0036 website in rv2-website, 0037 review rubric single repo copy (superseded by 0047), 0038 dead account pages hidden, admin and ban secrets hardened, 0039 Widescreen (Stretch) shows more map, 0040 first-run download of the original data, 0041 build on PRs, `main` and tags; re-run a build whose job never got a runner, 0042 Options "Game assets" and remembered placeholders, 0043 first start fullscreen at the desktop resolution on the Game Browser tab, 0044 backlog in the rv2-docs vault, 0045 clang-format and clang-tidy on changed lines through pre-commit, 0046 main menu shows the release version from the tag, 0047 two-axis review replaces thermo-nuclear. |
 
 ### Open items
 
@@ -59,7 +59,8 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `CMakePresets.json` | Presets: linux-x64, macos-arm64, win-x64-msvc (Debug), -asan and -release variants (Ninja); macOS uses the overlay triplet in `tools/vcpkg-triplets/` |
 | `LICENSE.txt` | GPLv3 text (code only) |
 | `README.md` | Project overview, fork and asset-removal statement |
-| `REVIEW.md` | Definition of done: `tools/review.sh` checks, reviewer checklist, defined terms, forbidden shortcuts, fresh-context PR review (`.claude/agents/`) and its record in the PR description |
+| `CONTEXT.md` | Glossary of code review terms: axis, spec source, blocker, review tier, review record |
+| `REVIEW.md` | Definition of done: `tools/review.sh` checks, Standards checklist, defined terms, forbidden shortcuts, the two-axis PR review and its record in the PR description |
 | `SECURITY.md` | Security policy: supported versions, private vulnerability reporting, response timeline |
 | `docs/decisions/0007-data-root-pref-dir-config-layers.md` | ADR 0007 |
 | `game/src/Paths.cpp` | Package and data roots (`contentFile` for the package's own content), saved and detected BV2 data folder (`originalDataDir` first) or the saved placeholders choice and the start order (`startDataDir`), the Options field's save rule (`saveDataDirField`), per-user pref dir, layered config loading (release settings like the master list skip `bv2.cfg`, ADR 0028), map and DB path helpers (ADR 0016), the one map-name rule `isMapName` (editor save, Host list, Q-S6 map request) |
@@ -175,6 +176,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/test_client_version.py` | The client binary holds the release text the build was given (`BV2_VERSION`, ADR 0046) |
 | `tests/test_fileio.cpp` | `FileIO` byte widths for `.bvm` data and the widths the `.DKO` loader relies on; `bv2ReadBytes` zero-fills a short read; fixed-string length prefix round trip; unterminated `CString::loadFromFile` (overflows under ASan without its bound); `getString` keeps 255 characters (R16); `MemIO` reads past its end as zero; `getNextToken` on a single token (R30) |
 | `tests/test_lang.cpp` | Step 13: PO parser (entries that change the English printf conversions or whose key English lacks are skipped; raw control bytes rejected), English fallback per key, OS locale matching (`ll_CC`, `ll`, `.po` before `.lang`), PO without glyphs skipped |
+| `tests/test_review_record.py` | `tools/check-review-record.py` and `tools/review.sh`: review tier, protocol hash, each way a ready PR's record fails, head and bot forwarding, dirty-tree NOTE |
 | `tests/test_lang_check.py` | Step 13: `tools/lang-check.py` fails on changed conversions, unknown keys, repeated keywords, tabs and a stale `en.pot`; warns about missing glyphs |
 | `tests/test_join_password.cpp` | Step 10: a client joins a passworded server only with the HMAC over its own challenge; no password or MD5 of it on the wire |
 | `tests/test_bans.cpp` | Server bans: 0.0.1's binary banlist moves to `banlist.tsv` and still refuses the IP; a ban past `sv_banDays` lets it in and stays in the file (ADR 0034) |
@@ -217,8 +219,8 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 
 | path | purpose |
 |---|---|
-| `.claude/agents/rv2-thermo-nuclear-review.md` | Claude Code subagent: fresh-context PR-closing review (REVIEW.md section 5) |
-| `.claude/skills/rv2-thermo-nuclear-review/SKILL.md` | Claude Code skill: the only copy of the maintainability rubric the review subagent loads; its `Rubric:` hash line is checked by `tools/review.sh` ([ADR 0037](docs/decisions/0037-review-rubric-single-repo-copy.md)) |
+| `.claude/skills/rv2-code-review/SKILL.md` | Claude Code skill: review workflow and its Standards, Spec and Risk worker briefs, vendored from a pinned upstream; its `Protocol:` hash line is checked by `tools/check-review-record.py` ([ADR 0047](docs/decisions/0047-two-axis-review-replaces-thermo-nuclear.md)) |
+| `.claude/skills/rv2-code-review/UPSTREAM-LICENSE` | MIT notice of the upstream skill |
 
 ### `.github/actions/setup-vcpkg`
 
@@ -233,8 +235,8 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `.github/workflows/secret-scan.yml` | CI: gitleaks over commits after the fork point and original-asset check |
 | `.github/workflows/build.yml` | CI on PRs, pushes to `main` and `v*` tags (ADR 0041): Debug and Release build and ctest, with the `v*` tag as `BV2_VERSION` and a step checking the Release `bv2` holds it (ADR 0046), Release package on Windows, macOS, Linux (`roboviolence2-<preset>` artifacts); `package-check` of the Linux package in a clean `ubuntu:24.04`; `deb-check`: the `.deb` installs with apt, a non-root user starts the server and removal leaves nothing, in clean `ubuntu:24.04` and `debian:13`; `package-smoke` (not required): Windows and macOS packages start server, master and client (Mesa llvmpipe on Windows); ASan smoke job with client under xvfb; Linux jobs upload the actual and diff PNGs of failed `screenshot_*` tests (`screenshots-<preset>`); `release` job: every run checks the release files are there; a `v*` tag publishes them (GitHub release, pre-release for `v0.*` and `v*-*`) and posts to Discord; `fuzz` job (not required, pushes to main): 2 min per client message type, uploads crash inputs |
 | `.github/workflows/ci-retry.yml` | CI: when a `build` job was cancelled because no hosted runner picked it up, re-runs the run's failed jobs (attempts 1 and 2, latest commit only; ADR 0041) |
-| `.github/workflows/hygiene.yml` | CI: ARCHITECTURE.md inventory, repository hygiene, content case; `review` (`tools/review.sh`, given the PR description) on PRs, rerun on description edits |
-| `.github/pull_request_template.md` | PR description: item, goal, out of scope, Allowed paths (read by `tools/review.sh`), tests |
+| `.github/workflows/hygiene.yml` | CI: ARCHITECTURE.md inventory, repository hygiene, content case; `review` (`tools/review.sh`, given the PR description, head and bot flag) on PRs, rerun on description edits |
+| `.github/pull_request_template.md` | PR description: item and Allowed paths (read by `tools/review.sh`), goal, out of scope, tests |
 | `.github/workflows/codeql.yml` | CodeQL: `c-cpp` (manual linux-x64 build of the three executables) and `actions`; push, PR, weekly; alerts under `build/` (vcpkg headers) filtered out |
 | `.github/workflows/dependency-graph.yml` | Submits resolved vcpkg ports to the dependency graph on push to `main` |
 | `.github/workflows/osv-vcpkg.yml` | Weekly OSV check of the vcpkg ports by upstream commit (`tools/osv-vcpkg.py`); not required |
@@ -335,7 +337,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/decisions/0033-first-run-dialog-recommends-bv2-zip.md` | ADR: the first-run data dialog recommends the original BV2 zip, shows its URL and the folder to choose, and has a Download button (amends 0016) |
 | `docs/decisions/0034-player-data-retention-and-privacy-policy.md` | ADR: the server never relays player IPs, bans (`banlist.tsv`) expire after `sv_banDays`, `admin-audit.log` after 90 days; privacy policy page, installer link and opt-out |
 | `docs/decisions/0036-website-in-rv2-website-repository.md` | ADR: the website, its tests, tooling and Pages workflow live in Hub-Tansky/rv2-website; its tests read `build.yml` from here |
-| `docs/decisions/0037-review-rubric-single-repo-copy.md` | ADR: the review rubric has one repo copy with a unique name; the gate checks its hash |
+| `docs/decisions/0037-review-rubric-single-repo-copy.md` | ADR (superseded by 0047): one repo copy of the review rubric, with a hash the gate checks |
 | `docs/decisions/0038-dead-accounts-hidden-admin-and-ban-secrets-hardened.md` | ADR: dead account pages hidden; 15-character admin and master ban secrets, per-IP admin lockout, HMAC-signed master bans |
 | `docs/decisions/0039-widescreen-stretch-shows-more-map.md` | ADR: the gameplay, scope and intro projections use their viewport's aspect; Stretch shows more map sideways (Hor+), Bars stays 4:3 |
 | `docs/decisions/0040-first-run-downloads-original-data.md` | ADR: the first-run box downloads the original data of a pinned upstream commit with the OS's curl and tar/unzip, checks the hashes and installs it in `original` beside the pref dir; supersedes 0033 |
@@ -345,6 +347,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/decisions/0044-backlog-in-the-rv2-docs-vault.md` | ADR: the backlog is one `ROBO-NNN` Markdown file per scope item in the private rv2-docs vault; supersedes 0024 |
 | `docs/decisions/0045-cpp-lint-pre-commit-on-changed-lines.md` | ADR: clang-format and clang-tidy run on commit through pre-commit, on changed lines only; `.githooks/pre-commit` calls it |
 | `docs/decisions/0046-main-menu-shows-release-version-from-tag.md` | ADR: the main menu shows the `v*` tag through `BV2_VERSION` and `lang_version`; the protocol number stays separate; owner-approved GUI exception |
+| `docs/decisions/0047-two-axis-review-replaces-thermo-nuclear.md` | ADR: PR review runs isolated Standards and Spec workers from a vendored skill; tier from changed paths; missing spec blocks |
 | `docs/decisions/README.md` | ADR format and index |
 
 ### `docs/ops`
@@ -786,6 +789,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tools/gen-placeholder-content.py` | Writes placeholder maps, textures, a readable font atlas, sounds and models for dev and CI |
 | `tools/gen-app-icon.py` | Renders the application icons and the `.dmg` background into `packaging/` (by hand; numpy, Pillow) |
 | `tools/check-hygiene.py` | Fails on spaces in paths, tracked ignored files, files over 5 MB, bad encoding, failed translation check |
+| `tools/check-review-record.py` | Review tier from changed paths, `Protocol:` hash, and the review record of a ready PR (REVIEW.md section 5) |
 | `tools/lang-check.py` | Fails when `en.pot` is stale, a `.po` is invalid, has unknown keys or changes printf conversions; warns about missing glyphs; lists untranslated keys |
 | `tools/lang-to-pot.py` | Generates `content/languages/en.pot` from `en.lang` |
 | `tools/seed_db.cpp` | Creates a SQLite DB from SQL files (build helper) |
@@ -796,7 +800,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tools/staging/README.md` | Staging deploy agent: host needs, install, env file, cron, commands, files |
 | `tools/staging/health-watch.sh` | Container health watcher beside `deploy.sh` (cron, every minute): ntfy when a service of the stack is unhealthy, stopped, restarting or missing for two runs in a row, and when all are well again; skips while a deploy runs |
 | `tools/staging/deploy.sh` | Staging deploy agent (Linux, cron; production runs it by hand with `RV2_DEPLOY_LABEL=prod`): newest successful main `containers` build, pinned to its commit, deployed only with no players on CTF and TDM, rollback, `/deployed` (ADR 0018) |
-| `tools/review.sh` | Review gate (REVIEW.md section 1): all checks, scope against the PR's Allowed paths, anti-gaming, review gate on the PR's review record; `--full` builds and tests |
+| `tools/review.sh` | Review gate (REVIEW.md section 1) on `merge-base...HEAD`: all checks, scope against the PR's Allowed paths, anti-gaming, `check-review-record.py`; `--full` builds and tests |
 | `tools/setup-dev.ps1` | Activates hooks, checks tools (Windows) |
 | `tools/setup-dev.sh` | Activates hooks, checks tools (Unix); prints the apt line for building and the package names for running a package |
 | `tools/vcpkg-triplets/arm64-osx.cmake` | vcpkg overlay triplet: macOS arm64 ports built for macOS 12 (PNS-26) |

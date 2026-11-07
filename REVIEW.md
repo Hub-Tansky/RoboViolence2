@@ -1,12 +1,12 @@
 # REVIEW.md: when delivered work is done
 
-Work is done when `tools/review.sh` passes and, for a scoped PR, its review record is in the PR description. A claim without that evidence doesn't count.
+Work is done when `tools/review.sh` passes and a ready PR has a review record for its head in the description. A claim without that evidence doesn't count. Terms are in [CONTEXT.md](CONTEXT.md).
 
 **Stop rule:** if any item below can't be met, stop. Don't mark the PR ready or move its scope item to Done. Write what's missing under **Not done / unsure** in the review record and tell the owner.
 
 ## 1. Mechanical checks: `tools/review.sh`
 
-Run `tools/review.sh` while working, and `tools/review.sh --full <preset>` before the PR is ready. CI runs the fast mode on every PR (required `review` check).
+Run `tools/review.sh` while working and before the PR is ready. CI runs it on every PR (required `review` check). Scope, anti-gaming, secrets and the tier read committed changes (`<merge-base>...HEAD`); the whole-tree checks read the working tree, so a dirty tree prints a NOTE. Green required CI on the PR head counts as `--full <preset>`, which stays available locally.
 
 | Check | Fails when |
 |---|---|
@@ -14,19 +14,26 @@ Run `tools/review.sh` while working, and `tools/review.sh --full <preset>` befor
 | secrets | gitleaks finds a secret in `merge-base..HEAD` (skipped locally if gitleaks is missing; CI `secret-scan` runs it) |
 | scope | a changed file is outside the PR's **Allowed paths** row (from the PR description: `REVIEW_PR_BODY` in CI, `gh pr view` locally, or `--scope <file>`) |
 | anti-gaming | an added line switches a check off: `#pragma warning`/`diagnostic`, `NOLINT`, `-Wno-`, `DISABLED_`, `--no-verify`, `continue-on-error: true`. A justified line carries `review: allow <reason>` |
-| review gate | a ready (non-draft) PR with an Allowed paths row has no `## Review record` naming a fresh-context reviewer, has a finding still `pending`, has a finding whose Outcome cell (in `### Findings`) says `deferred` but doesn't name a `ROBO-NNN` scope item, `#n` or issue URL right after `deferred →`, or lacks the raw report (`<details>` with the `Rubric:` line of the head's rubric on a line of its own, and no line starting `Rubric: NOT LOADED`) |
-| rubric | the `Rubric:` line in `.claude/skills/rv2-thermo-nuclear-review/SKILL.md` doesn't match the file's hash (the message prints the right line) |
+| protocol | the `Protocol:` line in `.claude/skills/rv2-code-review/SKILL.md` doesn't match the file's hash (the message prints the right line) |
+| review record | a ready non-bot PR has no Allowed paths row, or its record breaks section 5 (`tools/check-review-record.py`) |
 | `--full` | configure, build (warnings are errors) or `ctest` fails |
 
-In a PR without an Allowed paths row, changes to guard files (`tools/check-*`, `tools/review.sh`, `.githooks/`, `.github/`, `.gitleaks.toml`, `.gitignore`, this file) print a NOTE: the owner must approve them.
+In a draft or bot PR without an Allowed paths row, changes to guard files (`tools/check-*`, `tools/review.sh`, `.githooks/`, `.github/`, `.gitleaks.toml`, `.gitignore`, this file) print a NOTE: the owner must approve them.
 
-## 2. Judged by the reviewer
+## 2. Judged by the Standards axis
+
+**Blockers:**
 
 - The ground rules hold ([AGENTS.md](AGENTS.md#ground-rules)): BV2 assets still load, no unapproved **[GUI]** change, renames only in separate mechanical commits.
-- New behaviour has a test. A fix has a test with **fix proof**.
+- New behaviour has a test. A fix has a test with **fix proof**. A missing test in tooling (`tools/**`, `.githooks/**`, `.github/**`, `.claude/**`) is a suggestion instead, unless the scope item asks for it.
 - `ARCHITECTURE.md`, every affected README and the ADRs are updated. Every non-obvious decision has an ADR.
 - Mechanical rewrites (encoding, renames, formatting) are not mixed with functional changes in one commit.
-- Every finding of the PR review is acted on (section 5).
+- The diff introduces no direct defect: a regression, or a bug in new code, shown by a traced path.
+
+**Suggestions:**
+
+- A file grows past 1,000 lines when it could be split.
+- New logic duplicates logic that already exists.
 
 ## 3. Defined terms
 
@@ -45,44 +52,75 @@ In a PR without an Allowed paths row, changes to guard files (`tools/check-*`, `
 - `--no-verify`, `continue-on-error`, `|| true` around a check.
 - Widening a PR's **Allowed paths** without the owner's approval written next to the path.
 - Marking a PR ready, moving its item to Done, or writing a review record, before the review has run.
+- Changing a worker's severity or editing its report.
 
-## 5. PR close: fresh-context review
+## 5. PR close: isolated review
 
-Required for every PR with an Allowed paths row, and for an architecture-changing PR (new or moved modules, libraries or interfaces, changed ownership or data flow, protocol or file-format changes).
+Every ready PR needs an Allowed paths row and this review; only bot-authored PRs are exempt.
 
-1. `tools/review.sh --full <preset>` passes.
-2. Spawn the **`rv2-thermo-nuclear-review` subagent** (Agent tool, `.claude/agents/`). Its prompt holds only the PR number (or the scope text), the merge-base and links to earlier review records it must not contradict. If the session doesn't offer that agent type (it started outside this repo), spawn a general-purpose agent whose prompt is "Follow `.claude/agents/rv2-thermo-nuclear-review.md` in this repository as your instructions" plus the same inputs. The subagent loads the rubric from `.claude/skills/rv2-thermo-nuclear-review/SKILL.md`, the only copy (Skill tool, or a Read of the file), starts its report with the rubric's `Rubric: rv2-thermo-nuclear-review <hash>` line (or `Rubric: NOT LOADED – <reason>`), reviews `git diff <merge-base>..HEAD` against the skill and section 2, and doesn't re-raise findings earlier records rejected or deferred. The author doesn't pre-filter its findings. If the subagent or skill isn't available, stop and tell the owner.
-   Paste the report unedited into the PR description inside `<details><summary>Raw reviewer report</summary> … </details>` (later rounds appended under `Round k`). It is evidence, not proof: the author could forge it, so the owner may spot-check it against the session.
-3. Act on every finding:
+The tier comes from the changed paths, and `tools/review.sh` prints it:
 
-   | Implement directly | Confirm with the owner first |
+| Tier | When | Axes |
+|---|---|---|
+| docs | every path is `docs/**` or `*.md`, none of them `REVIEW.md`, `AGENTS.md`, `.claude/**`, `.github/**` or `docs/agents/**` | Standards |
+| code | anything else | Standards, Spec |
+| plus Risk | a path is `game/src/netPacket.h`, `game/src/ServerRecv.cpp`, `game/src/ClientRecv.cpp`, `engine/babonet/**` or `engine/credentials/**`, or the owner asks | those, plus Risk |
+
+1. `tools/review.sh` passes on a clean tree.
+2. Run the `rv2-code-review` workflow (`.claude/skills/rv2-code-review/SKILL.md`, the only copy). It pins the diff, resolves the spec source and runs one fresh, isolated worker per axis in parallel. No worker sees another's report or the author's context. In a tool without that skill, follow the file by hand. If workers can't run, stop and tell the owner.
+3. Spec needs a spec source: the scope item's acceptance criteria, then its linked issue, then the PR goal, read from the local vault first. If it can't be retrieved or has no acceptance criteria, Spec is `not assessable` and the PR can't be ready.
+4. Paste each report unedited. Aggregate without merging or re-ranking. The reports are evidence, not proof: the owner may spot-check them against the session.
+5. Give every finding an outcome:
+
+   | Severity | Accepted outcomes |
    |---|---|
-   | Inside the PR's scope and Allowed paths | Outside the scope or Allowed paths |
-   | Fixes a real defect, or removes duplication or dead code without changing behaviour | Changes gameplay, protocol, file formats or anything the player sees (**[GUI]**) |
-   | Doesn't contradict an ADR or the scope item | Reverses or bends an ADR or the item, or needs a new ADR |
-   | Small and verifiable with existing checks and tests | Large rewrite, new dependency, or a matter of taste with no clear gain |
+   | blocker | `fixed in <commit>`; `confirmed with owner: <decision>`; `deferred → <ROBO-NNN or issue link>`; `rejected: <reason citing path:line or a URL>` |
+   | suggestion | any of those, or `not taken` (no backlog item needed) |
 
-   Fixes go in their own commits (`<kind>: review: <summary>`). A finding left for later becomes a Proposed scope item in [rv2-docs](https://github.com/Hub-Tansky/rv2-docs) `40-backlog/20-proposed/` (or an issue) and the outcome `deferred → ROBO-NNN` (or the issue link). Ask the owner all open questions in one message, each with the finding, the proposed change and a recommendation.
-4. Write the `## Review record` section of the PR description from the template below.
-5. Mark the PR ready only after the last review round covers every commit and `--full` passed on the final head. `tools/review.sh` checks the record and that the report's `Rubric:` line matches the skill file at the PR head; a PR that changes the rubric needs a review run on the changed rubric.
+   Confirm with the owner first when a fix is outside the scope or Allowed paths, changes gameplay, protocol, file formats or anything the player sees (**[GUI]**), bends an ADR or the scope item, or is a large rewrite or new dependency. Otherwise fix directly, in its own commit (`<kind>: review: <summary>`). A deferred finding becomes a Proposed scope item in [rv2-docs](https://github.com/Hub-Tansky/rv2-docs) `40-backlog/20-proposed/` or an issue. Ask the owner all open questions in one message, each with the finding, the proposed change and a recommendation.
+6. After fixes, rerun every required axis on the full diff at the new head. Stop when a round finds no new blocker.
+7. Write the record. In the final round, Spec `fail` and `not assessable` block; `partial` blocks unless Outcomes says `confirmed with owner`, with the criterion's text in the Finding cell.
+8. Mark the PR ready only with required CI green on the head named in `Diff:`. Any later commit makes the record stale. A PR that changes the skill needs a review on the changed skill.
 
 ## Review record template
+
+Keep only the final round's raw reports, one `<details>` block per axis, its `<details>` and `</details>` lines at the start of the line. Findings from every round stay in Outcomes.
 
 ```markdown
 ## Review record
 
-Reviewer: fresh-context subagent rv2-thermo-nuclear-review, YYYY-MM-DD
-Diff: <merge-base>..<head>
+Diff: <merge-base>...<head>
+Spec source: <ROBO-NNN> rv2-docs@<sha> blob:<12 hex> [(uncommitted)]
 
 ### review.sh
 
-<pasted summary of tools/review.sh --full <preset>>
+<pasted summary of tools/review.sh, and the CI run for the head>
 
-### Findings
+### Standards
 
-| # | Finding | Outcome |
-|---|---|---|
-| 1 | <finding> | fixed in <commit> / confirmed with owner: <decision> / deferred → <ROBO-NNN or issue link> / rejected: <reason> |
+<details><summary>Raw report</summary>
+
+<report, unedited>
+
+</details>
+
+### Spec
+
+<details><summary>Raw report</summary>
+
+<report with its Criterion | Diff/test evidence | Status matrix, unedited; omitted in the docs tier>
+
+</details>
+
+### Risk
+
+<when required; same form>
+
+### Outcomes
+
+| # | Axis | Finding | Severity | Outcome |
+|---|---|---|---|---|
+| 1 | Standards | <finding> | blocker | fixed in <commit> |
 
 ### Fix proof
 
@@ -91,12 +129,6 @@ Diff: <merge-base>..<head>
 ### Not done / unsure
 
 <anything unverified, or "none">
-
-<details><summary>Raw reviewer report</summary>
-
-<report, unedited>
-
-</details>
 ```
 
 Records of Phases A–C and T steps 1–3 stay at the [last commit with docs/roadmap](https://github.com/Hub-Tansky/RoboViolence2/tree/58c91b2a660db2b290b0b5f504381980a6aedba2/docs/roadmap).

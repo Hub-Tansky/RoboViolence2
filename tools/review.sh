@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Mechanical review gate (REVIEW.md section 1). Exit 0 only if every check passed.
 # Usage: tools/review.sh [--base <ref>] [--scope <file>] [--full <preset>]
-#   --base   compare against this ref (default origin/main); the diff is merge-base..working tree
+#   --base   compare against this ref (default origin/main); the diff is merge-base...HEAD
 #   --scope  file holding the PR description (default: $REVIEW_PR_BODY in CI, else `gh pr view` of this branch)
-#   --full   also configure, build and ctest this preset (required before the PR is ready)
+#   --full   also configure, build and ctest this preset (green required CI on the PR head counts as this)
 set -u
 cd "$(dirname "$0")/.."
 
@@ -18,6 +18,7 @@ while [ $# -gt 0 ]; do
 done
 
 mb=$(git merge-base "$base" HEAD 2>/dev/null) || { echo "FAIL base: '$base' not found (git fetch origin main)"; exit 1; }
+[ -z "$(git status --porcelain)" ] || echo "NOTE working tree is dirty: diff checks read only commits; whole-tree checks read it as is"
 fail=0
 check() { # check <name> <command...>: run it, print PASS/FAIL; indent its output on failure, its NOTEs always
   local name=$1 out; shift
@@ -46,18 +47,22 @@ elif [ -n "${REVIEW_PR_BODY+x}" ]; then
 elif command -v gh >/dev/null 2>&1; then
   body=$(gh pr view --json body -q .body 2>/dev/null || true)
   [ -n "${REVIEW_PR_DRAFT:-}" ] || REVIEW_PR_DRAFT=$(gh pr view --json isDraft -q .isDraft 2>/dev/null || echo true)
+  [ -n "${REVIEW_PR_BOT:-}" ] || REVIEW_PR_BOT=$(gh pr view --json author -q .author.is_bot 2>/dev/null || echo false)
 else
   body=""
 fi
 
-# Scope, anti-gaming and review gate: one Python pass over the diff.
-check diff-rules env REVIEW_BASE="$mb" REVIEW_BODY="$body" REVIEW_DRAFT="${REVIEW_PR_DRAFT:-true}" python3 - <<'EOF'
-import hashlib, os, re, subprocess, sys
+# Protocol hash and review record of a ready PR. CI's HEAD is a merge commit, so it passes the real PR head.
+check review-record env REVIEW_BASE="$mb" REVIEW_HEAD="${REVIEW_PR_HEAD:-$(git rev-parse HEAD)}" REVIEW_BODY="$body" \
+  REVIEW_DRAFT="${REVIEW_PR_DRAFT:-true}" REVIEW_BOT="${REVIEW_PR_BOT:-false}" python3 -B tools/check-review-record.py
 
-base, body, draft = os.environ["REVIEW_BASE"], os.environ["REVIEW_BODY"].replace("\r\n", "\n"), os.environ["REVIEW_DRAFT"] == "true"
+# Scope and anti-gaming: one Python pass over the diff.
+check diff-rules env REVIEW_BASE="$mb" REVIEW_BODY="$body" python3 - <<'EOF'
+import os, re, subprocess, sys
+
+base, body = os.environ["REVIEW_BASE"] + "...HEAD", os.environ["REVIEW_BODY"].replace("\r\n", "\n")
 git = lambda *a: subprocess.run(["git", *a], capture_output=True, text=True, check=True).stdout
-changed = [f for f in git("diff", "--name-only", "--diff-filter=ACMR", base).split() if f]
-changed += [f for f in git("ls-files", "--others", "--exclude-standard").split() if f]
+changed = git("diff", "--name-only", "--diff-filter=ACMR", base).splitlines()
 problems = []
 
 def to_regex(g):
@@ -89,34 +94,6 @@ for line in git("diff", "-U0", "--src-prefix=a/", "--dst-prefix=b/", base).split
     elif file and line.startswith("+") and not file.endswith(".md") and file != "tools/review.sh":
         if BANNED.search(line) and "review: allow" not in line:
             problems.append(f"anti-gaming: {file}: {line[1:].strip()[:120]}")
-
-# Rubric hash (ADR 0037): sha256 of the repo's only rubric copy without its "Rubric:" line, first 12 hex digits.
-# Same as: grep -v '^Rubric: ' .claude/skills/rv2-thermo-nuclear-review/SKILL.md | sha256sum | cut -c1-12
-skill = open(".claude/skills/rv2-thermo-nuclear-review/SKILL.md", encoding="utf-8").read()
-rubric = "Rubric: rv2-thermo-nuclear-review " + hashlib.sha256("".join(
-    l for l in skill.splitlines(True) if not l.startswith("Rubric: ")).encode()).hexdigest()[:12]
-if rubric not in skill.splitlines():
-    problems.append(f"rubric: the skill's Rubric line is stale; set it to '{rubric}'")
-
-# Review gate: a ready PR with Allowed paths needs its fresh-context review record in the description.
-if row and not draft:
-    rec = body.split("## Review record", 1)[1] if "## Review record" in body else ""
-    if not rec:
-        problems.append("review gate: the PR is ready but its description has no '## Review record'")
-    elif "Reviewer: fresh-context subagent" not in rec or "### Findings" not in rec:
-        problems.append("review gate: the record lacks 'Reviewer: fresh-context subagent' or '### Findings'")
-    elif re.search(r"\|\s*pending\s*\|", rec):
-        problems.append("review gate: the record still has pending findings")
-    elif not re.search(rf"^[ \t]*{re.escape(rubric)}[ \t]*$", rec, re.M) or re.search(r"^[ \t]*Rubric: NOT LOADED", rec, re.M):
-        problems.append(f"review gate: the raw reviewer report lacks '{rubric}' (the repo rubric at this head), or says NOT LOADED")
-    else:
-        # Only the Outcome cell (last column) of the ### Findings table; finding text and raw reports may say "deferred".
-        findings = rec.split("### Findings", 1)[1].split("\n###", 1)[0]
-        for r in re.findall(r"^\|.*\|[ \t]*$", findings, re.M):
-            outcome = r.strip().strip("|").split("|")[-1]
-            if re.search(r"(?i)\bdeferred\b", outcome) and not re.search(
-                r"(?i)deferred\s*(?:→|->)\s*\[?(?:ROBO-\d{3}\b|#\d+|https://github\.com/Hub-Tansky/RoboViolence2/issues/\d+)", outcome):
-                problems.append(f"review gate: deferred finding without a ROBO-NNN item or issue link: {r.strip()[:100]}")
 
 print(f"scope: {'PR Allowed paths' if row else 'none (no Allowed paths row)'}; {len(changed)} changed files")
 for p in problems:

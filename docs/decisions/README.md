@@ -69,7 +69,7 @@ What we do, in one or two sentences.
 | [0034](0034-player-data-retention-and-privacy-policy.md) | Player IPs stay on the server, personal data on disk expires, and a privacy policy says so | Accepted |
 | [0035](https://github.com/Hub-Tansky/rv2-website/blob/main/docs/decisions/0035-website-tailwind-install-page-agent-files.md) | The website uses Tailwind from its CDN, has a separate install guide and publishes files for AI agents | Moved to rv2-website (0036) |
 | [0036](0036-website-in-rv2-website-repository.md) | The website lives in Hub-Tansky/rv2-website | Accepted |
-| [0037](0037-review-rubric-single-repo-copy.md) | The review rubric has one repo copy, and the gate checks its hash | Accepted |
+| [0037](0037-review-rubric-single-repo-copy.md) | The review rubric has one repo copy, and the gate checks its hash | Superseded by 0047 |
 | [0038](0038-dead-accounts-hidden-admin-and-ban-secrets-hardened.md) | Dead account pages are hidden; admin and master ban secrets meet NIST SP 800-63B-4 | Accepted |
 | [0039](0039-widescreen-stretch-shows-more-map.md) | Widescreen (Stretch) shows more map sideways instead of stretching a 4:3 view | Accepted |
 | [0040](0040-first-run-downloads-original-data.md) | The first-run box downloads the original BV2 data with the OS's own curl and unzip tools | Accepted (amended by 0042) |
@@ -79,3 +79,4 @@ What we do, in one or two sentences.
 | [0044](0044-backlog-in-the-rv2-docs-vault.md) | The backlog is one Markdown file per scope item in the private rv2-docs vault | Accepted |
 | [0045](0045-cpp-lint-pre-commit-on-changed-lines.md) | clang-format and clang-tidy run on commit through pre-commit, on changed lines only | Accepted |
 | [0046](0046-main-menu-shows-release-version-from-tag.md) | The main menu shows the release version from the tag, not the protocol number | Accepted |
+| [0047](0047-two-axis-review-replaces-thermo-nuclear.md) | PR review runs isolated Standards and Spec workers from a vendored skill | Accepted |
