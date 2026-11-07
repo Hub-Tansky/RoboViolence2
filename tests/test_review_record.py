@@ -79,7 +79,10 @@ CASES = [
     ("report blocker dropped from outcomes", body(standards=report("## Blockers\n1. `a.cpp:1` bad\n")), CODE, "has 1 blockers but Outcomes lists 0"),
     ("report blocker downgraded", body(standards=report("## Blockers\n1. `a.cpp:1` bad\n"),
                                        outcomes=row(severity="suggestion", outcome="not taken")), CODE, "has 1 blockers but Outcomes lists 0"),
-    ("report blocker listed", body(standards=report("## Blockers\n1. `a.cpp:1` bad\n## Suggestions\n1. y\n"), outcomes=row()), CODE, None),
+    ("report blocker listed", body(standards=report("## Blockers\n1. `a.cpp:1` bad\n"), outcomes=row()), CODE, None),
+    ("report suggestion dropped from outcomes", body(standards=report("## Blockers\nnone\n## Suggestions\n1. y\n")), CODE, "has 1 suggestions but Outcomes lists 0"),
+    ("report suggestion listed", body(standards=report("## Suggestions\n1. y\n"), outcomes=row(severity="suggestion", outcome="not taken")), CODE, None),
+    ("owner-requested Risk needs its report", body(risk="none"), CODE, "'### Risk' needs its raw report"),
 ]
 
 failed = 0

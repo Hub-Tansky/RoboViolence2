@@ -79,8 +79,8 @@ def table_rows(text):
     return rows
 
 
-def blocker_count(report):
-    part = re.search(r"^## Blockers[ \t]*\n(.*?)(?=^## |\Z)", report, re.M | re.S)
+def finding_count(report, heading):
+    part = re.search(rf"^## {heading}[ \t]*\n(.*?)(?=^## |\Z)", report, re.M | re.S)
     return len(re.findall(r"^\d+\.", part.group(1), re.M)) if part else 0
 
 
@@ -164,9 +164,10 @@ def check_record(body, changed, head, protocol):
             continue
         if not re.search(rf"^[ \t]*{re.escape(protocol)}[ \t]*$", report, re.M):
             problems.append(f"review gate: the {axis} report lacks '{protocol}' (the protocol at this head)")
-        rows = [o for o in outcomes if o["axis"] == axis and o["severity"] == "blocker"]
-        if len(rows) < blocker_count(report):
-            problems.append(f"review gate: the {axis} report has {blocker_count(report)} blockers but Outcomes lists {len(rows)}")
+        for severity, heading in (("blocker", "Blockers"), ("suggestion", "Suggestions")):
+            listed = sum(o["axis"] == axis and o["severity"] == severity for o in outcomes)
+            if listed < finding_count(report, heading):
+                problems.append(f"review gate: the {axis} report has {finding_count(report, heading)} {heading.lower()} but Outcomes lists {listed}")
         if axis == "Spec":
             problems += check_spec_matrix(report, outcomes)
     return problems

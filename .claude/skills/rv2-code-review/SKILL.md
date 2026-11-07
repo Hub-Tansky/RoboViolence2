@@ -5,7 +5,7 @@ description: Robo Violence 2's PR review workflow (REVIEW.md section 5). Pins th
 
 # rv2-code-review
 
-Protocol: rv2-code-review 0c8a5a57ab37
+Protocol: rv2-code-review 50eeece8c59b
 
 Adapted from `skills/engineering/code-review` in [mattpocock/skills](https://github.com/mattpocock/skills) at `4ae2317ddb22b046e26455e4f9c9b3aaaf62212d` (MIT; notice in `UPSTREAM-LICENSE`). Changes: a missing spec blocks instead of skipping the axis, no smell baseline, a matrix for Spec, a Risk worker, and the record in REVIEW.md. Upgrade only by a reviewed PR that updates this SHA.
 
@@ -13,7 +13,7 @@ Adapted from `skills/engineering/code-review` in [mattpocock/skills](https://git
 
 You are the parent. You pin, launch and aggregate. You don't review, filter or re-rank.
 
-1. **Pin.** `mb=$(git merge-base origin/main HEAD)`, `head=$(git rev-parse HEAD)`. Stop if `git diff $mb...$head` is empty or the tree is dirty.
+1. **Pin.** `mb=$(git merge-base origin/main HEAD)`, `head=$(git rev-parse HEAD)`. Stop if `git diff --text $mb...$head` is empty or the tree is dirty.
 2. **Run** `tools/review.sh`. Its NOTE gives the tier and whether Risk is required. Stop on a failure.
 3. **Resolve the spec source.** Take `ROBO-NNN` from the PR's Item row. Read `40-backlog/*/ROBO-NNN *.md` in the local vault (`~/Dev/RoboViolence2/Robo2-docs`) first, since it can be ahead of GitHub; without a local vault, use `gh api repos/Hub-Tansky/rv2-docs/contents/<path>`. Never commit or move changes you didn't make.
    - `Spec source: ROBO-NNN rv2-docs@<vault HEAD> blob:<first 12 hex of git hash-object FILE>`
@@ -27,13 +27,13 @@ You are the parent. You pin, launch and aggregate. You don't review, filter or r
    | code | Standards, Spec |
    | Risk required, or the owner asked | those, plus Risk |
 
-   Each prompt is: "Read `.claude/skills/rv2-code-review/SKILL.md` and follow only its section `<Worker> worker`", then that section's inputs. Add earlier outcomes of the same axis in a later round. Never give a worker another worker's report or your own opinion.
+   Each prompt is: "Read `.claude/skills/rv2-code-review/SKILL.md` and follow only its sections `<Worker> worker` and `Rules for every worker`", then that section's inputs. Add earlier outcomes of the same axis in a later round. Never give a worker another worker's report or your own opinion.
 5. **Aggregate.** Paste each report unedited into its section of the record (REVIEW.md template). Write a one-line summary per axis, naming the axis's worst finding. Don't pick a winner across axes, and don't change a severity.
 6. **Act.** Follow REVIEW.md section 5. After fixes, rerun every required worker on the full diff at the new head. Stop when a round finds no new blocker.
 
 ## Rules for every worker
 
-- You are read-only. Review `git diff <merge-base>...<head>`, and read each changed file in full. Don't spawn workers.
+- You are read-only. Review `git diff --text <merge-base>...<head>` (`.gitattributes` hides Markdown diffs without `--text`), and read each changed file in full. Don't spawn workers.
 - Don't re-raise a finding the earlier outcomes for your axis rejected or deferred.
 - Skip what `tools/review.sh` and CI enforce.
 - Cite each finding as `path:line`, source rule or criterion, evidence, and the smallest in-scope remedy.
