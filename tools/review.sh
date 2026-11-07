@@ -2,7 +2,7 @@
 # Mechanical review gate (REVIEW.md section 1). Exit 0 only if every check passed.
 # Usage: tools/review.sh [--base <ref>] [--scope <file>] [--full <preset>]
 #   --base   compare against this ref (default origin/main); the diff is merge-base...HEAD
-#   --scope  file holding the PR description (default: $REVIEW_PR_BODY in CI, else `gh pr view` of this branch)
+#   --scope  file holding the PR description (default: $REVIEW_PR_BODY in CI, else this branch's open PR via gh)
 #   --full   also configure, build and ctest this preset (green required CI on the PR head counts as this)
 set -u
 cd "$(dirname "$0")/.."
@@ -39,17 +39,40 @@ else
   echo "SKIP secrets: gitleaks not installed (CI secret-scan runs it)"
 fi
 
-# PR description: --scope file, CI's REVIEW_PR_BODY, or this branch's PR via gh. Empty outside a PR.
+# PR description: --scope file, CI's REVIEW_PR_BODY, or this branch's open PR via gh. Empty outside a PR.
+# The lookup names the repo (origin, or $REVIEW_REPO) and the branch: a bare `gh pr view` resolves the
+# `upstream` remote (Daivuk/BaboViolent2) first and follows the branch's tracking ref (often main).
 if [ -n "$scope" ]; then
   body=$(cat "$scope")
 elif [ -n "${REVIEW_PR_BODY+x}" ]; then
   body=$REVIEW_PR_BODY
-elif command -v gh >/dev/null 2>&1; then
-  body=$(gh pr view --json body -q .body 2>/dev/null || true)
-  [ -n "${REVIEW_PR_DRAFT:-}" ] || REVIEW_PR_DRAFT=$(gh pr view --json isDraft -q .isDraft 2>/dev/null || echo true)
-  [ -n "${REVIEW_PR_BOT:-}" ] || REVIEW_PR_BOT=$(gh pr view --json author -q .author.is_bot 2>/dev/null || echo false)
 else
   body=""
+  branch=$(git symbolic-ref -q --short HEAD || true)
+  repo=${REVIEW_REPO:-$(git remote get-url origin 2>/dev/null | sed -nE 's#^(https://|ssh://)?([^@/]*@)?github\.com[:/]([^/]+/[^/]+)$#\3#p' | sed 's#\.git$##')}
+  if ! command -v gh >/dev/null 2>&1; then
+    why="gh is not installed"
+  elif [ -z "$branch" ]; then
+    why="HEAD is detached"
+  elif [ -z "$repo" ]; then
+    why="origin is not a github.com remote (set REVIEW_REPO=owner/name)"
+  elif ! pr=$(gh pr list -R "$repo" --head "$branch" --state open --limit 1 --json number,isDraft,author,body 2>/dev/null); then
+    why="gh pr list -R $repo failed: $(gh pr list -R "$repo" --head "$branch" --limit 1 2>&1 >/dev/null | head -n 1)"
+  elif [ "$pr" = "[]" ]; then
+    why="$repo has no open PR from branch $branch"
+  else
+    why=""
+    pr=$(printf '%s' "$pr" | python3 -c 'import json, sys; p = json.load(sys.stdin)[0]
+print(p["number"], str(p["isDraft"]).lower(), str((p.get("author") or {}).get("is_bot", False)).lower())
+sys.stdout.write((p["body"] or "").rstrip("\n") + ".")')
+    read -r number draft bot <<<"${pr%%$'\n'*}"
+    body=${pr#*$'\n'}
+    body=${body%.}
+    [ -n "${REVIEW_PR_DRAFT:-}" ] || REVIEW_PR_DRAFT=$draft
+    [ -n "${REVIEW_PR_BOT:-}" ] || REVIEW_PR_BOT=$bot
+    echo "INFO PR description: $repo#$number (draft: $draft)"
+  fi
+  [ -z "$why" ] || echo "NOTE no PR description read: $why; scope and review-record checks run as for a draft without one (pass --scope <file> to give it)"
 fi
 
 # Protocol hash and review record of a ready PR. CI's HEAD is a merge commit, so it passes the real PR head.
