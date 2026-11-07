@@ -18,6 +18,7 @@
 
 ## Consequences
 - Every new commit makes the record stale, so reviews run last. A description edit reruns the gate without a new commit.
+- A missing test in tooling is a suggestion: on PR 134, most blockers that made review rounds repeat were such gaps.
 - Structural review shrinks to two suggestion-level rules in REVIEW.md. If maintainability slips, add documented rules, not a broader reviewer.
 - CI checks the Spec source's format, not its content. The gate's finding count is a lower bound, since Outcomes keeps earlier rounds' rows. The `Protocol:` hash detects drift but doesn't prove a review ran, so the owner's spot-check stays.
 - Rejected: using the skill live from GitHub. It is mutable, so reviews could change without a PR.

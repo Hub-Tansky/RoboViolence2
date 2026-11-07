@@ -25,7 +25,7 @@ In a draft or bot PR without an Allowed paths row, changes to guard files (`tool
 **Blockers:**
 
 - The ground rules hold ([AGENTS.md](AGENTS.md#ground-rules)): BV2 assets still load, no unapproved **[GUI]** change, renames only in separate mechanical commits.
-- New behaviour has a test. A fix has a test with **fix proof**.
+- New behaviour has a test. A fix has a test with **fix proof**. A missing test in tooling (`tools/**`, `.githooks/**`, `.github/**`, `.claude/**`) is a suggestion instead, unless the scope item asks for it.
 - `ARCHITECTURE.md`, every affected README and the ADRs are updated. Every non-obvious decision has an ADR.
 - Mechanical rewrites (encoding, renames, formatting) are not mixed with functional changes in one commit.
 - The diff introduces no direct defect: a regression, or a bug in new code, shown by a traced path.
