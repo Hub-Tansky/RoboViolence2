@@ -22,7 +22,7 @@ Used by `/wayfinder`. Map, tickets, answers and research notes live in rv2-docs 
 - **Ticket**: a Proposed scope item, `kind: research`, with `wayfinder: <research|prototype|grilling|task>`, `map: ROBO-NNN` and `## Question` in place of Context and Acceptance criteria.
 - **Blocking**: `blocked_by: [ROBO-NNN]`, written at creation. If a push forces a renumber, update every `map:` and `blocked_by` citing the old number in the same commit.
 - **Frontier**: items in `10-next/` or `20-proposed/` with this `map:` whose `blocked_by` items are all in `90-done/`; `10-next/` first, then lowest number.
-- **Claim**: move the ticket to `30-inprogress/` (status In progress) and push before any work. On a rejected push, drop the claim commit (`git fetch && git reset --hard @{u}`), then re-run the frontier and claim again.
+- **Claim**: move the ticket to `30-inprogress/` (status In progress) and push before any work. On a rejected push, drop the claim commit (`git fetch && git reset --keep @{u}`), then re-run the frontier and claim again.
 - **Resolve**: add `## Answer`, move the ticket to `90-done/`, and append a linked one-line gist to the map's Decisions so far, in one commit.
 - **Out of scope**: add `## Out of scope` with the reason, move the ticket to `90-done/`, and add one line to the map's Out of scope section.
 - **Research findings**: in the ticket's `## Answer`, or, when long, a `type: research` note in rv2-docs `20-product/` linked from it. This replaces the skill's `research/<name>` branch and the research skill's in-repo file; put that target in the research subagent's prompt.
