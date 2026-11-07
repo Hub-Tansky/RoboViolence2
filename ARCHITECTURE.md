@@ -290,6 +290,14 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/build/macos.md` | macOS build and run guide |
 | `docs/build/windows.md` | Windows build and run guide |
 
+### `docs/agents`
+
+| path | purpose |
+|---|---|
+| `docs/agents/domain.md` | Agent skills config: where the glossary and ADRs are and how skills use them |
+| `docs/agents/issue-tracker.md` | Agent skills config: "publish" and "fetch" map to rv2-docs scope items |
+| `docs/agents/triage-labels.md` | Agent skills config: triage roles mapped to GitHub issue labels and scope items |
+
 ### `docs/decisions`
 
 | path | purpose |
