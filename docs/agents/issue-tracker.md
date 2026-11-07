@@ -8,7 +8,15 @@ Create one Proposed scope item per ticket, per rv2-docs `AGENTS.md` § Backlog a
 
 ## When a skill says "fetch the relevant ticket"
 
-Read `40-backlog/*/ROBO-NNN *.md` in rv2-docs. `#n` is the intake issue; its scope item links it in `issue:`.
+Read `40-backlog/*/ROBO-NNN *.md` in rv2-docs. `#n` is the intake issue; its scope item has an `issue:` URL ending in `/issues/<n>`.
+
+## Triage (GitHub intake)
+
+`/triage` works on this repo's GitHub issues with `gh issue list/view/comment/edit --add-label/close`. For `ready-for-agent` and `ready-for-human`, the brief goes into a new Proposed scope item (Context and Acceptance criteria), and the issue gets a comment naming its `ROBO-NNN`.
+
+## Wayfinding operations
+
+Off. Don't create maps or `.scratch/` files; plan as Proposed scope items linked with `blocked_by`.
 
 ## PRs as a request surface
 
