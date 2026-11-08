@@ -147,8 +147,10 @@ namespace crashreport
 #ifdef BV2_PLATFORM_WINDOWS
 		*static_cast<volatile int*>(nullptr) = 0; // a real fault: RaiseException would report KernelBase.dll as the address
 #else
-		// A real fault, as a crash would be: write to a page that can't be written
+		// A real fault, as a crash would be: write to an unmapped page (SIGSEGV on Linux and macOS; a mapped PROT_NONE
+		// page gives SIGBUS on macOS)
 		void* page = mmap(nullptr, 4096, PROT_NONE, MAP_PRIVATE | MAP_ANON, -1, 0);
+		munmap(page, 4096);
 		*static_cast<volatile int*>(page) = 0;
 #endif
 	}
