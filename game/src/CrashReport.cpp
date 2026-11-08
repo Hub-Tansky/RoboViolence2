@@ -12,6 +12,7 @@
 #	include <csignal>
 #	include <execinfo.h>
 #	include <fcntl.h>
+#	include <sys/mman.h>
 #	include <unistd.h>
 #endif
 
@@ -107,7 +108,10 @@ namespace
 		for (size_t i = 0; i < sizeof(SIGNALS) / sizeof(SIGNALS[0]); ++i)
 			if (SIGNALS[i] == sig)
 				sigaction(sig, &g_previous[i], nullptr);
-		if (info->si_code <= 0 || info->si_code == SI_USER) // SI_USER is 0 on Linux, 0x10001 on macOS
+		// Kernel fault codes (SEGV_MAPERR, BUS_ADRALN, ...) are small positive numbers on Linux and macOS; sent signals
+		// use 0, negative codes (Linux) or 0x10001 and up (macOS SI_USER)
+		bool fault = sig != SIGABRT && info->si_code > 0 && info->si_code < 0x10000;
+		if (!fault)
 			raise(sig);
 	}
 #endif
@@ -143,7 +147,9 @@ namespace crashreport
 #ifdef BV2_PLATFORM_WINDOWS
 		*static_cast<volatile int*>(nullptr) = 0; // a real fault: RaiseException would report KernelBase.dll as the address
 #else
-		raise(SIGSEGV);
+		// A real fault, as a crash would be: write to a page that can't be written
+		void* page = mmap(nullptr, 4096, PROT_NONE, MAP_PRIVATE | MAP_ANON, -1, 0);
+		*static_cast<volatile int*>(page) = 0;
 #endif
 	}
 }
