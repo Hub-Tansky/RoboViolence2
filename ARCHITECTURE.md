@@ -22,7 +22,7 @@ Robo Violence 2: unofficial fork of BaboViolent 2, a top-down multiplayer shoote
 | Website | roboviolence.com is built and deployed from [Hub-Tansky/rv2-website](https://github.com/Hub-Tansky/rv2-website) ([ADR 0036](docs/decisions/0036-website-in-rv2-website-repository.md)); its tests read the release file names from `build.yml`. |
 | Hosting | Server images from `packaging/docker/Dockerfile` (GHCR on `main`), runbook [docs/ops/runbook.md](docs/ops/runbook.md). |
 | Known defects | Backlog items with `kind: bug`: `40-backlog/` in [Hub-Tansky/rv2-docs](https://github.com/Hub-Tansky/rv2-docs) ([ADR 0044](docs/decisions/0044-backlog-in-the-rv2-docs-vault.md)). |
-| Decisions | [docs/decisions/README.md](docs/decisions/README.md): 0001 Ninja, 0002 libcurl compiled out, 0003 OpenGL 2.1 kept, 0004 project name (superseded by 0008), 0005 `main/` data root, 0006 platform layer, 0007 data root, pref dir and config layers, 0008 display name "Robo Violence 2", 0009 internal renaming, 0010 BV2 asset compatibility and GUI freeze, 0011 gettext PO translations, 0012 Windows 10 22H2 minimum, 0013 rulesets, 0014 libsodium HMAC, 0015 admin HTTP API, 0016 player data lookup and package content, 0017 playtest pull agent, 0018 staging pull deploy, 0019 in-game name and fork credits, 0020 package and release format, 0021 one-argument CString is text, 0022 advertised server address, 0023 step review subagent in the repo (superseded by 0037), 0024 GitHub Project is the backlog (superseded by 0044), 0025 client autotest mode, 0026 screenshot goldens, 0029 static website (moved to rv2-website), 0033 first-run data dialog recommends the BV2 zip (superseded by 0040), 0034 player data retention and privacy policy, 0035 website Tailwind and agent files (moved to rv2-website), 0036 website in rv2-website, 0037 review rubric single repo copy (superseded by 0047), 0038 dead account pages hidden, admin and ban secrets hardened, 0039 Widescreen (Stretch) shows more map, 0040 first-run download of the original data, 0041 build on PRs, `main` and tags; re-run a build whose job never got a runner, 0042 Options "Game assets" and remembered placeholders, 0043 first start fullscreen at the desktop resolution on the Game Browser tab, 0044 backlog in the rv2-docs vault, 0045 clang-format and clang-tidy on changed lines through pre-commit, 0046 main menu shows the release version from the tag, 0047 two-axis review replaces thermo-nuclear. |
+| Decisions | [docs/decisions/README.md](docs/decisions/README.md): 0001 Ninja, 0002 libcurl compiled out, 0003 OpenGL 2.1 kept, 0004 project name (superseded by 0008), 0005 `main/` data root, 0006 platform layer, 0007 data root, pref dir and config layers, 0008 display name "Robo Violence 2", 0009 internal renaming, 0010 BV2 asset compatibility and GUI freeze, 0011 gettext PO translations, 0012 Windows 10 22H2 minimum, 0013 rulesets, 0014 libsodium HMAC, 0015 admin HTTP API, 0016 player data lookup and package content, 0017 playtest pull agent, 0018 staging pull deploy, 0019 in-game name and fork credits, 0020 package and release format, 0021 one-argument CString is text, 0022 advertised server address, 0023 step review subagent in the repo (superseded by 0037), 0024 GitHub Project is the backlog (superseded by 0044), 0025 client autotest mode, 0026 screenshot goldens, 0029 static website (moved to rv2-website), 0033 first-run data dialog recommends the BV2 zip (superseded by 0040), 0034 player data retention and privacy policy, 0035 website Tailwind and agent files (moved to rv2-website), 0036 website in rv2-website, 0037 review rubric single repo copy (superseded by 0047), 0038 dead account pages hidden, admin and ban secrets hardened, 0039 Widescreen (Stretch) shows more map, 0040 first-run download of the original data, 0041 build on PRs, `main` and tags; re-run a build whose job never got a runner, 0042 Options "Game assets" and remembered placeholders, 0043 first start fullscreen at the desktop resolution on the Game Browser tab, 0044 backlog in the rv2-docs vault, 0045 clang-format and clang-tidy on changed lines through pre-commit, 0046 main menu shows the release version from the tag, 0047 two-axis review replaces thermo-nuclear, 0048 client crash report in the pref dir. |
 
 ### Open items
 
@@ -163,6 +163,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/test_spawn_overlay.cpp` | `spawns::farthestFrom`: no DM spawn gives no line origin (the editor crash), the farthest of several, ties, nearest team spawn |
 | `tests/test_view_geometry.cpp` | Widescreen (Stretch) projects at the window's own aspect, Bars at 4:3; the camera's side margin widens with the view, and a narrow or short map centres it |
 | `tests/test_config.cpp` | dksvar config layering, transient values not saved, secrets masked, `dksvarGetValue` |
+| `tests/test_crash_report.cpp` | ROBO-186: runs itself as a crashing child and checks the `crash-*.txt` it leaves (version line, signal or exception code, a stack frame) and that the previous handler still runs (ADR 0048) |
 | `tests/test_credentials.cpp` | Step 10: the credential HMAC against RFC 4231; proofs check only with their own password, label and nonce |
 | `tests/test_crash_fixes.cpp` | Steps 5 and 7: one check per fixed defect (KEY_QUESTIONS Part D) on the in-process server |
 | `tests/test_dks.cpp` | R20: `dksPlayMusic` on a missing file 200 times; a sound deleted after `dksShutDown` (teardown) (ASan) |
@@ -211,7 +212,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 
 | path | purpose |
 |---|---|
-| `.github/ISSUE_TEMPLATE/bug_report.yml` | Issue form: bug report (part, OS, version, game data, logs); labels `bug`, `needs-triage` |
+| `.github/ISSUE_TEMPLATE/bug_report.yml` | Issue form: bug report (part, OS, version, game data, logs, optional crash dump, ADR 0048); labels `bug`, `needs-triage` |
 | `.github/ISSUE_TEMPLATE/config.yml` | Issue chooser: no blank issues; security reports go to private vulnerability reporting |
 | `.github/ISSUE_TEMPLATE/feature_request.yml` | Issue form: feature request with acceptance criteria; labels `enhancement`, `needs-triage` |
 | `.github/dependabot.yml` | Dependabot version updates: GitHub Actions and the server images' Docker base, weekly |
@@ -349,6 +350,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/decisions/0045-cpp-lint-pre-commit-on-changed-lines.md` | ADR: clang-format and clang-tidy run on commit through pre-commit, on changed lines only; `.githooks/pre-commit` calls it |
 | `docs/decisions/0046-main-menu-shows-release-version-from-tag.md` | ADR: the main menu shows the `v*` tag through `BV2_VERSION` and `lang_version`; the protocol number stays separate; owner-approved GUI exception |
 | `docs/decisions/0047-two-axis-review-replaces-thermo-nuclear.md` | ADR: PR review runs isolated Standards and Spec workers from a vendored skill; tier from changed paths; missing spec blocks |
+| `docs/decisions/0048-client-crash-report-in-pref-dir.md` | ADR: the client writes `crash-<start time>.txt` (version, signal, stack as module + offset) to the pref dir; no upload; Sentry and minidumps rejected |
 | `docs/decisions/README.md` | ADR format and index |
 
 ### `docs/ops`
@@ -645,12 +647,14 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/ConfirmPass.cpp` | Password confirmation dialog |
 | `game/src/ConfirmPass.h` | Password confirmation dialog |
 | `game/src/ConnectFailed.h` | Dialog: connection failed |
-| `game/src/Console.cpp` | In-game console: commands, log, remote console; feeds console lines to a running autotest; `refreshgames` asks the master for the game list; `screenshot`, `menutab` and `scoreboard` for screenshot tests (ADR 0026) |
+| `game/src/Console.cpp` | In-game console: commands, log, remote console; feeds console lines to a running autotest; `refreshgames` asks the master for the game list; `screenshot`, `menutab` and `scoreboard` for screenshot tests (ADR 0026); Debug build `crash` (ADR 0048) |
 | `game/src/Console.h` | In-game console: commands, log, remote console |
 | `game/src/Control.cpp` | Menu control base class |
 | `game/src/Control.h` | Menu control base class |
 | `game/src/ControlListener.cpp` | Menu control listener interface |
 | `game/src/ControlListener.h` | Menu control listener interface |
+| `game/src/CrashReport.cpp` | Client crash handler: signals (Linux, macOS) or unhandled exceptions (Windows) write `crash-<start time>.txt` with version and stack to the pref dir; `forceCrash` (ADR 0048) |
+| `game/src/CrashReport.h` | Interface of `CrashReport.cpp` (namespace `crashreport`) |
 | `game/src/CreateGame.h` | Create-game screen |
 | `game/src/Credits.h` | Credits screen |
 | `game/src/DataDirPicker.cpp` | Client start-up: `startDataDir` (saved or detected BV2 data folder, or the placeholders choice), else a first-run message box: "Download and play" runs `DataDownload`'s `curl` and `tar`/`unzip` argv (`SDL_CreateProcess`) with a progress window, or placeholders; a failure box offers retry, the browser or placeholders (ADR 0016, 0040) |
@@ -741,7 +745,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/WrongVersion.h` | Dialog: client/server version mismatch |
 | `game/src/Zeven.h` | Umbrella include for engine headers and common types |
 | `game/src/changes-log.txt` | Upstream change log |
-| `game/src/main.cpp` | Program entry: window, engine init, main loop; `--autotest` startup, per-step hook and watchdog (ADR 0025); the dedicated server line-buffers stdout; saves a requested screenshot before the swap |
+| `game/src/main.cpp` | Program entry: window, engine init, main loop; `--autotest` startup, per-step hook and watchdog (ADR 0025); the dedicated server line-buffers stdout; saves a requested screenshot before the swap; the client installs the crash report handler (ADR 0048) |
 | `game/src/netPacket.h` | Wire structs and message IDs (raw memcpy'd structs) |
 | `game/src/screengrab.cpp` | Screenshot capture (P and L keys, `screenshot` command): the next frame, from the back buffer before the swap |
 | `game/src/screengrab.h` | Screenshot capture |

@@ -21,6 +21,7 @@
 #include "FileIO.h"
 #include "CMaster.h"
 #include "Credentials.h"
+#include "CrashReport.h"
 #ifndef CONSOLE
 #include "Autotest.h"
 #include "KeyManager.h"
@@ -2352,6 +2353,15 @@ void Console::sendCommand(CString commandLine, bool isAdmin, unsigned long bbnet
 			return;
 		}
 	}
+
+#if !defined(NDEBUG) && !defined(CONSOLE)
+	// Debug build only: crashes the client so it leaves a crash report in the pref dir (ROBO-186, ADR 0048)
+	if (command == "crash")
+	{
+		crashreport::forceCrash();
+		return;
+	}
+#endif
 
 #ifdef _DEBUG
 #ifndef CONSOLE

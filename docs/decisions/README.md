@@ -80,3 +80,4 @@ What we do, in one or two sentences.
 | [0045](0045-cpp-lint-pre-commit-on-changed-lines.md) | clang-format and clang-tidy run on commit through pre-commit, on changed lines only | Accepted |
 | [0046](0046-main-menu-shows-release-version-from-tag.md) | The main menu shows the release version from the tag, not the protocol number | Accepted |
 | [0047](0047-two-axis-review-replaces-thermo-nuclear.md) | PR review runs isolated Standards and Spec workers from a vendored skill | Accepted |
+| [0048](0048-client-crash-report-in-pref-dir.md) | Write client crash reports as a text file in the pref dir | Accepted |
