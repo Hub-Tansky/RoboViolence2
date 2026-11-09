@@ -21,7 +21,7 @@ If you find a security vulnerability, **please do not open a public issue.** We 
 
 To report a vulnerability, please use one of the following channel:
 
-- **GitHub Private Vulnerability Reporting:** Go to the "Security" tab of this repository, select "Advisories", and click "Report a vulnerability".
+- **GitHub Private Vulnerability Reporting:** Go to the "Security and quality" tab of this repository and click "Report a vulnerability" button.
 
 
 ### What to Include
