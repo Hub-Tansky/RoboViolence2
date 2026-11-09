@@ -21,7 +21,7 @@ If you find a security vulnerability, **please do not open a public issue.** We 
 
 To report a vulnerability, please use one of the following channel:
 
-- **GitHub Private Vulnerability Reporting:** Go to the "Security and quality" tab of this repository and click "Report a vulnerability" button.
+- **GitHub Private Vulnerability Reporting:** [Report a vulnerability](https://github.com/Hub-Tansky/RoboViolence2/security/advisories/new).
 
 
 ### What to Include

@@ -21,6 +21,6 @@ Download a package from CI or build from source: [docs/build/](docs/build/README
 
 ## Where to read more
 - [AGENTS.md](AGENTS.md): project rules for fellow robots, agents and even human contributors
-- [Issues](https://github.com/Hub-Tansky/RoboViolence2/issues): bug reports, at the moment backlog lives in a private repo, and issues are the public intake
+- [Issues](https://github.com/Hub-Tansky/RoboViolence2/issues): bug reports and feature requests (public intake); the backlog lives in a private repo
 - [ARCHITECTURE.md](ARCHITECTURE.md): architecture index
 - Community channel for direct feedback: https://discord.gg/gRehxx43z 
