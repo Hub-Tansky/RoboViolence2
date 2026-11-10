@@ -39,7 +39,8 @@ for name in split_symbols.BINARIES:
         ok = f"roboviolence2-test-9.9.9-symbols/{name}.dSYM/Contents/Resources/DWARF/{name}" in names
         stabs = subprocess.run(["nm", "-ap", path], capture_output=True, text=True).stdout
         ok = ok and " OSO " not in stabs  # strip -S removed the debug map
-        ok = ok and subprocess.run(["codesign", "--verify", path]).returncode == 0  # still starts on arm64
+        if name != "bv2":  # the servers keep a valid signature, so they still start on arm64; make-package.py re-signs the app
+            ok = ok and subprocess.run(["codesign", "--verify", path]).returncode == 0
     else:
         bid = split_symbols.build_id(path)
         ok = f"roboviolence2-test-9.9.9-symbols/.build-id/{bid[:2]}/{bid[2:]}.debug" in names
