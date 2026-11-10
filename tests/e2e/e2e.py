@@ -2,7 +2,7 @@
 """Phase T4: end-to-end scenarios: bv2dedicated with the admin API, plus bv2 autotest clients under Xvfb.
 
 Usage: e2e.py <runtime dir> <scratch dir> <scenario>
-Scenarios: join_leave, password, chat, kick, ban, master_list, ctf_capture, ghost, user_map. Each has one observable: the admin API's
+Scenarios: join_leave, password, chat, kick, ban, master_list, ctf_capture, ghost, user_map, weapon_choice. Each has one observable: the admin API's
 `GET /status` player count or score, the server's stdout, or a client's autotest result (ADR 0025). Linux only (Xvfb).
 """
 import os
@@ -111,14 +111,14 @@ class Run:
     def command(self, text):
         return self.admin("POST", "/command", text.encode())
 
-    def client(self, name, steps, **env):
+    def client(self, name, steps, config="", **env):
         """Starts a bv2 autotest client named `name`; returns its process (exit 0 = its script passed)"""
         pref = os.path.join(self.dir, name)
         os.makedirs(pref)
         script = os.path.join(pref, "script.txt")
         with open(script, "w") as f:
             f.write("\n".join(steps) + "\n")
-        cmd, client_env = client_command(os.path.join(self.runtime, "bv2"), pref, script, f'cl_playerName "{name}"\n')
+        cmd, client_env = client_command(os.path.join(self.runtime, "bv2"), pref, script, f'cl_playerName "{name}"\n' + config)
         log = open(os.path.join(pref, "client.log"), "w")
         self.logs.append(log)
         return self.start(cmd, cwd=self.runtime, env=dict(client_env, DISPLAY=self.display, **env), stdout=log,
@@ -250,7 +250,31 @@ def master_list(run):
     check(run.finished(client) == 0, "client lists the server: Games found : 1")
 
 
-SCENARIOS = {f.__name__: f for f in (join_leave, password, chat, kick, ban, master_list, ctf_capture, ghost, user_map)}
+def weapon_choice(run):
+    """A client keeps its chosen gun (cl_primaryWeapon) when it joins again. Every other player's spawn used to overwrite
+    it on the client, so with bots on the server a human joined with the last spawned bot's gun"""
+    spawned = lambda: re.findall(r"Player e2e-a spawned; ID:\d+ WeaponID:(\d+)", run.server_text())
+    joins = lambda: run.server_text().count("server> e2e-a joined the game")
+    run.server(BV2_SV_BOTS="1")
+    run.command("set sv_forceRespawn 1")  # the client spawns without a key press
+    client = run.client("e2e-a", JOIN + ["wait 30", "disconnect", "expect-scene menu", "connect 127.0.0.1",
+                                         "expect-scene game", "wait 30"], config="cl_primaryWeapon 6\n")
+    run.joined("e2e-a")
+    run.command("move 0 e2e-a")
+    wait(lambda: len(spawned()) >= 1, 25, "e2e-a spawned")
+    check(spawned()[0] == "6", f"first spawn with the chosen gun 6, got {spawned()[0]}")
+    bot = re.search(r"^\[(\d+)\] .*\[bot\]", run.command("playerlist"), re.M)
+    check(bot, "playerlist names the bot")
+    run.command(f"forceplayerspawn {bot.group(1)} 8 8 1")  # every client sees the bot spawn with gun 1
+    wait(lambda: joins() >= 2, 60, "e2e-a joined again")
+    run.command("move 0 e2e-a")
+    wait(lambda: len(spawned()) >= 2, 25, "e2e-a spawned again")
+    check(spawned()[1] == "6", f"spawn after joining again with the chosen gun 6, got {spawned()[1]}")
+    check(run.finished(client) == 0, "client script passed")
+
+
+SCENARIOS = {f.__name__: f for f in (join_leave, password, chat, kick, ban, master_list, ctf_capture, ghost, user_map,
+                                     weapon_choice)}
 
 if __name__ == "__main__":
     runtime, scratch, name = sys.argv[1:4]

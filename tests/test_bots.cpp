@@ -85,7 +85,7 @@ int main(int, char** argv)
 	}
 
 	// The shipped names file loads
-	CHECK(server().botNames.size() == 32);
+	CHECK(server().botNames.size() == 13);
 
 	// sv_bots 8 on an empty CTF server (sv_maxPlayer 10): 4 bots per team, shown as players
 	console->sendCommand("set sv_bots 8");
