@@ -638,19 +638,19 @@ void Editor2::renderSelection() const
 	dkglPopOrtho();
 }
 
-void Editor2::Open(CString mapName)
+bool Editor2::Open(CString mapName)
 {
-	FileIO test(mapName, "rb");
-	if(test.isValid())
+	Map* opened = new Map(mapName, 0, editorRoot->font, true);
+	if (!opened->isValid) // corrupt, unknown version or insane size: Map's early returns leave it unrenderable (ROBO-163)
 	{
-		test.Close();
-		delete map;
-		map = new Map(mapName, 0, editorRoot->font, true);
+		delete opened;
+		console->add("\x4> Error opening map - invalid file.");
+		return false;
 	}
-	else
-	{
-		console->add("\x4> Error opening map - no such file.");
-	}
+	delete map;
+	map = opened;
+	isDirty = false;
+	return true;
 }
 
 bool Editor2::Save(CString mapName)

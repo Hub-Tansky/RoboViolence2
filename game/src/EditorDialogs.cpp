@@ -353,7 +353,7 @@ void OpenMapDialog::update(float delay)
 	if(subDialog != 0)
 	{
 		//subDialog->update(delay);
-		if(subDialog->state == StateYes)
+		if (subDialog->state == StateYes || subDialog->state == StateOK) // OK: the invalid map message
 		{
 			menuManager.hideDialog();
 			delete subDialog;
@@ -406,10 +406,11 @@ void OpenMapDialog::Click(CControl * control)
 
 void OpenMapDialog::OnOk()
 {
-	delete editor->map;
-	CString & mapName = lst_mapName->selectedChild->text;
-	editor->map = new Map(mapName, 0, dialogRoot->font, true);
-	editor->isDirty = false;
+	if (!editor->Open(lst_mapName->selectedChild->text))
+	{
+		state = StateNothing;
+		subDialog = new MessageDialog(dialogRoot->font, ButtonsOK, "Error!", "This map file is invalid or corrupt.");
+	}
 }
 
 void SaveAsMapDialog::LoadInfo(CString name)
