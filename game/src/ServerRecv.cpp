@@ -343,7 +343,7 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 					{
 						net_svcl_player_enum_state playerState;
 						playerState.playerID = (char)i;
-						memcpy(playerState.playerName, game->players[i]->name.s, game->players[i]->name.len() + 1);
+						snprintf(playerState.playerName, sizeof(playerState.playerName), "%s", game->players[i]->name.s);
 						memset(playerState.playerIP, 0, sizeof(playerState.playerIP)); // a player's IP stays on the server (privacy)
                         playerState.kills = (short)game->players[i]->kills;
 						playerState.deaths = (short)game->players[i]->deaths;
@@ -544,7 +544,7 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 			{
 				if (game->players[i])
 				{
-					if (game->players[i]->babonetID != bbnetID)
+					if (game->players[i]->babonetID != bbnetID && !game->players[i]->isBot) // a bot has no connection
 					{
 						bb_serverSend((char*)&playSound, sizeof(net_svcl_play_sound), NET_SVCL_PLAY_SOUND, game->players[i]->babonetID);
 					}
@@ -572,7 +572,7 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 				{
 					if (game->players[i])
 					{
-						if (game->players[i]->teamID == PLAYER_TEAM_SPECTATOR )
+						if (game->players[i]->teamID == PLAYER_TEAM_SPECTATOR && !game->players[i]->isBot)
 						{
 							bb_serverSend((char*)&chat, sizeof(net_clsv_svcl_chat), NET_CLSV_SVCL_CHAT, game->players[i]->babonetID);
 						}
@@ -585,7 +585,7 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 				{
 					if (game->players[i])
 					{
-						if (game->players[i]->teamID == PLAYER_TEAM_BLUE )
+						if (game->players[i]->teamID == PLAYER_TEAM_BLUE && !game->players[i]->isBot)
 						{
 							bb_serverSend((char*)&chat, sizeof(net_clsv_svcl_chat), NET_CLSV_SVCL_CHAT, game->players[i]->babonetID);
 						}
@@ -598,7 +598,7 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 				{
 					if (game->players[i])
 					{
-						if (game->players[i]->teamID == PLAYER_TEAM_RED )
+						if (game->players[i]->teamID == PLAYER_TEAM_RED && !game->players[i]->isBot)
 						{
 							bb_serverSend((char*)&chat, sizeof(net_clsv_svcl_chat), NET_CLSV_SVCL_CHAT, game->players[i]->babonetID);
 						}
@@ -856,7 +856,7 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 				// On envoit maintenant � �tout les autres joueurs
 				for (int i=0;i<MAX_PLAYER;++i)
 				{
-					if (game->players[i] && i!=playerChangeName.playerID)
+					if (game->players[i] && i!=playerChangeName.playerID && !game->players[i]->isBot)
 					{
 						bb_serverSend((char*)&playerChangeName, sizeof(net_clsv_svcl_player_change_name), NET_CLSV_SVCL_PLAYER_CHANGE_NAME, game->players[i]->babonetID);
 					}

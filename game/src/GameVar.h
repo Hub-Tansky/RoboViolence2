@@ -102,6 +102,7 @@ public:
 	int sv_maxPlayer;
 	int sv_banDays;
    int sv_maxPlayerInGame;
+   int sv_bots; // target population: humans + bots (ROBO-123)
    float sv_minTilesPerBabo;
    float sv_maxTilesPerBabo;
 	CString sv_password;

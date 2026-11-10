@@ -379,6 +379,9 @@ GameVar::GameVar()
    sv_maxPlayerInGame = 0; // Max player in the game
    dksvarRegister(CString("sv_maxPlayerInGame [int : 0 to 32 (default 0, no limit)]"), &sv_maxPlayerInGame, 0, 32,
 		LIMIT_MIN | LIMIT_MAX, true);
+	sv_bots = 0;
+	dksvarRegister(CString("sv_bots [int : 0 to 32, bots fill the server up to this many players; each human replaces one (default 0)]"), &sv_bots, 0, 32,
+		LIMIT_MIN | LIMIT_MAX, true);
 	sv_password = "";
 	dksvarRegister(CString("sv_password [string : \"\""), &sv_password, true);
 	sv_enableSMG = true;

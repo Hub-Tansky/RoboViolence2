@@ -26,7 +26,7 @@
 #include <map>
 #include "netPacket.h"
 #include "MemIO.h"
-
+#include "BotRoster.h"
 
 class Client;
 
@@ -554,8 +554,8 @@ public:
 			{
 				if (game->players[i])
 				{
-					if ( (game->players[i]->teamID != PLAYER_TEAM_AUTO_ASSIGN) &&
-						(game->players[i]->teamID != PLAYER_TEAM_SPECTATOR) )
+					if ((game->players[i]->teamID != PLAYER_TEAM_AUTO_ASSIGN) &&
+						(game->players[i]->teamID != PLAYER_TEAM_SPECTATOR) && !game->players[i]->isBot) // bots never vote
 					{
 						activePlayersID.push_back(game->players[i]->babonetID);
 						game->players[i]->voted = false;
@@ -698,9 +698,8 @@ public:
 	// Pour starter un new round
 	void resetRound();
 
-   // Number of players
-
-   int numPlayers();
+	// Humans and bots in the slots; every player count (browser, LAN broadcast, admin /status) reads it (ROBO-123)
+	bots::Count countPlayers() const;
 
 	void shootMinibotSV(CMiniBot * minibot, float imp, CVector3f p1, CVector3f p2);
 private:

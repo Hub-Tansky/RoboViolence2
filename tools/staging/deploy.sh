@@ -32,7 +32,8 @@ pick_run() {
 			and .conclusion == "success" and (.head_sha | startswith($sha)))] | .[0] | select(.) | "\(.id) \(.head_sha)"'
 }
 
-players_in() { sed -n 's/^players \([0-9]*\)$/\1/p'; } # /status text on stdin -> player count
+# /status text on stdin -> human count: the `humans` line, which leaves bots out (ADR 0049), else `players` (an older server)
+players_in() { awk '/^humans [0-9]+$/ { h = $2 } /^players [0-9]+$/ { p = $2 } END { if (h != "") print h; else if (p != "") print p }'; }
 
 # These use running and admin_status (below; the test stubs them). `up --remove-orphans` makes running mean "in the release"
 players_of() { # players_of <service> [path prefix]: its player count, 0 when it doesn't run; fails when /status doesn't answer

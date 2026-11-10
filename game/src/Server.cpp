@@ -62,6 +62,7 @@ Server::Server(Game * pGame): maxTimeOverMaxPing(5.0f)//, maxIdleTime(180.0f)
 
 	// Load the bans without the expired ones; 0.0.1's binary banlist moves to banlist.tsv, dated today
 	bans.load(bv2::userFile("banlist.tsv"), bv2::userFile("banlist"), (long long)time(nullptr), gameVar.sv_banDays);
+	botNames = bots::loadNames(bv2::contentFile("main/bots/names.txt"));
 	//reportUploadURLs.push_back("http://localhost/index.php");
 }
 
@@ -904,6 +905,7 @@ void Server::update(float delay)
 		}
 
 		dropStalledJoins(delay);
+		updateBots(delay);
 
 		int nbPlayers = 0;
 		// On update et send les ping
@@ -912,6 +914,8 @@ void Server::update(float delay)
 			if (game->players[i])
 			{
 				nbPlayers++;
+				if (game->players[i]->isBot)
+					continue; // no connection to ping
 
 				// No heartbeat while the client is still loading, or hasn't spawned yet
 				// (team pick / intro): it may not be pumping the network loop.
@@ -975,7 +979,7 @@ void Server::update(float delay)
 
 		for (int i=0;i<MAX_PLAYER;++i)
 		{
-			if (game->players[i])
+			if (game->players[i] && !game->players[i]->isBot) // no ping, idle or join-message rules for a bot
 			{
 				if (game->players[i]->babySitTime <= EPSILON && game->players[i]->ping * 33 > gameVar.sv_maxPing && gameVar.sv_maxPing != 0)
 				{
@@ -1023,7 +1027,7 @@ void Server::update(float delay)
 			net_svcl_minibot_coord_frame minibotCoordFrame;
 			for (int i=0;i<MAX_PLAYER;i++)
 			{
-				if (game->players[i])
+				if (game->players[i] && !game->players[i]->isBot) // a bot has no connection to send to
 				{
 					game->players[i]->sendPosFrame++;
 					if (game->players[i]->sendPosFrame >= game->players[i]->avgPing && game->players[i]->sendPosFrame >= gameVar.sv_minSendInterval + nbPlayers/8)
@@ -1420,6 +1424,116 @@ void Server::dropStalledJoins(float delay)
 			dropSlot(i, "join_timeout");
 		}
 	}
+}
+
+void Server::fromBot(int slot, int typeID, const void* data, int size)
+{
+	std::vector<char> wire((const char*)data, (const char*)data + size);
+	recvPacket(wire.data(), size, typeID, game->players[slot]->babonetID);
+}
+
+void Server::updateBots(float delay)
+{
+	for (int i = 0; i < MAX_PLAYER; ++i)
+		if (bots[i] && (!game->players[i] || !game->players[i]->isBot))
+			bots[i].reset(); // kicked or dropped
+	if (!game->map)
+		return;
+
+	// Bring each team to its wanted bot count: a leaving bot is one not carrying a flag, dead first, then the newest
+	int humans = 0, humansOn[2] = {0, 0}, botsOn[2] = {0, 0};
+	for (int i = 0; i < MAX_PLAYER; ++i)
+		if (Player* p = game->players[i])
+		{
+			const int t = p->teamID == PLAYER_TEAM_BLUE ? 0 : p->teamID == PLAYER_TEAM_RED ? 1
+																						   : -1;
+			if (p->isBot)
+			{
+				// A bot moved to spectator still counts for its team: it asks to rejoin (Bot::update)
+				const int playsFor = bots[i] ? bots[i]->team : p->teamID;
+				++botsOn[playsFor == PLAYER_TEAM_BLUE ? 0 : 1];
+			}
+			else
+			{
+				++humans;
+				if (t >= 0)
+					++humansOn[t];
+			}
+		}
+	const bots::Teams wanted = bots::wanted(humansOn[0], humansOn[1], humans, gameVar.sv_bots, gameVar.sv_maxPlayer);
+	const int want[2] = {wanted.blue, wanted.red};
+	for (int t = 0; t < 2; ++t)
+	{
+		const int team = t == 0 ? PLAYER_TEAM_BLUE : PLAYER_TEAM_RED;
+		for (; botsOn[t] > want[t]; --botsOn[t])
+		{
+			int leaving = -1;
+			float leavingScore = 1e9f;
+			for (int i = 0; i < MAX_PLAYER; ++i)
+			{
+				const Player* p = game->players[i];
+				if (!p || !p->isBot || !bots[i] || bots[i]->team != team)
+					continue;
+				const bool carrier = game->map->flagState[0] == i || game->map->flagState[1] == i;
+				const float score = (carrier ? 1e6f : 0.0f) + (p->status == PLAYER_STATUS_ALIVE ? p->timeAlive : -1.0f);
+				if (score < leavingScore)
+				{
+					leavingScore = score;
+					leaving = i;
+				}
+			}
+			if (leaving < 0)
+				break;
+			console->add(CString("server> %s left the game id:%d", game->players[leaving]->name.s, leaving), true);
+			dropSlot(leaving, "bot");
+			bots[leaving].reset();
+		}
+		for (; botsOn[t] < want[t]; ++botsOn[t])
+		{
+			int slot = -1;
+			for (int i = 0; i < gameVar.sv_maxPlayer && slot < 0; ++i)
+				if (!game->players[i])
+					slot = i;
+			if (slot < 0)
+				break;
+			// The lowest roster index no bot has, so names stay put
+			bool used[MAX_PLAYER] = {};
+			for (int i = 0; i < MAX_PLAYER; ++i)
+				if (bots[i])
+					used[bots[i]->rosterIndex % MAX_PLAYER] = true;
+			int index = 0;
+			while (used[index])
+				++index;
+			const UINT4 id = BOT_BABONET_ID + slot;
+			game->createNewPlayerSV((int)id);
+			Player* p = game->players[slot];
+			p->isBot = true;
+			p->ping = 0;
+			p->name = bots::name(botNames, index).c_str();
+			joined.insert(id);
+			validator.join(*p);
+			bots[slot].reset(new Bot(slot, index, team));
+			net_clsv_svcl_player_info info = {};
+			info.playerID = (int8_t)slot;
+			snprintf(info.playerName, sizeof(info.playerName), "%s", p->name.s);
+			bb_serverSend((char*)&info, sizeof(info), NET_CLSV_SVCL_PLAYER_INFO, 0);
+			console->add(CString("server> %s joined the game id:%d", p->name.s, slot), true);
+			net_clsv_svcl_team_request teamRequest = {};
+			teamRequest.playerID = (int8_t)slot;
+			teamRequest.teamRequested = (int8_t)team;
+			fromBot(slot, NET_CLSV_SVCL_TEAM_REQUEST, &teamRequest, sizeof(teamRequest));
+		}
+	}
+
+	bool any = false;
+	for (int i = 0; i < MAX_PLAYER; ++i)
+		any = any || bots[i];
+	if (!any)
+		return;
+	const bots::World world = bots::buildWorld(*game);
+	for (int i = 0; i < MAX_PLAYER; ++i)
+		if (bots[i] && game->players[i])
+			bots[i]->update(*this, world, delay);
 }
 
 void Server::nukePlayer(int i)

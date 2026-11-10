@@ -347,27 +347,17 @@ void CMaster::ReceivePeersPacket()
 					//we receive a query, lets send a broadcast with our infos
 					net_svcl_broadcast_game_info gameInfos;
 
-					sprintf( gameInfos.key , "3333113333" );
-					
-					
-					
+					snprintf(gameInfos.key, sizeof(gameInfos.key), "3333113333");
+
 					strncpy(gameInfos.GameInfo.map, RunningServer->game->mapName.s, 16);
 
 					char srvName[63];
-					sprintf( srvName , "{ LAN } %s", gameVar.sv_gameName.s );
+					snprintf(srvName, sizeof(srvName), "{ LAN } %s", gameVar.sv_gameName.s);
 					strncpy(gameInfos.GameInfo.serverName, srvName, 63);
-					strcpy(gameInfos.GameInfo.password, gameVar.sv_password != "" ? "*" : ""); // a flag: never the password (Q-S5)
-					sprintf( gameInfos.GameInfo.ip , "%s", bb_getMyIP() );
+					snprintf(gameInfos.GameInfo.password, sizeof(gameInfos.GameInfo.password), "%s", gameVar.sv_password != "" ? "*" : ""); // a flag: never the password (Q-S5)
+					snprintf(gameInfos.GameInfo.ip, sizeof(gameInfos.GameInfo.ip), "%s", bb_getMyIP());
 					gameInfos.GameInfo.port = (unsigned short)gameVar.sv_port;
-					int nbPlayer = 0;
-					for (int i=0;i<MAX_PLAYER;++i)
-					{
-						if (RunningServer->game->players[i])
-						{
-							nbPlayer++;
-						}
-					}
-					gameInfos.GameInfo.nbPlayer = nbPlayer;
+					gameInfos.GameInfo.nbPlayer = RunningServer->game->countPlayers().total();
 					gameInfos.GameInfo.maxPlayer = gameVar.sv_maxPlayer;
 					gameInfos.GameInfo.flags = 0;
 					gameInfos.GameInfo.gameType = RunningServer->game->gameType;
@@ -547,24 +537,14 @@ void CMaster::sendGameInfo(Server* server)
 			else
 				++it;
 		}
-		int i;
-
 		stBV2row bv2Row;
 
 		strncpy(bv2Row.map, server->game->mapName.s, 16);
 		strncpy(bv2Row.serverName, gameVar.sv_gameName.s, 63);
-		strcpy(bv2Row.password, gameVar.sv_password != "" ? "*" : ""); // a flag: never the password (Q-S5)
+		snprintf(bv2Row.password, sizeof(bv2Row.password), "%s", gameVar.sv_password != "" ? "*" : ""); // a flag: never the password (Q-S5)
 		snprintf(bv2Row.ip, sizeof(bv2Row.ip), "%s", gameVar.sv_publicAddress.s); // the master trusts it only from a private source
 		bv2Row.port = (unsigned short)gameVar.sv_port;
-		int nbPlayer = 0;
-		for (i=0;i<MAX_PLAYER;++i)
-		{
-			if (server->game->players[i])
-			{
-				nbPlayer++;
-			}
-		}
-		bv2Row.nbPlayer = nbPlayer;
+		bv2Row.nbPlayer = server->game->countPlayers().total(); // bots count too (ROBO-123)
 		bv2Row.maxPlayer = gameVar.sv_maxPlayer;
 		bv2Row.flags = 0;
 		bv2Row.gameType = server->game->gameType;

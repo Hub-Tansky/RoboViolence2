@@ -110,15 +110,12 @@ namespace
 		Game * game = scene->server->game;
 		std::string out = std::string("map ") + game->mapName.s + "\ngame type " + std::to_string(game->gameType) +
 			"\nscore blue " + std::to_string(game->blueScore) + " red " + std::to_string(game->redScore) + "\n";
-		int players = 0;
 		std::string list;
 		for (int i = 0; i < MAX_PLAYER; ++i)
-			if (Player * p = game->players[i])
-			{
-				++players;
+			if (Player* p = game->players[i])
 				list += std::to_string(i) + " " + textColorLess(p->name).s + " team " + std::to_string(p->teamID) + " ping " + std::to_string(p->avgPing) + "\n";
-			}
-		return out + "players " + std::to_string(players) + "\n" + list;
+		const bots::Count count = game->countPlayers();
+		return out + "players " + std::to_string(count.total()) + "\nhumans " + std::to_string(count.humans) + "\n" + list;
 	}
 }
 

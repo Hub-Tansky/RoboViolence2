@@ -34,6 +34,8 @@ players 2
 1 Bob team 2 ping 30'
 expect "player count from /status" 2 "$(printf '%s\n' "$status" | players_in)"
 expect "a player named 'players 9' is not the count" 0 "$(printf 'players 0\n3 players 9 team 1 ping 5\n' | players_in)"
+expect "bots don't hold back a deploy: humans, not players" 1 "$(printf 'players 9\nhumans 1\n0 Alice team 1 ping 20\n' | players_in)"
+expect "only bots: 0" 0 "$(printf 'players 8\nhumans 0\n' | players_in)"
 
 mkdir -p "$ROOT"
 expect "no failures recorded" 0 "$(failures_of cccc03)"

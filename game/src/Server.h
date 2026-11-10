@@ -25,9 +25,11 @@
 #include "Credentials.h"
 #include "Retention.h"
 #include "ServerValidator.h"
+#include "Bot.h"
 #include <algorithm>
 #include <iterator>
 #include <map>
+#include <memory>
 #include <string>
 
 #ifndef BV2_PLATFORM_WINDOWS
@@ -101,6 +103,12 @@ public:
 	// Per slot: seconds since the TCP connect while the join handshake is pending; past JOIN_TIMEOUT it is dropped
 	float joinWait[MAX_PLAYER] = {};
 	static constexpr float JOIN_TIMEOUT = 10.0f;
+
+	// Bots (ROBO-123): the brain of each bot slot, and their names (main/bots/names.txt)
+	std::unique_ptr<Bot> bots[MAX_PLAYER];
+	std::vector<std::string> botNames;
+	// A bot's babonetID: above any real connection's, never 0 (0 is broadcast)
+	static constexpr UINT4 BOT_BABONET_ID = 0x7FFFFF00;
 
 #ifndef CONSOLE
 	// La font
@@ -194,6 +202,10 @@ public:
 	void dropStalledJoins(float delay);
 	// Pour chatter
 	void sayall(CString message);
+	// Each frame: brings the bots to sv_bots (humans + bots), then runs them
+	void updateBots(float delay);
+	// A message from a bot, handled like the same message from a client
+	void fromBot(int slot, int typeID, const void* data, int size);
 #ifndef CONSOLE
 	// Pour le dessiner !?
 	void render();

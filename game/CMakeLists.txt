@@ -4,6 +4,8 @@ set(BV2_GAME_SOURCES
   src/AccountManager.cpp
   src/AdminApi.cpp
   src/Autotest.cpp
+  src/Bot.cpp
+  src/BotRoster.cpp
   src/Button.cpp
   src/CAStar.cpp
   src/CAStar_FindPath.cpp
@@ -100,6 +102,8 @@ set(BV2_GAME_SOURCES
 set(BV2_SERVER_SOURCES
   src/AccountManager.cpp
   src/AdminApi.cpp
+  src/Bot.cpp
+  src/BotRoster.cpp
   src/CAStar.cpp
   src/CAStar_FindPath.cpp
   src/CUrlData.cpp
