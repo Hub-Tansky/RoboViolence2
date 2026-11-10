@@ -869,10 +869,7 @@ void Player::switchWeapon(int newWeaponID, bool forceSwitch)
 	weapon->currentFireDelay = 1; // On a une 1sec de delait quand on switch de gun
 	weapon->m_owner = this;
 
-#ifndef CONSOLE
-	if (isThisPlayer) // another player's spawn is not this client's gun choice
-		gameVar.cl_primaryWeapon = newWeaponID;
-#endif
+	gameVar.cl_primaryWeapon = newWeaponID;
 
 	// On entends �
 #ifndef CONSOLE

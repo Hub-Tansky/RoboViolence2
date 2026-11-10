@@ -111,14 +111,14 @@ class Run:
     def command(self, text):
         return self.admin("POST", "/command", text.encode())
 
-    def client(self, name, steps, config="", **env):
+    def client(self, name, steps, **env):
         """Starts a bv2 autotest client named `name`; returns its process (exit 0 = its script passed)"""
         pref = os.path.join(self.dir, name)
         os.makedirs(pref)
         script = os.path.join(pref, "script.txt")
         with open(script, "w") as f:
             f.write("\n".join(steps) + "\n")
-        cmd, client_env = client_command(os.path.join(self.runtime, "bv2"), pref, script, f'cl_playerName "{name}"\n' + config)
+        cmd, client_env = client_command(os.path.join(self.runtime, "bv2"), pref, script, f'cl_playerName "{name}"\n')
         log = open(os.path.join(pref, "client.log"), "w")
         self.logs.append(log)
         return self.start(cmd, cwd=self.runtime, env=dict(client_env, DISPLAY=self.display, **env), stdout=log,
@@ -257,8 +257,10 @@ def weapon_choice(run):
     joins = lambda: run.server_text().count("server> e2e-a joined the game")
     run.server(BV2_SV_BOTS="2")  # one bot per team; the blue one leaves when e2e-a joins blue
     run.command("set sv_forceRespawn true")  # the client spawns without a key press
-    client = run.client("e2e-a", JOIN + ["wait 30", "disconnect", "expect-scene menu", "connect 127.0.0.1",
-                                         "expect-scene game", "wait 30"], config="cl_primaryWeapon 6\n")
+    # a console `set`, because the shipped bv2.example.cfg layer sets cl_primaryWeapon 3 over a --config file
+    client = run.client("e2e-a", ["expect-scene menu", "set cl_primaryWeapon 6", "connect 127.0.0.1", "expect-scene game",
+                                  "wait 30", "disconnect", "expect-scene menu", "connect 127.0.0.1", "expect-scene game",
+                                  "wait 30"])
     run.joined("e2e-a")
     run.command("move 0 e2e-a")
     wait(lambda: len(spawned()) >= 1, 25, "e2e-a spawned")
