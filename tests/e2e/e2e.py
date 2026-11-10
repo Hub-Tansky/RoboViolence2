@@ -255,25 +255,24 @@ def weapon_choice(run):
     it on the client, so with bots on the server a human joined with the last spawned bot's gun"""
     spawned = lambda: re.findall(r"Player e2e-a spawned; ID:\d+ WeaponID:(\d+)", run.server_text())
     joins = lambda: run.server_text().count("server> e2e-a joined the game")
-    run.server(BV2_SV_BOTS="2")  # one bot per team; the blue one leaves when e2e-a joins blue
-    run.command("set sv_forceRespawn true")  # the client spawns without a key press
-    # a console `set`, because the shipped bv2.example.cfg layer sets cl_primaryWeapon 3 over a --config file
+    run.server(BV2_SV_BOTS="2")
+    # a console `set`: the shipped bv2.example.cfg layer sets cl_primaryWeapon 3 over a --config file. The first visit
+    # stays a spectator (never spawns), so only the bot's spawn can touch the choice
     client = run.client("e2e-a", ["expect-scene menu", "set cl_primaryWeapon 6", "connect 127.0.0.1", "expect-scene game",
-                                  "wait 30", "disconnect", "expect-scene menu", "connect 127.0.0.1", "expect-scene game",
-                                  "wait 30"])
+                                  "wait 12", "disconnect", "expect-scene menu", "wait 2", "connect 127.0.0.1",
+                                  "expect-scene game", "wait 20"])
     run.joined("e2e-a")
-    run.command("move 0 e2e-a")
-    wait(lambda: len(spawned()) >= 1, 25, "e2e-a spawned")
-    check(spawned()[0] == "6", f"first spawn with the chosen gun 6, got {spawned()[0]}")
     bot = re.search(r"^\[(\d+)\] .*\[bot\]", run.command("playerlist"), re.M)
-    check(bot, "playerlist names the bot")
+    check(bot, "playerlist names a bot")
     run.command(f"forceplayerspawn {bot.group(1)} 8 8 1")  # every client sees the bot spawn with gun 1
-    wait(lambda: joins() >= 2, 60, "e2e-a joined again")
+    wait(lambda: "Player disconnected : e2e-a" in run.server_text(), 30, "e2e-a left")
+    check(not spawned(), "e2e-a did not spawn as a spectator")
+    run.command("set sv_forceRespawn true")  # sent on join: the client spawns without a key press
+    wait(lambda: joins() >= 2, 30, "e2e-a joined again")
     run.command("move 0 e2e-a")
-    wait(lambda: len(spawned()) >= 2, 25, "e2e-a spawned again")
-    check(spawned()[1] == "6", f"spawn after joining again with the chosen gun 6, got {spawned()[1]}")
+    wait(lambda: spawned(), 20, "e2e-a spawned")
+    check(spawned()[0] == "6", f"spawn after joining again with the chosen gun 6, got {spawned()[0]}")
     check(run.finished(client) == 0, "client script passed")
-
 
 SCENARIOS = {f.__name__: f for f in (join_leave, password, chat, kick, ban, master_list, ctf_capture, ghost, user_map,
                                      weapon_choice)}
