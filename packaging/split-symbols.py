@@ -8,7 +8,7 @@ make-package.py packs them without symbols:
 - Linux: <name>.debug per binary (objcopy --only-keep-debug), under .build-id/<xx>/<rest>.debug as gdb and
   debuginfod look them up; the binary keeps a .gnu_debuglink.
 - macOS: <name>.dSYM per binary (dsymutil), then strip -S. make-package.py signs the bundle after this.
-- Windows: the linker's <name>.pdb; the .exe carries none.
+- Windows: a copy of the linker's <name>.pdb (the .exe carries none; make-package.py packs only named files).
 Fails if a binary or its symbols are missing.
 """
 import re
