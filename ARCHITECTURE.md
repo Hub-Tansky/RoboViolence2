@@ -157,6 +157,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/smoke_server.py` | Starts `bv2dedicated` headless, runs the CTF script, types a `sayall` with printf specifiers, quits; checks exit code, server creation and `bv2.cfg`. `--install-under` runs it from a non-ASCII path (Windows UTF-8 code page) |
 | `tests/test_admin_api.cpp` | Step 12: the admin API refuses a wrong token, limits a burst, runs a command, returns the status, audits with secrets masked (not on Windows) |
 | `tests/test_admin_login.cpp` | Step 10: admin login only with HMACs over the connection's challenge; no user, password or MD5 on the wire |
+| `tests/test_frame_pacing.cpp` | ROBO-197: frame pacing decisions per window state and the frame schedule, without a window (ADR 0050) |
 | `tests/test_autotest.cpp` | Phase T3: autotest runner without a window: parsing, commands, waits, one match per expect, fail, timeout and early-quit reports (ADR 0025) |
 | `tests/test_babonet.cpp` | R7: a 10000-byte message over a loopback babonet connection arrives over several reads and intact |
 | `tests/test_babonet_ping.cpp` | PNS-56: a server-browser ping to a game server on this host is answered within 1 s while another process holds babonet's LAN port |
@@ -688,6 +689,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/EditorTools.h` | Map editor tools |
 | `game/src/Extended.h` | Skin and color chooser screen |
 | `game/src/FastDelegate.h` | Third-party fast C++ delegate header |
+| `game/src/FramePacing.h` | Client frame pacing decision from window state (render, minimum frame interval, screen saver) and the frame schedule (ROBO-197, ADR 0050) |
 | `game/src/FileIO.cpp` | File and memory-buffer reader/writer with fixed-width types |
 | `game/src/FileIO.h` | File and memory-buffer reader/writer with fixed-width types |
 | `game/src/Game.cpp` | Game state: players, projectiles, items, flags, round and mode logic (shared by client and server); `countPlayers` (humans and bots) for every player count |
@@ -762,7 +764,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/WrongVersion.h` | Dialog: client/server version mismatch |
 | `game/src/Zeven.h` | Umbrella include for engine headers and common types |
 | `game/src/changes-log.txt` | Upstream change log |
-| `game/src/main.cpp` | Program entry: window, engine init, main loop; `--autotest` startup, per-step hook and watchdog (ADR 0025); the dedicated server line-buffers stdout; saves a requested screenshot before the swap; the client installs the crash report handler (ADR 0048); frame pacing: applies `cl_enableVSync`, skips rendering while the window is hidden (10 Hz ticks), 30 fps while unfocused, lets the display sleep except in a focused game |
+| `game/src/main.cpp` | Program entry: window, engine init, main loop; `--autotest` startup, per-step hook and watchdog (ADR 0025); the dedicated server line-buffers stdout; saves a requested screenshot before the swap; the client installs the crash report handler (ADR 0048); frame pacing (`FramePacing.h`): applies `cl_enableVSync`, skips rendering while the window is hidden, 30 fps while unfocused or hidden, lets the display sleep except in a focused game |
 | `game/src/netPacket.h` | Wire structs and message IDs (raw memcpy'd structs) |
 | `game/src/screengrab.cpp` | Screenshot capture (P and L keys, `screenshot` command): the next frame, from the back buffer before the swap |
 | `game/src/screengrab.h` | Screenshot capture |

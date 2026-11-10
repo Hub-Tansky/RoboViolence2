@@ -27,6 +27,7 @@
 #include <cstring>
 #include "CMaster.h"
 #include "Paths.h"
+#include "FramePacing.h"
 #include "DataDirPicker.h"
 #ifndef CONSOLE
 #	include "CrashReport.h"
@@ -227,9 +228,8 @@ static void autotestUpdate(float delay)
 	dkwForceQuit();
 }
 
-// Frame pacing (ROBO-197): vsync follows cl_enableVSync; the display may sleep unless a game is played in the
-// focused window; an unfocused window draws at 30 fps, a hidden one draws nothing and ticks at 10 Hz.
-static void applyDisplaySettings()
+// vsync follows cl_enableVSync (the console can change it); the screen saver follows the frame's decision
+static void applyDisplaySettings(bool screenSaverAllowed)
 {
 	static int appliedVSync = -1;
 	if (appliedVSync != (int)gameVar.cl_enableVSync)
@@ -237,21 +237,12 @@ static void applyDisplaySettings()
 		appliedVSync = (int)gameVar.cl_enableVSync;
 		dkglEnableVsync(gameVar.cl_enableVSync);
 	}
-	static int screenSaverAllowed = -1;
-	int allow = !(dkwHasFocus() && std::strcmp(autotestScene(), "game") == 0);
-	if (screenSaverAllowed != allow)
+	static int appliedScreenSaver = -1;
+	if (appliedScreenSaver != (int)screenSaverAllowed)
 	{
-		screenSaverAllowed = allow;
-		dkwAllowScreenSaver(allow != 0);
+		appliedScreenSaver = (int)screenSaverAllowed;
+		dkwAllowScreenSaver(screenSaverAllowed);
 	}
-}
-
-static void waitUntil(std::chrono::steady_clock::time_point& next, std::chrono::milliseconds frame)
-{
-	std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
-	if (next > now)
-		std::this_thread::sleep_until(next);
-	next = (next > now ? next : now) + frame;
 }
 
 class MainLoopInterface : public CMainLoopInterface
@@ -303,15 +294,15 @@ public:
 			nbFrameElapsed--;
 		}
 
-		applyDisplaySettings();
-		static std::chrono::steady_clock::time_point nextFrame;
-		if (!dkwIsVisible())
-		{
-			waitUntil(nextFrame, std::chrono::milliseconds(100));
+		namespace pacing = roboviolence2::framePacing;
+		bool inGame = scene->client && scene->client->game->map;
+		pacing::Frame frame = pacing::decide(dkwIsVisible(), dkwHasFocus(), inGame);
+		applyDisplaySettings(frame.screenSaverAllowed);
+		static pacing::Clock::time_point nextFrame;
+		if (frame.minInterval > pacing::Clock::duration::zero())
+			std::this_thread::sleep_until(pacing::schedule(nextFrame, pacing::Clock::now(), frame.minInterval));
+		if (!frame.render)
 			return;
-		}
-		if (!dkwHasFocus())
-			waitUntil(nextFrame, std::chrono::milliseconds(33));
 
 		// On render le tout
 		scene->render();
