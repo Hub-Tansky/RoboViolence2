@@ -146,7 +146,7 @@ namespace bots
 				return true;
 			}
 			const int w = map.size[0], h = map.size[1];
-			std::vector<int> parent(w * h, -1);
+			std::vector<int> parent((size_t)w * h, -1);
 			std::deque<int> queue;
 			const int start = sy * w + sx, end = ey * w + ex;
 			parent[start] = start;

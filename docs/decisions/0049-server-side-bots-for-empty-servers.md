@@ -19,6 +19,7 @@
 - `bot_sim` (tests) plays a seeded bots-only match and fails CI when CTF has no capture, TDM no kill, or a bot stands still away from its goal over 10 s.
 
 ## Consequences
+- A bot an admin moves to spectator asks to rejoin its team once a second. With teams closed (`rejectallplayers`) bots wait in spectator and still count in the browser.
 - The staging deploy waits for 0 humans (`/status` line `humans N`), not 0 players, or bots would block every deploy.
 - A bot costs one player slot and a little CPU per frame (perception every 0.08 s, a BFS on the tile grid when the straight line is blocked).
 - Deviation from `bots.rs`: a retreating bot whose escape point resolves to where it stands fights back instead of holding still. The walled placeholder arenas corner bots; `bots.rs`'s maps rarely did.

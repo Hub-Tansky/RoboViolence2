@@ -133,6 +133,24 @@ int main(int, char** argv)
 	harness::tick(2);
 	CHECK(botsOn(PLAYER_TEAM_BLUE) == 3 && botsOn(PLAYER_TEAM_RED) == 4);
 	CHECK(game().countPlayers().humans == 1 && game().countPlayers().total() == 8);
+	// The human's team chat and a name change go to its team, not to the bots' network ids
+	harness::sent().clear();
+	net_clsv_svcl_chat chat = {};
+	chat.teamID = PLAYER_TEAM_BLUE;
+	std::snprintf(chat.message, sizeof(chat.message), "Tester: go");
+	harness::deliver(human, NET_CLSV_SVCL_CHAT, chat);
+	net_clsv_svcl_player_change_name rename = {};
+	rename.playerID = (int8_t)harness::slotOf(human);
+	std::snprintf(rename.playerName, sizeof(rename.playerName), "Renamed");
+	harness::deliver(human, NET_CLSV_SVCL_PLAYER_CHANGE_NAME, rename);
+	harness::tick(2);
+	int chats = 0, toBotsLater = 0;
+	for (const harness::SentPacket & p : harness::sent())
+	{
+		chats += p.typeID == NET_CLSV_SVCL_CHAT || p.typeID == NET_CLSV_SVCL_PLAYER_CHANGE_NAME;
+		toBotsLater += (UINT4)p.destination >= Server::BOT_BABONET_ID;
+	}
+	CHECK(chats >= 1 && toBotsLater == 0);
 
 	// The human leaves: the bot comes back
 	harness::disconnect(human);

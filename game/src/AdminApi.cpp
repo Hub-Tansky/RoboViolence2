@@ -109,7 +109,7 @@ namespace
 	{
 		Game * game = scene->server->game;
 		std::string out = std::string("map ") + game->mapName.s + "\ngame type " + std::to_string(game->gameType) +
-						  "\nscore blue " + std::to_string(game->blueScore) + " red " + std::to_string(game->redScore) + "\n";
+			"\nscore blue " + std::to_string(game->blueScore) + " red " + std::to_string(game->redScore) + "\n";
 		std::string list;
 		for (int i = 0; i < MAX_PLAYER; ++i)
 			if (Player* p = game->players[i])
