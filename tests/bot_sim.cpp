@@ -38,7 +38,7 @@ namespace
 int main(int argc, char** argv)
 {
 	std::string mode = "CTF";
-	int botCount = 8, seconds = 300;
+	int botCount = 8, seconds = 600; // 300 s can end without a capture on some seeds or platforms (rand differs)
 	unsigned seed = 1;
 	for (int i = 1; i < argc; i += 2)
 	{

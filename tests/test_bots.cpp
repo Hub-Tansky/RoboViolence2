@@ -55,6 +55,10 @@ namespace
 		// No bots left at the target, none with sv_bots 0
 		t = bots::wanted(4, 4, 8, 8, 10);
 		CHECK(t.blue + t.red == 0);
+		t = bots::wanted(5, 4, 9, 8, 10); // 9 or 10 humans: still no bots, the count is the humans
+		CHECK(t.blue + t.red == 0);
+		t = bots::wanted(5, 5, 10, 8, 10);
+		CHECK(t.blue + t.red == 0);
 		t = bots::wanted(0, 0, 0, 0, 10);
 		CHECK(t.blue + t.red == 0);
 

@@ -25,7 +25,8 @@ namespace bots
 
 	// Names from a text file, one per line; blank lines and lines starting with # are skipped
 	std::vector<std::string> loadNames(const std::string& path);
-	// A bot's display name: names[index] (cycled, cut to MAX_NAME) with " [bot]", or "Bot <index+1> [bot]" without names
+	// Longest name taken from the file: with " [bot]" it fits the 31-character wire name (playerName[32])
 	const size_t MAX_NAME = 25;
+	// A bot's display name: names[index] (cycled, cut to MAX_NAME) with " [bot]", or "Bot <index+1> [bot]" without names
 	std::string name(const std::vector<std::string>& names, int index);
 }

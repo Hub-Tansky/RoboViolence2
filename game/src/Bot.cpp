@@ -1138,13 +1138,15 @@ void Bot::update(Server& server, const bots::World& world, float delay)
 			// The roster index picks the main weapon (bots.rs): the next enabled one
 			const bool enabled[8] = {gameVar.sv_enableSMG, gameVar.sv_enableShotgun, gameVar.sv_enableSniper, gameVar.sv_enableDualMachineGun,
 									 gameVar.sv_enableChainGun, gameVar.sv_enableBazooka, gameVar.sv_enablePhotonRifle, gameVar.sv_enableFlameThrower};
-			int weapon = WEAPON_SMG;
+			int weapon = -1;
 			for (int i = 0; i < 8; ++i)
 				if (enabled[(rosterIndex + i) % 8])
 				{
 					weapon = (rosterIndex + i) % 8;
 					break;
 				}
+			if (weapon < 0)
+				return; // no main weapon enabled: the validator would kick the bot for any choice
 			spawn.weaponID = (int8_t)weapon;
 			spawn.meleeID = WEAPON_KNIVES;
 			const int skin = rosterIndex % 23 + 1; // skin01..skin23
