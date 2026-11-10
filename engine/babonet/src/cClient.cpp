@@ -579,8 +579,8 @@ int cClient::ReceiveStream(int nbytes,char *buf)
 				int nb = nbytes-nread;
 				if(memcmp(lastKey, "RND1", nb > 4 ? 4 : nb ))
 				{
-					//rnd key is corrupted, potential hacking
-					Disconnect();
+					//rnd key is corrupted, potential hacking: the caller drops the client, as for a bad full key (ROBO-068)
+					return 1;
 				}
 											
                 bytesRemaining = bytesRemaining - (unsigned short)(nbytes-nread);
