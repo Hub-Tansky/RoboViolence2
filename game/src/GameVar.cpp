@@ -379,240 +379,240 @@ GameVar::GameVar()
    sv_maxPlayerInGame = 0; // Max player in the game
    dksvarRegister(CString("sv_maxPlayerInGame [int : 0 to 32 (default 0, no limit)]"), &sv_maxPlayerInGame, 0, 32,
 		LIMIT_MIN | LIMIT_MAX, true);
-   sv_bots = 0;
-   dksvarRegister(CString("sv_bots [int : 0 to 32, bots fill the server up to this many players; each human replaces one (default 0)]"), &sv_bots, 0, 32,
-				  LIMIT_MIN | LIMIT_MAX, true);
-   sv_password = "";
-   dksvarRegister(CString("sv_password [string : \"\""), &sv_password, true);
-   sv_enableSMG = true;
-   dksvarRegister(CString("sv_enableSMG [bool : true | false (default true)]"), &sv_enableSMG, true);
-   sv_enableShotgun = true;
-   dksvarRegister(CString("sv_enableShotgun [bool : true | false (default true)]"), &sv_enableShotgun, true);
-   sv_enableSniper = true;
-   dksvarRegister(CString("sv_enableSniper [bool : true | false (default true)]"), &sv_enableSniper, true);
-   sv_enableDualMachineGun = true;
-   dksvarRegister(CString("sv_enableDualMachineGun [bool : true | false (default true)]"), &sv_enableDualMachineGun, true);
-   sv_enableChainGun = true;
-   dksvarRegister(CString("sv_enableChainGun [bool : true | false (default true)]"), &sv_enableChainGun, true);
-   sv_enableBazooka = true;
-   dksvarRegister(CString("sv_enableBazooka [bool : true | false (default true)]"), &sv_enableBazooka, true);
-   sv_enablePhotonRifle = true;
-   dksvarRegister(CString("sv_enablePhotonRifle [bool : true | false (default true)]"), &sv_enablePhotonRifle, true);
-   sv_enableFlameThrower = true;
-   dksvarRegister(CString("sv_enableFlameThrower [bool : true | false (default true)]"), &sv_enableFlameThrower, true);
-   sv_enableShotgunReload = true;
-   dksvarRegister(CString("sv_enableShotgunReload [bool : true | false (default true)]"), &sv_enableShotgunReload, true);
-   sv_slideOnIce = false;
-   dksvarRegister(CString("sv_slideOnIce [bool : true | false (default false)]"), &sv_slideOnIce, true);
-   sv_showEnemyTag = false;
-   dksvarRegister(CString("sv_showEnemyTag [bool : true | false (default false)]"), &sv_showEnemyTag, true);
-   zsv_adminUser = "";
-   dksvarRegister(CString("zsv_adminUser [string : \"\""), &zsv_adminUser, true);
-   zsv_adminPass = "";
-   dksvarRegister(CString("zsv_adminPass [string : \"\""), &zsv_adminPass, true);
-   zsv_adminApiPort = 0;
-   dksvarRegister(CString("zsv_adminApiPort [int : admin HTTP API port behind a TLS proxy, 0 off (default 0)]"), &zsv_adminApiPort, 0, 65535, LIMIT_MIN | LIMIT_MAX, true);
-   zsv_adminApiBind = "127.0.0.1";
-   dksvarRegister(CString("zsv_adminApiBind [string : admin API address (default 127.0.0.1)]"), &zsv_adminApiBind, true);
-   zsv_adminApiProxy = "";
-   dksvarRegister(CString("zsv_adminApiProxy [string : host of the TLS proxy whose X-Forwarded-For names the client (default none)]"), &zsv_adminApiProxy, true);
-   sv_enableSecondary = true;
-   dksvarRegister(CString("sv_enableSecondary [bool : true | false (default true)]"), &sv_enableSecondary, true);
-   sv_enableKnives = true;
-   dksvarRegister(CString("sv_enableKnives [bool : true | false (default true)]"), &sv_enableKnives, true);
-   sv_enableNuclear = true;
-   dksvarRegister(CString("sv_enableNuclear [bool : true | false (default true)]"), &sv_enableNuclear, true);
-   sv_enableShield = true;
-   dksvarRegister(CString("sv_enableShield [bool : true | false (default true)]"), &sv_enableShield, true);
-   sv_enableMinibot = true;
-   dksvarRegister(CString("sv_enableMinibot [bool : true | false (default true)]"), &sv_enableMinibot, true);
-   sv_autoBalance = true;
-   dksvarRegister(CString("sv_autoBalance [bool : true | false (default true)]"), &sv_autoBalance, true);
-   sv_autoBalanceTime = 4;
-   dksvarRegister(CString("sv_autoBalanceTime [int : 1 to 15 (default 4)]"), &sv_autoBalanceTime,
-				  1, 15, LIMIT_MIN | LIMIT_MAX, true);
-   sv_enableVote = true;
-   dksvarRegister(CString("sv_enableVote [bool : true | false (default true)]"), &sv_enableVote, true);
-   sv_gamePublic = true;
-   dksvarRegister(CString("sv_gamePublic [bool : true | false (default true)]"), &sv_gamePublic, true);
-   sv_maxUploadRate = 8.0f;
-   dksvarRegister(CString("sv_maxUploadRate [float : 0 = unlimited (default 8.0)]"), &sv_maxUploadRate,
-				  0, 0, LIMIT_MIN, true);
-   sv_showKills = false;
-   dksvarRegister(CString("sv_showKills [bool : true | false (default false)]"), &sv_showKills, true);
-   sv_matchcode = "";
-   dksvarRegister(CString("sv_matchcode [string : \"\" (default \"\")]"), &sv_matchcode, true);
-   sv_matchmode = 0;
-   dksvarRegister(CString("sv_matchmode [int : 0 = unlimited (default 0)]"), &sv_matchmode, 0, 0, LIMIT_MIN, true);
-   sv_report = false;
-   dksvarRegister(CString("sv_report [bool : true | false (default false)]"), &sv_report, true);
-   sv_maxPing = 1000;
-   dksvarRegister(CString("sv_maxPing [int : 0 to 1000 (default 1000)]"), &sv_maxPing, 0, 1000,
-				  LIMIT_MIN | LIMIT_MAX, true);
-   sv_autoSpectateWhenIdle = true;
-   dksvarRegister(CString("sv_autoSpectateWhenIdle [bool : true | false (default true)]"), &sv_autoSpectateWhenIdle, true);
-   sv_autoSpectateIdleMaxTime = 180;
-   dksvarRegister(CString("sv_autoSpectateIdleMaxTime [int : 60 to unlimited (default 180)]"), &sv_autoSpectateIdleMaxTime, 60, 0,
-				  LIMIT_MIN, true);
-   sv_beGoodServer = true;
-   dksvarRegister(CString("sv_beGoodServer [bool : true | false (default true)]"), &sv_beGoodServer, true);
-   sv_validateWeapons = true;
-   dksvarRegister(CString("sv_validateWeapons [bool : true | false (default true)]"), &sv_validateWeapons, true);
-   sv_speedHackKick = 3;
-   dksvarRegister(CString("sv_speedHackKick [int : 3-second windows with a speed or frame-rate violation in a row that kick, 1 to unlimited (default 3)]"),
-				  &sv_speedHackKick, 1, 0, LIMIT_MIN, true);
-   sv_antiCheat = 1;
-   dksvarRegister(CString("sv_antiCheat [int : 0 off, 1 log violations, 2 enforce: drop and warn/kick by score (default 1)]"),
-				  &sv_antiCheat, 0, 2, LIMIT_MIN | LIMIT_MAX, true);
-   sv_antiCheatWarn = 5;
-   dksvarRegister(CString("sv_antiCheatWarn [int : anti-cheat score that warns the player at sv_antiCheat 2 (default 5)]"),
-				  &sv_antiCheatWarn, 1, 0, LIMIT_MIN, true);
-   sv_antiCheatKick = 10;
-   dksvarRegister(CString("sv_antiCheatKick [int : anti-cheat score that kicks at sv_antiCheat 2 (default 10)]"),
-				  &sv_antiCheatKick, 1, 0, LIMIT_MIN, true);
-   sv_minTilesPerBabo = 55.0;
-   dksvarRegister(CString("sv_minTilesPerBabo [float : 0.0 to 250.0 (default 55.0)]"), &sv_minTilesPerBabo, 0, 250,
-				  LIMIT_MIN | LIMIT_MAX, true);
-   sv_maxTilesPerBabo = 80.0;
-   dksvarRegister(CString("sv_maxTilesPerBabo [float : 0.0 to 500.0 (default 80.0)]"), &sv_maxTilesPerBabo, 0, 500,
-				  LIMIT_MIN | LIMIT_MAX, true);
-   sv_zookaRemoteDet = true;
-   dksvarRegister(CString("sv_zookaRemoteDet [bool : true | false (default true)]"), &sv_zookaRemoteDet, true);
-   sv_explodingFT = false;
-   dksvarRegister(CString("sv_explodingFT [bool : true | false (default false)]"), &sv_explodingFT, true);
-   sv_sendJoinMessage = true;
-   dksvarRegister(CString("sv_sendJoinMessage [bool : true | false (default true)]"), &sv_sendJoinMessage, true);
-   sv_enableMolotov = true;
-   dksvarRegister(CString("sv_enableMolotov [bool : true | false (default true)]"), &sv_enableMolotov, true);
-   sv_joinMessage = "Welcome to the server!\0";
-   dksvarRegister(CString("sv_joinMessage [string : \"\" ]"), &sv_joinMessage, true);
-   sv_shottyDropRadius = 0.40f;
-   dksvarRegister(CString("sv_shottyDropRadius [float : 0 to 2 (default 0.40)]"), &sv_shottyDropRadius, 0, 2,
-				  LIMIT_MIN | LIMIT_MAX, true);
-   sv_shottyRange = 6.75f;
-   dksvarRegister(CString("sv_shottyRange [float : 1 to 24 (default 6.75)]"), &sv_shottyRange, 1, 24,
-				  LIMIT_MIN | LIMIT_MAX, true);
-   sv_ftMaxRange = 8.0f;
-   dksvarRegister(CString("sv_ftMaxRange [float : 1 to 24  (default 8.0)]"), &sv_ftMaxRange, 1, 24,
-				  LIMIT_MIN | LIMIT_MAX, true);
-   sv_ftMinRange = 1.0f;
-   dksvarRegister(CString("sv_ftMinRange [float : 0 to 24  (default 1.0)]"), &sv_ftMinRange, 0, 24,
-				  LIMIT_MIN | LIMIT_MAX, true);
-   sv_ftExpirationTimer = 1.5f;
-   dksvarRegister(CString("sv_ftExpirationTimer [float : 0 to 30  (default 1.5)]"), &sv_ftExpirationTimer, 0, 30,
-				  LIMIT_MIN | LIMIT_MAX, true);
-   sv_photonDamageCoefficient = 0.5f;
-   dksvarRegister(CString("sv_photonDamageCoefficient [float : -100 to 100 (default 0.5)]"), &sv_photonDamageCoefficient, -100, 100,
-				  LIMIT_MIN | LIMIT_MAX, true);
-   sv_photonVerticalShift = 0.325f;
-   dksvarRegister(CString("sv_photonVerticalShift [float : -100 to 100 (default 0.325)]"), &sv_photonVerticalShift, -100, 100,
-				  LIMIT_MIN | LIMIT_MAX, true);
-   sv_photonDistMult = 0.25;
-   dksvarRegister(CString("sv_photonDistMult [float : -100 to 100 (default 0.25)]"), &sv_photonDistMult, -100, 100,
-				  LIMIT_MIN | LIMIT_MAX, true);
-   sv_photonHorizontalShift = 5.0;
-   dksvarRegister(CString("sv_photonHorizontalShift [float : -100 to 100 (default 5.00)]"), &sv_photonHorizontalShift, -100, 100,
-				  LIMIT_MIN | LIMIT_MAX, true);
-   sv_ftDamage = 0.12f;
-   dksvarRegister(CString("sv_ftDamage [float : -100 to 100 (actual damage 100 times this, default 0.12)]"), &sv_ftDamage, -100, 100,
-				  LIMIT_MIN | LIMIT_MAX, true);
-   sv_smgDamage = 0.1f;
-   dksvarRegister(CString("sv_smgDamage [float : -100 to 100 (actual damage 100 times this, default 0.10)]"), &sv_smgDamage, -100, 100,
-				  LIMIT_MIN | LIMIT_MAX, true);
-   sv_dmgDamage = 0.14f;
-   dksvarRegister(CString("sv_dmgDamage [float : -100 to 100 (actual damage 100 times this, default 0.14)]"), &sv_dmgDamage, -100, 100,
-				  LIMIT_MIN | LIMIT_MAX, true);
-   sv_cgDamage = 0.16f;
-   dksvarRegister(CString("sv_cgDamage [float : -100 to 100 (actual damage 100 times this, default 0.16)]"), &sv_cgDamage, -100, 100,
-				  LIMIT_MIN | LIMIT_MAX, true);
-   sv_sniperDamage = 0.2f;
-   dksvarRegister(CString("sv_sniperDamage [float : -100 to 100 (actual damage 100 times this, default 0.20)]"), &sv_sniperDamage, -100, 100,
-				  LIMIT_MIN | LIMIT_MAX, true);
-   sv_shottyDamage = 0.21f;
-   dksvarRegister(CString("sv_shottyDamage [float : -100 to 100 (actual damage 100 times this, default 0.21)]"), &sv_shottyDamage, -100, 100,
-				  LIMIT_MIN | LIMIT_MAX, true);
-   sv_zookaDamage = 0.85f;
-   dksvarRegister(CString("sv_zookaDamage [float : -100 to 100 (actual damage 100 times this, default 0.85)]"), &sv_zookaDamage, -100, 100,
-				  LIMIT_MIN | LIMIT_MAX, true);
-   sv_zookaRadius = 2.0f;
-   dksvarRegister(CString("sv_zookaRadius [float : 1 to 8 (default 2.0)]"), &sv_zookaRadius, 1, 8,
-				  LIMIT_MIN | LIMIT_MAX, true);
-   sv_nukeRadius = 6.0f;
-   dksvarRegister(CString("sv_nukeRadius [float : 4 to 16 (default 6.0)]"), &sv_nukeRadius, 4, 16,
-				  LIMIT_MIN | LIMIT_MAX, true);
-   sv_nukeTimer = 3.0f;
-   dksvarRegister(CString("sv_nukeTimer [float : 0 to 12 (default 3.0)]"), &sv_nukeTimer, 0, 12,
-				  LIMIT_MIN | LIMIT_MAX, true);
-   sv_nukeReload = 12.0f;
-   dksvarRegister(CString("sv_nukeReload [float : 0 to 48 (default 12.0)]"), &sv_nukeReload, 0, 48,
-				  LIMIT_MIN | LIMIT_MAX, true);
-   sv_photonType = 1;
-   dksvarRegister(CString("sv_photonType [int : 0 to 3 (default 1)"), &sv_photonType, 0, 3,
-				  LIMIT_MIN | LIMIT_MAX, true);
+	sv_bots = 0;
+	dksvarRegister(CString("sv_bots [int : 0 to 32, bots fill the server up to this many players; each human replaces one (default 0)]"), &sv_bots, 0, 32,
+		LIMIT_MIN | LIMIT_MAX, true);
+	sv_password = "";
+	dksvarRegister(CString("sv_password [string : \"\""), &sv_password, true);
+	sv_enableSMG = true;
+	dksvarRegister(CString("sv_enableSMG [bool : true | false (default true)]"), &sv_enableSMG, true);
+	sv_enableShotgun = true;
+	dksvarRegister(CString("sv_enableShotgun [bool : true | false (default true)]"), &sv_enableShotgun, true);
+	sv_enableSniper = true;
+	dksvarRegister(CString("sv_enableSniper [bool : true | false (default true)]"), &sv_enableSniper, true);
+	sv_enableDualMachineGun = true;
+	dksvarRegister(CString("sv_enableDualMachineGun [bool : true | false (default true)]"), &sv_enableDualMachineGun, true);
+	sv_enableChainGun = true;
+	dksvarRegister(CString("sv_enableChainGun [bool : true | false (default true)]"), &sv_enableChainGun, true);
+	sv_enableBazooka = true;
+	dksvarRegister(CString("sv_enableBazooka [bool : true | false (default true)]"), &sv_enableBazooka, true);
+	sv_enablePhotonRifle = true;
+	dksvarRegister(CString("sv_enablePhotonRifle [bool : true | false (default true)]"), &sv_enablePhotonRifle, true);
+	sv_enableFlameThrower = true;
+	dksvarRegister(CString("sv_enableFlameThrower [bool : true | false (default true)]"), &sv_enableFlameThrower, true);
+	sv_enableShotgunReload = true;
+	dksvarRegister(CString("sv_enableShotgunReload [bool : true | false (default true)]"), &sv_enableShotgunReload, true);
+	sv_slideOnIce = false;
+	dksvarRegister(CString("sv_slideOnIce [bool : true | false (default false)]"), &sv_slideOnIce, true);
+	sv_showEnemyTag = false;
+	dksvarRegister(CString("sv_showEnemyTag [bool : true | false (default false)]"), &sv_showEnemyTag, true);
+	zsv_adminUser = "";
+	dksvarRegister(CString("zsv_adminUser [string : \"\""), &zsv_adminUser, true);
+	zsv_adminPass = "";
+	dksvarRegister(CString("zsv_adminPass [string : \"\""), &zsv_adminPass, true);
+	zsv_adminApiPort = 0;
+	dksvarRegister(CString("zsv_adminApiPort [int : admin HTTP API port behind a TLS proxy, 0 off (default 0)]"), &zsv_adminApiPort, 0, 65535, LIMIT_MIN | LIMIT_MAX, true);
+	zsv_adminApiBind = "127.0.0.1";
+	dksvarRegister(CString("zsv_adminApiBind [string : admin API address (default 127.0.0.1)]"), &zsv_adminApiBind, true);
+	zsv_adminApiProxy = "";
+	dksvarRegister(CString("zsv_adminApiProxy [string : host of the TLS proxy whose X-Forwarded-For names the client (default none)]"), &zsv_adminApiProxy, true);
+	sv_enableSecondary = true;
+	dksvarRegister(CString("sv_enableSecondary [bool : true | false (default true)]"), &sv_enableSecondary, true);
+	sv_enableKnives = true;
+	dksvarRegister(CString("sv_enableKnives [bool : true | false (default true)]"), &sv_enableKnives, true);
+	sv_enableNuclear = true;
+	dksvarRegister(CString("sv_enableNuclear [bool : true | false (default true)]"), &sv_enableNuclear, true);
+	sv_enableShield = true;
+	dksvarRegister(CString("sv_enableShield [bool : true | false (default true)]"), &sv_enableShield, true);
+		sv_enableMinibot = true;
+		dksvarRegister(CString("sv_enableMinibot [bool : true | false (default true)]"), &sv_enableMinibot, true);
+	sv_autoBalance = true;
+	dksvarRegister(CString("sv_autoBalance [bool : true | false (default true)]"), &sv_autoBalance, true);
+	sv_autoBalanceTime = 4;
+	dksvarRegister(CString("sv_autoBalanceTime [int : 1 to 15 (default 4)]"), &sv_autoBalanceTime,
+		1, 15, LIMIT_MIN | LIMIT_MAX, true);
+	sv_enableVote = true;
+	dksvarRegister(CString("sv_enableVote [bool : true | false (default true)]"), &sv_enableVote, true);
+	sv_gamePublic = true;
+	dksvarRegister(CString("sv_gamePublic [bool : true | false (default true)]"), &sv_gamePublic, true);
+	sv_maxUploadRate = 8.0f;
+	dksvarRegister(CString("sv_maxUploadRate [float : 0 = unlimited (default 8.0)]"), &sv_maxUploadRate,
+		0, 0, LIMIT_MIN, true);
+	sv_showKills = false;
+	dksvarRegister(CString("sv_showKills [bool : true | false (default false)]"), &sv_showKills, true);
+	sv_matchcode = "";
+	dksvarRegister(CString("sv_matchcode [string : \"\" (default \"\")]"), &sv_matchcode, true);
+	sv_matchmode = 0;
+	dksvarRegister(CString("sv_matchmode [int : 0 = unlimited (default 0)]"), &sv_matchmode, 0, 0, LIMIT_MIN, true);
+	sv_report = false;
+	dksvarRegister(CString("sv_report [bool : true | false (default false)]"), &sv_report, true);
+	sv_maxPing = 1000;
+	dksvarRegister(CString("sv_maxPing [int : 0 to 1000 (default 1000)]"), &sv_maxPing, 0, 1000,
+		LIMIT_MIN | LIMIT_MAX, true);
+	sv_autoSpectateWhenIdle = true;
+	dksvarRegister(CString("sv_autoSpectateWhenIdle [bool : true | false (default true)]"), &sv_autoSpectateWhenIdle, true);
+	sv_autoSpectateIdleMaxTime = 180;
+	dksvarRegister(CString("sv_autoSpectateIdleMaxTime [int : 60 to unlimited (default 180)]"), &sv_autoSpectateIdleMaxTime, 60, 0,
+		LIMIT_MIN, true);
+	sv_beGoodServer = true;
+	dksvarRegister(CString("sv_beGoodServer [bool : true | false (default true)]"), &sv_beGoodServer, true);
+	sv_validateWeapons = true;
+	dksvarRegister(CString("sv_validateWeapons [bool : true | false (default true)]"), &sv_validateWeapons, true);
+	sv_speedHackKick = 3;
+	dksvarRegister(CString("sv_speedHackKick [int : 3-second windows with a speed or frame-rate violation in a row that kick, 1 to unlimited (default 3)]"),
+		&sv_speedHackKick, 1, 0, LIMIT_MIN, true);
+	sv_antiCheat = 1;
+	dksvarRegister(CString("sv_antiCheat [int : 0 off, 1 log violations, 2 enforce: drop and warn/kick by score (default 1)]"),
+		&sv_antiCheat, 0, 2, LIMIT_MIN | LIMIT_MAX, true);
+	sv_antiCheatWarn = 5;
+	dksvarRegister(CString("sv_antiCheatWarn [int : anti-cheat score that warns the player at sv_antiCheat 2 (default 5)]"),
+		&sv_antiCheatWarn, 1, 0, LIMIT_MIN, true);
+	sv_antiCheatKick = 10;
+	dksvarRegister(CString("sv_antiCheatKick [int : anti-cheat score that kicks at sv_antiCheat 2 (default 10)]"),
+		&sv_antiCheatKick, 1, 0, LIMIT_MIN, true);
+	sv_minTilesPerBabo = 55.0;
+	dksvarRegister(CString("sv_minTilesPerBabo [float : 0.0 to 250.0 (default 55.0)]"), &sv_minTilesPerBabo, 0, 250,
+		LIMIT_MIN | LIMIT_MAX, true);
+	sv_maxTilesPerBabo = 80.0;
+	dksvarRegister(CString("sv_maxTilesPerBabo [float : 0.0 to 500.0 (default 80.0)]"), &sv_maxTilesPerBabo, 0, 500,
+		LIMIT_MIN | LIMIT_MAX, true);
+	sv_zookaRemoteDet = true;
+	dksvarRegister(CString("sv_zookaRemoteDet [bool : true | false (default true)]"), &sv_zookaRemoteDet, true);
+	sv_explodingFT = false;
+	dksvarRegister(CString("sv_explodingFT [bool : true | false (default false)]"), &sv_explodingFT, true);
+	sv_sendJoinMessage = true;
+	dksvarRegister(CString("sv_sendJoinMessage [bool : true | false (default true)]"), &sv_sendJoinMessage,true);
+	sv_enableMolotov = true;
+	dksvarRegister(CString("sv_enableMolotov [bool : true | false (default true)]"), &sv_enableMolotov,true);
+	sv_joinMessage = "Welcome to the server!\0";
+	dksvarRegister(CString("sv_joinMessage [string : \"\" ]"), &sv_joinMessage, true);
+	sv_shottyDropRadius = 0.40f;
+	dksvarRegister(CString("sv_shottyDropRadius [float : 0 to 2 (default 0.40)]"), &sv_shottyDropRadius, 0, 2,
+		LIMIT_MIN | LIMIT_MAX, true);
+	sv_shottyRange = 6.75f;
+	dksvarRegister(CString("sv_shottyRange [float : 1 to 24 (default 6.75)]"), &sv_shottyRange, 1, 24,
+		LIMIT_MIN | LIMIT_MAX, true);
+	sv_ftMaxRange = 8.0f;
+	dksvarRegister(CString("sv_ftMaxRange [float : 1 to 24  (default 8.0)]"), &sv_ftMaxRange, 1, 24,
+		LIMIT_MIN | LIMIT_MAX, true);
+	sv_ftMinRange = 1.0f;
+	dksvarRegister(CString("sv_ftMinRange [float : 0 to 24  (default 1.0)]"), &sv_ftMinRange, 0, 24,
+		LIMIT_MIN | LIMIT_MAX, true);
+	sv_ftExpirationTimer = 1.5f;
+	dksvarRegister(CString("sv_ftExpirationTimer [float : 0 to 30  (default 1.5)]"), &sv_ftExpirationTimer, 0, 30,
+		LIMIT_MIN | LIMIT_MAX, true);
+	sv_photonDamageCoefficient = 0.5f;
+	dksvarRegister(CString("sv_photonDamageCoefficient [float : -100 to 100 (default 0.5)]"), &sv_photonDamageCoefficient, -100, 100,
+		LIMIT_MIN | LIMIT_MAX, true);
+	sv_photonVerticalShift = 0.325f;
+	dksvarRegister(CString("sv_photonVerticalShift [float : -100 to 100 (default 0.325)]"), &sv_photonVerticalShift, -100, 100,
+		LIMIT_MIN | LIMIT_MAX, true);
+	sv_photonDistMult = 0.25;
+	dksvarRegister(CString("sv_photonDistMult [float : -100 to 100 (default 0.25)]"), &sv_photonDistMult, -100, 100,
+		LIMIT_MIN | LIMIT_MAX, true);
+	sv_photonHorizontalShift = 5.0;
+	dksvarRegister(CString("sv_photonHorizontalShift [float : -100 to 100 (default 5.00)]"), &sv_photonHorizontalShift, -100, 100,
+		LIMIT_MIN | LIMIT_MAX, true);
+	sv_ftDamage = 0.12f;
+	dksvarRegister(CString("sv_ftDamage [float : -100 to 100 (actual damage 100 times this, default 0.12)]"), &sv_ftDamage, -100, 100,
+		LIMIT_MIN | LIMIT_MAX, true);
+	sv_smgDamage = 0.1f;
+	dksvarRegister(CString("sv_smgDamage [float : -100 to 100 (actual damage 100 times this, default 0.10)]"), &sv_smgDamage, -100, 100,
+		LIMIT_MIN | LIMIT_MAX, true);
+	sv_dmgDamage = 0.14f;
+	dksvarRegister(CString("sv_dmgDamage [float : -100 to 100 (actual damage 100 times this, default 0.14)]"), &sv_dmgDamage, -100, 100,
+		LIMIT_MIN | LIMIT_MAX, true);
+	sv_cgDamage = 0.16f;
+	dksvarRegister(CString("sv_cgDamage [float : -100 to 100 (actual damage 100 times this, default 0.16)]"), &sv_cgDamage, -100, 100,
+		LIMIT_MIN | LIMIT_MAX, true);
+	sv_sniperDamage = 0.2f;
+	dksvarRegister(CString("sv_sniperDamage [float : -100 to 100 (actual damage 100 times this, default 0.20)]"), &sv_sniperDamage, -100, 100,
+		LIMIT_MIN | LIMIT_MAX, true);
+	sv_shottyDamage = 0.21f;
+	dksvarRegister(CString("sv_shottyDamage [float : -100 to 100 (actual damage 100 times this, default 0.21)]"), &sv_shottyDamage, -100, 100,
+		LIMIT_MIN | LIMIT_MAX, true);
+	sv_zookaDamage = 0.85f;
+	dksvarRegister(CString("sv_zookaDamage [float : -100 to 100 (actual damage 100 times this, default 0.85)]"), &sv_zookaDamage, -100, 100,
+		LIMIT_MIN | LIMIT_MAX, true);
+	sv_zookaRadius = 2.0f;
+	dksvarRegister(CString("sv_zookaRadius [float : 1 to 8 (default 2.0)]"), &sv_zookaRadius, 1, 8,
+		LIMIT_MIN | LIMIT_MAX, true);
+	sv_nukeRadius = 6.0f;
+	dksvarRegister(CString("sv_nukeRadius [float : 4 to 16 (default 6.0)]"), &sv_nukeRadius, 4, 16,
+		LIMIT_MIN | LIMIT_MAX, true);
+	sv_nukeTimer = 3.0f;
+	dksvarRegister(CString("sv_nukeTimer [float : 0 to 12 (default 3.0)]"), &sv_nukeTimer, 0, 12,
+		LIMIT_MIN | LIMIT_MAX, true);
+	sv_nukeReload = 12.0f;
+	dksvarRegister(CString("sv_nukeReload [float : 0 to 48 (default 12.0)]"), &sv_nukeReload, 0, 48,
+		LIMIT_MIN | LIMIT_MAX, true);
+	sv_photonType = 1;
+	dksvarRegister(CString("sv_photonType [int : 0 to 3 (default 1)"), &sv_photonType, 0, 3,
+		LIMIT_MIN | LIMIT_MAX, true);
 
-   sv_spawnImmunityTime = 2.0f;
-   dksvarRegister(CString("sv_spawnImmunityTime [float : 0 to 3 (default 2.0)]"), &sv_spawnImmunityTime, 0, 3, LIMIT_MIN | LIMIT_MAX, true);
+	sv_spawnImmunityTime = 2.0f;
+	dksvarRegister(CString("sv_spawnImmunityTime [float : 0 to 3 (default 2.0)]"), &sv_spawnImmunityTime, 0, 3, LIMIT_MIN | LIMIT_MAX, true);
+	
+	db_accountServer = ""; // from cl_accountURL or the master (see loadDBInfos)
+	db_version = 0;
 
-   db_accountServer = ""; // from cl_accountURL or the master (see loadDBInfos)
-   db_version = 0;
+	// Endpoints: the public master is built in (ADR 0028); "none" turns it off. No account login is built in (empty = off).
+	cl_masterServers = "master.roboviolence.com:10207";
+	dksvarRegister(CString("cl_masterServers [string : \"host:port,host:port\" or \"none\" (default \"master.roboviolence.com:10207\")]"), &cl_masterServers, true);
+	cl_accountURL = "";
+	dksvarRegister(CString("cl_accountURL [string : \"\" (default \"\")]"), &cl_accountURL, true);
 
-   // Endpoints: the public master is built in (ADR 0028); "none" turns it off. No account login is built in (empty = off).
-   cl_masterServers = "master.roboviolence.com:10207";
-   dksvarRegister(CString("cl_masterServers [string : \"host:port,host:port\" or \"none\" (default \"master.roboviolence.com:10207\")]"), &cl_masterServers, true);
-   cl_accountURL = "";
-   dksvarRegister(CString("cl_accountURL [string : \"\" (default \"\")]"), &cl_accountURL, true);
+//	dksvarRegister(CString("cl_accountServer [string : \"URL\"]", cl_accountServer.s), &cl_accountServer, true);
 
-   //	dksvarRegister(CString("cl_accountServer [string : \"URL\"]", cl_accountServer.s), &cl_accountServer, true);
-
-   cl_accountUsername = "";
-   dksvarRegister(CString("cl_accountUsername [string : \"\" (default \"\")]"), &cl_accountUsername, true);
-   cl_accountPassword = "";
-   dksvarRegister(CString("cl_accountPassword [string : \"\" (default \"\")]"), &cl_accountPassword, true);
-   cl_playerName = "Unnamed Robo";
-   dksvarRegister(CString("cl_playerName [string : \"\" (default \"Unnamed Robo\")]"), &cl_playerName, true);
-   cl_mapAuthorName = "";
-   dksvarRegister(CString("cl_mapAuthorName [string : \"\" (default \"\", max 24 characters)]"), &cl_mapAuthorName, true);
-   cl_cubicMotion = true;
-   dksvarRegister(CString("cl_cubicMotion [bool : true | false (default true)]"), &cl_cubicMotion, true);
-   cl_lastUsedIP = "0.0.0.0";
-   dksvarRegister(CString("cl_lastUsedIP [string : \"\"]"), &cl_lastUsedIP, true);
-   cl_port = 3333;
-   dksvarRegister(CString("cl_port [int : (default 3333)"), &cl_port, 1024, 65536,
-				  LIMIT_MIN | LIMIT_MAX, true);
-   cl_password = "";
-   dksvarRegister(CString("cl_password [string : \"\"]"), &cl_password, true);
-   cl_redDecal.set(.5f, .5f, 1);
-   dksvarRegister(CString("cl_redDecal [vector3f : (default .5 .5 1)]"), &cl_redDecal, true);
-   cl_greenDecal.set(0, 0, 1);
-   dksvarRegister(CString("cl_greenDecal [vector3f : (default 0 0 1)]"), &cl_greenDecal, true);
-   cl_blueDecal.set(0, 0, .5f);
-   dksvarRegister(CString("cl_blueDecal [vector3f : (default 0 0 .5)]"), &cl_blueDecal, true);
-   cl_skin = "skin10";
-   dksvarRegister(CString("cl_skin [string : \"skin10\"]"), &cl_skin, true);
-   cl_teamIndicatorType = 0;
-   dksvarRegister(CString("cl_teamIndicatorType [int : 0=Colourize, 1=Halos 2=TeamHalosOnly(default 0)]"),
-				  &cl_teamIndicatorType, 0, 2, LIMIT_MIN | LIMIT_MAX, true);
-   cl_glowSize = 0.5f;
-   dksvarRegister(CString("cl_glowSize [float : 0.25 to 0.5 (default 0.5)]"), &cl_glowSize, 0.25, 0.5, LIMIT_MIN | LIMIT_MAX, true);
-   cl_preciseCursor = true;
-   dksvarRegister(CString("cl_preciseCursor [bool : true | false (default true)]"), &cl_preciseCursor, true);
-   cl_enableXBox360Controller = false;
-   dksvarRegister(CString("cl_enableXBox360Controller [bool : true | false (default false)]"), &cl_enableXBox360Controller, true);
-   cl_grassTextureForAllMaps = false;
-   dksvarRegister(CString("cl_grassTextureForAllMaps [bool : true | false (default false)]"), &cl_grassTextureForAllMaps, true);
-   cl_enableVSync = true;
-   dksvarRegister(CString("cl_enableVSync [bool : true | false (default true)]"), &cl_enableVSync, true);
-   cl_affinityMode = 0;
-   dksvarRegister(CString("cl_affinityMode [int : 0=Default, 1=PartialBias, 2=FullBias]"),
-				  &cl_affinityMode, 0, 2, LIMIT_MIN | LIMIT_MAX, true);
-   cl_primaryWeapon = 0;
-   dksvarRegister(CString("cl_primaryWeapon [int : 0=SMG, 1=Shotgun, 2=Sniper, 3=DMG, 4=Chaingun, 5=Bazooka, 6=Photon, 7=Flamethrower]"),
-				  &cl_primaryWeapon, 0, 7, LIMIT_MIN | LIMIT_MAX, true);
-   //cl_weaponSideRight = true;
-   //dksvarRegister(CString("cl_weaponSideRight [bool : true | false (default true)]"),&cl_weaponSideRight,true);
-   cl_secondaryWeapon = 0;
-   dksvarRegister(CString("cl_secondaryWeapon [int : 0=Knives, 1=Nuclear, 2=Shield, 3=Minibot]"),
-				  &cl_secondaryWeapon, 0, 3, LIMIT_MIN | LIMIT_MAX, true);
+	cl_accountUsername = "";
+	dksvarRegister(CString("cl_accountUsername [string : \"\" (default \"\")]"), &cl_accountUsername, true);
+	cl_accountPassword = "";
+	dksvarRegister(CString("cl_accountPassword [string : \"\" (default \"\")]"), &cl_accountPassword, true);
+	cl_playerName = "Unnamed Robo";
+	dksvarRegister(CString("cl_playerName [string : \"\" (default \"Unnamed Robo\")]"), &cl_playerName, true);
+	cl_mapAuthorName = "";
+	dksvarRegister(CString("cl_mapAuthorName [string : \"\" (default \"\", max 24 characters)]"), &cl_mapAuthorName, true);
+	cl_cubicMotion = true;
+	dksvarRegister(CString("cl_cubicMotion [bool : true | false (default true)]"), &cl_cubicMotion, true);
+	cl_lastUsedIP = "0.0.0.0";
+	dksvarRegister(CString("cl_lastUsedIP [string : \"\"]"), &cl_lastUsedIP, true);
+	cl_port = 3333;
+	dksvarRegister(CString("cl_port [int : (default 3333)"), &cl_port, 1024, 65536,
+		LIMIT_MIN | LIMIT_MAX, true);
+	cl_password = "";
+	dksvarRegister(CString("cl_password [string : \"\"]"), &cl_password, true);
+	cl_redDecal.set(.5f,.5f,1);
+	dksvarRegister(CString("cl_redDecal [vector3f : (default .5 .5 1)]"), &cl_redDecal, true);
+	cl_greenDecal.set(0,0,1);
+	dksvarRegister(CString("cl_greenDecal [vector3f : (default 0 0 1)]"), &cl_greenDecal, true);
+	cl_blueDecal.set(0,0,.5f);
+	dksvarRegister(CString("cl_blueDecal [vector3f : (default 0 0 .5)]"), &cl_blueDecal, true);
+	cl_skin = "skin10";
+	dksvarRegister(CString("cl_skin [string : \"skin10\"]"), &cl_skin, true);
+	cl_teamIndicatorType = 0;
+	dksvarRegister(CString("cl_teamIndicatorType [int : 0=Colourize, 1=Halos 2=TeamHalosOnly(default 0)]"),
+		&cl_teamIndicatorType,0,2, LIMIT_MIN | LIMIT_MAX, true);
+	cl_glowSize = 0.5f;
+	dksvarRegister(CString("cl_glowSize [float : 0.25 to 0.5 (default 0.5)]"),&cl_glowSize,0.25,0.5, LIMIT_MIN | LIMIT_MAX,true);
+	cl_preciseCursor = true;
+	dksvarRegister(CString("cl_preciseCursor [bool : true | false (default true)]"),&cl_preciseCursor,true);
+	cl_enableXBox360Controller = false;
+	dksvarRegister(CString("cl_enableXBox360Controller [bool : true | false (default false)]"), &cl_enableXBox360Controller, true);
+	cl_grassTextureForAllMaps = false;
+	dksvarRegister(CString("cl_grassTextureForAllMaps [bool : true | false (default false)]"),&cl_grassTextureForAllMaps,true);
+	cl_enableVSync = true;
+	dksvarRegister(CString("cl_enableVSync [bool : true | false (default true)]"), &cl_enableVSync, true);
+	cl_affinityMode = 0;
+	dksvarRegister(CString("cl_affinityMode [int : 0=Default, 1=PartialBias, 2=FullBias]"),
+		&cl_affinityMode, 0, 2, LIMIT_MIN | LIMIT_MAX, true);
+	cl_primaryWeapon = 0;
+	dksvarRegister(CString("cl_primaryWeapon [int : 0=SMG, 1=Shotgun, 2=Sniper, 3=DMG, 4=Chaingun, 5=Bazooka, 6=Photon, 7=Flamethrower]"),
+		&cl_primaryWeapon, 0, 7, LIMIT_MIN | LIMIT_MAX, true);
+	//cl_weaponSideRight = true;
+	//dksvarRegister(CString("cl_weaponSideRight [bool : true | false (default true)]"),&cl_weaponSideRight,true);
+	cl_secondaryWeapon = 0;
+	dksvarRegister(CString("cl_secondaryWeapon [int : 0=Knives, 1=Nuclear, 2=Shield, 3=Minibot]"),
+		&cl_secondaryWeapon, 0, 3, LIMIT_MIN | LIMIT_MAX, true);
 #ifndef DISABLE_QUICK_MESSAGES
 	// quick messages
 	cl_qMsg01 = "aHello!";

@@ -1449,8 +1449,9 @@ void Server::updateBots(float delay)
 																						   : -1;
 			if (p->isBot)
 			{
-				if (t >= 0)
-					++botsOn[t];
+				// A bot moved to spectator still counts for its team: it asks to rejoin (Bot::update)
+				const int playsFor = bots[i] ? bots[i]->team : p->teamID;
+				++botsOn[playsFor == PLAYER_TEAM_BLUE ? 0 : 1];
 			}
 			else
 			{
@@ -1471,7 +1472,7 @@ void Server::updateBots(float delay)
 			for (int i = 0; i < MAX_PLAYER; ++i)
 			{
 				const Player* p = game->players[i];
-				if (!p || !p->isBot || p->teamID != team)
+				if (!p || !p->isBot || !bots[i] || bots[i]->team != team)
 					continue;
 				const bool carrier = game->map->flagState[0] == i || game->map->flagState[1] == i;
 				const float score = (carrier ? 1e6f : 0.0f) + (p->status == PLAYER_STATUS_ALIVE ? p->timeAlive : -1.0f);
@@ -1509,7 +1510,7 @@ void Server::updateBots(float delay)
 			p->name = bots::name(botNames, index).c_str();
 			joined.insert(id);
 			validator.join(*p);
-			bots[slot].reset(new Bot(slot, index));
+			bots[slot].reset(new Bot(slot, index, team));
 			net_clsv_svcl_player_info info = {};
 			info.playerID = (int8_t)slot;
 			snprintf(info.playerName, sizeof(info.playerName), "%s", p->name.s);

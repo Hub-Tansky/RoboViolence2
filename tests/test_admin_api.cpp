@@ -93,7 +93,8 @@ int main(int, char ** argv)
 	CHECK(code(request("GET", "/status", "")) == 401);
 	CHECK(code(request("GET", "/status", "wrong")) == 401);
 	std::string status = request("GET", "/status", "s3cret");
-	CHECK(code(status) == 200 && status.find("map ") != std::string::npos && status.find("players ") != std::string::npos);
+	CHECK(code(status) == 200 && status.find("map ") != std::string::npos && status.find("players ") != std::string::npos &&
+		  status.find("\nhumans 0\n") != std::string::npos);
 	std::string info = request("POST", "/command", "s3cret", "info");
 	CHECK(code(info) == 200 && info.find("[Server Info]") != std::string::npos);
 	CHECK(code(request("POST", "/command", "s3cret", "set sv_password hunter2")) == 200);

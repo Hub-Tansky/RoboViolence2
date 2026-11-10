@@ -171,6 +171,13 @@ int main(int, char** argv)
 	std::printf("deathmatch: up to %d alive, %u shots\n", mostAlive, after - before);
 	CHECK(mostAlive >= 4 && after > before);
 
+	// An admin moves everyone to spectator: the bots ask to rejoin their teams, and no extra bots fill slots
+	console->sendCommand("allwatch");
+	harness::tick(3);
+	CHECK(game().countPlayers().bots == 8);
+	harness::tick(30 * 2);
+	CHECK(botsOn(PLAYER_TEAM_BLUE) == 4 && botsOn(PLAYER_TEAM_RED) == 4 && game().countPlayers().bots == 8);
+
 	// sv_bots changes take effect at once
 	console->sendCommand("set sv_bots 4");
 	harness::tick(1);

@@ -16,7 +16,7 @@ extern Scene* scene;
 
 namespace
 {
-	// Verdict: a CTF match has a capture, a TDM one a kill, and no bot stands still away from its goal this long
+	// Verdict: a CTF match has a capture, a return and every role, a TDM one a kill, and no bot stands still away from its goal this long
 	const float MAX_STUCK_SECONDS = 10.0f;
 	const float STUCK_DISTANCE = 0.2f; // moved less than this in one second: standing still
 	const float AT_GOAL = 0.5f; // a defender on its post or a carrier waiting at its pod is holding, not stuck
@@ -138,7 +138,11 @@ int main(int argc, char** argv)
 			stuckEvents += bot->brain.stuckEvents;
 			stateChanges += bot->brain.stateChanges;
 		}
-	const bool pass = present == botCount && shots > 0 && (ctf ? captures.value() >= 1 : kills.value() >= 1) &&
+	bool everyRole = true; // CTF: each of the six roles held at some point
+	for (int r = 0; r < bots::ROLE_COUNT; ++r)
+		everyRole = everyRole && roleTime[r] > 0;
+	const bool pass = present == botCount && shots > 0 &&
+					  (ctf ? captures.value() >= 1 && returns.value() >= 1 && everyRole : kills.value() >= 1) &&
 					  maxStuck <= MAX_STUCK_SECONDS;
 
 	std::printf("{\n  \"mode\": \"%s\", \"seed\": %u, \"seconds\": %d, \"bots\": %d,\n", mode.c_str(), seed, seconds, present);

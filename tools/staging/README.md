@@ -50,11 +50,11 @@ The first run deploys the newest build at once (nothing is running to protect). 
 
 | Command | Does |
 |---|---|
-| `deploy.sh` | newest successful `main` `containers` run, once `/status` of CTF and `/tdm/status` of TDM both show `players 0` (what cron runs). If a game server runs but its `/status` doesn't answer (changed password, proxy down), it doesn't deploy |
+| `deploy.sh` | newest successful `main` `containers` run, once `/status` of CTF and `/tdm/status` of TDM both show `humans 0` (`players 0` from a server older than ADR 0049; bots never hold a deploy back) (what cron runs). If a game server runs but its `/status` doesn't answer (changed password, proxy down), it doesn't deploy |
 | `deploy.sh --sha <sha>` | that `main` build; also a manual rollback. Use the full SHA for builds older than the last 30 runs |
-| `deploy.sh --force` | don't wait for players to leave |
+| `deploy.sh --force` | don't wait for humans to leave |
 
-Notifications (ntfy): `RV2 staging now on <sha7>` (`RV2_DEPLOY_LABEL`, default `staging`, names the host there and in the state and env file paths; production sets `prod`); `FAILED at <stage>` with the rollback result; `waiting` once when players have held deploys back for 6 hours. Commits from before `BV2_IMAGE_TAG` existed are refused. A missing or unreadable env file is logged only (no ntfy topic yet). GitHub, download and pull failures notify once per stage and don't count; 3 failed deploys of a commit stop retries until `--sha`.
+Notifications (ntfy): `RV2 staging now on <sha7>` (`RV2_DEPLOY_LABEL`, default `staging`, names the host there and in the state and env file paths; production sets `prod`); `FAILED at <stage>` with the rollback result; `waiting` once when humans have held deploys back for 6 hours. Commits from before `BV2_IMAGE_TAG` existed are refused. A missing or unreadable env file is logged only (no ntfy topic yet). GitHub, download and pull failures notify once per stage and don't count; 3 failed deploys of a commit stop retries until `--sha`.
 
 Files under `/var/lib/rv2-staging/`: `deployed` (running commit), `state.tsv` (commit, result, stage, time), `releases/<sha7>/` (that commit's compose file, Caddyfile and `srv/deployed`, last 5; older releases' images are removed), `waiting`, `deploy.log`.
 

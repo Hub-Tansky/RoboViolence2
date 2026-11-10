@@ -15,13 +15,14 @@
 - **Bots count as players** in the browser row and LAN broadcast (`nbPlayer`), so `sv_bots 8` shows 8/10 with or without humans. `Game::countPlayers()` returns humans and bots separately, so a later UI can show them apart. Names end in ` [bot]` and come from `content/bots/names.txt`; ping shows 0.
 - Bots have user id 0, so nothing goes to stats or accounts; votes skip them.
 - Difficulty is fixed constants in `bots::Tuning` plus per-slot variation, as in `bots.rs`. No skill cvar yet.
-- Production enables them through the environment: `BV2_SV_BOTS` (compose default 8), not the launch scripts, which tests, the e2e run and client-hosted games also execute.
+- Hosts enable them through the environment: `BV2_SV_BOTS=8` in each host's env file (`/etc/rv2-<label>.env`; compose default 0), staging first, then prod. Not the launch scripts, which tests, the e2e run and client-hosted games also execute.
 - `bot_sim` (tests) plays a seeded bots-only match and fails CI when CTF has no capture, TDM no kill, or a bot stands still away from its goal over 10 s.
 
 ## Consequences
 - The staging deploy waits for 0 humans (`/status` line `humans N`), not 0 players, or bots would block every deploy.
 - A bot costs one player slot and a little CPU per frame (perception every 0.08 s, a BFS on the tile grid when the straight line is blocked).
 - Deviation from `bots.rs`: a retreating bot whose escape point resolves to where it stands fights back instead of holding still. The walled placeholder arenas corner bots; `bots.rs`'s maps rarely did.
+- Outside CTF a bot with no target and no memory heads for the nearest live enemy, seen or not, as `bots.rs` does (`hunt_target`, line 1121): on an empty-ish server it finds the human instead of wandering.
 - Bots see positions the server sees, not what a client would render, and never miss a sound. Tuning stays in one struct to adjust after playtests.
 - Rejected: an external bot process connecting as a client. It needs the join handshake, a password, the network path and a slot on the master's view of the server, for no gain.
 - Rejected: bots excluded from `nbPlayer`. The owner wants the browser to show a full-looking server (ROBO-123, Q8).

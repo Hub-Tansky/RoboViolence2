@@ -1110,7 +1110,21 @@ void Bot::update(Server& server, const bots::World& world, float delay)
 	if (!p || !game.map)
 		return;
 	if (p->teamID != PLAYER_TEAM_BLUE && p->teamID != PLAYER_TEAM_RED)
+	{
+		// Moved out (allwatch, rejected): ask to play again once a second, so it never strands a slot
+		alive = false;
+		spawnWait -= delay;
+		if (spawnWait <= 0)
+		{
+			spawnWait = 1.0f;
+			net_clsv_svcl_team_request request = {};
+			request.playerID = (int8_t)slot;
+			request.teamRequested = (int8_t)team;
+			send(server, NET_CLSV_SVCL_TEAM_REQUEST, &request, sizeof(request));
+		}
 		return;
+	}
+	team = p->teamID; // an auto-balance move sticks
 
 	if (p->status != PLAYER_STATUS_ALIVE)
 	{

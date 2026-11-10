@@ -148,12 +148,13 @@ namespace bots
 class Bot
 {
 public:
-	Bot(int slot, int rosterIndex)
-		: slot(slot), rosterIndex(rosterIndex) {}
+	Bot(int slot, int rosterIndex, int team)
+		: slot(slot), rosterIndex(rosterIndex), team(team) {}
 	// One server frame: spawn when allowed, think, move, and send this frame's messages
 	void update(Server& server, const bots::World& world, float delay);
 
 	int slot, rosterIndex;
+	int team; // blue or red: the team it plays for, kept while an admin moves it to spectator
 	bots::Brain brain;
 
 private:
