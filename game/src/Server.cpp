@@ -1496,7 +1496,7 @@ void Server::updateBots(float delay)
 					slot = i;
 			if (slot < 0)
 				break;
-			// The lowest roster index no bot has, so names stay put
+			// The lowest roster index no bot has, which picks the gun and skin
 			bool used[MAX_PLAYER] = {};
 			for (int i = 0; i < MAX_PLAYER; ++i)
 				if (bots[i])
