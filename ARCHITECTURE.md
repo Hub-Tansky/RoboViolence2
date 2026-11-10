@@ -55,7 +55,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `.dockerignore` | Docker build context: sources only (no `.git`, builds, docs) |
 | `AGENTS.md` | Canonical agent and contributor instructions; work tracking in the rv2-docs vault |
 | `ARCHITECTURE.md` | This file: summary and file inventory |
-| `CMakeLists.txt` | Root CMake project: options, the release text (`BV2_VERSION`, ADR 0046), runtime layout, placeholder content, subdirectories, install layout (binaries, `share/bv2/main` as `runtime/main` holds it, `.desktop`, icons; `bv2master` in component `master`), which the `.deb` packages |
+| `CMakeLists.txt` | Root CMake project: options, the release text (`BV2_VERSION`, ADR 0046), Release debug info and Linux build ID (ADR 0050), runtime layout, placeholder content, subdirectories, install layout (binaries, `share/bv2/main` as `runtime/main` holds it, `.desktop`, icons; `bv2master` in component `master`), which the `.deb` packages |
 | `CMakePresets.json` | Presets: linux-x64, macos-arm64, win-x64-msvc (Debug), -asan and -release variants (Ninja); macOS uses the overlay triplet in `tools/vcpkg-triplets/` |
 | `LICENSE.txt` | GPLv3 text (code only) |
 | `README.md` | Project overview, fork and asset-removal statement |
@@ -370,7 +370,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 
 | path | purpose |
 |---|---|
-| `docs/ops/runbook.md` | Hosting the server images: secrets, start, stop, upgrade, logs, console, ports, backups, production (pinned manual deploy, failover) |
+| `docs/ops/runbook.md` | Hosting the server images: secrets, start, stop, upgrade, logs, console, ports, backups, production (pinned manual deploy, failover), crash reports (resolving with release symbols) |
 
 ### `engine/babonet`
 

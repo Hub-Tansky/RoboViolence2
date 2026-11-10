@@ -1,6 +1,6 @@
 # 0050: Keep release debug symbols privately, one release per tag in a private repo
 
-- Status: Accepted
+- Status: Proposed
 - Date: 2026-11-10
 - Affects: ROBO-188, `CMakeLists.txt`, `packaging/split-symbols.py`, `.github/workflows/build.yml`, `game/src/CrashReport.cpp`, `docs/ops/runbook.md`
 
