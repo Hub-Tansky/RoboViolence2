@@ -227,6 +227,33 @@ static void autotestUpdate(float delay)
 	dkwForceQuit();
 }
 
+// Frame pacing (ROBO-197): vsync follows cl_enableVSync; the display may sleep unless a game is played in the
+// focused window; an unfocused window draws at 30 fps, a hidden one draws nothing and ticks at 10 Hz.
+static void applyDisplaySettings()
+{
+	static int appliedVSync = -1;
+	if (appliedVSync != (int)gameVar.cl_enableVSync)
+	{
+		appliedVSync = (int)gameVar.cl_enableVSync;
+		dkglEnableVsync(gameVar.cl_enableVSync);
+	}
+	static int screenSaverAllowed = -1;
+	int allow = !(dkwHasFocus() && std::strcmp(autotestScene(), "game") == 0);
+	if (screenSaverAllowed != allow)
+	{
+		screenSaverAllowed = allow;
+		dkwAllowScreenSaver(allow != 0);
+	}
+}
+
+static void waitUntil(std::chrono::steady_clock::time_point& next, std::chrono::milliseconds frame)
+{
+	std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
+	if (next > now)
+		std::this_thread::sleep_until(next);
+	next = (next > now ? next : now) + frame;
+}
+
 class MainLoopInterface : public CMainLoopInterface
 {
 public:
@@ -275,6 +302,16 @@ public:
 			// On d�r�ente pour le prochain frame
 			nbFrameElapsed--;
 		}
+
+		applyDisplaySettings();
+		static std::chrono::steady_clock::time_point nextFrame;
+		if (!dkwIsVisible())
+		{
+			waitUntil(nextFrame, std::chrono::milliseconds(100));
+			return;
+		}
+		if (!dkwHasFocus())
+			waitUntil(nextFrame, std::chrono::milliseconds(33));
 
 		// On render le tout
 		scene->render();

@@ -29,6 +29,7 @@ Robo Violence 2: unofficial fork of BaboViolent 2, a top-down multiplayer shoote
 - **Master server:** `MasterClient` is reconstructed (the original class is missing from the source release); its timeout is an assumption. See [masterserver/README.md](masterserver/README.md).
 - **GLU:** still the system library (headers and link) for `dko`, `zeven_client` and the game, so the headless server needs GLU dev packages; `dkt` is stubbed there. The renderer itself is unchanged fixed-function GL 2.1 (ADR 0003).
 - **OGG music** needs `stb_vorbis.c` (vcpkg `stb`, found in CI builds); the placeholders have no music, and playback was never heard.
+- **Frame pacing:** the main loop never waits on its own; vsync (`cl_enableVSync`, default on) paces a visible focused window, `main.cpp` sleeps when the window is unfocused or hidden.
 - **HiDPI:** `dkwGetResolution()` is the pixel size; the UI math assumes nothing else. Untested on a Retina display.
 - **Dead code:** 16 old-menu `.cpp` files in `game/src` are not built (see [game/README.md](game/README.md)).
 - **Warnings:** every target except `glad` builds with `-Werror` / `/WX`. Cosmetic classes (unused names, signed compares, initialiser order) are off for `game` and `masterserver` (`bv2_target_legacy_strict`); about 4800 string-literal-to-`char*` warnings are suppressed.
@@ -361,6 +362,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/decisions/0047-two-axis-review-replaces-thermo-nuclear.md` | ADR: PR review runs isolated Standards and Spec workers from a vendored skill; tier from changed paths; missing spec blocks |
 | `docs/decisions/0048-client-crash-report-in-pref-dir.md` | ADR: the client writes `crash-<start time>.txt` (version, signal, stack as module + offset) to the pref dir; no upload; Sentry and minidumps rejected |
 | `docs/decisions/0049-server-side-bots-for-empty-servers.md` | ADR: bots run in the game server as connectionless player slots sending client messages; `sv_bots` is a target population; bots count in the browser; prod enables them with `BV2_SV_BOTS` |
+| `docs/decisions/0050-client-frame-pacing-and-sleep.md` | ADR: client frame pacing follows vsync and window state; the display sleeps outside play |
 | `docs/decisions/README.md` | ADR format and index |
 
 ### `docs/ops`
@@ -504,7 +506,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `engine/zeven/include/dksvar.h` | dksvar: configuration variable registry |
 | `engine/zeven/include/dksvardef.h` | dksvar: variable definition macros |
 | `engine/zeven/include/dkt.h` | dkt: texture loading (TGA) and binding |
-| `engine/zeven/include/dkw.h` | dkw: window creation and events, window icon |
+| `engine/zeven/include/dkw.h` | dkw: window creation and events, window icon, visibility and focus, screen saver |
 | `engine/zeven/include/glheaders.h` | The only OpenGL include: glad, then GLU |
 | `engine/zeven/include/platform.h` | Platform macros (BV2_PLATFORM_*, BV2_POSIX), INT4/UINT4, `bv2ReadBytes` (checked `fread` for the engine loaders and `FileIO`), POSIX includes and Win32 type shims; force-included |
 
@@ -533,7 +535,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `engine/zeven/src/dkt.cpp` | dkt: texture loading (TGA) and binding |
 | `engine/zeven/src/dkt_console.cpp` | No-op dkt for the headless server |
 | `engine/zeven/src/dkti.h` | Internal header of the matching dk module |
-| `engine/zeven/src/dkw.cpp` | dkw: window creation and events, window icon, Ctrl/Cmd+V paste into text fields (ADR 0042) |
+| `engine/zeven/src/dkw.cpp` | dkw: window creation and events, window icon, Ctrl/Cmd+V paste into text fields (ADR 0042), visibility (minimized, hidden, occluded) and focus, screen saver switch |
 
 ### `engine/zeven/third_party/glad`
 
@@ -760,7 +762,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/WrongVersion.h` | Dialog: client/server version mismatch |
 | `game/src/Zeven.h` | Umbrella include for engine headers and common types |
 | `game/src/changes-log.txt` | Upstream change log |
-| `game/src/main.cpp` | Program entry: window, engine init, main loop; `--autotest` startup, per-step hook and watchdog (ADR 0025); the dedicated server line-buffers stdout; saves a requested screenshot before the swap; the client installs the crash report handler (ADR 0048) |
+| `game/src/main.cpp` | Program entry: window, engine init, main loop; `--autotest` startup, per-step hook and watchdog (ADR 0025); the dedicated server line-buffers stdout; saves a requested screenshot before the swap; the client installs the crash report handler (ADR 0048); frame pacing: applies `cl_enableVSync`, skips rendering while the window is hidden (10 Hz ticks), 30 fps while unfocused, lets the display sleep except in a focused game |
 | `game/src/netPacket.h` | Wire structs and message IDs (raw memcpy'd structs) |
 | `game/src/screengrab.cpp` | Screenshot capture (P and L keys, `screenshot` command): the next frame, from the back buffer before the swap |
 | `game/src/screengrab.h` | Screenshot capture |
