@@ -16,7 +16,7 @@
 
 int main()
 {
-	const unsigned short port = 10209;
+	const unsigned short port = 10210; // unused by other tests: ctest -j runs them side by side
 	if (bb_init() || bb_serverCreate(false, 4, port))
 	{
 		std::printf("FAIL: no server\n");
