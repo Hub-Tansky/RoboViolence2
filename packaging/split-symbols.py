@@ -32,10 +32,11 @@ def binary(runtime, name):
 
 
 def build_id(path):
-    notes = run("readelf", "-n", path, capture_output=True, text=True).stdout
-    m = re.search(r"Build ID: ([0-9a-f]+)", notes)
+    # readelf exits 1 on a warning about another note (e.g. a newer binutils note type), after printing the build ID
+    notes = subprocess.run(["readelf", "-n", str(path)], capture_output=True, text=True)
+    m = re.search(r"Build ID: ([0-9a-f]+)", notes.stdout)
     if not m:
-        sys.exit(f"{path} has no GNU build ID")
+        sys.exit(f"{path} has no GNU build ID: {notes.stderr.strip()}")
     return m.group(1)
 
 
