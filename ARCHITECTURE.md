@@ -68,6 +68,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/Paths.h` | Interface of `Paths.cpp` (namespace `bv2`) |
 | `packaging/linux/roboviolence2.desktop` | Linux desktop entry |
 | `packaging/make-package.py` | Builds the per-OS package from a Release `runtime/` (links resolved, macOS bundle re-signed, licences), plus the Windows installer (showing `LICENSE.txt` reflowed one paragraph per line), the macOS `.dmg` with only the app and Applications, or the Linux `.deb` (ADR 0020, 0030, 0031) |
+| `packaging/split-symbols.py` | Moves a Release runtime's symbols into `roboviolence2-<preset>-<version>-symbols.zip` before packaging: `.pdb`, `.dSYM` then `strip -S`, Linux `.build-id/` `.debug` files with a debuglink (ADR 0050) |
 | `packaging/make_deb.py` | Builds the Linux `.deb` from the build's `cmake --install` (stripped, without the master): client and `bv2dedicated` moved to `/usr/games`, launcher pointed there, licences, copyright and changelog added; Depends from `dpkg-shlibdeps` plus `libgl1`, `curl` and `unzip` (ADR 0031, 0040) |
 | `packaging/discord_release_post.py` | Prints the Discord webhook payload of the release job: one embed with the release page, the player downloads and the website, an optional ping of the opt-in role and no other mention (ADR 0032) |
 | `packaging/windows/roboviolence2.iss` | Inno Setup script for the Windows installer (per-user, unsigned); shows the reflowed licence from `make-package.py`; privacy policy link and the opt-out task for the public master (ADR 0034) |
@@ -164,10 +165,11 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/test_spawn_overlay.cpp` | `spawns::farthestFrom`: no DM spawn gives no line origin (the editor crash), the farthest of several, ties, nearest team spawn |
 | `tests/test_view_geometry.cpp` | Widescreen (Stretch) projects at the window's own aspect, Bars at 4:3; the camera's side margin widens with the view, and a narrow or short map centres it |
 | `tests/test_config.cpp` | dksvar config layering, transient values not saved, secrets masked, `dksvarGetValue` |
-| `tests/test_crash_report.cpp` | ROBO-186: runs itself as a crashing child and checks the `crash-*.txt` it leaves (version line, signal or exception code, a stack frame) and that the previous handler still runs (ADR 0048) |
+| `tests/test_crash_report.cpp` | ROBO-186: runs itself as a crashing child and checks the `crash-*.txt` it leaves (version line, signal or exception code, a stack frame, the load address on macOS) and that the previous handler still runs (ADR 0048) |
 | `tests/test_credentials.cpp` | Step 10: the credential HMAC against RFC 4231; proofs check only with their own password, label and nonce |
 | `tests/test_crash_fixes.cpp` | Steps 5 and 7: one check per fixed defect (KEY_QUESTIONS Part D) on the in-process server |
 | `tests/test_dks.cpp` | R20: `dksPlayMusic` on a missing file 200 times; a sound deleted after `dksShutDown` (teardown) (ASan) |
+| `tests/test_split_symbols.py` | ROBO-188: `split-symbols.py` on a copy of a Release build's binaries puts each one's symbols in the zip and strips it (ctest `split_symbols`, Release builds only; ADR 0050) |
 | `tests/test_example_cfg.py` | `config/bv2.example.cfg` names a new player as `GameVar.cpp` does and starts fullscreen at the desktop resolution (ADR 0043) |
 | `tests/test_window_icon.cpp` | `dkwSetWindowIcon` accepts the Linux client's compiled-in icon (`AppIcon.h`) and refuses bytes that aren't a PNG |
 | `tests/test_make_deb.py` | `make_deb.py` builds an installable `.deb` from the build's install: `share/bv2/main` equals `runtime/main`, layout, modes, root ownership, no master, version mapping (`-rc1` sorts before the release), Depends, launcher path (ctest `make_deb`, Linux client builds with dpkg-dev) |
@@ -238,7 +240,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | path | purpose |
 |---|---|
 | `.github/workflows/secret-scan.yml` | CI: gitleaks over commits after the fork point and original-asset check |
-| `.github/workflows/build.yml` | CI on PRs, pushes to `main` and `v*` tags (ADR 0041): Debug and Release build and ctest, with the `v*` tag as `BV2_VERSION` and a step checking the Release `bv2` holds it (ADR 0046), Release package on Windows, macOS, Linux (`roboviolence2-<preset>` artifacts); `package-check` of the Linux package in a clean `ubuntu:24.04`; `deb-check`: the `.deb` installs with apt, a non-root user starts the server and removal leaves nothing, in clean `ubuntu:24.04` and `debian:13`; `package-smoke` (not required): Windows and macOS packages start server, master and client (Mesa llvmpipe on Windows); ASan smoke job with client under xvfb; Linux jobs upload the actual and diff PNGs of failed `screenshot_*` tests (`screenshots-<preset>`); `release` job: every run checks the release files are there; a `v*` tag publishes them (GitHub release, pre-release for `v0.*` and `v*-*`) and posts to Discord; `fuzz` job (not required, pushes to main): 2 min per client message type, uploads crash inputs |
+| `.github/workflows/build.yml` | CI on PRs, pushes to `main` and `v*` tags (ADR 0041): Debug and Release build and ctest, with the `v*` tag as `BV2_VERSION` and a step checking the Release `bv2` holds it (ADR 0046), Release symbols split off before packaging and, on a `v*` tag, uploaded to the private `Hub-Tansky/rv2-symbols` (ADR 0050); Release package on Windows, macOS, Linux (`roboviolence2-<preset>` artifacts); `package-check` of the Linux package in a clean `ubuntu:24.04`; `deb-check`: the `.deb` installs with apt, a non-root user starts the server and removal leaves nothing, in clean `ubuntu:24.04` and `debian:13`; `package-smoke` (not required): Windows and macOS packages start server, master and client (Mesa llvmpipe on Windows); ASan smoke job with client under xvfb; Linux jobs upload the actual and diff PNGs of failed `screenshot_*` tests (`screenshots-<preset>`); `release` job: every run checks the release files are there; a `v*` tag publishes them (GitHub release, pre-release for `v0.*` and `v*-*`) and posts to Discord; `fuzz` job (not required, pushes to main): 2 min per client message type, uploads crash inputs |
 | `.github/workflows/ci-retry.yml` | CI: when a `build` job was cancelled because no hosted runner picked it up, re-runs the run's failed jobs (attempts 1 and 2, latest commit only; ADR 0041) |
 | `.github/workflows/hygiene.yml` | CI: ARCHITECTURE.md inventory, repository hygiene, content case; `review` (`tools/review.sh`, given the PR description, head and bot flag) on PRs, rerun on description edits |
 | `.github/pull_request_template.md` | PR description: item and Allowed paths (read by `tools/review.sh`), goal, out of scope, tests |
@@ -361,6 +363,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/decisions/0047-two-axis-review-replaces-thermo-nuclear.md` | ADR: PR review runs isolated Standards and Spec workers from a vendored skill; tier from changed paths; missing spec blocks |
 | `docs/decisions/0048-client-crash-report-in-pref-dir.md` | ADR: the client writes `crash-<start time>.txt` (version, signal, stack as module + offset) to the pref dir; no upload; Sentry and minidumps rejected |
 | `docs/decisions/0049-server-side-bots-for-empty-servers.md` | ADR: bots run in the game server as connectionless player slots sending client messages; `sv_bots` is a target population; bots count in the browser; prod enables them with `BV2_SV_BOTS` |
+| `docs/decisions/0050-release-symbols-kept-privately-per-tag.md` | ADR: Release builds carry debug info, split into a symbols zip before packaging; a `v*` tag stores it in the private repo `Hub-Tansky/rv2-symbols` with `SYMBOLS_TOKEN` |
 | `docs/decisions/README.md` | ADR format and index |
 
 ### `docs/ops`
@@ -668,7 +671,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/Control.h` | Menu control base class |
 | `game/src/ControlListener.cpp` | Menu control listener interface |
 | `game/src/ControlListener.h` | Menu control listener interface |
-| `game/src/CrashReport.cpp` | Client crash handler: signals (Linux, macOS) or unhandled exceptions (Windows) write `crash-<start time>.txt` with version and stack to the pref dir; `forceCrash` (ADR 0048) |
+| `game/src/CrashReport.cpp` | Client crash handler: signals (Linux, macOS) or unhandled exceptions (Windows) write `crash-<start time>.txt` with version, stack and (macOS) the main image's load address to the pref dir; `forceCrash` (ADR 0048) |
 | `game/src/CrashReport.h` | Interface of `CrashReport.cpp` (namespace `crashreport`) |
 | `game/src/CreateGame.h` | Create-game screen |
 | `game/src/Credits.h` | Credits screen |
