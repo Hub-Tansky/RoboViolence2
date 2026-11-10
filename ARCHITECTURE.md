@@ -581,8 +581,8 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/Button.h` | Menu button widget |
 | `game/src/Bot.cpp` | Server-side bots (ADR 0049): the brain ported from `bots.rs` (CTF roles, tactical states, tile BFS navigation, stuck recovery, aim, weapon use) and `Bot::update`, which spawns, moves and fires through the client messages |
 | `game/src/Bot.h` | Bot interface: `bots::Tuning` (every tuning number), `World`, `Brain`, `Action`, `think`, class `Bot` |
-| `game/src/BotRoster.cpp` | Bot roster rules: bots wanted per team for a target population, names file, ` [bot]` names |
-| `game/src/BotRoster.h` | Bot roster interface: `bots::Count`, `Teams`, `wanted`, `loadNames`, `name` |
+| `game/src/BotRoster.cpp` | Bot roster rules: bots wanted per team for a target population, names file, ` [bot]` names, a random free name for a new bot |
+| `game/src/BotRoster.h` | Bot roster interface: `bots::Count`, `Teams`, `wanted`, `loadNames`, `name`, `pickName` |
 | `game/src/CAStar.cpp` | A* path finding grid |
 | `game/src/CAStar.h` | A* path finding grid |
 | `game/src/CAStar_FindPath.cpp` | A* search routine |
