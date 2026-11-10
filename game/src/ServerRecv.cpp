@@ -343,7 +343,7 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 					{
 						net_svcl_player_enum_state playerState;
 						playerState.playerID = (char)i;
-						memcpy(playerState.playerName, game->players[i]->name.s, game->players[i]->name.len() + 1);
+						snprintf(playerState.playerName, sizeof(playerState.playerName), "%s", game->players[i]->name.s);
 						memset(playerState.playerIP, 0, sizeof(playerState.playerIP)); // a player's IP stays on the server (privacy)
                         playerState.kills = (short)game->players[i]->kills;
 						playerState.deaths = (short)game->players[i]->deaths;

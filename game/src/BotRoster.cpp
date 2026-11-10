@@ -38,6 +38,6 @@ namespace bots
 	{
 		if (names.empty())
 			return "Bot " + std::to_string(index + 1) + " [bot]";
-		return names[index % names.size()] + " [bot]";
+		return names[index % names.size()].substr(0, MAX_NAME) + " [bot]"; // fits the 31-character wire name
 	}
 }

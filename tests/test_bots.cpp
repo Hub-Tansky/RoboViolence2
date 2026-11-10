@@ -61,6 +61,7 @@ namespace
 		CHECK(bots::name({"Servo"}, 0) == "Servo [bot]");
 		CHECK(bots::name({"Servo", "Tin Can"}, 3) == "Tin Can [bot]");
 		CHECK(bots::name({}, 2) == "Bot 3 [bot]");
+		CHECK(bots::name({std::string(40, 'x')}, 0) == std::string(25, 'x') + " [bot]"); // fits playerName[32]
 		const char* path = "bots-test-names.txt";
 		std::ofstream(path) << "# comment\nServo\r\n\nTin Can \n";
 		const std::vector<std::string> names = bots::loadNames(path);

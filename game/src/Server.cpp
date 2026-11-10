@@ -1482,6 +1482,8 @@ void Server::updateBots(float delay)
 					leaving = i;
 				}
 			}
+			if (leaving < 0)
+				break;
 			console->add(CString("server> %s left the game id:%d", game->players[leaving]->name.s, leaving), true);
 			dropSlot(leaving, "bot");
 			bots[leaving].reset();
