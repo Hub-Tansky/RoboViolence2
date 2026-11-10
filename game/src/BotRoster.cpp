@@ -40,4 +40,13 @@ namespace bots
 			return "Bot " + std::to_string(index + 1) + " [bot]";
 		return names[index % names.size()].substr(0, MAX_NAME) + " [bot]"; // fits the 31-character wire name
 	}
+
+	int pickName(const std::vector<std::string>& names, const std::vector<std::string>& taken, int roll)
+	{
+		std::vector<int> free;
+		for (int i = 0; i < (int)names.size(); ++i)
+			if (std::find(taken.begin(), taken.end(), name(names, i)) == taken.end())
+				free.push_back(i);
+		return free.empty() ? -1 : free[(unsigned)roll % free.size()];
+	}
 }

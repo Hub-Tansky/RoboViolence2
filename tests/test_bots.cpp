@@ -66,6 +66,12 @@ namespace
 		CHECK(bots::name({"Servo", "Tin Can"}, 3) == "Tin Can [bot]");
 		CHECK(bots::name({}, 2) == "Bot 3 [bot]");
 		CHECK(bots::name({std::string(40, 'x')}, 0) == std::string(25, 'x') + " [bot]"); // fits playerName[32]
+		const std::vector<std::string> three = {"Servo", "Tin Can", "Bolt"};
+		CHECK(bots::pickName(three, {}, 0) == 0 && bots::pickName(three, {}, 5) == 2); // the roll picks among free names
+		CHECK(bots::pickName(three, {"Servo [bot]"}, 0) == 1);                        // a taken name is skipped
+		CHECK(bots::pickName(three, {"Servo [bot]", "Bolt [bot]"}, 7) == 1);
+		CHECK(bots::pickName(three, {"Servo [bot]", "Tin Can [bot]", "Bolt [bot]"}, 0) == -1);
+		CHECK(bots::pickName({}, {}, 3) == -1);
 		const char* path = "bots-test-names.txt";
 		std::ofstream(path) << "# comment\nServo\r\n\nTin Can \n";
 		const std::vector<std::string> names = bots::loadNames(path);
@@ -85,7 +91,7 @@ int main(int, char** argv)
 	}
 
 	// The shipped names file loads
-	CHECK(server().botNames.size() == 13);
+	CHECK(server().botNames.size() == 18);
 
 	// sv_bots 8 on an empty CTF server (sv_maxPlayer 10): 4 bots per team, shown as players
 	console->sendCommand("set sv_bots 8");

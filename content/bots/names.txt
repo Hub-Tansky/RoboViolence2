@@ -1,4 +1,4 @@
-# Bot names (ROBO-123): one per line, at most 25 characters (" [bot]" is added). Lines starting with # are skipped.
+# Bot names (ROBO-123): one per line, at most 25 characters (" [bot]" is added). Lines starting with # are skipped. A new bot takes a random free name.
 fx Dysproz
 ck ThunderBall
 nuvem
@@ -8,7 +8,12 @@ ck Nun
 Daivuk
 Pacifist
 Doimuk
+Sunita
 Lamb of God
+Wall Hugger
+Spawn Camper
+Chaos Ball
 ck Deadpool
 Zeven
+Community Hero
 Last Babo Standing

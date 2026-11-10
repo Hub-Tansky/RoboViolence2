@@ -29,4 +29,7 @@ namespace bots
 	const size_t MAX_NAME = 25;
 	// A bot's display name: names[index] (cycled, cut to MAX_NAME) with " [bot]", or "Bot <index+1> [bot]" without names
 	std::string name(const std::vector<std::string>& names, int index);
+	// A new bot's name, so every name in the list gets used: the roll-th (mod the count) name whose display name no
+	// bot in `taken` has, or -1 when every name is taken or there are none
+	int pickName(const std::vector<std::string>& names, const std::vector<std::string>& taken, int roll);
 }
