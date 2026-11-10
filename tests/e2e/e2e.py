@@ -255,8 +255,8 @@ def weapon_choice(run):
     it on the client, so with bots on the server a human joined with the last spawned bot's gun"""
     spawned = lambda: re.findall(r"Player e2e-a spawned; ID:\d+ WeaponID:(\d+)", run.server_text())
     joins = lambda: run.server_text().count("server> e2e-a joined the game")
-    run.server(BV2_SV_BOTS="1")
-    run.command("set sv_forceRespawn 1")  # the client spawns without a key press
+    run.server(BV2_SV_BOTS="2")  # one bot per team; the blue one leaves when e2e-a joins blue
+    run.command("set sv_forceRespawn true")  # the client spawns without a key press
     client = run.client("e2e-a", JOIN + ["wait 30", "disconnect", "expect-scene menu", "connect 127.0.0.1",
                                          "expect-scene game", "wait 30"], config="cl_primaryWeapon 6\n")
     run.joined("e2e-a")
