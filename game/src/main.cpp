@@ -27,6 +27,7 @@
 #include <cstring>
 #include "CMaster.h"
 #include "Paths.h"
+#include "FramePacing.h"
 #include "DataDirPicker.h"
 #ifndef CONSOLE
 #	include "CrashReport.h"
@@ -227,6 +228,23 @@ static void autotestUpdate(float delay)
 	dkwForceQuit();
 }
 
+// vsync follows cl_enableVSync (the console can change it); the screen saver follows the frame's decision
+static void applyDisplaySettings(bool screenSaverAllowed)
+{
+	static int appliedVSync = -1;
+	if (appliedVSync != (int)gameVar.cl_enableVSync)
+	{
+		appliedVSync = (int)gameVar.cl_enableVSync;
+		dkglEnableVsync(gameVar.cl_enableVSync);
+	}
+	static int appliedScreenSaver = -1;
+	if (appliedScreenSaver != (int)screenSaverAllowed)
+	{
+		appliedScreenSaver = (int)screenSaverAllowed;
+		dkwAllowScreenSaver(screenSaverAllowed);
+	}
+}
+
 class MainLoopInterface : public CMainLoopInterface
 {
 public:
@@ -275,6 +293,16 @@ public:
 			// On d�r�ente pour le prochain frame
 			nbFrameElapsed--;
 		}
+
+		namespace pacing = roboviolence2::framePacing;
+		bool inGame = scene->client && scene->client->game->map;
+		pacing::Frame frame = pacing::decide(dkwIsVisible(), dkwHasFocus(), inGame);
+		applyDisplaySettings(frame.screenSaverAllowed);
+		static pacing::Clock::time_point nextFrame;
+		if (frame.minInterval > pacing::Clock::duration::zero())
+			std::this_thread::sleep_until(pacing::schedule(nextFrame, pacing::Clock::now(), frame.minInterval));
+		if (!frame.render)
+			return;
 
 		// On render le tout
 		scene->render();
