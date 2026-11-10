@@ -27,6 +27,10 @@ namespace bots
 	std::vector<std::string> loadNames(const std::string& path);
 	// Longest name taken from the file: with " [bot]" it fits the 31-character wire name (playerName[32])
 	const size_t MAX_NAME = 25;
-	// A bot's display name: names[index] (cycled, cut to MAX_NAME) with " [bot]", or "Bot <index+1> [bot]" without names
+	// A bot's display name: names[index] (cycled, cut to MAX_NAME) with " [bot]", or "Bot <index+1> [bot]" without names.
+	// The server passes pickName's result, or the roster index when no name is free
 	std::string name(const std::vector<std::string>& names, int index);
+	// A new bot's name, so every name in the list gets used: the roll-th (mod the count) name whose display name no
+	// bot in `taken` has, or -1 when every name is taken or there are none
+	int pickName(const std::vector<std::string>& names, const std::vector<std::string>& taken, int roll);
 }

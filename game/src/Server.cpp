@@ -1496,7 +1496,7 @@ void Server::updateBots(float delay)
 					slot = i;
 			if (slot < 0)
 				break;
-			// The lowest roster index no bot has, so names stay put
+			// The lowest roster index no bot has, which picks the gun and skin
 			bool used[MAX_PLAYER] = {};
 			for (int i = 0; i < MAX_PLAYER; ++i)
 				if (bots[i])
@@ -1509,7 +1509,13 @@ void Server::updateBots(float delay)
 			Player* p = game->players[slot];
 			p->isBot = true;
 			p->ping = 0;
-			p->name = bots::name(botNames, index).c_str();
+			// A random free name from the list, so all of them show over time; the roster index still picks the gun
+			std::vector<std::string> taken;
+			for (int i = 0; i < MAX_PLAYER; ++i)
+				if (bots[i] && game->players[i])
+					taken.push_back(game->players[i]->name.s);
+			const int pick = bots::pickName(botNames, taken, rand());
+			p->name = bots::name(botNames, pick >= 0 ? pick : index).c_str();
 			joined.insert(id);
 			validator.join(*p);
 			bots[slot].reset(new Bot(slot, index, team));

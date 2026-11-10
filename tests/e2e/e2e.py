@@ -2,7 +2,7 @@
 """Phase T4: end-to-end scenarios: bv2dedicated with the admin API, plus bv2 autotest clients under Xvfb.
 
 Usage: e2e.py <runtime dir> <scratch dir> <scenario>
-Scenarios: join_leave, password, chat, kick, ban, master_list, ctf_capture, ghost, user_map. Each has one observable: the admin API's
+Scenarios: join_leave, password, chat, kick, ban, master_list, ctf_capture, ghost, user_map, weapon_choice. Each has one observable: the admin API's
 `GET /status` player count or score, the server's stdout, or a client's autotest result (ADR 0025). Linux only (Xvfb).
 """
 import os
@@ -71,7 +71,7 @@ class Run:
         wait(lambda: any(s in self.server_text() for s in ("Server Created on port 3333", "map not found")), 30,
              "server created")
         check("map not found" not in self.server_text(), "server found its map")
-        wait(lambda: self.players() == 0, 10, "admin API answering", API_INTERVAL)
+        wait(lambda: self.players() is not None, 10, "admin API answering", API_INTERVAL)  # bots count as players
 
     @staticmethod
     def collect(stream, lines):
@@ -250,7 +250,32 @@ def master_list(run):
     check(run.finished(client) == 0, "client lists the server: Games found : 1")
 
 
-SCENARIOS = {f.__name__: f for f in (join_leave, password, chat, kick, ban, master_list, ctf_capture, ghost, user_map)}
+def weapon_choice(run):
+    """A client keeps its chosen gun (cl_primaryWeapon) when it joins again. Every other player's spawn used to overwrite
+    it on the client, so with bots on the server a human joined with the last spawned bot's gun"""
+    spawned = lambda: re.findall(r"Player e2e-a spawned; ID:\d+ WeaponID:(\d+)", run.server_text())
+    joins = lambda: run.server_text().count("server> e2e-a joined the game")
+    run.server(BV2_SV_BOTS="2")
+    # a console `set`: the shipped bv2.example.cfg layer sets cl_primaryWeapon 3 over a --config file. The first visit
+    # stays a spectator (never spawns), so only the bot's spawn can touch the choice
+    client = run.client("e2e-a", ["expect-scene menu", "set cl_primaryWeapon 6", "connect 127.0.0.1", "expect-scene game",
+                                  "wait 12", "disconnect", "expect-scene menu", "wait 2", "connect 127.0.0.1",
+                                  "expect-scene game", "wait 20"])
+    run.joined("e2e-a")
+    bot = re.search(r"^\[(\d+)\] .*\[bot\]", run.command("playerlist"), re.M)
+    check(bot, "playerlist names a bot")
+    run.command(f"forceplayerspawn {bot.group(1)} 8 8 1")  # every client sees the bot spawn with gun 1
+    wait(lambda: "Player disconnected : e2e-a" in run.server_text(), 30, "e2e-a left")
+    check(not spawned(), "e2e-a did not spawn as a spectator")
+    run.command("set sv_forceRespawn true")  # sent on join: the client spawns without a key press
+    wait(lambda: joins() >= 2, 30, "e2e-a joined again")
+    run.command("move 0 e2e-a")
+    wait(lambda: spawned(), 20, "e2e-a spawned")
+    check(spawned()[0] == "6", f"spawn after joining again with the chosen gun 6, got {spawned()[0]}")
+    check(run.finished(client) == 0, "client script passed")
+
+SCENARIOS = {f.__name__: f for f in (join_leave, password, chat, kick, ban, master_list, ctf_capture, ghost, user_map,
+                                     weapon_choice)}
 
 if __name__ == "__main__":
     runtime, scratch, name = sys.argv[1:4]

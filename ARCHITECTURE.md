@@ -130,7 +130,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/harness/fake_babonet.cpp` | Test `bb_*` API: queued connects and messages in, captured sends out, client disconnects queued by the test (a server-side `bb_serverDisconnectClient` raises no event, like babonet); an object file, so it wins over babonet's `baboNet.cpp` |
 | `tests/harness/server_harness.cpp` | In-process dedicated server for tests: start, connect, join, deliver, tick |
 | `tests/harness/server_harness.h` | Harness API |
-| `tests/e2e/e2e.py` | E2E scenarios (Phase T4): `bv2dedicated` with the admin API, `bv2master` and `bv2 --autotest` clients under its own Xvfb; join/leave, password, chat, kick, ban, master list, CTF capture, a silent connection dropped by the join timeout, a pref-dir map named with a space hosted by `dedicate` and downloaded by a client (ctest `e2e_<scenario>`) |
+| `tests/e2e/e2e.py` | E2E scenarios (Phase T4): `bv2dedicated` with the admin API, `bv2master` and `bv2 --autotest` clients under its own Xvfb; join/leave, password, chat, kick, ban, master list, CTF capture, a silent connection dropped by the join timeout, a pref-dir map named with a space hosted by `dedicate` and downloaded by a client, a client keeping its chosen gun (`cl_primaryWeapon`) when it joins a server with bots again (ctest `e2e_<scenario>`) |
 | `tests/screenshots.py` | Phase T7: runs `tests/golden/<name>.txt` (with `<name>.cfg` config lines if present) and compares the frame with `<name>.png` within a tolerance; keeps actual and diff PNGs on failure, `--update` writes the golden (ADR 0026) |
 | `tests/golden/main-menu.txt` | Screenshot script: main menu, Game Browser tab (the one it opens on) (ctest `screenshot_main-menu`) |
 | `tests/golden/main-menu.png` | Golden for `screenshot_main-menu` |
@@ -581,8 +581,8 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/Button.h` | Menu button widget |
 | `game/src/Bot.cpp` | Server-side bots (ADR 0049): the brain ported from `bots.rs` (CTF roles, tactical states, tile BFS navigation, stuck recovery, aim, weapon use) and `Bot::update`, which spawns, moves and fires through the client messages |
 | `game/src/Bot.h` | Bot interface: `bots::Tuning` (every tuning number), `World`, `Brain`, `Action`, `think`, class `Bot` |
-| `game/src/BotRoster.cpp` | Bot roster rules: bots wanted per team for a target population, names file, ` [bot]` names |
-| `game/src/BotRoster.h` | Bot roster interface: `bots::Count`, `Teams`, `wanted`, `loadNames`, `name` |
+| `game/src/BotRoster.cpp` | Bot roster rules: bots wanted per team for a target population, names file, ` [bot]` names, a random free name for a new bot |
+| `game/src/BotRoster.h` | Bot roster interface: `bots::Count`, `Teams`, `wanted`, `loadNames`, `name`, `pickName` |
 | `game/src/CAStar.cpp` | A* path finding grid |
 | `game/src/CAStar.h` | A* path finding grid |
 | `game/src/CAStar_FindPath.cpp` | A* search routine |

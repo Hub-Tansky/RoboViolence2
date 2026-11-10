@@ -23,7 +23,7 @@ How many players on blue and red the server aims for (`sv_bots`); bots fill what
 _Avoid_: Bot count, minimum players
 
 **Bot roster**:
-The list of bot names (`content/bots/names.txt`); a bot keeps its roster index, which also picks its main weapon.
+The list of bot names (`content/bots/names.txt`); a new bot takes a random name no bot has. A bot keeps its roster index, which picks its main weapon and skin.
 _Avoid_: Bot list
 
 ### Bot behaviour
