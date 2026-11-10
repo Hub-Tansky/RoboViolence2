@@ -24,9 +24,10 @@
 #include "FileIO.h"
 #include "Game.h"
 #include <algorithm>
-#include "EditorTools.h"
-#include "EditorDialogs.h"
-#include "Scene.h"
+#	include <memory>
+#	include "EditorTools.h"
+#	include "EditorDialogs.h"
+#	include "Scene.h"
 
 extern Scene * scene;
 
@@ -640,15 +641,14 @@ void Editor2::renderSelection() const
 
 bool Editor2::Open(CString mapName)
 {
-	Map* opened = new Map(mapName, 0, editorRoot->font, true);
+	std::unique_ptr<Map> opened(new Map(mapName, 0, editorRoot->font, true));
 	if (!opened->isValid) // corrupt, unknown version or insane size: Map's early returns leave it unrenderable (ROBO-163)
 	{
-		delete opened;
 		console->add("\x4> Error opening map - invalid file.");
 		return false;
 	}
 	delete map;
-	map = opened;
+	map = opened.release();
 	isDirty = false;
 	return true;
 }
