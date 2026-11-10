@@ -81,3 +81,4 @@ What we do, in one or two sentences.
 | [0046](0046-main-menu-shows-release-version-from-tag.md) | The main menu shows the release version from the tag, not the protocol number | Accepted |
 | [0047](0047-two-axis-review-replaces-thermo-nuclear.md) | PR review runs isolated Standards and Spec workers from a vendored skill | Accepted |
 | [0048](0048-client-crash-report-in-pref-dir.md) | Write client crash reports as a text file in the pref dir | Accepted |
+| [0049](0049-server-side-bots-for-empty-servers.md) | Server-side bots fill empty servers to a target population | Accepted |

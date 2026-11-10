@@ -244,6 +244,9 @@ public:
 	//    Et tout les messages server vont lui �re envoy�
 	bool isAdmin;
 
+	// A server-driven bot (Bot.h, ROBO-123): no connection, never in stats
+	bool isBot = false;
+
 	// Son nom
 	CString name;
 

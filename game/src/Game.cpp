@@ -1647,18 +1647,13 @@ int Game::createNewPlayerSV(int babonetID)
 	return -1; // Pus de place
 }
 
-int Game::numPlayers(void)
+bots::Count Game::countPlayers() const
 {
-	int nbPlayer = 0;
-	for (int i=0;i<MAX_PLAYER;++i)
-	{
+	bots::Count count;
+	for (int i = 0; i < MAX_PLAYER; ++i)
 		if (players[i])
-		{
-			nbPlayer++;
-		}
-	}
-
-   return nbPlayer;
+			++(players[i]->isBot ? count.bots : count.humans);
+	return count;
 }
 
 #ifndef CONSOLE

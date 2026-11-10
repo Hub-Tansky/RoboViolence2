@@ -359,15 +359,7 @@ void CMaster::ReceivePeersPacket()
 					strcpy(gameInfos.GameInfo.password, gameVar.sv_password != "" ? "*" : ""); // a flag: never the password (Q-S5)
 					sprintf( gameInfos.GameInfo.ip , "%s", bb_getMyIP() );
 					gameInfos.GameInfo.port = (unsigned short)gameVar.sv_port;
-					int nbPlayer = 0;
-					for (int i=0;i<MAX_PLAYER;++i)
-					{
-						if (RunningServer->game->players[i])
-						{
-							nbPlayer++;
-						}
-					}
-					gameInfos.GameInfo.nbPlayer = nbPlayer;
+					gameInfos.GameInfo.nbPlayer = RunningServer->game->countPlayers().total();
 					gameInfos.GameInfo.maxPlayer = gameVar.sv_maxPlayer;
 					gameInfos.GameInfo.flags = 0;
 					gameInfos.GameInfo.gameType = RunningServer->game->gameType;
@@ -547,8 +539,6 @@ void CMaster::sendGameInfo(Server* server)
 			else
 				++it;
 		}
-		int i;
-
 		stBV2row bv2Row;
 
 		strncpy(bv2Row.map, server->game->mapName.s, 16);
@@ -556,15 +546,7 @@ void CMaster::sendGameInfo(Server* server)
 		strcpy(bv2Row.password, gameVar.sv_password != "" ? "*" : ""); // a flag: never the password (Q-S5)
 		snprintf(bv2Row.ip, sizeof(bv2Row.ip), "%s", gameVar.sv_publicAddress.s); // the master trusts it only from a private source
 		bv2Row.port = (unsigned short)gameVar.sv_port;
-		int nbPlayer = 0;
-		for (i=0;i<MAX_PLAYER;++i)
-		{
-			if (server->game->players[i])
-			{
-				nbPlayer++;
-			}
-		}
-		bv2Row.nbPlayer = nbPlayer;
+		bv2Row.nbPlayer = server->game->countPlayers().total(); // bots count too (ROBO-123)
 		bv2Row.maxPlayer = gameVar.sv_maxPlayer;
 		bv2Row.flags = 0;
 		bv2Row.gameType = server->game->gameType;

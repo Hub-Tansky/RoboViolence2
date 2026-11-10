@@ -1,0 +1,33 @@
+# Bot names (ROBO-123): one per line, at most 25 characters (" [bot]" is added). Lines starting with # are skipped.
+Rust Bucket
+Servo
+Tin Can
+Bolt Thrower
+Gear Grinder
+Scrap Heap
+Cog Doctor
+Piston Pete
+Circuit Breaker
+Overclock
+Null Pointer
+Segfault
+Byte Biter
+Diode Dan
+Spark Plug
+Rivet Rita
+Flag Snatcher
+Rocket Rob
+Grenade Gizmo
+Molotov Mech
+Shotgun Sprocket
+Sniper Sensor
+Wall Crawler
+Spawn Sentry
+Pod Patrol
+Blue Unit
+Red Unit
+Chaos Core
+Iron Clad
+Unit 404
+Last Bot Standing
+Robo Rookie

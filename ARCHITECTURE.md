@@ -16,7 +16,7 @@ Robo Violence 2: unofficial fork of BaboViolent 2, a top-down multiplayer shoote
 | Network | TCP, raw structs `memcpy`'d from `game/src/netPacket.h`. The server is authoritative for hits, damage, spawns, projectiles and flags; clients for their own movement. `playerID` (slot) differs from `babonetID` (connection). Protocol `GAME_VERSION_SV/CL` = 22100 (`game/src/Server.h:35`). Join and admin passwords are HMAC proofs over a per-connection challenge; master bans are HMAC-signed packets (`engine/credentials/include/Credentials.h`, ADR 0014, 0038). |
 | Variants | `CONSOLE` = headless server (explicit file list in `game/CMakeLists.txt`). Direct3D, non-Pro and VLD code were removed in Step 1. |
 | Config and secrets | Tracked: `config/*.example.cfg` with empty secrets, `content-seed/*.sql` for generated DBs. Real values stay local; gitleaks, hooks and CI enforce it ([config/README.md](config/README.md)). |
-| Assets | The original assets are removed and blocked by hash (`tools/check-original-assets.py`). Only `content/languages/` (English strings, template, guide) and `content/LaunchScript/` remain; the build generates placeholders (`tools/gen-placeholder-content.py`). |
+| Assets | The original assets are removed and blocked by hash (`tools/check-original-assets.py`). Only `content/languages/` (English strings, template, guide), `content/LaunchScript/` and `content/bots/` (bot names) remain; the build generates placeholders (`tools/gen-placeholder-content.py`). |
 | Encoding | UTF-8 without BOM, LF; `tools/check-encoding.py`. Some comments hold U+FFFD where upstream lost accents. |
 | Supply chain | Dependency graph fed by vcpkg (`dependency-graph.yml`, on push to `main`); Dependabot alerts and security updates on; Dependabot version updates for GitHub Actions (`.github/dependabot.yml`); CodeQL `c-cpp` and `actions` (`codeql.yml`, not required). Dependabot and OSV can't read vcpkg purls; `osv-vcpkg.yml` (weekly) queries OSV by each port's upstream commit (`tools/osv-vcpkg.py`). Bump the vcpkg baseline monthly, or sooner when it reports a port. |
 | Website | roboviolence.com is built and deployed from [Hub-Tansky/rv2-website](https://github.com/Hub-Tansky/rv2-website) ([ADR 0036](docs/decisions/0036-website-in-rv2-website-repository.md)); its tests read the release file names from `build.yml`. |
@@ -60,6 +60,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `LICENSE.txt` | GPLv3 text (code only) |
 | `README.md` | Project overview, fork and asset-removal statement |
 | `CONTEXT.md` | Glossary of code review terms: axis, spec source, blocker, review tier, review record |
+| `CONTEXT-MAP.md` | Lists the glossaries: code review (`CONTEXT.md`) and game (`game/CONTEXT.md`) |
 | `REVIEW.md` | Definition of done: `tools/review.sh` checks, Standards checklist, defined terms, forbidden shortcuts, the two-axis PR review and its record in the PR description |
 | `SECURITY.md` | Security policy: supported versions, private vulnerability reporting, response timeline |
 | `docs/decisions/0007-data-root-pref-dir-config-layers.md` | ADR 0007 |
@@ -94,10 +95,10 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `packaging/docker/Dockerfile` | Server images: one Ubuntu 24.04 build, targets `server` (`bv2dedicated`, launch script as argument, healthcheck on `BV2_HEALTH_PORT`) and `master` (`bv2master`), non-root, pref dir volume (step 11) |
 | `packaging/docker/master-entrypoint.sh` | Master image entrypoint: seeds `master.db` and `web.db` into the volume, then runs `bv2master` |
 | `packaging/docker/Caddyfile` | Caddy site: TLS for the game servers' admin APIs, CTF at `/`, TDM at `/tdm/` (`BV2_ADMIN_HOST`, default localhost) (step 12); `/deployed` serves the staging commit (phase T step 2) |
-| `packaging/docker/compose.example.yml` | Compose example: master, CTF (3333) and TDM (3334) game servers and the admin TLS proxy on one host, secrets from an env file outside the repo; `BV2_IMAGE_TAG` pins both images to a commit |
+| `packaging/docker/compose.example.yml` | Compose example: master, CTF (3333) and TDM (3334) game servers and the admin TLS proxy on one host, secrets from an env file outside the repo; `BV2_IMAGE_TAG` pins both images to a commit; `BV2_SV_BOTS` (default 8) fills each game server with bots |
 | `packaging/windows/bv2.manifest` | Windows manifest for `bv2`, `bv2dedicated` and `bv2master`: PerMonitorV2 DPI, UTF-8 code page, Windows 10/11 |
 | `packaging/windows/bv2.rc.in` | Windows resource script template: embeds `packaging/icons/roboviolence2.ico` |
-| `tests/CMakeLists.txt` | ctest targets: netPacket, config, fileio, credentials, join password, admin login, admin API, babonet large message, babonet ping with the LAN port taken, the two `SqlStatement.h` copies identical, crash fixes, validator, missing music (client builds), app icon files and wiring, the release text in the client binary (client builds), the built-in window icon (Linux client builds), the hicolor install (Linux), the `.deb` build (Linux), dedicated-server smoke, in-process server harness (`bv2server_lib` + fake babonet), packet hygiene, corpus replay, crash-input tests for `crash-*.bin` under ASan (none at present), master server, autotest runner and (with Xvfb on Linux, or on macOS) the client on autotest scripts; with Xvfb on Linux the e2e scenarios (`e2e_*`) and screenshots (`screenshot_*`); on Windows also the non-ASCII install path smoke and the no-VC++-runtime-DLL check |
+| `tests/CMakeLists.txt` | ctest targets: netPacket, config, fileio, credentials, join password, admin login, admin API, babonet large message, babonet ping with the LAN port taken, the two `SqlStatement.h` copies identical, crash fixes, validator, missing music (client builds), app icon files and wiring, the release text in the client binary (client builds), the built-in window icon (Linux client builds), the hicolor install (Linux), the `.deb` build (Linux), dedicated-server smoke, in-process server harness (`bv2server_lib` + fake babonet), bots and the seeded bot match, packet hygiene, corpus replay, crash-input tests for `crash-*.bin` under ASan (none at present), master server, autotest runner and (with Xvfb on Linux, or on macOS) the client on autotest scripts; with Xvfb on Linux the e2e scenarios (`e2e_*`) and screenshots (`screenshot_*`); on Windows also the non-ASCII install path smoke and the no-VC++-runtime-DLL check |
 | `tests/check_windows_deps.py` | Windows: fails if `bv2`, `bv2dedicated` or `bv2master` needs a Visual C++ runtime DLL |
 | `tests/corpus/clsv_admin_request/valid.bin` | Replay corpus: valid `clsv_admin_request` payload (`gen_corpus`) |
 | `tests/corpus/clsv_gameversion_accepted/valid.bin` | Replay corpus: valid `clsv_gameversion_accepted` payload (`gen_corpus`) |
@@ -182,6 +183,8 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/test_lang_check.py` | Step 13: `tools/lang-check.py` fails on changed conversions, unknown keys, repeated keywords, tabs and a stale `en.pot`; warns about missing glyphs |
 | `tests/test_join_password.cpp` | Step 10: a client joins a passworded server only with the HMAC over its own challenge; no password or MD5 of it on the wire |
 | `tests/test_bans.cpp` | Server bans: 0.0.1's binary banlist moves to `banlist.tsv` and still refuses the IP; a ban past `sv_banDays` lets it in and stays in the file (ADR 0034) |
+| `tests/test_bots.cpp` | Bots (ADR 0049): roster rules and names file; on the in-process CTF server `sv_bots 8` joins 4 per team, they spawn, move and shoot, get no packets, make room for a human and come back, stay through a map change to deathmatch, and follow `sv_bots` live |
+| `tests/bot_sim.cpp` | Seeded headless bots-only match (CTF, TDM): JSON summary of states, roles, shots, kills, captures, returns, stuck time; fails with no capture (CTF) or kill (TDM) or a bot still over 10 s (ctests `bot_sim_CTF`, `bot_sim_TDM`) |
 | `tests/test_player_privacy.cpp` | The player info relayed to everyone and the player list a new client gets carry no IP; the server keeps it (ADR 0034) |
 | `tests/test_join_timeout.cpp` | A connection that never answers the join handshake loses its slot after `Server::JOIN_TIMEOUT`; a client past the handshake keeps it while loading |
 | `tests/test_data_download.cpp` | ADR 0040: `firstMismatch` names a wrong or missing file; `replaceDir` keeps the old install when the move fails and replaces it otherwise, at `originalDataDir`, which auto-detect then finds; the browser zip's name is one auto-detect knows; the extract argv and the hash paths agree on where `main/` lands and the zip's folder names the pinned commit; the generated list holds the 324 `Content/main` hashes (ctest `data_download`, client builds) |
@@ -195,7 +198,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/test_validator.cpp` | Steps 8, 9: the step 8 kicks, `sv_antiCheat` levels, and each step 9 rule against a cheat and against normal (lagged) play |
 | `tests/test_master.cpp` | In-process master on port 10207 with a scratch `master.db`: register, list, heartbeat timeout (simulated 61 s), removal by `KILL_SERV`, SQL injection in names, maps, nicks and IPs, the ban list with LIKE filters (Q-S3), the ban secret, the advertised address and a reconnect; runs on Windows since R28 was fixed |
 | `tests/test_netpacket.cpp` | Byte-level layout of the packed wire structs |
-| `tests/test_staging_deploy.sh` | Phase T step 2: staging deploy helpers: main-only run selection, `/status` player count, CTF and TDM player counts and verify, failures per commit, infrastructure stages, env-file mode and readonly repository (ctest `staging_deploy`) |
+| `tests/test_staging_deploy.sh` | Phase T step 2: staging deploy helpers: main-only run selection, `/status` human count (bots ignored, `players` from older servers), CTF and TDM player counts and verify, failures per commit, infrastructure stages, env-file mode and readonly repository (ctest `staging_deploy`) |
 | `tests/test_health_watch.sh` | Container health watcher: which container states are problems, missing services from `GAME_SERVERS`, Docker not answering, two-run confirmation before an alert or recovery, a whole run against a stub `docker`, no check during a deploy but a stale lock ignored (ctest `health_watch`, Unix) |
 | `tests/test_playtest_agent.sh` | Phase T step 1: playtest agent helpers: main-only run selection (fork PR from `main` rejected), artifact digest, attempt limit, env-file mode and no export, launch script map swap (ctest `playtest_agent`, Unix with `jq`) |
 | `tools/check-content-case.py` | Fails when a literal `main/...` path differs from a real file name only by case |
@@ -271,6 +274,12 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 |---|---|
 | `content/LaunchScript/CTF.cfg` | Example dedicated-server launch script (CTF, port 3333; map is a placeholder) |
 | `content/LaunchScript/TDM.cfg` | Dedicated-server launch script (TDM, port 3334; map is a placeholder); the compose example's `tdm` service |
+
+### `content/bots`
+
+| path | purpose |
+|---|---|
+| `content/bots/names.txt` | Bot names, one per line (`main/bots/names.txt` at runtime); the owner edits them |
 
 ### `content/languages`
 
@@ -351,6 +360,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/decisions/0046-main-menu-shows-release-version-from-tag.md` | ADR: the main menu shows the `v*` tag through `BV2_VERSION` and `lang_version`; the protocol number stays separate; owner-approved GUI exception |
 | `docs/decisions/0047-two-axis-review-replaces-thermo-nuclear.md` | ADR: PR review runs isolated Standards and Spec workers from a vendored skill; tier from changed paths; missing spec blocks |
 | `docs/decisions/0048-client-crash-report-in-pref-dir.md` | ADR: the client writes `crash-<start time>.txt` (version, signal, stack as module + offset) to the pref dir; no upload; Sentry and minidumps rejected |
+| `docs/decisions/0049-server-side-bots-for-empty-servers.md` | ADR: bots run in the game server as connectionless player slots sending client messages; `sv_bots` is a target population; bots count in the browser; prod enables them with `BV2_SV_BOTS` |
 | `docs/decisions/README.md` | ADR format and index |
 
 ### `docs/ops`
@@ -555,6 +565,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 |---|---|
 | `game/CMakeLists.txt` | Targets `bv2server_lib` (the CONSOLE file list without `main.cpp`; also linked by the tests), bv2dedicated (`main.cpp` + `bv2server_lib`) and bv2 (client, with the per-OS application icon; on Linux `bv2_app_icon` generates `AppIcon.h`); `bv2_original_hashes` generates `OriginalHashes.h` from `tools/original-assets.sha256` (ADR 0040); `ReleaseVersion.h` holds the release text from `BV2_VERSION` (ADR 0046) |
 | `game/README.md` | Module README: game |
+| `game/CONTEXT.md` | Glossary of game terms: player, human player, bot, target population, bot roster, tactical state, CTF role, brain |
 
 ### `game/src`
 
@@ -562,12 +573,16 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 |---|---|
 | `game/src/AccountManager.cpp` | Account create/login/clan/friend requests over the master connection |
 | `game/src/AccountManager.h` | Account create/login/clan/friend requests over the master connection |
-| `game/src/AdminApi.cpp` | Admin HTTP API: non-blocking listener on the game thread, bearer token, per-source budget, connection cap, refused scene-rebuilding commands, audit log with secrets masked, pruned hourly to 90 days (step 12, ADR 0034) |
+| `game/src/AdminApi.cpp` | Admin HTTP API: non-blocking listener on the game thread, bearer token, per-source budget, connection cap, refused scene-rebuilding commands, audit log with secrets masked, pruned hourly to 90 days (step 12, ADR 0034); `/status` has `players` (humans and bots) and `humans` lines |
 | `game/src/AdminApi.h` | Admin HTTP API (`POST /command`, `GET /status`) behind a TLS proxy, ADR 0015 |
 | `game/src/Autotest.cpp` | `--autotest` script runner: parse, run commands, waits, `expect-console`, `expect-scene`, result report (ADR 0025) |
 | `game/src/Autotest.h` | Autotest runner API; exit codes 0 pass, 1 fail, 2 timeout |
 | `game/src/Button.cpp` | Menu button widget |
 | `game/src/Button.h` | Menu button widget |
+| `game/src/Bot.cpp` | Server-side bots (ADR 0049): the brain ported from `bots.rs` (CTF roles, tactical states, tile BFS navigation, stuck recovery, aim, weapon use) and `Bot::update`, which spawns, moves and fires through the client messages |
+| `game/src/Bot.h` | Bot interface: `bots::Tuning` (every tuning number), `World`, `Brain`, `Action`, `think`, class `Bot` |
+| `game/src/BotRoster.cpp` | Bot roster rules: bots wanted per team for a target population, names file, ` [bot]` names |
+| `game/src/BotRoster.h` | Bot roster interface: `bots::Count`, `Teams`, `wanted`, `loadNames`, `name` |
 | `game/src/CAStar.cpp` | A* path finding grid |
 | `game/src/CAStar.h` | A* path finding grid |
 | `game/src/CAStar_FindPath.cpp` | A* search routine |
@@ -673,7 +688,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/FastDelegate.h` | Third-party fast C++ delegate header |
 | `game/src/FileIO.cpp` | File and memory-buffer reader/writer with fixed-width types |
 | `game/src/FileIO.h` | File and memory-buffer reader/writer with fixed-width types |
-| `game/src/Game.cpp` | Game state: players, projectiles, items, flags, round and mode logic (shared by client and server) |
+| `game/src/Game.cpp` | Game state: players, projectiles, items, flags, round and mode logic (shared by client and server); `countPlayers` (humans and bots) for every player count |
 | `game/src/Game.h` | Game state: players, projectiles, items, flags, round and mode logic (shared by client and server); `forceStats` holds the scoreboard |
 | `game/src/GameProjectile.cpp` | Game: projectile and explosion simulation |
 | `game/src/GameRender.cpp` | Game: world rendering |
@@ -715,7 +730,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/OptionMenu.h` | Options screen |
 | `game/src/Password.h` | Password prompt dialog |
 | `game/src/Player.cpp` | Player entity: movement, weapons, hits, rendering |
-| `game/src/Player.h` | Player entity: movement, weapons, hits, rendering |
+| `game/src/Player.h` | Player entity: movement, weapons, hits, rendering; `isBot` marks a bot slot |
 | `game/src/PlayerUpdate.cpp` | Player: per-tick update (physics, firing, timers) |
 | `game/src/Quit.h` | Quit confirmation dialog |
 | `game/src/ReportGen.cpp` | XML server report generation |
@@ -725,7 +740,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/Scene.cpp` | Top-level scene: main loop, menus, game and editor switching, rendering setup |
 | `game/src/Scene.h` | Top-level scene: main loop, menus, game and editor switching, rendering setup |
 | `game/src/SceneNet.cpp` | Scene: starts and stops client and server, hosting and joining; kick, ban and unban through `Server::bans` (ADR 0034) |
-| `game/src/Server.cpp` | Authoritative server: connections, joins, tick, map and mode control; bans in `Server::bans` (`retention::BanList`, ADR 0034) |
+| `game/src/Server.cpp` | Authoritative server: connections, joins, tick, map and mode control; bans in `Server::bans` (`retention::BanList`, ADR 0034); `updateBots` adds and removes bots to `sv_bots` and runs them, `fromBot` feeds their messages to `recvPacket` (ADR 0049) |
 | `game/src/Server.h` | Authoritative server: connections, joins, tick, map and mode control |
 | `game/src/ServerCTF.cpp` | Server: capture-the-flag rules |
 | `game/src/ServerClose.h` | Dialog shown when the server closes the connection |
@@ -804,7 +819,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tools/staging/cloud-init.yml` | Staging host bootstrap (cloud-init, Ubuntu 24.04): Docker, `deploy.sh`, `rv2-staging-setup` for the env file, cron and first deploy |
 | `tools/staging/README.md` | Staging deploy agent: host needs, install, env file, cron, commands, files |
 | `tools/staging/health-watch.sh` | Container health watcher beside `deploy.sh` (cron, every minute): ntfy when a service of the stack is unhealthy, stopped, restarting or missing for two runs in a row, and when all are well again; skips while a deploy runs |
-| `tools/staging/deploy.sh` | Staging deploy agent (Linux, cron; production runs it by hand with `RV2_DEPLOY_LABEL=prod`): newest successful main `containers` build, pinned to its commit, deployed only with no players on CTF and TDM, rollback, `/deployed` (ADR 0018) |
+| `tools/staging/deploy.sh` | Staging deploy agent (Linux, cron; production runs it by hand with `RV2_DEPLOY_LABEL=prod`): newest successful main `containers` build, pinned to its commit, deployed only with no humans on CTF and TDM (bots don't count), rollback, `/deployed` (ADR 0018) |
 | `tools/review.sh` | Review gate (REVIEW.md section 1) on `merge-base...HEAD`: all checks, scope against the PR's Allowed paths, anti-gaming, `check-review-record.py`; `--full` builds and tests |
 | `tools/setup-dev.ps1` | Activates hooks, checks tools (Windows) |
 | `tools/setup-dev.sh` | Activates hooks, checks tools (Unix); prints the apt line for building and the package names for running a package |
