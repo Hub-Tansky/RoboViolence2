@@ -30,8 +30,8 @@ cClient::cClient()
 	Connection			=	0;
 	UDPenabled			=	false;
 
-	sprintf(LastMessage,"%s","");
-	sprintf(LastError,"%s","");
+	snprintf(LastMessage, sizeof(LastMessage), "%s", "");
+	snprintf(LastError, sizeof(LastError), "%s", "");
 
 	isConnected			=	false;
 	
@@ -64,8 +64,7 @@ cClient::cClient()
 	BytesSent			=	0;
 	BytesReceived		=	0;
 
-	sprintf(Key,RND_KEY);
-
+	snprintf(Key, sizeof(Key), RND_KEY);
 }
 
 //client persu par le server
@@ -91,8 +90,8 @@ cClient::cClient(sockaddr_in *ip, int fileDescriptor,UINT4 netID)
 	isConnected			=	false;
 	Connection			=	0;
 
-	sprintf(LastMessage,"%s","");
-	sprintf(LastError,"%s","");
+	snprintf(LastMessage, sizeof(LastMessage), "%s", "");
+	snprintf(LastError, sizeof(LastError), "%s", "");
 
 	NetID				=	netID;
 
@@ -130,7 +129,7 @@ cClient::cClient(sockaddr_in *ip, int fileDescriptor,UINT4 netID)
 	BytesSent			=	0;
 	BytesReceived		=	0;
 
-	sprintf(Key,RND_KEY);
+	snprintf(Key, sizeof(Key), RND_KEY);
 }
 
 //client qui veut se connecter a un serveur
@@ -141,8 +140,8 @@ cClient::cClient(const char *HostIP, unsigned short port,UINT4 netID)
 	BytesSent			=	0;
 	BytesReceived		=	0;
 
-	sprintf(LastMessage,"%s","");
-	sprintf(LastError,"%s","");
+	snprintf(LastMessage, sizeof(LastMessage), "%s", "");
+	snprintf(LastError, sizeof(LastError), "%s", "");
 
 	isConnected			=	false;
 	Connection			=	0;
@@ -202,13 +201,13 @@ cClient::cClient(const char *HostIP, unsigned short port,UINT4 netID)
 	Next				=	0;
 	Previous			=	0;
 
-	sprintf(Key,RND_KEY);
+	snprintf(Key, sizeof(Key), RND_KEY);
 
-	#ifdef USING_LOG
-		LogFile = fopen( "log.txt" , "a" );
-		fprintf( LogFile , "Going to start connection sequence\n");
-		fclose(LogFile);
-	#endif
+#ifdef USING_LOG
+	LogFile = fopen("log.txt", "a");
+	fprintf(LogFile, "Going to start connection sequence\n");
+	fclose(LogFile);
+#endif
 
 	//on part la thread qui nous connect//////
 	Connection			=	new cConnection(&UDPenabled,&Timeout,&RemoteIP,&FileDescriptor,&UDPfd,LastError,&master,&read_fds,&write_fds,&fdmax,&LastPacketID);
@@ -227,7 +226,7 @@ int cClient::UpdateConnection(float elapsed)
 			delete Connection; 
 			Connection = 0;
 
-			sprintf(LastMessage,"Connection to server succesfull FD : %i UDPfd : %i",FileDescriptor,UDPfd);
+			snprintf(LastMessage, sizeof(LastMessage), "Connection to server succesfull FD : %i UDPfd : %i", FileDescriptor, UDPfd);
 
 			return r;
 		}
@@ -235,7 +234,7 @@ int cClient::UpdateConnection(float elapsed)
 		if(r==1) //une erreur c produite durant la connection
 		{
 			//printf(">>>>>>>>>>>>>>Error while connecting\n");
-			//sprintf(LastMessage,"Error while connecting...aborting, see bb_clientGetLastError()");
+			//snprintf(LastMessage, sizeof(LastMessage), "Error while connecting...aborting, see bb_clientGetLastError()");
 
 			// cConnection already wrote into LastError (same buffer). Never pass the message
 			// as a format string: it can contain conversion specifiers.
@@ -257,16 +256,16 @@ int	cClient::ReceivePacketsFromServer()
 
 	if (select(fdmax+1, &read_fds, NULL, NULL, &Timeout) == -1)
 	{
-		//sprintf(LastError,"Error : Problem select()ing while cClient::ReceivePacketsFromServer() WSA : %i",WSAGetLastError());
-		sprintf(LastError,"Error : client, error while selecting, err no. %d", 
-		#ifdef BV2_PLATFORM_WINDOWS
-		WSAGetLastError()
-		#else
-		errno
-		#endif
+		//snprintf(LastError, sizeof(LastError), "Error : Problem select()ing while cClient::ReceivePacketsFromServer() WSA : %i",WSAGetLastError());
+		snprintf(LastError, sizeof(LastError), "Error : client, error while selecting, err no. %d",
+#ifdef BV2_PLATFORM_WINDOWS
+				 WSAGetLastError()
+#else
+				 errno
+#endif
 		);
-        return 1;
-   	 }
+		return 1;
+	}
 
 	Timeout.tv_sec	=	0;
 	Timeout.tv_usec =	0;
@@ -301,12 +300,12 @@ int	cClient::ReceivePacketsFromServer()
 					{
 						//le server nous a deconnecter
 						Disconnect();
-						sprintf(LastMessage,"Server disconnected");
+						snprintf(LastMessage, sizeof(LastMessage), "Server disconnected");
 						return 2;
 					}
 					else
 					{
-						//sprintf(LastError,"Error : Problem recv()ing from server UDP fd : %i WSA : %i",UDPfd,WSAGetLastError());
+						//snprintf(LastError, sizeof(LastError), "Error : Problem recv()ing from server UDP fd : %i WSA : %i",UDPfd,WSAGetLastError());
 						isReady = false;
 						continue;
 					}
@@ -321,8 +320,8 @@ int	cClient::ReceivePacketsFromServer()
 					//on va rechecker si on est ok
 					if (select(fdmax+1, &read_fds, NULL, NULL, &Timeout) == -1)
 					{
-						//sprintf(LastError,"Error : Problem select()ing while cClient::ReceivePacketsFromServer() WSA : %i",WSAGetLastError());
-						sprintf(LastError,"Error : client, error while selecting (#2)");
+						//snprintf(LastError, sizeof(LastError), "Error : Problem select()ing while cClient::ReceivePacketsFromServer() WSA : %i",WSAGetLastError());
+						snprintf(LastError, sizeof(LastError), "Error : client, error while selecting (#2)");
 						return 1;
 					}
 					Timeout.tv_sec	=	0;
@@ -350,14 +349,14 @@ int	cClient::ReceivePacketsFromServer()
 			{
 				//le server nous a deconnecter
 				Disconnect();
-				sprintf(LastMessage,"Server disconnected");
-                    //delete [] buf;
+				snprintf(LastMessage, sizeof(LastMessage), "Server disconnected");
+				//delete [] buf;
 				return 2;
 			}
 			else
 			{
-				sprintf(LastError,"Error : Problem recv()ing packets from server TCP");
-                    //delete [] buf;
+				snprintf(LastError, sizeof(LastError), "Error : Problem recv()ing packets from server TCP");
+				//delete [] buf;
 				return 1;
 			}	
 		}
@@ -370,8 +369,8 @@ int	cClient::ReceivePacketsFromServer()
 			{
 				//hacking
 				Disconnect();
-				sprintf(LastMessage,"Disconnected for potential hacking");
-                    //delete [] buf;
+				snprintf(LastMessage, sizeof(LastMessage), "Disconnected for potential hacking");
+				//delete [] buf;
 				return 2;
 			}
 		}
@@ -487,7 +486,7 @@ int cClient::SendPacketsToServer()
 
 	if (select(fdmax+1, NULL, &write_fds, NULL, &Timeout) == -1)
 	{
-		sprintf(LastError,"Error : Problem select()ing while SendPacketsToServer()");
+		snprintf(LastError, sizeof(LastError), "Error : Problem select()ing while SendPacketsToServer()");
 		return 1;
 	}
 	
@@ -800,7 +799,7 @@ bool cClient::GetPendingID(char *pid)
 
 	//create md5 hash from current PendingID
 	CMD5 md5(digest);
-	sprintf(digest, "%s",md5.getMD5Digest());
+	snprintf(digest, sizeof(digest), "%s", md5.getMD5Digest());
 	md5.setPlainText(0);
 
 	char newID[5];
@@ -904,7 +903,7 @@ int cClient::Send(UINT4 &nbByte)
 				if(iSent <= 0)
 				{
 					printf("Problem sending packets in cClient::Send() \n");
-					//sprintf(LastError,"Problem sending packets in cClient::Send()");
+					//snprintf(LastError, sizeof(LastError), "Problem sending packets in cClient::Send()");
 					delete [] buf;
 					return 1;
 				}
@@ -942,7 +941,7 @@ int cClient::Send(UINT4 &nbByte)
 			if(iSent <= 0)
 			{
 				printf("Problem sending packets in cClient::Send() \n");
-				//sprintf(LastError,"Problem sending packets in cClient::Send()");
+				//snprintf(LastError, sizeof(LastError), "Problem sending packets in cClient::Send()");
 				delete [] buf;
 				return 1;
 			}
@@ -968,7 +967,7 @@ void cClient::GetLastPacketID(char *pid)
 
 	//create md5 hash from current PendingID
 	CMD5 md5(digest);
-	sprintf(digest, "%s",md5.getMD5Digest());
+	snprintf(digest, sizeof(digest), "%s", md5.getMD5Digest());
 	md5.setPlainText(0);
 
 	char newID[5];
@@ -979,8 +978,7 @@ void cClient::GetLastPacketID(char *pid)
 	memcpy( &(newID[3]) , digest + 7 , sizeof (char) );
 	newID[4] = '\0';
 
-	sprintf(pid , "%s", newID);
-
+	snprintf(pid, 5, "%s", newID);
 }
 
 //le serveur veux envoyer a ce client
@@ -1055,7 +1053,7 @@ int cClient::SendUDP(int UDPFD,UINT4 &nbByte)
 
 		if(sent < 0)
 		{
-			//sprintf(LastError,"Error sending UDP packets to Client WSA : %i",WSAGetLastError());
+			//snprintf(LastError, sizeof(LastError), "Error sending UDP packets to Client WSA : %i",WSAGetLastError());
 			return 1;
 		}
 		
