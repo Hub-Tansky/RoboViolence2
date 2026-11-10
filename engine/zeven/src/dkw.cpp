@@ -33,6 +33,7 @@ namespace
 	CMainLoopInterface * g_mainLoop = 0;
 	bool g_done = false;
 	bool g_hasFocus = true;
+	bool g_visible = true; // not minimized, hidden or occluded
 	bool g_wantCapture = false;
 
 	int g_pixelW = 640;
@@ -250,6 +251,18 @@ namespace
 		case SDL_EVENT_WINDOW_RESIZED:
 		case SDL_EVENT_WINDOW_DISPLAY_SCALE_CHANGED:
 			refreshPixelSize();
+			break;
+
+		case SDL_EVENT_WINDOW_MINIMIZED:
+		case SDL_EVENT_WINDOW_HIDDEN:
+		case SDL_EVENT_WINDOW_OCCLUDED:
+			g_visible = false;
+			break;
+
+		case SDL_EVENT_WINDOW_RESTORED:
+		case SDL_EVENT_WINDOW_SHOWN:
+		case SDL_EVENT_WINDOW_EXPOSED:
+			g_visible = true;
 			break;
 
 		case SDL_EVENT_WINDOW_FOCUS_GAINED:
@@ -471,6 +484,24 @@ void dkwClipMouse(bool abEnabled)
 {
 	g_wantCapture = abEnabled;
 	applyMouseCapture();
+}
+
+bool dkwIsVisible()
+{
+	return g_visible;
+}
+
+bool dkwHasFocus()
+{
+	return g_hasFocus;
+}
+
+void dkwAllowScreenSaver(bool allowed)
+{
+	if (allowed)
+		SDL_EnableScreenSaver();
+	else
+		SDL_DisableScreenSaver();
 }
 
 void dkwShowMessage(const char* title, const char* text)

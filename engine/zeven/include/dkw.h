@@ -75,6 +75,15 @@ void			dkwUpdate();
 /// Captures the mouse (relative mode: the pointer is hidden and cannot leave the window) or releases it.
 void			dkwClipMouse( bool abEnabled = true );
 
+/// False while the window is minimized, hidden or fully covered: nothing drawn would be seen.
+bool dkwIsVisible();
+
+/// True while the window has keyboard focus.
+bool dkwHasFocus();
+
+/// Lets the display sleep and the screen saver start (true), or keeps them off (false, SDL's default).
+void dkwAllowScreenSaver(bool allowed);
+
 /// Shows a modal error box (replaces MessageBox).
 void			dkwShowMessage(const char* title, const char* text);
 
