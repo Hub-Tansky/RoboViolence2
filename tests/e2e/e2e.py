@@ -71,7 +71,7 @@ class Run:
         wait(lambda: any(s in self.server_text() for s in ("Server Created on port 3333", "map not found")), 30,
              "server created")
         check("map not found" not in self.server_text(), "server found its map")
-        wait(lambda: self.players() == 0, 10, "admin API answering", API_INTERVAL)
+        wait(lambda: self.players() is not None, 10, "admin API answering", API_INTERVAL)  # bots count as players
 
     @staticmethod
     def collect(stream, lines):
