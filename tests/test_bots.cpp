@@ -115,17 +115,19 @@ int main(int, char** argv)
 			botNames.push_back(name);
 		}
 
-	// They spawn after the respawn delay and move, shoot, and are never kicked by the join timeout or the anti-cheat
+	// They spawn after the respawn delay and move, shoot, and are never kicked by the join timeout or the anti-cheat.
+	// A bot that spawned may already be dead again (the shipped CTF script plays Pro damage, ADR 0052)
 	CVector3f start[MAX_PLAYER];
 	harness::tick(30 * 7);
-	int alive = 0;
+	int alive = 0, spawned = 0;
 	for (int i = 0; i < MAX_PLAYER; ++i)
 		if (Player* p = game().players[i])
 		{
 			alive += p->status == PLAYER_STATUS_ALIVE;
+			spawned += p->status == PLAYER_STATUS_ALIVE || p->deaths > 0;
 			start[i] = p->currentCF.position;
 		}
-	CHECK(alive == 8);
+	CHECK(spawned == 8);
 	harness::tick(30 * 30);
 	int moved = 0;
 	unsigned shots = 0;
