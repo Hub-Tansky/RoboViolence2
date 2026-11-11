@@ -15,6 +15,9 @@
 #	include <sys/mman.h>
 #	include <unistd.h>
 #endif
+#ifdef __APPLE__
+#	include <mach-o/dyld.h>
+#endif
 
 namespace
 {
@@ -127,6 +130,11 @@ namespace crashreport
 		std::string path = (std::filesystem::path(dir) / ("crash-" + std::string(stamp) + ".txt")).string();
 		snprintf(g_path, sizeof(g_path), "%s", path.c_str());
 		snprintf(g_header, sizeof(g_header), "Robo Violence 2 %s crash report, started %s\n", version, stamp);
+#ifdef __APPLE__
+		// ASLR slides the image: atos -l <this address> resolves the frames' absolute addresses (ROBO-188)
+		size_t used = strlen(g_header);
+		snprintf(g_header + used, sizeof(g_header) - used, "load address %p\n", (const void*)_dyld_get_image_header(0));
+#endif
 #ifdef BV2_PLATFORM_WINDOWS
 		g_previous = SetUnhandledExceptionFilter(onException);
 #else

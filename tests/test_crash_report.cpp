@@ -100,6 +100,9 @@ int main(int argc, char* argv[])
 	check(report.find("signal SIGSEGV") != std::string::npos, "report names the signal");
 	check(report.find("test_crash_report") != std::string::npos, "report has a stack frame");
 #endif
+#ifdef __APPLE__
+	check(report.find("\nload address 0x") != std::string::npos, "report has the main image's load address");
+#endif
 	if (failures)
 		std::printf("report was:\n%s\n", report.c_str());
 	else

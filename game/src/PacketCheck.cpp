@@ -56,13 +56,13 @@ namespace packet
 		enum Kind
 		{
 			Slot,             // 0..31
-			SlotOrNone,       // -1..31 (shot that hit a wall, flame that sticks to nobody)
+			SlotOrNone, // -1..31 (shot that hit a wall, flame that sticks to nobody, grenade or admin nuke explosion)
 			Team,             // spectator..auto-assign
 			Weapon,           // knownWeapon
 			ShotWeapon,       // knownWeapon or the minibot's gun (100)
 			ProjectileWeapon, // knownWeapon, -1 (life pack, dropped weapon or grenade) or -2 (flame), see ServerRecv.cpp
 			Flag,             // 0..1
-			FlagState,        // -2 at base, -1 dropped, else the carrier's slot
+			FlagState, // -3 admin score (Console.cpp teamScore commands, -3 then -2), -2 at base, -1 dropped, else the carrier's slot
 			ChunkSize,        // uint16 0..250
 			Index16,          // int16 >= 0
 		};
@@ -93,45 +93,34 @@ namespace packet
 			{NET_SVCL_NEWPLAYER, sizeof(net_svcl_newplayer), {F(net_svcl_newplayer, newPlayerID, Slot)}, {}},
 			{NET_SVCL_GAMEVERSION, sizeof(net_svcl_gameversion), {}, {}},
 			{NET_SVCL_JOIN_CHALLENGE, sizeof(net_svcl_join_challenge), {}, {}},
-			{NET_CLSV_SVCL_PLAYER_INFO, sizeof(net_clsv_svcl_player_info), {F(net_clsv_svcl_player_info, playerID, Slot)},
-				{END(net_clsv_svcl_player_info, playerIP), END(net_clsv_svcl_player_info, playerName), END(net_clsv_svcl_player_info, username)}},
+			{NET_CLSV_SVCL_PLAYER_INFO, sizeof(net_clsv_svcl_player_info), {F(net_clsv_svcl_player_info, playerID, Slot)}, {END(net_clsv_svcl_player_info, playerIP), END(net_clsv_svcl_player_info, playerName), END(net_clsv_svcl_player_info, username)}},
 			{NET_CLSV_SVCL_CHAT, sizeof(net_clsv_svcl_chat), {}, {END(net_clsv_svcl_chat, message)}},
 			{NET_SVCL_PLAYER_DISCONNECT, sizeof(net_svcl_player_disconnect), {F(net_svcl_player_disconnect, playerID, Slot)}, {}},
 			{NET_SVCL_SERVER_INFO, sizeof(net_svcl_server_info), {}, {END(net_svcl_server_info, mapName)}},
-			{NET_SVCL_PLAYER_ENUM_STATE, sizeof(net_svcl_player_enum_state),
-				{F(net_svcl_player_enum_state, playerID, Slot), F(net_svcl_player_enum_state, teamID, Team), F(net_svcl_player_enum_state, weaponID, Weapon)},
-				{END(net_svcl_player_enum_state, playerName), END(net_svcl_player_enum_state, playerIP), END(net_svcl_player_enum_state, skin)}},
-			{NET_CLSV_SVCL_TEAM_REQUEST, sizeof(net_clsv_svcl_team_request),
-				{F(net_clsv_svcl_team_request, playerID, Slot), F(net_clsv_svcl_team_request, teamRequested, Team)}, {}},
+			{NET_SVCL_PLAYER_ENUM_STATE, sizeof(net_svcl_player_enum_state), {F(net_svcl_player_enum_state, playerID, Slot), F(net_svcl_player_enum_state, teamID, Team), F(net_svcl_player_enum_state, weaponID, Weapon)}, {END(net_svcl_player_enum_state, playerName), END(net_svcl_player_enum_state, playerIP), END(net_svcl_player_enum_state, skin)}},
+			{NET_CLSV_SVCL_TEAM_REQUEST, sizeof(net_clsv_svcl_team_request), {F(net_clsv_svcl_team_request, playerID, Slot), F(net_clsv_svcl_team_request, teamRequested, Team)}, {}},
 			{NET_SVCL_PING, sizeof(net_svcl_ping), {F(net_svcl_ping, playerID, Slot)}, {}},
 			{NET_SVCL_PLAYER_PING, sizeof(net_svcl_player_ping), {F(net_svcl_player_ping, playerID, Slot)}, {}},
-			{NET_SVCL_PLAYER_SPAWN, sizeof(net_svcl_player_spawn),
-				{F(net_svcl_player_spawn, playerID, Slot), F(net_svcl_player_spawn, weaponID, Weapon), F(net_svcl_player_spawn, meleeID, Weapon)}, {END(net_svcl_player_spawn, skin)}},
+			{NET_SVCL_PLAYER_SPAWN, sizeof(net_svcl_player_spawn), {F(net_svcl_player_spawn, playerID, Slot), F(net_svcl_player_spawn, weaponID, Weapon), F(net_svcl_player_spawn, meleeID, Weapon)}, {END(net_svcl_player_spawn, skin)}},
 			{NET_CLSV_SVCL_PLAYER_COORD_FRAME, sizeof(net_clsv_svcl_player_coord_frame), {F(net_clsv_svcl_player_coord_frame, playerID, Slot)}, {}},
 			{NET_SVCL_MINIBOT_COORD_FRAME, sizeof(net_svcl_minibot_coord_frame), {F(net_svcl_minibot_coord_frame, playerID, Slot)}, {}},
 			{NET_SVCL_CREATE_MINIBOT, sizeof(net_svcl_create_minibot), {F(net_svcl_create_minibot, playerID, Slot)}, {}},
 			{NET_SVCL_PROJECTILE_COORD_FRAME, sizeof(net_svcl_projectile_coord_frame), {}, {}},
 			{NET_SVCL_SV_CHANGE, sizeof(net_svcl_sv_change), {}, {END(net_svcl_sv_change, svChange)}},
 			{NET_CLSV_SVCL_PLAYER_CHANGE_NAME, sizeof(net_clsv_svcl_player_change_name), {F(net_clsv_svcl_player_change_name, playerID, Slot)}, {END(net_clsv_svcl_player_change_name, playerName)}},
-			{NET_SVCL_PLAYER_SHOOT, sizeof(net_svcl_player_shoot),
-				{F(net_svcl_player_shoot, playerID, Slot), F(net_svcl_player_shoot, hitPlayerID, SlotOrNone), F(net_svcl_player_shoot, weaponID, ShotWeapon)}, {}},
-			{NET_CLSV_SVCL_PLAYER_PROJECTILE, sizeof(net_clsv_svcl_player_projectile),
-				{F(net_clsv_svcl_player_projectile, playerID, Slot), F(net_clsv_svcl_player_projectile, weaponID, ProjectileWeapon)}, {}},
+			{NET_SVCL_PLAYER_SHOOT, sizeof(net_svcl_player_shoot), {F(net_svcl_player_shoot, playerID, Slot), F(net_svcl_player_shoot, hitPlayerID, SlotOrNone), F(net_svcl_player_shoot, weaponID, ShotWeapon)}, {}},
+			{NET_CLSV_SVCL_PLAYER_PROJECTILE, sizeof(net_clsv_svcl_player_projectile), {F(net_clsv_svcl_player_projectile, playerID, Slot), F(net_clsv_svcl_player_projectile, weaponID, ProjectileWeapon)}, {}},
 			{NET_SVCL_DELETE_PROJECTILE, sizeof(net_svcl_delete_projectile), {}, {}},
-			{NET_SVCL_FLAME_STICK_TO_PLAYER, sizeof(net_svcl_flame_stick_to_player),
-				{F(net_svcl_flame_stick_to_player, projectileID, Index16), F(net_svcl_flame_stick_to_player, playerID, SlotOrNone)}, {}},
-			{NET_SVCL_EXPLOSION, sizeof(net_svcl_explosion), {F(net_svcl_explosion, playerID, Slot)}, {}},
-			{NET_SVCL_PLAYER_HIT, sizeof(net_svcl_player_hit),
-				{F(net_svcl_player_hit, playerID, Slot), F(net_svcl_player_hit, fromID, Slot), F(net_svcl_player_hit, weaponID, Weapon)}, {}},
+			{NET_SVCL_FLAME_STICK_TO_PLAYER, sizeof(net_svcl_flame_stick_to_player), {F(net_svcl_flame_stick_to_player, projectileID, Index16), F(net_svcl_flame_stick_to_player, playerID, SlotOrNone)}, {}},
+			{NET_SVCL_EXPLOSION, sizeof(net_svcl_explosion), {F(net_svcl_explosion, playerID, SlotOrNone)}, {}},
+			{NET_SVCL_PLAYER_HIT, sizeof(net_svcl_player_hit), {F(net_svcl_player_hit, playerID, Slot), F(net_svcl_player_hit, fromID, Slot), F(net_svcl_player_hit, weaponID, Weapon)}, {}},
 			{NET_SVCL_AUTOBALANCE, 0, {}, {}},
 			{NET_SVCL_PLAY_SOUND, sizeof(net_svcl_play_sound), {}, {}},
 			{NET_SVCL_CONSOLE, -1, {}, {}},
 			{NET_SVCL_SYNCHRONIZE_TIMER, sizeof(net_svcl_synchronize_timer), {}, {}},
-			{NET_SVCL_CHANGE_FLAG_STATE, sizeof(net_svcl_change_flag_state),
-				{F(net_svcl_change_flag_state, flagID, Flag), F(net_svcl_change_flag_state, newFlagState, FlagState), F(net_svcl_change_flag_state, playerID, Slot)}, {}},
+			{NET_SVCL_CHANGE_FLAG_STATE, sizeof(net_svcl_change_flag_state), {F(net_svcl_change_flag_state, flagID, Flag), F(net_svcl_change_flag_state, newFlagState, FlagState), F(net_svcl_change_flag_state, playerID, Slot)}, {}},
 			{NET_SVCL_DROP_FLAG, sizeof(net_svcl_drop_flag), {F(net_svcl_drop_flag, flagID, Flag)}, {}},
-			{NET_SVCL_FLAG_ENUM, sizeof(net_svcl_flag_enum),
-				{Field{(int)offsetof(net_svcl_flag_enum, flagState), FlagState}, Field{(int)offsetof(net_svcl_flag_enum, flagState) + 1, FlagState}}, {}},
+			{NET_SVCL_FLAG_ENUM, sizeof(net_svcl_flag_enum), {Field{(int)offsetof(net_svcl_flag_enum, flagState), FlagState}, Field{(int)offsetof(net_svcl_flag_enum, flagState) + 1, FlagState}}, {}},
 			{NET_SVCL_GAME_STATE, sizeof(net_svcl_round_state), {}, {}},
 			{NET_SVCL_CHANGE_GAME_TYPE, sizeof(net_svcl_change_game_type), {}, {}},
 			{NET_SVCL_MAP_CHANGE, sizeof(net_svcl_map_change), {}, {END(net_svcl_map_change, mapName)}},
@@ -161,7 +150,8 @@ namespace packet
 			case ShotWeapon: return knownWeapon(v) || v == WEAPON_MINIBOT_WEAPON;
 			case ProjectileWeapon: return knownWeapon(v) || v == -1 || v == -2;
 			case Flag: return v == 0 || v == 1;
-			case FlagState: return v >= -2 && v < MAX_PLAYER;
+			case FlagState:
+				return v >= -3 && v < MAX_PLAYER;
 			default: return false;
 			}
 		}

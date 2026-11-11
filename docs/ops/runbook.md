@@ -125,6 +125,16 @@ Backups: a nightly job copies `/etc/rv2-prod.env` and every `roboviolence2_*` vo
 
 Health: install `tools/staging/health-watch.sh` from the same commit as `deploy.sh`, into the same folder (it reads `deploy.sh` beside it), with a cron line for the deploy user: `* * * * * RV2_DEPLOY_LABEL=prod /opt/rv2-prod/health-watch.sh >>/var/lib/rv2-prod/health.log 2>&1`. It sends `RV2 prod unhealthy` with the bad or missing services within about two minutes, and `RV2 prod healthy again` after. An outside monitor still checks the public ports.
 
+## Crash reports
+
+A player's `crash-*.txt` (ADR 0048) names its version on the first line. Unzip `roboviolence2-<preset>-<tag>-symbols.zip` for that tag and platform from the private vault rv2-docs, `30-dev/crash-debug/<tag>/` (ADR 0051). The tag is `v` plus that version. Frames from a `0.0.0-dev` build have no stored symbols.
+
+| Platform | Frame looks like | Resolve |
+|---|---|---|
+| Linux | `bv2(+0x1a2b3) [0x...]` | `addr2line -Cfie .build-id/<xx>/<rest>.debug 0x1a2b3`; the build ID is `readelf -n bv2` of the packaged binary, or take the only `.debug` whose name matches it |
+| macOS | `bv2  0x0000000104f2c0e8 ...`, plus `load address 0x...` on line 2 | `atos -o bv2.dSYM/Contents/Resources/DWARF/bv2 -arch arm64 -l <load address> 0x0000000104f2c0e8` |
+| Windows | `bv2.exe+0x1234` | `cdb -z bv2.exe -y <unzipped dir> -c "ln bv2+0x1234; q"` with the packaged `bv2.exe` (WinDbg: same `ln`) |
+
 ## Without compose
 
 `docker run` needs `--init` (stop signals) and `-it` (the console): `docker run -d -it --init -p 3333:3333 -p 3333:3333/udp -v bv2-server:/var/lib/bv2 ghcr.io/hub-tansky/roboviolence2-server`.
