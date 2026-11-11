@@ -12,7 +12,7 @@
 extern Scene* scene;
 
 // The team the server last sent client `id` for its own slot after `from` in sent() and after that client's
-// SERVER_INFO (the client drops game packets before it); -2 when none
+// SERVER_INFO (the client drops game packets before it); -2 when none, -3 when the client got no SERVER_INFO
 static int ownTeamSent(UINT4 id, int slot, size_t from)
 {
 	int team = -2;
@@ -23,13 +23,13 @@ static int ownTeamSent(UINT4 id, int slot, size_t from)
 		if (p.destination != (INT4)id)
 			continue;
 		welcomed |= p.typeID == NET_SVCL_SERVER_INFO;
-		if (p.typeID != NET_CLSV_SVCL_TEAM_REQUEST || !welcomed)
+		if (p.typeID != NET_CLSV_SVCL_TEAM_REQUEST || !welcomed || p.data.size() < sizeof(net_clsv_svcl_team_request))
 			continue;
 		const net_clsv_svcl_team_request* r = (const net_clsv_svcl_team_request*)p.data.data();
 		if (r->playerID == slot)
 			team = r->teamRequested;
 	}
-	return team;
+	return welcomed ? team : -3;
 }
 
 static void acceptVersion(UINT4 id)
