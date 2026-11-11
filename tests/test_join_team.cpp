@@ -8,7 +8,6 @@
 #include "Server.h"
 
 #include <cstdio>
-#include <cstring>
 
 extern Scene* scene;
 
@@ -49,7 +48,7 @@ int main(int, char** argv)
 	// "joined the game" on the info. An admin moves the player right then.
 	UINT4 a = harness::connect();
 	net_clsv_svcl_player_info info = {};
-	strcpy(info.playerName, "Mover");
+	std::snprintf(info.playerName, sizeof(info.playerName), "%s", "Mover");
 	harness::deliver(a, NET_CLSV_SVCL_PLAYER_INFO, info);
 	harness::tick();
 	int slot = harness::slotOf(a);
@@ -65,7 +64,7 @@ int main(int, char** argv)
 	// A joiner still in spectator gets no team message: nothing changed for it
 	UINT4 b = harness::connect();
 	net_clsv_svcl_player_info infoB = {};
-	strcpy(infoB.playerName, "Watcher");
+	std::snprintf(infoB.playerName, sizeof(infoB.playerName), "%s", "Watcher");
 	harness::deliver(b, NET_CLSV_SVCL_PLAYER_INFO, infoB);
 	harness::tick();
 	before = harness::sent().size();

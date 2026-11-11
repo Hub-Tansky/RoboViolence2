@@ -116,7 +116,7 @@ int main(int, char** argv)
 		}
 
 	// They spawn after the respawn delay and move, shoot, and are never kicked by the join timeout or the anti-cheat.
-	// A bot that spawned may already be dead again (the shipped CTF script plays Pro damage, ADR 0052)
+	// A bot that spawned may already be dead again (the shipped CTF script plays Pro damage, ADR 0052).
 	CVector3f start[MAX_PLAYER];
 	harness::tick(30 * 7);
 	int alive = 0, spawned = 0;
