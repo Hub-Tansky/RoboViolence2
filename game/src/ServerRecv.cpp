@@ -437,12 +437,13 @@ void Server::recvPacket(char * wire, int size, int typeID, unsigned long bbnetID
 
 				// A team change made before this handshake (admin `move`, autobalance) was broadcast while the
 				// client still dropped game packets, and the enum above skips the joiner, so resend its own team.
-				if (game->players[gameVersionAccepted.playerID]->teamID != PLAYER_TEAM_SPECTATOR)
+				Player* joiner = game->players[gameVersionAccepted.playerID];
+				if (joiner->teamID != PLAYER_TEAM_SPECTATOR)
 				{
 					net_clsv_svcl_team_request ownTeam;
 					ownTeam.playerID = (int8_t)gameVersionAccepted.playerID;
-					ownTeam.teamRequested = game->players[gameVersionAccepted.playerID]->teamID;
-					bb_serverSend((char*)&ownTeam, sizeof(net_clsv_svcl_team_request), NET_CLSV_SVCL_TEAM_REQUEST, game->players[gameVersionAccepted.playerID]->babonetID);
+					ownTeam.teamRequested = joiner->teamID;
+					bb_serverSend((char*)&ownTeam, sizeof(net_clsv_svcl_team_request), NET_CLSV_SVCL_TEAM_REQUEST, joiner->babonetID);
 				}
 			}
 			break;

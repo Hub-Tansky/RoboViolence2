@@ -10,7 +10,7 @@
 #include <cstdio>
 #include <cstring>
 
-extern Scene * scene;
+extern Scene* scene;
 
 // The team the server last sent client `id` for its own slot after `from` in sent() and after that client's
 // SERVER_INFO (the client drops game packets before it); -2 when none
@@ -20,12 +20,15 @@ static int ownTeamSent(UINT4 id, int slot, size_t from)
 	bool welcomed = false;
 	for (size_t i = from; i < harness::sent().size(); ++i)
 	{
-		const harness::SentPacket & p = harness::sent()[i];
-		if (p.destination != (INT4)id) continue;
+		const harness::SentPacket& p = harness::sent()[i];
+		if (p.destination != (INT4)id)
+			continue;
 		welcomed |= p.typeID == NET_SVCL_SERVER_INFO;
-		if (p.typeID != NET_CLSV_SVCL_TEAM_REQUEST || !welcomed) continue;
-		const net_clsv_svcl_team_request * r = (const net_clsv_svcl_team_request *)p.data.data();
-		if (r->playerID == slot) team = r->teamRequested;
+		if (p.typeID != NET_CLSV_SVCL_TEAM_REQUEST || !welcomed)
+			continue;
+		const net_clsv_svcl_team_request* r = (const net_clsv_svcl_team_request*)p.data.data();
+		if (r->playerID == slot)
+			team = r->teamRequested;
 	}
 	return team;
 }
@@ -37,9 +40,10 @@ static void acceptVersion(UINT4 id)
 	harness::tick();
 }
 
-int main(int, char ** argv)
+int main(int, char** argv)
 {
-	if (!harness::start(argv[0])) return 1;
+	if (!harness::start(argv[0]))
+		return 1;
 
 	// The real client sends its player info before it accepts the version (ClientRecv.cpp), and the server logs
 	// "joined the game" on the info. An admin moves the player right then.
@@ -69,6 +73,7 @@ int main(int, char ** argv)
 	CHECK(harness::slotOf(b) >= 0 && ownTeamSent(b, harness::slotOf(b), before) == -2);
 
 	harness::stop();
-	if (harness::failures() == 0) std::printf("ok: join team\n");
+	if (harness::failures() == 0)
+		std::printf("ok: join team\n");
 	return harness::failures() ? 1 : 0;
 }
