@@ -1392,6 +1392,7 @@ void Server::nukeAll()
 			explosion.normal[1] = 0;
 			explosion.normal[2] = 1;
 			explosion.radius = gameVar.sv_nukeRadius;
+			explosion.playerID = -1; // no owner: the client must not take it for the player's own minibot nuke
 			bb_serverSend((char*)&explosion, sizeof(net_svcl_explosion), NET_SVCL_EXPLOSION, 0);
 			game->radiusHit(game->players[i]->currentCF.position, gameVar.sv_nukeRadius, game->players[i]->playerID, WEAPON_NUCLEAR);
 		}
@@ -1554,6 +1555,7 @@ void Server::nukePlayer(int i)
 		explosion.normal[1] = 0;
 		explosion.normal[2] = 1;
 		explosion.radius = gameVar.sv_nukeRadius;
+		explosion.playerID = -1; // no owner: the client must not take it for the player's own minibot nuke
 		bb_serverSend((char*)&explosion, sizeof(net_svcl_explosion), NET_SVCL_EXPLOSION, 0);
 		game->radiusHit(game->players[i]->currentCF.position, gameVar.sv_nukeRadius, game->players[i]->playerID, WEAPON_NUCLEAR);
 	}

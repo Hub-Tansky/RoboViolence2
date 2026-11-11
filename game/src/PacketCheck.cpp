@@ -56,13 +56,13 @@ namespace packet
 		enum Kind
 		{
 			Slot,             // 0..31
-			SlotOrNone,       // -1..31 (shot that hit a wall, flame that sticks to nobody)
+			SlotOrNone, // -1..31 (shot that hit a wall, flame that sticks to nobody, grenade or admin nuke explosion)
 			Team,             // spectator..auto-assign
 			Weapon,           // knownWeapon
 			ShotWeapon,       // knownWeapon or the minibot's gun (100)
 			ProjectileWeapon, // knownWeapon, -1 (life pack, dropped weapon or grenade) or -2 (flame), see ServerRecv.cpp
 			Flag,             // 0..1
-			FlagState,        // -2 at base, -1 dropped, else the carrier's slot
+			FlagState, // -3 admin score (Console.cpp teamScore commands, -3 then -2), -2 at base, -1 dropped, else the carrier's slot
 			ChunkSize,        // uint16 0..250
 			Index16,          // int16 >= 0
 		};
@@ -112,7 +112,7 @@ namespace packet
 			{NET_CLSV_SVCL_PLAYER_PROJECTILE, sizeof(net_clsv_svcl_player_projectile), {F(net_clsv_svcl_player_projectile, playerID, Slot), F(net_clsv_svcl_player_projectile, weaponID, ProjectileWeapon)}, {}},
 			{NET_SVCL_DELETE_PROJECTILE, sizeof(net_svcl_delete_projectile), {}, {}},
 			{NET_SVCL_FLAME_STICK_TO_PLAYER, sizeof(net_svcl_flame_stick_to_player), {F(net_svcl_flame_stick_to_player, projectileID, Index16), F(net_svcl_flame_stick_to_player, playerID, SlotOrNone)}, {}},
-			{NET_SVCL_EXPLOSION, sizeof(net_svcl_explosion), {F(net_svcl_explosion, playerID, Slot)}, {}},
+			{NET_SVCL_EXPLOSION, sizeof(net_svcl_explosion), {F(net_svcl_explosion, playerID, SlotOrNone)}, {}},
 			{NET_SVCL_PLAYER_HIT, sizeof(net_svcl_player_hit), {F(net_svcl_player_hit, playerID, Slot), F(net_svcl_player_hit, fromID, Slot), F(net_svcl_player_hit, weaponID, Weapon)}, {}},
 			{NET_SVCL_AUTOBALANCE, 0, {}, {}},
 			{NET_SVCL_PLAY_SOUND, sizeof(net_svcl_play_sound), {}, {}},
@@ -150,7 +150,8 @@ namespace packet
 			case ShotWeapon: return knownWeapon(v) || v == WEAPON_MINIBOT_WEAPON;
 			case ProjectileWeapon: return knownWeapon(v) || v == -1 || v == -2;
 			case Flag: return v == 0 || v == 1;
-			case FlagState: return v >= -2 && v < MAX_PLAYER;
+			case FlagState:
+				return v >= -3 && v < MAX_PLAYER;
 			default: return false;
 			}
 		}
