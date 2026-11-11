@@ -135,7 +135,7 @@ public:
 	void renderSelection() const;
 
 	// Open exisiting map
-	void Open(CString mapName);
+	bool Open(CString mapName); // false, keeping the current map, when the file is not a valid map; a missing file opens a blank map
 
 	// Save the map (moved here from Map::~Map)
 	bool Save(CString mapName); // false when the name is not bv2::isMapName or the file cannot be written

@@ -24,9 +24,10 @@
 #include "FileIO.h"
 #include "Game.h"
 #include <algorithm>
-#include "EditorTools.h"
-#include "EditorDialogs.h"
-#include "Scene.h"
+#	include <memory>
+#	include "EditorTools.h"
+#	include "EditorDialogs.h"
+#	include "Scene.h"
 
 extern Scene * scene;
 
@@ -638,19 +639,18 @@ void Editor2::renderSelection() const
 	dkglPopOrtho();
 }
 
-void Editor2::Open(CString mapName)
+bool Editor2::Open(CString mapName)
 {
-	FileIO test(mapName, "rb");
-	if(test.isValid())
+	std::unique_ptr<Map> opened(new Map(mapName, 0, editorRoot->font, true));
+	if (!opened->isValid) // corrupt, unknown version or insane size: Map's early returns leave it unrenderable (ROBO-163)
 	{
-		test.Close();
-		delete map;
-		map = new Map(mapName, 0, editorRoot->font, true);
+		console->add("\x4> Error opening map - invalid file.");
+		return false;
 	}
-	else
-	{
-		console->add("\x4> Error opening map - no such file.");
-	}
+	delete map;
+	map = opened.release();
+	isDirty = false;
+	return true;
 }
 
 bool Editor2::Save(CString mapName)
