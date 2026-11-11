@@ -242,7 +242,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `.github/workflows/secret-scan.yml` | CI: gitleaks over commits after the fork point and original-asset check |
 | `.github/workflows/build.yml` | CI on PRs, pushes to `main` and `v*` tags (ADR 0041): Debug and Release build and ctest, with the `v*` tag as `BV2_VERSION` and a step checking the Release `bv2` holds it (ADR 0046), Release package on Windows, macOS, Linux (`roboviolence2-<preset>` artifacts); `package-check` of the Linux package in a clean `ubuntu:24.04`; `deb-check`: the `.deb` installs with apt, a non-root user starts the server and removal leaves nothing, in clean `ubuntu:24.04` and `debian:13`; `package-smoke` (not required): Windows and macOS packages start server, master and client (Mesa llvmpipe on Windows); ASan smoke job with client under xvfb; Linux jobs upload the actual and diff PNGs of failed `screenshot_*` tests (`screenshots-<preset>`); `release` job: every run checks the release files are there; a `v*` tag publishes them (GitHub release, pre-release for `v0.*` and `v*-*`) and posts to Discord; `fuzz` job (not required, pushes to main): 2 min per client message type, uploads crash inputs |
 | `.github/workflows/ci-retry.yml` | CI: when a `build` job was cancelled because no hosted runner picked it up, re-runs the run's failed jobs (attempts 1 and 2, latest commit only; ADR 0041) |
-| `.github/workflows/hygiene.yml` | CI: ARCHITECTURE.md inventory, repository hygiene, content case; `review` (`tools/review.sh`, given the PR description, head and bot flag) on PRs, rerun on description edits |
+| `.github/workflows/hygiene.yml` | CI: ARCHITECTURE.md inventory, repository hygiene, content case, `format` (`tools/check-format.sh`); `review` (`tools/review.sh`, given the PR description, head and bot flag) on PRs, rerun on description edits |
 | `.github/pull_request_template.md` | PR description: item and Allowed paths (read by `tools/review.sh`), goal, out of scope, tests |
 | `.github/workflows/codeql.yml` | CodeQL: `c-cpp` (manual linux-x64 build of the three executables) and `actions`; push, PR, weekly; alerts under `build/` (vcpkg headers) filtered out |
 | `.github/workflows/dependency-graph.yml` | Submits resolved vcpkg ports to the dependency graph on push to `main` |
@@ -806,6 +806,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tools/check-architecture.ps1` | Fails if ARCHITECTURE.md and the tracked files disagree (Windows) |
 | `tools/check-architecture.sh` | Fails if ARCHITECTURE.md and the tracked files disagree (Unix) |
 | `tools/check-encoding.py` | Fails on non-UTF-8, BOM or CR in tracked text files |
+| `tools/check-format.sh` | Fails when C/C++ lines changed since a base don't match `.clang-format` (changed lines only, ADR 0045); CI `format` job |
 | `tools/check-original-assets.py` | Fails if a tracked file matches an original-asset hash |
 | `tools/original-assets.sha256` | SHA-256 of every removed original file; its `Content/main` entries are compiled into the client as `OriginalHashes.h` (ADR 0040) |
 | `tools/convert-encoding.py` | One-off UTF-8/LF converter used in step 1.4 |
