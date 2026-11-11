@@ -147,9 +147,10 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/golden/scoreboard.png` | Golden for `screenshot_scoreboard` |
 | `tests/golden/appearance.txt` | Screenshot script: main menu, Appearance tab with the Player name field (ctest `screenshot_appearance`) |
 | `tests/golden/appearance.png` | Golden for `screenshot_appearance` |
-| `tests/autotest_client.py` | Shared by `run_autotest.py`, `screenshots.py` and `e2e/e2e.py`: starts Xvfb with `-displayfd`, builds the `bv2 --autotest` command line and env, and runs a client with a fresh pref dir (`run_client`) |
+| `tests/autotest_client.py` | Shared by `run_autotest.py`, `screenshots.py` and `e2e/e2e.py`: starts Xvfb with `-displayfd`, builds the `bv2 --autotest` command line and env, and runs a client with a fresh pref dir, optionally seeded with files (`run_client`) |
 | `tests/autotest/fail.txt` | Autotest script that never passes: the client exits 1 (ctest `autotest_fail`) |
 | `tests/autotest/menu-host.txt` | Autotest script: menu, `help` output, host and join the placeholder map (ctest `autotest_menu_host`) |
+| `tests/autotest/corrupt-map.txt` | Autotest script: the menu builds with a map of unknown version in `maps/` (ctest `corrupt_map_preview`, ROBO-195) |
 | `tests/autotest/quit.txt` | Autotest script that quits before its last expect: the client exits 1, not 0 (ctest `autotest_quit`) |
 | `tests/autotest/timeout.txt` | Autotest script that outlasts `--timeout`: the client exits 2 (ctest `autotest_timeout`) |
 | `tests/autotest/usage.txt` | Autotest script: bad arguments to `screenshot`, `menutab` and `scoreboard` print their usage (ctest `autotest_usage`) |
@@ -167,6 +168,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/test_spawn_overlay.cpp` | `spawns::farthestFrom`: no DM spawn gives no line origin (the editor crash), the farthest of several, ties, nearest team spawn |
 | `tests/test_view_geometry.cpp` | Widescreen (Stretch) projects at the window's own aspect, Bars at 4:3; the camera's side margin widens with the view, and a narrow or short map centres it |
 | `tests/test_config.cpp` | dksvar config layering, transient values not saved, secrets masked, `dksvarGetValue` |
+| `tests/test_corrupt_map_preview.py` | ROBO-195: the client reaches the menu with `maps/zz-Corrupt.bvm` of unknown version, listed after the placeholder map in a fresh pref dir (ctest `corrupt_map_preview`) |
 | `tests/test_crash_report.cpp` | ROBO-186: runs itself as a crashing child and checks the `crash-*.txt` it leaves (version line, signal or exception code, a stack frame) and that the previous handler still runs (ADR 0048) |
 | `tests/test_credentials.cpp` | Step 10: the credential HMAC against RFC 4231; proofs check only with their own password, label and nonce |
 | `tests/test_crash_fixes.cpp` | Steps 5 and 7: one check per fixed defect (KEY_QUESTIONS Part D) on the in-process server |
