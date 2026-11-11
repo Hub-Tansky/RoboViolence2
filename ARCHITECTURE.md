@@ -160,6 +160,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/test_frame_pacing.cpp` | ROBO-197: frame pacing decisions per window state and the frame schedule, without a window (ADR 0050) |
 | `tests/test_autotest.cpp` | Phase T3: autotest runner without a window: parsing, commands, waits, one match per expect, fail, timeout and early-quit reports (ADR 0025) |
 | `tests/test_babonet.cpp` | R7: a 10000-byte message over a loopback babonet connection arrives over several reads and intact |
+| `tests/test_babonet_bad_key.cpp` | ROBO-068: a peer whose first bytes, short of a full key, aren't "RND1" is dropped from the server's client list |
 | `tests/test_babonet_ping.cpp` | PNS-56: a server-browser ping to a game server on this host is answered within 1 s while another process holds babonet's LAN port |
 | `tests/test_browsable_game.cpp` | A server browser row owns a copy of its lobby game's row (the lobby frees its own) |
 | `tests/test_cstring.cpp` | Phase C step 5: one-argument `CString` is text (arrays, `char*`, literals, direct and implicit); two or more arguments format (ADR 0021) |

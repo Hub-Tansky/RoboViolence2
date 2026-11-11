@@ -206,6 +206,12 @@ bv2_target_defaults(test_babonet)
 add_test(NAME babonet_large_message COMMAND test_babonet)
 set_tests_properties(babonet_large_message PROPERTIES TIMEOUT 60)
 
+add_executable(test_babonet_bad_key test_babonet_bad_key.cpp)
+target_link_libraries(test_babonet_bad_key PRIVATE babonet)
+bv2_target_defaults(test_babonet_bad_key)
+add_test(NAME babonet_bad_partial_key COMMAND test_babonet_bad_key)
+set_tests_properties(babonet_bad_partial_key PROPERTIES TIMEOUT 60)
+
 add_executable(test_babonet_ping test_babonet_ping.cpp)
 target_link_libraries(test_babonet_ping PRIVATE babonet)
 bv2_target_defaults(test_babonet_ping)
