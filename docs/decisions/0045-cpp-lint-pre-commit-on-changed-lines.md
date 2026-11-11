@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-11-05
-- Affects: `.pre-commit-config.yaml`, `.githooks/pre-commit`, `tools/setup-dev.sh`, `tools/setup-dev.ps1`, [AGENTS.md](../../AGENTS.md), `docs/build/`
+- Affects: `.pre-commit-config.yaml`, `.githooks/pre-commit`, `tools/setup-dev.sh`, `tools/setup-dev.ps1`, [AGENTS.md](../../AGENTS.md), `docs/build/`, `tools/check-format.sh`, `.github/workflows/hygiene.yml`
 
 ## Context
 - The owner wants [cpp-linter-hooks](https://github.com/cpp-linter/cpp-linter-hooks) clang-format and clang-tidy on every commit.
@@ -14,6 +14,7 @@
 - `.githooks/pre-commit` runs `pre-commit run` after its own checks and fails when `pre-commit` is missing. Nobody runs `pre-commit install`.
 - Formatting on commit is a local hook running `git-clang-format HEAD` from the `clang-format` wheel: only lines the commit changes are formatted. If it changes anything the commit stops and the result is reviewed and staged.
 - cpp-linter-hooks `clang-format` (whole file) stays as a `manual` stage at the owner's request; new files are already formatted in full by the changed-lines hook, and it is never run on legacy files.
+- CI job `format` (`hygiene.yml`, `tools/check-format.sh`) runs the same changed-lines check on every push and PR, because cloud agent sessions never set `core.hooksPath` and their commits skip the hook (2026-11-11: PR #142 merged ~230 unformatted changed lines).
 - cpp-linter-hooks `clang-tidy` runs on `engine/*/src`, `game/src` and `masterserver/src` sources (the CI `tidy` set) and reports only changed lines. It uses `build/macos-arm64/compile_commands.json` (the owner's preset; 2026-11-06, the default "newest `build/*` wins" picked a stale database) and fails when that file is missing.
 - `third_party/` is excluded. clang-format 23.1.5 and clang-tidy 23.1.4 (the newest clang-tidy wheel on PyPI) are pinned so every machine formats and lints alike.
 
