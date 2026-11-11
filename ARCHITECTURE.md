@@ -279,8 +279,8 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 
 | path | purpose |
 |---|---|
-| `content/LaunchScript/CTF.cfg` | Example dedicated-server launch script (CTF, port 3333; map is a placeholder) |
-| `content/LaunchScript/TDM.cfg` | Dedicated-server launch script (TDM, port 3334; map is a placeholder); the compose example's `tdm` service |
+| `content/LaunchScript/CTF.cfg` | Example dedicated-server launch script (CTF, port 3333, Pro ruleset; map is a placeholder) |
+| `content/LaunchScript/TDM.cfg` | Dedicated-server launch script (TDM, port 3334, Pro ruleset; map is a placeholder); the compose example's `tdm` service |
 
 ### `content/bots`
 
@@ -370,6 +370,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/decisions/0049-server-side-bots-for-empty-servers.md` | ADR: bots run in the game server as connectionless player slots sending client messages; `sv_bots` is a target population; bots count in the browser; prod enables them with `BV2_SV_BOTS` |
 | `docs/decisions/0050-client-frame-pacing-and-sleep.md` | ADR: client frame pacing follows vsync and window state; the display sleeps outside play |
 | `docs/decisions/0051-release-symbols-kept-privately-per-tag.md` | ADR: Release builds carry debug info, split into a symbols zip before packaging; a `v*` tag commits it to the private vault rv2-docs `30-dev/crash-debug/<tag>/` with `SYMBOLS_TOKEN` |
+| `docs/decisions/0052-public-servers-play-pro-ruleset.md` | ADR: the shipped CTF and TDM launch scripts play the Pro ruleset (ROBO-199) |
 | `docs/decisions/README.md` | ADR format and index |
 
 ### `docs/ops`

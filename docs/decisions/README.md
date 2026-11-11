@@ -45,7 +45,7 @@ What we do, in one or two sentences.
 | [0010](0010-bv2-asset-compat-and-gui-freeze.md) | Keep BV2 asset compatibility and the BV2 interface until replacement assets ship | Accepted (amended by 0017, 0038) |
 | [0011](0011-gettext-po-translations.md) | Use gettext PO for translations, keep .lang loading, default to the OS language | Accepted |
 | [0012](0012-windows-10-22h2-minimum.md) | Support Windows 10 22H2 and later as the minimum Windows target | Accepted |
-| [0013](0013-r3-restore-normal-and-pro-rulesets.md) | Restore the Normal and Pro rulesets (fix R3) | Accepted |
+| [0013](0013-r3-restore-normal-and-pro-rulesets.md) | Restore the Normal and Pro rulesets (fix R3) | Accepted (amended by 0052) |
 | [0014](0014-libsodium-hmac-for-credentials.md) | Use libsodium for the credential HMAC and nonces | Accepted (amended by 0038) |
 | [0015](0015-admin-http-api-behind-tls-proxy.md) | Remote admin is an HTTP API behind a TLS reverse proxy | Accepted |
 | [0016](0016-player-data-lookup-and-package-content.md) | The client finds the player's BV2 data; the package supplies its own content | Accepted (amended by 0033, 0040, 0042) |
@@ -84,3 +84,4 @@ What we do, in one or two sentences.
 | [0049](0049-server-side-bots-for-empty-servers.md) | Server-side bots fill empty servers to a target population | Accepted |
 | [0050](0050-client-frame-pacing-and-sleep.md) | Client frame pacing follows vsync and window state; the display sleeps outside play | Accepted |
 | [0051](0051-release-symbols-kept-privately-per-tag.md) | Keep release debug symbols privately, per tag in the rv2-docs vault | Accepted |
+| [0052](0052-public-servers-play-pro-ruleset.md) | The shipped launch scripts play the Pro ruleset | Accepted |
