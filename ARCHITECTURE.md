@@ -148,9 +148,10 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/golden/scoreboard.png` | Golden for `screenshot_scoreboard` |
 | `tests/golden/appearance.txt` | Screenshot script: main menu, Appearance tab with the Player name field (ctest `screenshot_appearance`) |
 | `tests/golden/appearance.png` | Golden for `screenshot_appearance` |
-| `tests/autotest_client.py` | Shared by `run_autotest.py`, `screenshots.py` and `e2e/e2e.py`: starts Xvfb with `-displayfd`, builds the `bv2 --autotest` command line and env, and runs a client with a fresh pref dir (`run_client`) |
+| `tests/autotest_client.py` | Shared by `run_autotest.py`, `screenshots.py` and `e2e/e2e.py`: starts Xvfb with `-displayfd`, builds the `bv2 --autotest` command line and env, and runs a client with a fresh pref dir, optionally seeded with files (`run_client`) |
 | `tests/autotest/fail.txt` | Autotest script that never passes: the client exits 1 (ctest `autotest_fail`) |
 | `tests/autotest/menu-host.txt` | Autotest script: menu, `help` output, host and join the placeholder map (ctest `autotest_menu_host`) |
+| `tests/autotest/corrupt-map.txt` | Autotest script: the menu builds with a map of unknown version in `maps/` (ctest `corrupt_map_preview`, ROBO-195) |
 | `tests/autotest/quit.txt` | Autotest script that quits before its last expect: the client exits 1, not 0 (ctest `autotest_quit`) |
 | `tests/autotest/timeout.txt` | Autotest script that outlasts `--timeout`: the client exits 2 (ctest `autotest_timeout`) |
 | `tests/autotest/usage.txt` | Autotest script: bad arguments to `screenshot`, `menutab` and `scoreboard` print their usage (ctest `autotest_usage`) |
@@ -161,12 +162,14 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/test_frame_pacing.cpp` | ROBO-197: frame pacing decisions per window state and the frame schedule, without a window (ADR 0050) |
 | `tests/test_autotest.cpp` | Phase T3: autotest runner without a window: parsing, commands, waits, one match per expect, fail, timeout and early-quit reports (ADR 0025) |
 | `tests/test_babonet.cpp` | R7: a 10000-byte message over a loopback babonet connection arrives over several reads and intact |
+| `tests/test_babonet_bad_key.cpp` | ROBO-068: a peer whose first bytes, short of a full key, aren't "RND1" is dropped from the server's client list |
 | `tests/test_babonet_ping.cpp` | PNS-56: a server-browser ping to a game server on this host is answered within 1 s while another process holds babonet's LAN port |
 | `tests/test_browsable_game.cpp` | A server browser row owns a copy of its lobby game's row (the lobby frees its own) |
 | `tests/test_cstring.cpp` | Phase C step 5: one-argument `CString` is text (arrays, `char*`, literals, direct and implicit); two or more arguments format (ADR 0021) |
 | `tests/test_spawn_overlay.cpp` | `spawns::farthestFrom`: no DM spawn gives no line origin (the editor crash), the farthest of several, ties, nearest team spawn |
 | `tests/test_view_geometry.cpp` | Widescreen (Stretch) projects at the window's own aspect, Bars at 4:3; the camera's side margin widens with the view, and a narrow or short map centres it |
 | `tests/test_config.cpp` | dksvar config layering, transient values not saved, secrets masked, `dksvarGetValue` |
+| `tests/test_corrupt_map_preview.py` | ROBO-195: the client reaches the menu with `maps/zz-Corrupt.bvm` of unknown version, listed after the placeholder map in a fresh pref dir (ctest `corrupt_map_preview`) |
 | `tests/test_crash_report.cpp` | ROBO-186: runs itself as a crashing child and checks the `crash-*.txt` it leaves (version line, signal or exception code, a stack frame, the load address on macOS) and that the previous handler still runs (ADR 0048) |
 | `tests/test_credentials.cpp` | Step 10: the credential HMAC against RFC 4231; proofs check only with their own password, label and nonce |
 | `tests/test_crash_fixes.cpp` | Steps 5 and 7: one check per fixed defect (KEY_QUESTIONS Part D) on the in-process server |
