@@ -66,7 +66,7 @@ jobs:
           python3 -m venv "$RUNNER_TEMP/dmgbuild"
           "$RUNNER_TEMP/dmgbuild/bin/pip" install --quiet --require-hashes -r packaging/macos/requirements.txt
           echo "$RUNNER_TEMP/dmgbuild/bin" >> "$GITHUB_PATH"
-      # Release symbols (.pdb, .dSYM, Linux .debug by build ID) leave the binaries before packaging (ROBO-188, ADR 0050)
+      # Release symbols (.pdb, .dSYM, Linux .debug by build ID) leave the binaries before packaging (ROBO-188, ADR 0051)
       - name: Split debug symbols
         shell: bash
         run: ${{ runner.os == 'Windows' && 'python' || 'python3' }} packaging/split-symbols.py build/${{ matrix.preset }}-release/runtime ${{ matrix.preset }} symbols "$BV2_VERSION"

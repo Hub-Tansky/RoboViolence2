@@ -18,7 +18,7 @@ project(BaboViolent2 LANGUAGES C CXX)
 
 # Static C++ runtime, as the x64-windows-static vcpkg ports use: players have no (debug) runtime DLLs (ADR 0012)
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-# Release builds carry debug info, split off into symbol files before packaging (ROBO-188, ADR 0050):
+# Release builds carry debug info, split off into symbol files before packaging (ROBO-188, ADR 0051):
 # MSVC links a .pdb next to each binary (/Z7 objects: no shared compile .pdb under parallel Ninja); GCC and Clang
 # keep DWARF, which packaging/split-symbols.py moves out.
 set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>$<$<CONFIG:Release>:Embedded>")

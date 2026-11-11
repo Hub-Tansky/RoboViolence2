@@ -82,4 +82,5 @@ What we do, in one or two sentences.
 | [0047](0047-two-axis-review-replaces-thermo-nuclear.md) | PR review runs isolated Standards and Spec workers from a vendored skill | Accepted |
 | [0048](0048-client-crash-report-in-pref-dir.md) | Write client crash reports as a text file in the pref dir | Accepted |
 | [0049](0049-server-side-bots-for-empty-servers.md) | Server-side bots fill empty servers to a target population | Accepted |
-| [0050](0050-release-symbols-kept-privately-per-tag.md) | Keep release debug symbols privately, per tag in the rv2-docs vault | Accepted |
+| [0050](0050-client-frame-pacing-and-sleep.md) | Client frame pacing follows vsync and window state; the display sleeps outside play | Accepted |
+| [0051](0051-release-symbols-kept-privately-per-tag.md) | Keep release debug symbols privately, per tag in the rv2-docs vault | Accepted |

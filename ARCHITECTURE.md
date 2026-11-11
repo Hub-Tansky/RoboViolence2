@@ -29,6 +29,7 @@ Robo Violence 2: unofficial fork of BaboViolent 2, a top-down multiplayer shoote
 - **Master server:** `MasterClient` is reconstructed (the original class is missing from the source release); its timeout is an assumption. See [masterserver/README.md](masterserver/README.md).
 - **GLU:** still the system library (headers and link) for `dko`, `zeven_client` and the game, so the headless server needs GLU dev packages; `dkt` is stubbed there. The renderer itself is unchanged fixed-function GL 2.1 (ADR 0003).
 - **OGG music** needs `stb_vorbis.c` (vcpkg `stb`, found in CI builds); the placeholders have no music, and playback was never heard.
+- **Frame pacing:** the main loop never waits on its own; vsync (`cl_enableVSync`, default on) paces a visible focused window, `main.cpp` sleeps when the window is unfocused or hidden.
 - **HiDPI:** `dkwGetResolution()` is the pixel size; the UI math assumes nothing else. Untested on a Retina display.
 - **Dead code:** 16 old-menu `.cpp` files in `game/src` are not built (see [game/README.md](game/README.md)).
 - **Warnings:** every target except `glad` builds with `-Werror` / `/WX`. Cosmetic classes (unused names, signed compares, initialiser order) are off for `game` and `masterserver` (`bv2_target_legacy_strict`); about 4800 string-literal-to-`char*` warnings are suppressed.
@@ -55,7 +56,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `.dockerignore` | Docker build context: sources only (no `.git`, builds, docs) |
 | `AGENTS.md` | Canonical agent and contributor instructions; work tracking in the rv2-docs vault |
 | `ARCHITECTURE.md` | This file: summary and file inventory |
-| `CMakeLists.txt` | Root CMake project: options, the release text (`BV2_VERSION`, ADR 0046), Release debug info and Linux build ID (ADR 0050), runtime layout, placeholder content, subdirectories, install layout (binaries, `share/bv2/main` as `runtime/main` holds it, `.desktop`, icons; `bv2master` in component `master`), which the `.deb` packages |
+| `CMakeLists.txt` | Root CMake project: options, the release text (`BV2_VERSION`, ADR 0046), Release debug info and Linux build ID (ADR 0051), runtime layout, placeholder content, subdirectories, install layout (binaries, `share/bv2/main` as `runtime/main` holds it, `.desktop`, icons; `bv2master` in component `master`), which the `.deb` packages |
 | `CMakePresets.json` | Presets: linux-x64, macos-arm64, win-x64-msvc (Debug), -asan and -release variants (Ninja); macOS uses the overlay triplet in `tools/vcpkg-triplets/` |
 | `LICENSE.txt` | GPLv3 text (code only) |
 | `README.md` | Project overview, fork and asset-removal statement |
@@ -68,7 +69,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/Paths.h` | Interface of `Paths.cpp` (namespace `bv2`) |
 | `packaging/linux/roboviolence2.desktop` | Linux desktop entry |
 | `packaging/make-package.py` | Builds the per-OS package from a Release `runtime/` (links resolved, macOS bundle re-signed, licences), plus the Windows installer (showing `LICENSE.txt` reflowed one paragraph per line), the macOS `.dmg` with only the app and Applications, or the Linux `.deb` (ADR 0020, 0030, 0031) |
-| `packaging/split-symbols.py` | Moves a Release runtime's symbols into `roboviolence2-<preset>-<version>-symbols.zip` before packaging: `.pdb`, `.dSYM` then `strip -S`, Linux `.build-id/` `.debug` files with a debuglink (ADR 0050) |
+| `packaging/split-symbols.py` | Moves a Release runtime's symbols into `roboviolence2-<preset>-<version>-symbols.zip` before packaging: `.pdb`, `.dSYM` then `strip -S`, Linux `.build-id/` `.debug` files with a debuglink (ADR 0051) |
 | `packaging/make_deb.py` | Builds the Linux `.deb` from the build's `cmake --install` (stripped, without the master): client and `bv2dedicated` moved to `/usr/games`, launcher pointed there, licences, copyright and changelog added; Depends from `dpkg-shlibdeps` plus `libgl1`, `curl` and `unzip` (ADR 0031, 0040) |
 | `packaging/discord_release_post.py` | Prints the Discord webhook payload of the release job: one embed with the release page, the player downloads and the website, an optional ping of the opt-in role and no other mention (ADR 0032) |
 | `packaging/windows/roboviolence2.iss` | Inno Setup script for the Windows installer (per-user, unsigned); shows the reflowed licence from `make-package.py`; privacy policy link and the opt-out task for the public master (ADR 0034) |
@@ -157,6 +158,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/smoke_server.py` | Starts `bv2dedicated` headless, runs the CTF script, types a `sayall` with printf specifiers, quits; checks exit code, server creation and `bv2.cfg`. `--install-under` runs it from a non-ASCII path (Windows UTF-8 code page) |
 | `tests/test_admin_api.cpp` | Step 12: the admin API refuses a wrong token, limits a burst, runs a command, returns the status, audits with secrets masked (not on Windows) |
 | `tests/test_admin_login.cpp` | Step 10: admin login only with HMACs over the connection's challenge; no user, password or MD5 on the wire |
+| `tests/test_frame_pacing.cpp` | ROBO-197: frame pacing decisions per window state and the frame schedule, without a window (ADR 0050) |
 | `tests/test_autotest.cpp` | Phase T3: autotest runner without a window: parsing, commands, waits, one match per expect, fail, timeout and early-quit reports (ADR 0025) |
 | `tests/test_babonet.cpp` | R7: a 10000-byte message over a loopback babonet connection arrives over several reads and intact |
 | `tests/test_babonet_ping.cpp` | PNS-56: a server-browser ping to a game server on this host is answered within 1 s while another process holds babonet's LAN port |
@@ -169,7 +171,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/test_credentials.cpp` | Step 10: the credential HMAC against RFC 4231; proofs check only with their own password, label and nonce |
 | `tests/test_crash_fixes.cpp` | Steps 5 and 7: one check per fixed defect (KEY_QUESTIONS Part D) on the in-process server |
 | `tests/test_dks.cpp` | R20: `dksPlayMusic` on a missing file 200 times; a sound deleted after `dksShutDown` (teardown) (ASan) |
-| `tests/test_split_symbols.py` | ROBO-188: `split-symbols.py` on a copy of a Release build's binaries puts each one's symbols in the zip and strips it (ctest `split_symbols`, Release builds only; ADR 0050) |
+| `tests/test_split_symbols.py` | ROBO-188: `split-symbols.py` on a copy of a Release build's binaries puts each one's symbols in the zip and strips it (ctest `split_symbols`, Release builds only; ADR 0051) |
 | `tests/test_example_cfg.py` | `config/bv2.example.cfg` names a new player as `GameVar.cpp` does and starts fullscreen at the desktop resolution (ADR 0043) |
 | `tests/test_window_icon.cpp` | `dkwSetWindowIcon` accepts the Linux client's compiled-in icon (`AppIcon.h`) and refuses bytes that aren't a PNG |
 | `tests/test_make_deb.py` | `make_deb.py` builds an installable `.deb` from the build's install: `share/bv2/main` equals `runtime/main`, layout, modes, root ownership, no master, version mapping (`-rc1` sorts before the release), Depends, launcher path (ctest `make_deb`, Linux client builds with dpkg-dev) |
@@ -240,7 +242,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | path | purpose |
 |---|---|
 | `.github/workflows/secret-scan.yml` | CI: gitleaks over commits after the fork point and original-asset check |
-| `.github/workflows/build.yml` | CI on PRs, pushes to `main` and `v*` tags (ADR 0041): Debug and Release build and ctest, with the `v*` tag as `BV2_VERSION` and a step checking the Release `bv2` holds it (ADR 0046), Release symbols split off before packaging and, on a `v*` tag, committed to the private vault rv2-docs `30-dev/crash-debug/<tag>/` (ADR 0050); Release package on Windows, macOS, Linux (`roboviolence2-<preset>` artifacts); `package-check` of the Linux package in a clean `ubuntu:24.04`; `deb-check`: the `.deb` installs with apt, a non-root user starts the server and removal leaves nothing, in clean `ubuntu:24.04` and `debian:13`; `package-smoke` (not required): Windows and macOS packages start server, master and client (Mesa llvmpipe on Windows); ASan smoke job with client under xvfb; Linux jobs upload the actual and diff PNGs of failed `screenshot_*` tests (`screenshots-<preset>`); `release` job: every run checks the release files are there; a `v*` tag publishes them (GitHub release, pre-release for `v0.*` and `v*-*`) and posts to Discord; `fuzz` job (not required, pushes to main): 2 min per client message type, uploads crash inputs |
+| `.github/workflows/build.yml` | CI on PRs, pushes to `main` and `v*` tags (ADR 0041): Debug and Release build and ctest, with the `v*` tag as `BV2_VERSION` and a step checking the Release `bv2` holds it (ADR 0046), Release symbols split off before packaging and, on a `v*` tag, committed to the private vault rv2-docs `30-dev/crash-debug/<tag>/` (ADR 0051); Release package on Windows, macOS, Linux (`roboviolence2-<preset>` artifacts); `package-check` of the Linux package in a clean `ubuntu:24.04`; `deb-check`: the `.deb` installs with apt, a non-root user starts the server and removal leaves nothing, in clean `ubuntu:24.04` and `debian:13`; `package-smoke` (not required): Windows and macOS packages start server, master and client (Mesa llvmpipe on Windows); ASan smoke job with client under xvfb; Linux jobs upload the actual and diff PNGs of failed `screenshot_*` tests (`screenshots-<preset>`); `release` job: every run checks the release files are there; a `v*` tag publishes them (GitHub release, pre-release for `v0.*` and `v*-*`) and posts to Discord; `fuzz` job (not required, pushes to main): 2 min per client message type, uploads crash inputs |
 | `.github/workflows/ci-retry.yml` | CI: when a `build` job was cancelled because no hosted runner picked it up, re-runs the run's failed jobs (attempts 1 and 2, latest commit only; ADR 0041) |
 | `.github/workflows/hygiene.yml` | CI: ARCHITECTURE.md inventory, repository hygiene, content case; `review` (`tools/review.sh`, given the PR description, head and bot flag) on PRs, rerun on description edits |
 | `.github/pull_request_template.md` | PR description: item and Allowed paths (read by `tools/review.sh`), goal, out of scope, tests |
@@ -363,7 +365,8 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/decisions/0047-two-axis-review-replaces-thermo-nuclear.md` | ADR: PR review runs isolated Standards and Spec workers from a vendored skill; tier from changed paths; missing spec blocks |
 | `docs/decisions/0048-client-crash-report-in-pref-dir.md` | ADR: the client writes `crash-<start time>.txt` (version, signal, stack as module + offset) to the pref dir; no upload; Sentry and minidumps rejected |
 | `docs/decisions/0049-server-side-bots-for-empty-servers.md` | ADR: bots run in the game server as connectionless player slots sending client messages; `sv_bots` is a target population; bots count in the browser; prod enables them with `BV2_SV_BOTS` |
-| `docs/decisions/0050-release-symbols-kept-privately-per-tag.md` | ADR: Release builds carry debug info, split into a symbols zip before packaging; a `v*` tag commits it to the private vault rv2-docs `30-dev/crash-debug/<tag>/` with `SYMBOLS_TOKEN` |
+| `docs/decisions/0050-client-frame-pacing-and-sleep.md` | ADR: client frame pacing follows vsync and window state; the display sleeps outside play |
+| `docs/decisions/0051-release-symbols-kept-privately-per-tag.md` | ADR: Release builds carry debug info, split into a symbols zip before packaging; a `v*` tag commits it to the private vault rv2-docs `30-dev/crash-debug/<tag>/` with `SYMBOLS_TOKEN` |
 | `docs/decisions/README.md` | ADR format and index |
 
 ### `docs/ops`
@@ -507,7 +510,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `engine/zeven/include/dksvar.h` | dksvar: configuration variable registry |
 | `engine/zeven/include/dksvardef.h` | dksvar: variable definition macros |
 | `engine/zeven/include/dkt.h` | dkt: texture loading (TGA) and binding |
-| `engine/zeven/include/dkw.h` | dkw: window creation and events, window icon |
+| `engine/zeven/include/dkw.h` | dkw: window creation and events, window icon, visibility and focus, screen saver |
 | `engine/zeven/include/glheaders.h` | The only OpenGL include: glad, then GLU |
 | `engine/zeven/include/platform.h` | Platform macros (BV2_PLATFORM_*, BV2_POSIX), INT4/UINT4, `bv2ReadBytes` (checked `fread` for the engine loaders and `FileIO`), POSIX includes and Win32 type shims; force-included |
 
@@ -536,7 +539,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `engine/zeven/src/dkt.cpp` | dkt: texture loading (TGA) and binding |
 | `engine/zeven/src/dkt_console.cpp` | No-op dkt for the headless server |
 | `engine/zeven/src/dkti.h` | Internal header of the matching dk module |
-| `engine/zeven/src/dkw.cpp` | dkw: window creation and events, window icon, Ctrl/Cmd+V paste into text fields (ADR 0042) |
+| `engine/zeven/src/dkw.cpp` | dkw: window creation and events, window icon, Ctrl/Cmd+V paste into text fields (ADR 0042), visibility (minimized, hidden, occluded) and focus, screen saver switch |
 
 ### `engine/zeven/third_party/glad`
 
@@ -689,6 +692,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/EditorTools.h` | Map editor tools |
 | `game/src/Extended.h` | Skin and color chooser screen |
 | `game/src/FastDelegate.h` | Third-party fast C++ delegate header |
+| `game/src/FramePacing.h` | Client frame pacing decision from window state (render, minimum frame interval, screen saver) and the frame schedule (ROBO-197, ADR 0050) |
 | `game/src/FileIO.cpp` | File and memory-buffer reader/writer with fixed-width types |
 | `game/src/FileIO.h` | File and memory-buffer reader/writer with fixed-width types |
 | `game/src/Game.cpp` | Game state: players, projectiles, items, flags, round and mode logic (shared by client and server); `countPlayers` (humans and bots) for every player count |
@@ -763,7 +767,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/WrongVersion.h` | Dialog: client/server version mismatch |
 | `game/src/Zeven.h` | Umbrella include for engine headers and common types |
 | `game/src/changes-log.txt` | Upstream change log |
-| `game/src/main.cpp` | Program entry: window, engine init, main loop; `--autotest` startup, per-step hook and watchdog (ADR 0025); the dedicated server line-buffers stdout; saves a requested screenshot before the swap; the client installs the crash report handler (ADR 0048) |
+| `game/src/main.cpp` | Program entry: window, engine init, main loop; `--autotest` startup, per-step hook and watchdog (ADR 0025); the dedicated server line-buffers stdout; saves a requested screenshot before the swap; the client installs the crash report handler (ADR 0048); frame pacing (`FramePacing.h`): applies `cl_enableVSync`, skips rendering while the window is hidden, 30 fps while unfocused or hidden, lets the display sleep except in a focused game |
 | `game/src/netPacket.h` | Wire structs and message IDs (raw memcpy'd structs) |
 | `game/src/screengrab.cpp` | Screenshot capture (P and L keys, `screenshot` command): the next frame, from the back buffer before the swap |
 | `game/src/screengrab.h` | Screenshot capture |

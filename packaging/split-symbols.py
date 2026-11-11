@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Moves the debug symbols out of a Release runtime before packaging (ROBO-188, ADR 0050).
+"""Moves the debug symbols out of a Release runtime before packaging (ROBO-188, ADR 0051).
 
 Usage: split-symbols.py <runtime dir> <preset> <out dir> <version>
 

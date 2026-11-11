@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""ROBO-188 (ADR 0050): split-symbols.py moves a Release build's symbols into the zip and leaves stripped binaries.
+"""ROBO-188 (ADR 0051): split-symbols.py moves a Release build's symbols into the zip and leaves stripped binaries.
 
 Usage: test_split_symbols.py <runtime dir> <scratch dir>. Works on a copy of the three binaries, never on the runtime.
 """

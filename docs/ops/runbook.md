@@ -127,7 +127,7 @@ Health: install `tools/staging/health-watch.sh` from the same commit as `deploy.
 
 ## Crash reports
 
-A player's `crash-*.txt` (ADR 0048) names its version on the first line. Unzip `roboviolence2-<preset>-<tag>-symbols.zip` for that tag and platform from the private vault rv2-docs, `30-dev/crash-debug/<tag>/` (ADR 0050). The tag is `v` plus that version. Frames from a `0.0.0-dev` build have no stored symbols.
+A player's `crash-*.txt` (ADR 0048) names its version on the first line. Unzip `roboviolence2-<preset>-<tag>-symbols.zip` for that tag and platform from the private vault rv2-docs, `30-dev/crash-debug/<tag>/` (ADR 0051). The tag is `v` plus that version. Frames from a `0.0.0-dev` build have no stored symbols.
 
 | Platform | Frame looks like | Resolve |
 |---|---|---|
