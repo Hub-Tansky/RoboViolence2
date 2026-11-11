@@ -106,15 +106,15 @@ When vcpkg can't download its ports (for example a proxy that blocks the gnu.org
 2. SDL3 at the tag that matches the vcpkg baseline, into a prefix (here `/opt/rv2deps`):
 
    ```bash
-   git clone --depth 1 -b release-3.4.16 https://github.com/libsdl-org/SDL.git
+   git clone --depth 1 -b release-3.4.20 https://github.com/libsdl-org/SDL.git
    cmake -S SDL -B SDL/build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/opt/rv2deps -DSDL_TESTS=OFF -DSDL_WAYLAND=OFF -DSDL_PIPEWIRE=OFF -DSDL_PULSEAUDIO=OFF
    cmake --build SDL/build && cmake --install SDL/build
    ```
 
-3. miniaudio 0.11.25, header and source only:
+3. miniaudio 0.11.26, header and source only:
 
    ```bash
-   git clone --depth 1 -b 0.11.25 https://github.com/mackron/miniaudio.git
+   git clone --depth 1 -b 0.11.26 https://github.com/mackron/miniaudio.git
    mkdir -p /opt/rv2deps/include/miniaudio && cp miniaudio/miniaudio.h miniaudio/miniaudio.c /opt/rv2deps/include/miniaudio/
    ```
 
