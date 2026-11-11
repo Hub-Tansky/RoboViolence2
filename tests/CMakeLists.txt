@@ -99,6 +99,12 @@ if(TARGET bv2server_lib)
   add_test(NAME join_password COMMAND test_join_password)
   set_tests_properties(join_password PROPERTIES ENVIRONMENT "BV2_PREF_DIR=${BV2_TEST_SCRATCH}/join-pref")
 
+  add_executable(test_join_team test_join_team.cpp)
+  target_link_libraries(test_join_team PRIVATE bv2_server_harness)
+  bv2_target_defaults(test_join_team)
+  add_test(NAME join_team COMMAND test_join_team)
+  set_tests_properties(join_team PROPERTIES ENVIRONMENT "BV2_PREF_DIR=${BV2_TEST_SCRATCH}/join-team-pref")
+
   add_executable(test_player_privacy test_player_privacy.cpp)
   target_link_libraries(test_player_privacy PRIVATE bv2_server_harness)
   bv2_target_defaults(test_player_privacy)

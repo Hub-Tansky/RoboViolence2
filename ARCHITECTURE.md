@@ -189,6 +189,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/test_review_diff_rules.py` | `tools/review.sh` diff-rules in a scratch repo: Allowed paths globs (`*`, `**`, `{a,b}`), the guard-file NOTE, banned added lines, `review: allow`, Markdown exemption |
 | `tests/test_lang_check.py` | Step 13: `tools/lang-check.py` fails on changed conversions, unknown keys, repeated keywords, tabs and a stale `en.pot`; warns about missing glyphs |
 | `tests/test_join_password.cpp` | Step 10: a client joins a passworded server only with the HMAC over its own challenge; no password or MD5 of it on the wire |
+| `tests/test_join_team.cpp` | ROBO-201: a joiner moved to a team before its handshake ends gets its own team after SERVER_INFO; a spectator joiner gets none |
 | `tests/test_bans.cpp` | Server bans: 0.0.1's binary banlist moves to `banlist.tsv` and still refuses the IP; a ban past `sv_banDays` lets it in and stays in the file (ADR 0034) |
 | `tests/test_bots.cpp` | Bots (ADR 0049): roster rules and names file; on the in-process CTF server `sv_bots 8` joins 4 per team, they spawn, move and shoot, get no packets, make room for a human and come back, stay through a map change to deathmatch, rejoin their team after `allwatch`, get none of a human's team chat or name change, and follow `sv_bots` live |
 | `tests/bot_sim.cpp` | Seeded headless bots-only match (CTF, TDM): JSON summary of states, roles, shots, kills, captures, returns, stuck time; fails with no capture, return or unused role (CTF), no kill (TDM), or a bot still over 10 s (ctests `bot_sim_CTF`, `bot_sim_TDM`) |
@@ -279,8 +280,8 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 
 | path | purpose |
 |---|---|
-| `content/LaunchScript/CTF.cfg` | Example dedicated-server launch script (CTF, port 3333; map is a placeholder) |
-| `content/LaunchScript/TDM.cfg` | Dedicated-server launch script (TDM, port 3334; map is a placeholder); the compose example's `tdm` service |
+| `content/LaunchScript/CTF.cfg` | Example dedicated-server launch script (CTF, port 3333, Pro ruleset; map is a placeholder) |
+| `content/LaunchScript/TDM.cfg` | Dedicated-server launch script (TDM, port 3334, Pro ruleset; map is a placeholder); the compose example's `tdm` service |
 
 ### `content/bots`
 
@@ -370,6 +371,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/decisions/0049-server-side-bots-for-empty-servers.md` | ADR: bots run in the game server as connectionless player slots sending client messages; `sv_bots` is a target population; bots count in the browser; prod enables them with `BV2_SV_BOTS` |
 | `docs/decisions/0050-client-frame-pacing-and-sleep.md` | ADR: client frame pacing follows vsync and window state; the display sleeps outside play |
 | `docs/decisions/0051-release-symbols-kept-privately-per-tag.md` | ADR: Release builds carry debug info, split into a symbols zip before packaging; a `v*` tag commits it to the private vault rv2-docs `30-dev/crash-debug/<tag>/` with `SYMBOLS_TOKEN` |
+| `docs/decisions/0052-public-servers-play-pro-ruleset.md` | ADR: the shipped CTF and TDM launch scripts play the Pro ruleset (ROBO-199) |
 | `docs/decisions/README.md` | ADR format and index |
 
 ### `docs/ops`
@@ -754,7 +756,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/Server.h` | Authoritative server: connections, joins, tick, map and mode control |
 | `game/src/ServerCTF.cpp` | Server: capture-the-flag rules |
 | `game/src/ServerClose.h` | Dialog shown when the server closes the connection |
-| `game/src/ServerRecv.cpp` | Server: handlers for every client-to-server packet, after the pre-dispatch check `Server::checkPacket`; a wrong join password frees the slot; relayed player info and the player list carry no IP (ADR 0034) |
+| `game/src/ServerRecv.cpp` | Server: handlers for every client-to-server packet, after the pre-dispatch check `Server::checkPacket`; a wrong join password frees the slot; the handshake ends by resending the joiner its own team (ROBO-201); relayed player info and the player list carry no IP (ADR 0034) |
 | `game/src/ServerSnD.cpp` | Server: search-and-destroy rules |
 | `game/src/ServerValidator.cpp` | Server cheat checks: spawn weapon whitelist, speed/frame kick, step 9 rules (weapon, movement, rate limits) with a decaying score |
 | `game/src/ServerValidator.h` | Server cheat checks (`Server::validator`), asked by the `ServerRecv.cpp` handlers |

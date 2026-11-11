@@ -1,6 +1,6 @@
 # 0013: Restore the Normal and Pro rulesets (fix R3)
 
-- Status: Accepted
+- Status: Accepted; amended by [0052](0052-public-servers-play-pro-ruleset.md)
 - Date: 2026-10-11
 - Affects: [Phase B step 5](https://github.com/Hub-Tansky/RoboViolence2/blob/58c91b2a660db2b290b0b5f504381980a6aedba2/docs/roadmap/phase-b-security-infrastructure-anti-cheat/step5-crash-fixes.md) task 5.1; KEY_QUESTIONS R3
 
