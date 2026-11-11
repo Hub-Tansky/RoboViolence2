@@ -25,11 +25,16 @@ def client_command(exe, pref, script, config_lines=""):
     return cmd, dict(os.environ, BV2_PREF_DIR=pref, SDL_AUDIODRIVER="dummy", BV2_MASTER_SERVERS="none")
 
 
-def run_client(exe, pref, script, config_lines="", extra_args=(), own_xvfb=False):
+def run_client(exe, pref, script, config_lines="", extra_args=(), own_xvfb=False, pref_files=None):
     """Runs `exe --autotest script` with a fresh pref dir; returns (exit code, output). On Linux it gets its own Xvfb when
-    there is no display, or always with own_xvfb (and SDL on X11), so the frame doesn't depend on the desktop"""
+    there is no display, or always with own_xvfb (and SDL on X11), so the frame doesn't depend on the desktop.
+    pref_files maps paths in the pref dir to bytes written there first"""
     shutil.rmtree(pref, ignore_errors=True)
     os.makedirs(pref)
+    for name, data in (pref_files or {}).items():
+        os.makedirs(os.path.dirname(os.path.join(pref, name)), exist_ok=True)
+        with open(os.path.join(pref, name), "wb") as f:
+            f.write(data)
     cmd, env = client_command(exe, pref, script, config_lines)
     cmd += list(extra_args)
     xvfb = None

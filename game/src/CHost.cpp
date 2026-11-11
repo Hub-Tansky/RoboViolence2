@@ -129,6 +129,9 @@ unsigned int loadMapPreview(CString mapFilename)
 		}
 	}
 
+	if (!cells) // unknown version: nothing read, nothing to preview (ROBO-195)
+		return 0;
+
 	// On cré l'espace pour la texture
 	//--- Est-ce qu'on a une minimap possible de ça?
 	FileIO* fileTGA = new FileIO(CString("main/modelmaps___/") + mapFilename + "/minimap.tga", "rb");
