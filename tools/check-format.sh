@@ -8,8 +8,8 @@ command -v git-clang-format >/dev/null && command -v clang-format >/dev/null || 
   echo "format: git-clang-format or clang-format not found (pipx install clang-format==23.1.5)" >&2
   exit 2
 }
-mb=$(git merge-base "$base" HEAD)
-files=$(git diff --name-only --diff-filter=ACMR "$mb" HEAD -- '*.c' '*.cc' '*.cpp' '*.h' '*.H' '*.hpp' '*.inl' | grep -v '/third_party/' || true)
+mb=$(git merge-base "$base" HEAD) || { echo "format: no merge-base with $base" >&2; exit 2; }
+files=$(git diff --name-only --diff-filter=ACMR "$mb" HEAD -- '*.c' '*.cc' '*.cpp' '*.h' '*.H' '*.hpp' '*.inl' | grep -Ev '(^|/)third_party/' || true)
 if [ -z "$files" ]; then
   echo "format: no C/C++ changes since $mb"
   exit 0

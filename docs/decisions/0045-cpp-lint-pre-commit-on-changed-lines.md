@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-11-05
-- Affects: `.pre-commit-config.yaml`, `.githooks/pre-commit`, `tools/setup-dev.sh`, `tools/setup-dev.ps1`, [AGENTS.md](../../AGENTS.md), `docs/build/`
+- Affects: `.pre-commit-config.yaml`, `.githooks/pre-commit`, `tools/setup-dev.sh`, `tools/setup-dev.ps1`, [AGENTS.md](../../AGENTS.md), `docs/build/`, `tools/check-format.sh`, `.github/workflows/hygiene.yml`
 
 ## Context
 - The owner wants [cpp-linter-hooks](https://github.com/cpp-linter/cpp-linter-hooks) clang-format and clang-tidy on every commit.
