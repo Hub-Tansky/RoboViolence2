@@ -175,6 +175,66 @@ int main(int, char ** argv)
 	CHECK(!packet::checkServerMessage((char *)&list, sizeof(list) - 1, NET_SVCL_MAP_LIST, out));
 	CHECK(!packet::checkServerMessage((char *)&list, sizeof(list), 9999, out));
 
+	// ROBO-198: the explosions the server sends pass the client's check. A grenade has no owner (playerID -1), and the
+	// admin nuke had an uninitialised one; the client dropped both, so a grenade vanished without a blast or sound
+	UINT4 thrower = harness::spawned(WEAPON_SMG);
+	int slotT = harness::slotOf(thrower);
+	net_clsv_svcl_player_projectile grenade = {};
+	grenade.playerID = (int8_t)slotT;
+	grenade.weaponID = WEAPON_GRENADE;
+	grenade.projectileType = PROJECTILE_GRENADE;
+	for (int k = 0; k < 3; ++k)
+		grenade.position[k] = (short)(game()->players[slotT]->currentCF.position[k] * 100);
+	grenade.vel[0] = 10;
+	deliver(thrower, NET_CLSV_SVCL_PLAYER_PROJECTILE, grenade);
+	harness::tick(90); // the fuse is 2 s
+	int explosions = 0;
+	for (const harness::SentPacket& p : harness::sent())
+		if (p.typeID == NET_SVCL_EXPLOSION)
+		{
+			++explosions;
+			CHECK(packet::checkServerMessage(p.data.data(), (int)p.data.size(), p.typeID, out));
+		}
+	CHECK(explosions == 1);
+	harness::sent().clear();
+	scene->server->nukePlayer(slotT);
+	explosions = 0;
+	for (const harness::SentPacket& p : harness::sent())
+		if (p.typeID == NET_SVCL_EXPLOSION)
+		{
+			++explosions;
+			CHECK(packet::checkServerMessage(p.data.data(), (int)p.data.size(), p.typeID, out));
+			CHECK(((const net_svcl_explosion*)p.data.data())->playerID == -1);
+		}
+	CHECK(explosions == 1);
+	harness::sent().clear();
+	scene->server->nukeAll();
+	explosions = 0;
+	for (const harness::SentPacket& p : harness::sent())
+		if (p.typeID == NET_SVCL_EXPLOSION)
+		{
+			++explosions;
+			CHECK(packet::checkServerMessage(p.data.data(), (int)p.data.size(), p.typeID, out));
+			CHECK(((const net_svcl_explosion*)p.data.data())->playerID == -1);
+		}
+	CHECK(explosions > 0);
+
+	// ROBO-198: the admin score commands send flag state -3, then -2, so clients count the capture; the client
+	// dropped the -3 and the score never showed
+	for (const char* command : {"blueTeamScore", "redTeamScore"})
+	{
+		harness::sent().clear();
+		console->sendCommand(CString("%s %i", command, slotT));
+		int flagStates = 0;
+		for (const harness::SentPacket& p : harness::sent())
+			if (p.typeID == NET_SVCL_CHANGE_FLAG_STATE)
+			{
+				++flagStates;
+				CHECK(packet::checkServerMessage(p.data.data(), (int)p.data.size(), p.typeID, out));
+			}
+		CHECK(flagStates == 2 || std::printf("  %s\n", command) < 0);
+	}
+
 	harness::stop();
 	if (harness::failures() == 0) std::printf("ok: packet hygiene\n");
 	return harness::failures() ? 1 : 0;

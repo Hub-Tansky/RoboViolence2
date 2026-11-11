@@ -1,0 +1,2 @@
+# ROBO-195: a map file with an unknown version in the pref dir's maps/ doesn't stop the menu from building
+expect-scene menu
