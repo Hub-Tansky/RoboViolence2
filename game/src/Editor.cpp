@@ -32,13 +32,7 @@
 extern Scene * scene;
 
 Editor2::Editor2(CString mapName, unsigned int font, int sizeX, int sizeY)
-	:	needToShutDown(false)
-	,	map(0)
-	,	active(0)
-	,	activeDialog(0)
-	,	inFrameFor(1.0f)
-	,	mouseInMenu(false)
-	,	isDirty(false)
+	: needToShutDown(false), map(0), active(0), activeDialog(0), inFrameFor(1.0f), mouseInMenu(false), isDirty(false), saveAsPending(false)
 {
 	if (mapName.len() > 15)
 		mapName.resize(15);
@@ -246,6 +240,11 @@ void Editor2::ShowFrame(CControl * frame)
 
 void Editor2::update(float delay)
 {
+	if (activeDialog == 0 && saveAsPending)
+	{
+		saveAsPending = false;
+		activeDialog = new SaveAsMapDialog(this, editorRoot->font, map->author_name, map->mapName);
+	}
 	if(activeDialog != 0)
 	{
 		//activeDialog->update(delay);
@@ -653,6 +652,14 @@ bool Editor2::Open(CString mapName)
 	return true;
 }
 
+bool Editor2::SaveOrSaveAs()
+{
+	if (Save(map->mapName))
+		return true;
+	saveAsPending = true;
+	return false;
+}
+
 bool Editor2::Save(CString mapName)
 {
     int i, j;
@@ -802,10 +809,8 @@ void Editor2::Click(CControl * control)
 	}
 	if (control == btn_save)
 	{
-		if(isDirty && !Save(map->mapName))
-		{
-			activeDialog = new SaveAsMapDialog(this, editorRoot->font, map->author_name, map->mapName);
-		}
+		if (isDirty)
+			SaveOrSaveAs();
 		return;
 	}
 	if (control == btn_saveAs)

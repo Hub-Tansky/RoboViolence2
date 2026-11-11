@@ -55,7 +55,7 @@ public:
 	~SaveDirtyDialog();
 
 	// Dialog events
-	virtual void OnOk();
+	virtual void OnYes();
 };
 
 class AlreadyExistDialog : public IEditorDialog

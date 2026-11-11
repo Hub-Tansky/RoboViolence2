@@ -37,6 +37,9 @@ public:
 	// Is the map saved or dirty?
 	bool isDirty;
 
+	// Open Save As once no dialog is up (SaveOrSaveAs could not save)
+	bool saveAsPending;
+
 	// Time since last (cursor in frame state)
 	float inFrameFor;
 
@@ -139,6 +142,9 @@ public:
 
 	// Save the map (moved here from Map::~Map)
 	bool Save(CString mapName); // false when the name is not bv2::isMapName or the file cannot be written
+
+	// Save to the map's own name; when that fails, Save As opens and false is returned (ROBO-162)
+	bool SaveOrSaveAs();
 
 	// Performs an action when one of the buttons is clicked
 	void Click(CControl * control);

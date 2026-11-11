@@ -67,9 +67,14 @@ SaveDirtyDialog::~SaveDirtyDialog()
 	}
 }
 
-void SaveDirtyDialog::OnOk()
+// Yes saves, then the caller goes on. Without a valid name Save As opens instead and the caller stops: Cancel (ROBO-162)
+void SaveDirtyDialog::OnYes()
 {
-	editor->Save(editor->map->mapName);
+	if (!editor->SaveOrSaveAs())
+	{
+		mustClose = false;
+		state = StateCancel;
+	}
 }
 
 AlreadyExistDialog::AlreadyExistDialog(Editor2 * editor, unsigned int font, bool & in_flag)
@@ -165,7 +170,14 @@ void NewMapDialog::update(float delay)
 	if(subDialog != 0)
 	{
 		//subDialog->update(delay);
-		if(subDialog->state == StateYes || subDialog->state == StateOK) // OK: the name message boxes
+		if (subDialog->state == StateCancel) // Save first? Yes without a valid name: Save As replaces this dialog
+		{
+			menuManager.hideDialog();
+			delete subDialog;
+			subDialog = 0;
+			state = StateCancel;
+		}
+		else if (subDialog->state != StateNothing) // Save first? Yes or No, or OK on a message box
 		{
 			menuManager.hideDialog();
 			delete subDialog;
@@ -353,7 +365,14 @@ void OpenMapDialog::update(float delay)
 	if(subDialog != 0)
 	{
 		//subDialog->update(delay);
-		if (subDialog->state == StateYes || subDialog->state == StateOK) // OK: the invalid map message
+		if (subDialog->state == StateCancel) // Save first? Yes without a valid name: Save As replaces this dialog
+		{
+			menuManager.hideDialog();
+			delete subDialog;
+			subDialog = 0;
+			state = StateCancel;
+		}
+		else if (subDialog->state != StateNothing) // Save first? Yes or No, or OK on a message box
 		{
 			menuManager.hideDialog();
 			delete subDialog;
