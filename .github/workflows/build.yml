@@ -66,6 +66,30 @@ jobs:
           python3 -m venv "$RUNNER_TEMP/dmgbuild"
           "$RUNNER_TEMP/dmgbuild/bin/pip" install --quiet --require-hashes -r packaging/macos/requirements.txt
           echo "$RUNNER_TEMP/dmgbuild/bin" >> "$GITHUB_PATH"
+      # Release symbols (.pdb, .dSYM, Linux .debug by build ID) leave the binaries before packaging (ROBO-188, ADR 0051)
+      - name: Split debug symbols
+        shell: bash
+        run: ${{ runner.os == 'Windows' && 'python' || 'python3' }} packaging/split-symbols.py build/${{ matrix.preset }}-release/runtime ${{ matrix.preset }} symbols "$BV2_VERSION"
+      # Kept privately in the private vault repo rv2-docs, 30-dev/crash-debug/<tag>/, never in the public release or artifacts
+      - name: Store symbols privately
+        if: github.ref_type == 'tag' && startsWith(github.ref_name, 'v')
+        shell: bash
+        env:
+          SYMBOLS_TOKEN: ${{ secrets.SYMBOLS_TOKEN }}  # fine-grained, Contents write on Hub-Tansky/rv2-docs only
+        run: |
+          git clone --depth 1 "https://x-access-token:${SYMBOLS_TOKEN}@github.com/Hub-Tansky/rv2-docs.git" "$RUNNER_TEMP/rv2-docs"
+          cd "$RUNNER_TEMP/rv2-docs"
+          mkdir -p "30-dev/crash-debug/$GITHUB_REF_NAME"
+          cp "$GITHUB_WORKSPACE"/symbols/*.zip "30-dev/crash-debug/$GITHUB_REF_NAME/"
+          git add 30-dev/crash-debug
+          git -c user.name=Hub-Tansky -c user.email=337104978+Hub-Tansky@users.noreply.github.com \
+            commit -q -m "crash-debug: ${{ matrix.preset }} symbols for $GITHUB_REF_NAME ($GITHUB_SHA)"
+          # The three build jobs push to the same branch: rebase onto whoever pushed first and try again
+          for attempt in 1 2 3 4 5; do
+            git push -q origin HEAD:main && exit 0
+            git pull -q --rebase origin main
+          done
+          exit 1
       # The archive on every OS, plus the installer (Windows), disk image (macOS) or .deb (Linux); ADR 0020, 0031
       - name: Package
         shell: bash

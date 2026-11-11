@@ -274,6 +274,10 @@ find_program(BV2_DPKG_SHLIBDEPS dpkg-shlibdeps)  # dpkg-dev (build-essential pul
 if(UNIX AND NOT APPLE AND BV2_DPKG_SHLIBDEPS AND TARGET bv2 AND TARGET bv2dedicated)
   add_test(NAME make_deb COMMAND ${Python3_EXECUTABLE} -B ${CMAKE_CURRENT_SOURCE_DIR}/test_make_deb.py "${CMAKE_BINARY_DIR}" "${BV2_TEST_SCRATCH}")
 endif()
+# Release only: the symbols ROBO-188 splits off (ADR 0051)
+if(CMAKE_BUILD_TYPE STREQUAL "Release" AND TARGET bv2 AND TARGET bv2dedicated AND TARGET bv2master)
+  add_test(NAME split_symbols COMMAND ${Python3_EXECUTABLE} -B ${CMAKE_CURRENT_SOURCE_DIR}/test_split_symbols.py "${BV2_RUNTIME_DIR}" "${BV2_TEST_SCRATCH}")
+endif()
 add_test(NAME lang_check COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test_lang_check.py "${BV2_TEST_SCRATCH}")
 add_test(NAME osv_vcpkg COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test_osv_vcpkg.py "${BV2_TEST_SCRATCH}")
 
