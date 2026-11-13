@@ -24,6 +24,7 @@
 #ifndef CONSOLE
 #include "Client.h"
 #endif
+#include "SecondaryMenu.h"
 #include "Server.h"
 #include "Scene.h"
 #include <time.h>
@@ -765,20 +766,25 @@ void Game::update(float delay)
 		scene->client->btn_guns[WEAPON_BAZOOKA]->enable = gameVar.sv_enableBazooka;
 		scene->client->btn_guns[WEAPON_PHOTON_RIFLE]->enable = gameVar.sv_enablePhotonRifle;
 		scene->client->btn_guns[WEAPON_FLAME_THROWER]->enable = gameVar.sv_enableFlameThrower;
-		
-		if(gameVar.sv_enableSecondary)
+
+		// A secondary the server disables is hidden and the rest close up (ROBO-212); sv_enableSecondary false greys them all
+		const bool secondaryOn[secondaryMenu::count] = {gameVar.sv_enableKnives, gameVar.sv_enableNuclear, gameVar.sv_enableShield, gameVar.sv_enableMinibot};
+		int secondaryRow[secondaryMenu::count];
+		secondaryMenu::layout(secondaryOn, secondaryRow);
+		for (int i = 0; i < secondaryMenu::count; ++i)
 		{
-			scene->client->btn_meleeguns[WEAPON_KNIVES-WEAPON_KNIVES]->enable = gameVar.sv_enableKnives;
-			scene->client->btn_meleeguns[WEAPON_NUCLEAR-WEAPON_KNIVES]->enable = gameVar.sv_enableNuclear;
-			scene->client->btn_meleeguns[WEAPON_SHIELD-WEAPON_KNIVES]->enable = gameVar.sv_enableShield;
-			scene->client->btn_meleeguns[WEAPON_MINIBOT-WEAPON_KNIVES]->enable = gameVar.sv_enableMinibot;
+			CControl* button = scene->client->btn_meleeguns[i];
+			button->visible = secondaryRow[i] >= 0;
+			button->enable = button->visible && gameVar.sv_enableSecondary;
+			if (button->visible)
+				button->localPos[1] = 130 + secondaryRow[i] * 40; // Client.cpp's column
 		}
-		else
+		const int chosenSecondary = thisPlayer->nextMeleeWeapon - WEAPON_KNIVES;
+		const int usableSecondary = secondaryMenu::fallback(secondaryOn, chosenSecondary);
+		if (usableSecondary != chosenSecondary)
 		{
-			scene->client->btn_meleeguns[WEAPON_KNIVES-WEAPON_KNIVES]->enable = false;
-			scene->client->btn_meleeguns[WEAPON_NUCLEAR-WEAPON_KNIVES]->enable = false;
-			scene->client->btn_meleeguns[WEAPON_SHIELD-WEAPON_KNIVES]->enable = false;
-			scene->client->btn_meleeguns[WEAPON_MINIBOT-WEAPON_KNIVES]->enable = false;
+			thisPlayer->nextMeleeWeapon = WEAPON_KNIVES + usableSecondary;
+			scene->client->currentMelee = scene->client->btn_meleeguns[usableSecondary];
 		}
 
 	}

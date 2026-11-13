@@ -85,3 +85,4 @@ What we do, in one or two sentences.
 | [0050](0050-client-frame-pacing-and-sleep.md) | Client frame pacing follows vsync and window state; the display sleeps outside play | Accepted |
 | [0051](0051-release-symbols-kept-privately-per-tag.md) | Keep release debug symbols privately, per tag in the rv2-docs vault | Accepted |
 | [0052](0052-public-servers-play-pro-ruleset.md) | The shipped launch scripts play the Pro ruleset | Accepted |
+| [0053](0053-three-public-servers-and-owner-defaults.md) | Three public servers, the owner's defaults, disabled secondaries hidden | Accepted |

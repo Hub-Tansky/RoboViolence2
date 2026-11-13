@@ -96,8 +96,8 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `packaging/icons/hicolor/512x512/apps/roboviolence2.png` | Linux hicolor icon, 512 px (installed as is) |
 | `packaging/docker/Dockerfile` | Server images: one Ubuntu 24.04 build, targets `server` (`bv2dedicated`, launch script as argument, healthcheck on `BV2_HEALTH_PORT`) and `master` (`bv2master`), non-root, pref dir volume (step 11) |
 | `packaging/docker/master-entrypoint.sh` | Master image entrypoint: seeds `master.db` and `web.db` into the volume, then runs `bv2master` |
-| `packaging/docker/Caddyfile` | Caddy site: TLS for the game servers' admin APIs, CTF at `/`, TDM at `/tdm/` (`BV2_ADMIN_HOST`, default localhost) (step 12); `/deployed` serves the staging commit (phase T step 2) |
-| `packaging/docker/compose.example.yml` | Compose example: master, CTF (3333) and TDM (3334) game servers and the admin TLS proxy on one host, secrets from an env file outside the repo; `BV2_IMAGE_TAG` pins both images to a commit; `BV2_SV_BOTS` from the env file fills each game server with bots (default 0) |
+| `packaging/docker/Caddyfile` | Caddy site: TLS for the game servers' admin APIs, CTF at `/`, TDM at `/tdm/`, FFA at `/ffa/` (`BV2_ADMIN_HOST`, default localhost) (step 12); `/deployed` serves the staging commit (phase T step 2) |
+| `packaging/docker/compose.example.yml` | Compose example: master, CTF (3333), TDM (3334) and FFA (3335) game servers and the admin TLS proxy on one host, secrets from an env file outside the repo; `BV2_IMAGE_TAG` pins both images to a commit; `BV2_SV_BOTS` from the env file fills each game server with bots (default 0) |
 | `packaging/windows/bv2.manifest` | Windows manifest for `bv2`, `bv2dedicated` and `bv2master`: PerMonitorV2 DPI, UTF-8 code page, Windows 10/11 |
 | `packaging/windows/bv2.rc.in` | Windows resource script template: embeds `packaging/icons/roboviolence2.ico` |
 | `tests/CMakeLists.txt` | ctest targets: netPacket, config, fileio, credentials, join password, admin login, admin API, babonet large message, babonet ping with the LAN port taken, the two `SqlStatement.h` copies identical, crash fixes, validator, missing music (client builds), app icon files and wiring, the release text in the client binary (client builds), the built-in window icon (Linux client builds), the hicolor install (Linux), the `.deb` build (Linux), dedicated-server smoke, in-process server harness (`bv2server_lib` + fake babonet), bots and the seeded bot match, packet hygiene, corpus replay, crash-input tests for `crash-*.bin` under ASan (none at present), master server, autotest runner and (with Xvfb on Linux, or on macOS) the client on autotest scripts; with Xvfb on Linux the e2e scenarios (`e2e_*`) and screenshots (`screenshot_*`); on Windows also the non-ASCII install path smoke and the no-VC++-runtime-DLL check |
@@ -166,6 +166,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/test_babonet_ping.cpp` | PNS-56: a server-browser ping to a game server on this host is answered within 1 s while another process holds babonet's LAN port |
 | `tests/test_browsable_game.cpp` | A server browser row owns a copy of its lobby game's row (the lobby frees its own) |
 | `tests/test_cstring.cpp` | Phase C step 5: one-argument `CString` is text (arrays, `char*`, literals, direct and implicit); two or more arguments format (ADR 0021) |
+| `tests/test_secondary_menu.cpp` | `secondaryMenu`: Nuke Bot and Mini Bot hidden, the rest close up, a saved hidden pick falls back to Knives or the first enabled one (ctest `secondary_menu`) |
 | `tests/test_spawn_overlay.cpp` | `spawns::farthestFrom`: no DM spawn gives no line origin (the editor crash), the farthest of several, ties, nearest team spawn |
 | `tests/test_view_geometry.cpp` | Widescreen (Stretch) projects at the window's own aspect, Bars at 4:3; the camera's side margin widens with the view, and a narrow or short map centres it |
 | `tests/test_config.cpp` | dksvar config layering, transient values not saved, secrets masked, `dksvarGetValue` |
@@ -175,7 +176,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/test_crash_fixes.cpp` | Steps 5 and 7: one check per fixed defect (KEY_QUESTIONS Part D) on the in-process server |
 | `tests/test_dks.cpp` | R20: `dksPlayMusic` on a missing file 200 times; a sound deleted after `dksShutDown` (teardown) (ASan) |
 | `tests/test_split_symbols.py` | ROBO-188: `split-symbols.py` on a copy of a Release build's binaries puts each one's symbols in the zip and strips it (ctest `split_symbols`, Release builds only; ADR 0051) |
-| `tests/test_example_cfg.py` | `config/bv2.example.cfg` names a new player as `GameVar.cpp` does and starts fullscreen at the desktop resolution (ADR 0043) |
+| `tests/test_example_cfg.py` | `config/bv2.example.cfg` names a new player as `GameVar.cpp` does and starts fullscreen at the desktop resolution (ADR 0043); it and the three launch scripts carry the owner's server defaults, names, modes, ports and sizes (ADR 0053) |
 | `tests/test_window_icon.cpp` | `dkwSetWindowIcon` accepts the Linux client's compiled-in icon (`AppIcon.h`) and refuses bytes that aren't a PNG |
 | `tests/test_make_deb.py` | `make_deb.py` builds an installable `.deb` from the build's install: `share/bv2/main` equals `runtime/main`, layout, modes, root ownership, no master, version mapping (`-rc1` sorts before the release), Depends, launcher path (ctest `make_deb`, Linux client builds with dpkg-dev) |
 | `tests/test_installer_licence.py` | The Windows installer's reflowed licence keeps every word and paragraph of `LICENSE.txt`, one line per paragraph except centred headings (ctest `installer_licence`) |
@@ -206,7 +207,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/test_validator.cpp` | Steps 8, 9: the step 8 kicks, `sv_antiCheat` levels, and each step 9 rule against a cheat and against normal (lagged) play |
 | `tests/test_master.cpp` | In-process master on port 10207 with a scratch `master.db`: register, list, heartbeat timeout (simulated 61 s), removal by `KILL_SERV`, SQL injection in names, maps, nicks and IPs, the ban list with LIKE filters (Q-S3), the ban secret, the advertised address and a reconnect; runs on Windows since R28 was fixed |
 | `tests/test_netpacket.cpp` | Byte-level layout of the packed wire structs |
-| `tests/test_staging_deploy.sh` | Phase T step 2: staging deploy helpers: main-only run selection, `/status` human count (bots ignored, `players` from older servers), CTF and TDM player counts and verify, failures per commit, infrastructure stages, env-file mode and readonly repository (ctest `staging_deploy`) |
+| `tests/test_staging_deploy.sh` | Phase T step 2: staging deploy helpers: main-only run selection, `/status` human count (bots ignored, `players` from older servers), CTF, TDM and FFA player counts and verify, failures per commit, infrastructure stages, env-file mode and readonly repository (ctest `staging_deploy`) |
 | `tests/test_health_watch.sh` | Container health watcher: which container states are problems, missing services from `GAME_SERVERS`, Docker not answering, two-run confirmation before an alert or recovery, a whole run against a stub `docker`, no check during a deploy but a stale lock ignored (ctest `health_watch`, Unix) |
 | `tests/test_playtest_agent.sh` | Phase T step 1: playtest agent helpers: main-only run selection (fork PR from `main` rejected), artifact digest, attempt limit, env-file mode and no export, launch script map swap (ctest `playtest_agent`, Unix with `jq`) |
 | `tools/check-content-case.py` | Fails when a literal `main/...` path differs from a real file name only by case |
@@ -253,7 +254,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `.github/workflows/codeql.yml` | CodeQL: `c-cpp` (manual linux-x64 build of the three executables) and `actions`; push, PR, weekly; alerts under `build/` (vcpkg headers) filtered out |
 | `.github/workflows/dependency-graph.yml` | Submits resolved vcpkg ports to the dependency graph on push to `main` |
 | `.github/workflows/osv-vcpkg.yml` | Weekly OSV check of the vcpkg ports by upstream commit (`tools/osv-vcpkg.py`); not required |
-| `.github/workflows/containers.yml` | CI: builds both server images, checks non-root, runs the compose example (healthy, both passworded servers listed by the master under one `BV2_PUBLIC_ADDRESS`), checks both answer the server browser's UDP ping, checks a remote `status` of CTF and TDM over TLS and `/deployed`, pushes multi-arch `:<sha>` and `:latest` to GHCR from `main` and weekly |
+| `.github/workflows/containers.yml` | CI: builds both server images, checks non-root, runs the compose example (healthy, the three passworded servers listed by the master under one `BV2_PUBLIC_ADDRESS`), checks each answers the server browser's UDP ping, checks a remote `status` of CTF, TDM and FFA over TLS and `/deployed`, pushes multi-arch `:<sha>` and `:latest` to GHCR from `main` and weekly |
 
 ### `config`
 
@@ -280,8 +281,9 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 
 | path | purpose |
 |---|---|
-| `content/LaunchScript/CTF.cfg` | Example dedicated-server launch script (CTF, port 3333, Pro ruleset; map is a placeholder) |
-| `content/LaunchScript/TDM.cfg` | Dedicated-server launch script (TDM, port 3334, Pro ruleset; map is a placeholder); the compose example's `tdm` service |
+| `content/LaunchScript/CTF.cfg` | Example dedicated-server launch script (CTF "Get that flag.", port 3333, 10 players, owner's defaults ADR 0053, Pro ruleset; map is a placeholder) |
+| `content/LaunchScript/FFA.cfg` | Dedicated-server launch script (free for all "Deathmatch ring", port 3335, 12 players, ADR 0053; map is a placeholder); the compose example's `ffa` service |
+| `content/LaunchScript/TDM.cfg` | Dedicated-server launch script (TDM "Team Deathmatch", port 3334, 10 players, ADR 0053, Pro ruleset; map is a placeholder); the compose example's `tdm` service |
 
 ### `content/bots`
 
@@ -372,6 +374,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `docs/decisions/0050-client-frame-pacing-and-sleep.md` | ADR: client frame pacing follows vsync and window state; the display sleeps outside play |
 | `docs/decisions/0051-release-symbols-kept-privately-per-tag.md` | ADR: Release builds carry debug info, split into a symbols zip before packaging; a `v*` tag commits it to the private vault rv2-docs `30-dev/crash-debug/<tag>/` with `SYMBOLS_TOKEN` |
 | `docs/decisions/0052-public-servers-play-pro-ruleset.md` | ADR: the shipped CTF and TDM launch scripts play the Pro ruleset (ROBO-199) |
+| `docs/decisions/0053-three-public-servers-and-owner-defaults.md` | ADR: FFA, CTF and TDM public servers, the owner's defaults in the scripts and example config, disabled secondaries hidden in the weapon menu (ROBO-212) |
 | `docs/decisions/README.md` | ADR format and index |
 
 ### `docs/ops`
@@ -761,6 +764,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/ServerValidator.cpp` | Server cheat checks: spawn weapon whitelist, speed/frame kick, step 9 rules (weapon, movement, rate limits) with a decaying score |
 | `game/src/ServerValidator.h` | Server cheat checks (`Server::validator`), asked by the `ServerRecv.cpp` handlers |
 | `game/src/SqlStatement.h` | Prepared SQLite statement with bound parameters (the game's copy) |
+| `game/src/SecondaryMenu.h` | The weapon menu's secondary column (`secondaryMenu::layout`, `fallback`): disabled secondaries hidden, the rest close up, a hidden pick falls back (ADR 0053) |
 | `game/src/SpawnOverlay.h` | The editor spawn overlay's line origin (`spawns::farthestFrom`): the DM spawn farthest from a team's spawns, -1 when there is none |
 | `game/src/ViewGeometry.h` | ([ADR 0039](docs/decisions/0039-widescreen-stretch-shows-more-map.md)) The 3D viewport inside the window (`view::rect`: whole window, or 4:3 between bars; `view::current` for this frame, defined in `IntroScreen.cpp`), the aspect the gameplay, scope and intro projections use, and the camera's margins at the map edges |
 | `game/src/Weapon.cpp` | Weapon definitions and stats |
@@ -832,7 +836,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tools/staging/cloud-init.yml` | Staging host bootstrap (cloud-init, Ubuntu 24.04): Docker, `deploy.sh`, `rv2-staging-setup` for the env file, cron and first deploy |
 | `tools/staging/README.md` | Staging deploy agent: host needs, install, env file, cron, commands, files |
 | `tools/staging/health-watch.sh` | Container health watcher beside `deploy.sh` (cron, every minute): ntfy when a service of the stack is unhealthy, stopped, restarting or missing for two runs in a row, and when all are well again; skips while a deploy runs |
-| `tools/staging/deploy.sh` | Staging deploy agent (Linux, cron; production runs it by hand with `RV2_DEPLOY_LABEL=prod`): newest successful main `containers` build, pinned to its commit, deployed only with no humans on CTF and TDM (bots don't count), rollback, `/deployed` (ADR 0018) |
+| `tools/staging/deploy.sh` | Staging deploy agent (Linux, cron; production runs it by hand with `RV2_DEPLOY_LABEL=prod`): newest successful main `containers` build, pinned to its commit, deployed only with no humans on CTF, TDM and FFA (bots don't count), rollback, `/deployed` (ADR 0018) |
 | `tools/review.sh` | Review gate (REVIEW.md section 1) on `merge-base...HEAD`: all checks, scope against the PR's Allowed paths, anti-gaming, `check-review-record.py`; `--full` builds and tests |
 | `tools/setup-dev.ps1` | Activates hooks, checks tools (Windows) |
 | `tools/setup-dev.sh` | Activates hooks, checks tools (Unix); prints the apt line for building and the package names for running a package |

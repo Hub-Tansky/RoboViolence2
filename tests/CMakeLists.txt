@@ -19,6 +19,11 @@ target_include_directories(test_spawn_overlay PRIVATE ${CMAKE_SOURCE_DIR}/game/s
 bv2_target_defaults(test_spawn_overlay)
 add_test(NAME spawn_overlay COMMAND test_spawn_overlay)
 
+add_executable(test_secondary_menu test_secondary_menu.cpp)
+target_include_directories(test_secondary_menu PRIVATE ${CMAKE_SOURCE_DIR}/game/src)
+bv2_target_defaults(test_secondary_menu)
+add_test(NAME secondary_menu COMMAND test_secondary_menu)
+
 add_executable(test_crash_report test_crash_report.cpp ${CMAKE_SOURCE_DIR}/game/src/CrashReport.cpp)
 target_include_directories(test_crash_report PRIVATE ${CMAKE_SOURCE_DIR}/game/src)
 target_link_libraries(test_crash_report PRIVATE zeven_core)  # platform.h

@@ -1,4 +1,4 @@
-# TLS in front of the game servers' admin APIs: CTF at /, TDM at /tdm/ (Phase B step 12, ADR 0015). BV2_ADMIN_HOST: the public name, for which
+# TLS in front of the game servers' admin APIs: CTF at /, TDM at /tdm/, FFA at /ffa/ (Phase B step 12, ADR 0015). BV2_ADMIN_HOST: the public name, for which
 # Caddy fetches a certificate (ACME needs 443 reachable: BV2_ADMIN_PORT=443); the default, localhost, uses Caddy's own CA.
 {
 	servers {
@@ -20,6 +20,9 @@
 	}
 	handle_path /tdm/* {
 		reverse_proxy tdm:8080
+	}
+	handle_path /ffa/* {
+		reverse_proxy ffa:8080
 	}
 	handle {
 		reverse_proxy server:8080
