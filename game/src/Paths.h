@@ -28,7 +28,8 @@ struct sqlite3;
 //
 //   content (read-only)  <dataRoot>/main/...   found by bv2PathsInit(); the process then chdir()s to dataRoot,
 //                                              so the code's "main/..." paths keep working
-//   package content      <packageRoot>/main/...  launch scripts, languages, bv2.example.cfg; see contentFile() (ADR 0016)
+//   package content      <packageRoot>/main/...  launch scripts, languages, bv2.example.cfg; see contentFile() (ADR 0016);
+//                                              the game's own maps, see mapFileForRead() (ADR 0054)
 //   user data (writable) <prefDir>/...         bv2.cfg, bv2.db, banlist, console.log, screenshots, saved maps
 namespace bv2
 {

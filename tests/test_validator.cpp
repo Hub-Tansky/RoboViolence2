@@ -453,7 +453,7 @@ static void movementRules()
 	CHECK(score(c) == 0);
 	leave(c);
 
-	// Walls: the test makes a one-cell wall in an open 3x3 block (the placeholder map has none). Round its corner in
+	// Walls: the test makes a one-cell wall in an open 3x3 block (the map need not have one). Round its corner in
 	// high-ping steps: nothing. Through it in short steps, twice: wall.
 	c = harness::spawned(WEAPON_SMG);
 	Map & map = *scene->server->game->map;

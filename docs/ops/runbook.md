@@ -10,7 +10,7 @@ Hosting the game server and the master server as containers (Phase B step 11). I
 | `ghcr.io/hub-tansky/roboviolence2-master` | `bv2master` | TCP 10207 | `/var/lib/bv2`: `master.db` (bans), `web.db` (game list), seeded on first start |
 
 - CI pushes multi-arch (amd64, arm64) `latest` and the commit SHA from `main`. GHCR packages start private: make them public, or `docker login ghcr.io` with a token that can read packages.
-- Both run as uid 10001. A local build follows the host (amd64 or arm64). The game data in the image is the generated placeholder set; for the original data see below.
+- Both run as uid 10001. A local build follows the host (amd64 or arm64). The game data in the image is the generated placeholder set plus the game's own maps (`content/maps`, [ADR 0054](../decisions/0054-game-ships-its-own-maps.md)), which the CTF, TDM and FFA services play; for the original data see below.
 - Build locally instead: `docker compose -f packaging/docker/compose.example.yml build`.
 
 ## Game servers
