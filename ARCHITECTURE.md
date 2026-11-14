@@ -283,9 +283,9 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 
 | path | purpose |
 |---|---|
-| `content/LaunchScript/CTF.cfg` | Example dedicated-server launch script (CTF "Get that flag", port 3333, 10 players, owner's defaults ADR 0053, Pro ruleset; plays the six CTF/TDM maps of `content/maps`) |
-| `content/LaunchScript/FFA.cfg` | Dedicated-server launch script (free for all "Deathmatch ring", port 3335, 12 players, ADR 0053; plays the four `DM-` maps of `content/maps`); the compose example's `ffa` service |
-| `content/LaunchScript/TDM.cfg` | Dedicated-server launch script (TDM "Team Deathmatch", port 3334, 10 players, ADR 0053, Pro ruleset; plays the six CTF/TDM maps of `content/maps`); the compose example's `tdm` service |
+| `content/LaunchScript/CTF.cfg` | Example dedicated-server launch script (CTF "Get that flag", port 3333, 10 players, owner's defaults ADR 0053, Pro ruleset; plays the six CTF/TDM maps of `content/maps` in plain order, no map-size filter, ROBO-215) |
+| `content/LaunchScript/FFA.cfg` | Dedicated-server launch script (free for all "Deathmatch ring", port 3335, 12 players, ADR 0053; plays the four `DM-` maps of `content/maps` in plain order, no map-size filter, ROBO-215); the compose example's `ffa` service |
+| `content/LaunchScript/TDM.cfg` | Dedicated-server launch script (TDM "Team Deathmatch", port 3334, 10 players, ADR 0053, Pro ruleset; plays the six CTF/TDM maps of `content/maps` in plain order, no map-size filter, ROBO-215); the compose example's `tdm` service |
 
 ### `content/maps`
 
