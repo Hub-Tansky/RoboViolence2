@@ -1013,12 +1013,17 @@ void Console::sendCommand(CString commandLine, bool isAdmin, unsigned long bbnet
 		else if (what == "pick")
 		{
 			if (OpenMapDialog* open = dynamic_cast<OpenMapDialog*>(dialog))
-				for (CControl* item : open->lbl_mapNameItem)
-					if (item->text == tokenize)
+			{
+				// Selects the row as a mouse click does (CControl::update); a click that misses the rows leaves none, which OK now ignores
+				CControl* list = open->lst_mapName;
+				for (size_t i = 2; i < list->children.size(); ++i)
+					if (list->children[i]->text == tokenize)
 					{
-						open->lst_mapName->selectedChild = item;
-						open->Click(item);
+						list->selectChild(int(i) - 2);
+						open->Click(list->children[i]);
+						break;
 					}
+			}
 		}
 		dialog = ed->activeDialog;
 		add(CString("editorclick: dialog %s, map %s", dialog && dialog->state == StateNothing ? "open" : "closed", ed->map ? ed->map->mapName.s : "none"));

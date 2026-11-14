@@ -677,7 +677,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/ConfirmPass.cpp` | Password confirmation dialog |
 | `game/src/ConfirmPass.h` | Password confirmation dialog |
 | `game/src/ConnectFailed.h` | Dialog: connection failed |
-| `game/src/Console.cpp` | In-game console: commands, log, remote console; feeds console lines to a running autotest; `refreshgames` asks the master for the game list; `screenshot`, `menutab` and `scoreboard` for screenshot tests (ADR 0026); Debug build `crash` (ADR 0048) |
+| `game/src/Console.cpp` | In-game console: commands, log, remote console; feeds console lines to a running autotest; `refreshgames` asks the master for the game list; `screenshot`, `menutab` and `scoreboard` for screenshot tests (ADR 0026); `editorclick` drives the editor's Open dialog for `tests/autotest/editor-open.txt` (ROBO-213); Debug build `crash` (ADR 0048) |
 | `game/src/Console.h` | In-game console: commands, log, remote console |
 | `game/src/Control.cpp` | Menu control base class |
 | `game/src/Control.h` | Menu control base class |
