@@ -24,7 +24,7 @@ defaults = ("sv_serverType 1", "sv_spawnType 0", "sv_winLimit 7", "sv_friendlyFi
 for line in defaults:
     if not re.search(rf"^{line}$", text, re.M):
         sys.exit(f'FAIL bv2.example.cfg lacks "{line}"')
-servers = {"FFA": ('"Deathmatch ring"', 0, 3335, 12), "CTF": ('"Get that flag."', 2, 3333, 10),
+servers = {"FFA": ('"Deathmatch ring"', 0, 3335, 12), "CTF": ('"Get that flag"', 2, 3333, 10),
            "TDM": ('"Team Deathmatch"', 1, 3334, 10)}
 for script, (name, game_type, port, players) in servers.items():
     lines = (root / f"content/LaunchScript/{script}.cfg").read_text()
