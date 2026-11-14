@@ -12,6 +12,7 @@
 ## Decision
 - New `content/LaunchScript/FFA.cfg` (`sv_gameType 0`, port 3335, compose service `ffa`, admin API at `/ffa/`). CTF keeps 3333 and TDM 3334.
 - The three scripts and `config/bv2.example.cfg` (the first config layer, so the Host tab's defaults) set the owner's values. Engine defaults in `GameVar.cpp` stay BV2's, as in ADR 0052.
+- The three scripts also set `sv_minTilesPerBabo 0` and `sv_maxTilesPerBabo 0` (ROBO-215, amends this ADR): BV2's map-size filter picks only maps with 55 to 80 open tiles per player, bots counted, and with 8 bots it left GrimSiege as the only CTF/TDM map. The servers walk their `addmap` list in order. `config/bv2.example.cfg` keeps BV2's 55/80, so a Host-tab server still filters by size.
 - The weapon menu hides a secondary the server disables and closes up the rest (`game/src/SecondaryMenu.h`). A saved pick of a hidden one falls back to the first enabled one. `sv_enableSecondary false` still greys the ones shown.
 - With friendly fire on, bots in team modes throw no molotovs or grenades, fire no rocket with a teammate within 3 units of the target, and hold a shot with a teammate on the line (the whole line for the photon rifle) (`game/src/Bot.cpp`). Without this, bots killed teammates about 100 times in a 10-minute CTF simulation, mostly with molotovs and grenades, and some seeds ended with no capture (`bot_sim_CTF`).
 

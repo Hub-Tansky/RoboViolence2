@@ -28,7 +28,8 @@ servers = {"FFA": ('"Deathmatch ring"', 0, 3335, 12), "CTF": ('"Get that flag"',
            "TDM": ('"Team Deathmatch"', 1, 3334, 10)}
 for script, (name, game_type, port, players) in servers.items():
     lines = (root / f"content/LaunchScript/{script}.cfg").read_text()
-    for line in (*defaults, f"sv_gameName {name}", f"sv_gameType {game_type}", f"sv_port {port}", f"sv_maxPlayer {players}"):
+    # ROBO-215: no map-size filter, or 8 bots pin CTF and TDM to the one map with 55-80 open tiles per player
+    for line in (*defaults, "sv_minTilesPerBabo 0", "sv_maxTilesPerBabo 0", f"sv_gameName {name}", f"sv_gameType {game_type}", f"sv_port {port}", f"sv_maxPlayer {players}"):
         if not re.search(rf"^set {re.escape(line)}$", lines, re.M):
             sys.exit(f'FAIL {script}.cfg lacks "set {line}"')
 print("ok: example config and launch scripts carry the server defaults")
