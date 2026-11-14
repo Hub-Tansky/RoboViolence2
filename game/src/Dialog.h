@@ -83,6 +83,14 @@ public:
 	virtual void MouseEnter(CControl * control);
 	virtual void Click(CControl * control);
 
+	// Clicks OK (or Cancel) as the mouse does, if the dialog has that button (console editorclick, tests)
+	void ClickButton(bool ok)
+	{
+		CControl* button = ok ? btn_ok : btn_cancel;
+		if (button)
+			Click(button);
+	}
+
 protected:
 	// Dialog events
 	virtual void OnOk();

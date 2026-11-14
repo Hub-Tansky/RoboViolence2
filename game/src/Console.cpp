@@ -31,7 +31,8 @@ extern roboviolence2::Autotest * autotest; // main.cpp: the running --autotest, 
 #include "Scene.h"
 #ifndef CONSOLE
 #include "CMainTab.h"
-#include "screengrab.h"
+#	include "EditorDialogs.h"
+#	include "screengrab.h"
 #endif
 #include <algorithm>
 #include <ctime>
@@ -695,7 +696,7 @@ void Console::sendCommand(CString commandLine, bool isAdmin, unsigned long bbnet
 		add("listbluespawns listredspawns");
 #else
 		add("connect remoteAdmin host edit sayteam vote savemap savemapforce");
-		add("rebuildmap refreshgames menutab scoreboard screenshot");
+		add("rebuildmap refreshgames menutab scoreboard screenshot editorclick");
 #endif
 		return;
 	}
@@ -989,6 +990,43 @@ void Console::sendCommand(CString commandLine, bool isAdmin, unsigned long bbnet
 				return;
 			}
 		add("\x9> usage: menutab news|profile|browser|host|editor|options|credits");
+		return;
+	}
+	// Clicks the editor's Open button, the open dialog's OK or Cancel, or picks a map in the Open list; then prints whether
+	// a dialog stays open and the edited map (tests/autotest/editor-open.txt, ROBO-213)
+	if (command == "editorclick")
+	{
+		CString what = tokenize.getFirstToken(' ');
+		if (what != "open" && what != "ok" && what != "cancel" && what != "pick")
+		{
+			add("\x9> usage: editorclick open|ok|cancel|pick <map>");
+			return;
+		}
+		Editor2* ed = scene->editor;
+		if (!ed)
+			return;
+		IDialog* dialog = ed->activeDialog;
+		if (what == "open" && !dialog)
+			ed->Click(ed->btn_open);
+		else if ((what == "ok" || what == "cancel") && dialog)
+			dialog->ClickButton(what == "ok");
+		else if (what == "pick")
+		{
+			if (OpenMapDialog* open = dynamic_cast<OpenMapDialog*>(dialog))
+			{
+				// Selects the row as a mouse click does (CControl::update); a click that misses the rows leaves none, which OK now ignores
+				CControl* list = open->lst_mapName;
+				for (size_t i = 2; i < list->children.size(); ++i)
+					if (list->children[i]->text == tokenize)
+					{
+						list->selectChild(int(i) - 2);
+						open->Click(list->children[i]);
+						break;
+					}
+			}
+		}
+		dialog = ed->activeDialog;
+		add(CString("editorclick: dialog %s, map %s", dialog && dialog->state == StateNothing ? "open" : "closed", ed->map ? ed->map->mapName.s : "none"));
 		return;
 	}
 	// Holds the scoreboard and hides the in-game menu, as Esc then Tab do (tests/screenshots)

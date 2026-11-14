@@ -152,6 +152,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/autotest/fail.txt` | Autotest script that never passes: the client exits 1 (ctest `autotest_fail`) |
 | `tests/autotest/menu-host.txt` | Autotest script: menu, `help` output, host and join the placeholder map (ctest `autotest_menu_host`) |
 | `tests/autotest/corrupt-map.txt` | Autotest script: the menu builds with a map of unknown version in `maps/` (ctest `corrupt_map_preview`, ROBO-195) |
+| `tests/autotest/editor-open.txt` | Autotest script: the editor's Open dialog with no map picked stays open on OK, then a picked map opens (ctest `autotest_editor_open`, ROBO-213) |
 | `tests/autotest/quit.txt` | Autotest script that quits before its last expect: the client exits 1, not 0 (ctest `autotest_quit`) |
 | `tests/autotest/timeout.txt` | Autotest script that outlasts `--timeout`: the client exits 2 (ctest `autotest_timeout`) |
 | `tests/autotest/usage.txt` | Autotest script: bad arguments to `screenshot`, `menutab` and `scoreboard` print their usage (ctest `autotest_usage`) |
@@ -676,7 +677,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/ConfirmPass.cpp` | Password confirmation dialog |
 | `game/src/ConfirmPass.h` | Password confirmation dialog |
 | `game/src/ConnectFailed.h` | Dialog: connection failed |
-| `game/src/Console.cpp` | In-game console: commands, log, remote console; feeds console lines to a running autotest; `refreshgames` asks the master for the game list; `screenshot`, `menutab` and `scoreboard` for screenshot tests (ADR 0026); Debug build `crash` (ADR 0048) |
+| `game/src/Console.cpp` | In-game console: commands, log, remote console; feeds console lines to a running autotest; `refreshgames` asks the master for the game list; `screenshot`, `menutab` and `scoreboard` for screenshot tests (ADR 0026); `editorclick` drives the editor's Open dialog for `tests/autotest/editor-open.txt` (ROBO-213); Debug build `crash` (ADR 0048) |
 | `game/src/Console.h` | In-game console: commands, log, remote console |
 | `game/src/Control.cpp` | Menu control base class |
 | `game/src/Control.h` | Menu control base class |

@@ -425,6 +425,11 @@ void OpenMapDialog::Click(CControl * control)
 
 void OpenMapDialog::OnOk()
 {
+	if (!lst_mapName->selectedChild) // Open with no map picked: the list starts with none (ROBO-213)
+	{
+		state = StateNothing;
+		return;
+	}
 	if (!editor->Open(lst_mapName->selectedChild->text))
 	{
 		state = StateNothing;
