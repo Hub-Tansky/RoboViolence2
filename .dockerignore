@@ -27,7 +27,7 @@ secrets/
 **/*.sqlite*
 # Original assets (never in an image)
 original-assets/
-content/maps/
+# content/maps/ is in: the game's own maps (owner-made, ROBO-214)
 content/models/
 content/skins/
 content/textures/
