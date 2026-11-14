@@ -15,8 +15,8 @@ namespace secondaryMenu
 		return shown;
 	}
 
-	// The secondary to use instead of `chosen` (an index) when it is disabled: the first enabled one, else 0 (Knives),
-	// as SelectToAvailableMeleeWeapon in Game.cpp
+	// The secondary to use instead of `chosen` (an index) when it is disabled: the first enabled one, else 0 (Knives).
+	// SelectToAvailableMeleeWeapon in Game.cpp uses it too
 	inline int fallback(const bool enabled[count], int chosen)
 	{
 		if (chosen >= 0 && chosen < count && enabled[chosen])

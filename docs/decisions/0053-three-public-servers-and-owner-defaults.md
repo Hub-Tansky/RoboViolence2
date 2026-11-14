@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-11-14
-- Affects: `content/LaunchScript/*.cfg`, `config/bv2.example.cfg`, `game/src/Game.cpp` (weapon menu), `packaging/docker/`, `tools/staging/deploy.sh`; extends [ADR 0027](0027-several-game-servers-per-host.md) and [ADR 0052](0052-public-servers-play-pro-ruleset.md); ROBO-212
+- Affects: `content/LaunchScript/*.cfg`, `config/bv2.example.cfg`, `game/src/Game.cpp` (weapon menu), `game/src/Bot.cpp` (friendly fire), `packaging/docker/`, `tools/staging/deploy.sh`; extends [ADR 0027](0027-several-game-servers-per-host.md) and [ADR 0052](0052-public-servers-play-pro-ruleset.md); ROBO-212
 
 ## Context
 - The owner asked on 2026-11-14 for three public servers, in this order: "Deathmatch ring" (free for all, 12 players), "Get that flag." (CTF, 10), "Team Deathmatch" (TDM, 10).
@@ -12,7 +12,8 @@
 ## Decision
 - New `content/LaunchScript/FFA.cfg` (`sv_gameType 0`, port 3335, compose service `ffa`, admin API at `/ffa/`). CTF keeps 3333 and TDM 3334.
 - The three scripts and `config/bv2.example.cfg` (the first config layer, so the Host tab's defaults) set the owner's values. Engine defaults in `GameVar.cpp` stay BV2's, as in ADR 0052.
-- The weapon menu hides a secondary the server disables and closes up the rest (`game/src/SecondaryMenu.h`). A saved pick of a hidden one falls back to the first enabled one. `sv_enableSecondary false` still greys all four.
+- The weapon menu hides a secondary the server disables and closes up the rest (`game/src/SecondaryMenu.h`). A saved pick of a hidden one falls back to the first enabled one. `sv_enableSecondary false` still greys the ones shown.
+- With friendly fire on, bots in team modes throw no molotovs or grenades, fire no rocket with a teammate within 3 units of the target, and hold a shot with a teammate on the line (the whole line for the photon rifle) (`game/src/Bot.cpp`). Without this, bots killed teammates about 100 times in a 10-minute CTF simulation, mostly with molotovs and grenades, and some seeds ended with no capture (`bot_sim_CTF`).
 
 ## Consequences
 - Prod needs TCP and UDP 3335 open, the deploy agent refreshed (its `GAME_SERVERS` lists `ffa`), and an uptime monitor for 3335.

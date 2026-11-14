@@ -335,12 +335,8 @@ int SelectToAvailableWeapon()
 //--- He oui, une fonction GLOBAL !!!!!!!!!!!!
 int SelectToAvailableMeleeWeapon()
 {
-	if (gameVar.sv_enableKnives)	return WEAPON_KNIVES;
-	if (gameVar.sv_enableNuclear)	return WEAPON_NUCLEAR;
-	if (gameVar.sv_enableShield)	return WEAPON_SHIELD;
-	if (gameVar.sv_enableMinibot)	return WEAPON_MINIBOT;
-
-	return WEAPON_KNIVES;
+	const bool enabled[secondaryMenu::count] = {gameVar.sv_enableKnives, gameVar.sv_enableNuclear, gameVar.sv_enableShield, gameVar.sv_enableMinibot};
+	return WEAPON_KNIVES + secondaryMenu::fallback(enabled, -1); // the weapon menu's rule too
 }
 
 
@@ -767,7 +763,7 @@ void Game::update(float delay)
 		scene->client->btn_guns[WEAPON_PHOTON_RIFLE]->enable = gameVar.sv_enablePhotonRifle;
 		scene->client->btn_guns[WEAPON_FLAME_THROWER]->enable = gameVar.sv_enableFlameThrower;
 
-		// A secondary the server disables is hidden and the rest close up (ROBO-212); sv_enableSecondary false greys them all
+		// A secondary the server disables is hidden and the rest close up (ROBO-212); sv_enableSecondary false greys the ones shown
 		const bool secondaryOn[secondaryMenu::count] = {gameVar.sv_enableKnives, gameVar.sv_enableNuclear, gameVar.sv_enableShield, gameVar.sv_enableMinibot};
 		int secondaryRow[secondaryMenu::count];
 		secondaryMenu::layout(secondaryOn, secondaryRow);
