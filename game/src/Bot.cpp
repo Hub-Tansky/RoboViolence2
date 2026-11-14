@@ -1008,17 +1008,22 @@ namespace bots
 			const float ready = weaponUtility(weaponID, d, reloading);
 			const unsigned sequence = b.shotsFired + slot;
 			const bool weaponReady = self.weapon && self.mfElapsedSinceLastShot >= self.weapon->fireDelay;
+			// Friendly fire on (ROBO-212): no thrown fire or grenades (they linger and bounce), no rocket near a teammate
+			const bool friendlyFire = gameVar.sv_friendlyFire && w.gameType != GAME_TYPE_DM;
+			bool mateNearTarget = false;
+			for (int i = 0; friendlyFire && i < MAX_PLAYER; ++i)
+				mateNearTarget |= i != slot && w.alive[i] && w.team[i] == w.team[slot] && dist(w.pos[i], t) < 3.0f;
 			if (d < 1.0f && b.meleeWait <= 0 && self.meleeWeapon)
 			{
 				act.fire = Action::MELEE;
 				b.meleeWait = std::max(1.0f, self.meleeWeapon->fireDelay);
 			}
-			else if (d >= 1.5f && d <= 5.0f && self.nbMolotovLeft > 0 && b.molotovWait <= 0 && gameVar.sv_enableMolotov && sequence % 6 == 1)
+			else if (d >= 1.5f && d <= 5.0f && self.nbMolotovLeft > 0 && b.molotovWait <= 0 && gameVar.sv_enableMolotov && sequence % 6 == 1 && !friendlyFire)
 			{
 				act.fire = Action::MOLOTOV;
 				b.molotovWait = 1.0f;
 			}
-			else if (d >= 2.0f && d <= 6.5f && self.nbGrenadeLeft > 0 && b.grenadeWait <= 0 && sequence % 4 == 0)
+			else if (d >= 2.0f && d <= 6.5f && self.nbGrenadeLeft > 0 && b.grenadeWait <= 0 && sequence % 4 == 0 && !friendlyFire)
 			{
 				act.fire = Action::GRENADE;
 				b.grenadeWait = 1.0f;
@@ -1029,7 +1034,17 @@ namespace bots
 				const CVector3f p1(myPos[0], myPos[1], 0.25f);
 				const CVector3f p2(p1[0] + (t[0] - p1[0]) * inv * 40, p1[1] + (t[1] - p1[1]) * inv * 40, 0.25f);
 				float hitT;
-				if (segmentCircleT(p1, p2, t, PLAYER_RADIUS, hitT) && hitT <= segmentHitT(p1, p2, rayEnd(map, p1, p2)) + 1e-3f)
+				bool clear = segmentCircleT(p1, p2, t, PLAYER_RADIUS, hitT) && hitT <= segmentHitT(p1, p2, rayEnd(map, p1, p2)) + 1e-3f;
+				// With friendly fire on, a teammate nearer on the line holds the shot too (ROBO-212)
+				for (int i = 0; clear && friendlyFire && i < MAX_PLAYER; ++i)
+				{
+					float mateT;
+					if (i != slot && w.alive[i] && w.team[i] == w.team[slot] && segmentCircleT(p1, p2, w.pos[i], PLAYER_RADIUS, mateT) && (mateT < hitT || weaponID == WEAPON_PHOTON_RIFLE)) // the photon beam goes through
+						clear = false;
+				}
+				if (clear && weaponID == WEAPON_BAZOOKA && mateNearTarget)
+					clear = false;
+				if (clear)
 				{
 					act.fire = weaponID == WEAPON_BAZOOKA ? Action::ROCKET : Action::SHOOT;
 					b.fireCooldown = 0.11f;
