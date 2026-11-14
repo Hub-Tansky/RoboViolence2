@@ -28,7 +28,8 @@ struct sqlite3;
 //
 //   content (read-only)  <dataRoot>/main/...   found by bv2PathsInit(); the process then chdir()s to dataRoot,
 //                                              so the code's "main/..." paths keep working
-//   package content      <packageRoot>/main/...  launch scripts, languages, bv2.example.cfg; see contentFile() (ADR 0016)
+//   package content      <packageRoot>/main/...  launch scripts, languages, bv2.example.cfg; see contentFile() (ADR 0016);
+//                                              the game's own maps, see mapFileForRead() (ADR 0054)
 //   user data (writable) <prefDir>/...         bv2.cfg, bv2.db, banlist, console.log, screenshots, saved maps
 namespace bv2
 {
@@ -97,10 +98,12 @@ namespace bv2
 	// inner spaces, and not a Windows device name (CON, PRN, AUX, NUL, COM1-9, LPT1-9, any case)
 	bool isMapName(const std::string & name);
 
-	// .bvm files in main/maps and prefDir()/maps whose stem isMapName, names without extension, sorted
+	// .bvm files in main/maps, prefDir()/maps and packageRoot()/main/maps (the game's own maps, content/maps) whose stem
+	// isMapName, names without extension, sorted
 	std::vector<std::string> listMapNames();
 
-	// Path of a map to read: prefDir()/maps/<name>.bvm when it exists, else main/maps/<name>.bvm
+	// Path of a map to read: prefDir()/maps/<name>.bvm when it exists, else main/maps/<name>.bvm in the data root, else
+	// packageRoot()/main/maps/<name>.bvm when it exists there, else main/maps/<name>.bvm
 	std::string mapFileForRead(const std::string & name);
 
 	// Path to write a map to: prefDir()/maps/<name>.bvm

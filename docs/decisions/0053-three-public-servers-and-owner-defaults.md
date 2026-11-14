@@ -1,6 +1,6 @@
 # 0053: Three public servers, the owner's defaults, disabled secondaries hidden
 
-- Status: Accepted
+- Status: Accepted; amended by [0054](0054-game-ships-its-own-maps.md)
 - Date: 2026-11-14
 - Affects: `content/LaunchScript/*.cfg`, `config/bv2.example.cfg`, `game/src/Game.cpp` (weapon menu), `game/src/Bot.cpp` (friendly fire), `packaging/docker/`, `tools/staging/deploy.sh`; extends [ADR 0027](0027-several-game-servers-per-host.md) and [ADR 0052](0052-public-servers-play-pro-ruleset.md); ROBO-212
 

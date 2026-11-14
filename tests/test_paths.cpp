@@ -164,6 +164,22 @@ int main(int argc, char ** argv)
 	fs::current_path(pkg);
 	check(bv2::listMapNames() == std::vector<std::string>{"CTF-A", "TEst 1"}, "listMapNames: both folders, valid names only");
 
+	// The game's own maps (content/maps in the package) stay listed and readable when BV2_DATA_DIR picks the player's copy
+	touch(content / "main" / "maps" / "CTF-Alert.bvm");
+	touch(content / "main" / "maps" / "CTF-Both.bvm");
+	touch(pkg / "main" / "maps" / "CTF-Both.bvm");
+	setEnv("BV2_DATA_DIR", content.string());
+	fs::current_path(pkg);
+	check(bv2::pathsInit(argv[0]) && bv2::dataRoot() == root(content), "BV2_DATA_DIR for the map lookup");
+	check(bv2::listMapNames() == std::vector<std::string>{"CTF-A", "CTF-Alert", "CTF-Both", "TEst 1"}, "listMapNames: data, pref and package maps");
+	check(bv2::mapFileForRead("CTF-A") == root(pkg) + "main/maps/CTF-A.bvm", "a package map is read from the package");
+	check(bv2::mapFileForRead("CTF-Alert") == "main/maps/CTF-Alert.bvm", "a data map is read from the data root");
+	check(bv2::mapFileForRead("CTF-Both") == "main/maps/CTF-Both.bvm", "the data root wins over the package");
+	check(bv2::mapFileForRead("TEst 1") == bv2::prefDir() + "maps/TEst 1.bvm", "the pref dir wins over both");
+	check(bv2::mapFileForRead("Nope") == "main/maps/Nope.bvm", "a missing map keeps the data-root path");
+	setEnv("BV2_DATA_DIR", "");
+	fs::current_path(pkg); // Windows can't remove the working directory
+
 	fs::remove_all(content);
 	check(bv2::savedDataDir().empty(), "a saved folder that no longer holds data is ignored");
 	check(bv2::startDataDir().dir.empty() && bv2::startDataDir().ask, "no data anywhere: the first-run box");
