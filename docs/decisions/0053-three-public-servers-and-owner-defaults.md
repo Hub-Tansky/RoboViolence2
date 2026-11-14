@@ -5,7 +5,7 @@
 - Affects: `content/LaunchScript/*.cfg`, `config/bv2.example.cfg`, `game/src/Game.cpp` (weapon menu), `game/src/Bot.cpp` (friendly fire), `packaging/docker/`, `tools/staging/deploy.sh`; extends [ADR 0027](0027-several-game-servers-per-host.md) and [ADR 0052](0052-public-servers-play-pro-ruleset.md); ROBO-212
 
 ## Context
-- The owner asked on 2026-11-14 for three public servers, in this order: "Deathmatch ring" (free for all, 12 players), "Get that flag" (CTF, 10), "Team Deathmatch" (TDM, 10).
+- The owner asked on 2026-11-14 for three public servers, in this order: "Deathmatch ring" (free for all, 12 players), "Get that flag." (CTF, 10), "Team Deathmatch" (TDM, 10).
 - And, for every server and the Host tab: Pro ruleset, Normal spawn, win limit 7, friendly fire on, reflect off, force respawn off, `sv_ftMaxRange 5`, Nuke Bot and Mini Bot off and not shown in the weapon menu.
 - `sv_enableNuclear` and `sv_enableMinibot` exist; the client greyed a disabled secondary but still listed it.
 
