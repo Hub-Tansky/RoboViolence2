@@ -377,7 +377,7 @@ namespace bv2
 	std::vector<std::string> listMapNames()
 	{
 		std::vector<std::string> names;
-		const std::string dirs[3] = { "main/maps", g_prefDir + "maps", g_packageRoot.empty() ? std::string() : g_packageRoot + "main/maps" };
+		const std::string dirs[3] = {"main/maps", g_prefDir + "maps", g_packageRoot.empty() ? std::string() : g_packageRoot + "main/maps"};
 		for (int d = 0; d < 3; ++d)
 		{
 			std::error_code ec;
