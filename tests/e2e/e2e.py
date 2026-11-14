@@ -205,8 +205,9 @@ def ban(run):
 
 def ctf_capture(run):
     """The server moves the bot: blue team, spawned on the red flag pod, then on its own (CTF-Placeholder pods: blue
-    at 3,8, red at 13,8; tools/gen-placeholder-content.py). Bots can't steer, and the server only checks positions."""
-    run.server()
+    at 3,8, red at 13,8; tools/gen-placeholder-content.py). Bots can't steer, and the server only checks positions.
+    The CTF script plays content/maps, so the placeholder map is set here."""
+    run.server(launch=b"set sv_gameType 2\nset sv_port 3333\ndedicate CTF-Placeholder\n")
     client = run.client("e2e-a", JOIN + ["wait 40"])  # stays well past both 10 s waits below
     run.joined("e2e-a")
     slot = re.search(r"^\[(\d+)\] e2e-a ", run.command("playerlist"), re.M)

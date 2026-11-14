@@ -377,8 +377,8 @@ namespace bv2
 	std::vector<std::string> listMapNames()
 	{
 		std::vector<std::string> names;
-		const std::string dirs[2] = { "main/maps", g_prefDir + "maps" };
-		for (int d = 0; d < 2; ++d)
+		const std::string dirs[3] = { "main/maps", g_prefDir + "maps", g_packageRoot.empty() ? std::string() : g_packageRoot + "main/maps" };
+		for (int d = 0; d < 3; ++d)
 		{
 			std::error_code ec;
 			for (fs::directory_iterator it(dirs[d], ec), end; !ec && it != end; it.increment(ec))
@@ -401,7 +401,11 @@ namespace bv2
 		std::error_code ec;
 		if (fs::is_regular_file(user, ec))
 			return user;
-		return "main/maps/" + name + ".bvm";
+		std::string data = "main/maps/" + name + ".bvm";
+		if (fs::is_regular_file(data, ec) || g_packageRoot.empty())
+			return data;
+		std::string package = g_packageRoot + data; // the game's own maps, also with BV2_DATA_DIR or the player's BV2 copy
+		return fs::is_regular_file(package, ec) ? package : data;
 	}
 
 	std::string mapFileForWrite(const std::string & name)

@@ -145,6 +145,13 @@ set(BV2_CONTENT_LINKS bots languages LaunchScript)  # content/ entries runtime/m
 foreach(entry ${BV2_CONTENT_LINKS})
   bv2_link_dir("${CMAKE_SOURCE_DIR}/content/${entry}" "${BV2_DATA_DIR}/${entry}")
 endforeach()
+# The game's own maps (content/maps, owner-made, GPL like the code) go into main/maps beside the placeholders; the game
+# also finds them in the package's main/maps when BV2_DATA_DIR or the player's BV2 copy is the data root (Paths.h).
+file(GLOB bv2_own_maps CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/content/maps/*.bvm")
+foreach(map ${bv2_own_maps})
+  get_filename_component(map_file "${map}" NAME)
+  configure_file("${map}" "${BV2_DATA_DIR}/maps/${map_file}" COPYONLY)
+endforeach()
 # Defaults only: the game keeps the user's settings in its pref directory (ADR 0007).
 configure_file("${CMAKE_SOURCE_DIR}/config/bv2.example.cfg" "${BV2_DATA_DIR}/bv2.example.cfg" COPYONLY)
 

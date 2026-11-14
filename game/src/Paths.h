@@ -97,10 +97,12 @@ namespace bv2
 	// inner spaces, and not a Windows device name (CON, PRN, AUX, NUL, COM1-9, LPT1-9, any case)
 	bool isMapName(const std::string & name);
 
-	// .bvm files in main/maps and prefDir()/maps whose stem isMapName, names without extension, sorted
+	// .bvm files in main/maps, prefDir()/maps and packageRoot()/main/maps (the game's own maps, content/maps) whose stem
+	// isMapName, names without extension, sorted
 	std::vector<std::string> listMapNames();
 
-	// Path of a map to read: prefDir()/maps/<name>.bvm when it exists, else main/maps/<name>.bvm
+	// Path of a map to read: prefDir()/maps/<name>.bvm when it exists, else main/maps/<name>.bvm in the data root, else
+	// packageRoot()/main/maps/<name>.bvm when it exists there, else main/maps/<name>.bvm
 	std::string mapFileForRead(const std::string & name);
 
 	// Path to write a map to: prefDir()/maps/<name>.bvm

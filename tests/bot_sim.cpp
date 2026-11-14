@@ -1,6 +1,7 @@
 // Headless bot match (ROBO-123, ADR 0049): bots only, on the in-process server, with a fixed seed. Prints a JSON
 // summary and exits 1 when the baseline verdict fails, so CI catches a brain that stops playing.
-// Usage: bot_sim [--mode CTF|TDM] [--bots N] [--seconds S] [--seed N]; BOT_SIM_DEBUG=1 logs bots standing still.
+// Usage: bot_sim [--mode CTF|TDM] [--map NAME] [--bots N] [--seconds S] [--seed N]; BOT_SIM_DEBUG=1 logs bots standing still.
+// The launch script's map by default; CI pins the placeholder map (tests/CMakeLists.txt), whose layout the baseline knows.
 #include "server_harness.h"
 
 #include "Console.h"
@@ -37,7 +38,7 @@ namespace
 
 int main(int argc, char** argv)
 {
-	std::string mode = "CTF";
+	std::string mode = "CTF", map;
 	int botCount = 8, seconds = 600; // 300 s can end without a capture on some seeds or platforms (rand differs)
 	unsigned seed = 1;
 	for (int i = 1; i < argc; i += 2)
@@ -45,6 +46,8 @@ int main(int argc, char** argv)
 		const char* value = i + 1 < argc ? argv[i + 1] : "";
 		if (!std::strcmp(argv[i], "--mode"))
 			mode = value;
+		else if (!std::strcmp(argv[i], "--map"))
+			map = value;
 		else if (!std::strcmp(argv[i], "--bots"))
 			botCount = std::atoi(value);
 		else if (!std::strcmp(argv[i], "--seconds"))
@@ -53,7 +56,7 @@ int main(int argc, char** argv)
 			seed = (unsigned)std::strtoul(value, 0, 10);
 		else
 		{
-			std::fprintf(stderr, "usage: bot_sim [--mode CTF|TDM] [--bots N] [--seconds S] [--seed N]\n");
+			std::fprintf(stderr, "usage: bot_sim [--mode CTF|TDM] [--map NAME] [--bots N] [--seconds S] [--seed N]\n");
 			return 2;
 		}
 	}
@@ -61,6 +64,16 @@ int main(int argc, char** argv)
 	{
 		std::fprintf(stderr, "server did not start\n");
 		return 1;
+	}
+	if (!map.empty())
+	{
+		console->sendCommand(CString("changemap %s", map.c_str()));
+		harness::tick(12 * 30); // the server changes map 10 s after the command
+		if (!scene->server->game || scene->server->game->mapName != map.c_str())
+		{
+			std::fprintf(stderr, "map %s did not load\n", map.c_str());
+			return 1;
+		}
 	}
 	std::srand(seed); // after start: the server seeds rand() with the clock
 	const bool debug = std::getenv("BOT_SIM_DEBUG") != 0;

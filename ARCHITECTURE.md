@@ -16,7 +16,7 @@ Robo Violence 2: unofficial fork of BaboViolent 2, a top-down multiplayer shoote
 | Network | TCP, raw structs `memcpy`'d from `game/src/netPacket.h`. The server is authoritative for hits, damage, spawns, projectiles and flags; clients for their own movement. `playerID` (slot) differs from `babonetID` (connection). Protocol `GAME_VERSION_SV/CL` = 22100 (`game/src/Server.h:35`). Join and admin passwords are HMAC proofs over a per-connection challenge; master bans are HMAC-signed packets (`engine/credentials/include/Credentials.h`, ADR 0014, 0038). |
 | Variants | `CONSOLE` = headless server (explicit file list in `game/CMakeLists.txt`). Direct3D, non-Pro and VLD code were removed in Step 1. |
 | Config and secrets | Tracked: `config/*.example.cfg` with empty secrets, `content-seed/*.sql` for generated DBs. Real values stay local; gitleaks, hooks and CI enforce it ([config/README.md](config/README.md)). |
-| Assets | The original assets are removed and blocked by hash (`tools/check-original-assets.py`). Only `content/languages/` (English strings, template, guide), `content/LaunchScript/` and `content/bots/` (bot names) remain; the build generates placeholders (`tools/gen-placeholder-content.py`). |
+| Assets | The original assets are removed and blocked by hash (`tools/check-original-assets.py`). Only `content/languages/` (English strings, template, guide), `content/LaunchScript/`, `content/bots/` (bot names) and `content/maps/` (the owner's own maps, not BV2's) remain; the build generates placeholders (`tools/gen-placeholder-content.py`). |
 | Encoding | UTF-8 without BOM, LF; `tools/check-encoding.py`. Some comments hold U+FFFD where upstream lost accents. |
 | Supply chain | Dependency graph fed by vcpkg (`dependency-graph.yml`, on push to `main`); Dependabot alerts and security updates on; Dependabot version updates for GitHub Actions (`.github/dependabot.yml`); CodeQL `c-cpp` and `actions` (`codeql.yml`, not required). Dependabot and OSV can't read vcpkg purls; `osv-vcpkg.yml` (weekly) queries OSV by each port's upstream commit (`tools/osv-vcpkg.py`). Bump the vcpkg baseline monthly, or sooner when it reports a port. |
 | Website | roboviolence.com is built and deployed from [Hub-Tansky/rv2-website](https://github.com/Hub-Tansky/rv2-website) ([ADR 0036](docs/decisions/0036-website-in-rv2-website-repository.md)); its tests read the release file names from `build.yml`. |
@@ -170,6 +170,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/test_spawn_overlay.cpp` | `spawns::farthestFrom`: no DM spawn gives no line origin (the editor crash), the farthest of several, ties, nearest team spawn |
 | `tests/test_view_geometry.cpp` | Widescreen (Stretch) projects at the window's own aspect, Bars at 4:3; the camera's side margin widens with the view, and a narrow or short map centres it |
 | `tests/test_config.cpp` | dksvar config layering, transient values not saved, secrets masked, `dksvarGetValue` |
+| `tests/test_content_maps.py` | `content/maps`: valid names, version 20202, spawns and flag pods on open, connected cells, flag pods at height 0 (else no pickup), launch scripts name only these maps (ctest `content_maps`) |
 | `tests/test_corrupt_map_preview.py` | ROBO-195: the client reaches the menu with `maps/zz-Corrupt.bvm` of unknown version, listed after the placeholder map in a fresh pref dir (ctest `corrupt_map_preview`) |
 | `tests/test_crash_report.cpp` | ROBO-186: runs itself as a crashing child and checks the `crash-*.txt` it leaves (version line, signal or exception code, a stack frame, the load address on macOS) and that the previous handler still runs (ADR 0048) |
 | `tests/test_credentials.cpp` | Step 10: the credential HMAC against RFC 4231; proofs check only with their own password, label and nonce |
@@ -281,9 +282,26 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 
 | path | purpose |
 |---|---|
-| `content/LaunchScript/CTF.cfg` | Example dedicated-server launch script (CTF "Get that flag", port 3333, 10 players, owner's defaults ADR 0053, Pro ruleset; map is a placeholder) |
-| `content/LaunchScript/FFA.cfg` | Dedicated-server launch script (free for all "Deathmatch ring", port 3335, 12 players, ADR 0053; map is a placeholder); the compose example's `ffa` service |
-| `content/LaunchScript/TDM.cfg` | Dedicated-server launch script (TDM "Team Deathmatch", port 3334, 10 players, ADR 0053, Pro ruleset; map is a placeholder); the compose example's `tdm` service |
+| `content/LaunchScript/CTF.cfg` | Example dedicated-server launch script (CTF "Get that flag", port 3333, 10 players, owner's defaults ADR 0053, Pro ruleset; plays the six CTF/TDM maps of `content/maps`) |
+| `content/LaunchScript/FFA.cfg` | Dedicated-server launch script (free for all "Deathmatch ring", port 3335, 12 players, ADR 0053; plays the four `DM-` maps of `content/maps`); the compose example's `ffa` service |
+| `content/LaunchScript/TDM.cfg` | Dedicated-server launch script (TDM "Team Deathmatch", port 3334, 10 players, ADR 0053, Pro ruleset; plays the six CTF/TDM maps of `content/maps`); the compose example's `tdm` service |
+
+### `content/maps`
+
+The game's own maps (BV2 format 20202), GPL-3.0 like the code. The build copies them into `main/maps`; with `BV2_DATA_DIR` or the player's BV2 copy as the data root the game still finds them in the package (`bv2::mapFileForRead`). `tests/test_content_maps.py` checks them.
+
+| path | purpose |
+|---|---|
+| `content/maps/DM-CyberLab.bvm` | Map by Hub-Tansky (free for all, 48x48, orange) |
+| `content/maps/DM-Hangar.bvm` | Map by Hub-Tansky (free for all, 32x32, modern) |
+| `content/maps/DM-LongDesert.bvm` | Map by Hub-Tansky (free for all, 25x48, sand) |
+| `content/maps/DM-RebelBunker.bvm` | Map by Hub-Tansky (free for all, 48x32, lava) |
+| `content/maps/DirtyTroll.bvm` | Map by Hub-Tansky (CTF/TDM, 32x32, grass) |
+| `content/maps/GrimSiege.bvm` | Map by Hub-Tansky (CTF/TDM, 24x36, sand) |
+| `content/maps/Relay.bvm` | Map by Hub-Tansky (CTF/TDM, 32x18, city) |
+| `content/maps/Rig.bvm` | Map by Hub-Tansky (CTF/TDM, 32x16, modern) |
+| `content/maps/RuinDome.bvm` | Map by Hub-Tansky (CTF/TDM, 32x32, snow) |
+| `content/maps/Thunder World.bvm` | Map by Hub-Tansky (CTF/TDM, 32x32, city) |
 
 ### `content/bots`
 

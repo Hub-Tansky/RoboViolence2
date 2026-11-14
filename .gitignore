@@ -117,7 +117,7 @@ MasterServer/Source/src/linuxmaster
 
 # ---- Original BaboViolent 2 assets (no license) ----
 /original-assets/
-/content/maps/
+# content/maps/ is tracked: the game's own maps (owner-made); tools/check-original-assets.py refuses original ones
 /content/models/
 /content/skins/
 /content/textures/
