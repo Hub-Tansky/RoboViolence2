@@ -10,7 +10,6 @@
 - `sv_enableNuclear` and `sv_enableMinibot` exist; the client greyed a disabled secondary but still listed it.
 
 ## Decision
-- The CTF name has no trailing period: the owner dropped it after the first prod deploy (2026-11-14).
 - New `content/LaunchScript/FFA.cfg` (`sv_gameType 0`, port 3335, compose service `ffa`, admin API at `/ffa/`). CTF keeps 3333 and TDM 3334.
 - The three scripts and `config/bv2.example.cfg` (the first config layer, so the Host tab's defaults) set the owner's values. Engine defaults in `GameVar.cpp` stay BV2's, as in ADR 0052.
 - The weapon menu hides a secondary the server disables and closes up the rest (`game/src/SecondaryMenu.h`). A saved pick of a hidden one falls back to the first enabled one. `sv_enableSecondary false` still greys the ones shown.
