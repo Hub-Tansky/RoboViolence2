@@ -74,6 +74,8 @@ int main(int argc, char** argv)
 			std::fprintf(stderr, "map %s did not load\n", map.c_str());
 			return 1;
 		}
+		// The rotation keeps this map: at a game's end the server picks the next map from mapList (Server.cpp)
+		scene->server->mapList.assign(1, CString("%s", map.c_str()));
 	}
 	std::srand(seed); // after start: the server seeds rand() with the clock
 	const bool debug = std::getenv("BOT_SIM_DEBUG") != 0;

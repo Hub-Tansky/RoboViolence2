@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Repository hygiene checks over tracked files (CI `hygiene` job).
 
-1. No path contains a space, except a map in content/maps (map names may hold inner spaces, bv2::isMapName).
+1. No path contains a space.
 2. No tracked file matches .gitignore (secrets, binaries, OS junk), checked case-insensitively
    as on macOS and Windows so a pattern like `Icon?` cannot hide packaging/icons/ there.
 3. No file over 5 MB outside content/ and assets-src/.
@@ -27,7 +27,7 @@ def main():
     bad = 0
     tracked = git("ls-files", "-z")
     for p in tracked:
-        if " " in p and not (p.startswith("content/maps/") and p.count("/") == 2 and p.endswith(".bvm")):
+        if " " in p:
             print(f"space in path: {p}")
             bad += 1
     for p in git("-c", "core.ignorecase=true", "ls-files", "-ci", "--exclude-standard"):

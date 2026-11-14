@@ -16,8 +16,8 @@ Pick your OS: [macOS](macos.md), [Linux](linux.md), [Windows](windows.md). Each 
   3. `original` beside the pref dir (installed by step 4), then `BaboViolent2-master` or `BaboViolent2` (the upstream repository, unzipped, also with the extra level Windows Extract All adds) in `Downloads`, `Desktop` or `Documents`; on Windows also `BaboViolent 2` or `BaboViolent2` in Program Files.
   4. On first start, a box offers "Download and play": the OS's `curl` and `tar`/`unzip` fetch the upstream data, which is checked against `tools/original-assets.sha256` and saved ([ADR 0040](../decisions/0040-first-run-downloads-original-data.md)). "Use placeholders" is remembered, also over data found later ([ADR 0042](../decisions/0042-game-assets-option-remembers-placeholders.md)); `--placeholders` skips it for one run.
   5. Options → Game assets: paste a data folder (or empty for placeholders), press Enter, restart.
-- The game server reads only `BV2_DATA_DIR`: it loads its maps from there and sends missing maps to clients.
-- Launch scripts, language files and `bv2.example.cfg` always come from the package's own `main/`.
+- The game server reads only `BV2_DATA_DIR` for original data: it loads its maps from there, and from the package's `main/maps` (the game's own maps, `content/maps`, [ADR 0054](../decisions/0054-game-ships-its-own-maps.md)), and sends missing maps to clients.
+- Launch scripts, language files, `bv2.example.cfg` and the game's own maps always come from the package's own `main/`.
 - Without data the game uses generated placeholder maps, textures and sounds. That is only for CI and development: it looks rough, has no music, and doesn't match other players' maps.
 - Saved settings, `bv2.db`, logs and downloaded maps go to the per-user pref dir ([ADR 0007](../decisions/0007-data-root-pref-dir-config-layers.md)); `BV2_PREF_DIR` overrides it:
 

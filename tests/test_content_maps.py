@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """The game's own maps (content/maps) are playable as the server reads them (game/src/Map.cpp, version 20202).
 
-Each map: a valid map name (bv2::isMapName), version 20202, a sane size, author set, every spawn and both flag pods on a
+Each map: a valid map name (the rule of bv2::isMapName, game/src/Paths.cpp), version 20202, a sane size, author set, every spawn and both flag pods on a
 passable cell inside the map, all of them in one connected area, and flag pods at height 0: ServerCTF.cpp picks up a
 flag within 0.25 of the pod measured with the player at z 0, so a pod at z 0.25 can never be taken. The CTF, TDM and
 FFA launch scripts name only maps that exist here.
@@ -14,6 +14,7 @@ import struct
 import sys
 
 NAME_CHARS = set("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_- ")
+DEVICE_NAMES = {"CON", "PRN", "AUX", "NUL"} | {f"{d}{i}" for d in ("COM", "LPT") for i in range(1, 10)}
 root = sys.argv[1]
 maps_dir = os.path.join(root, "content", "maps")
 failures = []
@@ -27,7 +28,8 @@ def fail(msg):
 def check_map(path):
     name = os.path.basename(path)[:-4]
     data = open(path, "rb").read()
-    if not (1 <= len(name) <= 15 and set(name) <= NAME_CHARS and name[0] != " " and name[-1] != " "):
+    if not (1 <= len(name) <= 15 and set(name) <= NAME_CHARS and name[0] != " " and name[-1] != " ") \
+            or name.upper() in DEVICE_NAMES:
         fail(f"{name}: not a valid map name")
     version, = struct.unpack_from("<I", data, 0)
     if version != 20202:

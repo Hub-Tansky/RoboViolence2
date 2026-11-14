@@ -132,7 +132,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/harness/fake_babonet.cpp` | Test `bb_*` API: queued connects and messages in, captured sends out, client disconnects queued by the test (a server-side `bb_serverDisconnectClient` raises no event, like babonet); an object file, so it wins over babonet's `baboNet.cpp` |
 | `tests/harness/server_harness.cpp` | In-process dedicated server for tests: start, connect, join, deliver, tick |
 | `tests/harness/server_harness.h` | Harness API |
-| `tests/e2e/e2e.py` | E2E scenarios (Phase T4): `bv2dedicated` with the admin API, `bv2master` and `bv2 --autotest` clients under its own Xvfb; join/leave, password, chat, kick, ban, master list, CTF capture, a silent connection dropped by the join timeout, a pref-dir map named with a space hosted by `dedicate` and downloaded by a client, a client keeping its chosen gun (`cl_primaryWeapon`) when it joins a server with bots again (ctest `e2e_<scenario>`) |
+| `tests/e2e/e2e.py` | E2E scenarios (Phase T4): `bv2dedicated` with the admin API, `bv2master` and `bv2 --autotest` clients under its own Xvfb; join/leave, password, chat, kick, ban, master list, CTF capture, a silent connection dropped by the join timeout, a pref-dir map named with a space hosted by `dedicate` and downloaded by a client, CTF capture on the placeholder map it sets itself (the CTF script plays `content/maps`), a client keeping its chosen gun (`cl_primaryWeapon`) when it joins a server with bots again (ctest `e2e_<scenario>`) |
 | `tests/screenshots.py` | Phase T7: runs `tests/golden/<name>.txt` (with `<name>.cfg` config lines if present) and compares the frame with `<name>.png` within a tolerance; keeps actual and diff PNGs on failure, `--update` writes the golden (ADR 0026) |
 | `tests/golden/main-menu.txt` | Screenshot script: main menu, Game Browser tab (the one it opens on) (ctest `screenshot_main-menu`) |
 | `tests/golden/main-menu.png` | Golden for `screenshot_main-menu` |
@@ -194,11 +194,11 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/test_join_team.cpp` | ROBO-201: a joiner moved to a team before its handshake ends gets its own team after SERVER_INFO; a spectator joiner gets none |
 | `tests/test_bans.cpp` | Server bans: 0.0.1's binary banlist moves to `banlist.tsv` and still refuses the IP; a ban past `sv_banDays` lets it in and stays in the file (ADR 0034) |
 | `tests/test_bots.cpp` | Bots (ADR 0049): roster rules and names file; with friendly fire on, `holdsForTeammate` (ADR 0053); on the in-process CTF server `sv_bots 8` joins 4 per team, they spawn, move and shoot, get no packets, make room for a human and come back, stay through a map change to deathmatch, rejoin their team after `allwatch`, get none of a human's team chat or name change, and follow `sv_bots` live |
-| `tests/bot_sim.cpp` | Seeded headless bots-only match (CTF, TDM): JSON summary of states, roles, shots, kills, captures, returns, stuck time; fails with no capture, return or unused role (CTF), no kill (TDM), or a bot still over 10 s (ctests `bot_sim_CTF`, `bot_sim_TDM`) |
+| `tests/bot_sim.cpp` | Seeded headless bots-only match (CTF, TDM; `--map` plays one map only, CI pins the placeholders): JSON summary of states, roles, shots, kills, captures, returns, stuck time; fails with no capture, return or unused role (CTF), no kill (TDM), or a bot still over 10 s (ctests `bot_sim_CTF`, `bot_sim_TDM`) |
 | `tests/test_player_privacy.cpp` | The player info relayed to everyone and the player list a new client gets carry no IP; the server keeps it (ADR 0034) |
 | `tests/test_join_timeout.cpp` | A connection that never answers the join handshake loses its slot after `Server::JOIN_TIMEOUT`; a client past the handshake keeps it while loading |
 | `tests/test_data_download.cpp` | ADR 0040: `firstMismatch` names a wrong or missing file; `replaceDir` keeps the old install when the move fails and replaces it otherwise, at `originalDataDir`, which auto-detect then finds; the browser zip's name is one auto-detect knows; the extract argv and the hash paths agree on where `main/` lands and the zip's folder names the pinned commit; the generated list holds the 324 `Content/main` hashes (ctest `data_download`, client builds) |
-| `tests/test_paths.cpp` | Phase C step 1: package vs data root, `contentFile`, `findDataIn` (upstream layout, `main/` itself, Windows Extract All nesting), saved folder, the Options field (quoted paths, refused folders) and the start order with the placeholders choice (ADR 0042), auto-detect, `BV2_DATA_DIR`; the built-in master list vs `bv2.cfg`, `BV2_MASTER_SERVERS` and `none` (ADR 0028); `isMapName` and `listMapNames` |
+| `tests/test_paths.cpp` | Phase C step 1: package vs data root, `contentFile`, `findDataIn` (upstream layout, `main/` itself, Windows Extract All nesting), saved folder, the Options field (quoted paths, refused folders) and the start order with the placeholders choice (ADR 0042), auto-detect, `BV2_DATA_DIR`; the built-in master list vs `bv2.cfg`, `BV2_MASTER_SERVERS` and `none` (ADR 0028); `isMapName` and `listMapNames`; package maps listed and read after the pref dir and data root (ADR 0054) |
 | `tests/test_osv_vcpkg.py` | Phase C step 4: `tools/osv-vcpkg.py` maps SPDX download locations to upstream repository and tag (offline) |
 | `tests/test_packet_hygiene.cpp` | Step 4 checks: sender binding (Q-S1), index ranges with controls (Q-S2), map names (Q-S6), skin and sound relay (Q-S7), `SV_CHANGE` filter (Q-S4), the handshake gate, `checkPacket` per message type and size, the client's `checkServerMessage` on values the server sends |
 | `tests/test_retention.cpp` | `BanList`: binary banlist moved once, saved on every change, line format, matching by age without dropping, expired bans dropped on load; admin log lines older than 90 days dropped (ADR 0034) |
@@ -301,7 +301,7 @@ The game's own maps (BV2 format 20202), GPL-3.0 like the code. The build copies 
 | `content/maps/Relay.bvm` | Map by Hub-Tansky (CTF/TDM, 32x18, city) |
 | `content/maps/Rig.bvm` | Map by Hub-Tansky (CTF/TDM, 32x16, modern) |
 | `content/maps/RuinDome.bvm` | Map by Hub-Tansky (CTF/TDM, 32x32, snow) |
-| `content/maps/Thunder World.bvm` | Map by Hub-Tansky (CTF/TDM, 32x32, city) |
+| `content/maps/ThunderWorld.bvm` | Map by Hub-Tansky (CTF/TDM, 32x32, city) |
 
 ### `content/bots`
 
@@ -392,6 +392,7 @@ The game's own maps (BV2 format 20202), GPL-3.0 like the code. The build copies 
 | `docs/decisions/0050-client-frame-pacing-and-sleep.md` | ADR: client frame pacing follows vsync and window state; the display sleeps outside play |
 | `docs/decisions/0051-release-symbols-kept-privately-per-tag.md` | ADR: Release builds carry debug info, split into a symbols zip before packaging; a `v*` tag commits it to the private vault rv2-docs `30-dev/crash-debug/<tag>/` with `SYMBOLS_TOKEN` |
 | `docs/decisions/0052-public-servers-play-pro-ruleset.md` | ADR: the shipped CTF and TDM launch scripts play the Pro ruleset (ROBO-199) |
+| `docs/decisions/0054-game-ships-its-own-maps.md` | ADR: the owner's maps in `content/maps`, shipped in `main/maps`, found in the package beside other data, flag pods at z 0 (ROBO-214) |
 | `docs/decisions/0053-three-public-servers-and-owner-defaults.md` | ADR: FFA, CTF and TDM public servers, the owner's defaults in the scripts and example config, disabled secondaries hidden in the weapon menu (ROBO-212) |
 | `docs/decisions/README.md` | ADR format and index |
 

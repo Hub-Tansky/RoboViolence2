@@ -64,7 +64,7 @@ jobs:
           compose="docker compose -f packaging/docker/compose.example.yml --env-file $RUNNER_TEMP/ci.env"
           $compose up -d --no-build --wait --wait-timeout 120
           $compose ps
-          want="[('203.0.113.7', 3333, 'DirtyTroll', 1), ('203.0.113.7', 3334, 'Thunder World', 1), ('203.0.113.7', 3335, 'DM-Hangar', 1)]"
+          want="[('203.0.113.7', 3333, 'DirtyTroll', 1), ('203.0.113.7', 3334, 'ThunderWorld', 1), ('203.0.113.7', 3335, 'DM-Hangar', 1)]"
           listed=""
           for i in $(seq 1 30); do
             $compose cp master:/var/lib/bv2/web.db web.db 2>/dev/null || true

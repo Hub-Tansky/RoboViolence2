@@ -86,3 +86,4 @@ What we do, in one or two sentences.
 | [0051](0051-release-symbols-kept-privately-per-tag.md) | Keep release debug symbols privately, per tag in the rv2-docs vault | Accepted |
 | [0052](0052-public-servers-play-pro-ruleset.md) | The shipped launch scripts play the Pro ruleset | Accepted |
 | [0053](0053-three-public-servers-and-owner-defaults.md) | Three public servers, the owner's defaults, disabled secondaries hidden | Accepted |
+| [0054](0054-game-ships-its-own-maps.md) | The game ships its own maps in content/maps | Accepted |
