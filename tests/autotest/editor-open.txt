@@ -1,0 +1,21 @@
+# ROBO-213: the editor's Open dialog with no map picked: OK used to read the list's null selection and crash.
+# Open, OK with nothing picked (the dialog stays), Cancel, then Open, pick a map, OK (the map opens).
+expect-scene menu
+edit RegressionMap 32 32
+expect-scene editor
+editorclick open
+expect-console editorclick: dialog open, map RegressionMap
+editorclick ok
+expect-console editorclick: dialog open, map RegressionMap
+editorclick ok
+expect-console editorclick: dialog open, map RegressionMap
+editorclick cancel
+expect-console editorclick: dialog closed, map RegressionMap
+wait 0.5
+editorclick open
+expect-console editorclick: dialog open, map RegressionMap
+editorclick pick CTF-Placeholder
+editorclick ok
+expect-console editorclick: dialog closed, map CTF-Placeholder
+editorclick nope
+expect-console usage: editorclick
