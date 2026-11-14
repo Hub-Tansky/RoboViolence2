@@ -1,6 +1,7 @@
 // Bots for empty servers (ROBO-123): the roster rules, then bots on the in-process CTF server.
 #include "server_harness.h"
 
+#include "Bot.h"
 #include "BotRoster.h"
 #include "Console.h"
 #include "Game.h"
@@ -81,11 +82,46 @@ namespace
 		std::remove(path);
 		CHECK(bots::loadNames("no-such-file.txt").empty());
 	}
+
+	// ROBO-212: with friendly fire on in a team mode, bots don't hit their own team
+	void holdsForTeammate()
+	{
+		bots::World w;
+		w.gameType = GAME_TYPE_CTF;
+		for (int i = 0; i < 3; ++i)
+			w.alive[i] = true;
+		w.team[0] = w.team[1] = PLAYER_TEAM_BLUE; // slot 0 shoots, slot 1 is its teammate
+		w.team[2] = PLAYER_TEAM_RED;
+		const CVector3f me(2, 5, 0), enemy(8, 5, 0), between(5, 5, 0), aside(5, 8, 0), behind(10, 5, 0);
+		w.pos[0] = me, w.pos[2] = enemy;
+		const bool savedFriendlyFire = gameVar.sv_friendlyFire;
+		gameVar.sv_friendlyFire = true;
+		w.pos[1] = between;
+		CHECK(bots::holdsForTeammate(w, 0, me, enemy, WEAPON_SMG));
+		w.pos[1] = aside;
+		CHECK(!bots::holdsForTeammate(w, 0, me, enemy, WEAPON_SMG));
+		CHECK(bots::holdsForTeammate(w, 0, me, enemy, WEAPON_GRENADE) && bots::holdsForTeammate(w, 0, me, enemy, WEAPON_COCKTAIL_MOLOTOV));
+		w.pos[1] = behind;
+		CHECK(!bots::holdsForTeammate(w, 0, me, enemy, WEAPON_SMG)); // behind the target: the bullet stops at it
+		CHECK(bots::holdsForTeammate(w, 0, me, enemy, WEAPON_PHOTON_RIFLE)); // the beam goes through
+		CHECK(bots::holdsForTeammate(w, 0, me, enemy, WEAPON_BAZOOKA)); // within 3 of the blast
+		w.alive[1] = false;
+		CHECK(!bots::holdsForTeammate(w, 0, me, enemy, WEAPON_PHOTON_RIFLE)); // a dead teammate blocks nothing
+		w.alive[1] = true;
+		w.pos[1] = between;
+		w.gameType = GAME_TYPE_DM; // no teams
+		CHECK(!bots::holdsForTeammate(w, 0, me, enemy, WEAPON_SMG) && !bots::holdsForTeammate(w, 0, me, enemy, WEAPON_GRENADE));
+		w.gameType = GAME_TYPE_CTF;
+		gameVar.sv_friendlyFire = false;
+		CHECK(!bots::holdsForTeammate(w, 0, me, enemy, WEAPON_SMG) && !bots::holdsForTeammate(w, 0, me, enemy, WEAPON_GRENADE));
+		gameVar.sv_friendlyFire = savedFriendlyFire;
+	}
 }
 
 int main(int, char** argv)
 {
 	rosterRules();
+	holdsForTeammate();
 	if (!harness::start(argv[0]))
 	{
 		std::printf("FAIL: server did not start\n");

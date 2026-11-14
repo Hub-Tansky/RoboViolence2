@@ -192,7 +192,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/test_join_password.cpp` | Step 10: a client joins a passworded server only with the HMAC over its own challenge; no password or MD5 of it on the wire |
 | `tests/test_join_team.cpp` | ROBO-201: a joiner moved to a team before its handshake ends gets its own team after SERVER_INFO; a spectator joiner gets none |
 | `tests/test_bans.cpp` | Server bans: 0.0.1's binary banlist moves to `banlist.tsv` and still refuses the IP; a ban past `sv_banDays` lets it in and stays in the file (ADR 0034) |
-| `tests/test_bots.cpp` | Bots (ADR 0049): roster rules and names file; on the in-process CTF server `sv_bots 8` joins 4 per team, they spawn, move and shoot, get no packets, make room for a human and come back, stay through a map change to deathmatch, rejoin their team after `allwatch`, get none of a human's team chat or name change, and follow `sv_bots` live |
+| `tests/test_bots.cpp` | Bots (ADR 0049): roster rules and names file; with friendly fire on, `holdsForTeammate` (ADR 0053); on the in-process CTF server `sv_bots 8` joins 4 per team, they spawn, move and shoot, get no packets, make room for a human and come back, stay through a map change to deathmatch, rejoin their team after `allwatch`, get none of a human's team chat or name change, and follow `sv_bots` live |
 | `tests/bot_sim.cpp` | Seeded headless bots-only match (CTF, TDM): JSON summary of states, roles, shots, kills, captures, returns, stuck time; fails with no capture, return or unused role (CTF), no kill (TDM), or a bot still over 10 s (ctests `bot_sim_CTF`, `bot_sim_TDM`) |
 | `tests/test_player_privacy.cpp` | The player info relayed to everyone and the player list a new client gets carry no IP; the server keeps it (ADR 0034) |
 | `tests/test_join_timeout.cpp` | A connection that never answers the join handshake loses its slot after `Server::JOIN_TIMEOUT`; a client past the handshake keeps it while loading |
@@ -594,7 +594,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `game/src/Button.cpp` | Menu button widget |
 | `game/src/Button.h` | Menu button widget |
 | `game/src/Bot.cpp` | Server-side bots (ADR 0049): the brain ported from `bots.rs` (CTF roles, tactical states, tile BFS navigation, stuck recovery, aim, weapon use; with friendly fire on, no molotov or grenade and no shot through a teammate, ADR 0053) and `Bot::update`, which spawns, moves and fires through the client messages |
-| `game/src/Bot.h` | Bot interface: `bots::Tuning` (every tuning number), `World`, `Brain`, `Action`, `think`, class `Bot` |
+| `game/src/Bot.h` | Bot interface: `bots::Tuning` (every tuning number), `World`, `Brain`, `Action`, `think`, `holdsForTeammate` (friendly fire, ADR 0053), class `Bot` |
 | `game/src/BotRoster.cpp` | Bot roster rules: bots wanted per team for a target population, names file, ` [bot]` names, a random free name for a new bot |
 | `game/src/BotRoster.h` | Bot roster interface: `bots::Count`, `Teams`, `wanted`, `loadNames`, `name`, `pickName` |
 | `game/src/CAStar.cpp` | A* path finding grid |
