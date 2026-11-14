@@ -17,7 +17,7 @@ expect() { # expect <name> <expected> <actual>
 
 ps_lines() { printf '%s\t%s\t%s\n' "$@"; } # ps_lines <service> <state> <status> ...: `docker ps -a` lines
 
-expect "the stack's services come from GAME_SERVERS" "master admin-proxy server tdm" "$(services)"
+expect "the stack's services come from GAME_SERVERS" "master admin-proxy server tdm ffa" "$(services)"
 expect "healthy, starting and healthcheck-less running containers are fine" "" "$(ps_lines \
 	master running 'Up 2 hours (healthy)' server running 'Up 5 seconds (health: starting)' admin-proxy running 'Up 2 hours' |
 	problems "master server admin-proxy")"
@@ -41,7 +41,7 @@ mkdir -p "$scratch/bin"
 printf '#!/bin/bash\n[ -f "%s" ] || exit 1\ncat "%s"\n' "$scratch/docker-up" "$scratch/ps" >"$scratch/bin/docker" && chmod +x "$scratch/bin/docker"
 touch "$scratch/docker-up"
 all_up() { ps_lines master running 'Up 1 minute (healthy)' server running 'Up 1 minute (healthy)' \
-	tdm running 'Up 1 minute (healthy)' admin-proxy running 'Up 1 minute'; }
+	tdm running 'Up 1 minute (healthy)' ffa running 'Up 1 minute (healthy)' admin-proxy running 'Up 1 minute'; }
 printf 'BV2_ADMIN_PASS=test-only-value\n' >"$RV2_STAGING_ENV" && chmod 600 "$RV2_STAGING_ENV"
 watch() { (unset RV2_HEALTH_SOURCE_ONLY; PATH="$scratch/bin:$PATH" bash "$watcher") | sed -n 's/^[^ ]* notify: //p'; }
 { all_up | grep -v '^tdm'; ps_lines tdm exited 'Exited (1) 1 minute ago'; } >"$scratch/ps"
@@ -51,7 +51,7 @@ expect "third run stays quiet" "" "$(watch)"
 : >"$scratch/ps"
 watch >/dev/null
 expect "no containers: every service is missing" \
-	"RV2 staging unhealthy - admin-proxy missing; master missing; server missing; tdm missing" "$(watch)"
+	"RV2 staging unhealthy - admin-proxy missing; ffa missing; master missing; server missing; tdm missing" "$(watch)"
 rm "$scratch/docker-up"
 watch >/dev/null
 expect "docker not answering is a problem" "RV2 staging unhealthy - docker does not answer" "$(watch)"
@@ -69,7 +69,7 @@ expect "nothing is checked while a deploy runs" "" "$(watch)"
 pkill -P $! 2>/dev/null; kill $!
 sleep 30 >/dev/null 2>&1 & echo $! >"$ROOT/lock"
 watch >/dev/null
-expect "a lock left by another process doesn't silence the watcher" "RV2 staging unhealthy - admin-proxy missing; master missing; server missing; tdm exited" "$(watch)"
+expect "a lock left by another process doesn't silence the watcher" "RV2 staging unhealthy - admin-proxy missing; ffa missing; master missing; server missing; tdm exited" "$(watch)"
 pkill -P $! 2>/dev/null; kill $!
 
 [ $failures -eq 0 ] && echo "all passed"

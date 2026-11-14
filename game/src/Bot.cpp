@@ -718,6 +718,27 @@ namespace bots
 		return unstuckHeading(map, from, goal);
 	}
 
+	bool holdsForTeammate(const World& w, int slot, const CVector3f& from, const CVector3f& target, int weaponID)
+	{
+		if (!gameVar.sv_friendlyFire || canDamage(w.gameType, PLAYER_TEAM_BLUE, PLAYER_TEAM_BLUE))
+			return false;
+		if (weaponID == WEAPON_COCKTAIL_MOLOTOV || weaponID == WEAPON_GRENADE)
+			return true; // fire lingers and grenades bounce
+		const CVector3f p1(from[0], from[1], 0.25f), p2(target[0], target[1], 0.25f);
+		const CVector3f beyond(p1[0] + (p2[0] - p1[0]) * 40, p1[1] + (p2[1] - p1[1]) * 40, 0.25f); // the photon beam goes through
+		for (int i = 0; i < MAX_PLAYER; ++i)
+		{
+			if (i == slot || !w.alive[i] || canDamage(w.gameType, w.team[slot], w.team[i]))
+				continue;
+			float t;
+			if (weaponID == WEAPON_BAZOOKA && dist(w.pos[i], target) < 3.0f)
+				return true;
+			if (weaponID == WEAPON_PHOTON_RIFLE ? segmentCircleT(p1, beyond, w.pos[i], PLAYER_RADIUS, t) : segmentCircleT(p1, p2, w.pos[i], PLAYER_RADIUS, t))
+				return true;
+		}
+		return false;
+	}
+
 	World buildWorld(Game& game)
 	{
 		World w;
@@ -1013,12 +1034,12 @@ namespace bots
 				act.fire = Action::MELEE;
 				b.meleeWait = std::max(1.0f, self.meleeWeapon->fireDelay);
 			}
-			else if (d >= 1.5f && d <= 5.0f && self.nbMolotovLeft > 0 && b.molotovWait <= 0 && gameVar.sv_enableMolotov && sequence % 6 == 1)
+			else if (d >= 1.5f && d <= 5.0f && self.nbMolotovLeft > 0 && b.molotovWait <= 0 && gameVar.sv_enableMolotov && sequence % 6 == 1 && !holdsForTeammate(w, slot, myPos, t, WEAPON_COCKTAIL_MOLOTOV))
 			{
 				act.fire = Action::MOLOTOV;
 				b.molotovWait = 1.0f;
 			}
-			else if (d >= 2.0f && d <= 6.5f && self.nbGrenadeLeft > 0 && b.grenadeWait <= 0 && sequence % 4 == 0)
+			else if (d >= 2.0f && d <= 6.5f && self.nbGrenadeLeft > 0 && b.grenadeWait <= 0 && sequence % 4 == 0 && !holdsForTeammate(w, slot, myPos, t, WEAPON_GRENADE))
 			{
 				act.fire = Action::GRENADE;
 				b.grenadeWait = 1.0f;
@@ -1029,7 +1050,8 @@ namespace bots
 				const CVector3f p1(myPos[0], myPos[1], 0.25f);
 				const CVector3f p2(p1[0] + (t[0] - p1[0]) * inv * 40, p1[1] + (t[1] - p1[1]) * inv * 40, 0.25f);
 				float hitT;
-				if (segmentCircleT(p1, p2, t, PLAYER_RADIUS, hitT) && hitT <= segmentHitT(p1, p2, rayEnd(map, p1, p2)) + 1e-3f)
+				if (segmentCircleT(p1, p2, t, PLAYER_RADIUS, hitT) && hitT <= segmentHitT(p1, p2, rayEnd(map, p1, p2)) + 1e-3f &&
+					!holdsForTeammate(w, slot, myPos, t, weaponID))
 				{
 					act.fire = weaponID == WEAPON_BAZOOKA ? Action::ROCKET : Action::SHOOT;
 					b.fireCooldown = 0.11f;

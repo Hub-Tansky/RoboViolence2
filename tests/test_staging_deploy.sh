@@ -62,19 +62,26 @@ done
 expect "prune drops the oldest beyond 5, never the kept one, and names their SHAs" "sha-r2" "$(prune_releases r1 | tr '\n' ' ' | sed 's/ $//')"
 expect "releases left" "r1 r3 r4 r5 r6 r7" "$(ls "$ROOT/releases" | tr '\n' ' ' | sed 's/ $//')"
 
-# CTF and TDM (stubs: which services run, and each one's /status by path prefix; any other prefix is a 404)
-RUNNING="server tdm" CTF_STATUS="players 2" TDM_STATUS="players 3"
+# CTF, TDM and FFA (stubs: which services run, and each one's /status by path prefix; any other prefix is a 404)
+RUNNING="server tdm" CTF_STATUS="players 2" TDM_STATUS="players 3" FFA_STATUS=""
 running() { case " $RUNNING " in *" $1 "*) return 0 ;; esac; return 1; }
 admin_status() {
 	case "${1:-}" in
 		"") [ -n "$CTF_STATUS" ] && echo "$CTF_STATUS" ;;
 		/tdm) [ -n "$TDM_STATUS" ] && echo "$TDM_STATUS" ;;
+		/ffa) [ -n "$FFA_STATUS" ] && echo "$FFA_STATUS" ;;
 		*) return 1 ;;
 	esac
 }
 expect "CTF players" 2 "$(players_of server)"
 expect "TDM players at /tdm" 3 "$(players_of tdm /tdm)"
 expect "players summed over CTF and TDM" 5 "$(total_players)"
+RUNNING="server tdm ffa" FFA_STATUS="humans 4"
+expect "FFA players at /ffa" 4 "$(players_of ffa /ffa)"
+expect "players summed over CTF, TDM and FFA" 9 "$(total_players)"
+FFA_STATUS=""
+expect "FFA runs, /ffa/status silent: no total, names ffa" "fail ffa" "$(n=$(total_players) || echo "fail $n")"
+RUNNING="server tdm"
 expect "both answer" yes "$(all_status && echo yes || echo no)"
 TDM_STATUS=""
 expect "TDM runs, /tdm/status silent: no total, names tdm" "fail tdm" "$(n=$(total_players) || echo "fail $n")"

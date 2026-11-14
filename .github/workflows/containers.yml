@@ -54,9 +54,9 @@ jobs:
             [ "$uid" != 0 ]
           done
       # The join password comes from the environment and survives the launch script: the master lists the games as
-      # passworded. Both values are random throwaways for this run. BV2_PUBLIC_ADDRESS (a documentation address): both
+      # passworded. Both values are random throwaways for this run. BV2_PUBLIC_ADDRESS (a documentation address): the
       # servers share one public IP, as on production, and the master lists each under it (ADR 0022)
-      - name: The compose example comes up healthy; the master lists both passworded servers (CTF 3333, TDM 3334)
+      - name: The compose example comes up healthy; the master lists the three passworded servers (CTF 3333, TDM 3334, FFA 3335)
         run: |
           set -euo pipefail
           printf 'BV2_SV_PASSWORD=%s\nBV2_ADMIN_PASS=%s\nBV2_PUBLIC_ADDRESS=203.0.113.7\n' "$(openssl rand -hex 8)" "$(openssl rand -hex 16)" > "$RUNNER_TEMP/ci.env"
@@ -64,7 +64,7 @@ jobs:
           compose="docker compose -f packaging/docker/compose.example.yml --env-file $RUNNER_TEMP/ci.env"
           $compose up -d --no-build --wait --wait-timeout 120
           $compose ps
-          want="[('203.0.113.7', 3333, 'CTF-Placeholder', 1), ('203.0.113.7', 3334, 'TDM-Placeholder', 1)]"
+          want="[('203.0.113.7', 3333, 'CTF-Placeholder', 1), ('203.0.113.7', 3334, 'TDM-Placeholder', 1), ('203.0.113.7', 3335, 'DM-Placeholder', 1)]"
           listed=""
           for i in $(seq 1 30); do
             $compose cp master:/var/lib/bv2/web.db web.db 2>/dev/null || true
@@ -76,7 +76,7 @@ jobs:
           [ "$listed" = "$want" ]
       # PNS-56: the server browser pings each game port over UDP (babonet peer, game/src/CPing.cpp). A babonet peer
       # request (system interface, packet 1, TYPE_DEMAND carrying a 4-byte id) must come back as TYPE_CONFIRM
-      - name: Both game servers answer the browser's UDP ping (3333, 3334)
+      - name: Every game server answers the browser's UDP ping (3333, 3334, 3335)
         run: |
           python3 - <<'PY'
           import socket, struct
@@ -84,7 +84,7 @@ jobs:
           HEADER_SIZE = struct.calcsize(HEADER)  # 9 bytes
           INTERFACE_SYSTEM, TYPE_DEMAND, TYPE_CONFIRM = 0, 2, 3  # engine/babonet/src/cUDPpacket.h
           FIRST_PACKET, REQUEST_ID = 1, struct.pack('<I', 7)
-          for port in (3333, 3334):
+          for port in (3333, 3334, 3335):
               s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
               s.settimeout(1)
               confirmed = False
@@ -123,6 +123,8 @@ jobs:
           grep -q 'Server Info' info.txt
           curl -skf -H "Authorization: Bearer $token" https://localhost:8443/tdm/status | tee tdm-status.txt
           grep -qx 'game type 1' tdm-status.txt
+          curl -skf -H "Authorization: Bearer $token" https://localhost:8443/ffa/status | tee ffa-status.txt
+          grep -qx 'game type 0' ffa-status.txt
       # Phase T step 2: the staging deploy agent publishes the running commit at /deployed
       - name: /deployed serves the published commit
         run: |
@@ -137,6 +139,7 @@ jobs:
           $compose logs --no-color master | tail -40
           $compose logs --no-color server | tail -40
           $compose logs --no-color tdm | tail -40
+          $compose logs --no-color ffa | tail -40
           $compose cp master:/var/lib/bv2/web.db web.db && python3 -c "import sqlite3; c=sqlite3.connect('web.db'); print([r for r in c.execute('select * from Games')])" || true
   push:
     name: push (${{ matrix.arch }})

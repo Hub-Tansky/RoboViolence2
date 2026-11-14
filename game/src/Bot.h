@@ -134,6 +134,10 @@ namespace bots
 		} fire = NONE;
 		V2 fireAt;
 	};
+	// With friendly fire on in a team mode (ROBO-212): true when `slot` must not fire `weaponID` from `from` at `target`:
+	// always for molotovs and grenades, a rocket with a teammate within 3 units of the target, a shot with a teammate on
+	// the line before the target (anywhere on it for the photon rifle)
+	bool holdsForTeammate(const World& world, int slot, const CVector3f& from, const CVector3f& target, int weaponID);
 	// The brain's frame for the bot in `slot` at `position` (bots.rs tick_bots, one bot)
 	Action think(Brain& brain, const World& world, int slot, const CVector3f& position, const Player& self, float delay);
 

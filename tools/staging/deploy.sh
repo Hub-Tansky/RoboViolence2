@@ -12,7 +12,7 @@ set -u
 readonly REPO=Hub-Tansky/RoboViolence2
 readonly IMAGES="ghcr.io/hub-tansky/roboviolence2-server ghcr.io/hub-tansky/roboviolence2-master"
 readonly PROJECT=roboviolence2 # `name:` in compose.example.yml
-readonly GAME_SERVERS="server: tdm:/tdm" # <compose service>:<admin API path prefix on the proxy> (ADR 0027); with master and admin-proxy these are every compose service (health-watch.sh)
+readonly GAME_SERVERS="server: tdm:/tdm ffa:/ffa" # <compose service>:<admin API path prefix on the proxy> (ADR 0027); with master and admin-proxy these are every compose service (health-watch.sh)
 # The label names the host in notifications and its state and env file paths; production sets prod (docs/ops/runbook.md)
 readonly LABEL=${RV2_DEPLOY_LABEL:-staging}
 readonly ROOT=${RV2_STAGING_ROOT:-/var/lib/rv2-$LABEL} # the overrides exist for the test
@@ -133,7 +133,7 @@ running() { # running <service>: that compose service has a running container
 	[ -n "$(docker ps -q -f "label=com.docker.compose.project=$PROJECT" -f "label=com.docker.compose.service=$1" -f status=running)" ]
 }
 
-admin_status() { # admin_status [path prefix]: a game server's /status through our own proxy (CTF; /tdm for TDM); -k: loopback
+admin_status() { # admin_status [path prefix]: a game server's /status through our own proxy (CTF; /tdm for TDM, /ffa for FFA); -k: loopback
 	local host=${BV2_ADMIN_HOST:-localhost} port=${BV2_ADMIN_PORT:-8443}
 	printf 'Authorization: Bearer %s\n' "$BV2_ADMIN_PASS" |
 		curl -fsS -k --max-time 5 -H @- --resolve "$host:$port:127.0.0.1" "https://$host:$port${1:-}/status"
