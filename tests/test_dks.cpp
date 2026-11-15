@@ -50,16 +50,18 @@ static int voiceStarvation()
 	int fail = 0;
 	int rain = dksPlaySound(weather, -1, 50); // a looping 2D voice, never stolen
 	CVector3f pos(1, 2, 0);
-	int firstShot = -1;
+	int shots[15];
 	for (int i = 0; i < 15; ++i)
-	{
-		int h = dksPlay3DSoundPitch(shot, 5, pos, 255, 1.0f);
-		if (i == 0)
-			firstShot = h;
-	}
-	if (dksPlay3DSoundPitch(shot, 5, pos, 255, 1.0f) < 0)
+		shots[i] = dksPlay3DSoundPitch(shot, 5, pos, 255, 1.0f);
+	int lateShot = dksPlay3DSoundPitch(shot, 5, pos, 255, 1.0f);
+	if (lateShot < 0)
 	{
 		std::printf("FAIL: a 3D sound with every voice busy was dropped, it should take the oldest 3D voice\n");
+		fail = 1;
+	}
+	else if ((lateShot & 0xFF) != (shots[0] & 0xFF))
+	{
+		std::printf("FAIL: a 3D sound took a newer 3D voice, not the oldest\n");
 		fail = 1;
 	}
 	int cheerHandle = dksPlaySound(cheer, -1, 255);
@@ -68,14 +70,28 @@ static int voiceStarvation()
 		std::printf("FAIL: the 2D score cheer was dropped with every voice busy with 3D sounds\n");
 		fail = 1;
 	}
-	if (firstShot >= 0 && cheerHandle >= 0 && (firstShot & 0xFF) == (cheerHandle & 0xFF))
+	else if ((cheerHandle & 0xFF) != (shots[1] & 0xFF))
 	{
-		std::printf("FAIL: the oldest 3D voice went to the second 3D sound, not the cheer: wrong order\n");
+		std::printf("FAIL: the 2D cheer took a newer 3D voice, not the oldest\n");
 		fail = 1;
 	}
-	// Fill the rest with 2D sounds; 3D sounds may not steal them, the looping one is never stolen
+	// 14 more 2D sounds take the 14 remaining 3D voices, the 15th the oldest one-shot 2D voice (the first cheer);
+	// none takes the looping one
+	int last = -1;
 	for (int i = 0; i < 15; ++i)
-		dksPlaySound(cheer, -1, 255);
+	{
+		last = dksPlaySound(cheer, -1, 255);
+		if (last < 0 || (last & 0xFF) == (rain & 0xFF))
+		{
+			std::printf("FAIL: a 2D sound was dropped or took the looping voice\n");
+			fail = 1;
+		}
+	}
+	if (last >= 0 && cheerHandle >= 0 && (last & 0xFF) != (cheerHandle & 0xFF))
+	{
+		std::printf("FAIL: with only 2D voices left, a 2D sound didn't take the oldest one\n");
+		fail = 1;
+	}
 	if (dksPlay3DSoundPitch(shot, 5, pos, 255, 1.0f) >= 0)
 	{
 		std::printf("FAIL: a 3D sound took a 2D voice\n");
