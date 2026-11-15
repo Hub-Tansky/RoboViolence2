@@ -135,6 +135,18 @@ int main(int argc, char ** argv)
 	bv2::loadConfigLayers(1, args);
 	check(bv2::parseHostPorts(masters.s).empty(), "BV2_MASTER_SERVERS=none turns the master list off");
 	setEnv("BV2_MASTER_SERVERS", "");
+	CString adminUser("");
+	dksvarRegister(CString("zsv_adminUser [string : \"\""), &adminUser, true);
+	setEnv("BV2_ADMIN_USER", "hub-tansky");
+	bv2::loadConfigLayers(1, args);
+	check(adminUser == CString("hub-tansky"), "BV2_ADMIN_USER sets the in-game admin login name");
+	dksvarSaveConfig((char *)bv2::configFile().c_str());
+	{
+		std::ifstream in(bv2::configFile());
+		std::string saved((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
+		check(saved.find("hub-tansky") == std::string::npos, "BV2_ADMIN_USER is not saved");
+	}
+	setEnv("BV2_ADMIN_USER", "");
 	check(bv2::parseHostPorts("none,127.0.0.1:10207").size() == 1, "a none entry beside a master is skipped");
 	std::vector<bv2::HostPort> hp = bv2::parseHostPorts("master.roboviolence.com:10207, other.invalid");
 	check(hp.size() == 2 && hp[0].host == "master.roboviolence.com" && hp[0].port == 10207 && hp[1].port == 11112,

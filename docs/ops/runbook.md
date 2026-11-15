@@ -26,16 +26,18 @@ The compose example runs three game servers from the same image and the same env
 
   ```
   BV2_SV_PASSWORD=
+  BV2_ADMIN_USER=
   BV2_ADMIN_PASS=
   BV2_MASTER_BAN_PASS=
   BV2_PUBLIC_ADDRESS=
   ```
 
-- The server reads `BV2_SV_PASSWORD` (join password), `BV2_ADMIN_PASS` (`zsv_adminPass`; in-game admin login needs 15 characters or more; five failures disconnect, and from five failures an IP waits 60 s, doubling with each failure after a lock up to an hour; it resets an hour after the last failure or lock ends) and `BV2_MASTER_SERVERS` and never saves them (ADR 0007). Empty means none, except `BV2_MASTER_SERVERS`: unset, the server lists itself on the public master `master.roboviolence.com:10207`; `none` lists it nowhere (ADR 0028).
+- The server reads `BV2_SV_PASSWORD` (join password), `BV2_ADMIN_USER` (`zsv_adminUser`, the in-game admin login name; empty keeps `bv2.cfg`'s), `BV2_ADMIN_PASS` (`zsv_adminPass`; in-game admin login needs 15 characters or more; five failures disconnect, and from five failures an IP waits 60 s, doubling with each failure after a lock up to an hour; it resets an hour after the last failure or lock ends) and `BV2_MASTER_SERVERS` and never saves them (ADR 0007). Empty means none, except `BV2_MASTER_SERVERS`: unset, the server lists itself on the public master `master.roboviolence.com:10207`; `none` lists it nowhere (ADR 0028).
 - `BV2_SV_BOTS` (not a secret; compose default 0, staging and prod env files set 8, staging first): `sv_bots`, the target population bots fill each game server to (ADR 0049). `set sv_bots N` in the console or admin API changes it until restart. Bots count in the browser's player count; `/status` adds `humans N`, and `deploy.sh` waits for 0 humans.
 - `BV2_PUBLIC_ADDRESS`: the server's public IPv4, listed by the master instead of the compose network address (ADR 0022).
 - `BV2_MASTER_BAN_PASS` (master, 15 characters or more): needed for `cacheban`/`cacheunban`; empty or shorter refuses them. It never crosses the network: the game server signs each ban with an HMAC keyed by it, which the master accepts within 5 minutes (ADR 0038).
-- The admin user and other settings: `name value` lines (no `set`), e.g. `zsv_adminUser "boss"`, in `bv2.cfg` in the server volume, or in a file passed with `--config <file> CTF` (name the launch script too). The launch script sets no secrets, so these and the environment values stay. `cl_masterServers` in `bv2.cfg` is ignored (ADR 0028): use `BV2_MASTER_SERVERS` or `--config`.
+- In-game admin login needs both the user and the password: `admin <user> <password>` in the client console, then `- <command>`. Without a user (env or `bv2.cfg`) only the admin API works.
+- Other settings: `name value` lines (no `set`), e.g. `sv_bots 4`, in `bv2.cfg` in the server volume, or in a file passed with `--config <file> CTF` (name the launch script too). The launch script sets no secrets, so these and the environment values stay. `cl_masterServers` in `bv2.cfg` is ignored (ADR 0028): use `BV2_MASTER_SERVERS` or `--config`.
 
 ## Run
 
