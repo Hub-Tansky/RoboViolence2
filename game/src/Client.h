@@ -165,6 +165,7 @@ public:
 
 	// Pour l'afficher
 	void render(float & alphaScope);
+	void renderChatInput(float yPos, float size, float scale); // the line a chat message is typed in (ClientRender.cpp)
 
 	// Pour rejoindre un server
 	int join(CString IPAddress, int port, CString password = "");

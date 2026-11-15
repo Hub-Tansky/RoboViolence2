@@ -16,6 +16,7 @@
 	BaboViolent 2 source code. If not, see http://www.gnu.org/licenses/.
 */
 
+#include "ViewGeometry.h"
 #ifndef CONSOLE
 #include "Client.h"
 #include "KeyManager.h"
@@ -27,8 +28,6 @@
 #ifdef RENDER_LAYER_TOGGLE
 	extern int renderToggle;
 #endif
-
-
 
 //
 // Pour l'afficher
@@ -536,11 +535,11 @@ void Client::render(float & alphaScope)
 
 					break;
 				}
-         
 
-            float textSize = (float)gameVar.r_chatTextSize;
+				float textScale = view::hudTextScale(res[1]);
+				float textSize = (float)gameVar.r_chatTextSize * textScale;
 
-            float xPos = ((float)res[0] / 800.0f) * 128 + 40;
+				float xPos = ((float)res[0] / 800.0f) * 128 + 40;
 				float yPos = res[1] - (((float)res[1] / 600.0f) * 128 + 40)-60;
 
 				for (i=0;i<(int)chatMessages.size();++i)
@@ -582,30 +581,7 @@ void Client::render(float & alphaScope)
 
 				// Si on est apres chatter
 				if (chatting.haveFocus())
-				{
-					glDisable(GL_TEXTURE_2D);
-					glBegin(GL_QUADS);
-						glColor4f(0,0,0, .5f);
-						glVertex2f(8,yPos +32+1);
-						glVertex2f(8,yPos +32+27);
-						glColor4f(0,0,0,0);
-						glVertex2f(500,yPos +32+27);
-						glVertex2f(500,yPos +32+1);
-					glEnd();
-					glEnable(GL_TEXTURE_2D);
-					glColor3f(1,1,1);
-					CString chattingTo;
-					if (isChattingTeam)
-						chattingTo = "sayteam : ";
-					else
-						chattingTo = "say : ";
-
-					
-               float chattingToWidth = dkfGetStringWidth(28, chattingTo.s);
-					printLeftText(10,yPos + 32,28,chattingTo);
-					chatting.print(28, 10+chattingToWidth,yPos + 32, 0);
-				}
-
+					renderChatInput(yPos, textSize, textScale);
 
 				// Les events
 				for (i=0;i<(int)eventMessages.size();++i)
@@ -620,14 +596,12 @@ void Client::render(float & alphaScope)
 					}
 					// On l'écris à peut pret au 2 tier de l'écran à gauche
 
-            float eventTextSize = (float)gameVar.r_eventTextSize;
+					float eventTextSize = (float)gameVar.r_eventTextSize * textScale;
 
-            if (gameVar.r_showEventText)
-            {
-               printLeftText(xPos,(float)res[1] - (float)(eventMessages.size() - i - 1) * eventTextSize-20-eventTextSize, eventTextSize, eventMessages[i].message);
-            }
-
-					
+					if (gameVar.r_showEventText)
+					{
+						printLeftText(xPos, (float)res[1] - (float)(eventMessages.size() - i - 1) * eventTextSize - 20 - eventTextSize, eventTextSize, eventMessages[i].message);
+					}
 				}
 
 			glPopAttrib();
@@ -766,6 +740,28 @@ void Client::render(float & alphaScope)
 			glPopAttrib();
 		dkglPopOrtho();
 	}
+}
+
+// The line the player types a chat message in, under the last chat line: chat text size, its fading
+// background 500 px wide at 600 lines (yPos + 32 while the text is at most 32 px)
+void Client::renderChatInput(float yPos, float size, float scale)
+{
+	float y = yPos + (size > 32 ? size : 32);
+	glDisable(GL_TEXTURE_2D);
+	glBegin(GL_QUADS);
+	glColor4f(0, 0, 0, .5f);
+	glVertex2f(8, y + 1);
+	glVertex2f(8, y + size - 1);
+	glColor4f(0, 0, 0, 0);
+	glVertex2f(500 * scale, y + size - 1);
+	glVertex2f(500 * scale, y + 1);
+	glEnd();
+	glEnable(GL_TEXTURE_2D);
+	glColor3f(1, 1, 1);
+	CString chattingTo = isChattingTeam ? "sayteam : " : "say : ";
+	float chattingToWidth = dkfGetStringWidth(size, chattingTo.s);
+	printLeftText(10, y, size, chattingTo);
+	chatting.print(size, 10 + chattingToWidth, y, 0);
 }
 #endif
 
