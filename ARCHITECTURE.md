@@ -169,14 +169,14 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/test_cstring.cpp` | Phase C step 5: one-argument `CString` is text (arrays, `char*`, literals, direct and implicit); two or more arguments format (ADR 0021) |
 | `tests/test_secondary_menu.cpp` | `secondaryMenu`: Nuke Bot and Mini Bot hidden, the rest close up, a saved hidden pick falls back to Knives or the first enabled one (ctest `secondary_menu`) |
 | `tests/test_spawn_overlay.cpp` | `spawns::farthestFrom`: no DM spawn gives no line origin (the editor crash), the farthest of several, ties, nearest team spawn |
-| `tests/test_view_geometry.cpp` | Widescreen (Stretch) projects at the window's own aspect, Bars at 4:3; the camera's side margin widens with the view, and a narrow or short map centres it |
+| `tests/test_view_geometry.cpp` | Widescreen (Stretch) projects at the window's own aspect, Bars at 4:3; the camera's side margin widens with the view, and a narrow or short map centres it; HUD text in window pixels scales by height / 600 (ROBO-128) |
 | `tests/test_config.cpp` | dksvar config layering, transient values not saved, secrets masked, `dksvarGetValue` |
 | `tests/test_content_maps.py` | `content/maps`: valid names, version 20202, spawns and flag pods on open, connected cells, flag pods at height 0 (else no pickup), launch scripts name only these maps (ctest `content_maps`) |
 | `tests/test_corrupt_map_preview.py` | ROBO-195: the client reaches the menu with `maps/zz-Corrupt.bvm` of unknown version, listed after the placeholder map in a fresh pref dir (ctest `corrupt_map_preview`) |
 | `tests/test_crash_report.cpp` | ROBO-186: runs itself as a crashing child and checks the `crash-*.txt` it leaves (version line, signal or exception code, a stack frame, the load address on macOS) and that the previous handler still runs (ADR 0048) |
 | `tests/test_credentials.cpp` | Step 10: the credential HMAC against RFC 4231; proofs check only with their own password, label and nonce |
 | `tests/test_crash_fixes.cpp` | Steps 5 and 7: one check per fixed defect (KEY_QUESTIONS Part D) on the in-process server |
-| `tests/test_dks.cpp` | R20: `dksPlayMusic` on a missing file 200 times; a sound deleted after `dksShutDown` (teardown) (ASan) |
+| `tests/test_dks.cpp` | R20: `dksPlayMusic` on a missing file 200 times; a sound deleted after `dksShutDown` (teardown) (ASan); ROBO-216: with every voice busy a 3D sound takes the oldest 3D voice, a 2D sound the oldest 3D voice and then the oldest 2D one, a looping voice never |
 | `tests/test_split_symbols.py` | ROBO-188: `split-symbols.py` on a copy of a Release build's binaries puts each one's symbols in the zip and strips it (ctest `split_symbols`, Release builds only; ADR 0051) |
 | `tests/test_example_cfg.py` | `config/bv2.example.cfg` names a new player as `GameVar.cpp` does and starts fullscreen at the desktop resolution (ADR 0043); it and the three launch scripts carry the owner's server defaults, names, modes, ports and sizes (ADR 0053) |
 | `tests/test_window_icon.cpp` | `dkwSetWindowIcon` accepts the Linux client's compiled-in icon (`AppIcon.h`) and refuses bytes that aren't a PNG |
@@ -788,7 +788,7 @@ The game's own maps (BV2 format 20202), GPL-3.0 like the code. The build copies 
 | `game/src/SqlStatement.h` | Prepared SQLite statement with bound parameters (the game's copy) |
 | `game/src/SecondaryMenu.h` | The weapon menu's secondary column (`secondaryMenu::layout`, `fallback`): disabled secondaries hidden, the rest close up, a hidden pick falls back (ADR 0053) |
 | `game/src/SpawnOverlay.h` | The editor spawn overlay's line origin (`spawns::farthestFrom`): the DM spawn farthest from a team's spawns, -1 when there is none |
-| `game/src/ViewGeometry.h` | ([ADR 0039](docs/decisions/0039-widescreen-stretch-shows-more-map.md)) The 3D viewport inside the window (`view::rect`: whole window, or 4:3 between bars; `view::current` for this frame, defined in `IntroScreen.cpp`), the aspect the gameplay, scope and intro projections use, and the camera's margins at the map edges |
+| `game/src/ViewGeometry.h` | ([ADR 0039](docs/decisions/0039-widescreen-stretch-shows-more-map.md)) The 3D viewport inside the window (`view::rect`: whole window, or 4:3 between bars; `view::current` for this frame, defined in `IntroScreen.cpp`), the aspect the gameplay, scope and intro projections use, and the camera's margins at the map edges; `view::hudTextScale` (height / 600) for chat, game event and name-tag text drawn in window pixels, whose sizes mean pixels at 600 lines (ROBO-128) |
 | `game/src/Weapon.cpp` | Weapon definitions and stats |
 | `game/src/Weapon.h` | Weapon definitions and stats |
 | `game/src/Write.cpp` | Chat input widget |

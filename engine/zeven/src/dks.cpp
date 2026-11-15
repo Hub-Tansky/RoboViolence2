@@ -53,6 +53,7 @@ namespace
 		DksSound * owner;
 		unsigned int serial;
 		bool used;
+		bool spatial;
 	};
 
 	ma_engine g_engine;
@@ -95,12 +96,38 @@ namespace
 		return -1;
 	}
 
+	// ROBO-216: with every voice busy (gunfire, casings, ricochets: s_maxSoftwareChannels defaults to 16) a new
+	// sound was dropped, so the CTF score cheer of a player in a firefight went silent. Steal the oldest one-shot
+	// voice instead: a 3D sound takes only another 3D voice, a 2D event or UI sound takes a 3D voice first, then the
+	// oldest 2D one. Looping voices (weather) are never stolen. -1 when nothing may be stolen.
+	int stealVoice(bool spatial)
+	{
+		for (int pass = 0; pass < (spatial ? 1 : 2); ++pass)
+		{
+			bool wantSpatial = pass == 0;
+			int best = -1;
+			for (size_t i = 0; i < g_voices.size(); ++i)
+			{
+				Voice* v = g_voices[i];
+				if (!v->used || v->spatial != wantSpatial || (v->owner && v->owner->loop))
+					continue;
+				if (best < 0 || v->serial < g_voices[best]->serial)
+					best = (int)i;
+			}
+			if (best >= 0)
+				return best;
+		}
+		return -1;
+	}
+
 	Voice * startVoice(DksSound * sound, int channel, int volume, bool spatial, int & handle)
 	{
 		handle = -1;
 		if (!g_ready || !sound || !sound->loaded)
 			return 0;
 		int slot = (channel >= 0 && channel < (int)g_voices.size()) ? channel : findVoice();
+		if (slot < 0)
+			slot = stealVoice(spatial);
 		if (slot < 0)
 			return 0;
 		Voice * v = g_voices[slot];
@@ -109,6 +136,7 @@ namespace
 		if (ma_sound_init_copy(&g_engine, &sound->master, flags, &g_sfxGroup, &v->sound) != MA_SUCCESS)
 			return 0;
 		v->used = true;
+		v->spatial = spatial;
 		v->owner = sound;
 		v->serial = g_serial++;
 		ma_sound_set_looping(&v->sound, sound->loop ? MA_TRUE : MA_FALSE);
@@ -134,6 +162,7 @@ bool			dksInit(int mixrate, int maxsoftwarechannels)
 	{
 		Voice * v = new Voice();
 		v->used = false;
+		v->spatial = false;
 		v->owner = 0;
 		v->serial = 0;
 		g_voices.push_back(v);

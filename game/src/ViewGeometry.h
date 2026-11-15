@@ -1,4 +1,5 @@
-// Where the 3D view sits in the window and how wide it is (ADR 0039: Stretch shows more map sideways, Bars stays 4:3).
+// Where the 3D view sits in the window and how wide it is (ADR 0039: Stretch shows more map sideways, Bars stays 4:3),
+// and how big text drawn in window pixels is (ROBO-128).
 // Plain C++: tests/test_view_geometry.cpp drives it without a window.
 #pragma once
 
@@ -52,5 +53,14 @@ namespace view
 	inline float clampCameraY(float y, float mapHeight)
 	{
 		return clampAxis(y, mapHeight, CAMERA_MARGIN_Y);
+	}
+
+	// Text drawn in window pixels (chat, game events, name tags) keeps the share of the screen it had at 800x600:
+	// sizes such as r_chatTextSize mean "pixels at 600 lines" (ROBO-128). An empty window keeps the set size.
+	const float HUD_TEXT_BASE_HEIGHT = 600;
+
+	inline float hudTextScale(int resH)
+	{
+		return resH > 0 ? static_cast<float>(resH) / HUD_TEXT_BASE_HEIGHT : 1;
 	}
 }
