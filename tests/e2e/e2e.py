@@ -2,7 +2,7 @@
 """Phase T4: end-to-end scenarios: bv2dedicated with the admin API, plus bv2 autotest clients under Xvfb.
 
 Usage: e2e.py <runtime dir> <scratch dir> <scenario>
-Scenarios: join_leave, password, chat, kick, ban, master_list, ctf_capture, ghost, user_map, weapon_choice. Each has one observable: the admin API's
+Scenarios: join_leave, password, chat, kick, ban, master_list, browser_tab_list, ctf_capture, ghost, user_map, weapon_choice. Each has one observable: the admin API's
 `GET /status` player count or score, the server's stdout, or a client's autotest result (ADR 0025). Linux only (Xvfb).
 """
 import os
@@ -251,6 +251,17 @@ def master_list(run):
     check(run.finished(client) == 0, "client lists the server: Games found : 1")
 
 
+def browser_tab_list(run):
+    """Opening the Browse tab lists the games again (ROBO-217): before, only the menu's first opening did, so a server
+    hosted later stayed missing until Refresh or a restart"""
+    run.master()
+    masters = "127.0.0.1:10207"
+    client = run.client("e2e-a", ["expect-scene menu", "expect-console No games found", "wait 12", "menutab host",
+                                  "menutab browser", "expect-console Games found : 1"], BV2_MASTER_SERVERS=masters)
+    run.server(BV2_MASTER_SERVERS=masters)  # registers 5 s after it starts, during the client's wait
+    check(run.finished(client) == 0, "the reopened Browse tab lists the server: Games found : 1")
+
+
 def weapon_choice(run):
     """A client keeps its chosen gun (cl_primaryWeapon) when it joins again. Every other player's spawn used to overwrite
     it on the client, so with bots on the server a human joined with the last spawned bot's gun"""
@@ -275,8 +286,8 @@ def weapon_choice(run):
     check(spawned()[0] == "6", f"spawn after joining again with the chosen gun 6, got {spawned()[0]}")
     check(run.finished(client) == 0, "client script passed")
 
-SCENARIOS = {f.__name__: f for f in (join_leave, password, chat, kick, ban, master_list, ctf_capture, ghost, user_map,
-                                     weapon_choice)}
+SCENARIOS = {f.__name__: f for f in (join_leave, password, chat, kick, ban, master_list, browser_tab_list, ctf_capture, ghost,
+                                     user_map, weapon_choice)}
 
 if __name__ == "__main__":
     runtime, scratch, name = sys.argv[1:4]

@@ -150,6 +150,8 @@ private:
 
 	//--- Effacer toute les games pr�sente
 	void eraseGames();
+	//--- Removes the queued master messages of one type
+	void dropQueued(int typeID);
 
 	//--- La row est valid�, on a le ping pis toute
 	void pingReceived(int ping);
@@ -197,6 +199,8 @@ public:
 
 	//--- Est-ce qu'on est pr�sentement connect� au master
 	bool isConnected() const {return (uniqueClientID != 0);}
+	//--- Games the master announced for the last list request (tests)
+	int gamesFound() const { return m_nbGameFound; }
 
 	void requestRemoteCacheList(CString& strFilter, CString& serverIP, CString& serverPort, unsigned long baboid);
 

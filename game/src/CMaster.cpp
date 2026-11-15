@@ -141,8 +141,8 @@ void CMaster::pingReceived(int ping)
 		//--- Remove that row
 		m_games.erase(m_games.begin());
 
-		// Keep the master session open for the next refresh; reconnecting on
-		// every listing caused connect/disconnect storms.
+		// Keep the master session open for the remaining rows of this listing;
+		// reconnecting per row caused connect/disconnect storms.
 	}
 }
 
@@ -527,16 +527,7 @@ void CMaster::sendGameInfo(Server* server)
 	{
 		// Replace only the previous BV2_ROW heartbeat; other queued master packets
 		// may still be waiting for the TCP session to come up.
-		for (std::vector<SMasterMessage*>::iterator it = messageStack.begin(); it != messageStack.end(); )
-		{
-			if ((*it)->typeID == BV2_ROW)
-			{
-				delete *it;
-				it = messageStack.erase(it);
-			}
-			else
-				++it;
-		}
+		dropQueued(BV2_ROW);
 		stBV2row bv2Row;
 
 		strncpy(bv2Row.map, server->game->mapName.s, 16);
@@ -556,8 +547,20 @@ void CMaster::sendGameInfo(Server* server)
 	}
 }
 
-
-
+// Removes the queued master messages of one type
+void CMaster::dropQueued(int typeID)
+{
+	for (std::vector<SMasterMessage*>::iterator it = messageStack.begin(); it != messageStack.end();)
+	{
+		if ((*it)->typeID == typeID)
+		{
+			delete *it;
+			it = messageStack.erase(it);
+		}
+		else
+			++it;
+	}
+}
 
 //
 //--- Requester la game
@@ -574,13 +577,22 @@ void CMaster::requestGames()
 	eraseGames();
 	m_nbGameFound = 0;
 
+	// Every list request goes out on a fresh master session (ROBO-217). A player's session sits idle
+	// while they browse, and a home router can drop an idle TCP connection without either end noticing:
+	// the old request then went nowhere and only a restart showed new servers. A hosting game keeps its
+	// session: its heartbeats every 20 s keep it alive, and the master may still owe it ban answers.
+	if (!RunningServer)
+		disconnectMaster();
+	// Replace a list request still queued, so only one goes out
+	dropQueued(BV2_LIST);
+
 	stBV2list bv2List;
-	strcpy(bv2List.Version, m_CurrentVersion );
+	snprintf(bv2List.Version, sizeof(bv2List.Version), "%s", m_CurrentVersion);
 	sendPacket((char*)(&bv2List), sizeof(stBV2list), BV2_LIST);
 
 	//send a udp broadcast
 	net_clsv_broadcast_query query;
-	sprintf( query.key , "3333113333");
+	snprintf(query.key, sizeof(query.key), "%s", "3333113333");
 	bb_peerSend( NET_BROADCAST , (char*) &query , NET_BROADCAST_QUERY , sizeof( net_clsv_broadcast_query ) , false );
 
 
@@ -633,7 +645,8 @@ void CMaster::sendPacket(const char* in_data, int in_size, int in_ID, bool disco
 	}
 
 	// add the message to the queue
-	if( messageStack.size() < 1 || (in_ID >= 1010 && in_ID <= 1013) || in_ID == 1016 || in_ID == 1017)
+	// A list request always queues: behind a server's heartbeat that waits for the connection it was dropped
+	if (messageStack.size() < 1 || in_ID == BV2_LIST || (in_ID >= 1010 && in_ID <= 1013) || in_ID == 1016 || in_ID == 1017)
 	{
 		messageStack.push_back(new SMasterMessage(in_data, in_size, in_ID));
 	}

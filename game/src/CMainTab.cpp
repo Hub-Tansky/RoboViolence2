@@ -114,7 +114,7 @@ CMainTab::CMainTab(CControl * in_parent)
 
 	current = 0;
 	lastButtonPress = 0;
-	timeBrowseDelay = -1;
+	timeBrowseDelay = 0;
 	showBrowser(); // the menu opens on the Game Browser (ADR 0043)
 }
 
@@ -133,11 +133,8 @@ void CMainTab::showTab(CControl * button, CListener * tab)
 void CMainTab::showBrowser()
 {
 	showTab(btn_browser, browser);
-	//--- If first time, browse
-	if (timeBrowseDelay == -1)
-	{
-		timeBrowseDelay = 2;
-	}
+	// Every opening of the tab lists the games, like Refresh (ROBO-217); before, only the first one did
+	timeBrowseDelay = 2;
 }
 
 

@@ -190,6 +190,17 @@ if(TARGET bv2master_lib)
   add_dependencies(test_master bv2_seed_master_db)
   add_test(NAME master COMMAND test_master "${BV2_RUNTIME_DIR}" "${BV2_TEST_SCRATCH}/master")
   set_tests_properties(master PROPERTIES TIMEOUT 60 RESOURCE_LOCK bv2_master_port)
+
+  # The browser's Refresh after the master session went silent (ROBO-217): the game's CMaster against the real master
+  if(TARGET bv2server_lib)
+    add_executable(test_master_refresh test_master_refresh.cpp)
+    target_link_libraries(test_master_refresh PRIVATE bv2server_lib bv2master_lib)
+    bv2_target_defaults(test_master_refresh)
+    add_dependencies(test_master_refresh bv2_seed_master_db)
+    add_test(NAME master_refresh COMMAND test_master_refresh "${BV2_RUNTIME_DIR}" "${BV2_TEST_SCRATCH}/master-refresh")
+    set_tests_properties(master_refresh PROPERTIES TIMEOUT 60 RESOURCE_LOCK bv2_master_port
+      ENVIRONMENT "BV2_PREF_DIR=${BV2_TEST_SCRATCH}/master-refresh-pref")
+  endif()
 endif()
 
 if(TARGET zeven_client)
@@ -318,7 +329,7 @@ endif()
 
 # Phase T4: server, master and autotest clients together (tests/e2e/e2e.py; Xvfb, so Linux only)
 if(TARGET bv2 AND TARGET bv2dedicated AND TARGET bv2master AND ROBOVIOLENCE2_XVFB AND NOT APPLE)
-  foreach(scenario join_leave password chat kick ban master_list ctf_capture ghost user_map weapon_choice)
+  foreach(scenario join_leave password chat kick ban master_list browser_tab_list ctf_capture ghost user_map weapon_choice)
     add_test(NAME e2e_${scenario} COMMAND ${Python3_EXECUTABLE} -B ${CMAKE_CURRENT_SOURCE_DIR}/e2e/e2e.py "${BV2_RUNTIME_DIR}" "${BV2_TEST_SCRATCH}/e2e" ${scenario})
     set_tests_properties(e2e_${scenario} PROPERTIES TIMEOUT 300 RESOURCE_LOCK "bv2_server_port;bv2_master_port")
   endforeach()
