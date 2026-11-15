@@ -574,7 +574,7 @@ void CMaster::requestGames()
 	eraseGames();
 	m_nbGameFound = 0;
 
-	// Every list request goes out on a fresh master session (ROBO-216). A player's session sits idle
+	// Every list request goes out on a fresh master session (ROBO-217). A player's session sits idle
 	// while they browse, and a home router can drop an idle TCP connection without either end noticing:
 	// the old request then went nowhere and only a restart showed new servers. A hosting game keeps its
 	// session: its heartbeats every 20 s keep it alive, and the master may still owe it ban answers.

@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-11-15
-- Affects: `game/src/CMaster.cpp` (`requestGames`, `sendPacket`), `tests/test_master_refresh.cpp`; ROBO-216
+- Affects: `game/src/CMaster.cpp` (`requestGames`, `sendPacket`), `tests/test_master_refresh.cpp`; ROBO-217
 
 ## Context
 - Owner report, 2026-11-15: a server hosted from the Host tab did not show in a friend's browser until the friend restarted the game. Refresh did nothing.

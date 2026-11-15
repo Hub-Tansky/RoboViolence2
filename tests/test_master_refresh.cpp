@@ -1,4 +1,4 @@
-// The server browser's Refresh lists a server hosted after the browser first listed (ROBO-216).
+// The server browser's Refresh lists a server hosted after the browser first listed (ROBO-217).
 // The game's CMaster talks to the real master in-process through a TCP relay. The relay then goes silent on the
 // open session, as a home router does when it drops an idle connection without telling either end, and a server
 // registers. Refresh has to list it without a restart.

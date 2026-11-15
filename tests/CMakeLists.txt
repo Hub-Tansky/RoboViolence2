@@ -191,7 +191,7 @@ if(TARGET bv2master_lib)
   add_test(NAME master COMMAND test_master "${BV2_RUNTIME_DIR}" "${BV2_TEST_SCRATCH}/master")
   set_tests_properties(master PROPERTIES TIMEOUT 60 RESOURCE_LOCK bv2_master_port)
 
-  # The browser's Refresh after the master session went silent (ROBO-216): the game's CMaster against the real master
+  # The browser's Refresh after the master session went silent (ROBO-217): the game's CMaster against the real master
   if(TARGET bv2server_lib)
     add_executable(test_master_refresh test_master_refresh.cpp)
     target_link_libraries(test_master_refresh PRIVATE bv2server_lib bv2master_lib)

@@ -208,7 +208,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/test_server_harness.cpp` | The in-process server starts on the placeholder CTF map, accepts a client and sends it the game state |
 | `tests/test_validator.cpp` | Steps 8, 9: the step 8 kicks, `sv_antiCheat` levels, and each step 9 rule against a cheat and against normal (lagged) play |
 | `tests/test_master.cpp` | In-process master on port 10207 with a scratch `master.db`: register, list, heartbeat timeout (simulated 61 s), removal by `KILL_SERV`, SQL injection in names, maps, nicks and IPs, the ban list with LIKE filters (Q-S3), the ban secret, the advertised address and a reconnect; runs on Windows since R28 was fixed |
-| `tests/test_master_refresh.cpp` | The game's `CMaster` against the real master through a TCP relay: after the relay silences the idle session (a router dropping it), Refresh still lists a newly registered server (ROBO-216, [ADR 0055](docs/decisions/0055-browser-refresh-uses-a-fresh-master-session.md)) |
+| `tests/test_master_refresh.cpp` | The game's `CMaster` against the real master through a TCP relay: after the relay silences the idle session (a router dropping it), Refresh still lists a newly registered server (ROBO-217, [ADR 0055](docs/decisions/0055-browser-refresh-uses-a-fresh-master-session.md)) |
 | `tests/test_netpacket.cpp` | Byte-level layout of the packed wire structs |
 | `tests/test_staging_deploy.sh` | Phase T step 2: staging deploy helpers: main-only run selection, `/status` human count (bots ignored, `players` from older servers), CTF, TDM and FFA player counts and verify, failures per commit, infrastructure stages, env-file mode and readonly repository (ctest `staging_deploy`) |
 | `tests/test_health_watch.sh` | Container health watcher: which container states are problems, missing services from `GAME_SERVERS`, Docker not answering, two-run confirmation before an alert or recovery, a whole run against a stub `docker`, no check during a deploy but a stale lock ignored (ctest `health_watch`, Unix) |
@@ -396,7 +396,7 @@ The game's own maps (BV2 format 20202), GPL-3.0 like the code. The build copies 
 | `docs/decisions/0052-public-servers-play-pro-ruleset.md` | ADR: the shipped CTF and TDM launch scripts play the Pro ruleset (ROBO-199) |
 | `docs/decisions/0053-three-public-servers-and-owner-defaults.md` | ADR: FFA, CTF and TDM public servers, the owner's defaults in the scripts and example config, disabled secondaries hidden in the weapon menu (ROBO-212) |
 | `docs/decisions/0054-game-ships-its-own-maps.md` | ADR: the owner's maps in `content/maps`, shipped in `main/maps`, found in the package beside other data, flag pods at z 0 (ROBO-214) |
-| `docs/decisions/0055-browser-refresh-uses-a-fresh-master-session.md` | ADR: every server list request opens a fresh master session (a hosting game keeps its own); a router can silently drop an idle one (ROBO-216) |
+| `docs/decisions/0055-browser-refresh-uses-a-fresh-master-session.md` | ADR: every server list request opens a fresh master session (a hosting game keeps its own); a router can silently drop an idle one (ROBO-217) |
 | `docs/decisions/README.md` | ADR format and index |
 
 ### `docs/ops`
