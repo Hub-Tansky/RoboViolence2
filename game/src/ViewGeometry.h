@@ -53,4 +53,14 @@ namespace view
 	{
 		return clampAxis(y, mapHeight, CAMERA_MARGIN_Y);
 	}
+
+	// Text drawn in window pixels (chat, game events, name tags) keeps the share of the screen it had at 800x600:
+	// sizes such as r_chatTextSize mean "pixels at 600 lines". Never smaller than that size (ROBO-128).
+	const float HUD_TEXT_BASE_HEIGHT = 600;
+
+	inline float hudTextScale(int resH)
+	{
+		float s = static_cast<float>(resH) / HUD_TEXT_BASE_HEIGHT;
+		return s > 1 ? s : 1;
+	}
 }

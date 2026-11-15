@@ -23,6 +23,7 @@
 #include "Map.h"
 #include "Game.h"
 #include "Scene.h"
+#include "ViewGeometry.h"
 #include <limits>
 
 extern Scene * scene;
@@ -649,7 +650,8 @@ void Player::renderName()
 				showName.insert(name.s, 0);
 			showName.insert("\x8",0);
 			if (ping > 12 && scene->client->blink < .25f) showName.insert(CString("\x5%s ", gameVar.lang_laggerC.s).s, 0);
-			printCenterText((float)onScreenPos[0], (float)onScreenPos[1]-28, 28,showName);
+			float nameSize = 28 * view::hudTextScale(res[1]);
+			printCenterText((float)onScreenPos[0], (float)onScreenPos[1] - nameSize, nameSize, showName);
 		}
 	}
 
