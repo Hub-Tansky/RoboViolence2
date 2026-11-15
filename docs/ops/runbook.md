@@ -36,8 +36,8 @@ The compose example runs three game servers from the same image and the same env
 - `BV2_SV_BOTS` (not a secret; compose default 0, staging and prod env files set 8, staging first): `sv_bots`, the target population bots fill each game server to (ADR 0049). `set sv_bots N` in the console or admin API changes it until restart. Bots count in the browser's player count; `/status` adds `humans N`, and `deploy.sh` waits for 0 humans.
 - `BV2_PUBLIC_ADDRESS`: the server's public IPv4, listed by the master instead of the compose network address (ADR 0022).
 - `BV2_MASTER_BAN_PASS` (master, 15 characters or more): needed for `cacheban`/`cacheunban`; empty or shorter refuses them. It never crosses the network: the game server signs each ban with an HMAC keyed by it, which the master accepts within 5 minutes (ADR 0038).
-- In-game admin login needs both the user and the password: `admin <user> <password>` in the client console, then `- <command>`. Without a user (env or `bv2.cfg`) only the admin API works.
-- Other settings: `name value` lines (no `set`), e.g. `sv_bots 4`, in `bv2.cfg` in the server volume, or in a file passed with `--config <file> CTF` (name the launch script too). The launch script sets no secrets, so these and the environment values stay. `cl_masterServers` in `bv2.cfg` is ignored (ADR 0028): use `BV2_MASTER_SERVERS` or `--config`.
+- In-game admin login needs both the user and the password: `admin <user> <password>` in the client console, then `- <command>`. Without a user from the env or any config layer (`bv2.cfg`, `config/local/*.cfg`, `--config`), only the admin API works.
+- Other settings: `name value` lines (no `set`), e.g. `sv_maxPlayer 12`, in `bv2.cfg` in the server volume, or in a file passed with `--config <file> CTF` (name the launch script too). The launch script sets no secrets, so these and the environment values stay. `cl_masterServers` in `bv2.cfg` is ignored (ADR 0028): use `BV2_MASTER_SERVERS` or `--config`.
 
 ## Run
 

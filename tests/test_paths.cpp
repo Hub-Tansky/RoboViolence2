@@ -137,14 +137,14 @@ int main(int argc, char ** argv)
 	setEnv("BV2_MASTER_SERVERS", "");
 	CString adminUser("");
 	dksvarRegister(CString("zsv_adminUser [string : \"\""), &adminUser, true);
-	setEnv("BV2_ADMIN_USER", "hub-tansky");
+	setEnv("BV2_ADMIN_USER", "boss");
 	bv2::loadConfigLayers(1, args);
-	check(adminUser == CString("hub-tansky"), "BV2_ADMIN_USER sets the in-game admin login name");
+	check(adminUser == CString("boss"), "BV2_ADMIN_USER sets the in-game admin login name");
 	dksvarSaveConfig((char*)bv2::configFile().c_str());
 	{
 		std::ifstream in(bv2::configFile());
 		std::string saved((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
-		check(saved.find("hub-tansky") == std::string::npos, "BV2_ADMIN_USER is not saved");
+		check(saved.find("boss") == std::string::npos, "BV2_ADMIN_USER is not saved");
 	}
 	setEnv("BV2_ADMIN_USER", "");
 	check(bv2::parseHostPorts("none,127.0.0.1:10207").size() == 1, "a none entry beside a master is skipped");

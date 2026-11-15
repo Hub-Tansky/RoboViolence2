@@ -29,7 +29,7 @@ sudo curl -fsSL https://raw.githubusercontent.com/Hub-Tansky/RoboViolence2/main/
 `/etc/rv2-staging.env`, mode 600, owned by that user. Compose reads it too (`--env-file`):
 
 ```
-BV2_ADMIN_USER=<in-game admin login name>
+BV2_ADMIN_USER=<optional: in-game admin login name; without it only the admin API works>
 BV2_ADMIN_PASS=<random, 16+ characters>
 BV2_ADMIN_HOST=<public name, or localhost>
 BV2_ADMIN_PORT=<443 with a public name; default 8443>
