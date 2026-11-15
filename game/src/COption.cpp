@@ -275,7 +275,7 @@ COption::COption(CControl * in_parent, CControl * in_alignTo)
    //--- Chat Text Size
 	label1 = new CControl(instance, CVector2i(10,10), CVector2i(200,40),"Chat Text Size:", this, "LABEL", separator, CONTROL_SNAP_BOTTOM);
 	label1->textAlign = CONTROL_TEXTALIGN_MIDDLERIGHT;
-	label1->toolTips = "The size of player chat text.\n";
+	label1->toolTips = "The size of player chat text and the line you type in, at 800x600.\nIt grows with the screen height.\n";
 	slc_chatTextSize = new CControl(instance, CVector2i(10,10), CVector2i(300,25),"28", this, "SLIDER", label1, CONTROL_SNAP_RIGHT);
 	slc_chatTextSize->value = gameVar.r_chatTextSize;
 	slc_chatTextSize->valueMin = 8;
@@ -284,7 +284,7 @@ COption::COption(CControl * in_parent, CControl * in_alignTo)
    //--- Event Text Size
 	label1 = new CControl(instance, CVector2i(10,10), CVector2i(200,40),"Game Event Text Size:", this, "LABEL", label1, CONTROL_SNAP_BOTTOM);
 	label1->textAlign = CONTROL_TEXTALIGN_MIDDLERIGHT;
-	label1->toolTips = "The size of game events text.\n";
+	label1->toolTips = "The size of game events text, at 800x600.\nIt grows with the screen height.\n";
 	slc_eventTextSize = new CControl(instance, CVector2i(10,10), CVector2i(300,25),"28", this, "SLIDER", label1, CONTROL_SNAP_RIGHT);
 	slc_eventTextSize->value = gameVar.r_eventTextSize;
 	slc_eventTextSize->valueMin = 8;

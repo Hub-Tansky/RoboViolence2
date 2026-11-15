@@ -169,7 +169,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/test_cstring.cpp` | Phase C step 5: one-argument `CString` is text (arrays, `char*`, literals, direct and implicit); two or more arguments format (ADR 0021) |
 | `tests/test_secondary_menu.cpp` | `secondaryMenu`: Nuke Bot and Mini Bot hidden, the rest close up, a saved hidden pick falls back to Knives or the first enabled one (ctest `secondary_menu`) |
 | `tests/test_spawn_overlay.cpp` | `spawns::farthestFrom`: no DM spawn gives no line origin (the editor crash), the farthest of several, ties, nearest team spawn |
-| `tests/test_view_geometry.cpp` | Widescreen (Stretch) projects at the window's own aspect, Bars at 4:3; the camera's side margin widens with the view, and a narrow or short map centres it |
+| `tests/test_view_geometry.cpp` | Widescreen (Stretch) projects at the window's own aspect, Bars at 4:3; the camera's side margin widens with the view, and a narrow or short map centres it; HUD text in window pixels scales by height / 600 (ROBO-128) |
 | `tests/test_config.cpp` | dksvar config layering, transient values not saved, secrets masked, `dksvarGetValue` |
 | `tests/test_content_maps.py` | `content/maps`: valid names, version 20202, spawns and flag pods on open, connected cells, flag pods at height 0 (else no pickup), launch scripts name only these maps (ctest `content_maps`) |
 | `tests/test_corrupt_map_preview.py` | ROBO-195: the client reaches the menu with `maps/zz-Corrupt.bvm` of unknown version, listed after the placeholder map in a fresh pref dir (ctest `corrupt_map_preview`) |
@@ -786,7 +786,7 @@ The game's own maps (BV2 format 20202), GPL-3.0 like the code. The build copies 
 | `game/src/SqlStatement.h` | Prepared SQLite statement with bound parameters (the game's copy) |
 | `game/src/SecondaryMenu.h` | The weapon menu's secondary column (`secondaryMenu::layout`, `fallback`): disabled secondaries hidden, the rest close up, a hidden pick falls back (ADR 0053) |
 | `game/src/SpawnOverlay.h` | The editor spawn overlay's line origin (`spawns::farthestFrom`): the DM spawn farthest from a team's spawns, -1 when there is none |
-| `game/src/ViewGeometry.h` | ([ADR 0039](docs/decisions/0039-widescreen-stretch-shows-more-map.md)) The 3D viewport inside the window (`view::rect`: whole window, or 4:3 between bars; `view::current` for this frame, defined in `IntroScreen.cpp`), the aspect the gameplay, scope and intro projections use, and the camera's margins at the map edges |
+| `game/src/ViewGeometry.h` | ([ADR 0039](docs/decisions/0039-widescreen-stretch-shows-more-map.md)) The 3D viewport inside the window (`view::rect`: whole window, or 4:3 between bars; `view::current` for this frame, defined in `IntroScreen.cpp`), the aspect the gameplay, scope and intro projections use, and the camera's margins at the map edges; `view::hudTextScale` (height / 600) for chat, game event and name-tag text drawn in window pixels, whose sizes mean pixels at 600 lines (ROBO-128) |
 | `game/src/Weapon.cpp` | Weapon definitions and stats |
 | `game/src/Weapon.h` | Weapon definitions and stats |
 | `game/src/Write.cpp` | Chat input widget |
