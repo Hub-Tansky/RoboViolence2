@@ -9,16 +9,28 @@
 #include <cstdio>
 #include <thread>
 
-static void writeSilentWav(const char * path, uint32_t samples)
+static void writeSilentWav(const char* path, uint32_t samples)
 {
-	FILE * f = std::fopen(path, "wb");
+	FILE* f = std::fopen(path, "wb");
 	const uint32_t rate = 8000, dataSize = samples * 2, riffSize = 36 + dataSize, fmtSize = 16, byteRate = rate * 2;
 	const uint16_t pcm = 1, channels = 1, align = 2, bits = 16;
-	std::fwrite("RIFF", 1, 4, f); std::fwrite(&riffSize, 4, 1, f); std::fwrite("WAVEfmt ", 1, 8, f);
-	std::fwrite(&fmtSize, 4, 1, f); std::fwrite(&pcm, 2, 1, f); std::fwrite(&channels, 2, 1, f); std::fwrite(&rate, 4, 1, f);
-	std::fwrite(&byteRate, 4, 1, f); std::fwrite(&align, 2, 1, f); std::fwrite(&bits, 2, 1, f);
-	std::fwrite("data", 1, 4, f); std::fwrite(&dataSize, 4, 1, f);
-	for (uint32_t i = 0; i < samples; ++i) { int16_t zero = 0; std::fwrite(&zero, 2, 1, f); }
+	std::fwrite("RIFF", 1, 4, f);
+	std::fwrite(&riffSize, 4, 1, f);
+	std::fwrite("WAVEfmt ", 1, 8, f);
+	std::fwrite(&fmtSize, 4, 1, f);
+	std::fwrite(&pcm, 2, 1, f);
+	std::fwrite(&channels, 2, 1, f);
+	std::fwrite(&rate, 4, 1, f);
+	std::fwrite(&byteRate, 4, 1, f);
+	std::fwrite(&align, 2, 1, f);
+	std::fwrite(&bits, 2, 1, f);
+	std::fwrite("data", 1, 4, f);
+	std::fwrite(&dataSize, 4, 1, f);
+	for (uint32_t i = 0; i < samples; ++i)
+	{
+		int16_t zero = 0;
+		std::fwrite(&zero, 2, 1, f);
+	}
 	std::fclose(f);
 }
 
@@ -27,9 +39,9 @@ static int voiceStarvation()
 {
 	dksInit(44100, 16);
 	writeSilentWav("dks-long.wav", 8000 * 30); // 30 s, so nothing ends while the test runs
-	DksSound * shot = dksCreateSoundFromFile((char *)"dks-long.wav", false);
-	DksSound * cheer = dksCreateSoundFromFile((char *)"dks-long.wav", false);
-	DksSound * weather = dksCreateSoundFromFile((char *)"dks-long.wav", true);
+	DksSound* shot = dksCreateSoundFromFile((char*)"dks-long.wav", false);
+	DksSound* cheer = dksCreateSoundFromFile((char*)"dks-long.wav", false);
+	DksSound* weather = dksCreateSoundFromFile((char*)"dks-long.wav", true);
 	if (!shot || !cheer || !weather)
 	{
 		std::printf("FAIL: the long WAV didn't load\n");

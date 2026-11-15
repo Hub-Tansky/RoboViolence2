@@ -108,7 +108,7 @@ namespace
 			int best = -1;
 			for (size_t i = 0; i < g_voices.size(); ++i)
 			{
-				Voice * v = g_voices[i];
+				Voice* v = g_voices[i];
 				if (!v->used || v->spatial != wantSpatial || (v->owner && v->owner->loop))
 					continue;
 				if (best < 0 || v->serial < g_voices[best]->serial)
