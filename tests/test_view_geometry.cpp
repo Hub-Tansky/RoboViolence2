@@ -33,12 +33,13 @@ int main()
 	check(near(view::clampCameraY(0, 64), 4) && near(view::clampCameraY(64, 64), 60), "top and bottom margin is 4");
 	check(near(view::clampCameraY(1, 6), 3), "short map centres the camera");
 
-	// ROBO-128: chat, event and name-tag text keep their 800x600 share of the screen, never smaller
+	// ROBO-128: chat, event and name-tag text keep their 800x600 share of the screen
 	check(near(view::hudTextScale(600), 1), "600 lines is the base size");
 	check(near(view::hudTextScale(1080), 1.8f), "1080 lines scales by 1.8");
 	check(near(18 * view::hudTextScale(1080), 32.4f), "default chat size 18 is about 32 px at 1080p");
 	check(near(view::hudTextScale(1200), 2), "1200 lines doubles");
-	check(near(view::hudTextScale(480), 1) && near(view::hudTextScale(0), 1), "small windows keep the set size");
+	check(near(view::hudTextScale(480), 0.8f), "480 lines scales down like the rest of the 800x600 HUD");
+	check(near(view::hudTextScale(0), 1), "an empty window keeps the set size");
 
 	if (!failures) std::printf("ok: view_geometry\n");
 	return failures ? 1 : 0;
