@@ -132,7 +132,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/harness/fake_babonet.cpp` | Test `bb_*` API: queued connects and messages in, captured sends out, client disconnects queued by the test (a server-side `bb_serverDisconnectClient` raises no event, like babonet); an object file, so it wins over babonet's `baboNet.cpp` |
 | `tests/harness/server_harness.cpp` | In-process dedicated server for tests: start, connect, join, deliver, tick |
 | `tests/harness/server_harness.h` | Harness API |
-| `tests/e2e/e2e.py` | E2E scenarios (Phase T4): `bv2dedicated` with the admin API, `bv2master` and `bv2 --autotest` clients under its own Xvfb; join/leave, password, chat, kick, ban, master list, CTF capture, a silent connection dropped by the join timeout, a pref-dir map named with a space hosted by `dedicate` and downloaded by a client, CTF capture on the placeholder map it sets itself (the CTF script plays `content/maps`), a client keeping its chosen gun (`cl_primaryWeapon`) when it joins a server with bots again (ctest `e2e_<scenario>`) |
+| `tests/e2e/e2e.py` | E2E scenarios (Phase T4): `bv2dedicated` with the admin API, `bv2master` and `bv2 --autotest` clients under its own Xvfb; join/leave, password, chat, kick, ban, master list, CTF capture, a silent connection dropped by the join timeout, a pref-dir map named with a space hosted by `dedicate` and downloaded by a client, CTF capture on the placeholder map it sets itself (the CTF script plays `content/maps`), a client keeping its chosen gun (`cl_primaryWeapon`) when it joins a server with bots again, a reopened Browse tab listing a server hosted after the first list (ROBO-217) (ctest `e2e_<scenario>`) |
 | `tests/screenshots.py` | Phase T7: runs `tests/golden/<name>.txt` (with `<name>.cfg` config lines if present) and compares the frame with `<name>.png` within a tolerance; keeps actual and diff PNGs on failure, `--update` writes the golden (ADR 0026) |
 | `tests/golden/main-menu.txt` | Screenshot script: main menu, Game Browser tab (the one it opens on) (ctest `screenshot_main-menu`) |
 | `tests/golden/main-menu.png` | Golden for `screenshot_main-menu` |
@@ -396,7 +396,7 @@ The game's own maps (BV2 format 20202), GPL-3.0 like the code. The build copies 
 | `docs/decisions/0052-public-servers-play-pro-ruleset.md` | ADR: the shipped CTF and TDM launch scripts play the Pro ruleset (ROBO-199) |
 | `docs/decisions/0053-three-public-servers-and-owner-defaults.md` | ADR: FFA, CTF and TDM public servers, the owner's defaults in the scripts and example config, disabled secondaries hidden in the weapon menu (ROBO-212) |
 | `docs/decisions/0054-game-ships-its-own-maps.md` | ADR: the owner's maps in `content/maps`, shipped in `main/maps`, found in the package beside other data, flag pods at z 0 (ROBO-214) |
-| `docs/decisions/0055-browser-refresh-uses-a-fresh-master-session.md` | ADR: every server list request opens a fresh master session (a hosting game keeps its own); a router can silently drop an idle one (ROBO-217) |
+| `docs/decisions/0055-browser-refresh-uses-a-fresh-master-session.md` | ADR: every server list request opens a fresh master session (a hosting game keeps its own), and every opening of the Browse tab requests the list; a router can silently drop an idle session (ROBO-217) |
 | `docs/decisions/README.md` | ADR format and index |
 
 ### `docs/ops`

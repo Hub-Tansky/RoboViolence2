@@ -133,11 +133,8 @@ void CMainTab::showTab(CControl * button, CListener * tab)
 void CMainTab::showBrowser()
 {
 	showTab(btn_browser, browser);
-	//--- If first time, browse
-	if (timeBrowseDelay == -1)
-	{
-		timeBrowseDelay = 2;
-	}
+	// Every opening of the tab lists the games, like Refresh (ROBO-217); before, only the first one did
+	timeBrowseDelay = 2;
 }
 
 

@@ -92,7 +92,7 @@ public:
 		if (timeBrowseDelay > 0)
 		{
 			timeBrowseDelay--;
-			if (timeBrowseDelay == 0 && !master->isConnected())
+			if (timeBrowseDelay == 0)
 			{
 				//--- On clear la liste avant
 				browser->lst_browseList->clearList();
