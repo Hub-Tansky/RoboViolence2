@@ -140,7 +140,7 @@ int main(int argc, char ** argv)
 	setEnv("BV2_ADMIN_USER", "hub-tansky");
 	bv2::loadConfigLayers(1, args);
 	check(adminUser == CString("hub-tansky"), "BV2_ADMIN_USER sets the in-game admin login name");
-	dksvarSaveConfig((char *)bv2::configFile().c_str());
+	dksvarSaveConfig((char*)bv2::configFile().c_str());
 	{
 		std::ifstream in(bv2::configFile());
 		std::string saved((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
