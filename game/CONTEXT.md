@@ -15,7 +15,7 @@ A player behind a network connection: a person running the game client.
 _Avoid_: Real player, user
 
 **Bot**:
-A player the server runs itself, with no connection; its name ends in ` [bot]`.
+A player the server runs itself, with no connection; its name ends in ` [bot]`, the tag drawn in cyan.
 _Avoid_: AI, NPC, fake player
 
 **Target population**:

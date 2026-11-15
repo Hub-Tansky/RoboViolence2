@@ -6,6 +6,7 @@
 #include "Console.h"
 #include "Game.h"
 #include "GameVar.h"
+#include "Helper.h"
 #include "Scene.h"
 #include "Server.h"
 
@@ -65,15 +66,17 @@ namespace
 		t = bots::wanted(0, 0, 0, 0, 10);
 		CHECK(t.blue + t.red == 0);
 
-		CHECK(bots::name({"Servo"}, 0) == "Servo [bot]");
-		CHECK(bots::name({"Servo", "Tin Can"}, 3) == "Tin Can [bot]");
-		CHECK(bots::name({}, 2) == "Bot 3 [bot]");
-		CHECK(bots::name({std::string(40, 'x')}, 0) == std::string(25, 'x') + " [bot]"); // fits playerName[32]
+		CHECK(bots::name({"Servo"}, 0) == "Servo \x03[bot]"); // [bot] in cyan (^3)
+		CHECK(bots::name({"Servo", "Tin Can"}, 3) == "Tin Can \x03[bot]");
+		CHECK(bots::name({}, 2) == "Bot 3 \x03[bot]");
+		CHECK(bots::name({std::string(40, 'x')}, 0) == std::string(24, 'x') + " \x03[bot]"); // fits playerName[32]
+		CHECK(bots::name({std::string(40, 'x')}, 0).size() == 31);
+		CHECK(std::string(textColorLess(bots::name({"Servo"}, 0).c_str()).s) == "Servo [bot]"); // matching by name strips the colour
 		const std::vector<std::string> three = {"Servo", "Tin Can", "Bolt"};
 		CHECK(bots::pickName(three, {}, 0) == 0 && bots::pickName(three, {}, 5) == 2); // the roll picks among free names
-		CHECK(bots::pickName(three, {"Servo [bot]"}, 0) == 1);                        // a taken name is skipped
-		CHECK(bots::pickName(three, {"Servo [bot]", "Bolt [bot]"}, 7) == 1);
-		CHECK(bots::pickName(three, {"Servo [bot]", "Tin Can [bot]", "Bolt [bot]"}, 0) == -1);
+		CHECK(bots::pickName(three, {bots::name(three, 0)}, 0) == 1); // a taken name is skipped
+		CHECK(bots::pickName(three, {bots::name(three, 0), bots::name(three, 2)}, 7) == 1);
+		CHECK(bots::pickName(three, {bots::name(three, 0), bots::name(three, 1), bots::name(three, 2)}, 0) == -1);
 		CHECK(bots::pickName({}, {}, 3) == -1);
 		const char* path = "bots-test-names.txt";
 		std::ofstream(path) << "# comment\nServo\r\n\nTin Can \n";
@@ -141,7 +144,7 @@ int main(int, char** argv)
 		if (Player* p = game().players[i])
 		{
 			const std::string name = p->name.s;
-			CHECK(name.size() > 6 && name.substr(name.size() - 6) == " [bot]");
+			CHECK(name.size() > 7 && name.substr(name.size() - 7) == " \x03[bot]");
 			CHECK(p->ping == 0);
 			bool listed = false;
 			for (int n = 0; n < (int)server().botNames.size(); ++n)
