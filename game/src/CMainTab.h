@@ -73,7 +73,7 @@ public:
 
 	// Shows tab and presses its button, the one pressed before is released
 	void showTab(CControl * button, CListener * tab);
-	// The Game Browser tab; the first time, it also asks for the game list
+	// The Game Browser tab; it also asks for the game list
 	void showBrowser();
 
 public:

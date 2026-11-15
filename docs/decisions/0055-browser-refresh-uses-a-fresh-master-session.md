@@ -18,6 +18,6 @@
 ## Consequences
 - The master sees one disconnect and one connect per Refresh. Listed games don't depend on the connection that registered them (`cBV2game` times out on missing heartbeats only), so a host's own Refresh would not drop its game either.
 - e2e `browser_tab_list`: a server starts after the client's first (empty) list; reopening the Browse tab must list it.
-- `tests/test_master_refresh.cpp` runs the game's `CMaster` against the real master through a relay that goes silent, the way a router drops a session.
+- `tests/test_master_refresh.cpp` runs the game's `CMaster` against the real master through a relay that goes silent, the way a router drops a session, and refreshes while a heartbeat waits for the connection. The hosting exception (`RunningServer`) has no test: it needs a running `Server`, which this test doesn't start.
 - Rejected: TCP keepalive on the babonet client (minutes to detect with OS defaults, and per-OS socket options), a reply timeout with retry (Refresh would still wait for the timeout every time the session is dead), and the master pinging idle players (protocol change for every client and the master).
 - The earlier rule "keep the master session open for the next refresh" (`pingReceived`) still holds for rows of one listing: no reconnect per row.

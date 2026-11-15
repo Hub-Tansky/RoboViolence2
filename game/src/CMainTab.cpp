@@ -114,7 +114,7 @@ CMainTab::CMainTab(CControl * in_parent)
 
 	current = 0;
 	lastButtonPress = 0;
-	timeBrowseDelay = -1;
+	timeBrowseDelay = 0;
 	showBrowser(); // the menu opens on the Game Browser (ADR 0043)
 }
 

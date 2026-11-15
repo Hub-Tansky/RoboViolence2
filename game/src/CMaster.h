@@ -150,6 +150,8 @@ private:
 
 	//--- Effacer toute les games pr�sente
 	void eraseGames();
+	//--- Removes the queued master messages of one type
+	void dropQueued(int typeID);
 
 	//--- La row est valid�, on a le ping pis toute
 	void pingReceived(int ping);

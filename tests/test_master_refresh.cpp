@@ -237,6 +237,19 @@ int main(int argc, char** argv)
 	CHECK(master->gamesFound() == 2);
 	CHECK(relay.accepted == 2);
 
+	std::printf("phase: Refresh while a heartbeat waits for the connection\n");
+	master->disconnectMaster();
+	stBV2row row = {}; // a server heartbeat from this game, as sendGameInfo queues it
+	strcpy(row.map, "CTF-Placeholder");
+	strcpy(row.serverName, "Third Server");
+	strcpy(row.Version, "2.11");
+	row.port = 3335;
+	row.maxPlayer = 10;
+	master->sendPacket((char*)&row, sizeof(row), BV2_ROW); // opens a session; queued until it is up
+	master->requestGames(); // used to be dropped: sendPacket queued only into an empty stack
+	pump(30);
+	CHECK(master->gamesFound() == 3);
+
 	delete master;
 	master = 0;
 	for (UINT4 h : hosts)
