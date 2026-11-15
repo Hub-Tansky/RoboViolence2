@@ -617,7 +617,7 @@ The game's own maps (BV2 format 20202), GPL-3.0 like the code. The build copies 
 | `game/src/Button.h` | Menu button widget |
 | `game/src/Bot.cpp` | Server-side bots (ADR 0049): the brain ported from `bots.rs` (CTF roles, tactical states, tile BFS navigation, stuck recovery, aim, weapon use; with friendly fire on, no molotov or grenade and no shot through a teammate, ADR 0053) and `Bot::update`, which spawns, moves and fires through the client messages |
 | `game/src/Bot.h` | Bot interface: `bots::Tuning` (every tuning number), `World`, `Brain`, `Action`, `think`, `holdsForTeammate` (friendly fire, ADR 0053), class `Bot` |
-| `game/src/BotRoster.cpp` | Bot roster rules: bots wanted per team for a target population, names file, ` [bot]` names, a random free name for a new bot |
+| `game/src/BotRoster.cpp` | Bot roster rules: bots wanted per team for a target population, names file, ` [bot]` names (`[bot]` in cyan, `^3`), a random free name for a new bot |
 | `game/src/BotRoster.h` | Bot roster interface: `bots::Count`, `Teams`, `wanted`, `loadNames`, `name`, `pickName` |
 | `game/src/CAStar.cpp` | A* path finding grid |
 | `game/src/CAStar.h` | A* path finding grid |

@@ -37,8 +37,8 @@ namespace bots
 	std::string name(const std::vector<std::string>& names, int index)
 	{
 		if (names.empty())
-			return "Bot " + std::to_string(index + 1) + " [bot]";
-		return names[index % names.size()].substr(0, MAX_NAME) + " [bot]"; // fits the 31-character wire name
+			return "Bot " + std::to_string(index + 1) + TAG;
+		return names[index % names.size()].substr(0, MAX_NAME) + TAG; // fits the 31-character wire name
 	}
 
 	int pickName(const std::vector<std::string>& names, const std::vector<std::string>& taken, int roll)

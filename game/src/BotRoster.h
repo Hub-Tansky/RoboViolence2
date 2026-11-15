@@ -25,9 +25,12 @@ namespace bots
 
 	// Names from a text file, one per line; blank lines and lines starting with # are skipped
 	std::vector<std::string> loadNames(const std::string& path);
-	// Longest name taken from the file: with " [bot]" it fits the 31-character wire name (playerName[32])
-	const size_t MAX_NAME = 25;
-	// A bot's display name: names[index] (cycled, cut to MAX_NAME) with " [bot]", or "Bot <index+1> [bot]" without names.
+	// Ends every bot name: " ^3[bot]", with the font's colour byte \x3 (cyan, CFont.cpp), as typing ^3 in a name gives.
+	// Name matching strips colours (textColorLess) and callers reset the colour after a name (\x8), as for human names.
+	const std::string TAG = " \x03[bot]";
+	// Longest name taken from the file: with TAG (7 bytes) it fits the 31-character wire name (playerName[32])
+	const size_t MAX_NAME = 24;
+	// A bot's display name: names[index] (cycled, cut to MAX_NAME) with TAG, or "Bot <index+1>" with TAG without names.
 	// The server passes pickName's result, or the roster index when no name is free
 	std::string name(const std::vector<std::string>& names, int index);
 	// A new bot's name, so every name in the list gets used: the roll-th (mod the count) name whose display name no
