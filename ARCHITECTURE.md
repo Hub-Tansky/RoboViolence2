@@ -176,7 +176,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/test_crash_report.cpp` | ROBO-186: runs itself as a crashing child and checks the `crash-*.txt` it leaves (version line, signal or exception code, a stack frame, the load address on macOS) and that the previous handler still runs (ADR 0048) |
 | `tests/test_credentials.cpp` | Step 10: the credential HMAC against RFC 4231; proofs check only with their own password, label and nonce |
 | `tests/test_crash_fixes.cpp` | Steps 5 and 7: one check per fixed defect (KEY_QUESTIONS Part D) on the in-process server |
-| `tests/test_dks.cpp` | R20: `dksPlayMusic` on a missing file 200 times; a sound deleted after `dksShutDown` (teardown) (ASan) |
+| `tests/test_dks.cpp` | R20: `dksPlayMusic` on a missing file 200 times; a sound deleted after `dksShutDown` (teardown) (ASan); ROBO-216: with every voice busy a 3D sound takes the oldest 3D voice, a 2D sound the oldest 3D voice and then the oldest 2D one, a looping voice never |
 | `tests/test_split_symbols.py` | ROBO-188: `split-symbols.py` on a copy of a Release build's binaries puts each one's symbols in the zip and strips it (ctest `split_symbols`, Release builds only; ADR 0051) |
 | `tests/test_example_cfg.py` | `config/bv2.example.cfg` names a new player as `GameVar.cpp` does and starts fullscreen at the desktop resolution (ADR 0043); it and the three launch scripts carry the owner's server defaults, names, modes, ports and sizes (ADR 0053) |
 | `tests/test_window_icon.cpp` | `dkwSetWindowIcon` accepts the Linux client's compiled-in icon (`AppIcon.h`) and refuses bytes that aren't a PNG |

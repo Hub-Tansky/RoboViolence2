@@ -196,7 +196,7 @@ if(TARGET zeven_client)
   add_executable(test_dks test_dks.cpp)
   target_link_libraries(test_dks PRIVATE zeven_client)
   bv2_target_defaults(test_dks)
-  add_test(NAME dks_missing_music COMMAND test_dks)
+  add_test(NAME dks COMMAND test_dks)
 endif()
 
 if(TARGET bv2_app_icon)
