@@ -25,9 +25,9 @@ namespace bots
 
 	// Names from a text file, one per line; blank lines and lines starting with # are skipped
 	std::vector<std::string> loadNames(const std::string& path);
-	// Ends every bot name: " ^3[bot]", with the font's colour byte \x3 (cyan, CFont.cpp), as typing ^3 in a name gives.
-	// Name matching strips colours (textColorLess) and callers reset the colour after a name (\x8), as for human names.
-	const std::string TAG = " \x03[bot]";
+	// Ends every bot name: " ^3[bot]", the colour byte \x3 (cyan, CFont.cpp) before [bot]. Name matching strips colours
+	// (textColorLess); a message that prints text after a name resets the colour first (\x8), as for coloured human names.
+	inline constexpr const char* TAG = " \x03[bot]";
 	// Longest name taken from the file: with TAG (7 bytes) it fits the 31-character wire name (playerName[32])
 	const size_t MAX_NAME = 24;
 	// A bot's display name: names[index] (cycled, cut to MAX_NAME) with TAG, or "Bot <index+1>" with TAG without names.

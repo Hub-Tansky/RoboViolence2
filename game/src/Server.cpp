@@ -1485,7 +1485,7 @@ void Server::updateBots(float delay)
 			}
 			if (leaving < 0)
 				break;
-			console->add(CString("server> %s left the game id:%d", game->players[leaving]->name.s, leaving), true);
+			console->add(CString("server> %s\x8 left the game id:%d", game->players[leaving]->name.s, leaving), true);
 			dropSlot(leaving, "bot");
 			bots[leaving].reset();
 		}
@@ -1524,7 +1524,7 @@ void Server::updateBots(float delay)
 			info.playerID = (int8_t)slot;
 			snprintf(info.playerName, sizeof(info.playerName), "%s", p->name.s);
 			bb_serverSend((char*)&info, sizeof(info), NET_CLSV_SVCL_PLAYER_INFO, 0);
-			console->add(CString("server> %s joined the game id:%d", p->name.s, slot), true);
+			console->add(CString("server> %s\x8 joined the game id:%d", p->name.s, slot), true);
 			net_clsv_svcl_team_request teamRequest = {};
 			teamRequest.playerID = (int8_t)slot;
 			teamRequest.teamRequested = (int8_t)team;
