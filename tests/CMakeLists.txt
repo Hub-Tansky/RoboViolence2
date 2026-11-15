@@ -190,6 +190,17 @@ if(TARGET bv2master_lib)
   add_dependencies(test_master bv2_seed_master_db)
   add_test(NAME master COMMAND test_master "${BV2_RUNTIME_DIR}" "${BV2_TEST_SCRATCH}/master")
   set_tests_properties(master PROPERTIES TIMEOUT 60 RESOURCE_LOCK bv2_master_port)
+
+  # The browser's Refresh after the master session went silent (ROBO-216): the game's CMaster against the real master
+  if(TARGET bv2server_lib)
+    add_executable(test_master_refresh test_master_refresh.cpp)
+    target_link_libraries(test_master_refresh PRIVATE bv2server_lib bv2master_lib)
+    bv2_target_defaults(test_master_refresh)
+    add_dependencies(test_master_refresh bv2_seed_master_db)
+    add_test(NAME master_refresh COMMAND test_master_refresh "${BV2_RUNTIME_DIR}" "${BV2_TEST_SCRATCH}/master-refresh")
+    set_tests_properties(master_refresh PROPERTIES TIMEOUT 60 RESOURCE_LOCK bv2_master_port
+      ENVIRONMENT "BV2_PREF_DIR=${BV2_TEST_SCRATCH}/master-refresh-pref")
+  endif()
 endif()
 
 if(TARGET zeven_client)

@@ -574,6 +574,24 @@ void CMaster::requestGames()
 	eraseGames();
 	m_nbGameFound = 0;
 
+	// Every list request goes out on a fresh master session (ROBO-216). A player's session sits idle
+	// while they browse, and a home router can drop an idle TCP connection without either end noticing:
+	// the old request then went nowhere and only a restart showed new servers. A hosting game keeps its
+	// session: its heartbeats every 20 s keep it alive, and the master may still owe it ban answers.
+	if (!RunningServer)
+		disconnectMaster();
+	// A list request still queued from before would make sendPacket drop this one
+	for (std::vector<SMasterMessage*>::iterator it = messageStack.begin(); it != messageStack.end();)
+	{
+		if ((*it)->typeID == BV2_LIST)
+		{
+			delete *it;
+			it = messageStack.erase(it);
+		}
+		else
+			++it;
+	}
+
 	stBV2list bv2List;
 	strcpy(bv2List.Version, m_CurrentVersion );
 	sendPacket((char*)(&bv2List), sizeof(stBV2list), BV2_LIST);
@@ -633,7 +651,8 @@ void CMaster::sendPacket(const char* in_data, int in_size, int in_ID, bool disco
 	}
 
 	// add the message to the queue
-	if( messageStack.size() < 1 || (in_ID >= 1010 && in_ID <= 1013) || in_ID == 1016 || in_ID == 1017)
+	// A list request always queues: behind a server's heartbeat that waits for the connection it was dropped
+	if (messageStack.size() < 1 || in_ID == BV2_LIST || (in_ID >= 1010 && in_ID <= 1013) || in_ID == 1016 || in_ID == 1017)
 	{
 		messageStack.push_back(new SMasterMessage(in_data, in_size, in_ID));
 	}
