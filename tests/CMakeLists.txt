@@ -293,6 +293,8 @@ add_test(NAME installer_licence COMMAND ${Python3_EXECUTABLE} -B ${CMAKE_CURRENT
 add_test(NAME review_record COMMAND ${Python3_EXECUTABLE} -B ${CMAKE_CURRENT_SOURCE_DIR}/test_review_record.py)
 add_test(NAME review_diff_rules COMMAND ${Python3_EXECUTABLE} -B ${CMAKE_CURRENT_SOURCE_DIR}/test_review_diff_rules.py)
 add_test(NAME ci_test_summary COMMAND ${Python3_EXECUTABLE} -B ${CMAKE_CURRENT_SOURCE_DIR}/test_ci_test_summary.py)
+# Nightly flake watch: one issue per flaky test (tools/flake-issues.py, ROBO-237)
+add_test(NAME flake_issues COMMAND ${Python3_EXECUTABLE} -B ${CMAKE_CURRENT_SOURCE_DIR}/test_flake_issues.py)
 add_test(NAME merge_risk COMMAND ${Python3_EXECUTABLE} -B ${CMAKE_CURRENT_SOURCE_DIR}/test_merge_risk.py)
 find_program(BV2_DPKG_SHLIBDEPS dpkg-shlibdeps)  # dpkg-dev (build-essential pulls it in)
 if(UNIX AND NOT APPLE AND BV2_DPKG_SHLIBDEPS AND TARGET bv2 AND TARGET bv2dedicated)
