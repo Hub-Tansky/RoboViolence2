@@ -359,12 +359,16 @@ jobs:
         with:
           name: clang-tidy-log
           path: tidy.log
+  boom:  # TEMPORARY ntfy test (ROBO-221 criterion 3), reverted before merge
+    runs-on: ubuntu-24.04
+    steps:
+      - run: exit 1
   # A failed run on main pings the owner's phone: the run URL and the failed jobs (ROBO-221). The topic is a secret,
   # so it reaches curl as config on stdin, never on the command line (tools/staging/deploy.sh notify)
   notify:
     name: notify (main failed)
-    needs: [build, release, package-check, deb-check, package-smoke, smoke, tidy]
-    if: ${{ !cancelled() && github.ref == 'refs/heads/main' && contains(needs.*.result, 'failure') }}
+    needs: [build, release, package-check, deb-check, package-smoke, smoke, tidy, boom]
+    if: ${{ !cancelled() && (github.ref == 'refs/heads/main' || github.event_name == 'pull_request') && contains(needs.*.result, 'failure') }}
     runs-on: ubuntu-24.04
     permissions:
       actions: read  # the run's job list
