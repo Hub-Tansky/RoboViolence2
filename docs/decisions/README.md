@@ -73,7 +73,7 @@ What we do, in one or two sentences.
 | [0038](0038-dead-accounts-hidden-admin-and-ban-secrets-hardened.md) | Dead account pages are hidden; admin and master ban secrets meet NIST SP 800-63B-4 | Accepted |
 | [0039](0039-widescreen-stretch-shows-more-map.md) | Widescreen (Stretch) shows more map sideways instead of stretching a 4:3 view | Accepted |
 | [0040](0040-first-run-downloads-original-data.md) | The first-run box downloads the original BV2 data with the OS's own curl and unzip tools | Accepted (amended by 0042) |
-| [0041](0041-macos-ci-runner-not-acquired-retry.md) | Build branches through their PR only, and re-run a build whose job never got a runner | Accepted |
+| [0041](0041-macos-ci-runner-not-acquired-retry.md) | Build branches through their PR only, and re-run a build whose job never got a runner | Accepted (amended by 0056) |
 | [0042](0042-game-assets-option-remembers-placeholders.md) | Options "Game assets" sets the BV2 data folder, and "Use placeholders" is remembered | Accepted |
 | [0043](0043-first-start-fullscreen-desktop-and-game-browser.md) | A new player starts fullscreen at the desktop resolution, on the Game Browser tab | Accepted (amended by 0055) |
 | [0044](0044-backlog-in-the-rv2-docs-vault.md) | The backlog is one Markdown file per scope item in the private rv2-docs vault | Accepted |
@@ -88,3 +88,4 @@ What we do, in one or two sentences.
 | [0053](0053-three-public-servers-and-owner-defaults.md) | Three public servers, the owner's defaults, disabled secondaries hidden | Accepted (amended by 0054) |
 | [0054](0054-game-ships-its-own-maps.md) | The game ships its own maps in content/maps | Accepted |
 | [0055](0055-browser-refresh-uses-a-fresh-master-session.md) | The server browser's Refresh uses a fresh master session | Accepted |
+| [0056](0056-main-ci-runs-finish-notify-nightly-fuzz.md) | Main CI runs finish, a red main notifies the owner, fuzz runs nightly | Accepted |

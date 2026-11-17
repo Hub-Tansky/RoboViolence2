@@ -1,6 +1,6 @@
 # 0041: Build branches through their PR only, and re-run a build whose job never got a runner
 
-- Status: Accepted
+- Status: Accepted (concurrency on `main` and tags, and the branch-head check for `main` and tag runs, amended by [ADR 0056](0056-main-ci-runs-finish-notify-nightly-fuzz.md))
 - Date: 2026-10-29
 - Affects: `.github/workflows/build.yml`, `.github/workflows/ci-retry.yml`, PR #122
 

@@ -4,9 +4,10 @@ on:
     branches: [main]
     tags: ['v*']
   pull_request:
+# A newer commit cancels a PR's run; runs on main and tags each finish, so every merge gets a result (ROBO-221, ADR 0056)
 concurrency:
-  group: build-${{ github.ref }}
-  cancel-in-progress: true
+  group: build-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 permissions:
   contents: read
 jobs:
@@ -184,8 +185,8 @@ jobs:
         run: |
           pkgs=$(tools/setup-dev.sh --linux-runtime-packages)
           grep -qF "sudo apt install $pkgs" docs/build/linux.md || { echo "docs/build/linux.md must list: sudo apt install $pkgs"; exit 1; }
-          apt-get update
-          apt-get install -y --no-install-recommends $pkgs
+          apt-get -o Acquire::Retries=3 update
+          apt-get -o Acquire::Retries=3 install -y --no-install-recommends $pkgs
       - name: Every library resolves; server and master start from the package
         shell: bash
         run: |
@@ -220,8 +221,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          apt-get update
-          apt-get install -y --no-install-recommends ./roboviolence2-linux-x64.deb
+          apt-get -o Acquire::Retries=3 update
+          apt-get -o Acquire::Retries=3 install -y --no-install-recommends ./roboviolence2-linux-x64.deb
           if ldd /usr/games/bv2 /usr/games/bv2dedicated | grep "not found"; then exit 1; fi
           # Only copyright from /usr/share/doc: the Docker images tell dpkg to skip the rest (ctest make_deb checks it)
           ls /usr/lib/x86_64-linux-gnu/libGL.so.1 /usr/share/bv2/main/LaunchScript/CTF.cfg \
@@ -337,37 +338,6 @@ jobs:
           rc=$?
           # 124 = still running when the timeout fired: it did not crash.
           [ "$rc" = 124 ] || { echo "client exited early with $rc"; exit 1; }
-  fuzz:
-    name: fuzz (not required)
-    # Main only (owner, 2026-10-10): ~40 min, and red until steps 4-7 fix the known defects
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v7
-      - uses: ./.github/actions/setup-vcpkg
-        with:
-          cache-key: linux-x64-asan
-      - run: cmake --preset linux-x64-asan -DBV2_BUILD_CLIENT=OFF
-      - run: cmake --build --preset linux-x64-asan --target fuzz_server
-      - name: Fuzz each client message type for 2 min (ASan)
-        working-directory: build/linux-x64-asan/runtime
-        shell: bash  # -eo pipefail: a crash fails its pipe
-        env:
-          ASAN_OPTIONS: detect_leaks=0
-          BV2_PREF_DIR: ${{ runner.temp }}/bv2-pref
-        run: |
-          status=0
-          for dir in ../../../tests/corpus/*/; do
-            ./fuzz_server ../../../tests/corpus "$(basename "$dir")" 120 "$GITHUB_RUN_ID" "$GITHUB_WORKSPACE/fuzz-out" 2>&1 | tail -40 || status=1
-          done
-          exit $status
-      # last.bin of a crashed type is its reproducer: add it to tests/corpus/<type>/ as crash-<name>.bin
-      - if: failure()
-        uses: actions/upload-artifact@v7
-        with:
-          name: fuzz-crashes
-          path: fuzz-out/
-
   tidy:
     name: clang-tidy (not required)
     runs-on: ubuntu-24.04
@@ -389,3 +359,26 @@ jobs:
         with:
           name: clang-tidy-log
           path: tidy.log
+  # A failed run on main pings the owner's phone: the run URL and the failed jobs (ROBO-221). The topic is a secret,
+  # so it reaches curl as config on stdin, never on the command line (tools/staging/deploy.sh notify)
+  notify:
+    name: notify (main failed)
+    needs: [build, release, package-check, deb-check, package-smoke, smoke]  # not tidy: continue-on-error, never red
+    if: ${{ !cancelled() && github.ref == 'refs/heads/main' && contains(needs.*.result, 'failure') }}
+    runs-on: ubuntu-24.04
+    permissions:
+      actions: read  # the run's job list
+    steps:
+      - shell: bash  # -e -o pipefail
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ -z "$NTFY_TOPIC" ]; then echo "No NTFY_TOPIC secret: no notification"; exit 0; fi
+          url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          failed=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/attempts/$GITHUB_RUN_ATTEMPT/jobs?per_page=100" \
+            -q '[.jobs[] | select(.conclusion == "failure" and (.name | startswith("clang-tidy") | not)) | .name] | join(", ")') || failed="(job list unavailable)"
+          printf 'url = "https://ntfy.sh/%s"\n' "$NTFY_TOPIC" |
+            curl -fsS --max-time 10 -K - -H "Title: RV2 build failed on main" -H "Click: $url" \
+              -d "${GITHUB_SHA::7} failed: $failed. $url" > /dev/null
+          echo "notified: $failed"
