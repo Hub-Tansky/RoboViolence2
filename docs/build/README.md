@@ -48,8 +48,29 @@ Run each program from its folder (a package folder, or `build/<preset>/runtime/`
 ctest --test-dir build/<preset> --output-on-failure
 ```
 
-Runs the netPacket layout, config, file IO and dedicated-server smoke tests.
+`ctest --test-dir build/<preset> -N` lists them.
 
 ## CI
 
-Workflows are in `.github/workflows/`. Required (the repository ruleset "main protection", see [AGENTS.md](../../AGENTS.md#build)): `build` (Windows, macOS, Linux; Debug and `-release` presets; uploads the Release `roboviolence2-<preset>` packages, the Windows installer and the macOS `.dmg`; the separate `release` job (not required) checks on every run that the release files are there and publishes them on a `v*` tag, ADR 0020), `smoke` (Linux ASan: ctest and a 10 s client run under xvfb), `scan` (`secret-scan.yml`), `architecture`, `hygiene` (paths, ignored files, size, encoding, content case), `review` (`tools/review.sh` on PRs: scope, anti-gaming, protocol, review record), `format` (clang-format on the changed C/C++ lines of a PR or push, ADR 0045; run locally with `tools/check-format.sh`, fix with the `git clang-format <merge-base>` command it prints). Not required: `codeql`, `clang-tidy`, `package-check` (Linux package in a clean `ubuntu:24.04`), `package-smoke` (Windows and macOS packages: server, master, and client for 10 s; Mesa llvmpipe on Windows), `containers` (server images and the compose example; pushes to GHCR from `main`). `ci-retry` re-runs a `build` whose job never got a hosted runner (a PR run only while it is the branch head, `main` and tag runs always) ([ADR 0041](../decisions/0041-macos-ci-runner-not-acquired-retry.md)). A newer commit cancels a PR's `build` run; runs on `main` and tags always finish, and a failed `build` on `main` sends the run URL and failed jobs to the owner's ntfy topic (`notify` job, `NTFY_TOPIC` secret). On `main`: `dependency-graph`. Nightly: `fuzz` (`fuzz.yml`, ASan fuzzer, 2 min per client message type; also by hand with `workflow_dispatch`). Weekly: `osv-vcpkg` (OSV check of the vcpkg ports, `tools/osv-vcpkg.py`). Bump the vcpkg baseline monthly, or when `osv-vcpkg` reports a port. Run them locally with `tools/review.sh` (`--full <preset>` adds build and ctest).
+Workflows are in `.github/workflows/`. Run them locally with `tools/review.sh` (`--full <preset>` adds build and ctest).
+
+Required (the repository ruleset "main protection", see [AGENTS.md](../../AGENTS.md#build)):
+
+- `build`: Windows, macOS, Linux; Debug and `-release` presets. Uploads the Release `roboviolence2-<preset>` packages, the Windows installer and the macOS `.dmg`. The separate `release` job (not required) checks on every run that the release files are there and publishes them on a `v*` tag (ADR 0020).
+- `smoke`: Linux ASan, ctest and a 10 s client run under xvfb.
+- `scan`: `secret-scan.yml`.
+- `architecture`.
+- `hygiene`: paths, ignored files, size, encoding, content case.
+- `review`: `tools/review.sh` on PRs: scope, anti-gaming, protocol, review record.
+- `format`: clang-format on the changed C/C++ lines of a PR or push (ADR 0045). Run locally with `tools/check-format.sh`, fix with the `git clang-format <merge-base>` command it prints.
+
+Not required:
+
+- `codeql`, `clang-tidy`.
+- `package-check`: Linux package in a clean `ubuntu:24.04`.
+- `package-smoke`: Windows and macOS packages: server, master, and client for 10 s; Mesa llvmpipe on Windows.
+- `containers`: server images and the compose example; pushes to GHCR from `main`.
+- `ci-retry`: re-runs a `build` whose job never got a hosted runner (a PR run only while it is the branch head, `main` and tag runs always; [ADR 0041](../decisions/0041-macos-ci-runner-not-acquired-retry.md)).
+- On `main`: `dependency-graph`. Nightly: `fuzz` (`fuzz.yml`, ASan fuzzer, 2 min per client message type; also by hand with `workflow_dispatch`). Weekly: `osv-vcpkg` (OSV check of the vcpkg ports, `tools/osv-vcpkg.py`). Bump the vcpkg baseline monthly, or when `osv-vcpkg` reports a port.
+
+A newer commit cancels a PR's `build` run. Runs on `main` and tags always finish, and a failed `build` on `main` sends the run URL and failed jobs to the owner's ntfy topic (`notify` job, `NTFY_TOPIC` secret).

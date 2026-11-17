@@ -41,7 +41,7 @@ What we do, in one or two sentences.
 | [0006](0006-sdl3-miniaudio-glad-platform-layer.md) | SDL3, miniaudio and glad behind the unchanged dk* APIs | Accepted |
 | [0007](0007-data-root-pref-dir-config-layers.md) | Data root, per-user pref dir and layered config | Accepted (amended by 0016, 0028) |
 | [0008](0008-display-name-robo-violence-2.md) | Spell the display name "Robo Violence 2" | Accepted (identifier timing amended by 0009; in-game name by 0017) |
-| [0009](0009-rename-internal-identifiers-continuously.md) | Rename internal identifiers continuously; interface names wait for §H | Accepted |
+| [0009](0009-rename-internal-identifiers-continuously.md) | Rename internal identifiers continuously; interface names wait for §H | Accepted (refactor items only since 0058) |
 | [0010](0010-bv2-asset-compat-and-gui-freeze.md) | Keep BV2 asset compatibility and the BV2 interface until replacement assets ship | Accepted (amended by 0017, 0038) |
 | [0011](0011-gettext-po-translations.md) | Use gettext PO for translations, keep .lang loading, default to the OS language | Accepted |
 | [0012](0012-windows-10-22h2-minimum.md) | Support Windows 10 22H2 and later as the minimum Windows target | Accepted |
@@ -90,3 +90,4 @@ What we do, in one or two sentences.
 | [0055](0055-browser-refresh-uses-a-fresh-master-session.md) | The server browser's Refresh uses a fresh master session | Accepted |
 | [0056](0056-main-ci-runs-finish-notify-nightly-fuzz.md) | Main CI runs finish, a red main notifies the owner, fuzz runs nightly | Accepted |
 | [0057](0057-review-record-keyed-to-patch-id-post-deploy-criteria.md) | The review record is keyed to the diff's patch-id; post-deploy criteria don't block | Accepted |
+| [0058](0058-agent-rule-order-ground-rules-3-4-refactor-only.md) | Agent rules have an order; ground rules 3 and 4 apply only in refactor items | Accepted |
