@@ -93,6 +93,16 @@ cmake --build --preset linux-x64
 
 Servers only: add `-DBV2_BUILD_CLIENT=OFF` to the configure command.
 
+## Commit hooks in cloud sessions
+
+A fresh Claude Code cloud container has no `core.hooksPath`, `gitleaks` or `pre-commit`, and commits as `noreply@anthropic.com`. The cloud environment's setup script runs [`tools/cloud-setup.sh`](../../tools/cloud-setup.sh) to fix that (ROBO-225):
+
+```bash
+bash /home/user/RoboViolence2/tools/cloud-setup.sh /home/user/RoboViolence2 /home/user/rv2-docs /home/user/rv2-website
+```
+
+It installs gitleaks (pinned, checksum checked) and pre-commit, sets the Hub-Tansky commit identity in each repository, and `core.hooksPath=.githooks` where the repository has hooks. A failed step prints a WARNING and the session still starts. The clang-tidy hook needs the macOS compile database, so cloud commits that touch C++ run `SKIP=clang-tidy git commit ...`.
+
 ## Without vcpkg (cloud sessions)
 
 When vcpkg can't download its ports (for example a proxy that blocks the gnu.org mirrors the autotools ports need), build against system packages and a hand-built SDL3. The SDL3 and miniaudio versions below are the `sdl3` and `miniaudio` ports at the `vcpkg.json` `builtin-baseline`; update them when the baseline moves. Checked on Ubuntu 24.04 at 34d73aa (2026-11-07): build plus `ctest -R screenshot_`, about 10 minutes.
