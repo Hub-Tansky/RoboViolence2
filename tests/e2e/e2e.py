@@ -327,8 +327,8 @@ def killed(run, victim, weapon):
 
 def no_dropped_messages(run, client):
     check(run.finished(client) == 0, "client script passed")
-    log = open(os.path.join(run.dir, "e2e-a", "client.log"), errors="replace").read()
-    dropped = re.findall(r"Dropped server message \d+ \(size \d+\)", log)
+    with open(os.path.join(run.dir, "e2e-a", "client.log"), errors="replace") as log:
+        dropped = re.findall(r"Dropped server message \d+ \(size \d+\)", log.read())
     check(not dropped, f"client accepted every server message, dropped: {dropped}")
 
 
@@ -366,9 +366,10 @@ def grenade(run):
 
 def nuke(run):
     """Admin nuke on the bot: an explosion with no owner (playerID -1), which the client dropped at random before
-    cf6a98e. The blast counts as the nuked player's (Server::nukePlayer), so it kills e2e-a beside it"""
-    human, bot, client = fight(run, "Nuke Bot")
-    run.command(f"forceplayerspawn {bot} 8 8")  # the bot needs a moment to aim: nuke it before it shoots
+    cf6a98e. The blast counts as the nuked player's (Server::nukePlayer), so it kills e2e-a beside it. Pro rules with
+    zero SMG damage and the bot on the SMG: only the nuke can kill e2e-a (friendly fire on: no bot grenades)"""
+    human, bot, client = fight(run, "Nuke Bot", b"set sv_serverType 1\nset sv_smgDamage 0\nset sv_friendlyFire true\n")
+    run.command(f"forceplayerspawn {bot} 8 8 0")
     run.command(f"forceplayerspawn {human} 6 8")
     run.command(f"nukeid {bot}")
     wait(lambda: killed(run, human, NUCLEAR), 20, "e2e-a killed by the nuke")
