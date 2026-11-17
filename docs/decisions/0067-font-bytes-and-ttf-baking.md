@@ -6,7 +6,7 @@
 
 ## Context
 - All text (chat, names, HUD, translations) is a `char` string; `CFont` draws one display list per byte. Bytes 1-9 are colour codes, 32-126 ASCII, and BV2's `babo.tga` has 32 Latin-1 letters at bytes 128-159 (`GameVar::loadLanguage` remapped them). Bytes 160-255 were unused.
-- Owner brief D4 asks for TTF fonts with Latin Extended (Polish ą ł ś, Czech ž, Hungarian ő). Several Latin-1 letters Polish, Czech and Spanish need (ó, á, ñ) are also missing from BV2's 32.
+- Owner brief D4 asks for TTF fonts with Latin Extended (Polish ą ł ś, Czech ž, Hungarian ő). The table covers the languages ROBO-238 lists: Latin-1 gaps, Polish, Czech, Slovak, Hungarian, Romanian, Turkish, Croatian, Latvian and Lithuanian. Several Latin-1 letters Polish, Czech and Spanish need (ó, á, ñ) are also missing from BV2's 32.
 - Changing text to UTF-8 or wide strings would touch every string, the network protocol and saved names.
 
 ## Decision
@@ -19,7 +19,7 @@ Text stays one byte per glyph, and the owner chose (decision card, 2026-11-17) t
 
 - Translations (`Lang.cpp`) map UTF-8 to these bytes through `bv2::fontByteFor`; a letter outside the table becomes `?` and a `.po` with such letters is not picked from the OS locale. `tools/lang-check.py` reads the same table.
 - Typed text (`dkw`) maps each code point through `bv2::typedFontByte` and drops letters without a byte; `Writting` no longer remaps Latin-1.
-- Romanian `Ș ș Ț ț` (comma below) map to the cedilla bytes `Ş ş Ţ ţ`; Romanian `Â` and `Î` have no byte.
+- Romanian `Ș ș Ț ț` (comma below) map to the cedilla bytes `Ş ş Ţ ţ`.
 
 ## Consequences
 - No string, protocol or save format changes. Before this, a typed letter outside BV2's 32 (ñ) was stored as its Latin-1 byte and drew nothing; now it is its table byte; a name typed with ł on a TTF client shows as l on a `babo.tga` client.
