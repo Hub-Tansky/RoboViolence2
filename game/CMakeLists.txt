@@ -142,10 +142,31 @@ set(BV2_SERVER_SOURCES
   src/tinyxmlparser.cpp
 )
 
+# Asset ids (ROBO-232, ADR 0065): the id and file columns of content/base-pack.tsv, compiled in so the original BV2 data
+# (no pack.tsv) resolves the same ids. Re-runs CMake when the manifest changes.
+set(BV2_BASE_PACK "${CMAKE_SOURCE_DIR}/content/base-pack.tsv")
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${BV2_BASE_PACK}")
+# A ';' in a row would split it into two CMake list items; tests/test_asset_ids.py fails on one in an id or file.
+file(STRINGS "${BV2_BASE_PACK}" bv2_pack_lines REGEX "^[^#]" ENCODING UTF-8)
+set(BV2_BASE_PACK_ROWS "")
+foreach(line IN LISTS bv2_pack_lines)
+  if(line MATCHES "^id\t")
+    continue()
+  endif()
+  if(line MATCHES "[\"\\\\]")
+    message(FATAL_ERROR "content/base-pack.tsv: a row has a quote or backslash, which BasePackIds.cpp can't hold: ${line}")
+  endif()
+  if(line MATCHES "^([^\t]+)\t([^\t]+)\t")
+    string(APPEND BV2_BASE_PACK_ROWS "\t\t{\"${CMAKE_MATCH_1}\", \"${CMAKE_MATCH_2}\"},\n")
+  endif()
+endforeach()
+configure_file(src/BasePackIds.cpp.in "${CMAKE_CURRENT_BINARY_DIR}/BasePackIds.cpp" @ONLY)
+
 # visibility: PRIVATE for executables, PUBLIC for bv2server_lib, whose dependents (bv2dedicated, tests) need the same
 # includes and libraries
 function(bv2_game_target target visibility)
   target_include_directories(${target} ${visibility} src)
+  target_sources(${target} PRIVATE src/AssetRegistry.cpp "${CMAKE_CURRENT_BINARY_DIR}/BasePackIds.cpp")
   target_link_libraries(${target} ${visibility} babonet credentials dko zeven_core ${BV2_SQLITE_TARGET} Threads::Threads)
   if(BV2_WITH_HTTP)
     target_sources(${target} PRIVATE src/CCurl.cpp)

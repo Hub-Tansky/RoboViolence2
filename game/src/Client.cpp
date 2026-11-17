@@ -16,6 +16,7 @@
 	BaboViolent 2 source code. If not, see http://www.gnu.org/licenses/.
 */
 
+#include "AssetRegistry.h"
 #ifndef CONSOLE
 #include "Client.h"
 #include "netPacket.h"
@@ -42,7 +43,7 @@ Client::Client(Game * pGame)
 	wrongVersionReason = false;
 	pendingVersionAccept = false;
 	serverFrameID = 0;
-	font = dkfCreateFont("main/fonts/babo.tga");
+	font = dkfCreateFont(bv2::assetPath("fonts/babo"));
 	game = pGame;
 	isRunning = false;
 	needToShutDown = false;

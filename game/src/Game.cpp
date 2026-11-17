@@ -17,6 +17,7 @@
 */
 
 #include "Paths.h"
+#include "AssetRegistry.h"
 #include "Game.h"
 #include "netPacket.h"
 #include "Console.h"
@@ -45,7 +46,7 @@ Game::Game(CString pMapName)
 //	uniqueProjectileID = 0;
 	mapName = pMapName;
 #ifndef CONSOLE
-	font = dkfCreateFont("main/fonts/babo.tga");
+	font = dkfCreateFont(bv2::assetPath("fonts/babo"));
 	tex_miniMapAllied = dktCreateTextureFromFile("main/textures/MiniMapAllied.tga", DKT_FILTER_LINEAR);
 	tex_miniMapEnemy = dktCreateTextureFromFile("main/textures/MiniMapEnemy.tga", DKT_FILTER_LINEAR);;
 	tex_baboShadow = dktCreateTextureFromFile("main/textures/BaboShadow.tga", DKT_FILTER_BILINEAR);
@@ -300,7 +301,7 @@ void Game::createMap()
 			{
 			/*	if (rand()%2 == 0)
 				{*/
-					dksPlayMusic("main/sounds/Music.ogg", -1, 60);
+			dksPlayMusic(bv2::assetPath("sounds/Music"), -1, 60);
 			/*	}
 				else
 				{
