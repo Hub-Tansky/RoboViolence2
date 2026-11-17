@@ -20,6 +20,7 @@
 
 
 #include "dkti.h"
+#include "dkt_image.h"
 #include <math.h>
 #include <sys/stat.h>
 
@@ -233,9 +234,10 @@ void reloadTGA(CTexture * texture)
 
 
 //
-// Loader un TGA
+// Loader une image (TGA ou PNG, ROBO-233): décodée par dkt_image, puis montée comme avant
 //
-unsigned int createTextureTGA(char * filename, int filter){
+static unsigned int createTextureFromImage(char* filename, int filter)
+{
 
 	// Notre texture ID de ogl
 	unsigned int Texture = 0;
@@ -251,67 +253,21 @@ unsigned int createTextureTGA(char * filename, int filter){
 			}
 		}
 
-		// Les variables utilisé pour tenir l'information loadé du Targa
-		unsigned char TGAcompare[12];
-		unsigned char header[6];
-		unsigned int bytesPerPixel;
-		unsigned int imageSize;
-		unsigned char temp;
-		unsigned char *imageData;
-		unsigned int bpp;
-		unsigned int width;
-		unsigned int height;
-
-		// On ouvre le fichier targa
-		FILE *file = fopen(filename, "rb");
-
-		// Si ça marche pas, oups, on returne 0 comme texture.
-		if (file == NULL) 
+		bv2::DecodedImage image;
+		if (!bv2::decodeImageFile(filename, image))
 		{
 			// on écris l'erreur dans le log
             printf("Cannot open texutre file: %s\n", filename);
 			CDkt::updateLastError(CString("ERROR > Can not read file : \"%s\"", filename).s);
 			return 0;
 		}
-
-		// On li le header du fichier (12 premiers byte)
-		bv2ReadBytes(file, TGAcompare, sizeof(TGAcompare));
-
-		// On li la suite du header
-		bv2ReadBytes(file, header, sizeof(header));
-
-		// On prend le width et le height du header
-		width  = header[1] * 256 + header[0];
-		height = header[3] * 256 + header[2];
-
-		// On prend le bbp (24bit ou 32bit)
-		bpp	= header[4];
-
-		// On le divise par 8 pour avoir 3 ou 4 bytes (RGB ou RGBA)
-		bytesPerPixel	= bpp/8;
-
-		// On calcul la grandeur de l'image en byte
-		imageSize		= width * height * bytesPerPixel;
-
-		// On alou alors autant de bytes qu'il faut pour tenir l'image
-		imageData = new unsigned char [imageSize];
-
-		// On li maintenant le gros bloc de données
-		bv2ReadBytes(file, imageData, imageSize);
+		unsigned int bytesPerPixel = (unsigned int)image.bytesPerPixel;
+		unsigned int width = (unsigned int)image.width;
+		unsigned int height = (unsigned int)image.height;
+		unsigned char* imageData = image.pixels.data();
 
 		// On défini si c'est RGB ou RGBA
 		GLint Level = (bytesPerPixel == 3) ? GL_RGB : GL_RGBA;
-
-		// Ici c'est con, mais faut switcher le rouge avec le bleu
-		for(unsigned int i=0; i<imageSize; i+=bytesPerPixel){
-
-			temp=imageData[i];
-			imageData[i] = imageData[i + 2];
-			imageData[i + 2] = temp;
-		}
-
-		// On ferme maintenant le fichier
-		fclose (file);
 
 		// On génère une texture
 		glGenTextures(1, &Texture);
@@ -358,9 +314,6 @@ unsigned int createTextureTGA(char * filename, int filter){
 		gluBuild2DMipmaps(GL_TEXTURE_2D, bytesPerPixel, width, height,
 						  Level, GL_UNSIGNED_BYTE, imageData);
 
-		// On delete notre Data qu'on n'a pus besoin
-		delete [] imageData;
-
 		// On se cré notre nouvelle texture
 		CTexture *texture = new CTexture;
 		texture->filename = filename;
@@ -378,8 +331,6 @@ unsigned int createTextureTGA(char * filename, int filter){
 	// On retourne l'index de la texture
 	return Texture;
 }
-
-
 
 //
 // Pour créer une texture vide
@@ -533,18 +484,17 @@ void			 dktCreateTextureFromBuffer(unsigned int *textureID, unsigned char *buffe
 //
 unsigned int	 dktCreateTextureFromFile(char *mFilename, int filter)
 {
-	if (strnicmp(&(mFilename[strlen(mFilename)-3]), "TGA", 3) == 0)
-
+	const size_t n = strlen(mFilename);
+	if (n >= 3 && (strnicmp(&(mFilename[n - 3]), "TGA", 3) == 0 || strnicmp(&(mFilename[n - 3]), "PNG", 3) == 0))
 	{
-		return createTextureTGA(mFilename, filter);
+		return createTextureFromImage(mFilename, filter);
 	}
 	else
 	{
-		// Doit obligatoirement être un TGA
-		CDkt::updateLastError("DKT : The image is not a TGA");
+		// Doit être un TGA ou un PNG
+		CDkt::updateLastError("DKT : The image is not a TGA or PNG");
 		return 0;
 	}
-	return 0;
 }
 
 

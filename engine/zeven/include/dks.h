@@ -50,6 +50,8 @@ void			dksStopSound(int channel);
 
 void			dksPlayMusic(char* filename, int channel=-1, int volume=255);
 void			dksStopMusic();
+/// True from a dksPlayMusic that opened its file (WAV, or OGG with stb_vorbis) until dksStopMusic.
+bool dksIsMusicPlaying();
 
 void			dksSet3DListenerAttributes(const CVector3f * pos, const CVector3f * vel, const CVector3f * forward, const CVector3f * up);
 

@@ -297,6 +297,11 @@ void			dksPlayMusic(char* filename, int channel, int volume)
 	ma_sound_start(&g_music);
 }
 
+bool dksIsMusicPlaying()
+{
+	return g_musicPlaying;
+}
+
 void			dksStopMusic()
 {
 	if (g_musicPlaying)

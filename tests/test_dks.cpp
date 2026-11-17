@@ -108,9 +108,44 @@ static int voiceStarvation()
 	return fail;
 }
 
-int main()
+// ROBO-233: an OGG loads as a sound effect and as music, where a WAV does
+static int oggLoads(const char* ogg)
+{
+#ifdef BV2_TEST_OGG
+	dksInit(44100, 16);
+	int fail = 0;
+	DksSound* sound = dksCreateSoundFromFile((char*)ogg, false);
+	if (dksPlaySound(sound, -1, 255) < 0)
+	{
+		std::printf("FAIL: %s didn't load as a sound effect\n", ogg);
+		fail = 1;
+	}
+	dksPlayMusic((char*)ogg, -1, 200);
+	if (!dksIsMusicPlaying())
+	{
+		std::printf("FAIL: %s didn't play as music\n", ogg);
+		fail = 1;
+	}
+	dksStopMusic();
+	if (dksIsMusicPlaying())
+	{
+		std::printf("FAIL: music still playing after dksStopMusic\n");
+		fail = 1;
+	}
+	dksShutDown();
+	dksDeleteSound(sound);
+	return fail;
+#else
+	std::printf("skip: built without stb_vorbis, so %s is not tested\n", ogg);
+	return 0;
+#endif
+}
+
+int main(int argc, char** argv)
 {
 	if (voiceStarvation())
+		return 1;
+	if (argc > 1 && oggLoads(argv[1]))
 		return 1;
 
 	dksInit(44100, 32);
@@ -140,6 +175,6 @@ int main()
 	dksShutDown();
 	dksDeleteSound(sound); // what the global menus do at exit
 	std::remove("dks-test.wav");
-	std::printf("ok: voice stealing, missing music, delete after shutdown\n");
+	std::printf("ok: voice stealing, OGG sound and music, missing music, delete after shutdown\n");
 	return 0;
 }

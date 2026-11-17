@@ -41,6 +41,11 @@ if(BV2_BUILD_CLIENT)
   if(NOT BV2_MINIAUDIO_INCLUDE_DIR)
     message(FATAL_ERROR "miniaudio.h not found (vcpkg port miniaudio, or brew install miniaudio)")
   endif()
+  # PNG textures need stb_image.h (vcpkg port stb, or libstb-dev).
+  find_path(BV2_STB_IMAGE_DIR stb_image.h PATH_SUFFIXES stb)
+  if(NOT BV2_STB_IMAGE_DIR)
+    message(FATAL_ERROR "stb_image.h not found (vcpkg port stb, or apt install libstb-dev)")
+  endif()
   # OGG music needs stb_vorbis.c (vcpkg port stb). Without it .ogg files do not play.
   find_path(BV2_STB_VORBIS_DIR stb_vorbis.c PATH_SUFFIXES stb)
 
@@ -49,6 +54,7 @@ if(BV2_BUILD_CLIENT)
     src/dki.cpp
     src/dkgl.cpp
     src/dkt.cpp
+    src/dkt_image.cpp
     src/dkf.cpp
     src/CFont.cpp
     src/dkp.cpp
@@ -57,6 +63,8 @@ if(BV2_BUILD_CLIENT)
   )
   target_include_directories(zeven_client PUBLIC include PRIVATE src "${BV2_MINIAUDIO_INCLUDE_DIR}")
   target_link_libraries(zeven_client PUBLIC zeven_core bv2_glu SDL3::SDL3 ${CMAKE_DL_LIBS})
+  # SYSTEM: stb_image's implementation compiles in dkt_image.cpp; its warnings are not ours.
+  target_include_directories(zeven_client SYSTEM PRIVATE "${BV2_STB_IMAGE_DIR}")
   if(BV2_STB_VORBIS_DIR)
     target_include_directories(zeven_client PRIVATE "${BV2_STB_VORBIS_DIR}")
     target_compile_definitions(zeven_client PRIVATE BV2_HAVE_STB_VORBIS)
