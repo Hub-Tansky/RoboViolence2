@@ -292,6 +292,7 @@ add_test(NAME discord_release_post COMMAND ${Python3_EXECUTABLE} -B ${CMAKE_CURR
 add_test(NAME installer_licence COMMAND ${Python3_EXECUTABLE} -B ${CMAKE_CURRENT_SOURCE_DIR}/test_installer_licence.py)
 add_test(NAME review_record COMMAND ${Python3_EXECUTABLE} -B ${CMAKE_CURRENT_SOURCE_DIR}/test_review_record.py)
 add_test(NAME review_diff_rules COMMAND ${Python3_EXECUTABLE} -B ${CMAKE_CURRENT_SOURCE_DIR}/test_review_diff_rules.py)
+add_test(NAME ci_test_summary COMMAND ${Python3_EXECUTABLE} -B ${CMAKE_CURRENT_SOURCE_DIR}/test_ci_test_summary.py)
 find_program(BV2_DPKG_SHLIBDEPS dpkg-shlibdeps)  # dpkg-dev (build-essential pulls it in)
 if(UNIX AND NOT APPLE AND BV2_DPKG_SHLIBDEPS AND TARGET bv2 AND TARGET bv2dedicated)
   add_test(NAME make_deb COMMAND ${Python3_EXECUTABLE} -B ${CMAKE_CURRENT_SOURCE_DIR}/test_make_deb.py "${CMAKE_BINARY_DIR}" "${BV2_TEST_SCRATCH}")
