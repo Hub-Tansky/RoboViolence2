@@ -35,7 +35,7 @@ What we do, in one or two sentences.
 |---|---|---|
 | [0001](0001-ninja-generator-on-all-presets.md) | Use the Ninja generator on all presets, MSVC included | Accepted |
 | [0002](0002-compile-out-libcurl.md) | Compile out libcurl in Phase A | Accepted |
-| [0003](0003-keep-opengl-2.1-then-sdl-gpu.md) | Keep OpenGL 2.1 for Phase A; isolate the renderer, then move it to SDL_GPU | Accepted |
+| [0003](0003-keep-opengl-2.1-then-sdl-gpu.md) | Keep OpenGL 2.1 for Phase A; isolate the renderer, then move it to SDL_GPU | Accepted (target re-checked per 0062) |
 | [0004](0004-project-name-roboviolence2.md) | Name the project RoboViolence 2, an unofficial fork of BaboViolent 2 | Superseded by 0008 |
 | [0005](0005-runtime-main-data-root.md) | Keep the `main/` data root; the runtime dir assembles it | Accepted (amended by 0016) |
 | [0006](0006-sdl3-miniaudio-glad-platform-layer.md) | SDL3, miniaudio and glad behind the unchanged dk* APIs | Accepted |
@@ -94,4 +94,5 @@ What we do, in one or two sentences.
 | [0059](0059-slim-review-docs-gate-only-incremental-rounds.md) | Docs PRs get no review worker; later rounds review only the new commits | Accepted |
 | [0060](0060-merge-by-risk-tier-with-owner-brief.md) | Merge by risk tier; MEDIUM and HIGH PRs carry an owner brief | Accepted |
 | [0061](0061-release-branch-for-production-hotfixes.md) | Refactor on main; production hotfixes on a release branch | Accepted |
+| [0062](0062-asset-packs-mode-modules-client-independent-server.md) | Asset packs, mode modules and a client-independent server are the long-term direction | Accepted |
 | [0063](0063-architecture-lists-modules-not-files.md) | ARCHITECTURE.md lists module directories, not files | Accepted |

@@ -29,6 +29,12 @@ In a draft or bot PR without an Allowed paths row, changes to guard files (`tool
 - `ARCHITECTURE.md` facts and module rows, every affected README and the ADRs are updated (files get no rows, ADR 0063). Every non-obvious decision has an ADR.
 - Mechanical rewrites (encoding, renames, formatting) are not mixed with functional changes in one commit.
 - The diff introduces no direct defect: a regression, or a bug in new code, shown by a traced path.
+- Added lines keep ground rules 5 to 9 ([ADR 0062](docs/decisions/0062-asset-packs-mode-modules-client-independent-server.md)):
+  - no new `"main/` asset path literal in game code;
+  - no new `#ifdef CONSOLE` or `#ifndef CONSOLE`, and no GL, audio or input header in rules code;
+  - no new `gameType ==` branch outside mode code, unless the owner approved it in the PR;
+  - no tunable number in a constructor call;
+  - a new or changed network message has explicit read and write, a `tests/corpus/` sample and a protocol doc line (`ARCHITECTURE.md` Network row until `docs/protocol.md` exists).
 
 **Suggestions:**
 
