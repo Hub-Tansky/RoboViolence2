@@ -46,6 +46,11 @@ jobs:
           cmake --preset ${{ matrix.preset }}-release
           cmake --build --preset ${{ matrix.preset }}-release -- -k 0
           ctest --test-dir build/${{ matrix.preset }}-release --output-on-failure
+      # Failed test names and the end of each one's output on the run page, so nobody reads the whole log (ROBO-223)
+      - name: Failed tests in the job summary
+        if: failure()
+        shell: bash
+        run: ${{ runner.os == 'Windows' && 'python' || 'python3' }} tools/ci-test-summary.py build/${{ matrix.preset }} build/${{ matrix.preset }}-release
       # The job's BV2_VERSION, not CMake's copy of it, reaches the Release binary: ctest client_version cannot tell (ADR 0046)
       - name: The release binary holds this run's version
         shell: bash
@@ -320,6 +325,9 @@ jobs:
         env:
           ASAN_OPTIONS: detect_leaks=0
         run: ctest --test-dir build/linux-x64-asan --output-on-failure
+      - name: Failed tests in the job summary
+        if: failure()
+        run: python3 tools/ci-test-summary.py build/linux-x64-asan
       - uses: actions/upload-artifact@v7
         if: failure()
         with:
