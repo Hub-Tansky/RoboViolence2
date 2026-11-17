@@ -172,6 +172,8 @@ sounds/FlameThrower	sounds/FlameThrower.wav	sound	WAV 1ch 22050 Hz 8-bit 0.96 s	
 sounds/Grenade	sounds/Grenade.wav	sound	WAV 1ch 22050 Hz 8-bit 0.37 s	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
 sounds/GrenadeRebond	sounds/GrenadeRebond.wav	sound	WAV 1ch 11025 Hz 16-bit 0.10 s	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
 sounds/LifePack	sounds/LifePack.wav	sound	WAV 1ch 11025 Hz 16-bit 0.62 s	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+sounds/InGame01	sounds/InGame01.ogg	sound	OGG music	Robo Violence 2 contributors		GPL-3.0-or-later	missing
+sounds/InGame02	sounds/InGame02.ogg	sound	OGG music	Robo Violence 2 contributors		GPL-3.0-or-later	missing
 sounds/Menu	sounds/Menu.ogg	sound	OGG 2ch 44100 Hz 32.0 s	Robo Violence 2 contributors		GPL-3.0-or-later	missing
 sounds/Music	sounds/Music.ogg	sound	OGG 2ch 44100 Hz 305.3 s	Robo Violence 2 contributors		GPL-3.0-or-later	missing
 sounds/PhotonRifle	sounds/PhotonRifle.wav	sound	WAV 1ch 22050 Hz 16-bit 2.01 s	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder

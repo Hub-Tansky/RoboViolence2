@@ -271,6 +271,15 @@ foreach(cfg DEBUG RELEASE RELWITHDEBINFO MINSIZEREL)
 endforeach()
 add_test(NAME paths COMMAND test_paths "${BV2_TEST_SCRATCH}")
 
+# ROBO-232: asset ids resolve through the compiled-in base pack manifest; literal ids in game code are all rows of it
+add_executable(test_asset_registry test_asset_registry.cpp ${CMAKE_SOURCE_DIR}/game/src/AssetRegistry.cpp
+  ${CMAKE_BINARY_DIR}/game/BasePackIds.cpp)
+target_include_directories(test_asset_registry PRIVATE ${CMAKE_SOURCE_DIR}/game/src)
+target_link_libraries(test_asset_registry PRIVATE zeven_core)
+bv2_target_defaults(test_asset_registry)
+add_test(NAME asset_registry COMMAND test_asset_registry)
+add_test(NAME asset_ids COMMAND ${Python3_EXECUTABLE} -B ${CMAKE_CURRENT_SOURCE_DIR}/test_asset_ids.py ${CMAKE_SOURCE_DIR})
+
 if(TARGET bv2_original_hashes)
   add_executable(test_data_download test_data_download.cpp ${CMAKE_SOURCE_DIR}/game/src/DataDownload.cpp
     ${CMAKE_SOURCE_DIR}/game/src/Paths.cpp)

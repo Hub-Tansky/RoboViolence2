@@ -18,14 +18,15 @@
 
 #ifndef CONSOLE
 #include "Client.h"
-#include "netPacket.h"
-#include "Console.h"
-#include "Helper.h"
-#include "GameVar.h"
-#include "Scene.h"
-#include "CStatus.h"
+#	include "AssetRegistry.h"
+#	include "netPacket.h"
+#	include "Console.h"
+#	include "Helper.h"
+#	include "GameVar.h"
+#	include "Scene.h"
+#	include "CStatus.h"
 
-#include "screengrab.h"
+#	include "screengrab.h"
 
 extern Scene * scene;
 
@@ -42,7 +43,7 @@ Client::Client(Game * pGame)
 	wrongVersionReason = false;
 	pendingVersionAccept = false;
 	serverFrameID = 0;
-	font = dkfCreateFont("main/fonts/babo.tga");
+	font = dkfCreateFont(bv2::assetPath("fonts/babo"));
 	game = pGame;
 	isRunning = false;
 	needToShutDown = false;

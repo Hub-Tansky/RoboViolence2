@@ -17,6 +17,7 @@
 */
 
 #include "SqlStatement.h"
+#include "AssetRegistry.h"
 #include "Paths.h"
 #include "Scene.h"
 #include "Console.h"
@@ -43,7 +44,7 @@ Scene::Scene()
 	frameID = 0;
 #ifndef CONSOLE
 	mainTab = 0;
-	font = dkfCreateFont("main/fonts/babo.tga");
+	font = dkfCreateFont(bv2::assetPath("fonts/babo"));
 	tex_crosshair = dktCreateTextureFromFile("main/textures/Cross01.tga", DKT_FILTER_LINEAR);
 	tex_menuCursor = dktCreateTextureFromFile("main/textures/MenuCursor.tga", DKT_FILTER_LINEAR);
 	//tex_miniHeadGames = dktCreateTextureFromFile("main/textures/miniHeadGames.tga", DKT_FILTER_LINEAR);
@@ -84,7 +85,7 @@ Scene::Scene()
 	menuManager.root->enable = true;
 	menuManager.root->visible = false; //--- Not now */
 	dksSetSfxMasterVolume(gameVar.s_masterVolume);
-//	dksPlayMusic("main/sounds/Menu.ogg", -1);
+	//	dksPlayMusic(bv2::assetPath("sounds/Menu"), -1);
 
 #endif
 	// On reset el timer
@@ -141,7 +142,8 @@ void Scene::update(float delay)
 		if (introScreen->showDelay <= 0) 
 		{
 			ZEVEN_SAFE_DELETE(introScreen);
-			if (gameVar.s_inGameMusic) dksPlayMusic("main/sounds/Menu.ogg", -1);
+			if (gameVar.s_inGameMusic)
+				dksPlayMusic(bv2::assetPath("sounds/Menu"), -1);
 			createMenu();
 			menuManager.root->visible = true;
 		}

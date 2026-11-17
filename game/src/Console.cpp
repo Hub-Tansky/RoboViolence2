@@ -17,6 +17,7 @@
 */
 
 #include "Paths.h"
+#include "AssetRegistry.h"
 #include "Console.h"
 #include "FileIO.h"
 #include "CMaster.h"
@@ -570,7 +571,7 @@ void Console::init()
 {
 #ifndef CONSOLE
 	m_currentText = new Writting();
-	m_font = dkfCreateFont("main/fonts/babo.tga");
+	m_font = dkfCreateFont(bv2::assetPath("fonts/babo"));
 #endif
 	if (gameVar.c_debug) add("Console created");
 }

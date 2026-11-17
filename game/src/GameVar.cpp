@@ -17,6 +17,7 @@
 */
 
 #include "SqlStatement.h"
+#include "AssetRegistry.h"
 #include "Paths.h"
 #include "GameVar.h"
 #include "netPacket.h"
@@ -259,34 +260,34 @@ GameVar::GameVar()
 
 #ifndef CONSOLE
 	// Weapon names stay empty until main() calls reloadLanguage(): gameVar is a static, so this runs before pathsInit()
-	weapons[WEAPON_DUAL_MACHINE_GUN] = new Weapon("main/models/DualMachineGun.DKO", "main/sounds/DualMachineGun.wav", .1f, gameVar.lang_dualMachineGun, 
-		.13f, 10, 1, .8f, 2, WEAPON_DUAL_MACHINE_GUN, PROJECTILE_DIRECT);
-	weapons[WEAPON_SMG] = new Weapon("main/models/SMG.DKO", "main/sounds/SMG.wav", .1f, gameVar.lang_subMachineGun,
-		.1f, 8, 1, .5f, 1, WEAPON_SMG, PROJECTILE_DIRECT);
-   weapons[WEAPON_CHAIN_GUN] = new Weapon("main/models/ChainGun.DKO", "main/sounds/ChainGun.wav", .1f, gameVar.lang_changGun,
-      .19f, 15, 1, 2.00f, 5, WEAPON_CHAIN_GUN, PROJECTILE_DIRECT);
-	weapons[WEAPON_SHOTGUN] = new Weapon("main/models/ShotGun.DKO", "main/sounds/Shotgun.wav", 0.85f, gameVar.lang_shotgun,
-		.21f, 20, 5, 3.0f, 12, WEAPON_SHOTGUN, PROJECTILE_DIRECT);
-	weapons[WEAPON_SNIPER] = new Weapon("main/models/Sniper.DKO", "main/sounds/Sniper.wav", 2.0f, gameVar.lang_sniper,
-		.30f, 0, 1, 3.0f, 0, WEAPON_SNIPER, PROJECTILE_DIRECT);
-	weapons[WEAPON_BAZOOKA] = new Weapon("main/models/Bazooka.DKO", "main/sounds/Bazooka.wav", 1.75f, lang_bazooka,
-		.75f, 0, 1, 3.0f, 0, WEAPON_BAZOOKA, PROJECTILE_ROCKET);
-	weapons[WEAPON_GRENADE] = new Weapon("main/models/Hand.DKO", "main/sounds/Grenade.wav", 1.0f, gameVar.lang_grenade,
-		1.5f, 0, 1, -1.0f, 0, WEAPON_GRENADE, PROJECTILE_GRENADE);
-	weapons[WEAPON_COCKTAIL_MOLOTOV] = new Weapon("main/models/Hand.DKO", "main/sounds/Grenade.wav", 1.0f, "Flame",
-		0.15f, 0, 1, -1.0f, 0, WEAPON_COCKTAIL_MOLOTOV, PROJECTILE_COCKTAIL_MOLOTOV);
-	weapons[WEAPON_KNIVES] = new Weapon("main/models/Knifes.DKO", "main/sounds/knifes.wav", 1.0f, "Popup Knives",
-		0.60f, 0, 1, 0, 0, WEAPON_KNIVES, PROJECTILE_NONE);
-	weapons[WEAPON_NUCLEAR] = new Weapon("main/models/Nuclear.DKO", "main/sounds/Siren.WAV", 12.0f, "Nuke Bot",
-		8.0f, 0, 1, 0, 0, WEAPON_NUCLEAR, PROJECTILE_NONE);
-	weapons[WEAPON_PHOTON_RIFLE] = new Weapon("main/models/PhotonRifle.DKO", "main/sounds/PhotonRifle.wav", 1.5f, "Photon Rifle",
-		0.24f, 0, 1, 5.0f, 0, WEAPON_PHOTON_RIFLE, PROJECTILE_DIRECT);
-	weapons[WEAPON_FLAME_THROWER] = new Weapon("main/models/FlameThrower.DKO", "main/sounds/FlameThrower.wav", .1f, "Flame Thrower",
-		.08f, 10, 1, 0, 10, WEAPON_FLAME_THROWER, PROJECTILE_DIRECT);
-	weapons[WEAPON_SHIELD] = new Weapon("main/models/Shield.DKO", "main/sounds/shield.wav", 3.0f, "Instant Shield",
-		0, 0, 1, 0, 0, WEAPON_SHIELD, PROJECTILE_NONE);
-		weapons[WEAPON_MINIBOT] = new Weapon("main/models/Antena.DKO", "main/sounds/equip.wav", 1.0f, "Mini Bot",
-			.05f, 0, 1, 0, 0, WEAPON_MINIBOT, PROJECTILE_NONE);
+	weapons[WEAPON_DUAL_MACHINE_GUN] = new Weapon("models/DualMachineGun", "sounds/DualMachineGun", .1f, gameVar.lang_dualMachineGun,
+												  .13f, 10, 1, .8f, 2, WEAPON_DUAL_MACHINE_GUN, PROJECTILE_DIRECT);
+	weapons[WEAPON_SMG] = new Weapon("models/SMG", "sounds/SMG", .1f, gameVar.lang_subMachineGun,
+									 .1f, 8, 1, .5f, 1, WEAPON_SMG, PROJECTILE_DIRECT);
+	weapons[WEAPON_CHAIN_GUN] = new Weapon("models/ChainGun", "sounds/ChainGun", .1f, gameVar.lang_changGun,
+										   .19f, 15, 1, 2.00f, 5, WEAPON_CHAIN_GUN, PROJECTILE_DIRECT);
+	weapons[WEAPON_SHOTGUN] = new Weapon("models/ShotGun", "sounds/Shotgun", 0.85f, gameVar.lang_shotgun,
+										 .21f, 20, 5, 3.0f, 12, WEAPON_SHOTGUN, PROJECTILE_DIRECT);
+	weapons[WEAPON_SNIPER] = new Weapon("models/Sniper", "sounds/Sniper", 2.0f, gameVar.lang_sniper,
+										.30f, 0, 1, 3.0f, 0, WEAPON_SNIPER, PROJECTILE_DIRECT);
+	weapons[WEAPON_BAZOOKA] = new Weapon("models/Bazooka", "sounds/Bazooka", 1.75f, lang_bazooka,
+										 .75f, 0, 1, 3.0f, 0, WEAPON_BAZOOKA, PROJECTILE_ROCKET);
+	weapons[WEAPON_GRENADE] = new Weapon("models/Hand", "sounds/Grenade", 1.0f, gameVar.lang_grenade,
+										 1.5f, 0, 1, -1.0f, 0, WEAPON_GRENADE, PROJECTILE_GRENADE);
+	weapons[WEAPON_COCKTAIL_MOLOTOV] = new Weapon("models/Hand", "sounds/Grenade", 1.0f, "Flame",
+												  0.15f, 0, 1, -1.0f, 0, WEAPON_COCKTAIL_MOLOTOV, PROJECTILE_COCKTAIL_MOLOTOV);
+	weapons[WEAPON_KNIVES] = new Weapon("models/Knifes", "sounds/knifes", 1.0f, "Popup Knives",
+										0.60f, 0, 1, 0, 0, WEAPON_KNIVES, PROJECTILE_NONE);
+	weapons[WEAPON_NUCLEAR] = new Weapon("models/Nuclear", "sounds/Siren", 12.0f, "Nuke Bot",
+										 8.0f, 0, 1, 0, 0, WEAPON_NUCLEAR, PROJECTILE_NONE);
+	weapons[WEAPON_PHOTON_RIFLE] = new Weapon("models/PhotonRifle", "sounds/PhotonRifle", 1.5f, "Photon Rifle",
+											  0.24f, 0, 1, 5.0f, 0, WEAPON_PHOTON_RIFLE, PROJECTILE_DIRECT);
+	weapons[WEAPON_FLAME_THROWER] = new Weapon("models/FlameThrower", "sounds/FlameThrower", .1f, "Flame Thrower",
+											   .08f, 10, 1, 0, 10, WEAPON_FLAME_THROWER, PROJECTILE_DIRECT);
+	weapons[WEAPON_SHIELD] = new Weapon("models/Shield", "sounds/shield", 3.0f, "Instant Shield",
+										0, 0, 1, 0, 0, WEAPON_SHIELD, PROJECTILE_NONE);
+	weapons[WEAPON_MINIBOT] = new Weapon("models/Antena", "sounds/equip", 1.0f, "Mini Bot",
+										 .05f, 0, 1, 0, 0, WEAPON_MINIBOT, PROJECTILE_NONE);
 #else
 	weapons[WEAPON_DUAL_MACHINE_GUN] = new Weapon("", "", .1f, "Dual Machine Gun",
 		.13f, 10, 1, .8f, 2, WEAPON_DUAL_MACHINE_GUN, PROJECTILE_DIRECT);
@@ -912,13 +913,13 @@ void GameVar::sendOne(char * varName, UINT4 babonetID)
 //
 void GameVar::loadModels()
 {
-#ifndef CONSOLE	
-	dko_rocket = dkoLoadFile("main/models/Rocket.DKO");
-	dko_grenade = dkoLoadFile("main/models/Grenade.DKO");
-	dko_douille = dkoLoadFile("main/models/Douille.DKO");
-	dko_lifePack = dkoLoadFile("main/models/LifePack.DKO");
-	dko_cocktailMolotov = dkoLoadFile("main/models/CocktailMolotov.DKO");
-	dko_gib = dkoLoadFile("main/models/Gib.DKO");
+#ifndef CONSOLE
+	dko_rocket = dkoLoadFile(bv2::assetPath("models/Rocket"));
+	dko_grenade = dkoLoadFile(bv2::assetPath("models/Grenade"));
+	dko_douille = dkoLoadFile(bv2::assetPath("models/Douille"));
+	dko_lifePack = dkoLoadFile(bv2::assetPath("models/LifePack"));
+	dko_cocktailMolotov = dkoLoadFile(bv2::assetPath("models/CocktailMolotov"));
+	dko_gib = dkoLoadFile(bv2::assetPath("models/Gib"));
 
 	weapons[WEAPON_DUAL_MACHINE_GUN]->loadModels();
 	weapons[WEAPON_SMG]->loadModels();
