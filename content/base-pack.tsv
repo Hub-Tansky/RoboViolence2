@@ -1,0 +1,212 @@
+# Base pack manifest (ADR 0064). One row per asset; columns separated by one TAB:
+# id: stable name code asks for; file: path under the pack root; type: texture, sound, model or font;
+# format: what the loader needs (placeholders copy it); author, tool, licence: who made it, with what, under which licence;
+# source: where it came from, `generated placeholder`, or `missing` (no file in the pack yet; tools/check-pack.py allows it).
+id	file	type	format	author	tool	licence	source
+models/Antena	models/Antena.DKO	model	DKO v2, 2 mesh, 2 material, textures: Shieldtga.tga	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+models/Bazooka	models/Bazooka.DKO	model	DKO v2, 2 mesh, 1 material	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+models/BlueFlag	models/BlueFlag.DKO	model	DKO v2, 2 mesh, 2 material	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+models/BlueFlagPod	models/BlueFlagPod.DKO	model	DKO v2, 2 mesh, 2 material	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+models/ChainGun	models/ChainGun.DKO	model	DKO v2, 1 mesh, 1 material	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+models/CocktailMolotov	models/CocktailMolotov.DKO	model	DKO v2, 1 mesh, 1 material	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+models/Douille	models/Douille.DKO	model	DKO v2, 1 mesh, 1 material	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+models/DualMachineGun	models/DualMachineGun.DKO	model	DKO v2, 1 mesh, 1 material	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+models/FlameThrower	models/FlameThrower.DKO	model	DKO v2, 3 mesh, 3 material	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+models/Gib	models/Gib.DKO	model	DKO v2, 2 mesh, 2 material	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+models/Grenade	models/Grenade.DKO	model	DKO v2, 2 mesh, 2 material	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+models/Hand	models/Hand.DKO	model	DKO v2, 0 mesh, 272 material	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+models/Knife	models/Knife.tga	texture	TGA 64×64×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+models/Knifes	models/Knifes.DKO	model	DKO v2, 8 mesh, 1 material, textures: Knife.tga	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+models/LifePack	models/LifePack.DKO	model	DKO v2, 2 mesh, 2 material	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+models/Nuclear	models/Nuclear.DKO	model	DKO v2, 3 mesh, 3 material	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+models/PhotonRifle	models/PhotonRifle.DKO	model	DKO v2, 5 mesh, 2 material	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+models/RedFlag	models/RedFlag.DKO	model	DKO v2, 2 mesh, 2 material	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+models/RedFlagPod	models/RedFlagPod.DKO	model	DKO v2, 2 mesh, 2 material	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+models/Rocket	models/Rocket.DKO	model	DKO v2, 2 mesh, 2 material	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+models/SMG	models/SMG.DKO	model	DKO v2, 1 mesh, 1 material	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+models/Shield	models/Shield.DKO	model	DKO v2, 1 mesh, 1 material, textures: Shieldtga.tga	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+models/ShieldMagnet	models/ShieldMagnet.DKO	model	DKO v2, 1 mesh, 1 material	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+models/Shieldtga	models/Shieldtga.tga	texture	TGA 128×128×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+models/ShotGun	models/ShotGun.DKO	model	DKO v2, 1 mesh, 1 material	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+models/Sniper	models/Sniper.DKO	model	DKO v2, 1 mesh, 1 material	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/ArrowD	textures/ArrowD.tga	texture	TGA 16×16×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/ArrowL	textures/ArrowL.tga	texture	TGA 16×16×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/ArrowR	textures/ArrowR.tga	texture	TGA 16×16×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/ArrowU	textures/ArrowU.tga	texture	TGA 16×16×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/BaboHalo	textures/BaboHalo.tga	texture	TGA 128×128×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/BaboShadow	textures/BaboShadow.tga	texture	TGA 32×32×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/BerretGuy	textures/BerretGuy.tga	texture	TGA 256×256×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/BlueFlag	textures/BlueFlag.tga	texture	TGA 64×64×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/BombMark	textures/BombMark.tga	texture	TGA 64×64×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/CartridgeIcon	textures/CartridgeIcon.tga	texture	TGA 64×64×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/Cloud	textures/Cloud.tga	texture	TGA 256×256×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/Cross01	textures/Cross01.tga	texture	TGA 32×32×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/CrossHit	textures/CrossHit.tga	texture	TGA 32×32×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/ExplosionMark	textures/ExplosionMark.tga	texture	TGA 64×64×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/GrenadeIcon	textures/GrenadeIcon.tga	texture	TGA 64×64×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/Icones	textures/Icones.tga	texture	TGA 32×32×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/Menu	textures/Menu.tga	texture	TGA 64×64×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/Menu1Back	textures/Menu1Back.tga	texture	TGA 256×256×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/Menu2Back	textures/Menu2Back.tga	texture	TGA 256×256×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/Menu3Back	textures/Menu3Back.tga	texture	TGA 256×256×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/Menu4Back	textures/Menu4Back.tga	texture	TGA 256×256×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/Menu5Back	textures/Menu5Back.tga	texture	TGA 256×256×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/MenuCursor	textures/MenuCursor.tga	texture	TGA 32×32×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/MiniMapAllied	textures/MiniMapAllied.tga	texture	TGA 16×16×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/MiniMapEnemy	textures/MiniMapEnemy.tga	texture	TGA 16×16×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/RedFlag	textures/RedFlag.tga	texture	TGA 64×64×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/Smoke1	textures/Smoke1.tga	texture	TGA 128×128×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/Smoke2	textures/Smoke2.tga	texture	TGA 128×128×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/blood01	textures/blood01.tga	texture	TGA 64×64×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/blood02	textures/blood02.tga	texture	TGA 64×64×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/blood03	textures/blood03.tga	texture	TGA 64×64×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/blood04	textures/blood04.tga	texture	TGA 64×64×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/blood05	textures/blood05.tga	texture	TGA 64×64×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/blood06	textures/blood06.tga	texture	TGA 64×64×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/blood07	textures/blood07.tga	texture	TGA 64×64×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/blood08	textures/blood08.tga	texture	TGA 64×64×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/blood09	textures/blood09.tga	texture	TGA 64×64×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/blood10	textures/blood10.tga	texture	TGA 64×64×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/dirt1	textures/dirt1.tga	texture	TGA 128×128×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/dirt2	textures/dirt2.tga	texture	TGA 128×128×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/drip	textures/drip.tga	texture	TGA 16×16×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/glowTrail	textures/glowTrail.tga	texture	TGA 32×32×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/grass	textures/grass.tga	texture	TGA 128×128×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/medals/Medal01	textures/medals/Medal01.tga	texture	TGA 64×64×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/medals/Medal02	textures/medals/Medal02.tga	texture	TGA 64×64×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/medals/Medal03	textures/medals/Medal03.tga	texture	TGA 64×64×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/medals/Medal04	textures/medals/Medal04.tga	texture	TGA 64×64×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/medals/Medal05	textures/medals/Medal05.tga	texture	TGA 64×64×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/medals/Medal06	textures/medals/Medal06.tga	texture	TGA 64×64×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/medals/Medal07	textures/medals/Medal07.tga	texture	TGA 64×64×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/medals/Medal08	textures/medals/Medal08.tga	texture	TGA 64×64×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/medals/Medal09	textures/medals/Medal09.tga	texture	TGA 64×64×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/medals/Medal10	textures/medals/Medal10.tga	texture	TGA 64×64×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/medals/Medal11	textures/medals/Medal11.tga	texture	TGA 64×64×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/molotovIcon	textures/molotovIcon.tga	texture	TGA 64×64×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/nuzzleFlash	textures/nuzzleFlash.tga	texture	TGA 32×32×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/screenHit	textures/screenHit.tga	texture	TGA 128×128×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/shotGlow	textures/shotGlow.tga	texture	TGA 32×32×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/snowflake	textures/snowflake.tga	texture	TGA 16×16×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/animal/tex_floor	textures/themes/animal/tex_floor.tga	texture	TGA 128×128×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/animal/tex_floor_dirt	textures/themes/animal/tex_floor_dirt.tga	texture	TGA 128×128×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/animal/tex_wall_center	textures/themes/animal/tex_wall_center.tga	texture	TGA 128×128×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/city/tex_floor	textures/themes/city/tex_floor.tga	texture	TGA 128×128×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/city/tex_floor_dirt	textures/themes/city/tex_floor_dirt.tga	texture	TGA 128×128×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/city/tex_wall_center	textures/themes/city/tex_wall_center.tga	texture	TGA 128×128×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/core/tex_floor	textures/themes/core/tex_floor.tga	texture	TGA 128×128×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/core/tex_floor_dirt	textures/themes/core/tex_floor_dirt.tga	texture	TGA 128×128×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/core/tex_wall_center	textures/themes/core/tex_wall_center.tga	texture	TGA 128×128×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/frozen/tex_floor	textures/themes/frozen/tex_floor.tga	texture	TGA 128×128×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/frozen/tex_floor_dirt	textures/themes/frozen/tex_floor_dirt.tga	texture	TGA 128×128×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/frozen/tex_wall_center	textures/themes/frozen/tex_wall_center.tga	texture	TGA 128×128×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/grain/tex_floor	textures/themes/grain/tex_floor.tga	texture	TGA 128×128×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/grain/tex_floor_dirt	textures/themes/grain/tex_floor_dirt.tga	texture	TGA 128×128×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/grain/tex_wall_center	textures/themes/grain/tex_wall_center.tga	texture	TGA 128×128×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/grass/tex_floor	textures/themes/grass/tex_floor.tga	texture	TGA 128×128×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/grass/tex_floor_dirt	textures/themes/grass/tex_floor_dirt.tga	texture	TGA 128×128×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/grass/tex_wall_center	textures/themes/grass/tex_wall_center.tga	texture	TGA 128×128×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/lava/tex_floor	textures/themes/lava/tex_floor.tga	texture	TGA 128×128×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/lava/tex_floor_dirt	textures/themes/lava/tex_floor_dirt.tga	texture	TGA 128×128×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/lava/tex_wall_center	textures/themes/lava/tex_wall_center.tga	texture	TGA 128×128×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/medieval/tex_floor	textures/themes/medieval/tex_floor.tga	texture	TGA 128×128×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/medieval/tex_floor_dirt	textures/themes/medieval/tex_floor_dirt.tga	texture	TGA 128×128×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/medieval/tex_wall_center	textures/themes/medieval/tex_wall_center.tga	texture	TGA 128×128×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/metal/tex_floor	textures/themes/metal/tex_floor.tga	texture	TGA 128×128×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/metal/tex_floor_dirt	textures/themes/metal/tex_floor_dirt.tga	texture	TGA 128×128×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/metal/tex_wall_center	textures/themes/metal/tex_wall_center.tga	texture	TGA 128×128×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/modern/tex_floor	textures/themes/modern/tex_floor.tga	texture	TGA 128×128×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/modern/tex_floor_dirt	textures/themes/modern/tex_floor_dirt.tga	texture	TGA 128×128×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/modern/tex_wall_center	textures/themes/modern/tex_wall_center.tga	texture	TGA 128×128×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/orange/tex_floor	textures/themes/orange/tex_floor.tga	texture	TGA 128×128×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/orange/tex_floor_dirt	textures/themes/orange/tex_floor_dirt.tga	texture	TGA 128×128×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/orange/tex_wall_center	textures/themes/orange/tex_wall_center.tga	texture	TGA 128×128×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/rainy/tex_floor	textures/themes/rainy/tex_floor.tga	texture	TGA 128×128×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/rainy/tex_floor_dirt	textures/themes/rainy/tex_floor_dirt.tga	texture	TGA 128×128×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/rainy/tex_wall_center	textures/themes/rainy/tex_wall_center.tga	texture	TGA 128×128×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/real/tex_floor	textures/themes/real/tex_floor.tga	texture	TGA 128×128×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/real/tex_floor_dirt	textures/themes/real/tex_floor_dirt.tga	texture	TGA 128×128×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/real/tex_wall_center	textures/themes/real/tex_wall_center.tga	texture	TGA 128×128×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/road/tex_floor	textures/themes/road/tex_floor.tga	texture	TGA 128×128×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/road/tex_floor_dirt	textures/themes/road/tex_floor_dirt.tga	texture	TGA 128×128×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/road/tex_wall_center	textures/themes/road/tex_wall_center.tga	texture	TGA 128×128×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/rock/tex_floor	textures/themes/rock/tex_floor.tga	texture	TGA 128×128×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/rock/tex_floor_dirt	textures/themes/rock/tex_floor_dirt.tga	texture	TGA 128×128×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/rock/tex_wall_center	textures/themes/rock/tex_wall_center.tga	texture	TGA 128×128×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/sand/tex_floor	textures/themes/sand/tex_floor.tga	texture	TGA 128×128×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/sand/tex_floor_dirt	textures/themes/sand/tex_floor_dirt.tga	texture	TGA 128×128×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/sand/tex_wall_center	textures/themes/sand/tex_wall_center.tga	texture	TGA 128×128×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/savana/tex_floor	textures/themes/savana/tex_floor.tga	texture	TGA 128×128×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/savana/tex_floor_dirt	textures/themes/savana/tex_floor_dirt.tga	texture	TGA 128×128×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/savana/tex_wall_center	textures/themes/savana/tex_wall_center.tga	texture	TGA 128×128×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/snow/tex_floor	textures/themes/snow/tex_floor.tga	texture	TGA 128×128×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/snow/tex_floor_dirt	textures/themes/snow/tex_floor_dirt.tga	texture	TGA 128×128×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/snow/tex_wall_center	textures/themes/snow/tex_wall_center.tga	texture	TGA 128×128×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/soft/tex_floor	textures/themes/soft/tex_floor.tga	texture	TGA 128×128×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/soft/tex_floor_dirt	textures/themes/soft/tex_floor_dirt.tga	texture	TGA 128×128×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/soft/tex_wall_center	textures/themes/soft/tex_wall_center.tga	texture	TGA 128×128×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/street/tex_floor	textures/themes/street/tex_floor.tga	texture	TGA 128×128×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/street/tex_floor_dirt	textures/themes/street/tex_floor_dirt.tga	texture	TGA 128×128×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/street/tex_wall_center	textures/themes/street/tex_wall_center.tga	texture	TGA 128×128×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/tropical/tex_floor	textures/themes/tropical/tex_floor.tga	texture	TGA 128×128×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/tropical/tex_floor_dirt	textures/themes/tropical/tex_floor_dirt.tga	texture	TGA 128×128×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/tropical/tex_wall_center	textures/themes/tropical/tex_wall_center.tga	texture	TGA 128×128×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/winter/tex_floor	textures/themes/winter/tex_floor.tga	texture	TGA 128×128×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/winter/tex_floor_dirt	textures/themes/winter/tex_floor_dirt.tga	texture	TGA 128×128×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/winter/tex_wall_center	textures/themes/winter/tex_wall_center.tga	texture	TGA 128×128×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/wooden/tex_floor	textures/themes/wooden/tex_floor.tga	texture	TGA 128×128×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/wooden/tex_floor_dirt	textures/themes/wooden/tex_floor_dirt.tga	texture	TGA 128×128×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/themes/wooden/tex_wall_center	textures/themes/wooden/tex_wall_center.tga	texture	TGA 128×128×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+fonts/babo	fonts/babo.tga	font	TGA 512×512×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+sounds/BaboCreve1	sounds/BaboCreve1.wav	sound	WAV 1ch 22050 Hz 16-bit 1.77 s	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+sounds/BaboCreve2	sounds/BaboCreve2.wav	sound	WAV 1ch 22050 Hz 16-bit 1.50 s	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+sounds/BaboCreve3	sounds/BaboCreve3.wav	sound	WAV 1ch 22050 Hz 16-bit 1.23 s	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+sounds/Bazooka	sounds/Bazooka.wav	sound	WAV 1ch 22050 Hz 16-bit 0.92 s	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+sounds/Button	sounds/Button.wav	sound	WAV 1ch 22050 Hz 8-bit 0.30 s	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+sounds/ChainGun	sounds/ChainGun.wav	sound	WAV 1ch 22050 Hz 8-bit 0.16 s	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+sounds/Chat	sounds/Chat.wav	sound	WAV 1ch 22050 Hz 16-bit 0.25 s	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+sounds/ControlOver	sounds/ControlOver.wav	sound	WAV 1ch 22050 Hz 8-bit 0.49 s	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+sounds/DualMachineGun	sounds/DualMachineGun.wav	sound	WAV 1ch 22050 Hz 16-bit 0.93 s	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+sounds/Explosion1	sounds/Explosion1.wav	sound	WAV 1ch 22050 Hz 16-bit 4.23 s	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+sounds/FlameThrower	sounds/FlameThrower.wav	sound	WAV 1ch 22050 Hz 8-bit 0.96 s	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+sounds/Grenade	sounds/Grenade.wav	sound	WAV 1ch 22050 Hz 8-bit 0.37 s	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+sounds/GrenadeRebond	sounds/GrenadeRebond.wav	sound	WAV 1ch 11025 Hz 16-bit 0.10 s	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+sounds/LifePack	sounds/LifePack.wav	sound	WAV 1ch 11025 Hz 16-bit 0.62 s	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+sounds/Menu	sounds/Menu.ogg	sound	OGG 2ch 44100 Hz 32.0 s	Robo Violence 2 contributors		GPL-3.0-or-later	missing
+sounds/Music	sounds/Music.ogg	sound	OGG 2ch 44100 Hz 305.3 s	Robo Violence 2 contributors		GPL-3.0-or-later	missing
+sounds/PhotonRifle	sounds/PhotonRifle.wav	sound	WAV 1ch 22050 Hz 16-bit 2.01 s	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+sounds/PhotonStart	sounds/PhotonStart.wav	sound	WAV 1ch 11025 Hz 16-bit 1.47 s	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+sounds/SMG	sounds/SMG.wav	sound	WAV 1ch 22050 Hz 16-bit 0.82 s	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+sounds/Shotgun	sounds/Shotgun.wav	sound	WAV 1ch 22050 Hz 16-bit 0.97 s	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+sounds/Siren	sounds/Siren.WAV	sound	WAV 1ch 11025 Hz 8-bit 0.89 s	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+sounds/Sniper	sounds/Sniper.wav	sound	WAV 1ch 22050 Hz 16-bit 2.01 s	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+sounds/Write	sounds/Write.wav	sound	WAV 1ch 22050 Hz 16-bit 0.15 s	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+sounds/cheerBlueTeam	sounds/cheerBlueTeam.wav	sound	WAV 1ch 44100 Hz 16-bit 6.28 s	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+sounds/cheerRedTeam	sounds/cheerRedTeam.wav	sound	WAV 1ch 44100 Hz 16-bit 4.53 s	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+sounds/cocktailmolotov	sounds/cocktailmolotov.wav	sound	WAV 1ch 44100 Hz 16-bit 1.97 s	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+sounds/douille1	sounds/douille1.wav	sound	WAV 1ch 22050 Hz 16-bit 0.90 s	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+sounds/douille2	sounds/douille2.wav	sound	WAV 1ch 22050 Hz 16-bit 0.91 s	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+sounds/douille3	sounds/douille3.wav	sound	WAV 1ch 22050 Hz 16-bit 1.02 s	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+sounds/equip	sounds/equip.wav	sound	WAV 1ch 22050 Hz 16-bit 0.35 s	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+sounds/etook	sounds/etook.wav	sound	WAV 1ch 44100 Hz 16-bit 5.88 s	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+sounds/ftook	sounds/ftook.wav	sound	WAV 1ch 11025 Hz 16-bit 1.34 s	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+sounds/hit	sounds/hit.wav	sound	WAV 1ch 22050 Hz 16-bit 0.14 s	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+sounds/hit1	sounds/hit1.wav	sound	WAV 1ch 22050 Hz 8-bit 0.33 s	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+sounds/hit2	sounds/hit2.wav	sound	WAV 1ch 22050 Hz 8-bit 0.22 s	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+sounds/impact	sounds/impact.wav	sound	WAV 1ch 22050 Hz 16-bit 0.36 s	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+sounds/knifes	sounds/knifes.wav	sound	WAV 1ch 22050 Hz 8-bit 1.15 s	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+sounds/lava	sounds/lava.wav	sound	WAV 1ch 11025 Hz 8-bit 5.64 s	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+sounds/lavasteam	sounds/lavasteam.wav	sound	WAV 1ch 11025 Hz 8-bit 0.86 s	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+sounds/overHeat	sounds/overHeat.wav	sound	WAV 1ch 22050 Hz 16-bit 3.90 s	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+sounds/rain2	sounds/rain2.wav	sound	WAV 1ch 11025 Hz 8-bit 5.56 s	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+sounds/return	sounds/return.wav	sound	WAV 1ch 44100 Hz 16-bit 0.99 s	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+sounds/ric1	sounds/ric1.wav	sound	WAV 1ch 22050 Hz 8-bit 1.33 s	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+sounds/ric2	sounds/ric2.wav	sound	WAV 1ch 22050 Hz 8-bit 0.40 s	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+sounds/ric3	sounds/ric3.wav	sound	WAV 1ch 22050 Hz 8-bit 0.73 s	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+sounds/ric4	sounds/ric4.wav	sound	WAV 1ch 22050 Hz 8-bit 1.38 s	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+sounds/ric5	sounds/ric5.wav	sound	WAV 1ch 22050 Hz 8-bit 1.01 s	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+sounds/shield	sounds/shield.wav	sound	WAV 1ch 22050 Hz 8-bit 2.10 s	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+sounds/shotgunReload	sounds/shotgunReload.wav	sound	WAV 1ch 8000 Hz 16-bit 0.17 s	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+sounds/wind	sounds/wind.wav	sound	WAV 1ch 8013 Hz 8-bit 4.04 s	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/sky	textures/sky.tga	texture	TGA 256×256×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/sniperScope	textures/sniperScope.tga	texture	TGA 256×256×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder

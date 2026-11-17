@@ -159,9 +159,9 @@ option(BV2_PLACEHOLDER_CONTENT "Generate placeholder maps, textures, sounds and 
 if(BV2_PLACEHOLDER_CONTENT)
   find_package(Python3 REQUIRED COMPONENTS Interpreter)
   add_custom_command(
-    OUTPUT "${BV2_DATA_DIR}/maps/CTF-Placeholder.bvm"
+    OUTPUT "${BV2_DATA_DIR}/maps/CTF-Placeholder.bvm" "${BV2_DATA_DIR}/pack.tsv"
     COMMAND Python3::Interpreter "${CMAKE_SOURCE_DIR}/tools/gen-placeholder-content.py" "${BV2_DATA_DIR}"
-    DEPENDS "${CMAKE_SOURCE_DIR}/tools/gen-placeholder-content.py" "${CMAKE_SOURCE_DIR}/tools/placeholder-manifest.tsv"
+    DEPENDS "${CMAKE_SOURCE_DIR}/tools/gen-placeholder-content.py" "${CMAKE_SOURCE_DIR}/content/base-pack.tsv"
     COMMENT "Generating placeholder game data")
   add_custom_target(bv2_placeholder_content DEPENDS "${BV2_DATA_DIR}/maps/CTF-Placeholder.bvm")
 endif()
