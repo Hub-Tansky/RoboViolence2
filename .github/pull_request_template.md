@@ -7,6 +7,16 @@
 | Out of scope | <tempting work left out, with its ROBO-NNN item> |
 | Allowed paths | <globs in backticks, e.g. `game/src/Server*.cpp` `tests/**` `ARCHITECTURE.md`> |
 
+## Owner brief
+<the line tools/merge-risk.py prints, e.g. Tier: MEDIUM (game/src/Game.cpp)>
+Player sees: <what changes in the game, plain words>
+Not changed: <formats, protocol, menus, as applies>
+Proof: <test name; for a fix, the assertion that fails without it>
+Not covered by a test: <what, and the manual steps>
+Undo: <revert sha; data migration yes or no>
+
+<!-- Required on a ready MEDIUM or HIGH PR. For a content/LaunchScript/** change, list every value it changes. -->
+
 Before:
 
 After:

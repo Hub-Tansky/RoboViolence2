@@ -60,6 +60,7 @@ cmake --build --preset <preset> --target bv2dedicated bv2master
 - Finish every PR by updating `ARCHITECTURE.md` (inventory and changed facts) and running `tools/check-architecture.sh`.
 - Record non-obvious decisions as ADRs in `docs/decisions/`.
 - Work is done only per [REVIEW.md](REVIEW.md): `tools/review.sh` passes (CI `review` check), and a ready PR has a review record from the `rv2-code-review` workflow (`.claude/skills/rv2-code-review/`, section 5), for its head. Its stop rule and forbidden shortcuts apply to every change.
+- Merge by tier (`tools/merge-risk.py`, printed by `tools/review.sh`; [ADR 0060](docs/decisions/0060-merge-by-risk-tier-with-owner-brief.md)). HIGH: a risk path (`netPacket.h`, `ServerRecv.cpp`, `ClientRecv.cpp`, `engine/babonet/`, `engine/credentials/`), `packaging/`, a guard file, a `GAME_VERSION_SV/CL` change, a `[GUI]` item, more than 600 added lines or more than 25 files. MEDIUM: other changes under `game/`, `engine/`, `masterserver/`, `content/`. LOW: docs, tests or non-guard tooling only. LOW and MEDIUM: merge when required checks are green and post the owner brief in the thread. HIGH: also run the Risk worker, request a GitHub Copilot review on the PR, and wait for the owner's playtest on staging and "merge".
 - Don't mix mechanical rewrites (encoding, renames, formatting) with functional changes in one commit.
 
 ## Agent skills

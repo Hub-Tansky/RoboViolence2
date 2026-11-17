@@ -5,6 +5,7 @@ Env: REVIEW_BASE (merge-base), REVIEW_HEAD (PR head), REVIEW_BODY (PR descriptio
 REVIEW_DRAFT and REVIEW_BOT ("true" skips the record checks).
 """
 import hashlib
+import importlib.util
 import os
 import re
 import subprocess
@@ -142,6 +143,18 @@ def check_spec_matrix(report, outcomes):
     return problems
 
 
+def check_owner_brief(body, tier_line):
+    """A ready MEDIUM or HIGH PR needs '## Owner brief' holding tools/merge-risk.py's line verbatim (ROBO-228)."""
+    if tier_line.startswith("Tier: LOW "):
+        return []
+    brief = re.search(r"^## Owner brief[ \t]*\n(.*?)(?=^## |\Z)", body, re.M | re.S)
+    if not brief:
+        return [f"review gate: a ready MEDIUM or HIGH PR needs '## Owner brief' with '{tier_line}'"]
+    if not re.search(rf"^{re.escape(tier_line)}[ \t]*$", brief.group(1), re.M):
+        return [f"review gate: the Owner brief's Tier line must be '{tier_line}' (tools/merge-risk.py)"]
+    return []
+
+
 def check_record(body, changed, head, protocol, current_patch_id=None):
     """Problems of a ready PR's description; an empty list means it may be ready.
     current_patch_id: patch_id() of the PR's diff now, compared with the record's Patch-id when the head moved."""
@@ -212,6 +225,10 @@ def main():
         problems.append(f"protocol: the skill's Protocol line is stale; set it to '{protocol}'")
     if os.environ.get("REVIEW_DRAFT") != "true" and os.environ.get("REVIEW_BOT") != "true":
         problems += check_record(body, changed, head, protocol, patch_id(base, head))
+        risk = importlib.util.spec_from_file_location("merge_risk", os.path.join(os.path.dirname(os.path.abspath(__file__)), "merge-risk.py"))
+        merge_risk = importlib.util.module_from_spec(risk)
+        risk.loader.exec_module(merge_risk)
+        problems += check_owner_brief(body, merge_risk.tier_line(base, head, body))
 
     print(f"NOTE review tier: {review_tier(changed)}; Risk report required: {'yes' if risk_required(changed) else 'no'}")
     for p in problems:

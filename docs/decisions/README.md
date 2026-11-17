@@ -91,3 +91,4 @@ What we do, in one or two sentences.
 | [0056](0056-main-ci-runs-finish-notify-nightly-fuzz.md) | Main CI runs finish, a red main notifies the owner, fuzz runs nightly | Accepted |
 | [0057](0057-review-record-keyed-to-patch-id-post-deploy-criteria.md) | The review record is keyed to the diff's patch-id; post-deploy criteria don't block | Accepted |
 | [0059](0059-slim-review-docs-gate-only-incremental-rounds.md) | Docs PRs get no review worker; later rounds review only the new commits | Accepted |
+| [0060](0060-merge-by-risk-tier-with-owner-brief.md) | Merge by risk tier; MEDIUM and HIGH PRs carry an owner brief | Accepted |
