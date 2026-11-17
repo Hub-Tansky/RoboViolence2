@@ -80,7 +80,7 @@ The tier comes from the changed paths, and `tools/review.sh` prints it:
    Confirm with the owner first when a fix is outside the scope or Allowed paths, changes gameplay, protocol, file formats or anything the player sees (**[GUI]**), bends an ADR or the scope item, or is a large rewrite or new dependency. Otherwise fix directly, in its own commit (`<kind>: review: <summary>`). A deferred finding becomes a Proposed scope item in [rv2-docs](https://github.com/Hub-Tansky/rv2-docs) `40-backlog/20-proposed/` or an issue. Ask the owner all open questions in one message, each with the finding, the proposed change and a recommendation.
 6. After fixes, rerun every required axis on the full diff at the new head. Stop when a round finds no new blocker.
 7. Write the record. In the final round, Spec `fail` and `not assessable` block; `partial` blocks unless Outcomes says `confirmed with owner`, with the criterion's text in the Finding cell. `post-deploy` does not block, and only for a criterion that starts with `(post-deploy)` in the scope item (only a running server or a release build can show it); the item then stays in Testing until the owner ticks it.
-8. Mark the PR ready only with required CI green on the head named in `Diff:`. A later commit that changes the diff's patch-id makes the record stale. A merge from main that leaves it unchanged does not. A PR that changes the skill needs a review on the changed skill.
+8. Mark the PR ready only with required CI green on the PR head. A later commit that changes the diff's patch-id makes the record stale. A merge from main that leaves it unchanged does not. A PR that changes the skill needs a review on the changed skill.
 
 ## Review record template
 
@@ -90,7 +90,7 @@ Keep only the final round's raw reports, one `<details>` block per axis, its `<d
 ## Review record
 
 Diff: <merge-base>...<head>
-Patch-id: <40 hex: git diff --text <merge-base>...<head> | git patch-id --stable | cut -d' ' -f1>
+Patch-id: <40 hex: git diff --text <merge-base>...<head> | git patch-id --verbatim | cut -d' ' -f1>
 Spec source: <ROBO-NNN> rv2-docs@<sha> blob:<12 hex> [(uncommitted)]
 
 ### review.sh

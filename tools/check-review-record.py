@@ -36,11 +36,12 @@ def protocol_line(skill_text):
 
 
 def patch_id(base, head, cwd=None):
-    """`git diff --text <base>...<head> | git patch-id --stable`, first field: the same for the same change after a merge
-    from main that leaves the diff alone (ROBO-224). None when git fails or the diff is empty."""
+    """`git diff --text <base>...<head> | git patch-id --verbatim`, first field: the same for the same change after a merge
+    from main that leaves the diff alone (ROBO-224). --verbatim, not --stable alone: a whitespace-only change (Python or
+    YAML indentation) must alter it. None when git fails or the diff is empty."""
     try:
         diff = subprocess.run(["git", "diff", "--text", f"{base}...{head}"], cwd=cwd, capture_output=True, check=True).stdout
-        out = subprocess.run(["git", "patch-id", "--stable"], cwd=cwd, input=diff, capture_output=True, check=True).stdout
+        out = subprocess.run(["git", "patch-id", "--verbatim"], cwd=cwd, input=diff, capture_output=True, check=True).stdout
     except (OSError, subprocess.CalledProcessError):
         return None
     return out.split()[0].decode() if out.split() else None

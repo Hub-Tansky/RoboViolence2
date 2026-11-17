@@ -109,6 +109,7 @@ PID_CASES = [
     ("code change after the record", body(diff=MOVED), OTHER_PID, "Patch-id changed"),
     ("moved head, record without Patch-id", body(diff="Diff: bbbbbbb...ddddddd"), PID, "Patch-id changed"),
     ("moved head, git failed", body(diff=MOVED), None, "Patch-id changed"),
+    ("moved head, short Patch-id", body(diff=f"Diff: {'b' * 7}...ddddddd\nPatch-id: {PID[:12]}"), PID, "Patch-id changed"),
     ("post-deploy with the tag", body(spec=report(POST)), None, None),
     ("post-deploy without the tag", body(spec=report(POST.replace("(post-deploy) ", ""))), None, "needs a criterion starting '(post-deploy)'"),
     ("post-deploy tag not at the start", body(spec=report(POST.replace("(post-deploy) Players", "Players (post-deploy)"))), None, "needs a criterion starting"),
@@ -205,6 +206,11 @@ try:
     if gate.patch_id(main2, rev("HEAD"), cwd=repo) == recorded:
         failed += 1
         print("FAIL patch-id: a new change to the PR kept it")
+    reindent = rev("HEAD")
+    commit("docs/a.md", "a\n  b\n", "indent only")
+    if gate.patch_id(main2, rev("HEAD"), cwd=repo) == gate.patch_id(main2, reindent, cwd=repo):
+        failed += 1
+        print("FAIL patch-id: an indentation-only change kept it")
     if gate.patch_id(base, "0" * 40, cwd=repo) is not None:
         failed += 1
         print("FAIL patch-id: an unknown head must give None")

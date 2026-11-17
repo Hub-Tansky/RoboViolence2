@@ -9,11 +9,10 @@
 - The Spec matrix accepted only `pass`, `partial` and `fail`. PR #152 waited 2 h 14 min for the owner because one criterion could only be checked on a deployed server.
 
 ## Decision
-- The record carries `Patch-id: <40 hex>` under `Diff:` (`git diff --text <merge-base>...<head> | git patch-id --stable`). The record is current when the PR head starts with the recorded head, or when the patch-id of `git diff --text $REVIEW_BASE...$REVIEW_HEAD` equals the recorded one. Otherwise the gate fails as before.
-- Spec status `post-deploy` passes when the criterion cell starts with `(post-deploy)`; any other use fails. The scope item sets the tag, which the owner approves; the item stays in Testing until the owner ticks the criterion.
+A review record stays current while `git diff --text <merge-base>...<head> | git patch-id --verbatim` equals its `Patch-id:` line, even if the PR head moved; and the Spec status `post-deploy` passes only for a criterion that starts with `(post-deploy)`. Details: [REVIEW.md section 5](../../REVIEW.md#5-pr-close-isolated-review).
 
 ## Consequences
-- A merge from `main` with no conflict in the PR's files needs no new review round. `git patch-id` ignores line numbers and whitespace but not context lines, so a merge that changes lines next to the PR's hunks still asks for a round.
+- A merge from `main` with no conflict in the PR's files needs no new review round. `git patch-id --verbatim` ignores line numbers but not whitespace or context lines (`--stable` alone would accept a re-indented Python or YAML block), so a merge that changes lines next to the PR's hunks still asks for a round.
 - A record without `Patch-id:` behaves as before.
 - Known limit: the gate cannot read the private scope item, so it trusts that the Spec worker copied the criterion text verbatim, tag included.
 - Rejected: comparing trees (a merge from `main` always changes the tree), and a `--force` override for the gate (it would also skip real changes).
