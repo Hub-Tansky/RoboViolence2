@@ -147,6 +147,20 @@ for path, expected in [("game/src/ServerRecv.cpp", True), ("engine/credentials/s
         failed += 1
         print(f"FAIL risk {path}: expected {expected}")
 
+MED = "Tier: MEDIUM (game/src/Game.cpp)"
+for name, text, line, expected in [
+    ("LOW needs no brief", "", "Tier: LOW (docs only)", None),
+    ("MEDIUM without brief", "## How\n", MED, "needs '## Owner brief'"),
+    ("MEDIUM with brief", f"## Owner brief\n{MED}\nPlayer sees: x\n## How\n", MED, None),
+    ("brief with another tier", "## Owner brief\nTier: LOW (docs only)\n## How\n", MED, "Tier line must be"),
+    ("tier line outside the brief", f"## Owner brief\nPlayer sees: x\n## How\n{MED}\n", MED, "Tier line must be"),
+    ("HIGH without brief", "", "Tier: HIGH (tools/review.sh)", "needs '## Owner brief'"),
+]:
+    got = gate.check_owner_brief(text, line)
+    if (expected is None and got) or (expected is not None and not (len(got) == 1 and expected in got[0])):
+        failed += 1
+        print(f"FAIL owner brief {name}: {got}")
+
 a = gate.protocol_line("x\nProtocol: rv2-code-review old\nProtocol: template\ny\n")
 if a != gate.protocol_line("x\nProtocol: rv2-code-review new\nProtocol: template\ny\n") or a == gate.protocol_line("x\nProtocol: old\nProtocol: changed\ny\n"):
     failed += 1
