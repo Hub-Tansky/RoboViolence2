@@ -25,6 +25,11 @@ $(run 4 dddd04 push main Hub-Tansky/RoboViolence2 failure),
 $(run 3 cccc03 push main Hub-Tansky/RoboViolence2 success)]}"
 expect "newest successful main push; fork PR, other branch and failed run skipped" "3 cccc03" "$(printf '%s' "$runs" | pick_run)"
 expect "sha of a fork PR is never selected" "" "$(printf '%s' "$runs" | pick_run ffff)"
+runs="{\"workflow_runs\":[
+$(run 8 aaaa08 push release/0.0 Hub-Tansky/RoboViolence2 success),
+$(run 7 bbbb07 push main Hub-Tansky/RoboViolence2 success)]}"
+expect "cron (no sha) never picks a release branch" "7 bbbb07" "$(printf '%s' "$runs" | pick_run)"
+expect "a release branch build is picked by its sha (hotfix, ADR 0061)" "8 aaaa08" "$(printf '%s' "$runs" | pick_run aaaa08)"
 
 status='map CTF-Placeholder
 game type 2

@@ -1,7 +1,7 @@
 name: build
 on:
   push:  # branches only through their PR: a push and a pull_request run per commit doubled the scarce macOS jobs (ADR 0041)
-    branches: [main]
+    branches: [main, 'release/**']  # release/*: the production hotfix line, every merge gets a run too (ADR 0061)
     tags: ['v*']
   pull_request:
 # A newer commit cancels a PR's run; runs on main and tags each finish, so every merge gets a result (ROBO-221, ADR 0056)
@@ -367,12 +367,12 @@ jobs:
         with:
           name: clang-tidy-log
           path: tidy.log
-  # A failed run on main pings the owner's phone: the run URL and the failed jobs (ROBO-221). The topic is a secret,
+  # A failed run on main or a release branch pings the owner's phone: the run URL and the failed jobs (ROBO-221). The topic is a secret,
   # so it reaches curl as config on stdin, never on the command line (tools/staging/deploy.sh notify)
   notify:
-    name: notify (main failed)
+    name: notify (main or release failed)
     needs: [build, release, package-check, deb-check, package-smoke, smoke]  # not tidy: continue-on-error, never red
-    if: ${{ !cancelled() && github.ref == 'refs/heads/main' && contains(needs.*.result, 'failure') }}
+    if: ${{ !cancelled() && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release/')) && contains(needs.*.result, 'failure') }}
     runs-on: ubuntu-24.04
     permissions:
       actions: read  # the run's job list
@@ -387,6 +387,6 @@ jobs:
           failed=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/attempts/$GITHUB_RUN_ATTEMPT/jobs?per_page=100" \
             -q '[.jobs[] | select(.conclusion == "failure" and (.name | startswith("clang-tidy") | not)) | .name] | join(", ")') || failed="(job list unavailable)"
           printf 'url = "https://ntfy.sh/%s"\n' "$NTFY_TOPIC" |
-            curl -fsS --max-time 10 -K - -H "Title: RV2 build failed on main" -H "Click: $url" \
+            curl -fsS --max-time 10 -K - -H "Title: RV2 build failed on $GITHUB_REF_NAME" -H "Click: $url" \
               -d "${GITHUB_SHA::7} failed: $failed. $url" > /dev/null
           echo "notified: $failed"

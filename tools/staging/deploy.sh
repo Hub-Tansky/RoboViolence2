@@ -2,7 +2,8 @@
 # Staging deploy agent: runs the newest main server and master images on this host, never during a game (ADR 0018).
 # Decision: docs/decisions/0018-staging-pull-deploy.md. Setup: tools/staging/README.md.
 # Usage: deploy.sh               the newest main build whose `containers` run passed, once no one is playing (cron runs this)
-#        deploy.sh --sha <sha>   that main build (also a manual rollback), once no one is playing
+#        deploy.sh --sha <sha>   that main build (also a manual rollback), once no one is playing; a full SHA may also
+#                                be a `release/*` build, the production hotfix line (ADR 0061)
 #        deploy.sh --force       don't wait for an empty server
 # While anyone plays, a run deploys nothing and exits 0 (log line "waits"); the next run retries.
 # Also production, by hand with RV2_DEPLOY_LABEL=prod and no cron (docs/ops/runbook.md#production): a change here changes prod.
@@ -24,11 +25,13 @@ readonly INFRA_STAGES=" env select fetch pull wait-empty "
 
 # --- Helpers, also sourced by health-watch.sh with RV2_DEPLOY_SOURCE_ONLY (tests: test_staging_deploy.sh, test_health_watch.sh) ---
 
-# pick_run [sha prefix]: workflow-runs JSON on stdin -> "<run id> <sha>" of the newest successful push to main of REPO.
+# pick_run [sha prefix]: workflow-runs JSON on stdin -> "<run id> <sha>" of the newest successful push to main of REPO,
+# or with a sha also to a `release/*` branch (hotfixes, ADR 0061); cron passes none, so staging stays on main.
 # The same filter as tools/playtest/agent.sh: head_repository excludes fork pull requests from a branch named main.
 pick_run() {
 	jq -r --arg repo "$REPO" --arg sha "${1:-}" '[.workflow_runs[]
-		| select(.event == "push" and .head_branch == "main" and .head_repository.full_name == $repo
+		| select(.event == "push" and .head_repository.full_name == $repo
+			and (.head_branch == "main" or ($sha != "" and (.head_branch | startswith("release/"))))
 			and .conclusion == "success" and (.head_sha | startswith($sha)))] | .[0] | select(.) | "\(.id) \(.head_sha)"'
 }
 
@@ -204,11 +207,12 @@ load_env || fail "env file"
 for t in curl jq docker; do command -v "$t" >/dev/null || fail "missing tool: $t"; done
 
 stage select
-query="branch=main&event=push&status=success&per_page=30"
-[ ${#WANT_SHA} = 40 ] && query="$query&head_sha=$WANT_SHA" # a full SHA is found however old it is
+query="event=push&status=success&per_page=30"
+# A full SHA is found however old it is, on main or a release branch; otherwise only main is listed
+if [ ${#WANT_SHA} = 40 ]; then query="$query&head_sha=$WANT_SHA"; else query="branch=main&$query"; fi
 runs=$(curl -fsS --max-time 20 "https://api.github.com/repos/$REPO/actions/workflows/containers.yml/runs?$query") || fail "runs query"
 pick=$(printf '%s' "$runs" | pick_run "$WANT_SHA")
-[ -n "$pick" ] || fail "no successful main push run of containers${WANT_SHA:+ for $WANT_SHA}"
+[ -n "$pick" ] || fail "no successful main or release push run of containers${WANT_SHA:+ for $WANT_SHA}"
 SHA=${pick#* }
 # Already running. The weekly rebuild re-tags the same commit; it reaches staging with the next commit (ADR 0018).
 [ "$SHA" = "$PREV" ] && { rm -f "$ROOT/infra-failure" "$ROOT/waiting"; exit 0; }
