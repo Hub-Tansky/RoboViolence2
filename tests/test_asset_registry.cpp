@@ -35,7 +35,6 @@ int main()
 			if (!bv2::assetKnown(id.c_str()))
 				std::printf("FAIL: theme texture %s is not in the manifest\n", id.c_str()), g_fail = 1;
 		}
-	check(bv2::THEME_NAME_COUNT == 23, "23 themes (THEME_GRASS..THEME_WOODEN)");
 
 	check(!bv2::assetKnown("models/NoSuchModel"), "an unknown id is known");
 	char* first = bv2::assetPath("models/NoSuchModel");

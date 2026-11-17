@@ -13,7 +13,7 @@ namespace bv2
 									   "winter", "wooden"};
 	const int THEME_NAME_COUNT = (int)(sizeof(THEME_NAMES) / sizeof(THEME_NAMES[0]));
 
-	// The textures Map loads from a theme folder
+	// The textures Map loads from a theme folder, in this order: floor, floor dirt, wall
 	const char* const THEME_TEXTURES[] = {"tex_floor", "tex_floor_dirt", "tex_wall_center"};
 
 	// Asset id of a theme texture: textures/themes/<theme>/<texture>

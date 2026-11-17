@@ -947,7 +947,7 @@ void Map::reloadTheme()
 	if(themeStr == "" || gameVar.cl_grassTextureForAllMaps)
 	{
 		theme = THEME_GRASS;
-		themeStr = bv2::THEME_NAMES[THEME_GRASS];
+		themeStr = bv2::THEME_NAMES[THEME_GRASS - THEME_START];
 	}
 
 	// Les textures
@@ -955,14 +955,14 @@ void Map::reloadTheme()
 	tex_dirt = dktCreateTextureFromFile("main/textures/dirt1.tga", DKT_FILTER_BILINEAR);
 	tex_wall = dktCreateTextureFromFile("main/textures/dirt2.tga", DKT_FILTER_BILINEAR);*/
 
-	tex_grass = dktCreateTextureFromFile(bv2::assetPath(bv2::themeTextureId(themeStr.s, "tex_floor").c_str()), DKT_FILTER_BILINEAR);
+	tex_grass = dktCreateTextureFromFile(bv2::assetPath(bv2::themeTextureId(themeStr.s, bv2::THEME_TEXTURES[0]).c_str()), DKT_FILTER_BILINEAR);
 	if(tex_grass == 0)
 		tex_grass = dktCreateTextureFromFile(bv2::assetPath("textures/themes/grass/tex_floor"), DKT_FILTER_BILINEAR);
-	tex_dirt = dktCreateTextureFromFile(bv2::assetPath(bv2::themeTextureId(themeStr.s, "tex_floor_dirt").c_str()), DKT_FILTER_BILINEAR);
+	tex_dirt = dktCreateTextureFromFile(bv2::assetPath(bv2::themeTextureId(themeStr.s, bv2::THEME_TEXTURES[1]).c_str()), DKT_FILTER_BILINEAR);
 	if(tex_dirt == 0)
 		tex_dirt = dktCreateTextureFromFile(bv2::assetPath("textures/themes/grass/tex_floor_dirt"), DKT_FILTER_BILINEAR);
 //	tex_wall_bottom = dktCreateTextureFromFile((CString("main/textures/themes/") + themeStr + "/tex_wall_bottom.tga").s, DKT_FILTER_BILINEAR);
-	tex_wall = dktCreateTextureFromFile(bv2::assetPath(bv2::themeTextureId(themeStr.s, "tex_wall_center").c_str()), DKT_FILTER_BILINEAR);
+	tex_wall = dktCreateTextureFromFile(bv2::assetPath(bv2::themeTextureId(themeStr.s, bv2::THEME_TEXTURES[2]).c_str()), DKT_FILTER_BILINEAR);
 	if(tex_wall == 0)
 		tex_wall = dktCreateTextureFromFile(bv2::assetPath("textures/themes/grass/tex_wall_center"), DKT_FILTER_BILINEAR);
 //	tex_wall_up = dktCreateTextureFromFile((CString("main/textures/themes/") + themeStr + "/tex_wall_up.tga").s, DKT_FILTER_BILINEAR);

@@ -49,7 +49,6 @@ Game::Game(CString pMapName)
 	font = dkfCreateFont(bv2::assetPath("fonts/babo"));
 	tex_miniMapAllied = dktCreateTextureFromFile(bv2::assetPath("textures/MiniMapAllied"), DKT_FILTER_LINEAR);
 	tex_miniMapEnemy = dktCreateTextureFromFile(bv2::assetPath("textures/MiniMapEnemy"), DKT_FILTER_LINEAR);
-	;
 	tex_baboShadow = dktCreateTextureFromFile(bv2::assetPath("textures/BaboShadow"), DKT_FILTER_BILINEAR);
 #endif
 
