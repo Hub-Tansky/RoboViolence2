@@ -142,7 +142,8 @@ void Scene::update(float delay)
 		if (introScreen->showDelay <= 0) 
 		{
 			ZEVEN_SAFE_DELETE(introScreen);
-			if (gameVar.s_inGameMusic) dksPlayMusic(bv2::assetPath("sounds/Menu"), -1);
+			if (gameVar.s_inGameMusic)
+				dksPlayMusic(bv2::assetPath("sounds/Menu"), -1);
 			createMenu();
 			menuManager.root->visible = true;
 		}

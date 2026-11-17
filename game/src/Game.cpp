@@ -301,7 +301,7 @@ void Game::createMap()
 			{
 			/*	if (rand()%2 == 0)
 				{*/
-					dksPlayMusic(bv2::assetPath("sounds/Music"), -1, 60);
+			dksPlayMusic(bv2::assetPath("sounds/Music"), -1, 60);
 			/*	}
 				else
 				{
