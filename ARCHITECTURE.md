@@ -212,6 +212,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/test_netpacket.cpp` | Byte-level layout of the packed wire structs |
 | `tests/test_staging_deploy.sh` | Phase T step 2: staging deploy helpers: main-only run selection, `/status` human count (bots ignored, `players` from older servers), CTF, TDM and FFA player counts and verify, failures per commit, infrastructure stages, env-file mode and readonly repository (ctest `staging_deploy`) |
 | `tests/test_health_watch.sh` | Container health watcher: which container states are problems, missing services from `GAME_SERVERS`, Docker not answering, two-run confirmation before an alert or recovery, a whole run against a stub `docker`, no check during a deploy but a stale lock ignored (ctest `health_watch`, Unix) |
+| `tests/test_cloud_setup.sh` | ROBO-225: `tools/cloud-setup.sh` against stub gitleaks and pre-commit: identity and `core.hooksPath` per repository, a bad argument only warns, exit 0, gitleaks pin equals `secret-scan.yml` |
 | `tests/test_playtest_agent.sh` | Phase T step 1: playtest agent helpers: main-only run selection (fork PR from `main` rejected), artifact digest, attempt limit, env-file mode and no export, launch script map swap (ctest `playtest_agent`, Unix with `jq`) |
 | `tools/check-content-case.py` | Fails when a literal `main/...` path differs from a real file name only by case |
 | `vcpkg.json` | vcpkg manifest (sqlite3, curl; Step 3 completes it) |
@@ -864,5 +865,6 @@ The game's own maps (BV2 format 20202), GPL-3.0 like the code. The build copies 
 | `tools/review.sh` | Review gate (REVIEW.md section 1) on `merge-base...HEAD`: all checks, scope against the PR's Allowed paths, anti-gaming, `check-review-record.py`; `--full` builds and tests |
 | `tools/setup-dev.ps1` | Activates hooks, checks tools (Windows) |
 | `tools/setup-dev.sh` | Activates hooks, checks tools (Unix); prints the apt line for building and the package names for running a package |
+| `tools/cloud-setup.sh` | Cloud session setup run by the environment's setup script (ROBO-225): pinned gitleaks with checksum, pre-commit, Hub-Tansky identity and `core.hooksPath=.githooks` per repository; warns and exits 0 on a failed step |
 | `tools/vcpkg-triplets/arm64-osx.cmake` | vcpkg overlay triplet: macOS arm64 ports built for macOS 12 (PNS-26) |
 
