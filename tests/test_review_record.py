@@ -100,6 +100,26 @@ for name, text, changed, expected in CASES:
         failed += 1
         print(f"FAIL {name}: {problems}")
 
+# ROBO-224: a moved head passes when the diff's patch-id is the recorded one; `post-deploy` needs the tagged criterion.
+PID, OTHER_PID = "1" * 40, "2" * 40
+MOVED = f"Diff: {'b' * 7}...ddddddd\nPatch-id: {PID}"
+POST = "| Criterion | Diff/test evidence | Status |\n|---|---|---|\n| (post-deploy) Players see it on prod | `a.cpp:1` | post-deploy |\n"
+PID_CASES = [
+    ("merge-only head change, same patch-id", body(diff=MOVED), PID, None),
+    ("code change after the record", body(diff=MOVED), OTHER_PID, "Patch-id changed"),
+    ("moved head, record without Patch-id", body(diff="Diff: bbbbbbb...ddddddd"), PID, "Patch-id changed"),
+    ("moved head, git failed", body(diff=MOVED), None, "Patch-id changed"),
+    ("post-deploy with the tag", body(spec=report(POST)), None, None),
+    ("post-deploy without the tag", body(spec=report(POST.replace("(post-deploy) ", ""))), None, "needs a criterion starting '(post-deploy)'"),
+    ("post-deploy tag not at the start", body(spec=report(POST.replace("(post-deploy) Players", "Players (post-deploy)"))), None, "needs a criterion starting"),
+]
+for name, text, current, expected in PID_CASES:
+    problems = gate.check_record(text, CODE, HEAD, PROTOCOL, current)
+    good = not problems if expected is None else len(problems) == 1 and expected in problems[0]
+    if not good:
+        failed += 1
+        print(f"FAIL {name}: {problems}")
+
 TIERS = [
     (["docs/a.md", "README.md"], "docs"),
     (["docs/img.png"], "docs"),
@@ -161,6 +181,33 @@ try:
         if result.returncode != code or expected not in result.stdout:
             failed += 1
             print(f"FAIL script draft={draft} bot={bot}: {result.returncode} {result.stdout} {result.stderr}")
+
+    # patch_id(): a merge from main that leaves the PR's change alone keeps it; a new change to the PR alters it.
+    def rev(ref):
+        return subprocess.run(["git", "rev-parse", ref], cwd=repo, capture_output=True, text=True, check=True).stdout.strip()
+    def commit(path, text, msg):
+        with open(os.path.join(repo, path), "w", encoding="utf-8", newline="\n") as f:
+            f.write(text)
+        git(repo, "add", "-A")
+        git(repo, "commit", "-q", "-m", msg)
+    pr = rev("HEAD")
+    git(repo, "checkout", "-q", "-b", "main2", base)
+    commit("other.txt", "main moved on\n", "main")
+    main2 = rev("HEAD")
+    git(repo, "checkout", "-q", pr)
+    git(repo, "merge", "-q", "--no-edit", main2)
+    merged = rev("HEAD")
+    recorded = gate.patch_id(base, pr, cwd=repo)
+    if not recorded or gate.patch_id(main2, merged, cwd=repo) != recorded:
+        failed += 1
+        print(f"FAIL patch-id: a merge from main changed it ({recorded})")
+    commit("docs/a.md", "a\nb\n", "change")
+    if gate.patch_id(main2, rev("HEAD"), cwd=repo) == recorded:
+        failed += 1
+        print("FAIL patch-id: a new change to the PR kept it")
+    if gate.patch_id(base, "0" * 40, cwd=repo) is not None:
+        failed += 1
+        print("FAIL patch-id: an unknown head must give None")
 
     with open(skill_path, "a", encoding="utf-8", newline="\n") as f:
         f.write("edited\n")

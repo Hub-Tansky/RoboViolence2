@@ -5,7 +5,7 @@ description: Robo Violence 2's PR review workflow (REVIEW.md section 5). Pins th
 
 # rv2-code-review
 
-Protocol: rv2-code-review 50eeece8c59b
+Protocol: rv2-code-review f32b25745edf
 
 Adapted from `skills/engineering/code-review` in [mattpocock/skills](https://github.com/mattpocock/skills) at `4ae2317ddb22b046e26455e4f9c9b3aaaf62212d` (MIT; notice in `UPSTREAM-LICENSE`). Changes: a missing spec blocks instead of skipping the axis, no smell baseline, a matrix for Spec, a Risk worker, and the record in REVIEW.md. Upgrade only by a reviewed PR that updates this SHA.
 
@@ -13,7 +13,7 @@ Adapted from `skills/engineering/code-review` in [mattpocock/skills](https://git
 
 You are the parent. You pin, launch and aggregate. You don't review, filter or re-rank.
 
-1. **Pin.** `mb=$(git merge-base origin/main HEAD)`, `head=$(git rev-parse HEAD)`. Stop if `git diff --text $mb...$head` is empty or the tree is dirty.
+1. **Pin.** `mb=$(git merge-base origin/main HEAD)`, `head=$(git rev-parse HEAD)`. Stop if `git diff --text $mb...$head` is empty or the tree is dirty. Write `Patch-id: $(git diff --text $mb...$head | git patch-id --stable | cut -d' ' -f1)` under the record's `Diff:` line.
 2. **Run** `tools/review.sh`. Its NOTE gives the tier and whether Risk is required. Stop on a failure.
 3. **Resolve the spec source.** Take `ROBO-NNN` from the PR's Item row. Read `40-backlog/*/ROBO-NNN *.md` in the local vault (`~/Dev/RoboViolence2/Robo2-docs`) first, since it can be ahead of GitHub; without a local vault, use `gh api repos/Hub-Tansky/rv2-docs/contents/<path>`. Never commit or move changes you didn't make.
    - `Spec source: ROBO-NNN rv2-docs@<vault HEAD> blob:<first 12 hex of git hash-object FILE>`
@@ -29,7 +29,7 @@ You are the parent. You pin, launch and aggregate. You don't review, filter or r
 
    Each prompt is: "Read `.claude/skills/rv2-code-review/SKILL.md` and follow only its sections `<Worker> worker` and `Rules for every worker`", then that section's inputs. Add earlier outcomes of the same axis in a later round. Never give a worker another worker's report or your own opinion.
 5. **Aggregate.** Paste each report unedited into its section of the record (REVIEW.md template). Write a one-line summary per axis, naming the axis's worst finding. Don't pick a winner across axes, and don't change a severity.
-6. **Act.** Follow REVIEW.md section 5. After fixes, rerun every required worker on the full diff at the new head. Stop when a round finds no new blocker.
+6. **Act.** Follow REVIEW.md section 5. After fixes, rerun every required worker on the full diff at the new head. Stop when a round finds no new blocker. A later merge from main that leaves the Patch-id unchanged needs no new round: update `Diff:` only if you want, the gate accepts the old head.
 
 ## Rules for every worker
 
@@ -79,7 +79,9 @@ Check traceability and scope creep only. Don't report code style or standards. G
 
 | Criterion | Diff/test evidence | Status |
 |---|---|---|
-| <criterion> | `path:line`, test | pass / partial / fail |
+| <criterion> | `path:line`, test | pass / partial / fail / post-deploy |
+
+Write only the status word in the Status cell. Use `post-deploy` only for a criterion whose text starts with `(post-deploy)`, when the diff and tests support it but only a running server or a release build can show it.
 
 - **Blockers:** a criterion that fails; behaviour in the diff the spec didn't ask for, quoting the nearest spec line.
 - **Suggestions:** a spec gap that the diff doesn't make worse.

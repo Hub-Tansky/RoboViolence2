@@ -188,7 +188,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/test_client_version.py` | The client binary holds the release text the build was given (`BV2_VERSION`, ADR 0046) |
 | `tests/test_fileio.cpp` | `FileIO` byte widths for `.bvm` data and the widths the `.DKO` loader relies on; `bv2ReadBytes` zero-fills a short read; fixed-string length prefix round trip; unterminated `CString::loadFromFile` (overflows under ASan without its bound); `getString` keeps 255 characters (R16); `MemIO` reads past its end as zero; `getNextToken` on a single token (R30) |
 | `tests/test_lang.cpp` | Step 13: PO parser (entries that change the English printf conversions or whose key English lacks are skipped; raw control bytes rejected), English fallback per key, OS locale matching (`ll_CC`, `ll`, `.po` before `.lang`), PO without glyphs skipped |
-| `tests/test_review_record.py` | `tools/check-review-record.py` and `tools/review.sh`: review tier, protocol hash, each way a ready PR's record fails, head and bot forwarding, dirty-tree NOTE |
+| `tests/test_review_record.py` | `tools/check-review-record.py` and `tools/review.sh`: review tier, protocol hash, each way a ready PR's record fails, Patch-id after a merge from main and after a new change, `post-deploy` with and without the tag, head and bot forwarding, dirty-tree NOTE |
 | `tests/test_review_diff_rules.py` | `tools/review.sh` diff-rules in a scratch repo: Allowed paths globs (`*`, `**`, `{a,b}`), the guard-file NOTE, banned added lines, `review: allow`, Markdown exemption |
 | `tests/test_lang_check.py` | Step 13: `tools/lang-check.py` fails on changed conversions, unknown keys, repeated keywords, tabs and a stale `en.pot`; warns about missing glyphs |
 | `tests/test_join_password.cpp` | Step 10: a client joins a passworded server only with the HMAC over its own challenge; no password or MD5 of it on the wire |
@@ -399,6 +399,7 @@ The game's own maps (BV2 format 20202), GPL-3.0 like the code. The build copies 
 | `docs/decisions/0054-game-ships-its-own-maps.md` | ADR: the owner's maps in `content/maps`, shipped in `main/maps`, found in the package beside other data, flag pods at z 0 (ROBO-214) |
 | `docs/decisions/0055-browser-refresh-uses-a-fresh-master-session.md` | ADR: every server list request opens a fresh master session (a hosting game keeps its own), and every opening of the Browse tab requests the list; a router can silently drop an idle session (ROBO-217) |
 | `docs/decisions/0056-main-ci-runs-finish-notify-nightly-fuzz.md` | ADR: `build` runs on `main` and tags are never cancelled by a newer push, a failed `main` run posts to ntfy (`NTFY_TOPIC`), `fuzz` runs nightly in `fuzz.yml` |
+| `docs/decisions/0057-review-record-keyed-to-patch-id-post-deploy-criteria.md` | ADR: a review record stays current while the diff's patch-id is unchanged (merges from main); Spec status `post-deploy` for `(post-deploy)` criteria |
 | `docs/decisions/README.md` | ADR format and index |
 
 ### `docs/ops`
@@ -850,7 +851,7 @@ The game's own maps (BV2 format 20202), GPL-3.0 like the code. The build copies 
 | `tools/gen-placeholder-content.py` | Writes placeholder maps, textures, a readable font atlas, sounds and models for dev and CI |
 | `tools/gen-app-icon.py` | Renders the application icons and the `.dmg` background into `packaging/` (by hand; numpy, Pillow) |
 | `tools/check-hygiene.py` | Fails on spaces in paths, tracked files ignored by .gitignore (checked case-insensitively, as on macOS), files over 5 MB, bad encoding, failed translation check |
-| `tools/check-review-record.py` | Review tier from changed paths, `Protocol:` hash, and the review record of a ready PR (REVIEW.md section 5) |
+| `tools/check-review-record.py` | Review tier from changed paths, `Protocol:` hash, and the review record of a ready PR (REVIEW.md section 5): current by head or by the diff's `Patch-id`, Spec `post-deploy` only for `(post-deploy)` criteria (ADR 0057) |
 | `tools/lang-check.py` | Fails when `en.pot` is stale, a `.po` is invalid, has unknown keys or changes printf conversions; warns about missing glyphs; lists untranslated keys |
 | `tools/lang-to-pot.py` | Generates `content/languages/en.pot` from `en.lang` |
 | `tools/seed_db.cpp` | Creates a SQLite DB from SQL files (build helper) |

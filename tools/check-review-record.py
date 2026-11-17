@@ -17,6 +17,8 @@ RISK_PATHS = re.compile(r"^(game/src/(netPacket\.h|ServerRecv\.cpp|ClientRecv\.c
 
 SPEC_SOURCE = re.compile(r"^Spec source: (ROBO-\d{3}) rv2-docs@[0-9a-f]{7,40} blob:[0-9a-f]{12}( \(uncommitted\))?[ \t]*$", re.M)
 DIFF = re.compile(r"^Diff: [0-9a-f]{7,40}\.\.\.([0-9a-f]{7,40})[ \t]*$", re.M)
+PATCH_ID = re.compile(r"^Patch-id: ([0-9a-f]{40})[ \t]*$", re.M)
+POST_DEPLOY_TAG = "(post-deploy)"
 FIXED = r"fixed in `?[0-9a-f]{7,40}"
 OWNER = r"confirmed with owner:\s*\S"
 DEFERRED = r"deferred\s*(?:→|->)\s*\[?(?:ROBO-\d{3}\b|#\d+|https://github\.com/Hub-Tansky/RoboViolence2/issues/\d+)"
@@ -31,6 +33,17 @@ def protocol_line(skill_text):
     first = next((i for i, l in enumerate(lines) if l.startswith("Protocol: ")), len(lines))
     kept = "".join(lines[:first] + lines[first + 1:])
     return "Protocol: rv2-code-review " + hashlib.sha256(kept.encode()).hexdigest()[:12]
+
+
+def patch_id(base, head, cwd=None):
+    """`git diff --text <base>...<head> | git patch-id --stable`, first field: the same for the same change after a merge
+    from main that leaves the diff alone (ROBO-224). None when git fails or the diff is empty."""
+    try:
+        diff = subprocess.run(["git", "diff", "--text", f"{base}...{head}"], cwd=cwd, capture_output=True, check=True).stdout
+        out = subprocess.run(["git", "patch-id", "--stable"], cwd=cwd, input=diff, capture_output=True, check=True).stdout
+    except (OSError, subprocess.CalledProcessError):
+        return None
+    return out.split()[0].decode() if out.split() else None
 
 
 def review_tier(changed):
@@ -113,7 +126,10 @@ def check_spec_matrix(report, outcomes):
         return ["review gate: the Spec report has no Criterion matrix (not assessable)"]
     for r in matrix:
         status = r[-1].lower()
-        if status == "partial":
+        if status == "post-deploy":
+            if not r[0].startswith(POST_DEPLOY_TAG):
+                problems.append(f"review gate: 'post-deploy' needs a criterion starting '{POST_DEPLOY_TAG}': {r[0][:80]}")
+        elif status == "partial":
             if not any(o["axis"] == "Spec" and r[0] in o["finding"] and re.match(OWNER, o["outcome"], re.I) for o in outcomes):
                 problems.append(f"review gate: partial criterion needs an Outcome starting 'confirmed with owner:': {r[0][:80]}")
         elif status != "pass":
@@ -121,8 +137,9 @@ def check_spec_matrix(report, outcomes):
     return problems
 
 
-def check_record(body, changed, head, protocol):
-    """Problems of a ready PR's description; an empty list means it may be ready."""
+def check_record(body, changed, head, protocol, current_patch_id=None):
+    """Problems of a ready PR's description; an empty list means it may be ready.
+    current_patch_id: patch_id() of the PR's diff now, compared with the record's Patch-id when the head moved."""
     item = re.search(r"^\|\s*Item\s*\|(.*)\|[ \t]*$", body, re.M)
     if not re.search(r"^\|\s*Allowed paths\s*\|", body, re.M):
         return ["review gate: a ready PR needs an Allowed paths row"]
@@ -136,7 +153,10 @@ def check_record(body, changed, head, protocol):
     if not diff:
         problems.append("review gate: the record lacks 'Diff: <merge-base>...<head>'")
     elif not head.startswith(diff.group(1)):
-        problems.append(f"review gate: the record's Diff ends in {diff.group(1)}, but the PR head is {head}; review the new commits")
+        recorded = PATCH_ID.search(record)
+        if not (recorded and current_patch_id and recorded.group(1) == current_patch_id):
+            problems.append(f"review gate: the record's Diff ends in {diff.group(1)}, but the PR head is {head} and the diff's "
+                            "Patch-id changed (or the record has none); review the new commits")
 
     spec_source = SPEC_SOURCE.search(record)
     if not spec_source:
@@ -184,7 +204,7 @@ def main():
     if protocol not in skill.splitlines():
         problems.append(f"protocol: the skill's Protocol line is stale; set it to '{protocol}'")
     if os.environ.get("REVIEW_DRAFT") != "true" and os.environ.get("REVIEW_BOT") != "true":
-        problems += check_record(body, changed, head, protocol)
+        problems += check_record(body, changed, head, protocol, patch_id(base, head))
 
     print(f"NOTE review tier: {review_tier(changed)}; Risk report required: {'yes' if risk_required(changed) else 'no'}")
     for p in problems:
