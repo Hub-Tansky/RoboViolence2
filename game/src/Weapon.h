@@ -112,8 +112,8 @@ public:
 
 #ifndef CONSOLE
 	// For delayed loading of models
-	CString dkoFile;
-	CString soundFile;
+	CString dkoId; // asset ids (AssetRegistry.h), e.g. "models/SMG" and "sounds/SMG"
+	CString soundId;
 
 	// Le son
 	DksSound * sfx_sound;
@@ -156,7 +156,7 @@ public:
 
 public:
 	// Constructeur
-	Weapon(CString dkoFilename, CString soundFilename, float pFireDelay, CString pWeaponName, float pDamage, float pImp, int pNbShot, float pReculVel, float pStartImp, int pWeaponID, int pProjectileType);
+	Weapon(CString pDkoId, CString pSoundId, float pFireDelay, CString pWeaponName, float pDamage, float pImp, int pNbShot, float pReculVel, float pStartImp, int pWeaponID, int pProjectileType);
 	Weapon(Weapon * pWeapon);
 
 	// Destructeur

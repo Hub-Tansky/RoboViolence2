@@ -287,6 +287,15 @@ foreach(cfg DEBUG RELEASE RELWITHDEBINFO MINSIZEREL)
 endforeach()
 add_test(NAME paths COMMAND test_paths "${BV2_TEST_SCRATCH}")
 
+# ROBO-232: asset ids resolve through the compiled-in base pack manifest; literal ids in game code are all rows of it
+add_executable(test_asset_registry test_asset_registry.cpp ${CMAKE_SOURCE_DIR}/game/src/AssetRegistry.cpp
+  ${CMAKE_BINARY_DIR}/game/BasePackIds.cpp)
+target_include_directories(test_asset_registry PRIVATE ${CMAKE_SOURCE_DIR}/game/src)
+target_link_libraries(test_asset_registry PRIVATE zeven_core)
+bv2_target_defaults(test_asset_registry)
+add_test(NAME asset_registry COMMAND test_asset_registry)
+add_test(NAME asset_ids COMMAND ${Python3_EXECUTABLE} -B ${CMAKE_CURRENT_SOURCE_DIR}/test_asset_ids.py ${CMAKE_SOURCE_DIR})
+
 if(TARGET bv2_original_hashes)
   add_executable(test_data_download test_data_download.cpp ${CMAKE_SOURCE_DIR}/game/src/DataDownload.cpp
     ${CMAKE_SOURCE_DIR}/game/src/Paths.cpp)
@@ -349,7 +358,7 @@ endif()
 
 # Phase T4: server, master and autotest clients together (tests/e2e/e2e.py; Xvfb, so Linux only)
 if(TARGET bv2 AND TARGET bv2dedicated AND TARGET bv2master AND ROBOVIOLENCE2_XVFB AND NOT APPLE)
-  foreach(scenario join_leave password chat kick ban master_list browser_tab_list ctf_capture ghost user_map weapon_choice)
+  foreach(scenario join_leave password chat kick ban master_list browser_tab_list ctf_capture ghost user_map weapon_choice grenade rocket flamethrower photon_rifle nuke)
     add_test(NAME e2e_${scenario} COMMAND ${Python3_EXECUTABLE} -B ${CMAKE_CURRENT_SOURCE_DIR}/e2e/e2e.py "${BV2_RUNTIME_DIR}" "${BV2_TEST_SCRATCH}/e2e" ${scenario})
     set_tests_properties(e2e_${scenario} PROPERTIES TIMEOUT 300 RESOURCE_LOCK "bv2_server_port;bv2_master_port")
   endforeach()

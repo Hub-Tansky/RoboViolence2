@@ -17,6 +17,7 @@
 */
 
 #include "Paths.h"
+#include "AssetRegistry.h"
 #include "Server.h"
 #include "Console.h"
 #include "netPacket.h"
@@ -42,7 +43,7 @@ Server::Server(Game * pGame): maxTimeOverMaxPing(5.0f)//, maxIdleTime(180.0f)
 	game = pGame;
 	game->isServerGame = true;
 #ifndef CONSOLE
-	font = dkfCreateFont("main/fonts/babo.tga");
+	font = dkfCreateFont(bv2::assetPath("fonts/babo"));
 #endif
 	needToShutDown = false;
 	pingDelay = 0;

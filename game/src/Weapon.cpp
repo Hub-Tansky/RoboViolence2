@@ -17,6 +17,7 @@
 */
 
 #include "Weapon.h"
+#include "AssetRegistry.h"
 #include "GameVar.h"
 #include "Player.h"
 #include "Map.h"
@@ -30,7 +31,7 @@ extern Scene * scene;
 //
 // Constructeur
 //
-Weapon::Weapon(CString dkoFilename, CString soundFilename, float pFireDelay, CString pWeaponName, float pDamage, float pImp, int pNbShot, float pReculVel, float pStartImp, int pWeaponID, int pProjectileType)
+Weapon::Weapon(CString pDkoId, CString pSoundId, float pFireDelay, CString pWeaponName, float pDamage, float pImp, int pNbShot, float pReculVel, float pStartImp, int pWeaponID, int pProjectileType)
 {
 	currentFireDelay = 0;
 	charge = 0;
@@ -49,8 +50,8 @@ Weapon::Weapon(CString dkoFilename, CString soundFilename, float pFireDelay, CSt
 	currentFireDelay = 0; // On est ready à tirer au début
 
 #ifndef CONSOLE
-	dkoFile = dkoFilename;
-	soundFile = soundFilename;
+	dkoId = pDkoId;
+	soundId = pSoundId;
 #endif
 	damage = pDamage;
 	impressision = pImp;
@@ -126,15 +127,15 @@ Weapon::Weapon(Weapon * pWeapon)
 void Weapon::loadModels()
 {
 	firingNuzzle = 0;
-	dkoModel = dkoLoadFile(dkoFile.s);
+	dkoModel = dkoLoadFile(bv2::assetPath(dkoId));
 	dkoAlternative = 0;
 	if (weaponID == WEAPON_SHIELD)
 	{
-		dkoAlternative = dkoLoadFile("main/models/ShieldMagnet.DKO");
+		dkoAlternative = dkoLoadFile(bv2::assetPath("models/ShieldMagnet"));
 	}
 	modelAnim = 0;
 
-	sfx_sound = dksCreateSoundFromFile(soundFile.s, false);
+	sfx_sound = dksCreateSoundFromFile(bv2::assetPath(soundId), false);
 
 	int i=0;
 	unsigned int flashID;
