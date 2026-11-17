@@ -5,6 +5,8 @@
 // babo.tga has no glyphs past 159: CFont draws the plain letter given here instead.
 #pragma once
 
+#include <string>
+
 namespace bv2
 {
 	const int FONT_FIRST_BYTE = 32;
@@ -72,5 +74,18 @@ namespace bv2
 			return 0;
 		const int b = fontByteFor(c);
 		return b < 0 ? 0 : (unsigned int)b;
+	}
+
+	// Font-byte text (what Writting holds) as Latin-1 bytes, for text that leaves the game, such as a typed folder path
+	// (ADR 0042); a letter outside Latin-1 becomes '?'
+	inline std::string fontTextToLatin1(const std::string& text)
+	{
+		std::string out;
+		for (unsigned char b : text)
+		{
+			const unsigned int c = b < 128 ? b : fontByteCodepoint(b);
+			out += c > 0 && c <= 255 ? (char)c : '?';
+		}
+		return out;
 	}
 }

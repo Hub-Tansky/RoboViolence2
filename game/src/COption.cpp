@@ -16,6 +16,8 @@
 	BaboViolent 2 source code. If not, see http://www.gnu.org/licenses/.
 */
 
+#include "FontCodes.h"
+
 #ifndef CONSOLE
 
 #include "COption.h"
@@ -797,7 +799,8 @@ void COption::Validate(CControl * control)
 		std::string text = txt_dataDir->text.s;
 		if (text == dataDirShown)
 			return; // the field also validates when it loses focus: only a change is saved
-		switch (bv2::saveDataDirField(text))
+		// typed letters are font bytes (ROBO-238): give the path back its Latin-1 bytes
+		switch (bv2::saveDataDirField(bv2::fontTextToLatin1(text)))
 		{
 		case bv2::DataDirField::Placeholders: lbl_dataDirStatus->text = "Placeholders from the next start."; break;
 		case bv2::DataDirField::Saved: lbl_dataDirStatus->text = "Saved. Restart Robo Violence 2 to use it."; break;

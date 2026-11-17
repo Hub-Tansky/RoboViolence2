@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-11-17
-- Affects: `engine/zeven/include/FontCodes.h`, `engine/zeven/src/dkf_ttf.cpp`, `engine/zeven/src/CFont.cpp`, `engine/zeven/src/dkw.cpp`, `game/src/Lang.cpp`, `game/src/Writting.cpp`, `tools/lang-check.py`, `content/languages/README.md`; ROBO-238 (refactor Phase 1 A3, [ADR 0062](0062-asset-packs-mode-modules-client-independent-server.md))
+- Affects: `engine/zeven/include/FontCodes.h`, `engine/zeven/src/dkf_ttf.cpp`, `engine/zeven/src/CFont.cpp`, `engine/zeven/src/dkw.cpp`, `game/src/Lang.cpp`, `game/src/Writting.cpp`, `game/src/COption.cpp`, `tools/lang-check.py`, `content/languages/README.md`; ROBO-238 (refactor Phase 1 A3, [ADR 0062](0062-asset-packs-mode-modules-client-independent-server.md))
 
 ## Context
 - All text (chat, names, HUD, translations) is a `char` string; `CFont` draws one display list per byte. Bytes 1-9 are colour codes, 32-126 ASCII, and BV2's `babo.tga` has 32 Latin-1 letters at bytes 128-159 (`GameVar::loadLanguage` remapped them). Bytes 160-255 were unused.
@@ -23,6 +23,8 @@ Text stays one byte per glyph, and the owner chose (decision card, 2026-11-17) t
 
 ## Consequences
 - No string, protocol or save format changes. Before this, a typed letter outside BV2's 32 (ñ) was stored as its Latin-1 byte and drew nothing; now it is its table byte; a name typed with ł on a TTF client shows as l on a `babo.tga` client.
+- A name or chat line saved before this change with a typed letter outside BV2's 32 (`ñ` stored as Latin-1 byte 241) now reads as the table letter at that byte. Such letters drew nothing before, so few saved texts hold them.
+- The Options "Game assets" folder field turns its font bytes back into Latin-1 (`bv2::fontTextToLatin1`) before it looks for data, so ADR 0042's Latin-1 paths still work; a letter outside Latin-1 becomes `?`.
 - 96 slots are full: another script (Cyrillic, Greek) needs a wider text encoding, a new decision.
 - The table order is a format: changing it changes what saved names and translations show. Add letters only by replacing, never by reordering.
 

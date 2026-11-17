@@ -79,6 +79,8 @@ int main(int argc, char ** argv)
 		  "Romanian comma-below letters type as the cedilla ones");
 	check(bv2::typedFontByte(8) == 0 && bv2::typedFontByte(127) == 0 && bv2::typedFontByte(0x416) == 0,
 		  "control characters and letters without a glyph are dropped");
+	check(bv2::fontTextToLatin1(std::string("ba") + (char)165 + "o " + (char)130 + (char)182) == "ba\xf1o \xe9?",
+		  "a typed path goes back to Latin-1 (ADR 0042)");
 
 	// .lang and the English fallback: en.lang first, the chosen file on top
 	writeFile(dir + "en.lang", "lang_a\t\t\tApple\nlang_b\t\t\t%s\\x8 bee\\n\xe9\n\nEND\n");

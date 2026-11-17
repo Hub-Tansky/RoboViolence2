@@ -41,7 +41,7 @@ def font_letters():
     return letters | set("\u0218\u0219\u021a\u021b")
 
 
-LATIN1 = font_letters()
+FONT_LETTERS = font_letters()
 
 
 def specs(text):
@@ -91,7 +91,7 @@ def check_po(name, entries, english):
         if specs(entries[k]) != specs(english[k]):
             print(f"{name}: {k} changes the conversions {specs(english[k])} to {specs(entries[k])}")
             bad += 1
-        odd = sorted({c for c in entries[k] if ord(c) > 127 and c not in LATIN1})
+        odd = sorted({c for c in entries[k] if ord(c) > 127 and c not in FONT_LETTERS})
         if odd:
             print(f"{name}: warning: {k} uses {''.join(odd)}, which the font lacks: the OS default skips this file")
     missing = [k for k in english if k not in entries]
