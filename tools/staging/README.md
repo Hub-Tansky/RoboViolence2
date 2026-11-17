@@ -2,7 +2,7 @@
 
 Production runs the same agent by hand ([runbook: Production](../../docs/ops/runbook.md#production)), so a change here changes production too.
 
-Keeps a staging host on the newest `main` server and master images: pulls only successful `containers` runs of `main` from this repo, deploys only when no one is connected, rolls back on failure and publishes the running commit at `/deployed`. Scope: [step 2](https://github.com/Hub-Tansky/RoboViolence2/blob/58c91b2a660db2b290b0b5f504381980a6aedba2/docs/roadmap/phase-t-testing-environment/step2-staging-deploy.md). Decision: [ADR 0018](../../docs/decisions/0018-staging-pull-deploy.md). Container operation: [runbook](../../docs/ops/runbook.md).
+Keeps a staging host on the newest `main` server and master images: pulls only successful `containers` runs of `main` from this repo (`--sha <full sha>` also takes a `release/**` run, the production hotfix line, [ADR 0061](../../docs/decisions/0061-release-branch-for-production-hotfixes.md)), deploys only when no one is connected, rolls back on failure and publishes the running commit at `/deployed`. Scope: [step 2](https://github.com/Hub-Tansky/RoboViolence2/blob/58c91b2a660db2b290b0b5f504381980a6aedba2/docs/roadmap/phase-t-testing-environment/step2-staging-deploy.md). Decision: [ADR 0018](../../docs/decisions/0018-staging-pull-deploy.md). Container operation: [runbook](../../docs/ops/runbook.md).
 
 The host's address, provider and access go in the owner's private Obsidian vault (`RoboViolence2/prv_wiki/docs_restricted/testing-environment/`), never in the repo.
 
@@ -52,7 +52,7 @@ The first run deploys the newest build at once (nothing is running to protect). 
 | Command | Does |
 |---|---|
 | `deploy.sh` | newest successful `main` `containers` run, once `/status` of CTF, `/tdm/status` of TDM and `/ffa/status` of FFA all show `humans 0` (`players 0` from a server older than ADR 0049; bots never hold a deploy back) (what cron runs). If a game server runs but its `/status` doesn't answer (changed password, proxy down), it doesn't deploy |
-| `deploy.sh --sha <sha>` | that `main` build; also a manual rollback. Use the full SHA for builds older than the last 30 runs |
+| `deploy.sh --sha <sha>` | that `main` build; also a manual rollback. Use the full SHA for builds older than the last 30 runs and for a `release/**` build (ADR 0061) |
 | `deploy.sh --force` | don't wait for humans to leave |
 
 Notifications (ntfy): `RV2 staging now on <sha7>` (`RV2_DEPLOY_LABEL`, default `staging`, names the host there and in the state and env file paths; production sets `prod`); `FAILED at <stage>` with the rollback result; `waiting` once when humans have held deploys back for 6 hours. Commits from before `BV2_IMAGE_TAG` existed are refused. A missing or unreadable env file is logged only (no ntfy topic yet). GitHub, download and pull failures notify once per stage and don't count; 3 failed deploys of a commit stop retries until `--sha`.

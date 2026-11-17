@@ -1,6 +1,6 @@
 name: containers
 # Server images (Phase B step 11): build both and run the compose example on every push and PR; push to GHCR from main,
-# also weekly so base-image security fixes land without a code change.
+# also weekly so base-image security fixes land without a code change, and :<sha> only from release/* (hotfixes, ADR 0061).
 on:
   push:
   pull_request:
@@ -144,7 +144,7 @@ jobs:
   push:
     name: push (${{ matrix.arch }})
     needs: images
-    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'schedule')
+    if: (github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'schedule')) || (startsWith(github.ref, 'refs/heads/release/') && github.event_name == 'push')
     strategy:
       matrix:
         include:
@@ -181,7 +181,7 @@ jobs:
           push: true
           tags: ${{ env.MASTER_IMAGE }}:${{ github.sha }}-${{ matrix.arch }}
           cache-from: type=gha,scope=servers-${{ matrix.runner }}
-  # Multi-arch :<sha> and :latest (Phase T step 2): the staging host may be amd64 or arm64
+  # Multi-arch :<sha> and, from main only, :latest (Phase T step 2): the staging host may be amd64 or arm64
   manifest:
     needs: push
     runs-on: ubuntu-24.04
@@ -195,10 +195,11 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Join the architectures into one tag per commit, and latest
+      - name: Join the architectures into one tag per commit, and latest from main
         run: |
           set -euo pipefail
           for image in "$SERVER_IMAGE" "$MASTER_IMAGE"; do
-            docker buildx imagetools create -t "$image:$GITHUB_SHA" -t "$image:latest" "$image:$GITHUB_SHA-amd64" "$image:$GITHUB_SHA-arm64"
+            latest=(); [ "$GITHUB_REF" = refs/heads/main ] && latest=(-t "$image:latest")
+            docker buildx imagetools create -t "$image:$GITHUB_SHA" "${latest[@]}" "$image:$GITHUB_SHA-amd64" "$image:$GITHUB_SHA-arm64"
             docker buildx imagetools inspect "$image:$GITHUB_SHA"
           done
