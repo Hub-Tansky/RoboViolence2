@@ -65,9 +65,11 @@ try:
     git("add", "-A"); git("commit", "-q", "-m", "base")
     git("checkout", "-q", "-b", "pr")
     open(os.path.join(repo, "game", "src", "Game.cpp"), "w").write("int a;\n")
+    with open(os.path.join(repo, "game", "src", "Old.cpp"), "wb") as f:
+        f.write(b"// caf\xe9 (Latin-1, not UTF-8)\n")
     git("add", "-A"); git("commit", "-q", "-m", "change")
     for name, got, expected in [
-        ("tier_line", risk.tier_line("main", "pr", "", cwd=repo), "Tier: MEDIUM (game/src/Game.cpp)"),
+        ("tier_line", risk.tier_line("main", "pr", "", cwd=repo), "Tier: MEDIUM (game/src/Game.cpp and 1 more game files)"),
         ("bad base", risk.tier_line("no-such-ref", "pr", "", cwd=repo), "Tier: HIGH (merge-risk error: CalledProcessError)"),
     ]:
         if got != expected:

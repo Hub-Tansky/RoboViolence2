@@ -61,7 +61,8 @@ def classify(changed, added, diff_text, body):
 def tier_line(base, head="HEAD", body="", cwd=None):
     """The line this script prints; HIGH on any error."""
     try:
-        git = lambda *a: subprocess.run(["git", *a], cwd=cwd, capture_output=True, text=True, check=True).stdout
+        # Diffs hold Latin-1 legacy sources and binary data: decode leniently.
+        git = lambda *a: subprocess.run(["git", *a], cwd=cwd, capture_output=True, check=True).stdout.decode("utf-8", "replace")
         mb = git("merge-base", base, head).strip()
         changed = git("diff", "--name-only", "--no-renames", f"{mb}...{head}").splitlines()
         added = sum(int(a) for a, *_ in (l.split("\t") for l in git("diff", "--numstat", "--no-renames", f"{mb}...{head}").splitlines()) if a.isdigit())
