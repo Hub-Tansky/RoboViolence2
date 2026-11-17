@@ -9,7 +9,7 @@
 - A flaky test shows up only on someone's PR, where it costs a re-run and looks like the PR's fault.
 
 ## Decision
-`flake-watch.yml` runs nightly and on `workflow_dispatch` on Linux: it builds `linux-x64-asan` and runs the `e2e_*` and `bots` tests with `ctest --repeat until-fail:10`. On a failure `tools/flake-issues.py` comments on the open issue titled "Flaky test: <name>" (label `flaky-test`) or opens one, with the failing run's output, and the job pings the owner's ntfy topic like `build.yml`'s `notify` job.
+`flake-watch.yml` runs nightly and on `workflow_dispatch` on Linux: it builds `linux-x64-asan` and runs the `e2e_*` and `bots` tests with `ctest --repeat until-fail:10`. On a failure `tools/flake-issues.py` comments on the open issue titled "Flaky test: <name>" (found by title, label or not) or opens one with the label `flaky-test`, with the failing run's output, and the job pings the owner's ntfy topic like `build.yml`'s `notify` job.
 
 ## Consequences
 - One open issue per flaky test collects every failing night; closing it after a fix starts a new one on the next failure.

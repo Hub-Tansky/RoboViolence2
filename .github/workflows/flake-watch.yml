@@ -7,6 +7,9 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+concurrency:  # a hand-started run waits for the nightly one: two runs could both open the same issue
+  group: flake-watch
+  cancel-in-progress: false
 jobs:
   flake-watch:
     name: flake-watch (not required)
@@ -25,6 +28,7 @@ jobs:
       - run: cmake --preset linux-x64-asan
       - run: cmake --build --preset linux-x64-asan
       - name: e2e and bots tests, 10 times each until one fails
+        timeout-minutes: 140  # a step timeout is a failure, so the issue and ntfy steps still run (a job timeout would skip them)
         env:
           ASAN_OPTIONS: detect_leaks=0
         run: ctest --test-dir build/linux-x64-asan -R '^(e2e_.*|bots)$' --repeat until-fail:10 --no-tests=error --output-on-failure

@@ -5,7 +5,7 @@ Usage: flake-issues.py <ctest build dir>
 Env: GITHUB_REPOSITORY (owner/name), GH_TOKEN for `gh api`; GITHUB_SERVER_URL, GITHUB_RUN_ID and GITHUB_SHA name the run.
 
 Reads the failed tests and their output with tools/ci-test-summary.py. For each failed test it comments on the open
-issue titled "Flaky test: <name>" (label flaky-test), or opens one. Exits 1 when a `gh api` call fails.
+issue titled "Flaky test: <name>", or opens one with the label flaky-test. Exits 1 when a `gh api` call fails.
 """
 import importlib.util
 import json
@@ -15,7 +15,6 @@ import sys
 
 LABEL = "flaky-test"
 TAIL = 60
-FENCE = "````"
 
 _spec = importlib.util.spec_from_file_location(
     "ci_test_summary", os.path.join(os.path.dirname(os.path.abspath(__file__)), "ci-test-summary.py"))
@@ -24,10 +23,15 @@ _spec.loader.exec_module(summary)
 
 
 def gh(method, path, payload=None):
-    """`gh api` call; the parsed JSON reply."""
-    cmd = ["gh", "api", "-X", method, path] + (["--input", "-"] if payload is not None else [])
+    """`gh api` call; the parsed JSON reply. A GET of a list follows every page."""
+    if method == "GET":
+        cmd = ["gh", "api", "--paginate", "--jq", ".[]", path]  # one JSON object per line
+    else:
+        cmd = ["gh", "api", "-X", method, path] + (["--input", "-"] if payload is not None else [])
     out = subprocess.run(cmd, input=json.dumps(payload) if payload is not None else None,
                          capture_output=True, text=True, check=True).stdout
+    if method == "GET":
+        return [json.loads(line) for line in out.splitlines() if line.strip()]
     return json.loads(out) if out.strip() else None
 
 
@@ -39,7 +43,7 @@ def body(name, lines, env):
     run = f"{env.get('GITHUB_SERVER_URL', 'https://github.com')}/{env.get('GITHUB_REPOSITORY', '')}/actions/runs/{env.get('GITHUB_RUN_ID', '?')}"
     tail = lines[-TAIL:] if lines else ["(no output recorded in LastTest.log)"]
     return (f"`{name}` failed in the nightly flake watch (`ctest --repeat until-fail:10`) at {env.get('GITHUB_SHA', '?')[:7]}: {run}\n\n"
-            f"Last {TAIL} lines of the failing run:\n\n{FENCE}\n" + "\n".join(tail) + f"\n{FENCE}\n")
+            f"Last {TAIL} lines of the failing run:\n\n{summary.FENCE}\n" + "\n".join(tail) + f"\n{summary.FENCE}\n")
 
 
 def report(build_dir, env, api=gh):
@@ -52,9 +56,11 @@ def report(build_dir, env, api=gh):
     repo = env["GITHUB_REPOSITORY"]
     try:
         api("POST", f"repos/{repo}/labels", {"name": LABEL, "color": "d93f0b", "description": "Failed in the nightly flake watch"})
-    except subprocess.CalledProcessError:
-        pass  # 422: the label exists
-    open_issues = {i["title"]: i["number"] for i in api("GET", f"repos/{repo}/issues?state=open&labels={LABEL}&per_page=100")
+    except subprocess.CalledProcessError as e:
+        if "already_exists" not in (e.stderr or "") and "422" not in (e.stderr or ""):
+            raise
+    # By title, label or not: an issue opened or relabelled by hand still gets the comment
+    open_issues = {i["title"]: i["number"] for i in api("GET", f"repos/{repo}/issues?state=open&per_page=100")
                    if "pull_request" not in i}
     done = []
     for name in names:

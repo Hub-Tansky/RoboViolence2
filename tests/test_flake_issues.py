@@ -30,13 +30,13 @@ def section(name, output, passed):
 
 
 class Api:
-    def __init__(self, open_issues, label_exists):
-        self.calls, self.open_issues, self.label_exists = [], open_issues, label_exists
+    def __init__(self, open_issues, label_exists, label_error='gh: Validation Failed (HTTP 422) "already_exists"'):
+        self.calls, self.open_issues, self.label_exists, self.label_error = [], open_issues, label_exists, label_error
 
     def __call__(self, method, path, payload=None):
         self.calls.append((method, path, payload))
         if path.endswith("/labels") and self.label_exists:
-            raise subprocess.CalledProcessError(1, "gh", "422 already_exists")
+            raise subprocess.CalledProcessError(1, "gh", "", self.label_error)
         if method == "GET":
             return self.open_issues
         return {}
@@ -64,7 +64,18 @@ with tempfile.TemporaryDirectory() as d:
           "issue body holds the failing run's output, not an earlier passing run")
     check("abcdef0" in posts[0][2]["body"] and "https://github.com/o/r/actions/runs/42" in posts[0][2]["body"], "issue body names the commit and the run")
     check(posts[1][1] == "repos/o/r/issues/7/comments", "an open issue for the test gets a comment")
-    check(any(c[1] == "repos/o/r/issues?state=open&labels=flaky-test&per_page=100" for c in api.calls), "looks up open flaky-test issues")
+    check(any(c[1] == "repos/o/r/issues?state=open&per_page=100" for c in api.calls), "looks up all open issues, labelled or not")
+
+    api = Api([{"title": "Flaky test: bots", "number": 3}], False)
+    done = mod.report(d, env, api)
+    check(("commented", "bots") in done, "an open issue without the label still gets the comment")
+
+    api = Api([], True, "gh: Bad credentials (HTTP 401)")
+    try:
+        mod.report(d, env, api)
+        check(False, "a label error other than 'exists' stops the script")
+    except subprocess.CalledProcessError:
+        check(True, "a label error other than 'exists' stops the script")
 
     os.remove(os.path.join(tmp, "LastTestsFailed.log"))
     api = Api([], False)
