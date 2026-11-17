@@ -6,7 +6,7 @@ One file per non-obvious decision: `NNNN-kebab-title.md`, numbered in order, nev
 
 - An accepted ADR is never edited except for its **Status** line. To change a decision, write a new ADR and mark the old one `Superseded by NNNN`.
 - Keep it under one screen. Cite code as `path:line`; link the scope item (ROBO-NNN), issue, PR or file it affects.
-- Add every new ADR to the index below and to the `ARCHITECTURE.md` inventory.
+- Add every new ADR to the index below.
 - An ADR moved to another repository keeps its number here: its index row links the file there with status `Moved to <repo> (NNNN)`, NNNN being the ADR that moved it.
 
 ## Format
@@ -94,3 +94,4 @@ What we do, in one or two sentences.
 | [0059](0059-slim-review-docs-gate-only-incremental-rounds.md) | Docs PRs get no review worker; later rounds review only the new commits | Accepted |
 | [0060](0060-merge-by-risk-tier-with-owner-brief.md) | Merge by risk tier; MEDIUM and HIGH PRs carry an owner brief | Accepted |
 | [0061](0061-release-branch-for-production-hotfixes.md) | Refactor on main; production hotfixes on a release branch | Accepted |
+| [0063](0063-architecture-lists-modules-not-files.md) | ARCHITECTURE.md lists module directories, not files | Accepted |
