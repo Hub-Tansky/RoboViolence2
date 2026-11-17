@@ -40,7 +40,13 @@ install_gitleaks() {
 	else
 		bin=/usr/local/bin
 		[ -w "$bin" ] || { bin=$HOME/.local/bin; mkdir -p "$bin"; }
-		if install -m 755 "$tmp/gitleaks" "$bin/gitleaks"; then ok "gitleaks $GITLEAKS_VERSION in $bin"; else warn "gitleaks: could not install to $bin"; fi
+		if ! install -m 755 "$tmp/gitleaks" "$bin/gitleaks"; then
+			warn "gitleaks: could not install to $bin"
+		elif ! command -v gitleaks >/dev/null 2>&1; then
+			warn "gitleaks installed to $bin, which is not on PATH; the hooks will refuse commits"
+		else
+			ok "gitleaks $GITLEAKS_VERSION in $bin"
+		fi
 	fi
 	rm -rf "$tmp"
 }
@@ -53,7 +59,11 @@ install_pre_commit() {
 	# The container's Python is externally managed (PEP 668), and pipx is not installed.
 	if python3 -m pip install --quiet --disable-pip-version-check --break-system-packages "pre-commit==$PRE_COMMIT_VERSION" >/dev/null 2>&1 \
 		|| python3 -m pip install --quiet --disable-pip-version-check --user "pre-commit==$PRE_COMMIT_VERSION" >/dev/null 2>&1; then
-		ok "pre-commit $PRE_COMMIT_VERSION"
+		if command -v pre-commit >/dev/null 2>&1; then
+			ok "pre-commit $PRE_COMMIT_VERSION"
+		else
+			warn "pre-commit installed, but not on PATH (pip --user puts it in ~/.local/bin); the hooks will refuse commits"
+		fi
 	else
 		warn "pre-commit: pip install failed"
 	fi
