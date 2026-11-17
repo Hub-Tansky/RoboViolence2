@@ -332,13 +332,20 @@ def no_dropped_messages(run, client):
     check(not dropped, f"client accepted every server message, dropped: {dropped}")
 
 
-def bot_kills_with(run, weapon, death, gun=None, setup=b""):
-    """The bot gets `gun` (default `weapon`) and stands 4 m from e2e-a; it shoots on sight (Bot.cpp). Waits for a kill
-    with `weapon`, named `death` on the client"""
+def bot_kills_with(run, weapon, death, setup=b""):
+    """The bot gets `weapon` and stands 4 m from e2e-a; it shoots on sight (Bot.cpp). Waits for a kill with `weapon`,
+    named `death` on the client. Each try places both again, in case the bot killed itself and came back elsewhere"""
     human, bot, client = fight(run, death, setup)
-    run.command(f"forceplayerspawn {human} 6 8")
-    run.command(f"forceplayerspawn {bot} 10 8 {weapon if gun is None else gun}")
-    wait(lambda: killed(run, human, weapon), 45, f"e2e-a killed with weapon {weapon}")
+    tries = 5
+    for n in range(1, tries + 1):
+        run.command(f"forceplayerspawn {human} 6 8")
+        run.command(f"forceplayerspawn {bot} 10 8 {weapon}")
+        try:
+            wait(lambda: killed(run, human, weapon), 12, f"e2e-a killed with weapon {weapon}, try {n} of {tries}")
+            break
+        except AssertionError:
+            if n == tries:
+                raise
     no_dropped_messages(run, client)
 
 
@@ -359,9 +366,20 @@ def flamethrower(run):
 
 def grenade(run):
     """Bots throw a grenade every fourth shot at 2 to 6.5 m (Bot.cpp), never in a team game with friendly fire on
-    (holdsForTeammate). Pro rules with zero SMG damage leave the grenade (and the knife, under 1 m) as the only way the
-    bot can hurt; ROBO-198: the client dropped every grenade explosion"""
-    bot_kills_with(run, GRENADE, "Grenade", gun=0, setup=b"set sv_serverType 1\nset sv_smgDamage 0\nset sv_friendlyFire false\n")  # gun 0: SMG
+    (holdsForTeammate). Pro rules with zero SMG damage and no molotovs leave the grenade (and the knife, under 1 m) as
+    the only way the bot hurts. One grenade kills only within 1 m (Game::radiusHit) and a bot spawns with two
+    (Player.cpp). A grenade flies at one speed whatever the distance (Bot.cpp), so e2e-a waits in a corner, where
+    grenades bounce back to it, and the bot is placed again every 3 s, with two more, until one finishes e2e-a.
+    ROBO-198: the client dropped every grenade explosion"""
+    human, bot, client = fight(run, "Grenade", b"set sv_serverType 1\nset sv_smgDamage 0\nset sv_friendlyFire false\n"
+                                               b"set sv_enableMolotov false\n")
+    run.command(f"forceplayerspawn {human} 1.5 1.5")
+    end = time.time() + 60
+    while not killed(run, human, GRENADE):
+        check(time.time() < end, f"timed out after 60 s waiting for: e2e-a killed with weapon {GRENADE}")
+        run.command(f"forceplayerspawn {bot} 4.5 4.5 0")  # gun 0: SMG
+        time.sleep(3)
+    no_dropped_messages(run, client)
 
 
 def nuke(run):
