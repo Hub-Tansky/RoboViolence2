@@ -28,6 +28,8 @@ CASES = [
     ("GAME_VERSION_CL removed line", ["game/src/Client.h"], 1, "-#define GAME_VERSION_CL 19\n", "", "HIGH"),
     ("GAME_VERSION in a +++ header only", ["game/src/a.cpp"], 1, "+++ b/GAME_VERSION_SV\n", "", "MEDIUM"),
     ("[GUI] item", ["game/src/Menu.cpp"], 3, "", GUI_BODY, "HIGH"),
+    ("[GUI] item, CRLF body", ["game/src/Menu.cpp"], 3, "", GUI_BODY.replace("\n", "\r\n"), "HIGH"),
+    ("added line starting with -", ["game/src/Server.h"], 1, "+--GAME_VERSION_SV;\n", "", "HIGH"),
     ("601 added lines", ["game/src/a.cpp"], 601, "", "", "HIGH"),
     ("600 added lines", ["game/src/a.cpp"], 600, "", "", "MEDIUM"),
     ("26 files", [f"tests/t{i}.py" for i in range(26)], 26, "", "", "HIGH"),

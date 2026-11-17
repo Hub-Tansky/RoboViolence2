@@ -16,7 +16,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Same pattern as GUARDS in tools/review.sh (tests/test_merge_risk.py checks they match).
 GUARDS = re.compile(r"^(tools/check-|tools/review\.sh$|tools/original-assets|\.githooks/|\.github/|\.gitleaks\.toml$|\.gitignore$|REVIEW\.md$)")
 PACKAGING = re.compile(r"^packaging/")
-GAME_VERSION = re.compile(r"^[+-](?![+-]).*\bGAME_VERSION_(SV|CL)\b", re.M)
+GAME_VERSION = re.compile(r"^(?!\+\+\+ |--- )[+-].*\bGAME_VERSION_(SV|CL)\b", re.M)  # changed lines, not file headers
 GAME_CODE = re.compile(r"^(game|engine|masterserver|content)/")
 LOW_PATHS = re.compile(r"^(tests|tools)/")
 MAX_ADDED, MAX_FILES = 600, 25
@@ -30,7 +30,7 @@ def _gate():
 
 
 def item_is_gui(body):
-    row = re.search(r"^\|\s*Item\s*\|(.*)\|[ \t]*$", body or "", re.M)
+    row = _gate().ITEM_ROW.search((body or "").replace("\r\n", "\n"))
     return bool(row and "[GUI]" in row.group(1))
 
 

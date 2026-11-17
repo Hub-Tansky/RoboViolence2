@@ -20,6 +20,7 @@ SPEC_SOURCE = re.compile(r"^Spec source: (ROBO-\d{3}) rv2-docs@[0-9a-f]{7,40} bl
 DIFF = re.compile(r"^Diff: [0-9a-f]{7,40}\.\.\.([0-9a-f]{7,40})[ \t]*$", re.M)
 PATCH_ID = re.compile(r"^Patch-id: ([0-9a-f]{40})[ \t]*$", re.M)
 POST_DEPLOY_TAG = "(post-deploy)"
+ITEM_ROW = re.compile(r"^\|\s*Item\s*\|(.*)\|[ \t]*$", re.M)
 # The diff behind a Patch-id, with every config that changes its text pinned, so a record made on the Mac matches CI.
 # The skill's Pin step runs the same command.
 PATCH_DIFF = ["-c", "diff.noprefix=false", "-c", "diff.mnemonicPrefix=false", "-c", "diff.renames=true",
@@ -158,7 +159,7 @@ def check_owner_brief(body, tier_line):
 def check_record(body, changed, head, protocol, current_patch_id=None):
     """Problems of a ready PR's description; an empty list means it may be ready.
     current_patch_id: patch_id() of the PR's diff now, compared with the record's Patch-id when the head moved."""
-    item = re.search(r"^\|\s*Item\s*\|(.*)\|[ \t]*$", body, re.M)
+    item = ITEM_ROW.search(body)
     if not re.search(r"^\|\s*Allowed paths\s*\|", body, re.M):
         return ["review gate: a ready PR needs an Allowed paths row"]
     start = re.search(r"^## Review record[ \t]*$", body, re.M)
