@@ -1,6 +1,6 @@
 # REVIEW.md: when delivered work is done
 
-Work is done when `tools/review.sh` passes and a ready PR has a review record for its head in the description. A claim without that evidence doesn't count. Terms are in [CONTEXT.md](CONTEXT.md).
+Work is done when `tools/review.sh` passes and a ready PR has a review record for its head, or one with the same `Patch-id:` (section 5, item 8), in the description. A claim without that evidence doesn't count. Terms are in [CONTEXT.md](CONTEXT.md).
 
 **Stop rule:** if any item below can't be met, stop. Don't mark the PR ready or move its scope item to Done. Write what's missing under **Not done / unsure** in the review record and tell the owner.
 
@@ -90,7 +90,7 @@ Keep only the final round's raw reports, one `<details>` block per axis, its `<d
 ## Review record
 
 Diff: <merge-base>...<head>
-Patch-id: <40 hex: git diff --text <merge-base>...<head> | git patch-id --verbatim | cut -d' ' -f1>
+Patch-id: <40 hex: the Pin step's command in the rv2-code-review skill>
 Spec source: <ROBO-NNN> rv2-docs@<sha> blob:<12 hex> [(uncommitted)]
 
 ### review.sh

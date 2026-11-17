@@ -9,7 +9,7 @@
 - The Spec matrix accepted only `pass`, `partial` and `fail`. PR #152 waited 2 h 14 min for the owner because one criterion could only be checked on a deployed server.
 
 ## Decision
-A review record stays current while `git diff --text <merge-base>...<head> | git patch-id --verbatim` equals its `Patch-id:` line, even if the PR head moved; and the Spec status `post-deploy` passes only for a criterion that starts with `(post-deploy)`. Details: [REVIEW.md section 5](../../REVIEW.md#5-pr-close-isolated-review).
+A review record stays current while `git diff --text <merge-base>...<head> | git patch-id --verbatim` (git diff options pinned) equals its `Patch-id:` line, even if the PR head moved; and the Spec status `post-deploy` passes only for a criterion that starts with `(post-deploy)`. Details: [REVIEW.md section 5](../../REVIEW.md#5-pr-close-isolated-review).
 
 ## Consequences
 - A merge from `main` with no conflict in the PR's files needs no new review round. `git patch-id --verbatim` ignores line numbers but not whitespace or context lines (`--stable` alone would accept a re-indented Python or YAML block), so a merge that changes lines next to the PR's hunks still asks for a round.

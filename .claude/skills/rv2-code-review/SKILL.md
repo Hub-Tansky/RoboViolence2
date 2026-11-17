@@ -5,7 +5,7 @@ description: Robo Violence 2's PR review workflow (REVIEW.md section 5). Pins th
 
 # rv2-code-review
 
-Protocol: rv2-code-review 02d558bfd23a
+Protocol: rv2-code-review c0914723e6e5
 
 Adapted from `skills/engineering/code-review` in [mattpocock/skills](https://github.com/mattpocock/skills) at `4ae2317ddb22b046e26455e4f9c9b3aaaf62212d` (MIT; notice in `UPSTREAM-LICENSE`). Changes: a missing spec blocks instead of skipping the axis, no smell baseline, a matrix for Spec, a Risk worker, and the record in REVIEW.md. Upgrade only by a reviewed PR that updates this SHA.
 
@@ -13,7 +13,7 @@ Adapted from `skills/engineering/code-review` in [mattpocock/skills](https://git
 
 You are the parent. You pin, launch and aggregate. You don't review, filter or re-rank.
 
-1. **Pin.** `mb=$(git merge-base origin/main HEAD)`, `head=$(git rev-parse HEAD)`. Stop if `git diff --text $mb...$head` is empty or the tree is dirty. Write `Patch-id: $(git diff --text $mb...$head | git patch-id --verbatim | cut -d' ' -f1)` under the record's `Diff:` line.
+1. **Pin.** `mb=$(git merge-base origin/main HEAD)`, `head=$(git rev-parse HEAD)`. Stop if `git diff --text $mb...$head` is empty or the tree is dirty. Write `Patch-id: $(git -c diff.noprefix=false -c diff.mnemonicPrefix=false -c diff.renames=true diff --text --no-ext-diff --no-color --no-textconv $mb...$head | git patch-id --verbatim | cut -d' ' -f1)` under the record's `Diff:` line (the same command as `PATCH_DIFF` in `tools/check-review-record.py`).
 2. **Run** `tools/review.sh`. Its NOTE gives the tier and whether Risk is required. Stop on a failure.
 3. **Resolve the spec source.** Take `ROBO-NNN` from the PR's Item row. Read `40-backlog/*/ROBO-NNN *.md` in the local vault (`~/Dev/RoboViolence2/Robo2-docs`) first, since it can be ahead of GitHub; without a local vault, use `gh api repos/Hub-Tansky/rv2-docs/contents/<path>`. Never commit or move changes you didn't make.
    - `Spec source: ROBO-NNN rv2-docs@<vault HEAD> blob:<first 12 hex of git hash-object FILE>`

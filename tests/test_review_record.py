@@ -206,6 +206,11 @@ try:
     if gate.patch_id(main2, rev("HEAD"), cwd=repo) == recorded:
         failed += 1
         print("FAIL patch-id: a new change to the PR kept it")
+    git(repo, "config", "diff.noprefix", "true")  # a Mac setting must not change the id CI computes
+    if gate.patch_id(base, pr, cwd=repo) != recorded:
+        failed += 1
+        print("FAIL patch-id: diff.noprefix changed it")
+    git(repo, "config", "--unset", "diff.noprefix")
     reindent = rev("HEAD")
     commit("docs/a.md", "a\n  b\n", "indent only")
     if gate.patch_id(main2, rev("HEAD"), cwd=repo) == gate.patch_id(main2, reindent, cwd=repo):

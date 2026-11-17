@@ -19,6 +19,10 @@ SPEC_SOURCE = re.compile(r"^Spec source: (ROBO-\d{3}) rv2-docs@[0-9a-f]{7,40} bl
 DIFF = re.compile(r"^Diff: [0-9a-f]{7,40}\.\.\.([0-9a-f]{7,40})[ \t]*$", re.M)
 PATCH_ID = re.compile(r"^Patch-id: ([0-9a-f]{40})[ \t]*$", re.M)
 POST_DEPLOY_TAG = "(post-deploy)"
+# The diff behind a Patch-id, with every config that changes its text pinned, so a record made on the Mac matches CI.
+# The skill's Pin step runs the same command.
+PATCH_DIFF = ["-c", "diff.noprefix=false", "-c", "diff.mnemonicPrefix=false", "-c", "diff.renames=true",
+              "diff", "--text", "--no-ext-diff", "--no-color", "--no-textconv"]
 FIXED = r"fixed in `?[0-9a-f]{7,40}"
 OWNER = r"confirmed with owner:\s*\S"
 DEFERRED = r"deferred\s*(?:→|->)\s*\[?(?:ROBO-\d{3}\b|#\d+|https://github\.com/Hub-Tansky/RoboViolence2/issues/\d+)"
@@ -40,7 +44,7 @@ def patch_id(base, head, cwd=None):
     from main that leaves the diff alone (ROBO-224). --verbatim, not --stable alone: a whitespace-only change (Python or
     YAML indentation) must alter it. None when git fails or the diff is empty."""
     try:
-        diff = subprocess.run(["git", "diff", "--text", f"{base}...{head}"], cwd=cwd, capture_output=True, check=True).stdout
+        diff = subprocess.run(["git", *PATCH_DIFF, f"{base}...{head}"], cwd=cwd, capture_output=True, check=True).stdout
         out = subprocess.run(["git", "patch-id", "--verbatim"], cwd=cwd, input=diff, capture_output=True, check=True).stdout
     except (OSError, subprocess.CalledProcessError):
         return None
