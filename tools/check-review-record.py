@@ -153,6 +153,10 @@ def check_record(body, changed, head, protocol, current_patch_id=None):
         return ["review gate: the PR is ready but its description has no '## Review record'"]
     record = body[start.end():]
     problems = []
+    if review_tier(changed) == "docs":
+        # Docs tier runs no worker (REVIEW.md section 5): the gate and the author's notes are the review.
+        parts = sections(record)
+        return [f"review gate: the record lacks '### {name}'" for name in ("review.sh", "Not done / unsure") if name not in parts]
 
     diff = DIFF.search(record)
     if not diff:
@@ -176,9 +180,7 @@ def check_record(body, changed, head, protocol, current_patch_id=None):
     outcome_problems, outcomes = check_outcomes(parts.get("Outcomes", ""))
     problems += outcome_problems
 
-    required = ["Standards"]
-    if review_tier(changed) == "code":
-        required.append("Spec")
+    required = ["Standards", "Spec"]
     if risk_required(changed) or "Risk" in parts:
         required.append("Risk")
     for axis in required:
