@@ -118,7 +118,7 @@ Install (a new or failover host): the staging README's [By hand](../../tools/sta
 
 | Task | Do |
 |---|---|
-| Deploy a commit | `RV2_DEPLOY_LABEL=prod /opt/rv2-prod/deploy.sh --sha <full sha>`, then check `https://<admin host>/deployed` and that the master lists every game server |
+| Deploy a commit | `RV2_DEPLOY_LABEL=prod /opt/rv2-prod/deploy.sh --sha <full sha>` (a `main` or `release/**` commit, ADR 0061), then check `https://<admin host>/deployed` and that the master lists every game server |
 | Roll back | the same with the previous full SHA: the second-to-last `pass` row of `/var/lib/rv2-prod/state.tsv` (`deployed` holds the running one); `--force` if players are on |
 | Add a game server | as in [Game servers](#game-servers) |
 | Fail over to another host | install as above, restore the latest backup into the volumes and `/etc/rv2-prod.env`, set the new `BV2_PUBLIC_ADDRESS`, deploy the same SHA, then point the `master` and `admin` DNS records at it. The restored `caddy-data` carries the admin certificate, so verify passes before DNS moves; if it has expired, point `admin` first and deploy again |
