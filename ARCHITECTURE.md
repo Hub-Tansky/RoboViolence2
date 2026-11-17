@@ -37,7 +37,7 @@ Robo Violence 2: unofficial fork of BaboViolent 2, a top-down multiplayer shoote
 
 ## Modules
 
-One row per module directory. `tools/check-architecture.sh` fails when a directory under `engine/`, `packaging/` or `content/`, or `game/src`, `masterserver/src`, `tests` or `tools` holds tracked files and has no row, or when a row names a directory that doesn't exist. Files get no rows: a file's purpose is in its header comment, its module README or the ADR that added it. The per-file table this replaced (ADR 0061) is in `git show 276d92d:ARCHITECTURE.md`.
+One row per module directory. `tools/check-architecture.sh` fails when a directory under `engine/`, `packaging/` or `content/`, or `game/src`, `masterserver/src`, `tests` or `tools` holds tracked files and has no row, or when a row names a directory that doesn't exist. Files get no rows: a file's purpose is in its header comment, its module README or the ADR that added it. The per-file table this replaced (ADR 0063) is in `git show 276d92d:ARCHITECTURE.md`.
 
 | directory | purpose |
 |---|---|

@@ -1,5 +1,5 @@
 #!/bin/bash
-# Test for tools/check-architecture.sh (ROBO-235, ADR 0061): module rows, not file rows.
+# Test for tools/check-architecture.sh (ROBO-235, ADR 0063): module rows, not file rows.
 # Usage: test_check_architecture.sh <scratch dir>
 set -u
 script=$(cd "$(dirname "$0")/../tools" && pwd)/check-architecture.sh

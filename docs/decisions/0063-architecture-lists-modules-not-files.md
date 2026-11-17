@@ -1,4 +1,4 @@
-# 0061: ARCHITECTURE.md lists module directories, not files
+# 0063: ARCHITECTURE.md lists module directories, not files
 
 - Status: Accepted
 - Date: 2026-11-17

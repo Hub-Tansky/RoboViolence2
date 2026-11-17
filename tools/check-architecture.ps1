@@ -1,4 +1,4 @@
-# Windows copy of tools/check-architecture.sh (ADR 0061): every module directory has a row under
+# Windows copy of tools/check-architecture.sh (ADR 0063): every module directory has a row under
 # ARCHITECTURE.md "## Modules", and every row names an existing directory.
 $ErrorActionPreference = 'Stop'
 Set-Location (Join-Path $PSScriptRoot '..')

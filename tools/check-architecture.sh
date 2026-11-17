@@ -1,5 +1,5 @@
 #!/bin/sh
-# Fails when ARCHITECTURE.md's "## Modules" rows and the module directories disagree (ADR 0061):
+# Fails when ARCHITECTURE.md's "## Modules" rows and the module directories disagree (ADR 0063):
 # every directory under engine/, packaging/ or content/, and game/src, masterserver/src, tests and tools,
 # that holds tracked files needs a row; every row must name an existing directory.
 # Usage: tools/check-architecture.sh [repo dir] (default: this repository)
