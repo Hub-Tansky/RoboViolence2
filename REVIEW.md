@@ -39,7 +39,7 @@ In a draft or bot PR without an Allowed paths row, changes to guard files (`tool
 
 | Term | Means |
 |---|---|
-| New behaviour | Anything a player, operator, script or other module can trigger that didn't exist before: code paths, config variables, console commands, packets, CI jobs, scripts |
+| New behaviour | Anything a player, a server operator or another module of the game can trigger that didn't exist before. CI jobs and scripts count only when they are guard files, and a missing test there stays a suggestion (section 2) |
 | Fix proof | Revert the fix locally, run the new test, paste its failing assertion into the review record, restore the fix |
 | Non-obvious decision | One with a rejected alternative, one a later agent might reverse, or one that changes a format, protocol, dependency or ground rule |
 | Affected README | The README of any module (`engine/*`, `game`, `masterserver`, `docs/build`, …) whose files, public API, build or run steps the diff changes |
@@ -62,12 +62,12 @@ The tier comes from the changed paths, and `tools/review.sh` prints it:
 
 | Tier | When | Axes |
 |---|---|---|
-| docs | every path is `docs/**` or `*.md`, none of them `REVIEW.md`, `AGENTS.md`, `.claude/**`, `.github/**` or `docs/agents/**` | Standards |
+| docs | every path is `docs/**` or `*.md`, none of them `REVIEW.md`, `AGENTS.md`, `.claude/**`, `.github/**` or `docs/agents/**` | none: the gate only |
 | code | anything else | Standards, Spec |
 | plus Risk | a path is `game/src/netPacket.h`, `game/src/ServerRecv.cpp`, `game/src/ClientRecv.cpp`, `engine/babonet/**` or `engine/credentials/**`, or the owner asks | those, plus Risk |
 
 1. `tools/review.sh` passes on a clean tree.
-2. Run the `rv2-code-review` workflow (`.claude/skills/rv2-code-review/SKILL.md`, the only copy). It pins the diff, resolves the spec source and runs one fresh, isolated worker per axis in parallel. No worker sees another's report or the author's context. In a tool without that skill, follow the file by hand. If workers can't run, stop and tell the owner.
+2. Run the `rv2-code-review` workflow (`.claude/skills/rv2-code-review/SKILL.md`, the only copy). It pins the diff, resolves the spec source and runs one fresh, isolated worker per axis, one after another. No worker sees another's report or the author's context. In a tool without that skill, follow the file by hand. If workers can't run, stop and tell the owner.
 3. Spec needs a spec source: the scope item's acceptance criteria, then its linked issue, then the PR goal, read from the local vault first. If it can't be retrieved or has no acceptance criteria, Spec is `not assessable` and the PR can't be ready.
 4. Paste each report unedited. Aggregate without merging or re-ranking. The reports are evidence, not proof: the owner may spot-check them against the session.
 5. Give every finding an outcome:
@@ -78,19 +78,20 @@ The tier comes from the changed paths, and `tools/review.sh` prints it:
    | suggestion | any of those, or `not taken` (no backlog item needed) |
 
    Confirm with the owner first when a fix is outside the scope or Allowed paths, changes gameplay, protocol, file formats or anything the player sees (**[GUI]**), bends an ADR or the scope item, or is a large rewrite or new dependency. Otherwise fix directly, in its own commit (`<kind>: review: <summary>`). A deferred finding becomes a Proposed scope item in [rv2-docs](https://github.com/Hub-Tansky/rv2-docs) `40-backlog/20-proposed/` or an issue. Ask the owner all open questions in one message, each with the finding, the proposed change and a recommendation.
-6. After fixes, rerun every required axis on the full diff at the new head. Stop when a round finds no new blocker.
+6. After fixes, rerun only the axes that had a blocker, on the PR's own new commits (`git log -p --text --first-parent --no-merges <last reviewed head>..HEAD`, which leaves out merges from main) plus their open findings. Rerun every axis when the skill's `Protocol:` line changed. Two rounds at most. Send what is left to the owner in one message.
 7. Write the record. In the final round, Spec `fail` and `not assessable` block; `partial` blocks unless Outcomes says `confirmed with owner`, with the criterion's text in the Finding cell. `post-deploy` does not block, and only for a criterion that starts with `(post-deploy)` in the scope item (only a running server or a release build can show it); the item then stays in Testing until the owner ticks it.
 8. Mark the PR ready only with required CI green on the PR head. A later commit that changes the diff's patch-id makes the record stale. A merge from main that leaves it unchanged does not. A PR that changes the skill needs a review on the changed skill.
 
 ## Review record template
 
-Keep only the final round's raw reports, one `<details>` block per axis, its `<details>` and `</details>` lines at the start of the line. Findings from every round stay in Outcomes.
+Keep only each axis's latest raw report, one `<details>` block per axis, its `<details>` and `</details>` lines at the start of the line. Findings from every round stay in Outcomes. In the docs tier the record is `## Review record` with `### review.sh` and `### Not done / unsure` only.
 
 ```markdown
 ## Review record
 
 Diff: <merge-base>...<head>
 Patch-id: <40 hex: the Pin step's command in the rv2-code-review skill>
+Rounds: <n>
 Spec source: <ROBO-NNN> rv2-docs@<sha> blob:<12 hex> [(uncommitted)]
 
 ### review.sh
@@ -109,7 +110,7 @@ Spec source: <ROBO-NNN> rv2-docs@<sha> blob:<12 hex> [(uncommitted)]
 
 <details><summary>Raw report</summary>
 
-<report with its Criterion | Diff/test evidence | Status matrix, unedited; omitted in the docs tier>
+<report with its Criterion | Diff/test evidence | Status matrix, unedited>
 
 </details>
 

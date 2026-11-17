@@ -79,7 +79,7 @@ What we do, in one or two sentences.
 | [0044](0044-backlog-in-the-rv2-docs-vault.md) | The backlog is one Markdown file per scope item in the private rv2-docs vault | Accepted |
 | [0045](0045-cpp-lint-pre-commit-on-changed-lines.md) | clang-format and clang-tidy run on commit through pre-commit, on changed lines only; clang-format also in CI | Accepted |
 | [0046](0046-main-menu-shows-release-version-from-tag.md) | The main menu shows the release version from the tag, not the protocol number | Accepted |
-| [0047](0047-two-axis-review-replaces-thermo-nuclear.md) | PR review runs isolated Standards and Spec workers from a vendored skill | Accepted (amended by 0057) |
+| [0047](0047-two-axis-review-replaces-thermo-nuclear.md) | PR review runs isolated Standards and Spec workers from a vendored skill | Accepted (amended by 0057, 0059) |
 | [0048](0048-client-crash-report-in-pref-dir.md) | Write client crash reports as a text file in the pref dir | Accepted |
 | [0049](0049-server-side-bots-for-empty-servers.md) | Server-side bots fill empty servers to a target population | Accepted |
 | [0050](0050-client-frame-pacing-and-sleep.md) | Client frame pacing follows vsync and window state; the display sleeps outside play | Accepted |
@@ -91,3 +91,4 @@ What we do, in one or two sentences.
 | [0056](0056-main-ci-runs-finish-notify-nightly-fuzz.md) | Main CI runs finish, a red main notifies the owner, fuzz runs nightly | Accepted |
 | [0057](0057-review-record-keyed-to-patch-id-post-deploy-criteria.md) | The review record is keyed to the diff's patch-id; post-deploy criteria don't block | Accepted |
 | [0058](0058-agent-rule-order-ground-rules-3-4-refactor-only.md) | Agent rules have an order; ground rules 3 and 4 apply only in refactor items | Accepted |
+| [0059](0059-slim-review-docs-gate-only-incremental-rounds.md) | Docs PRs get no review worker; later rounds review only the new commits | Accepted |
