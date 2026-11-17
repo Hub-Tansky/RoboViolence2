@@ -191,6 +191,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/test_review_record.py` | `tools/check-review-record.py` and `tools/review.sh`: review tier, protocol hash, each way a ready PR's record fails, Patch-id after a merge from main and after a new change, `post-deploy` with and without the tag, head and bot forwarding, dirty-tree NOTE |
 | `tests/test_review_diff_rules.py` | `tools/review.sh` diff-rules in a scratch repo: Allowed paths globs (`*`, `**`, `{a,b}`), the guard-file NOTE, banned added lines, `review: allow`, Markdown exemption |
 | `tests/test_ci_test_summary.py` | ROBO-223: `tools/ci-test-summary.py` on a fake `Testing/Temporary` (CRLF `LastTest.log`): lists failed tests only, last 30 output lines, keeps a printed ``` or ctest-like line inside the output; `main()` appends and exits 0 on a cp1252 console |
+| `tests/test_merge_risk.py` | ROBO-228: `tools/merge-risk.py` tier rules one by one, its `GUARDS` copy equals `tools/review.sh`, `tier_line` on a scratch repo and HIGH on a git error |
 | `tests/test_lang_check.py` | Step 13: `tools/lang-check.py` fails on changed conversions, unknown keys, repeated keywords, tabs and a stale `en.pot`; warns about missing glyphs |
 | `tests/test_join_password.cpp` | Step 10: a client joins a passworded server only with the HMAC over its own challenge; no password or MD5 of it on the wire |
 | `tests/test_join_team.cpp` | ROBO-201: a joiner moved to a team before its handshake ends gets its own team after SERVER_INFO; a spectator joiner gets none |
@@ -256,7 +257,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `.github/workflows/fuzz.yml` | CI, nightly and `workflow_dispatch` (not required): `fuzz` job, ASan `fuzz_server` 2 min per client message type, uploads crash inputs |
 | `.github/workflows/ci-retry.yml` | CI: when a `build` job was cancelled because no hosted runner picked it up, re-runs the run's failed jobs (attempts 1 and 2; PR runs only while latest commit, `main` and tag runs always; ADR 0041, 0056) |
 | `.github/workflows/hygiene.yml` | CI: ARCHITECTURE.md inventory, repository hygiene, content case, `format` (`tools/check-format.sh`); `review` (`tools/review.sh`, given the PR description, head and bot flag) on PRs, rerun on description edits |
-| `.github/pull_request_template.md` | PR description: item and Allowed paths (read by `tools/review.sh`), goal, out of scope, tests |
+| `.github/pull_request_template.md` | PR description: item and Allowed paths (read by `tools/review.sh`), owner brief with the merge tier (ADR 0060), goal, out of scope, tests |
 | `.github/workflows/codeql.yml` | CodeQL: `c-cpp` (manual linux-x64 build of the three executables) and `actions`; push, PR, weekly; alerts under `build/` (vcpkg headers) filtered out |
 | `.github/workflows/dependency-graph.yml` | Submits resolved vcpkg ports to the dependency graph on push to `main` |
 | `.github/workflows/osv-vcpkg.yml` | Weekly OSV check of the vcpkg ports by upstream commit (`tools/osv-vcpkg.py`); not required |
@@ -403,6 +404,7 @@ The game's own maps (BV2 format 20202), GPL-3.0 like the code. The build copies 
 | `docs/decisions/0056-main-ci-runs-finish-notify-nightly-fuzz.md` | ADR: `build` runs on `main` and tags are never cancelled by a newer push, a failed `main` run posts to ntfy (`NTFY_TOPIC`), `fuzz` runs nightly in `fuzz.yml` |
 | `docs/decisions/0057-review-record-keyed-to-patch-id-post-deploy-criteria.md` | ADR: a review record stays current while the diff's patch-id is unchanged (merges from main); Spec status `post-deploy` for `(post-deploy)` criteria |
 | `docs/decisions/0059-slim-review-docs-gate-only-incremental-rounds.md` | ADR: docs tier runs no review worker; code-tier workers run in sequence on hunks, later rounds only on new commits, two rounds at most |
+| `docs/decisions/0060-merge-by-risk-tier-with-owner-brief.md` | ADR: LOW/MEDIUM/HIGH merge tier from `tools/merge-risk.py`; agents merge LOW and MEDIUM on green with an owner brief, HIGH waits for the owner's playtest and "merge" |
 | `docs/decisions/README.md` | ADR format and index |
 
 ### `docs/ops`
@@ -843,6 +845,7 @@ The game's own maps (BV2 format 20202), GPL-3.0 like the code. The build copies 
 | `tools/CMakeLists.txt` | Database seeding (bv2_seed_db_tool, master.db, web.db) |
 | `tools/osv-vcpkg.py` | Checks the installed vcpkg ports against OSV by upstream commit (PNS-22) |
 | `tools/ci-test-summary.py` | CI: names of failed ctest tests and the last 30 lines of each one's output from `Testing/Temporary`, appended to `$GITHUB_STEP_SUMMARY` and printed to the job log in UTF-8 (ROBO-223); always exits 0 |
+| `tools/merge-risk.py` | Merge risk tier of a PR: prints `Tier: LOW|MEDIUM|HIGH (<reason>)` from the diff and the PR body (ADR 0060); `tools/review.sh` prints it, `tools/check-review-record.py` requires it in a MEDIUM or HIGH PR's Owner brief; HIGH on any error |
 | `tools/FORK_BASE` | First commit after upstream; secret scans start here |
 | `tools/check-architecture.ps1` | Fails if ARCHITECTURE.md and the tracked files disagree (Windows) |
 | `tools/check-architecture.sh` | Fails if ARCHITECTURE.md and the tracked files disagree (Unix) |
@@ -855,7 +858,7 @@ The game's own maps (BV2 format 20202), GPL-3.0 like the code. The build copies 
 | `tools/gen-placeholder-content.py` | Writes placeholder maps, textures, a readable font atlas, sounds and models for dev and CI |
 | `tools/gen-app-icon.py` | Renders the application icons and the `.dmg` background into `packaging/` (by hand; numpy, Pillow) |
 | `tools/check-hygiene.py` | Fails on spaces in paths, tracked files ignored by .gitignore (checked case-insensitively, as on macOS), files over 5 MB, bad encoding, failed translation check |
-| `tools/check-review-record.py` | Review tier from changed paths, `Protocol:` hash, and the review record of a ready PR (REVIEW.md section 5; docs tier: `### review.sh` and `### Not done / unsure` only, ADR 0059): current by head or by the diff's `Patch-id`, Spec `post-deploy` only for `(post-deploy)` criteria (ADR 0057) |
+| `tools/check-review-record.py` | Review tier from changed paths, `Protocol:` hash, and the review record of a ready PR (REVIEW.md section 5; docs tier: `### review.sh` and `### Not done / unsure` only, ADR 0059): current by head or by the diff's `Patch-id`, Spec `post-deploy` only for `(post-deploy)` criteria (ADR 0057); a ready MEDIUM or HIGH PR needs `## Owner brief` with `tools/merge-risk.py`'s line (ADR 0060) |
 | `tools/lang-check.py` | Fails when `en.pot` is stale, a `.po` is invalid, has unknown keys or changes printf conversions; warns about missing glyphs; lists untranslated keys |
 | `tools/lang-to-pot.py` | Generates `content/languages/en.pot` from `en.lang` |
 | `tools/seed_db.cpp` | Creates a SQLite DB from SQL files (build helper) |
@@ -866,7 +869,7 @@ The game's own maps (BV2 format 20202), GPL-3.0 like the code. The build copies 
 | `tools/staging/README.md` | Staging deploy agent: host needs, install, env file, cron, commands, files |
 | `tools/staging/health-watch.sh` | Container health watcher beside `deploy.sh` (cron, every minute): ntfy when a service of the stack is unhealthy, stopped, restarting or missing for two runs in a row, and when all are well again; skips while a deploy runs |
 | `tools/staging/deploy.sh` | Staging deploy agent (Linux, cron; production runs it by hand with `RV2_DEPLOY_LABEL=prod`): newest successful main `containers` build, pinned to its commit, deployed only with no humans on CTF, TDM and FFA (bots don't count), rollback, `/deployed` (ADR 0018) |
-| `tools/review.sh` | Review gate (REVIEW.md section 1) on `merge-base...HEAD`: all checks, scope against the PR's Allowed paths, anti-gaming, `check-review-record.py`; `--full` builds and tests |
+| `tools/review.sh` | Review gate (REVIEW.md section 1) on `merge-base...HEAD`: all checks, scope against the PR's Allowed paths, anti-gaming, `check-review-record.py`, the merge tier as a NOTE (`tools/merge-risk.py`); `--full` builds and tests |
 | `tools/setup-dev.ps1` | Activates hooks, checks tools (Windows) |
 | `tools/setup-dev.sh` | Activates hooks, checks tools (Unix); prints the apt line for building and the package names for running a package |
 | `tools/cloud-setup.sh` | Cloud session setup run by the environment's setup script (ROBO-225): pinned gitleaks with checksum, pre-commit, Hub-Tansky identity and `core.hooksPath=.githooks` per repository; warns and exits 0 on a failed step |

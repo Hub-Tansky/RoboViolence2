@@ -85,6 +85,9 @@ fi
 check review-record env REVIEW_BASE="$mb" REVIEW_HEAD="${REVIEW_PR_HEAD:-$(git rev-parse HEAD)}" REVIEW_BODY="$body" \
   REVIEW_DRAFT="${REVIEW_PR_DRAFT:-true}" REVIEW_BOT="${REVIEW_PR_BOT:-false}" python3 -B tools/check-review-record.py
 
+# Merge risk tier (ROBO-228): MEDIUM and HIGH need an Owner brief; HIGH waits for the owner's "merge".
+echo "NOTE $(REVIEW_BODY="$body" python3 -B tools/merge-risk.py --base "$mb" --head "${REVIEW_PR_HEAD:-HEAD}")"
+
 # Scope and anti-gaming: one Python pass over the diff.
 check diff-rules env REVIEW_BASE="$mb" REVIEW_BODY="$body" python3 - <<'EOF'
 import os, re, subprocess, sys
