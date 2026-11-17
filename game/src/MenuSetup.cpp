@@ -16,6 +16,8 @@
 	BaboViolent 2 source code. If not, see http://www.gnu.org/licenses/.
 */
 
+#include "AssetRegistry.h"
+
 #ifndef CONSOLE
 
 #include "Scene.h"
@@ -34,7 +36,7 @@ void Scene::createMenu()
 	if(gameVar.r_animatedMenu)
 	{
 		menuManager.root->superPanel = true;
-		menuManager.root->texture = dktCreateTextureFromFile("main/textures/Smoke2.tga", DKT_FILTER_NEAREST);
+		menuManager.root->texture = dktCreateTextureFromFile(bv2::assetPath("textures/Smoke2"), DKT_FILTER_NEAREST);
 	}
 
 	//--- Create the main tab container

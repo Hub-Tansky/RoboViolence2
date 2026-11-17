@@ -16,6 +16,8 @@
 	BaboViolent 2 source code. If not, see http://www.gnu.org/licenses/.
 */
 
+#include "AssetRegistry.h"
+
 #ifndef CONSOLE
 
 #include "CNews.h"
@@ -70,7 +72,7 @@ CNews::CNews(CControl * in_parent, CControl * in_alignTo)
 	//instance->borderColor.set(1,.5f,.25f);
 
 	lst_news = new CControl(instance, CVector2i(10,10), CVector2i(716,486), "", this, "LISTBOX");
-	lst_news->texture = dktCreateTextureFromFile("main/textures/Menu2Back.tga", DKT_FILTER_LINEAR);
+	lst_news->texture = dktCreateTextureFromFile(bv2::assetPath("textures/Menu2Back"), DKT_FILTER_LINEAR);
 
 	instance->backColor.set(0,.3f,.7f);
 	instance->imgColor = instance->backColor;

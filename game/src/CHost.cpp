@@ -16,6 +16,8 @@
 	BaboViolent 2 source code. If not, see http://www.gnu.org/licenses/.
 */
 
+#include "AssetRegistry.h"
+
 #ifndef CONSOLE
 
 #include "Paths.h"
@@ -209,7 +211,7 @@ CHost::CHost(CControl * in_parent, CControl * in_alignTo)
 
 	//--- Da big frame
 	instance = new CControl(parent, CVector2i(0,0), CVector2i(736, 506), "", this, "FRAME", in_alignTo, CONTROL_SNAP_BOTTOM);
-	instance->texture = dktCreateTextureFromFile("main/textures/Menu3Back.tga", DKT_FILTER_LINEAR);
+	instance->texture = dktCreateTextureFromFile(bv2::assetPath("textures/Menu3Back"), DKT_FILTER_LINEAR);
 	instance->borderColor.set(1,.5f,.25f);
 
 	//--- Labels and controls

@@ -61,30 +61,6 @@
 // THEME_END must always be the same as the last theme number!
 #define THEME_END      THEME_WOODEN
 
-#define THEME_GRASS_STR    "grass"
-#define THEME_SNOW_STR     "snow"
-#define THEME_SAND_STR     "sand"
-#define THEME_CITY_STR     "city"
-#define THEME_MODERN_STR   "modern"
-#define THEME_LAVA_STR     "lava"
-#define THEME_ANIMAL_STR   "animal"
-#define THEME_ORANGE_STR   "orange"
-#define THEME_CORE_STR     "core"
-#define THEME_FROZEN_STR   "frozen"
-#define THEME_GRAIN_STR    "grain"
-#define THEME_MEDIEVAL_STR "medieval"
-#define THEME_METAL_STR    "metal"
-#define THEME_RAINY_STR    "rainy"
-#define THEME_REAL_STR     "real"
-#define THEME_ROAD_STR     "road"
-#define THEME_ROCK_STR     "rock"
-#define THEME_SAVANA_STR   "savana"
-#define THEME_SOFT_STR     "soft"
-#define THEME_STREET_STR   "street"
-#define THEME_TROPICAL_STR "tropical"
-#define THEME_WINTER_STR   "winter"
-#define THEME_WOODEN_STR   "wooden"
-
 #define WEATHER_NONE      0
 #define WEATHER_FOG       1
 #define WEATHER_SNOW      2

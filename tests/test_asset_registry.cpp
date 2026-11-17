@@ -1,6 +1,7 @@
 // ROBO-232: the asset registry resolves every base pack id to main/<file>, and an id the manifest lacks is reported
 // and resolves to a path no loader opens.
 #include "AssetRegistry.h"
+#include "MapThemes.h"
 
 #include <cstdio>
 #include <cstring>
@@ -25,6 +26,15 @@ int main()
 		  "sounds/Siren keeps the file's own case");
 	check(bv2::assetKnown("sounds/Menu"), "a row with source missing is still an id");
 	check(bv2::assetUnknownCount() == 0, "a known id counted as unknown");
+
+	// ROBO-243: Map builds theme texture ids at runtime; every theme x texture must be a manifest id
+	for (int t = 0; t < bv2::THEME_NAME_COUNT; ++t)
+		for (const char* tex : bv2::THEME_TEXTURES)
+		{
+			const std::string id = bv2::themeTextureId(bv2::THEME_NAMES[t], tex);
+			if (!bv2::assetKnown(id.c_str()))
+				std::printf("FAIL: theme texture %s is not in the manifest\n", id.c_str()), g_fail = 1;
+		}
 
 	check(!bv2::assetKnown("models/NoSuchModel"), "an unknown id is known");
 	char* first = bv2::assetPath("models/NoSuchModel");

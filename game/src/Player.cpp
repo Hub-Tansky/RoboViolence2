@@ -17,6 +17,7 @@
 */
 
 #include <cfloat>
+#include "AssetRegistry.h"
 #include "Player.h"
 #include "GameVar.h"
 #include "Console.h"
@@ -137,8 +138,8 @@ Player::Player(char pPlayerID, Map * pMap, Game * pGame): pingLogInterval(0.05f)
 	weapon = 0;
 	meleeWeapon = 0;
 #ifndef CONSOLE
-	tex_baboShadow = dktCreateTextureFromFile("main/textures/BaboShadow.tga", DKT_FILTER_BILINEAR);
-	tex_baboHalo = dktCreateTextureFromFile("main/textures/BaboHalo.tga", DKT_FILTER_BILINEAR);
+	tex_baboShadow = dktCreateTextureFromFile(bv2::assetPath("textures/BaboShadow"), DKT_FILTER_BILINEAR);
+	tex_baboHalo = dktCreateTextureFromFile(bv2::assetPath("textures/BaboHalo"), DKT_FILTER_BILINEAR);
 #endif
 	nextSpawnWeapon = gameVar.cl_primaryWeapon;//WEAPON_SMG;
 	nextMeleeWeapon = gameVar.cl_secondaryWeapon + WEAPON_KNIVES;//WEAPON_KNIVES;
