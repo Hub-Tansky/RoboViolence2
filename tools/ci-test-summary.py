@@ -4,8 +4,8 @@
 Usage: ci-test-summary.py <ctest build dir>...
 
 Reads Testing/Temporary/LastTestsFailed.log (the failed test names) and LastTest.log (each test's output) in every
-directory and prints, per failed test, its name and the last 30 lines of its output. Appends to $GITHUB_STEP_SUMMARY
-when that is set, otherwise prints to stdout. A missing or unreadable directory is skipped; the script always exits 0,
+directory and prints, per failed test, its name and the last 30 lines of its output, to stdout and, when it is set,
+appended to $GITHUB_STEP_SUMMARY. A missing or unreadable directory is skipped; the script always exits 0,
 so it can never turn a run red on its own.
 """
 import os
@@ -69,8 +69,7 @@ def main(argv):
     if path:
         with open(path, "a", encoding="utf-8") as f:
             f.write(text)
-    else:
-        sys.stdout.write(text)
+    sys.stdout.write(text)  # also the log's last step, for `gh run view --log-failed`
     return 0
 
 
