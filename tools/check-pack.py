@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check an asset pack against its manifest (ADR 0064).
+"""Check an asset pack against its manifest (ADR 0065).
 
 Usage: check-pack.py <pack dir> [--manifest FILE]   (default manifest: <pack dir>/pack.tsv)
 Fails when the header lacks a column, a row has an empty id, file, type, author or licence, an unknown type,

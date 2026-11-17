@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Write placeholder game data for development and CI: no original assets.
 
-Reads the base pack manifest content/base-pack.tsv (the files the game loads at startup, ADR 0064) and writes, under <out>/:
+Reads the base pack manifest content/base-pack.tsv (the files the game loads at startup, ADR 0065) and writes, under <out>/:
   - a solid-colour TGA (same size and depth) for every required texture,
   - a font atlas for main/fonts/babo.tga (5×7 bitmap glyphs, ASCII 33–159),
   - a short silent WAV (same format) for every required sound,
@@ -137,7 +137,7 @@ def bvm(name, size=16):
 
 
 def required_rows(manifest):
-    """(file, format) per manifest row; file is relative to the pack root (ADR 0064)."""
+    """(file, format) per manifest row; file is relative to the pack root (ADR 0065)."""
     header = None
     for line in open(manifest, encoding="utf-8"):
         if line.startswith("#") or not line.strip():
@@ -170,7 +170,7 @@ def main():
     for rel, typ in required_rows(manifest):
         # the runtime main/ dir is `out` itself, the pack root
         dest = os.path.join(out, rel)
-        name = rel.split("/", 1)[1]  # the name below the type folder, as before ADR 0064: it seeds the colour
+        name = rel.split("/", 1)[1]  # the name below the type folder, as before ADR 0065: it seeds the colour
         ext = os.path.splitext(rel)[1].lower()
         if ext == ".tga":
             m = re.match(r"TGA (\d+)×(\d+)×(\d+)", typ)

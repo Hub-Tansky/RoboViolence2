@@ -1,5 +1,5 @@
 #!/bin/bash
-# Test for tools/check-pack.py (ROBO-231, ADR 0064): author, licence, unique ids and files present.
+# Test for tools/check-pack.py (ROBO-231, ADR 0065): author, licence, unique ids and files present.
 # Usage: test_check_pack.sh <scratch dir>
 set -u
 script=$(cd "$(dirname "$0")/../tools" && pwd)/check-pack.py

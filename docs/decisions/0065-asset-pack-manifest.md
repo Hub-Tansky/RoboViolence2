@@ -1,4 +1,4 @@
-# 0064: An asset pack is a folder with a pack.tsv manifest; the base pack's is content/base-pack.tsv
+# 0065: An asset pack is a folder with a pack.tsv manifest; the base pack's is content/base-pack.tsv
 
 - Status: Accepted
 - Date: 2026-11-17

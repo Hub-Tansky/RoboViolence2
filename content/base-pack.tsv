@@ -1,4 +1,4 @@
-# Base pack manifest (ADR 0064). One row per asset; columns separated by one TAB:
+# Base pack manifest (ADR 0065). One row per asset; columns separated by one TAB:
 # id: stable name code asks for; file: path under the pack root; type: texture, sound, model or font;
 # format: what the loader needs (placeholders copy it); author, tool, licence: who made it, with what, under which licence;
 # source: where it came from, `generated placeholder`, or `missing` (no file in the pack yet; tools/check-pack.py allows it).
