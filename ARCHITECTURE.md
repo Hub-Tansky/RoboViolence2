@@ -398,6 +398,7 @@ The game's own maps (BV2 format 20202), GPL-3.0 like the code. The build copies 
 | `docs/decisions/0053-three-public-servers-and-owner-defaults.md` | ADR: FFA, CTF and TDM public servers, the owner's defaults in the scripts and example config, disabled secondaries hidden in the weapon menu (ROBO-212) |
 | `docs/decisions/0054-game-ships-its-own-maps.md` | ADR: the owner's maps in `content/maps`, shipped in `main/maps`, found in the package beside other data, flag pods at z 0 (ROBO-214) |
 | `docs/decisions/0055-browser-refresh-uses-a-fresh-master-session.md` | ADR: every server list request opens a fresh master session (a hosting game keeps its own), and every opening of the Browse tab requests the list; a router can silently drop an idle session (ROBO-217) |
+| `docs/decisions/0056-main-ci-runs-finish-notify-nightly-fuzz.md` | ADR: `build` runs on `main` and tags are never cancelled by a newer push, a failed `main` run posts to ntfy (`NTFY_TOPIC`), `fuzz` runs nightly in `fuzz.yml` |
 | `docs/decisions/README.md` | ADR format and index |
 
 ### `docs/ops`

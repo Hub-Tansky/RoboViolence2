@@ -4,7 +4,7 @@ on:
     branches: [main]
     tags: ['v*']
   pull_request:
-# A newer commit cancels a PR's run; runs on main and tags each finish, so every merge gets a result (ROBO-221)
+# A newer commit cancels a PR's run; runs on main and tags each finish, so every merge gets a result (ROBO-221, ADR 0056)
 concurrency:
   group: build-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
@@ -363,7 +363,7 @@ jobs:
   # so it reaches curl as config on stdin, never on the command line (tools/staging/deploy.sh notify)
   notify:
     name: notify (main failed)
-    needs: [build, release, package-check, deb-check, package-smoke, smoke, tidy]
+    needs: [build, release, package-check, deb-check, package-smoke, smoke]  # not tidy: continue-on-error, never red
     if: ${{ !cancelled() && github.ref == 'refs/heads/main' && contains(needs.*.result, 'failure') }}
     runs-on: ubuntu-24.04
     permissions:
@@ -377,7 +377,7 @@ jobs:
           if [ -z "$NTFY_TOPIC" ]; then echo "No NTFY_TOPIC secret: no notification"; exit 0; fi
           url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
           failed=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/attempts/$GITHUB_RUN_ATTEMPT/jobs?per_page=100" \
-            -q '[.jobs[] | select(.conclusion == "failure") | .name] | join(", ")') || failed="(job list unavailable)"
+            -q '[.jobs[] | select(.conclusion == "failure" and (.name | startswith("clang-tidy") | not)) | .name] | join(", ")') || failed="(job list unavailable)"
           printf 'url = "https://ntfy.sh/%s"\n' "$NTFY_TOPIC" |
             curl -fsS --max-time 10 -K - -H "Title: RV2 build failed on main" -H "Click: $url" \
               -d "${GITHUB_SHA::7} failed: $failed. $url" > /dev/null
