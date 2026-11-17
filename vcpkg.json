@@ -12,7 +12,7 @@
   ],
   "features": {
     "client": {
-      "description": "bv2 client: SDL3 window and input, miniaudio audio, stb_vorbis for OGG music",
+      "description": "bv2 client: SDL3 window and input, miniaudio audio, stb_image for PNG textures, stb_vorbis for OGG sounds and music",
       "dependencies": [
         "sdl3",
         "miniaudio",

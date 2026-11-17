@@ -18,7 +18,7 @@
 
 /// \file dks.h
 /// Sound effects and music on miniaudio (WASAPI, Core Audio, PipeWire/PulseAudio/ALSA).
-/// Effects are decoded WAV files; music streams (WAV, MP3, and OGG when built with stb_vorbis).
+/// Effects are decoded WAV files (and OGG when built with stb_vorbis); music streams (WAV, MP3, and OGG when built with stb_vorbis).
 /// Volumes are 0..255 as before. A channel is a handle returned by the play functions; -1 means "no sound".
 
 #ifndef DKS_H
@@ -50,6 +50,8 @@ void			dksStopSound(int channel);
 
 void			dksPlayMusic(char* filename, int channel=-1, int volume=255);
 void			dksStopMusic();
+/// Test support (ROBO-233): true from a dksPlayMusic that opened its file (WAV, or OGG with stb_vorbis) until dksStopMusic.
+bool dksIsMusicPlaying();
 
 void			dksSet3DListenerAttributes(const CVector3f * pos, const CVector3f * vel, const CVector3f * forward, const CVector3f * up);
 

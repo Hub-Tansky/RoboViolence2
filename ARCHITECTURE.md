@@ -28,7 +28,7 @@ Robo Violence 2: unofficial fork of BaboViolent 2, a top-down multiplayer shoote
 
 - **Master server:** `MasterClient` is reconstructed (the original class is missing from the source release); its timeout is an assumption. See [masterserver/README.md](masterserver/README.md).
 - **GLU:** still the system library (headers and link) for `dko`, `zeven_client` and the game, so the headless server needs GLU dev packages; `dkt` is stubbed there. The renderer itself is unchanged fixed-function GL 2.1 (ADR 0003).
-- **OGG music** needs `stb_vorbis.c` (vcpkg `stb`, found in CI builds); the placeholders have no music, and playback was never heard.
+- **OGG** needs `stb_vorbis.c` (vcpkg `stb`, found in CI builds); `test_dks` opens an OGG as an effect and as music, but the placeholders have no music and playback was never heard. Without `stb_vorbis.c` (Linux `libstb-dev` lacks it) the OGG test is skipped. PNG textures need `stb_image.h` (required).
 - **Frame pacing:** the main loop never waits on its own; vsync (`cl_enableVSync`, default on) paces a visible focused window, `main.cpp` sleeps when the window is unfocused or hidden.
 - **HiDPI:** `dkwGetResolution()` is the pixel size; the UI math assumes nothing else. Untested on a Retina display.
 - **Dead code:** 16 old-menu `.cpp` files in `game/src` are not built (see [game/README.md](game/README.md)).
