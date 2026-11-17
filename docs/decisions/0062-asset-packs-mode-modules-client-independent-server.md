@@ -25,7 +25,7 @@ The code moves toward three seams, each landing with its test: an **asset seam**
 
 ## Consequences
 - R1 to R5 are ground rules 5 to 9 in AGENTS.md and Standards blockers in REVIEW.md; R6 to R8 are already covered (ground rule 1, the test blocker) or apply only from the mini game kit on.
-- No mode code exists until the mode interface (Phase 2); until then a branch an item cannot avoid is named under Not done / unsure in its review record, as debt for that phase.
+- No mode code exists until the mode interface (Phase 2); until then a branch an item cannot avoid needs the owner's approval in the PR.
 - Phase 1 (ROBO-231 to ROBO-234: manifest, registry, PNG/OGG/glTF/TTF loaders, pack order) runs before the release; the sim core (ROBO-012), protocol rework (ROBO-017) and renderer (ROBO-018) wait until after it.
 - ADR 0003's SDL_GPU target is re-checked when ROBO-018 starts: if the web is a target platform the renderer needs a web backend.
 - Rejected: a rewrite on another engine (loses the BV2 feel, the tested server and the netcode hardening); waiting with all of it until after the release (every asset added without an id is touched twice).
