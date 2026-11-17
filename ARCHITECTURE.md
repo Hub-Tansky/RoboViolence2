@@ -190,7 +190,7 @@ One row per tracked file. `tools/check-architecture.sh` fails when this list and
 | `tests/test_lang.cpp` | Step 13: PO parser (entries that change the English printf conversions or whose key English lacks are skipped; raw control bytes rejected), English fallback per key, OS locale matching (`ll_CC`, `ll`, `.po` before `.lang`), PO without glyphs skipped |
 | `tests/test_review_record.py` | `tools/check-review-record.py` and `tools/review.sh`: review tier, protocol hash, each way a ready PR's record fails, head and bot forwarding, dirty-tree NOTE |
 | `tests/test_review_diff_rules.py` | `tools/review.sh` diff-rules in a scratch repo: Allowed paths globs (`*`, `**`, `{a,b}`), the guard-file NOTE, banned added lines, `review: allow`, Markdown exemption |
-| `tests/test_ci_test_summary.py` | ROBO-223: `tools/ci-test-summary.py` on a fake `Testing/Temporary` (CRLF `LastTest.log`): lists failed tests only, last 30 output lines, keeps a printed ``` inside the fence |
+| `tests/test_ci_test_summary.py` | ROBO-223: `tools/ci-test-summary.py` on a fake `Testing/Temporary` (CRLF `LastTest.log`): lists failed tests only, last 30 output lines, keeps a printed ``` or ctest-like line inside the output; `main()` appends and exits 0 on a cp1252 console |
 | `tests/test_lang_check.py` | Step 13: `tools/lang-check.py` fails on changed conversions, unknown keys, repeated keywords, tabs and a stale `en.pot`; warns about missing glyphs |
 | `tests/test_join_password.cpp` | Step 10: a client joins a passworded server only with the HMAC over its own challenge; no password or MD5 of it on the wire |
 | `tests/test_join_team.cpp` | ROBO-201: a joiner moved to a team before its handshake ends gets its own team after SERVER_INFO; a spectator joiner gets none |
@@ -839,7 +839,7 @@ The game's own maps (BV2 format 20202), GPL-3.0 like the code. The build copies 
 |---|---|
 | `tools/CMakeLists.txt` | Database seeding (bv2_seed_db_tool, master.db, web.db) |
 | `tools/osv-vcpkg.py` | Checks the installed vcpkg ports against OSV by upstream commit (PNS-22) |
-| `tools/ci-test-summary.py` | CI: names of failed ctest tests and the last 30 lines of each one's output from `Testing/Temporary`, appended to `$GITHUB_STEP_SUMMARY` (ROBO-223); always exits 0 |
+| `tools/ci-test-summary.py` | CI: names of failed ctest tests and the last 30 lines of each one's output from `Testing/Temporary`, appended to `$GITHUB_STEP_SUMMARY` and printed to the job log in UTF-8 (ROBO-223); always exits 0 |
 | `tools/FORK_BASE` | First commit after upstream; secret scans start here |
 | `tools/check-architecture.ps1` | Fails if ARCHITECTURE.md and the tracked files disagree (Windows) |
 | `tools/check-architecture.sh` | Fails if ARCHITECTURE.md and the tracked files disagree (Unix) |

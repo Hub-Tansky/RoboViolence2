@@ -5,6 +5,7 @@ Builds a fake Testing/Temporary from a LastTest.log in ctest's format (CRLF, as 
 """
 import importlib.util
 import os
+import subprocess
 import sys
 import tempfile
 
@@ -36,7 +37,7 @@ with tempfile.TemporaryDirectory() as d:
     os.makedirs(tmp)
     long_out = [f"line {i}" for i in range(1, 41)] + ["ASSERT failed: x == 2"]
     log = ["Start testing", RULE] + section(1, "good", ["fine"], True) + section(2, "net_layout", long_out, False) \
-        + section(3, "smoke", ["```", "boom"], False)
+        + section(3, "smoke", ["```", "1/9 Test: nested ctest progress", "caf\u00e9 \u2713", "boom"], False)
     with open(os.path.join(tmp, "LastTest.log"), "w", newline="\r\n") as f:
         f.write("\n".join(log))
     with open(os.path.join(tmp, "LastTestsFailed.log"), "w") as f:
@@ -49,9 +50,20 @@ with tempfile.TemporaryDirectory() as d:
     check("line 11\n" not in text and "line 12\n" in text, "only the last 30 lines are shown")
     check("\r" not in text, "CRLF is stripped")
     check(RULE not in text, "the rule after Output: is dropped")
-    check("````\n```\nboom\n````" in text, "a ``` in the output stays inside the fence")
 
+    check("````\n```\n1/9 Test: nested ctest progress\ncaf\u00e9 \u2713\nboom\n````" in text, "a ctest-like line inside output keeps the tail")
     check(mod.summary([os.path.join(d, "missing")]).startswith("No failed ctest tests"), "no failures: one plain line")
+
+    # main(): appends to $GITHUB_STEP_SUMMARY, writes UTF-8 to a cp1252 console (Windows runner), returns 0.
+    step = os.path.join(d, "summary.md")
+    with open(step, "w", encoding="utf-8") as f:
+        f.write("earlier step\n")
+    code = subprocess.run([sys.executable, "-B", os.path.join(ROOT, "tools", "ci-test-summary.py"), d], capture_output=True,
+                          env=dict(os.environ, GITHUB_STEP_SUMMARY=step, PYTHONIOENCODING="cp1252")).returncode
+    with open(step, encoding="utf-8") as f:
+        written = f.read()
+    check(code == 0, "main() exits 0 with non-cp1252 output on a cp1252 console")
+    check(written.startswith("earlier step\n") and "caf\u00e9 \u2713" in written, "the summary is appended after earlier text")
 
 print("ci_test_summary: " + ("FAILED" if failures else "ok"))
 sys.exit(1 if failures else 0)

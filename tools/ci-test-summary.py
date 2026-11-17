@@ -34,7 +34,7 @@ def outputs(tmp):
     with f:
         for raw in f:
             line = raw.rstrip("\r\n")
-            m = re.match(r"^\d+/\d+ Test: (.+)$", line)
+            m = re.match(r"^\d+/\d+ Test: (.+)$", line) if lines is None else None  # never inside a test's output
             if m:
                 name, lines = m.group(1), None
             elif name and lines is None and line == "Output:":
@@ -69,7 +69,9 @@ def main(argv):
     if path:
         with open(path, "a", encoding="utf-8") as f:
             f.write(text)
-    sys.stdout.write(text)  # also the log's last step, for `gh run view --log-failed`
+    # Also the log's last step, for `gh run view --log-failed`. UTF-8 whatever the console codepage (Windows: cp1252).
+    sys.stdout.buffer.write(text.encode("utf-8", "replace"))
+    sys.stdout.flush()
     return 0
 
 
