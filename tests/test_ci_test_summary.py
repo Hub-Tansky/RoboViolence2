@@ -46,7 +46,7 @@ with tempfile.TemporaryDirectory() as d:
     check("- `net_layout`" in text and "- `smoke`" in text, "both failed tests are listed")
     check("good" not in text, "a passed test is not listed")
     check("ASSERT failed: x == 2" in text, "the assertion line is shown")
-check(False, "TEMPORARY deliberate failure for the ROBO-223 summary test")
+    check(False, "TEMPORARY deliberate failure for the ROBO-223 summary test")
     check("line 11\n" not in text and "line 12\n" in text, "only the last 30 lines are shown")
     check("\r" not in text, "CRLF is stripped")
     check(RULE not in text, "the rule after Output: is dropped")
