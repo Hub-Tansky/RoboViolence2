@@ -301,11 +301,11 @@ void Game::createMap()
 			{
 			/*	if (rand()%2 == 0)
 				{*/
-			dksPlayMusic(bv2::assetPath("sounds/Music"), -1, 60);
+					dksPlayMusic(bv2::assetPath("sounds/Music"), -1, 60);
 			/*	}
 				else
 				{
-					dksPlayMusic(bv2::assetPath("sounds/InGame02"), -1);
+					dksPlayMusic("main/sounds/InGame02.ogg", -1);
 				}*/
 			}
 		}

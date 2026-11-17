@@ -85,7 +85,7 @@ Scene::Scene()
 	menuManager.root->enable = true;
 	menuManager.root->visible = false; //--- Not now */
 	dksSetSfxMasterVolume(gameVar.s_masterVolume);
-	//	dksPlayMusic(bv2::assetPath("sounds/Menu"), -1);
+//	dksPlayMusic("main/sounds/Menu.ogg", -1);
 
 #endif
 	// On reset el timer
@@ -142,8 +142,7 @@ void Scene::update(float delay)
 		if (introScreen->showDelay <= 0) 
 		{
 			ZEVEN_SAFE_DELETE(introScreen);
-			if (gameVar.s_inGameMusic)
-				dksPlayMusic(bv2::assetPath("sounds/Menu"), -1);
+			if (gameVar.s_inGameMusic) dksPlayMusic(bv2::assetPath("sounds/Menu"), -1);
 			createMenu();
 			menuManager.root->visible = true;
 		}

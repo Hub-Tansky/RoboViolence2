@@ -18,14 +18,13 @@
 
 #ifndef CONSOLE
 #include "Client.h"
-#	include "AssetRegistry.h"
-#	include "PacketCheck.h"
-#	include <set>
-#	include <vector>
-#	include "netPacket.h"
-#	include "Console.h"
-#	include "Scene.h"
-#	include "CStatus.h"
+#include "PacketCheck.h"
+#include <set>
+#include <vector>
+#include "netPacket.h"
+#include "Console.h"
+#include "Scene.h"
+#include "CStatus.h"
 
 extern Scene * scene;
 
@@ -396,15 +395,15 @@ void Client::recvPacket(char * wire, int size, int typeID)
 				this->needToShutDown = true;
 
 			//--- On start ça ste tune là !
-			/*		if (gameVar.s_inGameMusic)
+	/*		if (gameVar.s_inGameMusic)
 			{
 				if (rand()%2 == 0)
 				{
-					dksPlayMusic(bv2::assetPath("sounds/InGame01"), -1);
+					dksPlayMusic("main/sounds/InGame01.ogg", -1);
 				}
 				else
 				{
-					dksPlayMusic(bv2::assetPath("sounds/InGame02"), -1);
+					dksPlayMusic("main/sounds/InGame02.ogg", -1);
 				}
 			}*/
 			break;

@@ -146,11 +146,15 @@ set(BV2_SERVER_SOURCES
 # (no pack.tsv) resolves the same ids. Re-runs CMake when the manifest changes.
 set(BV2_BASE_PACK "${CMAKE_SOURCE_DIR}/content/base-pack.tsv")
 set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${BV2_BASE_PACK}")
+# A ';' in a row would split it into two CMake list items; tests/test_asset_ids.py fails on one in an id or file.
 file(STRINGS "${BV2_BASE_PACK}" bv2_pack_lines REGEX "^[^#]" ENCODING UTF-8)
 set(BV2_BASE_PACK_ROWS "")
 foreach(line IN LISTS bv2_pack_lines)
   if(line MATCHES "^id\t")
     continue()
+  endif()
+  if(line MATCHES "[\"\\\\]")
+    message(FATAL_ERROR "content/base-pack.tsv: a row has a quote or backslash, which BasePackIds.cpp can't hold: ${line}")
   endif()
   if(line MATCHES "^([^\t]+)\t([^\t]+)\t")
     string(APPEND BV2_BASE_PACK_ROWS "\t\t{\"${CMAKE_MATCH_1}\", \"${CMAKE_MATCH_2}\"},\n")

@@ -16,17 +16,17 @@
 	BaboViolent 2 source code. If not, see http://www.gnu.org/licenses/.
 */
 
+#include "AssetRegistry.h"
 #ifndef CONSOLE
 #include "Client.h"
-#	include "AssetRegistry.h"
-#	include "netPacket.h"
-#	include "Console.h"
-#	include "Helper.h"
-#	include "GameVar.h"
-#	include "Scene.h"
-#	include "CStatus.h"
+#include "netPacket.h"
+#include "Console.h"
+#include "Helper.h"
+#include "GameVar.h"
+#include "Scene.h"
+#include "CStatus.h"
 
-#	include "screengrab.h"
+#include "screengrab.h"
 
 extern Scene * scene;
 

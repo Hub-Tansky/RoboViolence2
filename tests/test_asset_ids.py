@@ -22,7 +22,12 @@ def manifest_ids(path):
         if header is None:
             header = cols
             continue
-        ids.add(dict(zip(header, cols))["id"])
+        row = dict(zip(header, cols))
+        for col in ("id", "file"):
+            if re.search(r'[;"\\]', row[col]):  # game/CMakeLists.txt compiles these into BasePackIds.cpp
+                print(f"FAIL: content/base-pack.tsv {col} {row[col]!r} has ; \" or \\")
+                ids.add(None)
+        ids.add(row["id"])
     return ids
 
 
@@ -41,17 +46,19 @@ def asked_ids(text):
 
 def main():
     ids = manifest_ids(os.path.join(ROOT, "content", "base-pack.tsv"))
-    bad, seen = [], 0
+    bad, seen = ([] if None not in ids else ["content/base-pack.tsv: bad character in an id or file"]), 0
     for rel in built_sources(ROOT) + ["src/Weapon.h"]:
         path = os.path.join(ROOT, "game", rel)
         if not os.path.exists(path):
             continue
         text = open(path, encoding="utf-8", errors="replace").read()
-        text = re.sub(r"//[^\n]*", "", text)  # commented-out loads ask for nothing
+        # commented-out loads ask for nothing; block comments keep their newlines so line numbers still match
+        text = re.sub(r"/\*.*?\*/", lambda m: "\n" * m.group(0).count("\n"), text, flags=re.S)
+        text = re.sub(r"//[^\n]*", "", text)
         for asset_id in asked_ids(text):
             seen += 1
             if asset_id not in ids:
-                line = text[: text.find('"' + asset_id + '"')].count("\n") + 1  # comments removed: lines still match
+                line = text[: text.find('"' + asset_id + '"')].count("\n") + 1
                 bad.append(f"game/{rel}:{line}: asset id \"{asset_id}\" is not in content/base-pack.tsv")
     for b in bad:
         print("FAIL:", b)
