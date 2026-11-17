@@ -340,7 +340,7 @@ The game's own maps (BV2 format 20202), GPL-3.0 like the code. The build copies 
 
 | path | purpose |
 |---|---|
-| `docs/build/README.md` | Download vs build, game data, playing a local game, tests |
+| `docs/build/README.md` | Download vs build, game data, playing a local game, tests, CI jobs |
 | `docs/build/linux.md` | Linux build and run guide; build without vcpkg and screenshot golden regeneration |
 | `docs/build/macos.md` | macOS build and run guide |
 | `docs/build/windows.md` | Windows build and run guide |
@@ -403,6 +403,7 @@ The game's own maps (BV2 format 20202), GPL-3.0 like the code. The build copies 
 | `docs/decisions/0055-browser-refresh-uses-a-fresh-master-session.md` | ADR: every server list request opens a fresh master session (a hosting game keeps its own), and every opening of the Browse tab requests the list; a router can silently drop an idle session (ROBO-217) |
 | `docs/decisions/0056-main-ci-runs-finish-notify-nightly-fuzz.md` | ADR: `build` runs on `main` and tags are never cancelled by a newer push, a failed `main` run posts to ntfy (`NTFY_TOPIC`), `fuzz` runs nightly in `fuzz.yml` |
 | `docs/decisions/0057-review-record-keyed-to-patch-id-post-deploy-criteria.md` | ADR: a review record stays current while the diff's patch-id is unchanged (merges from main); Spec status `post-deploy` for `(post-deploy)` criteria |
+| `docs/decisions/0058-agent-rule-order-ground-rules-3-4-refactor-only.md` | ADR: agent rule order (scope item, minimal-change rules, ground rules); ground rules 3 and 4 only in `refactor` items; amends 0009 |
 | `docs/decisions/0059-slim-review-docs-gate-only-incremental-rounds.md` | ADR: docs tier runs no review worker; code-tier workers run in sequence on hunks, later rounds only on new commits, two rounds at most |
 | `docs/decisions/0060-merge-by-risk-tier-with-owner-brief.md` | ADR: LOW/MEDIUM/HIGH merge tier from `tools/merge-risk.py`; agents merge LOW and MEDIUM on green with an owner brief, HIGH waits for the owner's playtest and "merge" |
 | `docs/decisions/README.md` | ADR format and index |
