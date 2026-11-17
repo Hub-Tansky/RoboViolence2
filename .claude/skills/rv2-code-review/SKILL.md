@@ -5,7 +5,7 @@ description: Robo Violence 2's PR review workflow (REVIEW.md section 5). Pins th
 
 # rv2-code-review
 
-Protocol: rv2-code-review c0914723e6e5
+Protocol: rv2-code-review 3afe5c65a8d0
 
 Adapted from `skills/engineering/code-review` in [mattpocock/skills](https://github.com/mattpocock/skills) at `4ae2317ddb22b046e26455e4f9c9b3aaaf62212d` (MIT; notice in `UPSTREAM-LICENSE`). Changes: a missing spec blocks instead of skipping the axis, no smell baseline, a matrix for Spec, a Risk worker, and the record in REVIEW.md. Upgrade only by a reviewed PR that updates this SHA.
 
@@ -13,27 +13,27 @@ Adapted from `skills/engineering/code-review` in [mattpocock/skills](https://git
 
 You are the parent. You pin, launch and aggregate. You don't review, filter or re-rank.
 
-1. **Pin.** `mb=$(git merge-base origin/main HEAD)`, `head=$(git rev-parse HEAD)`. Stop if `git diff --text $mb...$head` is empty or the tree is dirty. Write `Patch-id: $(git -c diff.noprefix=false -c diff.mnemonicPrefix=false -c diff.renames=true diff --text --no-ext-diff --no-color --no-textconv $mb...$head | git patch-id --verbatim | cut -d' ' -f1)` under the record's `Diff:` line (the same command as `PATCH_DIFF` in `tools/check-review-record.py`).
-2. **Run** `tools/review.sh`. Its NOTE gives the tier and whether Risk is required. Stop on a failure.
+1. **Pin.** `mb=$(git merge-base origin/main HEAD)`, `head=$(git rev-parse HEAD)`. Stop if `git diff --text $mb...$head` is empty or the tree is dirty. Write `Patch-id: $(git -c diff.noprefix=false -c diff.mnemonicPrefix=false -c diff.renames=true diff --text --no-ext-diff --no-color --no-textconv $mb...$head | git patch-id --verbatim | cut -d' ' -f1)` under the record's `Diff:` line (the same command as `PATCH_DIFF` in `tools/check-review-record.py`), then `Rounds: <n>`.
+2. **Run** `tools/review.sh`. Its NOTE gives the tier and whether Risk is required. Stop on a failure. In the docs tier stop here: no worker runs, and the record holds only `### review.sh` and `### Not done / unsure` (REVIEW.md section 5).
 3. **Resolve the spec source.** Take `ROBO-NNN` from the PR's Item row. Read `40-backlog/*/ROBO-NNN *.md` in the local vault (`~/Dev/RoboViolence2/Robo2-docs`) first, since it can be ahead of GitHub; without a local vault, use `gh api repos/Hub-Tansky/rv2-docs/contents/<path>`. Never commit or move changes you didn't make.
    - `Spec source: ROBO-NNN rv2-docs@<vault HEAD> blob:<first 12 hex of git hash-object FILE>`
    - Append ` (uncommitted)` when `git status --porcelain -- FILE` in the vault lists the item.
    - Also fetch the item's linked issue, if any. Precedence: acceptance criteria, then linked issue, then PR goal.
-4. **Launch the workers in parallel**, each with a fresh context and none of this conversation:
+4. **Launch the workers one after another**, each with a fresh context and none of this conversation:
 
    | Tier | Workers |
    |---|---|
-   | docs | Standards |
+   | docs | none (the gate only) |
    | code | Standards, Spec |
    | Risk required, or the owner asked | those, plus Risk |
 
    Each prompt is: "Read `.claude/skills/rv2-code-review/SKILL.md` and follow only its sections `<Worker> worker` and `Rules for every worker`", then that section's inputs. Add earlier outcomes of the same axis in a later round. Never give a worker another worker's report or your own opinion.
 5. **Aggregate.** Paste each report unedited into its section of the record (REVIEW.md template). Write a one-line summary per axis, naming the axis's worst finding. Don't pick a winner across axes, and don't change a severity.
-6. **Act.** Follow REVIEW.md section 5. After fixes, rerun every required worker on the full diff at the new head. Stop when a round finds no new blocker. A later merge from main that leaves the Patch-id unchanged needs no new round. The gate accepts the old head; updating `Diff:` is optional.
+6. **Act.** Follow REVIEW.md section 5. After fixes, rerun only the axes that had a blocker, on `git diff --text <last reviewed head>..HEAD` plus their open findings. Two rounds at most. Send what is left to the owner in one message. A later merge from main that leaves the Patch-id unchanged needs no new round. The gate accepts the old head; updating `Diff:` is optional.
 
 ## Rules for every worker
 
-- You are read-only. Review `git diff --text <merge-base>...<head>` (`.gitattributes` hides Markdown diffs without `--text`), and read each changed file in full. Don't spawn workers.
+- You are read-only. Review `git diff --text <merge-base>...<head>` (`.gitattributes` hides Markdown diffs without `--text`; in a later round, the range you are given). Read each changed hunk with 40 lines of context (`-U40`); open the whole file only to trace a defect you will report. The Risk worker reads whole files. Don't spawn workers.
 - Don't re-raise a finding the earlier outcomes for your axis rejected or deferred.
 - Skip what `tools/review.sh` and CI enforce.
 - Cite each finding as `path:line`, source rule or criterion, evidence, and the smallest in-scope remedy.
@@ -69,7 +69,7 @@ Read `AGENTS.md`, `REVIEW.md`, and the ADRs and module READMEs for the changed a
 - **Blockers:** a breach of a documented rule (cite file and rule), including REVIEW.md section 2; a direct defect the diff introduces, meaning a regression or a bug in new code, shown by a traced path.
 - **Suggestions:** REVIEW.md's maintainability rules, and improvements a documented rule supports.
 
-Don't judge whether the diff meets its goal or scope item. In the docs tier, check only the documented rules for documentation and whether the text is correct against the code.
+Don't judge whether the diff meets its goal or scope item.
 
 ## Spec worker
 

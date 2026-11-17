@@ -402,6 +402,7 @@ The game's own maps (BV2 format 20202), GPL-3.0 like the code. The build copies 
 | `docs/decisions/0055-browser-refresh-uses-a-fresh-master-session.md` | ADR: every server list request opens a fresh master session (a hosting game keeps its own), and every opening of the Browse tab requests the list; a router can silently drop an idle session (ROBO-217) |
 | `docs/decisions/0056-main-ci-runs-finish-notify-nightly-fuzz.md` | ADR: `build` runs on `main` and tags are never cancelled by a newer push, a failed `main` run posts to ntfy (`NTFY_TOPIC`), `fuzz` runs nightly in `fuzz.yml` |
 | `docs/decisions/0057-review-record-keyed-to-patch-id-post-deploy-criteria.md` | ADR: a review record stays current while the diff's patch-id is unchanged (merges from main); Spec status `post-deploy` for `(post-deploy)` criteria |
+| `docs/decisions/0059-slim-review-docs-gate-only-incremental-rounds.md` | ADR: docs tier runs no review worker; code-tier workers run in sequence on hunks, later rounds only on new commits, two rounds at most |
 | `docs/decisions/README.md` | ADR format and index |
 
 ### `docs/ops`
@@ -854,7 +855,7 @@ The game's own maps (BV2 format 20202), GPL-3.0 like the code. The build copies 
 | `tools/gen-placeholder-content.py` | Writes placeholder maps, textures, a readable font atlas, sounds and models for dev and CI |
 | `tools/gen-app-icon.py` | Renders the application icons and the `.dmg` background into `packaging/` (by hand; numpy, Pillow) |
 | `tools/check-hygiene.py` | Fails on spaces in paths, tracked files ignored by .gitignore (checked case-insensitively, as on macOS), files over 5 MB, bad encoding, failed translation check |
-| `tools/check-review-record.py` | Review tier from changed paths, `Protocol:` hash, and the review record of a ready PR (REVIEW.md section 5): current by head or by the diff's `Patch-id`, Spec `post-deploy` only for `(post-deploy)` criteria (ADR 0057) |
+| `tools/check-review-record.py` | Review tier from changed paths, `Protocol:` hash, and the review record of a ready PR (REVIEW.md section 5; docs tier: `### review.sh` and `### Not done / unsure` only, ADR 0059): current by head or by the diff's `Patch-id`, Spec `post-deploy` only for `(post-deploy)` criteria (ADR 0057) |
 | `tools/lang-check.py` | Fails when `en.pot` is stale, a `.po` is invalid, has unknown keys or changes printf conversions; warns about missing glyphs; lists untranslated keys |
 | `tools/lang-to-pot.py` | Generates `content/languages/en.pot` from `en.lang` |
 | `tools/seed_db.cpp` | Creates a SQLite DB from SQL files (build helper) |

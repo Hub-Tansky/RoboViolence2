@@ -1,6 +1,6 @@
 # 0047: PR review runs isolated Standards and Spec workers from a vendored skill
 
-- Status: Accepted (record freshness and Spec statuses amended by [ADR 0057](0057-review-record-keyed-to-patch-id-post-deploy-criteria.md))
+- Status: Accepted (record freshness and Spec statuses amended by [ADR 0057](0057-review-record-keyed-to-patch-id-post-deploy-criteria.md); docs tier and later rounds by [ADR 0059](0059-slim-review-docs-gate-only-incremental-rounds.md))
 - Date: 2026-11-07
 - Affects: ROBO-181, [REVIEW.md](../../REVIEW.md), `.claude/skills/rv2-code-review/`, `tools/check-review-record.py`; supersedes [0037](0037-review-rubric-single-repo-copy.md)
 
