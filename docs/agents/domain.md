@@ -7,7 +7,7 @@ Multi-context repo. How the engineering skills read this repo's domain docs.
 - `CONTEXT-MAP.md` at the repo root: lists the contexts and their `CONTEXT.md` glossaries (code review at the root, game in `game/`). `/domain-modeling` adds terms to the one the topic belongs to.
 - `CONTEXT.md` in rv2-docs: backlog terms (scope item, `ROBO-NNN`, status, GUI item, area).
 - `docs/decisions/` (not `docs/adr/`): the ADRs, indexed in its README. Read the ones touching the area you work in. New ADRs go there in its format.
-- `AGENTS.md` and `ARCHITECTURE.md`: rules, layout and the file inventory.
+- `AGENTS.md` and `ARCHITECTURE.md`: rules, layout, facts and the module directories.
 
 If a file doesn't exist, proceed silently. Don't suggest creating it upfront.
 
