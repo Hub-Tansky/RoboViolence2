@@ -14,4 +14,5 @@
 ## Consequences
 - A PR that only adds files to an existing module needs no `ARCHITECTURE.md` edit; a new module directory needs a row.
 - A file's purpose lives in its header comment, its module README or the ADR that added it. The last per-file table is `git show 276d92d:ARCHITECTURE.md`.
+- `tools/check-architecture.sh` is the only checker; its PowerShell copy is removed (nothing called it).
 - Rejected: generating the table from header comments (another tool to keep green for a list nobody needs to read in full).

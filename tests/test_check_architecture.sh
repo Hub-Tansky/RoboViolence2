@@ -32,6 +32,9 @@ expect "a new module directory without a row fails" 1 "no row in ARCHITECTURE.md
 rows game/src engine/zeven engine/newmod tests tools packaging/gone
 expect "a row naming a missing directory fails" 1 "row names a missing directory: packaging/gone/"
 
+mkdir -p packaging/gone && echo x > packaging/gone/untracked.o
+expect "a row naming a directory with only untracked files fails" 1 "row names a missing directory: packaging/gone/"
+
 rows game/src engine/zeven engine/newmod tests tools
 expect "rows outside the Modules section don't count" 0 "ok:"
 
