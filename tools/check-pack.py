@@ -3,7 +3,8 @@
 
 Usage: check-pack.py <pack dir> [--manifest FILE]   (default manifest: <pack dir>/pack.tsv)
 Fails when the header lacks a column, a row has an empty id, file, type, author or licence, an unknown type,
-a duplicate id (case-insensitive), or a file missing from the pack. A row whose source is `missing` may lack its file;
+a duplicate id (case-insensitive), an id or file that leaves the pack root (absolute, `..`, backslash), or a file missing
+from the pack. A row whose source is `missing` may lack its file;
 it is listed as a NOTE. Python 3, stdlib only.
 """
 import os
@@ -12,6 +13,11 @@ import sys
 COLUMNS = ["id", "file", "type", "format", "author", "tool", "licence", "source"]
 REQUIRED = ["id", "file", "type", "author", "licence"]
 TYPES = {"texture", "sound", "model", "font"}
+
+
+def outside_root(path):
+    """True when a manifest path could leave the pack root: absolute, a drive, a backslash or a `..` part."""
+    return path.startswith("/") or ":" in path or "\\" in path or ".." in path.split("/")
 
 
 def check(pack, manifest):
@@ -35,6 +41,10 @@ def check(pack, manifest):
             problems.append(f"{manifest}:{n}: {row['id'] or '?'}: empty {', '.join(empty)}")
         if row["type"] and row["type"] not in TYPES:
             problems.append(f"{manifest}:{n}: {row['id']}: unknown type '{row['type']}'")
+        bad = [c for c in ("id", "file") if outside_root(row[c])]
+        if bad:
+            problems.append(f"{manifest}:{n}: {row['id']}: {' and '.join(bad)} must stay inside the pack root")
+            continue
         key = row["id"].lower()
         if key in ids:
             problems.append(f"{manifest}:{n}: {row['id']}: duplicate id (line {ids[key]})")

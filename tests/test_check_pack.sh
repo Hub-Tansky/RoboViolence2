@@ -31,6 +31,12 @@ manifest "$good" "TEXTURES/a|textures/A.tga|texture|TGA|Ann|Krita|CC0-1.0|own"
 expect "duplicate id (case-insensitive) fails" 1 "duplicate id"
 manifest "textures/A|textures/A.tga|picture|TGA|Ann|Krita|CC0-1.0|own"
 expect "unknown type fails" 1 "unknown type"
+manifest "$good" "textures/C|../outside.tga|texture|TGA|Ann|Krita|CC0-1.0|own"
+expect "a file outside the pack root fails" 1 "file must stay inside the pack root"
+manifest "$good" "/etc/x|textures/A.tga|texture|TGA|Ann|Krita|CC0-1.0|own"
+expect "an absolute id fails" 1 "id must stay inside the pack root"
+manifest "$good" "textures/D|textures/D.tga|texture|TGA|Ann|Krita|CC0-1.0"
+expect "a row with too few columns fails" 1 "7 columns, header has 8"
 printf 'id\tfile\n' > pack.tsv
 expect "header without a column fails" 1 "header lacks"
 
