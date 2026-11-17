@@ -14,7 +14,8 @@ WEAPON_IDS = re.compile(r'new Weapon\(\s*"([^"]*)"\s*,\s*"([^"]*)"')
 
 
 def manifest_ids(path):
-    ids, header = set(), None
+    """(ids, errors): the manifest's ids, and rows whose id or file game/CMakeLists.txt can't compile in"""
+    ids, errors, header = set(), [], None
     for line in open(path, encoding="utf-8"):
         if line.startswith("#") or not line.strip():
             continue
@@ -25,10 +26,9 @@ def manifest_ids(path):
         row = dict(zip(header, cols))
         for col in ("id", "file"):
             if re.search(r'[;"\\]', row[col]):  # game/CMakeLists.txt compiles these into BasePackIds.cpp
-                print(f"FAIL: content/base-pack.tsv {col} {row[col]!r} has ; \" or \\")
-                ids.add(None)
+                errors.append(f"content/base-pack.tsv: {col} {row[col]!r} has ; \" or \\")
         ids.add(row["id"])
-    return ids
+    return ids, errors
 
 
 def built_sources(root):
@@ -45,16 +45,16 @@ def asked_ids(text):
 
 
 def main():
-    ids = manifest_ids(os.path.join(ROOT, "content", "base-pack.tsv"))
-    bad, seen = ([] if None not in ids else ["content/base-pack.tsv: bad character in an id or file"]), 0
+    ids, bad = manifest_ids(os.path.join(ROOT, "content", "base-pack.tsv"))
+    seen = 0
     for rel in built_sources(ROOT) + ["src/Weapon.h"]:
         path = os.path.join(ROOT, "game", rel)
         if not os.path.exists(path):
             continue
         text = open(path, encoding="utf-8", errors="replace").read()
-        # commented-out loads ask for nothing; block comments keep their newlines so line numbers still match
-        text = re.sub(r"/\*.*?\*/", lambda m: "\n" * m.group(0).count("\n"), text, flags=re.S)
-        text = re.sub(r"//[^\n]*", "", text)
+        # Commented-out loads ask for nothing. One left-to-right pass, so a "/*" inside a // comment opens no block;
+        # stripped comments keep their newlines so line numbers still match.
+        text = re.sub(r"//[^\n]*|/\*.*?\*/", lambda m: "\n" * m.group(0).count("\n"), text, flags=re.S)
         for asset_id in asked_ids(text):
             seen += 1
             if asset_id not in ids:
