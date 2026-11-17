@@ -406,6 +406,7 @@ The game's own maps (BV2 format 20202), GPL-3.0 like the code. The build copies 
 | `docs/decisions/0058-agent-rule-order-ground-rules-3-4-refactor-only.md` | ADR: agent rule order (scope item, minimal-change rules, ground rules); ground rules 3 and 4 only in `refactor` items; amends 0009 |
 | `docs/decisions/0059-slim-review-docs-gate-only-incremental-rounds.md` | ADR: docs tier runs no review worker; code-tier workers run in sequence on hunks, later rounds only on new commits, two rounds at most |
 | `docs/decisions/0060-merge-by-risk-tier-with-owner-brief.md` | ADR: LOW/MEDIUM/HIGH merge tier from `tools/merge-risk.py`; agents merge LOW and MEDIUM on green with an owner brief, HIGH waits for the owner's playtest and "merge" |
+| `docs/decisions/0062-asset-packs-mode-modules-client-independent-server.md` | ADR: long-term direction (asset seam, rules seam, front seam) and rules R1 to R8 for new code; ground rules 5 to 9 |
 | `docs/decisions/README.md` | ADR format and index |
 
 ### `docs/ops`

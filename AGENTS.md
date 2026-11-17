@@ -88,6 +88,14 @@ Multi-context: `CONTEXT-MAP.md` lists the glossaries (root `CONTEXT.md` for code
 3. In items of kind `refactor` only: **Internal renaming** ([ADR 0009](docs/decisions/0009-rename-internal-identifiers-continuously.md)). Replace `bv2`/`babo` with `roboviolence2` in code symbols, namespaces, source file and class names, internal CMake targets and variables, and comments, in files a PR already touches. Binaries (`bv2`, `bv2dedicated`, `bv2master`), `BV2_*` env vars and CMake options, cvars, config and pref paths, `bv2.db`, file formats, protocol and master-server IDs, and visible strings wait for the rebrand (PNS-20, H.7). Renames are separate mechanical commits; tests stay green.
 4. In items of kind `refactor` only: **Touch-and-improve** (PNS-19). In files a PR already touches, replace raw `sprintf`/`strcpy`/`strcat` with `snprintf` or `std::string`, and use `std::unique_ptr` where ownership is clear. Add a test with each fix.
 
+Rules 5 to 9 keep new code from adding debt against the long-term direction ([ADR 0062](docs/decisions/0062-asset-packs-mode-modules-client-independent-server.md)); they apply to every PR, and moving old code is for `refactor` items.
+
+5. **Asset ids:** no new asset path literal (`"main/…"`) in game code; a new asset gets an id in the pack manifest.
+6. **No new `CONSOLE` split:** no new `#ifdef CONSOLE` or `#ifndef CONSOLE`; rules code includes no GL, audio or input header.
+7. **Modes:** no new `gameType ==` branch outside mode code.
+8. **Data, not code:** tunable numbers go in data files or cvars, not in constructor calls.
+9. **Protocol:** a new or changed network message gets explicit field-by-field read and write, a sample in `tests/corpus/` and a line in the protocol doc; messages carry ids, never file names or paths.
+
 PNS-n is an old id: scope item ROBO-0nn carries it in `aliases`.
 
 ## Deprecated, to be removed
