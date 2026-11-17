@@ -2,7 +2,8 @@
 """Phase T4: end-to-end scenarios: bv2dedicated with the admin API, plus bv2 autotest clients under Xvfb.
 
 Usage: e2e.py <runtime dir> <scratch dir> <scenario>
-Scenarios: join_leave, password, chat, kick, ban, master_list, browser_tab_list, ctf_capture, ghost, user_map, weapon_choice. Each has one observable: the admin API's
+Scenarios: join_leave, password, chat, kick, ban, master_list, browser_tab_list, ctf_capture, ghost, user_map, weapon_choice,
+grenade, rocket, flamethrower, photon_rifle, nuke. Each has one observable: the admin API's
 `GET /status` player count or score, the server's stdout, or a client's autotest result (ADR 0025). Linux only (Xvfb).
 """
 import os
@@ -111,14 +112,17 @@ class Run:
     def command(self, text):
         return self.admin("POST", "/command", text.encode())
 
-    def client(self, name, steps, **env):
-        """Starts a bv2 autotest client named `name`; returns its process (exit 0 = its script passed)"""
+    def client(self, name, steps, timeout=None, **env):
+        """Starts a bv2 autotest client named `name`; returns its process (exit 0 = its script passed). `timeout`: the
+        script's limit in seconds when it needs more than the default 60 (--timeout, ADR 0025)"""
         pref = os.path.join(self.dir, name)
         os.makedirs(pref)
         script = os.path.join(pref, "script.txt")
         with open(script, "w") as f:
             f.write("\n".join(steps) + "\n")
         cmd, client_env = client_command(os.path.join(self.runtime, "bv2"), pref, script, f'cl_playerName "{name}"\n')
+        if timeout:
+            cmd += ["--timeout", str(timeout)]
         log = open(os.path.join(pref, "client.log"), "w")
         self.logs.append(log)
         return self.start(cmd, cwd=self.runtime, env=dict(client_env, DISPLAY=self.display, **env), stdout=log,
@@ -286,8 +290,93 @@ def weapon_choice(run):
     check(spawned()[0] == "6", f"spawn after joining again with the chosen gun 6, got {spawned()[0]}")
     check(run.finished(client) == 0, "client script passed")
 
+# Weapons and effects (ROBO-240): every server message the client gets in a fight must pass its packet check. A dropped
+# one is logged once ("Dropped server message <type>", ClientRecv.cpp), as ROBO-198's grenade explosion was
+GRENADE, BAZOOKA, PHOTON_RIFLE, FLAME_THROWER, NUCLEAR = 8, 5, 6, 7, 11  # game/src/GameVar.h
+FIGHT_LAUNCH = (b"set sv_gameType 1\nset sv_port 3333\nset sv_showKills true\nset sv_forceRespawn true\nset sv_spawnImmunityTime 0\n"
+                b"dedicate TDM-Placeholder\n")  # team deathmatch: the bot fights instead of running for a flag
+
+
+def fight(run, death, setup=b""):
+    """e2e-a on blue, facing one red bot on TDM-Placeholder (an open 16 x 16 arena); returns (e2e-a's slot, the bot's slot, client).
+    sv_bots 2 with one human on blue leaves one bot, on red (BotRoster.cpp). The client passes once its console shows
+    e2e-a killed by the weapon named `death` (`<killer> -----<weapon>-----> e2e-a`, Player.cpp)"""
+    run.server(launch=setup + FIGHT_LAUNCH, BV2_SV_BOTS="2")
+    # "wait 2" is not a wait for a condition: it keeps the client up for effect messages sent after the kill, for no_dropped_messages
+    client = run.client("e2e-a", JOIN + [f"expect-console -----{death}-----> ", "wait 2"], timeout=100)
+    run.joined("e2e-a")
+    run.command("move 0 e2e-a")
+    slots = {}
+
+    def found():
+        text = run.command("playerlist")
+        human = re.search(r"^\[(\d+)\] e2e-a ", text, re.M)
+        bots = re.findall(r"^\[(\d+)\] .*\[bot\]", text, re.M)
+        if human and len(bots) == 1:
+            slots.update(human=int(human.group(1)), bot=int(bots[0]))  # playerlist pads: [02]
+        return bool(slots)
+    wait(found, 20, "playerlist: e2e-a and one bot", API_INTERVAL)
+    wait(lambda: "Player e2e-a spawned" in run.server_text(), 20, "e2e-a spawned (sv_forceRespawn)")
+    return slots["human"], slots["bot"], client
+
+
+def killed(run, victim, weapon):
+    """The server's kill lines (sv_showKills) with this victim and weapon: `Player id:<victim> killed player id:<killer>`"""
+    return re.findall(rf"Player id:{victim} killed player id:\d+ with weapon id:{weapon}\b", run.server_text())
+
+
+def no_dropped_messages(run, client):
+    check(run.finished(client) == 0, "client script passed")
+    log = open(os.path.join(run.dir, "e2e-a", "client.log"), errors="replace").read()
+    dropped = re.findall(r"Dropped server message \d+ \(size \d+\)", log)
+    check(not dropped, f"client accepted every server message, dropped: {dropped}")
+
+
+def bot_kills_with(run, weapon, death, gun=None, setup=b""):
+    """The bot gets `gun` (default `weapon`) and stands 4 m from e2e-a; it shoots on sight (Bot.cpp). Waits for a kill
+    with `weapon`, named `death` on the client"""
+    human, bot, client = fight(run, death, setup)
+    run.command(f"forceplayerspawn {human} 6 8")
+    run.command(f"forceplayerspawn {bot} 10 8 {weapon if gun is None else gun}")
+    wait(lambda: killed(run, human, weapon), 45, f"e2e-a killed with weapon {weapon}")
+    no_dropped_messages(run, client)
+
+
+def rocket(run):
+    bot_kills_with(run, BAZOOKA, "Bazooka")
+
+
+def photon_rifle(run):
+    bot_kills_with(run, PHOTON_RIFLE, "Photon Rifle")
+
+
+def flamethrower(run):
+    """Held fire shrinks the flame to sv_ftMinRange (1 m) after sv_ftExpirationTimer (Game.cpp shootSV), shorter than the
+    bot's 1.5 m standoff (Bot.cpp flankGoal). A bot never lets go of the trigger, so its flame stops reaching (ROBO-241).
+    Timer 0 keeps the full range"""
+    bot_kills_with(run, FLAME_THROWER, "Flame Thrower", setup=b"set sv_ftExpirationTimer 0\n")
+
+
+def grenade(run):
+    """Bots throw a grenade every fourth shot at 2 to 6.5 m (Bot.cpp), never in a team game with friendly fire on
+    (holdsForTeammate). Pro rules with zero SMG damage leave the grenade (and the knife, under 1 m) as the only way the
+    bot can hurt; ROBO-198: the client dropped every grenade explosion"""
+    bot_kills_with(run, GRENADE, "Grenade", gun=0, setup=b"set sv_serverType 1\nset sv_smgDamage 0\nset sv_friendlyFire false\n")  # gun 0: SMG
+
+
+def nuke(run):
+    """Admin nuke on the bot: an explosion with no owner (playerID -1), which the client dropped at random before
+    cf6a98e. The blast counts as the nuked player's (Server::nukePlayer), so it kills e2e-a beside it"""
+    human, bot, client = fight(run, "Nuke Bot")
+    run.command(f"forceplayerspawn {bot} 8 8")  # the bot needs a moment to aim: nuke it before it shoots
+    run.command(f"forceplayerspawn {human} 6 8")
+    run.command(f"nukeid {bot}")
+    wait(lambda: killed(run, human, NUCLEAR), 20, "e2e-a killed by the nuke")
+    no_dropped_messages(run, client)
+
+
 SCENARIOS = {f.__name__: f for f in (join_leave, password, chat, kick, ban, master_list, browser_tab_list, ctf_capture, ghost,
-                                     user_map, weapon_choice)}
+                                     user_map, weapon_choice, grenade, rocket, flamethrower, photon_rifle, nuke)}
 
 if __name__ == "__main__":
     runtime, scratch, name = sys.argv[1:4]
