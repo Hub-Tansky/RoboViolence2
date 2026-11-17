@@ -1,0 +1,52 @@
+name: flake-watch
+# Nightly, Linux only: the e2e and bots tests 10 times each, to catch flaky tests before they redden a PR (ROBO-237,
+# ADR 0064). A failure opens or comments on one "Flaky test: <name>" issue per test and pings the owner's phone.
+on:
+  schedule:
+    - cron: '47 3 * * *'  # 03:47 UTC daily, after fuzz
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  flake-watch:
+    name: flake-watch (not required)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    permissions:
+      contents: read
+      issues: write  # tools/flake-issues.py
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup-vcpkg
+        with:
+          cache-key: linux-x64-asan
+      - name: Extra packages
+        run: sudo apt-get install -y xvfb libgl1-mesa-dri
+      - run: cmake --preset linux-x64-asan
+      - run: cmake --build --preset linux-x64-asan
+      - name: e2e and bots tests, 10 times each until one fails
+        env:
+          ASAN_OPTIONS: detect_leaks=0
+        run: ctest --test-dir build/linux-x64-asan -R '^(e2e_.*|bots)$' --repeat until-fail:10 --no-tests=error --output-on-failure
+      - name: Failed tests in the job summary
+        if: failure()
+        run: python3 tools/ci-test-summary.py build/linux-x64-asan
+      - name: One issue per flaky test
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 -B tools/flake-issues.py build/linux-x64-asan
+      # Same ntfy call as build.yml's notify job: the topic is a secret, so it reaches curl as config on stdin
+      - name: Ping the owner
+        if: failure()
+        shell: bash
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: |
+          if [ -z "$NTFY_TOPIC" ]; then echo "No NTFY_TOPIC secret: no notification"; exit 0; fi
+          url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          failed=$(sed 's/^[0-9]*://' build/linux-x64-asan/Testing/Temporary/LastTestsFailed.log 2>/dev/null | paste -sd, -) || true
+          printf 'url = "https://ntfy.sh/%s"\n' "$NTFY_TOPIC" |
+            curl -fsS --max-time 10 -K - -H "Title: RV2 flake watch failed" -H "Click: $url" \
+              -d "${GITHUB_SHA::7} flaky: ${failed:-build or setup step}. $url" > /dev/null
+          echo "notified: ${failed:-build or setup step}"

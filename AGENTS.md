@@ -127,6 +127,7 @@ Kept only for compatibility; remove once the trigger holds, each removal with an
 - The server is authoritative for hits, damage, spawns, projectiles and flags. Clients are authoritative for their own movement.
 - Server variables (`sv_*`) are registered in `game/src/GameVar.cpp` via `dksvarRegister` and pushed to clients.
 - Decisions are ADRs in `docs/decisions/` (format and index in its README). Read them before reversing a choice; write one for any non-obvious new choice.
+- A test waits for a condition with a deadline, never for a fixed time. The nightly `flake-watch` workflow runs the `e2e_*` and `bots` tests 10 times and opens a "Flaky test: <name>" issue per failure ([ADR 0064](docs/decisions/0064-nightly-flake-watch.md)).
 - Tests start the client only through `tests/run_autotest.py` or `tests/e2e/`, with a scratch `BV2_PREF_DIR`. Never start the GUI client on the owner's desktop without asking.
 - Known defects are in the backlog: items in `40-backlog/` with `kind: bug` (see [Work tracking](#work-tracking)). Check them before "fixing" odd behaviour, since some of it is load-bearing.
 
