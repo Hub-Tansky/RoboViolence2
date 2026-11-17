@@ -9,7 +9,7 @@ Robo Violence 2, an unofficial fork of BaboViolent 2 ([ADR 0008](docs/decisions/
 - `masterserver/src/`: standalone master server (SQLite).
 - `content/`: `languages/`, `LaunchScript/` (`main/` at runtime). `config/`, `content-seed/`: example configs and SQL seeds. `tools/`: checks, generators, setup scripts.
 
-[ARCHITECTURE.md](ARCHITECTURE.md) lists every tracked file; module READMEs describe each module.
+[ARCHITECTURE.md](ARCHITECTURE.md) holds the facts and one row per module directory; module READMEs describe each module.
 
 ## Build
 
@@ -58,7 +58,7 @@ cmake --build --preset <preset> --target bv2dedicated bv2master
 - Order when rules conflict: the scope item, then the three rules above, then the ground rules. Ground rules 3 and 4 apply only in items of kind `refactor`. A reviewer does not raise a case the scope item does not name unless it is reachable from the network.
 - Commit subjects are `<kind>: <summary>` with kind `feat`, `fix`, `refactor`, `ci`, `docs`, `test` or `chore`; review fixes are `<kind>: review: <summary>`. One PR per item, with `Closes #n` when the scope item's `issue:` links one. Branch names and the number of commits are not reviewed.
 - Never commit secrets, real hosts or IPs. Never use `--no-verify`.
-- Finish every PR by updating `ARCHITECTURE.md` (inventory and changed facts) and running `tools/check-architecture.sh`.
+- Finish every PR by updating `ARCHITECTURE.md` (changed facts, and a row for a new module directory) and running `tools/check-architecture.sh`. Files get no rows (ADR 0063).
 - Record non-obvious decisions as ADRs in `docs/decisions/`.
 - Work is done only per [REVIEW.md](REVIEW.md): `tools/review.sh` passes (CI `review` check), and a ready PR has a review record from the `rv2-code-review` workflow (`.claude/skills/rv2-code-review/`, section 5), for its head or a head with the same `Patch-id`. Its stop rule and forbidden shortcuts apply to every change.
 - Merge by tier (`tools/merge-risk.py`, printed by `tools/review.sh`; [ADR 0060](docs/decisions/0060-merge-by-risk-tier-with-owner-brief.md)). HIGH: a risk path (`netPacket.h`, `ServerRecv.cpp`, `ClientRecv.cpp`, `engine/babonet/`, `engine/credentials/`), `packaging/`, a guard file, a `GAME_VERSION_SV/CL` change, a `[GUI]` item, more than 600 added lines or more than 25 files. MEDIUM: other changes under `game/`, `engine/`, `masterserver/`, `content/`. LOW: only docs, tests and non-guard tooling, alone or mixed. Anything else: MEDIUM. LOW and MEDIUM: merge when required checks are green and post the owner brief in the thread. HIGH: also run the Risk worker, request a GitHub Copilot review on the PR, and wait for the owner's playtest on staging and "merge".
