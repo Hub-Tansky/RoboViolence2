@@ -1,4 +1,5 @@
 // Phase B step 13: the PO parser, English fallback per key, OS locale matching and the glyph skip (game/src/Lang.cpp).
+#include "FontCodes.h"
 #include "Lang.h"
 
 #include <cstdio>
@@ -63,6 +64,21 @@ int main(int argc, char ** argv)
 	lang::Texts ru = {{"lang_a", "A"}};
 	check(lang::parsePo("msgctxt \"lang_a\"\nmsgid \"A\"\nmsgstr \"\xd0\x96x\"\n", ru, &glyphs) && !glyphs && ru["lang_a"] == "?x",
 		  "a letter without a glyph (Cyrillic) becomes '?'");
+
+	// FontCodes.h (ADR 0067): every glyph byte maps to one code point and back, babo.tga's fallback letters are ASCII,
+	// and typed letters become font bytes (ROBO-238)
+	for (int b = bv2::FONT_FIRST_BYTE; b < bv2::FONT_FIRST_BYTE + bv2::FONT_BYTE_COUNT; ++b)
+		if (b != 127 && bv2::fontByteFor(bv2::fontByteCodepoint(b)) != b)
+			std::printf("FAIL byte %i does not round-trip\n", b), ++failures;
+	bool plainOk = true;
+	for (const bv2::FontExtraLetter& e : bv2::FONT_EXTRA)
+		plainOk = plainOk && e.plain > 32 && e.plain < 127;
+	check(plainOk, "every extra letter's plain letter is printable ASCII");
+	check(bv2::typedFontByte('A') == 'A' && bv2::typedFontByte(0xE9) == 130 && bv2::typedFontByte(0xF1) == 165 && bv2::typedFontByte(0x142) == 182, "typed A, e-acute, n-tilde and l-stroke are font bytes");
+	check(bv2::typedFontByte(0x219) == (unsigned)bv2::fontByteFor(0x15F) && bv2::typedFontByte(0x21A) == (unsigned)bv2::fontByteFor(0x162),
+		  "Romanian comma-below letters type as the cedilla ones");
+	check(bv2::typedFontByte(8) == 0 && bv2::typedFontByte(127) == 0 && bv2::typedFontByte(0x416) == 0,
+		  "control characters and letters without a glyph are dropped");
 
 	// .lang and the English fallback: en.lang first, the chosen file on top
 	writeFile(dir + "en.lang", "lang_a\t\t\tApple\nlang_b\t\t\t%s\\x8 bee\\n\xe9\n\nEND\n");

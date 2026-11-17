@@ -30,7 +30,7 @@
 #include <stddef.h>
 
 /// Implemented by the application: paint() runs one cycle (updates plus a render), textWrite() receives
-/// typed characters as Latin-1 codes (the bitmap font renders by byte value) plus 8, 9, 13 for backspace, tab, enter.
+/// typed characters as font bytes (FontCodes.h; letters without a glyph are dropped) plus 8, 9, 13 for backspace, tab, enter.
 class CMainLoopInterface
 {
 public:

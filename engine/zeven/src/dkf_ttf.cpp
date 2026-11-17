@@ -90,7 +90,8 @@ namespace bv2
 			stbtt_GetCodepointHMetrics(&info, cp, &advance, &lsb);
 			const float advancePx = (float)advance * scaleX;
 			g.w = advancePx / (float)lineHeight;
-			// texture rectangle: the advance box, top of the line to the bottom; rows are stored bottom-up
+			// texture rectangle: the advance box, top of the line to the bottom; rows are stored bottom-up. Ink left of
+			// the pen (a negative left bearing, as in j) is baked but not drawn, as babo.tga glyphs have none
 			const int originX = cellX[b], top = cellY[b];
 			g.u1 = (float)originX / (float)atlas;
 			g.u2 = ((float)originX + advancePx) / (float)atlas;

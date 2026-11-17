@@ -53,9 +53,24 @@ namespace bv2
 	// Font byte for a code point, or -1 (colour codes and newline are not glyphs: see lang::utf8ToFont)
 	inline int fontByteFor(unsigned int c)
 	{
+		// Romanian's comma-below letters Ș ș Ț ț draw as the cedilla ones in the table
+		if (c >= 0x218 && c <= 0x21B)
+		{
+			const unsigned int cedilla[4] = {0x15E, 0x15F, 0x162, 0x163};
+			c = cedilla[c - 0x218];
+		}
 		for (int b = FONT_FIRST_BYTE; b < FONT_FIRST_BYTE + FONT_BYTE_COUNT; ++b)
 			if (fontByteCodepoint(b) == c)
 				return b;
 		return -1;
+	}
+
+	// Font byte for a typed code point, or 0 when it is a control character or has no glyph
+	inline unsigned int typedFontByte(unsigned int c)
+	{
+		if (c < 32 || c == 127)
+			return 0;
+		const int b = fontByteFor(c);
+		return b < 0 ? 0 : (unsigned int)b;
 	}
 }
