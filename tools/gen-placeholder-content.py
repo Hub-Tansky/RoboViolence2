@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """Write placeholder game data for development and CI: no original assets.
 
-Reads tools/placeholder-manifest.tsv (the files the game loads at startup) and writes, under <out>/:
+Reads the base pack manifest content/base-pack.tsv (the files the game loads at startup, ADR 0065) and writes, under <out>/:
   - a solid-colour TGA (same size and depth) for every required texture,
   - a font atlas for main/fonts/babo.tga (5×7 bitmap glyphs, ASCII 33–159),
   - a short silent WAV (same format) for every required sound,
   - an empty but valid .DKO model for every required model,
-  - four tiny maps (DM, TDM, CTF, SND) in .bvm v20202.
+  - four tiny maps (DM, TDM, CTF, SND) in .bvm v20202,
+  - the manifest itself as <out>/pack.tsv, so the placeholder data root is the base pack.
 Music (.ogg) is not generated: only the client plays it, and no encoder is available here.
 Usage: gen-placeholder-content.py <out-dir> [--manifest FILE]
 Python 3, stdlib only.
@@ -18,7 +19,7 @@ import sys
 import zlib
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DEFAULT_MANIFEST = os.path.join(ROOT, "tools", "placeholder-manifest.tsv")
+DEFAULT_MANIFEST = os.path.join(ROOT, "content", "base-pack.tsv")
 
 
 def colour(name):
@@ -136,11 +137,17 @@ def bvm(name, size=16):
 
 
 def required_rows(manifest):
+    """(file, format) per manifest row; file is relative to the pack root (ADR 0065)."""
+    header = None
     for line in open(manifest, encoding="utf-8"):
         if line.startswith("#") or not line.strip():
             continue
-        folder, name, fmt = line.rstrip("\n").split("\t")
-        yield folder, name, fmt
+        cols = line.rstrip("\n").split("\t")
+        if header is None:
+            header = cols
+            continue
+        row = dict(zip(header, cols))
+        yield row["file"], row["format"]
 
 
 def write(path, data):
@@ -160,29 +167,32 @@ def main():
         manifest = sys.argv[sys.argv.index("--manifest") + 1]
     # content/ holds only languages and scripts; main/ in the runtime dir is the game's data root
     counts, skipped = {}, []
-    for folder, rel, typ in required_rows(manifest):
-        # folder is "main/<kind>"; the runtime main/ dir is `out` itself
-        dest = os.path.join(out, folder.split("/", 1)[1], rel)
+    for rel, typ in required_rows(manifest):
+        # the runtime main/ dir is `out` itself, the pack root
+        dest = os.path.join(out, rel)
+        name = rel.split("/", 1)[1]  # the name below the type folder, as before ADR 0065: it seeds the colour
         ext = os.path.splitext(rel)[1].lower()
         if ext == ".tga":
             m = re.match(r"TGA (\d+)×(\d+)×(\d+)", typ)
-            if folder == "main/fonts" and (int(m[1]), int(m[2]), int(m[3])) == (512, 512, 32):
+            if rel.startswith("fonts/") and (int(m[1]), int(m[2]), int(m[3])) == (512, 512, 32):
                 data = font_atlas()
             else:
-                data = tga(rel, int(m[1]), int(m[2]), int(m[3]))
+                data = tga(name, int(m[1]), int(m[2]), int(m[3]))
         elif ext == ".wav":
             m = re.match(r"WAV (\d+)ch (\d+) Hz (\d+)-bit", typ)
             data = wav(int(m[1]), int(m[2]), int(m[3]))
         elif ext == ".dko":
             data = dko()
         else:
-            skipped.append(rel)
+            skipped.append(name)
             continue
         write(dest, data)
         counts[ext] = counts.get(ext, 0) + 1
     for name in ("DM-Placeholder", "TDM-Placeholder", "CTF-Placeholder", "SND-Placeholder"):
         write(os.path.join(out, "maps", name + ".bvm"), bvm(name))
         counts[".bvm"] = counts.get(".bvm", 0) + 1
+    with open(manifest, "rb") as f:
+        write(os.path.join(out, "pack.tsv"), f.read())
     print("placeholder content:", counts, "skipped:", skipped)
     return 0
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Check literal "main/..." paths in the sources against the real file names.
 
-Real names come from content/ (tracked), tools/placeholder-manifest.tsv and tools/original-assets.sha256
+Real names come from content/ (tracked), content/base-pack.tsv and tools/original-assets.sha256
 (the removed originals). Linux is case-sensitive, so a path that matches a real
 file only when case is ignored is an error. Paths that match nothing are only
 listed (dynamic names, user files, files from this fork).
@@ -25,10 +25,10 @@ def real_names():
         path = line.split("  ", 1)[-1]
         if path.startswith(ORIGINAL_PREFIX + "main/"):
             names.add(path[len(ORIGINAL_PREFIX):])
-    for line in (ROOT / "tools/placeholder-manifest.tsv").read_text(encoding="utf-8").splitlines():
-        if line and not line.startswith("#"):
-            folder, name, _ = line.split("\t")
-            names.add(f"{folder}/{name}")
+    rows = [l.split("\t") for l in (ROOT / "content/base-pack.tsv").read_text(encoding="utf-8").splitlines() if l and not l.startswith("#")]
+    file_col = rows[0].index("file")
+    for row in rows[1:]:
+        names.add("main/" + row[file_col])
     return names
 
 

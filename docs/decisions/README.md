@@ -97,3 +97,4 @@ What we do, in one or two sentences.
 | [0062](0062-asset-packs-mode-modules-client-independent-server.md) | Asset packs, mode modules and a client-independent server are the long-term direction | Accepted |
 | [0063](0063-architecture-lists-modules-not-files.md) | ARCHITECTURE.md lists module directories, not files | Accepted |
 | [0064](0064-nightly-flake-watch.md) | A nightly workflow repeats the e2e and bots tests and files one issue per flaky test | Accepted |
+| [0065](0065-asset-pack-manifest.md) | An asset pack is a folder with a pack.tsv manifest; the base pack's is content/base-pack.tsv | Accepted |
