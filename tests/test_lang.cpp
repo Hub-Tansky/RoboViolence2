@@ -54,8 +54,15 @@ int main(int argc, char ** argv)
 	check(f["msgid"] == "%s joined", "a msgid that agrees with a bad msgstr doesn't count");
 
 	lang::Texts pl = {{"lang_a", "A"}};
-	check(lang::parsePo("msgctxt \"lang_a\"\nmsgid \"A\"\nmsgstr \"\xc5\x81\xc3\xb3" "d\xc5\xba \xc3\xa9\"\n", pl, &glyphs) && !glyphs
-		&& pl["lang_a"] == "??d? \x82", "letters without glyphs (Polish, o-acute) become '?'");
+	check(lang::parsePo("msgctxt \"lang_a\"\nmsgid \"A\"\nmsgstr \"\xc5\x81\xc3\xb3"
+						"d\xc5\xba \xc3\xa9\"\n",
+						pl, &glyphs) &&
+			  glyphs && pl["lang_a"] == "\xb5\xa2"
+										"d\xbc \x82",
+		  "Polish letters and o-acute are font bytes 160-255 (ROBO-238, FontCodes.h)");
+	lang::Texts ru = {{"lang_a", "A"}};
+	check(lang::parsePo("msgctxt \"lang_a\"\nmsgid \"A\"\nmsgstr \"\xd0\x96x\"\n", ru, &glyphs) && !glyphs && ru["lang_a"] == "?x",
+		  "a letter without a glyph (Cyrillic) becomes '?'");
 
 	// .lang and the English fallback: en.lang first, the chosen file on top
 	writeFile(dir + "en.lang", "lang_a\t\t\tApple\nlang_b\t\t\t%s\\x8 bee\\n\xe9\n\nEND\n");

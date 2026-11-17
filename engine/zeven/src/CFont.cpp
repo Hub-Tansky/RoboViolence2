@@ -20,8 +20,8 @@
 
 
 #include "CFont.h"
-
-
+#include "dkf_ttf.h"
+#include "FontCodes.h"
 
 //
 // Constructeur / Destructeur
@@ -53,7 +53,8 @@ CFont::~CFont()
 //
 void CFont::destroy()
 {
-	if (baseFont) glDeleteLists(baseFont, 128);
+	if (baseFont)
+		glDeleteLists(baseFont, 256); // reloadIt makes 256
 	baseFont = 0;
 }
 
@@ -210,12 +211,40 @@ int CFont::loadTGAFile(char * tgaFile)
 		}
 
 		delete [] alphaData;
+		// ROBO-238: babo.tga has no glyphs past 159; those bytes draw the plain letter (a for a-ogonek)
+		for (int c = bv2::FONT_BV2_BYTE_END; c < 256; ++c)
+		{
+			const int plain = (unsigned char)bv2::FONT_EXTRA[c - bv2::FONT_BV2_BYTE_END].plain;
+			characterProp[c] = characterProp[plain];
+			finalCaracKerning[c] = finalCaracKerning[plain];
+		}
 	}
 
 	return textureID;
 }
 
-
+//
+// ROBO-238: a TrueType font, baked to an atlas whose glyphs are one line high like the babo.tga ones
+//
+int CFont::loadTTFFile(char* ttfFile)
+{
+	bv2::BakedFont baked;
+	if (!bv2::bakeTtfFile(ttfFile, 64, baked))
+		return 0;
+	textureID = dktCreateEmptyTexture(baked.atlasSize, baked.atlasSize, 4, DKT_FILTER_BILINEAR);
+	dktCreateTextureFromBuffer(&textureID, baked.rgba.data(), baked.atlasSize, baked.atlasSize, 4, DKT_FILTER_BILINEAR);
+	fntFont = false;
+	for (int c = 0; c < 256; ++c)
+	{
+		characterProp[c].u1 = baked.glyphs[c].u1;
+		characterProp[c].v1 = baked.glyphs[c].v1;
+		characterProp[c].u2 = baked.glyphs[c].u2;
+		characterProp[c].v2 = baked.glyphs[c].v2;
+		characterProp[c].w = baked.glyphs[c].w;
+		finalCaracKerning[c] = baked.glyphs[c].w;
+	}
+	return (int)textureID;
+}
 
 //
 // Signifie que l'on vient de créer l'objet font
@@ -225,6 +254,10 @@ int CFont::create(CString filename)
 	if (strnicmp(&(filename.s[strlen(filename.s)-3]), "TGA", 3) == 0)
 	{
 		return loadTGAFile(filename.s);
+	}
+	if (strnicmp(&(filename.s[strlen(filename.s) - 3]), "TTF", 3) == 0)
+	{
+		return loadTTFFile(filename.s);
 	}
 
 	// On ouvre le fichier de définition
@@ -356,9 +389,9 @@ void CFont::reloadIt()
 	}
 	else
 	{
-		// On passe nos 128 en loop
+		// Bytes 32-255 (ROBO-238: 160-255 are FontCodes.h letters)
 		int i = 0;
-		while (i<128)
+		while (i < bv2::FONT_BYTE_COUNT)
 		{
 			// Ensuite on crée notre display list pour ce caractère
 			glNewList(baseFont+i+32 /* on commence au charatère 32, "Space" */, GL_COMPILE);

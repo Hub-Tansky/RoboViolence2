@@ -98,3 +98,4 @@ What we do, in one or two sentences.
 | [0063](0063-architecture-lists-modules-not-files.md) | ARCHITECTURE.md lists module directories, not files | Accepted |
 | [0064](0064-nightly-flake-watch.md) | A nightly workflow repeats the e2e and bots tests and files one issue per flaky test | Accepted |
 | [0065](0065-asset-pack-manifest.md) | An asset pack is a folder with a pack.tsv manifest; the base pack's is content/base-pack.tsv | Accepted |
+| [0067](0067-font-bytes-and-ttf-baking.md) | Text is one byte per glyph; bytes 160-255 hold 96 extra letters; a TTF is baked to babo.tga widths | Accepted |
