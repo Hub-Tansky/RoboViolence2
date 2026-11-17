@@ -30,6 +30,9 @@ $(run 8 aaaa08 push release/0.0 Hub-Tansky/RoboViolence2 success),
 $(run 7 bbbb07 push main Hub-Tansky/RoboViolence2 success)]}"
 expect "cron (no sha) never picks a release branch" "7 bbbb07" "$(printf '%s' "$runs" | pick_run)"
 expect "a release branch build is picked by its sha (hotfix, ADR 0061)" "8 aaaa08" "$(printf '%s' "$runs" | pick_run aaaa08)"
+full=0123456789abcdef0123456789abcdef01234567
+expect "a full sha queries every branch" "event=push&status=success&per_page=30&head_sha=$full" "$(runs_query $full)"
+expect "no sha or a prefix queries main only" "branch=main&event=push&status=success&per_page=30" "$(runs_query 0123abc)"
 
 status='map CTF-Placeholder
 game type 2

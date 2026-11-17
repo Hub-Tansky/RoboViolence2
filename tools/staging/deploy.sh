@@ -27,12 +27,19 @@ readonly INFRA_STAGES=" env select fetch pull wait-empty "
 
 # pick_run [sha prefix]: workflow-runs JSON on stdin -> "<run id> <sha>" of the newest successful push to main of REPO,
 # or with a sha also to a `release/*` branch (hotfixes, ADR 0061); cron passes none, so staging stays on main.
-# The same filter as tools/playtest/agent.sh: head_repository excludes fork pull requests from a branch named main.
+# The same repo filter as tools/playtest/agent.sh (head_repository excludes fork pull requests from a branch named main);
+# unlike it, a sha also accepts release/*.
 pick_run() {
 	jq -r --arg repo "$REPO" --arg sha "${1:-}" '[.workflow_runs[]
 		| select(.event == "push" and .head_repository.full_name == $repo
 			and (.head_branch == "main" or ($sha != "" and (.head_branch | startswith("release/"))))
 			and .conclusion == "success" and (.head_sha | startswith($sha)))] | .[0] | select(.) | "\(.id) \(.head_sha)"'
+}
+
+# runs_query [sha]: the containers runs query. A full SHA is found however old it is, on main or a release branch
+# (ADR 0061); otherwise only main is listed
+runs_query() {
+	if [ ${#1} = 40 ]; then echo "event=push&status=success&per_page=30&head_sha=$1"; else echo "branch=main&event=push&status=success&per_page=30"; fi
 }
 
 # /status text on stdin -> human count: the `humans` line, which leaves bots out (ADR 0049), else `players` (an older server)
@@ -207,9 +214,7 @@ load_env || fail "env file"
 for t in curl jq docker; do command -v "$t" >/dev/null || fail "missing tool: $t"; done
 
 stage select
-query="event=push&status=success&per_page=30"
-# A full SHA is found however old it is, on main or a release branch; otherwise only main is listed
-if [ ${#WANT_SHA} = 40 ]; then query="$query&head_sha=$WANT_SHA"; else query="branch=main&$query"; fi
+query=$(runs_query "$WANT_SHA")
 runs=$(curl -fsS --max-time 20 "https://api.github.com/repos/$REPO/actions/workflows/containers.yml/runs?$query") || fail "runs query"
 pick=$(printf '%s' "$runs" | pick_run "$WANT_SHA")
 [ -n "$pick" ] || fail "no successful main or release push run of containers${WANT_SHA:+ for $WANT_SHA}"
