@@ -1,4 +1,4 @@
-// Image files decoded to the pixel rows that dkt hands to OpenGL (ROBO-233, ADR 0010 R6: new loaders beside the old).
+// Image files decoded to the pixel rows that dkt hands to OpenGL (ROBO-233, ADR 0010: new formats beside the old).
 // Rows run bottom to top and channels are RGB or RGBA, the layout the BV2 TGA loader always produced.
 #pragma once
 
