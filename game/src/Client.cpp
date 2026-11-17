@@ -62,13 +62,13 @@ Client::Client(Game * pGame)
 	m_sfxOver = dksCreateSoundFromFile("main/sounds/ControlOver.wav", false);
 
 	blink = 0;
-	tex_screenHit = dktCreateTextureFromFile("main/textures/screenHit.tga", DKT_FILTER_LINEAR);
-	tex_grenadeLeft = dktCreateTextureFromFile("main/textures/GrenadeIcon.tga", DKT_FILTER_LINEAR);
-	tex_shotgunLeft = dktCreateTextureFromFile("main/textures/CartridgeIcon.tga", DKT_FILTER_LINEAR);
-	tex_molotovLeft = dktCreateTextureFromFile("main/textures/molotovIcon.tga", DKT_FILTER_LINEAR);
-	tex_blueFlag = dktCreateTextureFromFile("main/textures/BlueFlag.tga", DKT_FILTER_LINEAR);
-	tex_redFlag = dktCreateTextureFromFile("main/textures/RedFlag.tga", DKT_FILTER_LINEAR);
-	tex_crossHit = dktCreateTextureFromFile("main/textures/CrossHit.tga", DKT_FILTER_LINEAR);
+	tex_screenHit = dktCreateTextureFromFile(bv2::assetPath("textures/screenHit"), DKT_FILTER_LINEAR);
+	tex_grenadeLeft = dktCreateTextureFromFile(bv2::assetPath("textures/GrenadeIcon"), DKT_FILTER_LINEAR);
+	tex_shotgunLeft = dktCreateTextureFromFile(bv2::assetPath("textures/CartridgeIcon"), DKT_FILTER_LINEAR);
+	tex_molotovLeft = dktCreateTextureFromFile(bv2::assetPath("textures/molotovIcon"), DKT_FILTER_LINEAR);
+	tex_blueFlag = dktCreateTextureFromFile(bv2::assetPath("textures/BlueFlag"), DKT_FILTER_LINEAR);
+	tex_redFlag = dktCreateTextureFromFile(bv2::assetPath("textures/RedFlag"), DKT_FILTER_LINEAR);
+	tex_crossHit = dktCreateTextureFromFile(bv2::assetPath("textures/CrossHit"), DKT_FILTER_LINEAR);
 	hitIndicator = 0;
 
 	// On hide la mouse

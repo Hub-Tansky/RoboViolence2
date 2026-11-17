@@ -16,6 +16,8 @@
 	BaboViolent 2 source code. If not, see http://www.gnu.org/licenses/.
 */
 
+#include "AssetRegistry.h"
+
 #ifndef CONSOLE
 #include "Control.h"
 #include "Helper.h"
@@ -38,7 +40,7 @@ Control::Control(CVector2i screenPosition, CString caption, unsigned int font, f
 	anim = 0;
 	changeCaption(caption);
 	m_sfxOver = dksCreateSoundFromFile("main/sounds/ControlOver.wav", false);
-	tex_menu = dktCreateTextureFromFile("main/textures/Menu.tga", DKT_FILTER_LINEAR);
+	tex_menu = dktCreateTextureFromFile(bv2::assetPath("textures/Menu"), DKT_FILTER_LINEAR);
 }
 
 

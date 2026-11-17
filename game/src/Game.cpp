@@ -47,9 +47,10 @@ Game::Game(CString pMapName)
 	mapName = pMapName;
 #ifndef CONSOLE
 	font = dkfCreateFont(bv2::assetPath("fonts/babo"));
-	tex_miniMapAllied = dktCreateTextureFromFile("main/textures/MiniMapAllied.tga", DKT_FILTER_LINEAR);
-	tex_miniMapEnemy = dktCreateTextureFromFile("main/textures/MiniMapEnemy.tga", DKT_FILTER_LINEAR);;
-	tex_baboShadow = dktCreateTextureFromFile("main/textures/BaboShadow.tga", DKT_FILTER_BILINEAR);
+	tex_miniMapAllied = dktCreateTextureFromFile(bv2::assetPath("textures/MiniMapAllied"), DKT_FILTER_LINEAR);
+	tex_miniMapEnemy = dktCreateTextureFromFile(bv2::assetPath("textures/MiniMapEnemy"), DKT_FILTER_LINEAR);
+	;
+	tex_baboShadow = dktCreateTextureFromFile(bv2::assetPath("textures/BaboShadow"), DKT_FILTER_BILINEAR);
 #endif
 
 	players = new Player*[MAX_PLAYER];
