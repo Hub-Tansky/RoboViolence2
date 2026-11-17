@@ -9,7 +9,7 @@
 - Every round re-reviewed the full diff with workers reading every changed file in full. A session with five PRs under review hit the usage limit in 32 minutes (audit 2026-11-11).
 
 ## Decision
-The docs tier runs no worker: `tools/review.sh` and a record with `### review.sh` and `### Not done / unsure` are the review. In the code tier, workers run one after another and read changed hunks with 40 lines of context; after fixes only the axes that had a blocker rerun, on the new commits plus their open findings, for two rounds at most, and what is left goes to the owner in one message.
+The docs tier runs no worker: `tools/review.sh` and a record with `### review.sh` and `### Not done / unsure` are the review. In the code tier, workers run one after another and read changed hunks with 40 lines of context; after fixes only the axes that had a blocker rerun (every axis when the skill's `Protocol:` line changed), on the PR's own new commits plus their open findings, for two rounds at most, and what is left goes to the owner in one message.
 
 ## Consequences
 - A docs PR is checked for paths, encoding, links and the Allowed paths row, not for wording.

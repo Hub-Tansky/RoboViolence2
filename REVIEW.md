@@ -39,7 +39,7 @@ In a draft or bot PR without an Allowed paths row, changes to guard files (`tool
 
 | Term | Means |
 |---|---|
-| New behaviour | Anything a player, a server operator or another module of the game can trigger. CI jobs and scripts need a test only when they are guard files |
+| New behaviour | Anything a player, a server operator or another module of the game can trigger that didn't exist before. CI jobs and scripts count only when they are guard files, and a missing test there stays a suggestion (section 2) |
 | Fix proof | Revert the fix locally, run the new test, paste its failing assertion into the review record, restore the fix |
 | Non-obvious decision | One with a rejected alternative, one a later agent might reverse, or one that changes a format, protocol, dependency or ground rule |
 | Affected README | The README of any module (`engine/*`, `game`, `masterserver`, `docs/build`, …) whose files, public API, build or run steps the diff changes |
@@ -78,7 +78,7 @@ The tier comes from the changed paths, and `tools/review.sh` prints it:
    | suggestion | any of those, or `not taken` (no backlog item needed) |
 
    Confirm with the owner first when a fix is outside the scope or Allowed paths, changes gameplay, protocol, file formats or anything the player sees (**[GUI]**), bends an ADR or the scope item, or is a large rewrite or new dependency. Otherwise fix directly, in its own commit (`<kind>: review: <summary>`). A deferred finding becomes a Proposed scope item in [rv2-docs](https://github.com/Hub-Tansky/rv2-docs) `40-backlog/20-proposed/` or an issue. Ask the owner all open questions in one message, each with the finding, the proposed change and a recommendation.
-6. After fixes, rerun only the axes that had a blocker, on `git diff <last reviewed head>..HEAD` plus their open findings. Two rounds at most. Send what is left to the owner in one message.
+6. After fixes, rerun only the axes that had a blocker, on the PR's own new commits (`git log -p --text --first-parent --no-merges <last reviewed head>..HEAD`, which leaves out merges from main) plus their open findings. Rerun every axis when the skill's `Protocol:` line changed. Two rounds at most. Send what is left to the owner in one message.
 7. Write the record. In the final round, Spec `fail` and `not assessable` block; `partial` blocks unless Outcomes says `confirmed with owner`, with the criterion's text in the Finding cell. `post-deploy` does not block, and only for a criterion that starts with `(post-deploy)` in the scope item (only a running server or a release build can show it); the item then stays in Testing until the owner ticks it.
 8. Mark the PR ready only with required CI green on the PR head. A later commit that changes the diff's patch-id makes the record stale. A merge from main that leaves it unchanged does not. A PR that changes the skill needs a review on the changed skill.
 

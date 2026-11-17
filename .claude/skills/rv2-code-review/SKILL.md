@@ -5,7 +5,7 @@ description: Robo Violence 2's PR review workflow (REVIEW.md section 5). Pins th
 
 # rv2-code-review
 
-Protocol: rv2-code-review 3afe5c65a8d0
+Protocol: rv2-code-review 619537b58e95
 
 Adapted from `skills/engineering/code-review` in [mattpocock/skills](https://github.com/mattpocock/skills) at `4ae2317ddb22b046e26455e4f9c9b3aaaf62212d` (MIT; notice in `UPSTREAM-LICENSE`). Changes: a missing spec blocks instead of skipping the axis, no smell baseline, a matrix for Spec, a Risk worker, and the record in REVIEW.md. Upgrade only by a reviewed PR that updates this SHA.
 
@@ -29,7 +29,7 @@ You are the parent. You pin, launch and aggregate. You don't review, filter or r
 
    Each prompt is: "Read `.claude/skills/rv2-code-review/SKILL.md` and follow only its sections `<Worker> worker` and `Rules for every worker`", then that section's inputs. Add earlier outcomes of the same axis in a later round. Never give a worker another worker's report or your own opinion.
 5. **Aggregate.** Paste each report unedited into its section of the record (REVIEW.md template). Write a one-line summary per axis, naming the axis's worst finding. Don't pick a winner across axes, and don't change a severity.
-6. **Act.** Follow REVIEW.md section 5. After fixes, rerun only the axes that had a blocker, on `git diff --text <last reviewed head>..HEAD` plus their open findings. Two rounds at most. Send what is left to the owner in one message. A later merge from main that leaves the Patch-id unchanged needs no new round. The gate accepts the old head; updating `Diff:` is optional.
+6. **Act.** Follow REVIEW.md section 5. After fixes, rerun only the axes that had a blocker, on the PR's own new commits (`git log -p --text --first-parent --no-merges <last reviewed head>..HEAD`) plus their open findings. Rerun every axis when the `Protocol:` line changed. Two rounds at most. Update `Diff:`, `Patch-id:` and `Rounds:` to the new head. Send what is left to the owner in one message. A later merge from main that leaves the Patch-id unchanged needs no new round. The gate accepts the old head; updating `Diff:` is optional.
 
 ## Rules for every worker
 
