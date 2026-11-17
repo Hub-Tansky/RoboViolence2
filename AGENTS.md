@@ -92,9 +92,9 @@ Rules 5 to 9 keep new code from adding debt against the long-term direction ([AD
 
 5. **Asset ids:** no new asset path literal (`"main/…"`) in game code; a new asset gets an id in the pack manifest.
 6. **No new `CONSOLE` split:** no new `#ifdef CONSOLE` or `#ifndef CONSOLE`; rules code includes no GL, audio or input header.
-7. **Modes:** no new `gameType ==` branch outside mode code.
-8. **Data, not code:** tunable numbers go in data files or cvars, not in constructor calls.
-9. **Protocol:** a new or changed network message gets explicit field-by-field read and write, a sample in `tests/corpus/` and a line in the protocol doc; messages carry ids, never file names or paths.
+7. **Modes:** no new `gameType ==` branch outside mode code. No mode code exists until the mode interface (Phase 2), so until then a branch the item cannot avoid is named under **Not done / unsure** in the review record.
+8. **Data, not code:** tunable numbers (gameplay values a designer would change: speed, damage, timing, range) go in data files or cvars, not in constructor calls.
+9. **Protocol:** a new or changed network message gets explicit field-by-field read and write, a sample in `tests/corpus/` and a line in the protocol doc (the Network row of `ARCHITECTURE.md` until `docs/protocol.md` exists); messages carry ids, never file names or paths.
 
 PNS-n is an old id: scope item ROBO-0nn carries it in `aliases`.
 
