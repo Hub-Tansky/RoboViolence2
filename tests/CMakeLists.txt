@@ -329,6 +329,7 @@ add_test(NAME ci_test_summary COMMAND ${Python3_EXECUTABLE} -B ${CMAKE_CURRENT_S
 add_test(NAME flake_issues COMMAND ${Python3_EXECUTABLE} -B ${CMAKE_CURRENT_SOURCE_DIR}/test_flake_issues.py)
 add_test(NAME merge_risk COMMAND ${Python3_EXECUTABLE} -B ${CMAKE_CURRENT_SOURCE_DIR}/test_merge_risk.py)
 add_test(NAME docs_only COMMAND ${Python3_EXECUTABLE} -B ${CMAKE_CURRENT_SOURCE_DIR}/test_docs_only.py)
+add_test(NAME backlog_move COMMAND ${Python3_EXECUTABLE} -B ${CMAKE_CURRENT_SOURCE_DIR}/test_backlog_move.py)
 find_program(BV2_DPKG_SHLIBDEPS dpkg-shlibdeps)  # dpkg-dev (build-essential pulls it in)
 if(UNIX AND NOT APPLE AND BV2_DPKG_SHLIBDEPS AND TARGET bv2 AND TARGET bv2dedicated)
   add_test(NAME make_deb COMMAND ${Python3_EXECUTABLE} -B ${CMAKE_CURRENT_SOURCE_DIR}/test_make_deb.py "${CMAKE_BINARY_DIR}" "${BV2_TEST_SCRATCH}")

@@ -73,6 +73,7 @@ Not required:
 - `package-smoke`: Windows and macOS packages: server, master, and client for 10 s; Mesa llvmpipe on Windows.
 - `containers`: server images and the compose example; pushes `:<sha>` and `:latest` to GHCR from `main`, `:<sha>` only from `release/**` ([ADR 0061](../decisions/0061-release-branch-for-production-hotfixes.md)).
 - `ci-retry`: re-runs a `build` whose job never got a hosted runner (a PR run only while it is the branch head, `main` and tag runs always; [ADR 0041](../decisions/0041-macos-ci-runner-not-acquired-retry.md)).
+- `backlog-move`: after a merge, moves the PR's backlog item in rv2-docs to Done, or Testing while a `(post-deploy)` criterion is unticked (`tools/backlog-move.py`; [ADR ROBO-249](../decisions/ROBO-249-backlog-item-moves-on-merge.md)).
 - On `main`: `dependency-graph`. Nightly: `fuzz` (`fuzz.yml`, ASan fuzzer, 2 min per client message type; also by hand with `workflow_dispatch`) and `flake-watch` (`flake-watch.yml`, the `e2e_*` and `bots` tests 10 times each; a failure opens or comments on a "Flaky test: <name>" issue and pings ntfy; [ADR 0064](../decisions/0064-nightly-flake-watch.md)). Weekly: `osv-vcpkg` (OSV check of the vcpkg ports, `tools/osv-vcpkg.py`). Bump the vcpkg baseline monthly, or when `osv-vcpkg` reports a port.
 
 A newer commit cancels a PR's `build` run. Runs on `main`, `release/**` (ADR 0061) and tags always finish, and a failed `build` on `main` or `release/**` sends the run URL and failed jobs to the owner's ntfy topic (`notify` job, `NTFY_TOPIC` secret).
