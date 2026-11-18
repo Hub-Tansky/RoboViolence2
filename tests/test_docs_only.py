@@ -18,13 +18,15 @@ spec.loader.exec_module(tool)
 # (case, event, changed paths, docs only)
 CASES = [
     ("README", "pull_request", ["README.md"], True),
-    ("docs dir", "pull_request", ["docs/build/linux.md", "docs/decisions/0001-x.md"], True),
+    ("docs dir", "pull_request", ["docs/build/windows.md", "docs/decisions/0001-x.md"], True),
     ("one .cpp", "pull_request", ["README.md", "game/src/Game.cpp"], False),
     ("AGENTS.md steers agents", "pull_request", ["AGENTS.md"], False),
     ("REVIEW.md steers the gate", "pull_request", ["REVIEW.md"], False),
     ("workflow", "pull_request", [".github/workflows/README.md"], False),
     ("skills", "pull_request", [".claude/skills/x/SKILL.md"], False),
     ("no paths", "pull_request", [], False),
+    ("linux.md: package-check reads it", "pull_request", ["docs/build/linux.md"], False),
+    ("docs/agents steers agents", "pull_request", ["docs/agents/x.md"], False),
     ("push to main", "push", ["README.md"], False),
     ("schedule", "schedule", ["README.md"], False),
     ("by hand", "workflow_dispatch", ["README.md"], False),
@@ -60,7 +62,7 @@ finally:
 
 # Every step after the check carries the DOCS_ONLY condition, or runs only on failure or a tag (never on a docs-only PR).
 GATED = {".github/workflows/build.yml": ["build", "smoke", "tidy"], ".github/workflows/containers.yml": ["images"]}
-SAFE = re.compile(r"failure\(\)|github\.ref_type == 'tag'")
+SAFE = re.compile(r"^(failure\(\)|github\.ref_type == 'tag')( && [^|]*)?$")  # never true on a docs-only PR
 for path, jobs in GATED.items():
     text = open(os.path.join(ROOT, path), encoding="utf-8").read()
     for job in jobs:
@@ -73,7 +75,8 @@ for path, jobs in GATED.items():
             continue
         for s in steps[gate + 1:]:
             cond = re.search(r"^(?:        )?if: (.*)$", s, re.M)
-            if not cond or not ("env.DOCS_ONLY != 'true'" in cond.group(1) or SAFE.search(cond.group(1))):
+            c = cond.group(1).strip() if cond else ""
+            if not (c.startswith("env.DOCS_ONLY != 'true' && ") or c == "env.DOCS_ONLY != 'true'" or SAFE.match(c)):
                 print(f"FAIL {path} {job}: step runs on a docs-only PR: {s.splitlines()[0]}")
                 failures += 1
     for job, block in re.findall(r"^  ([a-z-]+):\n(.*?)(?=^  [a-z-]+:\n|\Z)", text, re.M | re.S):

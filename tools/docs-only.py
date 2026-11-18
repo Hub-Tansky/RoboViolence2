@@ -4,8 +4,8 @@
 Usage: tools/docs-only.py <event name>
 Only a pull_request can be docs-only: push (main, release/*, tags), schedule and workflow_dispatch always run
 everything. Its changed paths are the checkout's merge commit against its first parent (the base branch), so the
-checkout needs fetch-depth 2. Docs-only is the review gate's docs tier (review_tier() in tools/check-review-record.py):
-every path under docs/ or a .md file, none of them AGENTS.md, REVIEW.md, .claude/, .github/ or docs/agents/.
+checkout needs fetch-depth 2. Docs-only is the review gate's docs tier (review_tier() in tools/check-review-record.py),
+minus the docs a build job checks (CHECKED_DOCS).
 Writes `docs=` to $GITHUB_OUTPUT and DOCS_ONLY to $GITHUB_ENV when they are set. Any error prints false.
 """
 import importlib.util
@@ -14,6 +14,8 @@ import subprocess
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# Docs a skipped job reads: package-check greps docs/build/linux.md for the runtime packages (tools/setup-dev.sh)
+CHECKED_DOCS = {"docs/build/linux.md"}
 
 
 def review_tier(changed):
@@ -24,7 +26,8 @@ def review_tier(changed):
 
 
 def docs_only(event, changed):
-    return event == "pull_request" and bool(changed) and review_tier(changed) == "docs"
+    return (event == "pull_request" and bool(changed) and not CHECKED_DOCS.intersection(changed)
+            and review_tier(changed) == "docs")
 
 
 def changed_paths(cwd=ROOT):
