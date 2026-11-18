@@ -16,6 +16,8 @@
 	BaboViolent 2 source code. If not, see http://www.gnu.org/licenses/.
 */
 
+#include "AssetRegistry.h"
+
 #ifndef CONSOLE
 #include "Client.h"
 #include "PacketCheck.h"
@@ -845,7 +847,7 @@ void Client::recvPacket(char * wire, int size, int typeID)
 				if(game->thisPlayer->meleeWeapon->weaponID == WEAPON_NUCLEAR && 
 					game->thisPlayer->minibot && explosion.radius >= 4.0f)
 				{
-					dksPlay3DSound(dksCreateSoundFromFile("main/sounds/BaboCreve3.wav", false), -1, 5, game->thisPlayer->minibot->currentCF.position,64);
+					dksPlay3DSound(dksCreateSoundFromFile(bv2::assetPath("sounds/BaboCreve3"), false), -1, 5, game->thisPlayer->minibot->currentCF.position, 64);
 					game->spawnBloodMinibot(game->thisPlayer->minibot->currentCF.position, .5f);
 					delete game->thisPlayer->minibot;
 					game->thisPlayer->minibot = 0;

@@ -55,11 +55,11 @@ Client::Client(Game * pGame)
 
 	proServer = false;
 
-	m_sfxChat = dksCreateSoundFromFile("main/sounds/Chat.wav", false);
-	sfxHit = dksCreateSoundFromFile("main/sounds/hit.wav", false);
-	sfxShotyReload = dksCreateSoundFromFile("main/sounds/shotgunReload.wav", false);
-	m_sfxClic = dksCreateSoundFromFile("main/sounds/Button.wav", false);
-	m_sfxOver = dksCreateSoundFromFile("main/sounds/ControlOver.wav", false);
+	m_sfxChat = dksCreateSoundFromFile(bv2::assetPath("sounds/Chat"), false);
+	sfxHit = dksCreateSoundFromFile(bv2::assetPath("sounds/hit"), false);
+	sfxShotyReload = dksCreateSoundFromFile(bv2::assetPath("sounds/shotgunReload"), false);
+	m_sfxClic = dksCreateSoundFromFile(bv2::assetPath("sounds/Button"), false);
+	m_sfxOver = dksCreateSoundFromFile(bv2::assetPath("sounds/ControlOver"), false);
 
 	blink = 0;
 	tex_screenHit = dktCreateTextureFromFile(bv2::assetPath("textures/screenHit"), DKT_FILTER_LINEAR);
