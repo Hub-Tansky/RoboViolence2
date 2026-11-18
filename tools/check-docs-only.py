@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Is this CI run a docs-only pull request (ROBO-246, ADR 0067)? Prints `docs=true` or `docs=false`.
 
-Usage: tools/docs-only.py <event name>
+Usage: tools/check-docs-only.py <event name>
 Only a pull_request can be docs-only: push (main, release/*, tags), schedule and workflow_dispatch always run
 everything. Its changed paths are the checkout's merge commit against its first parent (the base branch), so the
 checkout needs fetch-depth 2. Docs-only is the review gate's docs tier (review_tier() in tools/check-review-record.py),

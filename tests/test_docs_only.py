@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""tools/docs-only.py (ROBO-246): which runs are docs-only, the changed paths of a PR merge commit, and that every
+"""tools/check-docs-only.py (ROBO-246): which runs are docs-only, the changed paths of a PR merge commit, and that every
 step after the docs-only check in build.yml and containers.yml is skipped on a docs-only PR (ADR 0067)."""
 import importlib.util
 import os
@@ -11,7 +11,7 @@ import tempfile
 
 sys.dont_write_bytecode = True
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-spec = importlib.util.spec_from_file_location("docs_only", os.path.join(ROOT, "tools", "docs-only.py"))
+spec = importlib.util.spec_from_file_location("docs_only", os.path.join(ROOT, "tools", "check-docs-only.py"))
 tool = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(tool)
 
