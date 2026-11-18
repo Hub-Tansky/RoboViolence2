@@ -10,7 +10,7 @@
 - No tool parses the `NNNN-` prefix: `grep -rn "decisions/0" tools .github` finds only comments and links to existing ADRs, and the review and docs-only checks match `docs/` by path only.
 
 ## Decision
-A new ADR is `docs/decisions/ROBO-NNN-<slug>.md`, titled `# ROBO-NNN: <decision>`, NNN being the scope item that makes the decision; a second one from the same item is `ROBO-NNN-2-<slug>.md`. The files `0001` to `0070` keep their names and numbers. The index lists both kinds, new rows last.
+A new ADR is `docs/decisions/ROBO-NNN-<slug>.md`, titled `# ROBO-NNN: <decision>`, NNN being the scope item that makes the decision; a second one from the same item is `ROBO-NNN-2-<slug>.md`, titled `# ROBO-NNN-2: <decision>`. The files `0001` to `0070` keep their names and numbers. The index lists both kinds, new rows last.
 
 ## Consequences
 - Two parallel PRs can no longer pick the same ADR name; they can still both append an index row, a one-line merge conflict.

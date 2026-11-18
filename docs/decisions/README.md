@@ -13,7 +13,7 @@ One file per non-obvious decision, named after the scope item that makes it: `RO
 ## Format
 
 ```markdown
-# ROBO-NNN: <decision as an imperative phrase>
+# ROBO-NNN: <decision as an imperative phrase>   (a second ADR of the item: # ROBO-NNN-2: ...)
 
 - Status: Accepted | Superseded by <id> | Deprecated
 - Date: YYYY-MM-DD
