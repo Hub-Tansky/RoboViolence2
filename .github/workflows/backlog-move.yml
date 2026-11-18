@@ -1,15 +1,14 @@
 name: backlog-move
 # After a merge, the PR's backlog item in the private vault rv2-docs moves to Done (90-done/) or stays Testing
 # (30-inprogress/) while an unticked `(post-deploy)` criterion is left; tools/backlog-move.py (ROBO-249, ADR ROBO-249).
-# Never fails a merge: no ROBO id, no item file or no token give a warning.
+# Never fails a merge: no ROBO id means nothing to do; no item file or no token gives a warning.
+# No concurrency group: it would cancel a pending run when a third merge queues. Parallel runs rebase and retry instead.
 on:
   pull_request:
     types: [closed]
+    branches: [main, 'release/**']  # not stacked PRs into feature branches
 permissions:
   contents: read
-concurrency:  # one push to rv2-docs main at a time; queued runs wait, none is cancelled
-  group: backlog-move
-  cancel-in-progress: false
 jobs:
   backlog-move:
     name: backlog-move (not required)
@@ -36,14 +35,16 @@ jobs:
           fi
           vault="$RUNNER_TEMP/rv2-docs"
           git clone -q --depth 1 "https://x-access-token:${DOCS_TOKEN}@github.com/Hub-Tansky/rv2-docs.git" "$vault"
-          python3 -B tools/backlog-move.py "$vault" "$PR_NUMBER"
+          git -C "$vault" config user.name Hub-Tansky  # also for the commits a rebase rewrites
+          git -C "$vault" config user.email 337104978+Hub-Tansky@users.noreply.github.com
+          DOCS_TOKEN= python3 -B tools/backlog-move.py "$vault" "$PR_NUMBER"
       - name: Commit and push as Hub-Tansky
         if: steps.move.outputs.message != ''
         env:
           MESSAGE: ${{ steps.move.outputs.message }}
         working-directory: ${{ runner.temp }}/rv2-docs
         run: |
-          git -c user.name=Hub-Tansky -c user.email=337104978+Hub-Tansky@users.noreply.github.com commit -q -m "$MESSAGE"
+          git commit -q -m "$MESSAGE"
           # Agents and other merges push to the same branch: rebase onto whoever pushed first and try again
           for attempt in 1 2 3 4 5; do
             git push -q origin HEAD:main && exit 0

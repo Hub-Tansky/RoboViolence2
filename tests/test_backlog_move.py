@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """tools/backlog-move.py (ROBO-249): a merged PR's item moves to Done or Testing in a throwaway vault; no id, a missing
-file and an item already in place change nothing and never fail (ADR ROBO-249)."""
+file and an item already in place change nothing and never fail; Done is final (ADR ROBO-249)."""
 import importlib.util
 import os
 import shutil
@@ -45,9 +45,9 @@ def git(vault, *args):
     return subprocess.run(["git", *args], cwd=vault, check=True, capture_output=True, text=True).stdout
 
 
-def vault_with(items):
+def vault_with(items, parent=None):
     """items: {(folder, id): (status, criteria)}"""
-    vault = tempfile.mkdtemp(prefix="vault-")
+    vault = tempfile.mkdtemp(prefix="vault-", dir=parent)
     git(vault, "init", "-q")
     git(vault, "config", "user.name", "t")
     git(vault, "config", "user.email", "t@example.invalid")
@@ -72,15 +72,17 @@ def read(vault, folder, rid):
     return open(path).read() if os.path.exists(path) else None
 
 
-# 1. Plain criteria: Done in 90-done, updated today, staged as a rename.
-v = vault_with({("30-inprogress", "ROBO-300"): ("In progress", "- [x] a\n- [ ] b")})
+# 1. Plain criteria: Done in 90-done, updated today, staged as a rename. The vault sits under `_temp/` as on a runner.
+runner_temp = os.path.join(tempfile.mkdtemp(prefix="runner-"), "_temp")
+os.makedirs(runner_temp)
+v = vault_with({("30-inprogress", "ROBO-300"): ("In progress", "- [x] a\n- [ ] b")}, runner_temp)
 msg, note = tool.move(v, body("ROBO-300 (rv2-docs `40-backlog/30-inprogress/ROBO-300 T.md`)"), "7", "2026-11-18")
 check("done message", msg == "backlog: ROBO-300 -> Done (PR #7)", msg)
 text = read(v, "90-done", "ROBO-300")
 check("done moved", text is not None and read(v, "30-inprogress", "ROBO-300") is None)
 check("done status", text and "\nstatus: Done\n" in text and "\nupdated: 2026-11-18\n" in text and "\ncreated: 2026-11-01\n" in text, text)
 check("done staged rename", git(v, "status", "--porcelain").startswith("R "), git(v, "status", "--porcelain"))
-shutil.rmtree(v)
+shutil.rmtree(os.path.dirname(runner_temp))
 
 # 2. Unticked (post-deploy): Testing, stays in 30-inprogress.
 v = vault_with({("30-inprogress", "ROBO-301"): ("In progress", "- [x] a\n- [ ] (post-deploy) players see it")})
@@ -105,6 +107,21 @@ shutil.rmtree(v)
 v = vault_with({("90-done", "ROBO-303"): ("Done", "- [x] a")})
 msg, note = tool.move(v, body("ROBO-303"), "11", "2026-11-18")
 check("already done", msg is None and "already" in note and git(v, "status", "--porcelain") == "", note)
+shutil.rmtree(v)
+
+# 5b. Done is final: an item closed by hand with an unticked (post-deploy) box does not go back to Testing.
+v = vault_with({("90-done", "ROBO-307"): ("Done", "- [ ] (post-deploy) owner waived it")})
+msg, note = tool.move(v, body("ROBO-307"), "15", "2026-11-18")
+check("done is final", msg is None and "already Done" in note and git(v, "status", "--porcelain") == "", note)
+shutil.rmtree(v)
+
+# 5c. No frontmatter: warning, nothing changed.
+v = vault_with({})
+os.makedirs(os.path.join(v, "40-backlog", "30-inprogress"))
+with open(os.path.join(v, "40-backlog", "30-inprogress", "ROBO-308 T.md"), "w") as f:
+    f.write("# T\nstatus: In progress\n")
+msg, note = tool.move(v, body("ROBO-308"), "16", "2026-11-18")
+check("no frontmatter", msg is None and note.startswith("warning") and "frontmatter" in note, note)
 shutil.rmtree(v)
 
 # 6. No id in the Item row (an id elsewhere in the body does not count), and no Item row at all.

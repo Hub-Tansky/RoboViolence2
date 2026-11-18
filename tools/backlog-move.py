@@ -6,7 +6,8 @@ The item is the first ROBO-NNN in the description's Item row. With an unticked c
 gets `status: Testing` in 40-backlog/30-inprogress/; otherwise `status: Done` in 40-backlog/90-done/ (rv2-docs AGENTS.md
 § Backlog). It edits `status` and `updated`, runs `git mv` in the vault and writes the commit message
 `backlog: ROBO-NNN -> <status> (PR #n)` to $GITHUB_OUTPUT as `message=` (empty when nothing changed); the caller commits.
-No ROBO id, no item file or two item files: a warning and exit 0, never a failed merge run.
+No ROBO id: nothing to do. No item file, two item files or no frontmatter: a warning. Always exit 0, never a failed
+merge run. An item already Done in 90-done/ stays there.
 """
 import datetime
 import glob
@@ -20,6 +21,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ITEM_ID = re.compile(r"\bROBO-\d{3,}\b")
 PENDING_POST_DEPLOY = re.compile(r"^\s*- \[ \] \(post-deploy\)", re.M)
 TARGETS = {"Testing": "30-inprogress", "Done": "90-done"}
+FRONTMATTER = re.compile(r"^---\n.*?\n---\n", re.S)
 
 
 def item_row():
@@ -47,9 +49,7 @@ def target_status(text):
 
 def set_field(text, name, value):
     """Replace a frontmatter field's value; only inside the leading --- block."""
-    head = re.match(r"^---\n.*?\n---\n", text, re.S)
-    if not head:
-        raise ValueError("no frontmatter")
+    head = FRONTMATTER.match(text)
     block = head.group(0)
     new, n = re.subn(rf"^{name}:.*$", f"{name}: {value}", block, count=1, flags=re.M)
     if n == 0:
@@ -62,16 +62,25 @@ def move(vault, body, pr, today):
     rid = item_id(body)
     if not rid:
         return None, "no ROBO-NNN in the Item row: nothing to move"
-    files = [f for f in glob.glob(os.path.join(vault, "40-backlog", "*", f"{rid} *.md")) if "/_" not in f.replace(os.sep, "/")]
+    # Skip `_templates/` and the like, judged inside the vault: the runner's clone sits under `_temp/` (ADR ROBO-249)
+    files = [f for f in glob.glob(os.path.join(vault, "40-backlog", "*", f"{rid} *.md"))
+             if not any(part.startswith("_") for part in os.path.relpath(f, vault).split(os.sep))]
     if len(files) != 1:
         return None, f"warning: {len(files)} item files for {rid} in {vault}/40-backlog: nothing moved"
     src = files[0]
     text = open(src, encoding="utf-8").read()
+    head = FRONTMATTER.match(text)
+    if not head:
+        return None, f"warning: {os.path.relpath(src, vault)} has no frontmatter: nothing moved"
+    current = re.search(r"^status:[ \t]*(.*?)[ \t]*$", head.group(0), re.M)
+    current = current.group(1) if current else None
+    done_dir = os.path.join(vault, "40-backlog", TARGETS["Done"])
+    if current == "Done" and os.path.dirname(src) == done_dir:
+        return None, f"{rid} is already Done: nothing to move"  # Done is final: the owner may have closed it by hand
     status = target_status(text)
-    current = re.search(r"^status:[ \t]*(.*?)[ \t]*$", text, re.M)
     dest_dir = os.path.join(vault, "40-backlog", TARGETS[status])
     dest = os.path.join(dest_dir, os.path.basename(src))
-    if current and current.group(1) == status and os.path.dirname(src) == dest_dir:
+    if current == status and os.path.dirname(src) == dest_dir:
         return None, f"{rid} is already {status}: nothing to move"
     text = set_field(set_field(text, "status", status), "updated", today)
     with open(src, "w", encoding="utf-8", newline="\n") as f:
