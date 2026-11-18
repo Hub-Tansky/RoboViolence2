@@ -4,6 +4,7 @@ file and an item already in place change nothing and never fail; Done is final (
 import importlib.util
 import os
 import shutil
+import stat
 import subprocess
 import sys
 import tempfile
@@ -39,6 +40,14 @@ def check(name, cond, detail=""):
     if not cond:
         print(f"FAIL {name} {detail}")
         failures += 1
+
+
+def rmtree(path):
+    """Windows: git object files are read-only, and shutil.rmtree can't delete them until made writable."""
+    def writable(func, p, _):
+        os.chmod(p, stat.S_IWRITE)
+        func(p)
+    shutil.rmtree(path, **({"onexc": writable} if sys.version_info >= (3, 12) else {"onerror": writable}))
 
 
 def git(vault, *args):
@@ -82,7 +91,7 @@ text = read(v, "90-done", "ROBO-300")
 check("done moved", text is not None and read(v, "30-inprogress", "ROBO-300") is None)
 check("done status", text and "\nstatus: Done\n" in text and "\nupdated: 2026-11-18\n" in text and "\ncreated: 2026-11-01\n" in text, text)
 check("done staged rename", git(v, "status", "--porcelain").startswith("R "), git(v, "status", "--porcelain"))
-shutil.rmtree(os.path.dirname(runner_temp))
+rmtree(os.path.dirname(runner_temp))
 
 # 2. Unticked (post-deploy): Testing, stays in 30-inprogress.
 v = vault_with({("30-inprogress", "ROBO-301"): ("In progress", "- [x] a\n- [ ] (post-deploy) players see it")})
@@ -95,25 +104,25 @@ check("testing status", text and "\nstatus: Testing\n" in text, text)
 git(v, "commit", "-qm", "move")
 msg, note = tool.move(v, body("ROBO-301"), "9", "2026-11-19")
 check("already testing", msg is None and "already" in note, note)
-shutil.rmtree(v)
+rmtree(v)
 
 # 4. Ticked (post-deploy): Done.
 v = vault_with({("10-next", "ROBO-302"): ("Next", "- [x] (post-deploy) seen on prod")})
 msg, _ = tool.move(v, body("ROBO-302"), "10", "2026-11-18")
 check("ticked post-deploy done", msg == "backlog: ROBO-302 -> Done (PR #10)" and read(v, "90-done", "ROBO-302"), msg)
-shutil.rmtree(v)
+rmtree(v)
 
 # 5. Already Done: no change.
 v = vault_with({("90-done", "ROBO-303"): ("Done", "- [x] a")})
 msg, note = tool.move(v, body("ROBO-303"), "11", "2026-11-18")
 check("already done", msg is None and "already" in note and git(v, "status", "--porcelain") == "", note)
-shutil.rmtree(v)
+rmtree(v)
 
 # 5b. Done is final: an item closed by hand with an unticked (post-deploy) box does not go back to Testing.
 v = vault_with({("90-done", "ROBO-307"): ("Done", "- [ ] (post-deploy) owner waived it")})
 msg, note = tool.move(v, body("ROBO-307"), "15", "2026-11-18")
 check("done is final", msg is None and "already Done" in note and git(v, "status", "--porcelain") == "", note)
-shutil.rmtree(v)
+rmtree(v)
 
 # 5c. No frontmatter: warning, nothing changed.
 v = vault_with({})
@@ -122,7 +131,7 @@ with open(os.path.join(v, "40-backlog", "30-inprogress", "ROBO-308 T.md"), "w") 
     f.write("# T\nstatus: In progress\n")
 msg, note = tool.move(v, body("ROBO-308"), "16", "2026-11-18")
 check("no frontmatter", msg is None and note.startswith("warning") and "frontmatter" in note, note)
-shutil.rmtree(v)
+rmtree(v)
 
 # 6. No id in the Item row (an id elsewhere in the body does not count), and no Item row at all.
 v = vault_with({("30-inprogress", "ROBO-304"): ("In progress", "- [ ] a")})
@@ -134,7 +143,7 @@ for case, b in [("no id", body("none (chore)") + "\nSee ROBO-304.\n"), ("no row"
 for case, rid in [("missing", "ROBO-305"), ("template only", "ROBO-999")]:
     msg, note = tool.move(v, body(rid), "13", "2026-11-18")
     check(case, msg is None and note.startswith("warning") and git(v, "status", "--porcelain") == "", note)
-shutil.rmtree(v)
+rmtree(v)
 
 # 8. CLI: exit 0, ::warning:: line and an empty message= output on a missing item.
 v = vault_with({})
@@ -144,7 +153,7 @@ r = subprocess.run([sys.executable, "-B", TOOL, v, "14", "2026-11-18"], capture_
 check("cli exit 0", r.returncode == 0, r.stderr)
 check("cli warning", r.stdout.startswith("::warning::"), r.stdout)
 check("cli output", open(out).read() == "message=\n", open(out).read())
-shutil.rmtree(v)
+rmtree(v)
 
 print("FAILED" if failures else "OK")
 sys.exit(1 if failures else 0)
