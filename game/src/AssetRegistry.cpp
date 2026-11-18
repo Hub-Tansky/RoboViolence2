@@ -59,7 +59,9 @@ namespace
 		return dir;
 	}
 
-	// The id and file columns of a pack's main/pack.tsv (ADR 0065); false when the pack has none
+	// The id and file columns of a pack's main/pack.tsv (ADR 0065); false when the pack has none. Reads only those two
+	// columns and skips malformed rows (a player's pack must not stop the game); tools/check-pack.py and the CMake
+	// step fail on them instead.
 	bool readManifest(const std::string& root, std::map<std::string, std::string>& files)
 	{
 		std::ifstream in(std::filesystem::path(root + DATA_FOLDER + "pack.tsv"));

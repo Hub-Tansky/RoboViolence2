@@ -51,7 +51,7 @@ static void packStacking(const std::string& scratch)
 								 "models/Extra\tmodels/Extra.DKO\tmodel\nsounds/Siren\tsounds/Gone.wav\tsound\n");
 
 	char* before = bv2::assetPath("models/Grenade");
-	bv2::setAssetPacks({base, base});
+	bv2::setAssetPacks({base.substr(0, base.size() - 1), base}); // one root, two spellings: one pack
 	same(bv2::assetPath("sounds/Siren"), "main/sounds/Siren.WAV", "base pack alone: relative path");
 	same(bv2::assetPath("models/Rocket"), "main/models/Rocket.DKO", "base pack alone: compiled-in file, not its pack.tsv");
 
