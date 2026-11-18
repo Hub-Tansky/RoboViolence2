@@ -1,4 +1,4 @@
-# 0068: New models are authored as glTF and converted to .DKO offline
+# 0070: New models are authored as glTF and converted to .DKO offline
 
 - Status: Accepted
 - Date: 2026-11-18

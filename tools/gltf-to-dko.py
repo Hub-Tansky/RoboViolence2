@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Convert a glTF 2.0 model (.glb, or .gltf with its .bin) to a static .DKO the game draws (ROBO-239, ADR 0068).
+"""Convert a glTF 2.0 model (.glb, or .gltf with its .bin) to a static .DKO the game draws (ROBO-239, ADR 0070).
 
 The art format is glTF (owner decision D2); the game keeps loading .DKO through engine/dko. This converter writes:
   - one DKO material per glTF material: name, diffuse colour (baseColorFactor), diffuse texture (the image file name

@@ -100,4 +100,5 @@ What we do, in one or two sentences.
 | [0065](0065-asset-pack-manifest.md) | An asset pack is a folder with a pack.tsv manifest; the base pack's is content/base-pack.tsv | Accepted |
 | [0066](0066-game-loads-assets-by-id.md) | Game code loads assets by id; the base manifest's ids are compiled in | Accepted |
 | [0067](0067-font-bytes-and-ttf-baking.md) | Text is one byte per glyph; bytes 160-255 hold 96 extra letters; a TTF is baked to babo.tga widths | Accepted |
-| [0068](0068-gltf-converts-to-dko.md) | New models are authored as glTF and converted to .DKO offline | Accepted |
+| [0068](0068-docs-only-prs-skip-the-build.md) | A docs-only PR skips the build steps; its required checks still report success | Accepted |
+| [0070](0070-gltf-converts-to-dko.md) | New models are authored as glTF and converted to .DKO offline | Accepted |

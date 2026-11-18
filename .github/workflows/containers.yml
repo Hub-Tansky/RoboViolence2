@@ -25,9 +25,16 @@ jobs:
     runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 2  # the merge commit and the base: tools/check-docs-only.py diffs them
+      # A docs-only PR skips the rest; the job still reports success, so required checks pass (ROBO-246, ADR 0068)
+      - id: docs
+        uses: ./.github/actions/docs-only
       - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+        if: env.DOCS_ONLY != 'true'
       # One build stage, two targets: the second build reuses the first's cached layers
       - name: Build the server image
+        if: env.DOCS_ONLY != 'true'
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
           context: .
@@ -38,6 +45,7 @@ jobs:
           cache-from: type=gha,scope=servers-${{ matrix.runner }}
           cache-to: type=gha,scope=servers-${{ matrix.runner }},mode=max
       - name: Build the master image
+        if: env.DOCS_ONLY != 'true'
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
           context: .
@@ -47,6 +55,7 @@ jobs:
           tags: ${{ env.MASTER_IMAGE }}:latest
           cache-from: type=gha,scope=servers-${{ matrix.runner }}
       - name: Both run as a non-root user
+        if: env.DOCS_ONLY != 'true'
         run: |
           for image in "$SERVER_IMAGE" "$MASTER_IMAGE"; do
             uid=$(docker run --rm --entrypoint id "$image:latest" -u)
@@ -57,6 +66,7 @@ jobs:
       # passworded. Both values are random throwaways for this run. BV2_PUBLIC_ADDRESS (a documentation address): the
       # servers share one public IP, as on production, and the master lists each under it (ADR 0022)
       - name: The compose example comes up healthy; the master lists the three passworded servers (CTF 3333, TDM 3334, FFA 3335)
+        if: env.DOCS_ONLY != 'true'
         run: |
           set -euo pipefail
           printf 'BV2_SV_PASSWORD=%s\nBV2_ADMIN_PASS=%s\nBV2_PUBLIC_ADDRESS=203.0.113.7\n' "$(openssl rand -hex 8)" "$(openssl rand -hex 16)" > "$RUNNER_TEMP/ci.env"
@@ -77,6 +87,7 @@ jobs:
       # PNS-56: the server browser pings each game port over UDP (babonet peer, game/src/CPing.cpp). A babonet peer
       # request (system interface, packet 1, TYPE_DEMAND carrying a 4-byte id) must come back as TYPE_CONFIRM
       - name: Every game server answers the browser's UDP ping (3333, 3334, 3335)
+        if: env.DOCS_ONLY != 'true'
         run: |
           python3 - <<'PY'
           import socket, struct
@@ -107,6 +118,7 @@ jobs:
           PY
       # Step 12: the admin API through the TLS proxy (Caddy's own CA for localhost, hence -k)
       - name: Remote status and a command over TLS
+        if: env.DOCS_ONLY != 'true'
         run: |
           set -euo pipefail
           token=$(sed -n 's/^BV2_ADMIN_PASS=//p' "$RUNNER_TEMP/ci.env")
@@ -127,13 +139,14 @@ jobs:
           grep -qx 'game type 0' ffa-status.txt
       # Phase T step 2: the staging deploy agent publishes the running commit at /deployed
       - name: /deployed serves the published commit
+        if: env.DOCS_ONLY != 'true'
         run: |
           set -euo pipefail
           echo "$GITHUB_SHA ci" > packaging/docker/srv/deployed # created before `up`, as deploy.sh does
           curl -skf https://localhost:8443/deployed | tee deployed.txt
           grep -q "^$GITHUB_SHA " deployed.txt
       - name: Logs and the master's game list
-        if: always()
+        if: env.DOCS_ONLY != 'true' && always()
         run: |
           compose="docker compose -f packaging/docker/compose.example.yml"
           $compose logs --no-color master | tail -40
