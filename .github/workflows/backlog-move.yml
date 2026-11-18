@@ -37,17 +37,20 @@ jobs:
           git clone -q --depth 1 "https://x-access-token:${DOCS_TOKEN}@github.com/Hub-Tansky/rv2-docs.git" "$vault"
           git -C "$vault" config user.name Hub-Tansky  # also for the commits a rebase rewrites
           git -C "$vault" config user.email 337104978+Hub-Tansky@users.noreply.github.com
+          git -C "$vault" remote set-url origin https://github.com/Hub-Tansky/rv2-docs.git  # no token in .git/config
           DOCS_TOKEN= python3 -B tools/backlog-move.py "$vault" "$PR_NUMBER"
       - name: Commit and push as Hub-Tansky
         if: steps.move.outputs.message != ''
         env:
+          DOCS_TOKEN: ${{ secrets.SYMBOLS_TOKEN }}
           MESSAGE: ${{ steps.move.outputs.message }}
         working-directory: ${{ runner.temp }}/rv2-docs
         run: |
+          auth="http.https://github.com/.extraheader=AUTHORIZATION: basic $(printf 'x-access-token:%s' "$DOCS_TOKEN" | base64 -w0)"
           git commit -q -m "$MESSAGE"
           # Agents and other merges push to the same branch: rebase onto whoever pushed first and try again
           for attempt in 1 2 3 4 5; do
-            git push -q origin HEAD:main && exit 0
-            git pull -q --rebase origin main || { git rebase --abort; exit 1; }
+            git -c "$auth" push -q origin HEAD:main && exit 0
+            git -c "$auth" pull -q --rebase origin main || { git rebase --abort; exit 1; }
           done
           exit 1

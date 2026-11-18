@@ -19,6 +19,7 @@ The token is `SYMBOLS_TOKEN` (fine-grained, Contents write on rv2-docs only), sh
 - Agents no longer move an item after a merge; they still move it into `30-inprogress/` when work starts, and the owner still ticks `(post-deploy)` criteria and moves Testing items to Done.
 - No ROBO id in the Item row: nothing to do. No item file, two item files, no frontmatter or no token: a warning in the run, no commit, never a red merge; the item is then moved by hand. A merged PR from a fork (no secrets) or into another branch is skipped; its item is moved by hand.
 - An item already at its target status and folder is left alone, so a second PR for the same item adds no commit.
+- The status is decided on the clone. If someone edits the same item before the push and the rebase applies cleanly (for example a new `(post-deploy)` criterion while the run sets `status: Done`), the pushed status can be stale; the owner corrects it by hand.
 - The workflow is not a required check; a failed push (rebase conflict) shows as a failed run, the merge stands.
 - The PR body comes in through `env`, never into the shell script; the tool runs from the target branch, not the PR head.
 - Rejected: moving items in the review gate before merge (the merge may never happen); a scheduled sweep over merged PRs (late, and has to remember what it already moved).
