@@ -1,20 +1,21 @@
 # Architecture decision records
 
-One file per non-obvious decision: `NNNN-kebab-title.md`, numbered in order, never reused.
+One file per non-obvious decision, named after the scope item that makes it: `ROBO-NNN-kebab-title.md` (a second decision of the same item: `ROBO-NNN-2-kebab-title.md`). Parallel PRs took the same next number four times; a scope item's number is already unique ([ADR ROBO-248](ROBO-248-adrs-named-by-scope-item.md)). The files `0001` to `0070` keep their numbers; never add a new `NNNN-` file.
 
 ## Rules
 
-- An accepted ADR is never edited except for its **Status** line. To change a decision, write a new ADR and mark the old one `Superseded by NNNN`.
+- An ADR's id is its number (`0042`) or its scope item (`ROBO-248`, `ROBO-248-2`). Cite it as `ADR <id>`.
+- An accepted ADR is never edited except for its **Status** line. To change a decision, write a new ADR and mark the old one `Superseded by <id>`.
 - Keep it under one screen. Cite code as `path:line`; link the scope item (ROBO-NNN), issue, PR or file it affects.
-- Add every new ADR to the index below.
-- An ADR moved to another repository keeps its number here: its index row links the file there with status `Moved to <repo> (NNNN)`, NNNN being the ADR that moved it.
+- Add every new ADR to the index below, as a new last row.
+- An ADR moved to another repository keeps its id here: its index row links the file there with status `Moved to <repo> (<id>)`, <id> being the ADR that moved it.
 
 ## Format
 
 ```markdown
-# NNNN: <decision as an imperative phrase>
+# ROBO-NNN: <decision as an imperative phrase>   (a second ADR of the item: # ROBO-NNN-2: ...)
 
-- Status: Accepted | Superseded by NNNN | Deprecated
+- Status: Accepted | Superseded by <id> | Deprecated
 - Date: YYYY-MM-DD
 - Affects: <scope item, issue, PR or file>
 
@@ -31,7 +32,7 @@ What we do, in one or two sentences.
 
 ## Index
 
-| # | Decision | Status |
+| ADR | Decision | Status |
 |---|---|---|
 | [0001](0001-ninja-generator-on-all-presets.md) | Use the Ninja generator on all presets, MSVC included | Accepted |
 | [0002](0002-compile-out-libcurl.md) | Compile out libcurl in Phase A | Accepted |
@@ -103,3 +104,4 @@ What we do, in one or two sentences.
 | [0068](0068-docs-only-prs-skip-the-build.md) | A docs-only PR skips the build steps; its required checks still report success | Accepted |
 | [0069](0069-asset-packs-stack-over-the-base-pack.md) | Asset packs stack over the base pack; the BV2 data is an optional pack on top | Accepted |
 | [0070](0070-gltf-converts-to-dko.md) | New models are authored as glTF and converted to .DKO offline | Accepted |
+| [ROBO-248](ROBO-248-adrs-named-by-scope-item.md) | Name new ADRs after their scope item, not the next number | Accepted |
