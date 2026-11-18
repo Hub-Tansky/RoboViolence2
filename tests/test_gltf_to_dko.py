@@ -1,0 +1,318 @@
+#!/usr/bin/env python3
+"""ROBO-239: tools/gltf-to-dko.py turns a small glTF (as .gltf and as .glb) into a .DKO with the expected meshes,
+materials, material groups, vertices and dummy; engine/dko loads the result (through dko_probe, when given) and
+reports the same bounding box and dummy position; unsupported input fails with exit 1 instead of a broken file.
+
+Usage: test_gltf_to_dko.py <repo root> <scratch dir> [<dko_probe executable>]
+"""
+import base64
+import importlib.util
+import json
+import os
+import shutil
+import struct
+import subprocess
+import sys
+import zlib
+
+ROOT, SCRATCH = sys.argv[1], os.path.join(sys.argv[2], "gltf-to-dko")
+PROBE = sys.argv[3] if len(sys.argv) > 3 else None
+spec = importlib.util.spec_from_file_location("gltf_to_dko", os.path.join(ROOT, "tools", "gltf-to-dko.py"))
+conv = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(conv)
+
+failures = []
+
+
+def check(ok, what):
+    if not ok:
+        failures.append(what)
+        print(f"FAIL: {what}")
+
+
+def close(a, b, eps=1e-4):
+    return len(a) == len(b) and all(abs(x - y) < eps for x, y in zip(a, b))
+
+
+# --- a small model: "body" (cube in Red + quad in Steel), child "barrel" (triangle in Steel), its child "flash1"
+CUBE = [(x, y, z) for x in (-1, 1) for y in (-1, 1) for z in (-1, 1)]
+CUBE_IDX = [0, 1, 3, 0, 3, 2, 4, 6, 7, 4, 7, 5, 0, 4, 5, 0, 5, 1, 2, 3, 7, 2, 7, 6, 0, 2, 6, 0, 6, 4, 1, 5, 7, 1, 7, 3]
+QUAD = [(2, 0, 0), (3, 0, 0), (3, 1, 0), (2, 0, 0), (3, 1, 0), (2, 1, 0)]
+QUAD_N = [(0, 0, 1)] * 6
+QUAD_UV = [(0, 0), (1, 0), (1, 1), (0, 0), (1, 1), (0, 1)]
+TRI = [(0, 0, 0), (0.5, 0, 0), (0, 0.5, 0)]
+BARREL_T, FLASH_T = (1, 2, 3), (0, 0, 0.5)
+
+
+def build(extra_material=None, mode=None, sparse=False):
+    """(glTF json, binary buffer) of the small model."""
+    blob, views, accessors = bytearray(), [], []
+
+    def add(values, fmt, kind, ctype, target=None):
+        while len(blob) % 4:
+            blob.append(0)
+        flat = [x for v in values for x in (v if isinstance(v, tuple) else (v,))]
+        data = struct.pack(f"<{len(flat)}{fmt}", *flat)
+        views.append({"buffer": 0, "byteOffset": len(blob), "byteLength": len(data)})
+        if target:
+            views[-1]["target"] = target
+        blob.extend(data)
+        acc = {"bufferView": len(views) - 1, "componentType": ctype, "count": len(values), "type": kind}
+        if kind == "VEC3" and fmt == "f":
+            acc["min"] = [min(v[i] for v in values) for i in range(3)]
+            acc["max"] = [max(v[i] for v in values) for i in range(3)]
+        accessors.append(acc)
+        return len(accessors) - 1
+
+    cube = add(CUBE, "f", "VEC3", 5126)
+    cube_idx = add(CUBE_IDX, "H", "SCALAR", 5123)
+    quad, quad_n, quad_uv = add(QUAD, "f", "VEC3", 5126), add(QUAD_N, "f", "VEC3", 5126), add(QUAD_UV, "f", "VEC2", 5126)
+    tri = add(TRI, "f", "VEC3", 5126)
+    if sparse:
+        accessors[tri]["sparse"] = {"count": 1}
+    body = {"primitives": [{"attributes": {"POSITION": cube}, "indices": cube_idx, "material": 0},
+                           {"attributes": {"POSITION": quad, "NORMAL": quad_n, "TEXCOORD_0": quad_uv}, "material": 1}]}
+    barrel = {"primitives": [{"attributes": {"POSITION": tri}, "material": 1}]}
+    if mode is not None:
+        barrel["primitives"][0]["mode"] = mode
+    materials = [{"name": "Red", "pbrMetallicRoughness": {"baseColorFactor": [1, 0, 0, 1]}},
+                 {"name": "Steel", "doubleSided": True, "pbrMetallicRoughness": {"baseColorFactor": [0.5, 0.5, 0.5, 0.8]}}]
+    doc = {"asset": {"version": "2.0"}, "scene": 0, "scenes": [{"nodes": [0]}],
+           "nodes": [{"name": "body", "mesh": 0, "children": [1]},
+                     {"name": "barrel", "mesh": 1, "translation": list(BARREL_T), "children": [2]},
+                     {"name": "flash1", "translation": list(FLASH_T)}],
+           "meshes": [body, barrel], "materials": materials, "accessors": accessors, "bufferViews": views,
+           "buffers": [{"byteLength": len(blob)}]}
+    if extra_material:
+        extra_material(doc)
+    return doc, bytes(blob)
+
+
+def write_gltf(path, doc, blob):
+    doc = json.loads(json.dumps(doc))
+    doc["buffers"][0]["uri"] = "data:application/octet-stream;base64," + base64.b64encode(blob).decode()
+    with open(path, "w") as f:
+        json.dump(doc, f)
+
+
+def write_glb(path, doc, blob):
+    js = json.dumps(doc).encode()
+    js += b" " * (-len(js) % 4)
+    blob += b"\0" * (-len(blob) % 4)
+    body = struct.pack("<II", len(js), 0x4E4F534A) + js + struct.pack("<II", len(blob), 0x004E4942) + blob
+    with open(path, "wb") as f:
+        f.write(struct.pack("<III", 0x46546C67, 2, 12 + len(body)) + body)
+
+
+def png_1x1():
+    raw = b"\0\xff\0\0"
+    def part(kind, data):
+        return struct.pack(">I", len(data)) + kind + data + struct.pack(">I", zlib.crc32(kind + data))
+    return (b"\x89PNG\r\n\x1a\n" + part(b"IHDR", struct.pack(">IIBBBBB", 1, 1, 8, 2, 0, 0, 0))
+            + part(b"IDAT", zlib.compress(raw)) + part(b"IEND", b""))
+
+
+# --- an independent reader that follows engine/dko's CDkoModel::loadFromFile
+class Reader:
+    def __init__(self, data):
+        self.data, self.pos = data, 0
+
+    def take(self, fmt):
+        v = struct.unpack_from("<" + fmt, self.data, self.pos)
+        self.pos += struct.calcsize("<" + fmt)
+        return v
+
+    def chunk(self):
+        return self.take("h")[0]
+
+    def string(self):
+        end = self.data.index(b"\0", self.pos)
+        s = self.data[self.pos:end].decode("latin-1")
+        self.pos = end + 1
+        return s
+
+
+def read_dko(path):
+    r = Reader(open(path, "rb").read())
+    model = {"materials": [], "meshes": [], "dummies": [], "frames": None}
+    c = conv.CHUNK
+    while True:
+        cid = r.chunk()
+        if cid == c["END"]:
+            break
+        if cid == c["VERSION"]:
+            model["version"] = r.take("h")[0]
+        elif cid == c["TIME_INFO"]:
+            model["frames"] = r.take("hhh")[2]
+        elif cid == c["PROPERTIES"]:
+            while (sub := r.chunk()) != c["END"]:
+                {c["NAME"]: r.string, c["POSITION"]: lambda: r.take("3f"), c["MATRIX"]: lambda: r.take("9f")}[sub]()
+        elif cid == c["MATLIST"]:
+            n = r.take("h")[0]
+            mats = [None] * n
+            for i in range(n):
+                m = {}
+                while (sub := r.chunk()) != c["END"]:
+                    if sub == c["MATNAME"]:
+                        m["name"] = r.string()
+                    elif sub == c["TEX_DIFFUSE"]:
+                        m["texture"] = r.string()
+                    elif sub in (c["AMBIENT"], c["DIFFUSE"], c["SPECULAR"], c["EMISSIVE"]):
+                        m[sub] = r.take("4f")
+                    elif sub == c["SHININESS"]:
+                        r.take("h")
+                    elif sub == c["TRANSPARENCY"]:
+                        m["transparency"] = r.take("f")[0]
+                    elif sub == c["TWO_SIDED"]:
+                        m["two_sided"] = r.take("B")[0]
+                    else:
+                        raise ValueError(f"material chunk {sub:#x}")
+                mats[n - i - 1] = m
+            model["materials"] = mats
+        elif cid == c["TRI_MESH"]:
+            mesh = {"groups": []}
+            while (sub := r.chunk()) != c["END"]:
+                if sub == c["NAME"]:
+                    mesh["name"] = r.string()
+                elif sub == c["POSITION"]:
+                    r.take("3f")
+                elif sub == c["MATRIX"]:
+                    r.take("9f")
+                elif sub == c["NB_MAT_GROUP"]:
+                    for _ in range(r.take("h")[0]):
+                        g = {}
+                        while (gc := r.chunk()) != c["END"]:
+                            if gc == c["MAT_ID"]:
+                                g["material"] = r.take("h")[0]
+                            elif gc == c["NB_VERTEX"]:
+                                g["n"] = r.take("i")[0]
+                            elif gc == c["VERTEX_ARRAY"]:
+                                f = r.take(f"{g['n'] * 3}f")
+                                g["vertices"] = [f[i:i + 3] for i in range(0, len(f), 3)]
+                            elif gc == c["NORMAL_ARRAY"]:
+                                f = r.take(f"{g['n'] * 3}f")
+                                g["normals"] = [f[i:i + 3] for i in range(0, len(f), 3)]
+                            elif gc == c["TEXCOORD_ARRAY"]:
+                                f = r.take(f"{g['n'] * 2}f")
+                                g["uvs"] = [f[i:i + 2] for i in range(0, len(f), 2)]
+                            else:
+                                raise ValueError(f"group chunk {gc:#x}")
+                        mesh["groups"].append(g)
+                else:
+                    raise ValueError(f"mesh chunk {sub:#x}")
+            model["meshes"].append(mesh)
+        elif cid == c["DUMMY"]:
+            d = {}
+            while (sub := r.chunk()) != c["END"]:
+                if sub == c["NAME"]:
+                    d["name"] = r.string()
+                elif sub == c["POSITION"]:
+                    d["position"] = r.take("3f")
+                elif sub == c["MATRIX"]:
+                    d["matrix"] = r.take("9f")
+            model["dummies"].append(d)
+        else:
+            raise ValueError(f"top chunk {cid:#x}")
+    check(r.pos == len(r.data), f"{path}: {len(r.data) - r.pos} bytes after the END chunk")
+    return model
+
+
+def game(v):
+    """glTF axes to game axes, as the converter documents: (x, y, z) -> (x, -z, y)."""
+    return (v[0], -v[2], v[1])
+
+
+def check_model(path, label):
+    m = read_dko(path)
+    check(m.get("version") == 2 and m["frames"] == 1, f"{label}: version 2, one frame")
+    check([x["name"] for x in m["materials"]] == ["Red", "Steel"], f"{label}: materials Red, Steel in order")
+    check(close(m["materials"][0][conv.CHUNK["DIFFUSE"]], (1, 0, 0, 1)), f"{label}: Red diffuse")
+    check(abs(m["materials"][1]["transparency"] - 0.2) < 1e-6 and m["materials"][1]["two_sided"] == 1,
+          f"{label}: Steel transparency 0.2, two-sided")
+    check([x.get("name") for x in m["meshes"]] == ["body", "barrel"], f"{label}: meshes body, barrel")
+    groups = [[(g["material"], g["n"]) for g in x["groups"]] for x in m["meshes"]]
+    check(groups == [[(0, 36), (1, 6)], [(1, 3)]], f"{label}: material groups {groups}")
+    body = m["meshes"][0]["groups"]
+    check(close([x for v in body[0]["vertices"] for x in v],
+                [x for i in CUBE_IDX for x in game(CUBE[i])]), f"{label}: cube de-indexed in game axes")
+    check(all(close(n, (0, -1, 0)) for n in body[1]["normals"]), f"{label}: quad normal +Z becomes -Y")
+    check(close([x for uv in body[1]["uvs"] for x in uv], [x for u, v in QUAD_UV for x in (u, 1 - v)]),
+          f"{label}: uv v flipped")
+    barrel = m["meshes"][1]["groups"][0]["vertices"]
+    want = [game(tuple(p + t for p, t in zip(v, BARREL_T))) for v in TRI]
+    check(close([x for v in barrel for x in v], [x for v in want for x in v]), f"{label}: barrel at its node")
+    flash = game(tuple(a + b for a, b in zip(BARREL_T, FLASH_T)))
+    dummies = [(d["name"], d["position"]) for d in m["dummies"]]
+    check(len(dummies) == 1 and dummies[0][0] == "flash1" and close(dummies[0][1], flash),
+          f"{label}: dummy flash1 at {flash}, got {dummies}")
+    return m, flash
+
+
+def probe(path, model, flash, label):
+    out = subprocess.run([PROBE, path, "flash1"], capture_output=True, text=True)
+    check(out.returncode == 0, f"{label}: dko_probe exit {out.returncode}: {out.stdout}{out.stderr}")
+    if out.returncode:
+        return
+    got = {line.split()[1]: [float(x) for x in line.split()[2:]] for line in out.stdout.splitlines()
+           if line.startswith("probe ")}
+    verts = [v for x in model["meshes"] for g in x["groups"] for v in g["vertices"]]
+    lo = [min(v[i] for v in verts) for i in range(3)]
+    hi = [max(v[i] for v in verts) for i in range(3)]
+    box = [(lo[i] + hi[i]) / 2 for i in range(3)] + [(hi[i] - lo[i]) / 2 for i in range(3)]
+    check(close(got.get("oabb", []), box), f"{label}: engine bounding box {got.get('oabb')} != {box}")
+    radius = max(sum(x * x for x in v) ** 0.5 for v in verts)
+    check(close(got.get("radius", []), [radius]), f"{label}: engine radius {got.get('radius')} != {radius}")
+    check(close(got.get("dummy", []), flash), f"{label}: engine dummy {got.get('dummy')} != {flash}")
+
+
+def run(src, dst, *extra):
+    return conv.main([src, dst, "--scale", "1", *extra])
+
+
+shutil.rmtree(SCRATCH, ignore_errors=True)
+os.makedirs(SCRATCH)
+doc, blob = build()
+for ext, writer in ((".gltf", write_gltf), (".glb", write_glb)):
+    src, dst = os.path.join(SCRATCH, "weapon" + ext), os.path.join(SCRATCH, f"weapon{ext[1:]}.DKO")
+    writer(src, doc, blob)
+    check(run(src, dst) == 0, f"{ext}: converter exit 0")
+    if os.path.exists(dst):
+        model, flash = check_model(dst, ext)
+        if PROBE:
+            probe(dst, model, flash, ext)
+
+# without --scale, 1 m is 200 DKO units (the game draws models at 0.005)
+dst = os.path.join(SCRATCH, "default-scale.DKO")
+check(conv.main([os.path.join(SCRATCH, "weapon.glb"), dst]) == 0, "default scale: exit 0")
+if os.path.exists(dst):
+    got = read_dko(dst)["dummies"][0]["position"]
+    want = tuple(200 * x for x in game(tuple(a + b for a, b in zip(BARREL_T, FLASH_T))))
+    check(close(got, want, 1e-2), f"default scale: dummy at {want}, got {got}")
+
+# an embedded PNG on Red is written beside the .DKO and named by TEX_DIFFUSE
+def textured(d):
+    d["images"] = [{"name": "skin", "uri": "data:image/png;base64," + base64.b64encode(png_1x1()).decode()}]
+    d["textures"] = [{"source": 0}]
+    d["materials"][0]["pbrMetallicRoughness"]["baseColorTexture"] = {"index": 0}
+
+
+tex_dir = os.path.join(SCRATCH, "tex")
+os.makedirs(tex_dir)
+write_gltf(os.path.join(SCRATCH, "textured.gltf"), *build(textured))
+check(run(os.path.join(SCRATCH, "textured.gltf"), os.path.join(tex_dir, "textured.DKO")) == 0, "textured: exit 0")
+check(open(os.path.join(tex_dir, "skin.png"), "rb").read() == png_1x1(), "textured: skin.png written beside the DKO")
+if os.path.exists(os.path.join(tex_dir, "textured.DKO")):
+    mats = read_dko(os.path.join(tex_dir, "textured.DKO"))["materials"]
+    check(mats[0].get("texture") == "skin.png" and "texture" not in mats[1], "textured: Red has TEX_DIFFUSE skin.png")
+    if PROBE:
+        out = subprocess.run([PROBE, os.path.join(tex_dir, "textured.DKO"), "flash1"], capture_output=True, text=True)
+        check(out.returncode == 0, f"textured: dko_probe exit {out.returncode}: {out.stdout}")
+
+# unsupported input: exit 1 and no output file
+for label, kwargs in (("lines", {"mode": 1}), ("sparse", {"sparse": True})):
+    src, dst = os.path.join(SCRATCH, label + ".gltf"), os.path.join(SCRATCH, label + ".DKO")
+    write_gltf(src, *build(**kwargs))
+    check(run(src, dst) == 1 and not os.path.exists(dst), f"{label}: exit 1, no .DKO written")
+
+print("FAIL" if failures else "OK", f"({len(failures)} failures)")
+sys.exit(1 if failures else 0)
