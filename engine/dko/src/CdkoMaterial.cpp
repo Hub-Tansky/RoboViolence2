@@ -54,7 +54,7 @@ CdkoMaterial::CdkoMaterial()
 CdkoMaterial::~CdkoMaterial()
 {
 	if (textureMat) delete textureMat;
-	if (matName) delete matName;
+	delete[] matName;
 
 #ifndef CONSOLE
 	dktDeleteTexture(&texDiffuse);

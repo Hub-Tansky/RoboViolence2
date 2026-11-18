@@ -95,7 +95,7 @@ COctreeNode::COctreeNode(CFace **mFaceArray, int mNbFace, CVector mCenter, float
 
 COctreeNode::~COctreeNode()
 {
-	if (faceArray) delete faceArray;
+	delete[] faceArray;
 
 	for(int i=0;i<8;i++)
 	{

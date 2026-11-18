@@ -50,7 +50,7 @@ One row per module directory. `tools/check-architecture.sh` fails when a directo
 | `masterserver/` | Target `bv2master`; see [README](masterserver/README.md) |
 | `masterserver/src/` | Master server sources |
 | `tests/` | ctest suite (`tests/CMakeLists.txt`, `ctest -N` lists the tests): unit tests, `harness/` in-process server, `corpus/` packet samples, `autotest/` client scripts, `golden/` screenshot goldens, `e2e/` scenarios |
-| `tools/` | Repo checks (`check-*`, guard files), `review.sh`, `merge-risk.py`, generators (placeholders, icons, `.pot`), packaging and release helpers |
+| `tools/` | Repo checks (`check-*`, guard files), `review.sh`, `merge-risk.py`, generators (placeholders, icons, `.pot`), the glTF to `.DKO` converter (ADR 0070), packaging and release helpers |
 | `tools/playtest/` | Playtest pull agent for the owner's Mac (ADR 0017); see [README](tools/playtest/README.md) |
 | `tools/staging/` | Staging pull deploy and health watch (ADR 0018); see [README](tools/staging/README.md) |
 | `packaging/docker/` | Server and master images (`Dockerfile`), master entrypoint, Caddy for the admin APIs; runbook [docs/ops/runbook.md](docs/ops/runbook.md) |
