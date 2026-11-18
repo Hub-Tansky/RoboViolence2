@@ -6,7 +6,7 @@
 
 ## Context
 - The owner makes the new art, and D2 chose glTF 2.0 as its format. The game draws models through `engine/dko`, which reads the BV2 `.DKO` chunk format (static or vertex-animated triangle lists, materials, named dummies such as `flash1` and `eject1`) and loads only `.DKO` and `.3ds`.
-- ROBO-239 asked for a prototype that settles one of two ways: a runtime glTF loader beside the DKO one, or a converter to `.DKO`.
+- ROBO-239 planned a cgltf runtime loader prototype first, with a glTF to `.DKO` converter as the fallback. No loader prototype was built: reading the loader showed that a converter gives the same drawn result with no runtime change, so the converter was built first and the loader is rejected below on that reading, not on a failed prototype.
 
 ## Decision
 New models are authored as glTF and converted offline by `tools/gltf-to-dko.py` (Python 3, standard library only) into a `.DKO` that the unchanged `engine/dko` loads:
@@ -22,6 +22,6 @@ Static models only: animations, skins, morph targets, sparse accessors and non-t
 - No new code or dependency in the client or the server, and one draw path: a converted model goes through the same loader, culling and ray tests as the BV2 models, and the BV2 data loads as before.
 - The converted `.DKO` ships in the pack; the `.glb` stays the source. The pack manifest (ADR 0065) lists the `.DKO`.
 - `test_gltf_to_dko` builds a small glTF (as `.gltf` and `.glb`), converts it and checks meshes, materials, groups, vertices, uv, normals and the dummy with its own reader, then loads the result through `engine/dko` (`dko_probe`) and compares the bounding box, radius and dummy position.
-- Prototype check (2026-11-18, not automated): a procedural `.glb` weapon converted to `models/SMG.DKO` in a copy of the BV2 data drew in the player's hand where the BV2 SMG draws.
-- Animated models (the BV2 vertex-animated DKOs) need a later extension: glTF morph targets or sampled frames written as DKO frames.
+- Prototype check (2026-11-18, not automated): a procedural `.glb` weapon converted to `models/SMG.DKO` in a copy of the BV2 data drew in the player's hand where the BV2 SMG draws; the same run on placeholder data passed its autotest and its screenshot is on the PR.
+- The BV2 weapons are static (one DKO frame); the flags, flag pole, knives and shields are vertex-animated. Converting animated glTF into DKO frames is ROBO-247.
 - Rejected: a runtime glTF loader. It adds a parser (cgltf or tinygltf) to client and server, a second draw path for the same scene code, and a second set of ray and sphere tests for collisions, for no gain at runtime; the game would still need every DKO feature (dummies, two-sided materials) mapped from glTF either way.
