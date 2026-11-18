@@ -62,7 +62,9 @@ finally:
 
 # Every step after the check carries the DOCS_ONLY condition, or runs only on failure or a tag (never on a docs-only PR).
 GATED = {".github/workflows/build.yml": ["build", "smoke", "tidy"], ".github/workflows/containers.yml": ["images"]}
-SAFE = re.compile(r"^(failure\(\)|github\.ref_type == 'tag')( && [^|]*)?$")  # never true on a docs-only PR
+# An if: that is never true on a docs-only PR: the DOCS_ONLY test, failure() or a tag, then only && terms (no ||, which
+# GitHub binds looser than &&) or one parenthesised group
+SAFE = re.compile(r"^(env\.DOCS_ONLY != 'true'|failure\(\)|github\.ref_type == 'tag')( && ([^|()]*|\([^()]*\)))?$")
 for path, jobs in GATED.items():
     text = open(os.path.join(ROOT, path), encoding="utf-8").read()
     for job in jobs:
@@ -76,7 +78,7 @@ for path, jobs in GATED.items():
         for s in steps[gate + 1:]:
             cond = re.search(r"^(?:        )?if: (.*)$", s, re.M)
             c = cond.group(1).strip() if cond else ""
-            if not (c.startswith("env.DOCS_ONLY != 'true' && ") or c == "env.DOCS_ONLY != 'true'" or SAFE.match(c)):
+            if not SAFE.match(c):
                 print(f"FAIL {path} {job}: step runs on a docs-only PR: {s.splitlines()[0]}")
                 failures += 1
     for job, block in re.findall(r"^  ([a-z-]+):\n(.*?)(?=^  [a-z-]+:\n|\Z)", text, re.M | re.S):
