@@ -1,3 +1,4 @@
+// probe: ROBO-246 acceptance, not for merge
 /*
 	Copyright 2012 bitHeads inc.
 
