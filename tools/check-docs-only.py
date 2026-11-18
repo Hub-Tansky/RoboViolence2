@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Is this CI run a docs-only pull request (ROBO-246, ADR 0067)? Prints `docs=true` or `docs=false`.
+"""Is this CI run a docs-only pull request (ROBO-246, ADR 0068)? Prints `docs=true` or `docs=false`.
 
 Usage: tools/check-docs-only.py <event name>
 Only a pull_request can be docs-only: push (main, release/*, tags), schedule and workflow_dispatch always run

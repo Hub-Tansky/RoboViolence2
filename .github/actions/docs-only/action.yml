@@ -1,7 +1,7 @@
 name: docs-only
 description: >-
   Sets DOCS_ONLY=true (and output docs) when this run is a pull request that changes only docs-tier paths
-  (tools/check-docs-only.py, ADR 0067). Run it right after actions/checkout with fetch-depth 2; later steps take
+  (tools/check-docs-only.py, ADR 0068). Run it right after actions/checkout with fetch-depth 2; later steps take
   `if: env.DOCS_ONLY != 'true'`, so a required check still reports success.
 outputs:
   docs:

@@ -1,4 +1,4 @@
-# 0067: A docs-only PR skips the build steps; its required checks still report success
+# 0068: A docs-only PR skips the build steps; its required checks still report success
 
 - Status: Accepted
 - Date: 2026-11-18

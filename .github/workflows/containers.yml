@@ -27,7 +27,7 @@ jobs:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 2  # the merge commit and the base: tools/check-docs-only.py diffs them
-      # A docs-only PR skips the rest; the job still reports success, so required checks pass (ROBO-246, ADR 0067)
+      # A docs-only PR skips the rest; the job still reports success, so required checks pass (ROBO-246, ADR 0068)
       - id: docs
         uses: ./.github/actions/docs-only
       - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1

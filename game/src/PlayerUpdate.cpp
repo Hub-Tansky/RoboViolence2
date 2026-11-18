@@ -17,6 +17,7 @@
 */
 
 #include "Player.h"
+#include "AssetRegistry.h"
 #include "netPacket.h"
 #include "GameVar.h"
 #include "Console.h"
@@ -224,7 +225,7 @@ void Player::update(float delay)
 			if(minibot->m_seekingTime <= 0 && minibot->owner->meleeWeapon && minibot->owner->meleeWeapon->weaponID == WEAPON_MINIBOT)
 			{
 #ifndef CONSOLE
-				dksPlay3DSound(dksCreateSoundFromFile("main/sounds/BaboCreve3.wav", false), -1, 5, minibot->currentCF.position,64);
+				dksPlay3DSound(dksCreateSoundFromFile(bv2::assetPath("sounds/BaboCreve3"), false), -1, 5, minibot->currentCF.position, 64);
 				game->spawnBloodMinibot(minibot->currentCF.position, .5f);
 #endif
 				delete minibot;

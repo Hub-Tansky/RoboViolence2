@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """tools/check-docs-only.py (ROBO-246): which runs are docs-only, the changed paths of a PR merge commit, and that every
-step after the docs-only check in build.yml and containers.yml is skipped on a docs-only PR (ADR 0067)."""
+step after the docs-only check in build.yml and containers.yml is skipped on a docs-only PR (ADR 0068)."""
 import importlib.util
 import os
 import re

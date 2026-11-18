@@ -101,11 +101,11 @@ Game::Game(CString pMapName)
 	spectatorPing = 0;
 #ifndef CONSOLE
 	// On load nos sons pour le mode CTF
-	sfx_fcapture = dksCreateSoundFromFile("main/sounds/ftook.wav", false);
-	sfx_ecapture = dksCreateSoundFromFile("main/sounds/etook.wav", false);
-	sfx_return = dksCreateSoundFromFile("main/sounds/return.wav", false);
-	sfx_win = dksCreateSoundFromFile("main/sounds/cheerRedTeam.wav", false);
-	sfx_loose = dksCreateSoundFromFile("main/sounds/cheerBlueTeam.wav", false);
+	sfx_fcapture = dksCreateSoundFromFile(bv2::assetPath("sounds/ftook"), false);
+	sfx_ecapture = dksCreateSoundFromFile(bv2::assetPath("sounds/etook"), false);
+	sfx_return = dksCreateSoundFromFile(bv2::assetPath("sounds/return"), false);
+	sfx_win = dksCreateSoundFromFile(bv2::assetPath("sounds/cheerRedTeam"), false);
+	sfx_loose = dksCreateSoundFromFile(bv2::assetPath("sounds/cheerBlueTeam"), false);
 #endif
 
    UpdateProSettings();

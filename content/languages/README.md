@@ -24,4 +24,8 @@ The game's strings. Format and fallback: [ADR 0011](../../docs/decisions/0011-ge
 
 ## Glyph limit
 
-The font has ASCII and these Latin-1 letters only: `Ç ü é â ä à å ç ê ë è ï î ì Ä Å É æ Æ ô ö ò û ù ÿ Ö Ü ø £ Ø × ª` (`game/src/Lang.cpp`). Other characters (for example Polish `ą ę ł ż`, `ó`, Cyrillic) show as `?`. The OS-language default skips a PO that uses them; setting `languageFile` by hand still loads it. New fonts: PNS-20, PNS-21.
+Text is one byte per letter ([ADR 0067](../../docs/decisions/0067-font-bytes-and-ttf-baking.md)). Beyond ASCII the font has 128 letters, listed in `engine/zeven/include/FontCodes.h`:
+- BV2's 32 Latin-1 letters `Ç ü é â ä à å ç ê ë è ï î ì Ä Å É æ Æ ô ö ò û ù ÿ Ö Ü ø £ Ø × ª`;
+- 96 more: the missing Latin-1 letters (`á í ó ú ý ñ ã õ ß` and capitals) and the letters of Polish, Czech, Slovak, Hungarian, Romanian (`Ș ș Ț ț` draw as `Ş ş Ţ ţ`), Turkish, Croatian, Latvian and Lithuanian.
+
+The original `babo.tga` font has glyphs only for the first 32, so it draws the plain letter for the 96 (`ł` as `l`); a TTF font draws them all. Any other character (for example Cyrillic) shows as `?`, and the OS-language default skips a PO that uses one; setting `languageFile` by hand still loads it.
