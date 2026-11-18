@@ -53,7 +53,7 @@ Client::Client(Game * pGame)
 	isConnected = false;
 	gotGameState = false;
 
-   proServer = false;
+	proServer = false;
 
 	m_sfxChat = dksCreateSoundFromFile("main/sounds/Chat.wav", false);
 	sfxHit = dksCreateSoundFromFile("main/sounds/hit.wav", false);
