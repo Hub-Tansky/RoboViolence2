@@ -39,7 +39,7 @@ Control::Control(CVector2i screenPosition, CString caption, unsigned int font, f
 	m_clicDelay = 0;
 	anim = 0;
 	changeCaption(caption);
-	m_sfxOver = dksCreateSoundFromFile("main/sounds/ControlOver.wav", false);
+	m_sfxOver = dksCreateSoundFromFile(bv2::assetPath("sounds/ControlOver"), false);
 	tex_menu = dktCreateTextureFromFile(bv2::assetPath("textures/Menu"), DKT_FILTER_LINEAR);
 }
 

@@ -16,6 +16,8 @@
 	BaboViolent 2 source code. If not, see http://www.gnu.org/licenses/.
 */
 
+#include "AssetRegistry.h"
+
 #ifndef CONSOLE
 #ifndef CPANEL_H_INCLUDED
 #define CPANEL_H_INCLUDED
@@ -38,7 +40,7 @@ public:
 		animY = 0;
 		velY = 0;
 		counterSound = 0;
-		m_sfxImpact = dksCreateSoundFromFile("main/sounds/impact.wav", false);
+		m_sfxImpact = dksCreateSoundFromFile(bv2::assetPath("sounds/impact"), false);
 	}
 	virtual ~CPanel()
 	{
