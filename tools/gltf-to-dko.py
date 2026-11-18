@@ -10,7 +10,7 @@ The art format is glTF (owner decision D2); the game keeps loading .DKO through 
   - glTF's Y-up axes as the game's Z-up: (x, y, z) -> (x, -z, y), which are Blender's axes again (Blender exports
     (x, y, z) as glTF (x, z, -y)): author in Blender as the BV2 models were built, Z up, a weapon's muzzle along +Y,
   - metres times --scale (default 200): the game draws models at 0.005, so 1 m in Blender is 1 game unit (a map tile).
-Static only: no animation (one frame), no skins, no morph targets, no sparse accessors.
+Static only: animations, skins, morph targets, sparse accessors and non-triangle primitives fail (exit 1).
 
 Usage: gltf-to-dko.py <in.glb|in.gltf> <out.DKO> [--scale S]  (S DKO units per metre, default 200)
 Python 3, stdlib only.
@@ -155,9 +155,20 @@ def walk(doc):
         stack.extend((c, world) for c in reversed(node.get("children", [])))
 
 
-def convert(doc, buffers, folder, out_dir, scale=DEFAULT_SCALE):
-    """The DKO's parts: (materials, meshes, dummies); writes embedded images into out_dir."""
-    materials = []
+def unsupported(doc):
+    """Raises GltfError for what a static .DKO can't hold, instead of writing a bind pose that looks valid."""
+    if doc.get("animations"):
+        raise GltfError("animations are not supported (static models only)")
+    if doc.get("skins") or any("skin" in n for n in doc.get("nodes", [])):
+        raise GltfError("skins are not supported (static models only)")
+    if any("targets" in p for m in doc.get("meshes", []) for p in m.get("primitives", [])):
+        raise GltfError("morph targets are not supported (static models only)")
+
+
+def convert(doc, buffers, folder, scale=DEFAULT_SCALE):
+    """The DKO's parts: (materials, meshes, dummies, images), images as {file name beside the .DKO: bytes}."""
+    unsupported(doc)
+    materials, images = [], {}
     for i, m in enumerate(doc.get("materials", [])):
         pbr = m.get("pbrMetallicRoughness", {})
         colour = list(pbr.get("baseColorFactor", (1, 1, 1, 1)))
@@ -165,7 +176,7 @@ def convert(doc, buffers, folder, out_dir, scale=DEFAULT_SCALE):
         if "baseColorTexture" in pbr:
             image_index = doc["textures"][pbr["baseColorTexture"]["index"]].get("source")
             if image_index is not None:
-                texture = image_file(doc, buffers, folder, out_dir, image_index)
+                texture, images[texture] = image_file(doc, buffers, folder, image_index)
         materials.append({"name": m.get("name") or f"material{i}", "diffuse": colour, "texture": texture,
                           "two_sided": bool(m.get("doubleSided"))})
     default_material = None
@@ -200,6 +211,7 @@ def convert(doc, buffers, folder, out_dir, scale=DEFAULT_SCALE):
             verts, norms, coords = [], [], []
             for k in order:
                 verts.append(apply(world, positions[k], 1))
+                # world matrix, not its inverse transpose: normals tilt under non-uniform node scale
                 norms.append(normalise(apply(world, normals[k], 0)) if normals else (0.0, 0.0, 1.0))
                 u, v = uvs[k] if uvs else (0.0, 0.0)
                 coords.append((u, 1.0 - v))  # glTF v runs down the image, the game's TGA rows run up
@@ -209,15 +221,16 @@ def convert(doc, buffers, folder, out_dir, scale=DEFAULT_SCALE):
         raise GltfError("the scene has no mesh")
     if len(dummies) > MAX_DUMMIES:
         raise GltfError(f"{len(dummies)} nodes without a mesh, engine/dko keeps at most {MAX_DUMMIES} dummies")
-    return materials, meshes, dummies
+    return materials, meshes, dummies, images
 
 
-def image_file(doc, buffers, folder, out_dir, index):
-    """File name (beside the .DKO) of image index; embedded images are written out."""
+def image_file(doc, buffers, folder, index):
+    """(file name beside the .DKO, bytes) of image index: engine/dko opens textures next to the model."""
     image = doc["images"][index]
     uri = image.get("uri")
     if uri and not uri.startswith("data:"):
-        return os.path.basename(uri)
+        with open(os.path.join(folder, uri), "rb") as f:
+            return os.path.basename(uri), f.read()
     if uri:
         head, payload = uri.split(",", 1)
         data, mime = base64.b64decode(payload), head[5:].split(";")[0]
@@ -227,9 +240,7 @@ def image_file(doc, buffers, folder, out_dir, index):
         data, mime = buffers[view["buffer"]][start:start + view["byteLength"]], image.get("mimeType", "")
     ext = {"image/png": ".png", "image/jpeg": ".jpg"}.get(mime, ".png")
     name = (image.get("name") or f"image{index}") + ext
-    with open(os.path.join(out_dir, name), "wb") as f:
-        f.write(data)
-    return name
+    return name, data
 
 
 def chunk(name):
@@ -291,13 +302,16 @@ def main(argv):
     src, dst, scale = args.src, args.dst, args.scale
     try:
         doc, buffers, folder = load(src)
+        materials, meshes, dummies, images = convert(doc, buffers, folder, scale)
         out_dir = os.path.dirname(os.path.abspath(dst))
-        materials, meshes, dummies = convert(doc, buffers, folder, out_dir, scale)
+        for name, data in images.items():
+            with open(os.path.join(out_dir, name), "wb") as f:
+                f.write(data)
+        with open(dst, "wb") as f:
+            f.write(write_dko(materials, meshes, dummies, os.path.splitext(os.path.basename(dst))[0]))
     except (GltfError, KeyError, IndexError, ValueError, OSError, struct.error) as e:
         print(f"gltf-to-dko: {src}: {e}")
         return 1
-    with open(dst, "wb") as f:
-        f.write(write_dko(materials, meshes, dummies, os.path.splitext(os.path.basename(dst))[0]))
     n = sum(len(g["vertices"]) for m in meshes for g in m["groups"])
     print(f"{dst}: {len(meshes)} meshes, {len(materials)} materials, {n // 3} triangles, {len(dummies)} dummies")
     return 0

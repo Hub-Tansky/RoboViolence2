@@ -3,7 +3,7 @@
 Loader and renderer for the `.DKO` model format (chunked binary, exported from 3ds Max) with ray and sphere intersection against an octree.
 
 - **API:** `include/dko.h`, prefix `dko*` (`dkoLoadFile`, `dkoRender`, `dkoGetDummyPosition`, ray/sphere tests).
-- **Format:** `src/dko-chunk-info.txt`; `src/CHUNKINF.H` is Autodesk's 3DS chunk list (3DS import).
+- **Format:** `src/dko-chunk-info.txt`; `src/CHUNKINF.H` is Autodesk's 3DS chunk list (3DS import). New static `.DKO` files come from glTF through `tools/gltf-to-dko.py` (ADR 0068).
 - **Depends on:** `zeven_core` (types, `dkt` textures), OpenGL.
 - **Used by:** `bv2`, `bv2dedicated` (the server loads models for collision and dummies).
 

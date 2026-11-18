@@ -44,7 +44,7 @@ TRI = [(0, 0, 0), (0.5, 0, 0), (0, 0.5, 0)]
 BARREL_T, FLASH_T = (1, 2, 3), (0, 0, 0.5)
 
 
-def build(extra_material=None, mode=None, sparse=False):
+def build(edit=None, mode=None, sparse=False):
     """(glTF json, binary buffer) of the small model."""
     blob, views, accessors = bytearray(), [], []
 
@@ -83,8 +83,8 @@ def build(extra_material=None, mode=None, sparse=False):
                      {"name": "flash1", "translation": list(FLASH_T)}],
            "meshes": [body, barrel], "materials": materials, "accessors": accessors, "bufferViews": views,
            "buffers": [{"byteLength": len(blob)}]}
-    if extra_material:
-        extra_material(doc)
+    if edit:
+        edit(doc)
     return doc, bytes(blob)
 
 
@@ -308,8 +308,37 @@ if os.path.exists(os.path.join(tex_dir, "textured.DKO")):
         out = subprocess.run([PROBE, os.path.join(tex_dir, "textured.DKO"), "flash1"], capture_output=True, text=True)
         check(out.returncode == 0, f"textured: dko_probe exit {out.returncode}: {out.stdout}")
 
+# an external image file is copied beside the .DKO
+def external(d):
+    d["images"] = [{"uri": "skin2.png"}]
+    d["textures"] = [{"source": 0}]
+    d["materials"][1]["pbrMetallicRoughness"]["baseColorTexture"] = {"index": 0}
+
+
+ext_dir = os.path.join(SCRATCH, "ext")
+os.makedirs(ext_dir)
+with open(os.path.join(SCRATCH, "skin2.png"), "wb") as f:
+    f.write(png_1x1())
+write_gltf(os.path.join(SCRATCH, "external.gltf"), *build(external))
+check(run(os.path.join(SCRATCH, "external.gltf"), os.path.join(ext_dir, "external.DKO")) == 0, "external: exit 0")
+check(os.path.exists(os.path.join(ext_dir, "skin2.png")), "external: skin2.png copied beside the DKO")
+
 # unsupported input: exit 1 and no output file
-for label, kwargs in (("lines", {"mode": 1}), ("sparse", {"sparse": True})):
+def animated(d):
+    d["animations"] = [{"channels": [], "samplers": []}]
+
+
+def skinned(d):
+    d["skins"] = [{"joints": [2]}]
+    d["nodes"][1]["skin"] = 0
+
+
+def morphed(d):
+    d["meshes"][1]["primitives"][0]["targets"] = [{"POSITION": d["meshes"][1]["primitives"][0]["attributes"]["POSITION"]}]
+
+
+for label, kwargs in (("lines", {"mode": 1}), ("sparse", {"sparse": True}), ("animated", {"edit": animated}),
+                      ("skinned", {"edit": skinned}), ("morphed", {"edit": morphed})):
     src, dst = os.path.join(SCRATCH, label + ".gltf"), os.path.join(SCRATCH, label + ".DKO")
     write_gltf(src, *build(**kwargs))
     check(run(src, dst) == 1 and not os.path.exists(dst), f"{label}: exit 1, no .DKO written")
