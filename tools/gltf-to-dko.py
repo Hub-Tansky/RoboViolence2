@@ -3,7 +3,7 @@
 
 The art format is glTF (owner decision D2); the game keeps loading .DKO through engine/dko. This converter writes:
   - one DKO material per glTF material: name, diffuse colour (baseColorFactor), diffuse texture (the image file name
-    of baseColorTexture, beside the .DKO; embedded images are written there too),
+    of baseColorTexture, beside the .DKO; embedded images are written and external ones copied there),
   - one DKO mesh per glTF mesh node, one material group per triangle primitive, de-indexed (DKO stores triangle
     lists), with the node's world transform applied,
   - one DKO dummy per glTF node without a mesh (weapons look up "flash1", "flash2", ... and "eject1", ...),
@@ -296,7 +296,7 @@ def write_dko(materials, meshes, dummies, name="model"):
 def main(argv):
     parser = argparse.ArgumentParser(prog="gltf-to-dko.py", description="Convert a glTF 2.0 model to a static .DKO.")
     parser.add_argument("src", help="input .glb, or .gltf with its buffers")
-    parser.add_argument("dst", help="output .DKO; embedded images are written beside it")
+    parser.add_argument("dst", help="output .DKO; embedded images are written and external ones copied beside it")
     parser.add_argument("--scale", type=float, default=DEFAULT_SCALE, help="DKO units per metre (default 200)")
     args = parser.parse_args(argv)
     src, dst, scale = args.src, args.dst, args.scale
