@@ -30,7 +30,7 @@
 //
 CSnow::CSnow()
 {
-	m_sfxRain = dksCreateSoundFromFile("main/sounds/wind.wav", true);
+	m_sfxRain = dksCreateSoundFromFile(bv2::assetPath("sounds/wind"), true);
 	tex_snow = dktCreateTextureFromFile(bv2::assetPath("textures/snowflake"), DKT_FILTER_LINEAR);
 
 	//--- Start the sound

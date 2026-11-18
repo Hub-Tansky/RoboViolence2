@@ -16,6 +16,8 @@
 	BaboViolent 2 source code. If not, see http://www.gnu.org/licenses/.
 */
 
+#include "AssetRegistry.h"
+
 #ifndef CONSOLE
 
 #include "CRain.h"
@@ -28,7 +30,7 @@
 //
 CRain::CRain()
 {
-	m_sfxRain = dksCreateSoundFromFile("main/sounds/rain2.wav", true);
+	m_sfxRain = dksCreateSoundFromFile(bv2::assetPath("sounds/rain2"), true);
 
 	//--- Start the sound
 	channel = dksPlaySound(m_sfxRain, -1, 50);
