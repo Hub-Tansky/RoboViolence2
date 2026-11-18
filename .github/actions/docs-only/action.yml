@@ -1,0 +1,15 @@
+name: docs-only
+description: >-
+  Sets DOCS_ONLY=true (and output docs) when this run is a pull request that changes only docs-tier paths
+  (tools/check-docs-only.py, ADR 0068). Run it right after actions/checkout with fetch-depth 2; later steps take
+  `if: env.DOCS_ONLY != 'true'`, so a required check still reports success.
+outputs:
+  docs:
+    description: "'true' for a docs-only pull request"
+    value: ${{ steps.check.outputs.docs }}
+runs:
+  using: composite
+  steps:
+    - id: check
+      shell: bash
+      run: ${{ runner.os == 'Windows' && 'python' || 'python3' }} tools/check-docs-only.py "${{ github.event_name }}"
