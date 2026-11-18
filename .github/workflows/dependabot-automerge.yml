@@ -1,6 +1,6 @@
 name: dependabot-automerge
 # Dependabot's GitHub Actions minor and patch updates turn on auto-merge: GitHub merges them once the required checks
-# are green. Majors and Docker updates stay for the owner (ROBO-250, ADR ROBO-250).
+# are green. Majors, Docker updates and pushes by anyone else turn it off again (ROBO-250, ADR ROBO-250).
 on:
   pull_request:
     types: [opened, synchronize, reopened]
@@ -9,8 +9,7 @@ permissions:
 jobs:
   automerge:
     name: dependabot-automerge (not required)
-    # Dependabot's own PR and its own push: a person pushing to the branch gets no auto-merge from this run
-    if: github.event.pull_request.user.login == 'dependabot[bot]' && github.actor == 'dependabot[bot]' && github.repository == 'Hub-Tansky/RoboViolence2'
+    if: github.event.pull_request.user.login == 'dependabot[bot]' && github.repository == 'Hub-Tansky/RoboViolence2'
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     permissions:
@@ -19,11 +18,23 @@ jobs:
     steps:
       - name: Dependabot metadata
         id: meta
-        uses: dependabot/fetch-metadata@v2
+        continue-on-error: true  # on a push by someone else: no metadata, so the last step turns auto-merge off
+        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98  # v3.1.0
       - name: Turn on auto-merge (squash)
-        if: steps.meta.outputs.package-ecosystem == 'github_actions' && (steps.meta.outputs.update-type == 'version-update:semver-minor' || steps.meta.outputs.update-type == 'version-update:semver-patch')
+        if: github.actor == 'dependabot[bot]' && steps.meta.outputs.package-ecosystem == 'github_actions' && (steps.meta.outputs.update-type == 'version-update:semver-minor' || steps.meta.outputs.update-type == 'version-update:semver-patch')
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
           PR_URL: ${{ github.event.pull_request.html_url }}
         run: gh pr merge --auto --squash "$PR_URL"
+      # A PR that Dependabot rewrote to a major, or that a person pushed to, loses auto-merge an earlier run turned on
+      - name: Turn off auto-merge
+        if: always() && !(github.actor == 'dependabot[bot]' && steps.meta.outputs.package-ecosystem == 'github_actions' && (steps.meta.outputs.update-type == 'version-update:semver-minor' || steps.meta.outputs.update-type == 'version-update:semver-patch'))
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+        run: |
+          if [ -n "$(gh pr view "$PR_URL" --json autoMergeRequest -q .autoMergeRequest)" ]; then
+            gh pr merge --disable-auto "$PR_URL"
+          fi

@@ -93,7 +93,7 @@ What we do, in one or two sentences.
 | [0057](0057-review-record-keyed-to-patch-id-post-deploy-criteria.md) | The review record is keyed to the diff's patch-id; post-deploy criteria don't block | Accepted |
 | [0058](0058-agent-rule-order-ground-rules-3-4-refactor-only.md) | Agent rules have an order; ground rules 3 and 4 apply only in refactor items | Accepted |
 | [0059](0059-slim-review-docs-gate-only-incremental-rounds.md) | Docs PRs get no review worker; later rounds review only the new commits | Accepted |
-| [0060](0060-merge-by-risk-tier-with-owner-brief.md) | Merge by risk tier; MEDIUM and HIGH PRs carry an owner brief | Accepted |
+| [0060](0060-merge-by-risk-tier-with-owner-brief.md) | Merge by risk tier; MEDIUM and HIGH PRs carry an owner brief | Accepted (amended by ROBO-250) |
 | [0061](0061-release-branch-for-production-hotfixes.md) | Refactor on main; production hotfixes on a release branch | Accepted |
 | [0062](0062-asset-packs-mode-modules-client-independent-server.md) | Asset packs, mode modules and a client-independent server are the long-term direction | Accepted |
 | [0063](0063-architecture-lists-modules-not-files.md) | ARCHITECTURE.md lists module directories, not files | Accepted |

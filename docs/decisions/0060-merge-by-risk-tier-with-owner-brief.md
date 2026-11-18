@@ -1,6 +1,6 @@
 # 0060: Merge by risk tier; MEDIUM and HIGH PRs carry an owner brief
 
-- Status: Accepted
+- Status: Accepted; amended by [ROBO-250](ROBO-250-dependabot-actions-auto-merge.md)
 - Date: 2026-11-17
 - Affects: `tools/merge-risk.py`, `tools/review.sh`, `tools/check-review-record.py`, `.github/pull_request_template.md`, [AGENTS.md](../../AGENTS.md) "Agent rules"; ROBO-228 (workflow audit WP-08, owner decisions 1, 2 and 4 of 2026-11-11)
 
