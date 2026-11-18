@@ -27,6 +27,7 @@
 #include <cstring>
 #include "CMaster.h"
 #include "Paths.h"
+#include "AssetRegistry.h"
 #include "FramePacing.h"
 #include "DataDirPicker.h"
 #ifndef CONSOLE
@@ -437,6 +438,7 @@ int main(int argc, const char* argv[])
 
 	// PREMI�E CHOSE �FAIRE, on load les config
 	bv2::pathsInit(argv[0]);
+	bv2::setAssetPacks({bv2::dataRoot(), bv2::packageRoot()}); // ADR 0069: BV2_DATA_DIR stacks over the base pack
 	dksvarInit(&stringInterface);
 	std::string configPath = bv2::loadConfigLayers(argc, (const char* const*)argv);
 	roboviolence2ApplyNetlogFromEnv();
@@ -559,6 +561,7 @@ int main(int argc, char* argv[])
 	crashreport::install(bv2::prefDir(), g_releaseVersion); // ROBO-186, ADR 0048
 	if (!autotestStart(argc, argv)) return exitCode;
 	bv2::chooseDataDir(argc, argv);
+	bv2::setAssetPacks({bv2::dataRoot(), bv2::packageRoot()}); // ADR 0069: the player's BV2 data stacks over the base pack
 	dksvarInit(&stringInterface);
 	std::string configPath = bv2::loadConfigLayers(argc, (const char* const*)argv);
 	roboviolence2ApplyNetlogFromEnv();
