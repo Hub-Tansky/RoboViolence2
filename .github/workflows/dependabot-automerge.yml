@@ -1,0 +1,29 @@
+name: dependabot-automerge
+# Dependabot's GitHub Actions minor and patch updates turn on auto-merge: GitHub merges them once the required checks
+# are green. Majors and Docker updates stay for the owner (ROBO-250, ADR ROBO-250).
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+permissions:
+  contents: read
+jobs:
+  automerge:
+    name: dependabot-automerge (not required)
+    # Dependabot's own PR and its own push: a person pushing to the branch gets no auto-merge from this run
+    if: github.event.pull_request.user.login == 'dependabot[bot]' && github.actor == 'dependabot[bot]' && github.repository == 'Hub-Tansky/RoboViolence2'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: write       # gh pr merge
+      pull-requests: write  # gh pr merge --auto
+    steps:
+      - name: Dependabot metadata
+        id: meta
+        uses: dependabot/fetch-metadata@v2
+      - name: Turn on auto-merge (squash)
+        if: steps.meta.outputs.package-ecosystem == 'github_actions' && (steps.meta.outputs.update-type == 'version-update:semver-minor' || steps.meta.outputs.update-type == 'version-update:semver-patch')
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+        run: gh pr merge --auto --squash "$PR_URL"

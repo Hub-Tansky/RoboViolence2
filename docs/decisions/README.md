@@ -106,3 +106,4 @@ What we do, in one or two sentences.
 | [0070](0070-gltf-converts-to-dko.md) | New models are authored as glTF and converted to .DKO offline | Accepted |
 | [ROBO-248](ROBO-248-adrs-named-by-scope-item.md) | Name new ADRs after their scope item, not the next number | Accepted |
 | [ROBO-249](ROBO-249-backlog-item-moves-on-merge.md) | A merged PR's backlog item moves to Done or Testing by workflow | Accepted |
+| [ROBO-250](ROBO-250-dependabot-actions-auto-merge.md) | Dependabot's GitHub Actions minor and patch updates merge themselves when green | Accepted |
