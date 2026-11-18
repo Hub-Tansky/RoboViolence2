@@ -26,8 +26,22 @@ QUOTED = re.compile(r'"((?:[^"\\]|\\.)*)"$')
 KEYWORDS = ("msgctxt", "msgid", "msgstr")
 # printf conversions, as formatSpecs() in game/src/Lang.cpp finds them ("%%" is left out)
 SPECS = re.compile(r"%%|%[-+ #0-9.hlLqjzt]*[a-zA-Z]?")
-# The font's glyphs beyond ASCII: LATIN1 in game/src/Lang.cpp
-LATIN1 = set("ÇüéâäàåçêëèïîìÄÅÉæÆôöòûùÿÖÜø£Ø×ª")
+
+
+def font_letters():
+    """The font's letters beyond ASCII: FONT_LATIN1 and FONT_EXTRA in engine/zeven/include/FontCodes.h (ADR 0067),
+    plus Romanian's comma-below letters, which fontByteFor draws as the cedilla ones."""
+    with open(os.path.join(ROOT, "engine", "zeven", "include", "FontCodes.h"), encoding="utf-8") as f:
+        text = f.read()
+    latin1 = re.search(r"FONT_LATIN1\[32\] = \{([^}]*)\}", text)[1]
+    letters = {chr(int(n)) for n in re.findall(r"\d+", latin1)}
+    letters |= {chr(int(h, 16)) for h in re.findall(r"\{0x([0-9A-Fa-f]+), '", text)}
+    if len(letters) != 128:
+        raise SystemExit(f"lang-check: read {len(letters)} letters from FontCodes.h, expected 128")
+    return letters | set("\u0218\u0219\u021a\u021b")
+
+
+FONT_LETTERS = font_letters()
 
 
 def specs(text):
@@ -77,7 +91,7 @@ def check_po(name, entries, english):
         if specs(entries[k]) != specs(english[k]):
             print(f"{name}: {k} changes the conversions {specs(english[k])} to {specs(entries[k])}")
             bad += 1
-        odd = sorted({c for c in entries[k] if ord(c) > 127 and c not in LATIN1})
+        odd = sorted({c for c in entries[k] if ord(c) > 127 and c not in FONT_LETTERS})
         if odd:
             print(f"{name}: warning: {k} uses {''.join(odd)}, which the font lacks: the OS default skips this file")
     missing = [k for k in english if k not in entries]

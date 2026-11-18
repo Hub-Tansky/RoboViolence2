@@ -10,9 +10,9 @@ Engine utilities behind small C APIs with a `dk` prefix.
 | `dkt_console.cpp` | no-op `dkt` for the headless server | `zeven_console` |
 | `dkw` | SDL3 window, GL 2.1 compatibility context host, event pump, window icon, visibility and focus, screen saver | `zeven_client` |
 | `dki` | keyboard (`DIK_*` IDs, `dikeys.h`), mouse and gamepad state | `zeven_client` |
-| `dkgl`, `dkt`, `dkf`/`CFont`, `dkp`/`CParticle` | GL state, textures (TGA, PNG; decoding in `dkt_image`), fonts, particles | `zeven_client` |
+| `dkgl`, `dkt`, `dkf`/`CFont`, `dkp`/`CParticle` | GL state, textures (TGA, PNG; decoding in `dkt_image`), fonts (`babo.tga` atlas, or a `.ttf` baked by `dkf_ttf`; glyph bytes in `FontCodes.h`), particles | `zeven_client` |
 | `dks` | miniaudio effects and music | `zeven_client` |
 
 - **Headers:** `include/` (public), `src/*i.h` (module internals). `dkt_image.h` is public so `tests/test_dkt_image.cpp` can decode without a GL context. `platform.h` is force-included by CMake. `glheaders.h` is the only place that includes OpenGL (glad from `third_party/glad`, then GLU).
-- **Depends on:** pthreads, glad; the client adds SDL3, miniaudio, stb_image (PNG textures, required) and (for OGG) stb_vorbis. GLU is the system library for now.
+- **Depends on:** pthreads, glad; the client adds SDL3, miniaudio, stb_image and stb_truetype (PNG textures, TTF fonts, required) and (for OGG) stb_vorbis. GLU is the system library for now.
 - **Gotchas:** `systemVariable` is built on first use (`dksvarRegistry()`) because the game registers variables from a global constructor. `dkwGetResolution()` is the drawable size in pixels (HiDPI-aware): use it for `glViewport`. `dks` has a fixed voice pool (`s_maxSoftwareChannels`); when it is full a new sound steals the oldest one-shot voice instead of being dropped: a 3D sound only another 3D voice, a 2D event or UI sound a 3D voice first, then a 2D one; looping voices are never stolen (ROBO-216, so the CTF score cheer survives a firefight). Key binds in `bv2.cfg` are the old Windows keyboard scancodes (`dikeys.h`); `dkw` translates SDL scancodes. See [../../docs/analysis/01_SYSTEM_OVERVIEW.md](https://github.com/Hub-Tansky/RoboViolence2/blob/fc0aff7c5aa946406c7c110e8e7c2d972a7daeb8/docs/analysis/01_SYSTEM_OVERVIEW.md) and [ADR 0006](../../docs/decisions/0006-sdl3-miniaudio-glad-platform-layer.md).

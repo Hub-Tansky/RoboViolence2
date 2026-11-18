@@ -1,5 +1,7 @@
 #include "Lang.h"
 
+#include "FontCodes.h"
+
 #include <cctype>
 #include <cstdio>
 #include <cstring>
@@ -10,19 +12,12 @@ namespace lang
 {
 	namespace
 	{
-		// The Latin-1 letters CFont draws at 128 + index (the original BV2 font)
-		const int LATIN1[32] = {199, 252, 233, 226, 228, 224, 229, 231, 234, 235, 232, 239, 238, 236, 196, 197, 201, 230,
-			198, 244, 246, 242, 251, 249, 255, 214, 220, 248, 163, 216, 215, 170};
-
-		// Font byte for a code point, or -1: ASCII, the colour codes \x1-\x9, newline and the letters above
+		// Font byte for a code point, or -1: the colour codes \x1-\x9, newline and the glyphs of FontCodes.h
 		int fontByte(unsigned int c)
 		{
-			if ((c >= 32 && c < 128) || (c >= 1 && c <= 9) || c == '\n')
+			if ((c >= 1 && c <= 9) || c == '\n')
 				return (int)c;
-			for (int i = 0; i < 32; ++i)
-				if ((unsigned int)LATIN1[i] == c)
-					return 128 + i;
-			return -1;
+			return bv2::fontByteFor(c);
 		}
 
 		// UTF-8 to font bytes; a character without a glyph (or a bad byte) becomes '?' and clears ok
@@ -120,7 +115,11 @@ namespace lang
 			{
 				int character = fgetc(fic);
 				for (int k = 0; k < 32; ++k)
-					if (character == LATIN1[k]) { character = 128 + k; break; }
+					if ((unsigned int)character == bv2::FONT_LATIN1[k])
+					{
+						character = 128 + k;
+						break;
+					}
 				if (character == '\t')
 					continue;
 				if (character == '\n' || character == EOF || i >= 510) // end of line, end of file or buffer full

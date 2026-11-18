@@ -120,6 +120,7 @@ public:
 	// Pour loader les propriétées de la police d'un fichier
 	int loadFontFile(ifstream &fntFile);
 	int loadTGAFile(char * tgaFile);
+	int loadTTFFile(char* ttfFile); // ROBO-238: baked by dkf_ttf.h
 
 	// Pour créer la police
 	int create(CString filename); // attention, ceci ne cré PAS les display list

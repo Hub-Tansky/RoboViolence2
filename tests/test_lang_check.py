@@ -21,7 +21,7 @@ CASES = [
     ("tab escape", ENTRY.format(key="lang_quit", text="a\\tb"), True, "bad string"),
     ("raw tab", ENTRY.format(key="lang_quit", text="a\tb"), True, "bad string"),
     ("raw colour byte", ENTRY.format(key="lang_quit", text="a\x02b"), True, "bad string"),
-    ("glyph", ENTRY.format(key="lang_quit", text="Wyjdź"), False, "which the font lacks"),
+    ("glyph", ENTRY.format(key="lang_quit", text="Выход"), False, "which the font lacks"),
 ]
 
 
@@ -39,6 +39,13 @@ def main():
         if (r.returncode != 0) != should_fail or expect not in r.stdout:
             print(f"FAIL {case}: exit {r.returncode}\n{r.stdout}")
             failures += 1
+    # ROBO-238: Polish letters have font bytes (engine/zeven/include/FontCodes.h), so no glyph warning
+    with open(os.path.join(lang_dir, "pl.po"), "w", encoding="utf-8", newline="\n") as f:
+        f.write(ENTRY.format(key="lang_quit", text="Wyjdź, Ș"))
+    r = subprocess.run([sys.executable, CHECK, lang_dir], capture_output=True, encoding="utf-8")
+    if r.returncode != 0 or "which the font lacks" in r.stdout:
+        print(f"FAIL polish: exit {r.returncode}\n{r.stdout}")
+        failures += 1
     with open(os.path.join(lang_dir, "en.pot"), "a", encoding="utf-8") as f:
         f.write("\n")
     os.remove(os.path.join(lang_dir, "pl.po"))
