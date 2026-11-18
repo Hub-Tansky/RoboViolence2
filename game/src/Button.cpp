@@ -16,6 +16,8 @@
 	BaboViolent 2 source code. If not, see http://www.gnu.org/licenses/.
 */
 
+#include "AssetRegistry.h"
+
 #ifndef CONSOLE
 #include "Button.h"
 #include "ControlListener.h"
@@ -34,7 +36,7 @@ Button::Button(CVector2i screenPosition,
 : Control(screenPosition, caption, m_font, textSize, justify)
 {
 	m_listener = listener;
-	m_sfxClic = dksCreateSoundFromFile("main/sounds/Button.wav", false);
+	m_sfxClic = dksCreateSoundFromFile(bv2::assetPath("sounds/Button"), false);
 }
 
 

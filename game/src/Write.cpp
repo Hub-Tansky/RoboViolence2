@@ -16,6 +16,8 @@
 	BaboViolent 2 source code. If not, see http://www.gnu.org/licenses/.
 */
 
+#include "AssetRegistry.h"
+
 #ifndef CONSOLE
 #include "Write.h"
 #include "Menu.h"
@@ -35,7 +37,7 @@ Write::Write(CVector2i screenPosition,
 {
 	validationType = flag;
 	set("%s", caption.s);
-	m_sfxClic = dksCreateSoundFromFile("main/sounds/Button.wav", false);
+	m_sfxClic = dksCreateSoundFromFile(bv2::assetPath("sounds/Button"), false);
 }
 
 

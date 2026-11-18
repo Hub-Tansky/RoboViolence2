@@ -47,7 +47,7 @@ def asked_ids(text):
 def main():
     ids, bad = manifest_ids(os.path.join(ROOT, "content", "base-pack.tsv"))
     seen = 0
-    for rel in built_sources(ROOT) + ["src/Weapon.h"]:
+    for rel in built_sources(ROOT) + ["src/Weapon.h", "src/CPanel.h"]:
         path = os.path.join(ROOT, "game", rel)
         if not os.path.exists(path):
             continue

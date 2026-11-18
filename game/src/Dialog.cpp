@@ -16,6 +16,8 @@
 	BaboViolent 2 source code. If not, see http://www.gnu.org/licenses/.
 */
 
+#include "AssetRegistry.h"
+
 #ifndef CONSOLE
 #include "Dialog.h"
 #include "CMenuManager.h"
@@ -26,8 +28,8 @@ IDialog::IDialog(unsigned int font, CString dialogTitle, CVector2i size, DialogB
 	,	m_sfxOver(0)
 	,	dialogRoot(0)
 {
-	m_sfxClic = dksCreateSoundFromFile("main/sounds/Button.wav", false);
-	m_sfxOver = dksCreateSoundFromFile("main/sounds/ControlOver.wav", false);
+	m_sfxClic = dksCreateSoundFromFile(bv2::assetPath("sounds/Button"), false);
+	m_sfxOver = dksCreateSoundFromFile(bv2::assetPath("sounds/ControlOver"), false);
 
 	dialogRoot = new CControl();
 	dialogRoot->font = font;

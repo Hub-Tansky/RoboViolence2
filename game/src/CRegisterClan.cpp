@@ -16,14 +16,16 @@
 	BaboViolent 2 source code. If not, see http://www.gnu.org/licenses/.
 */
 
+#include "AssetRegistry.h"
+
 #ifndef CONSOLE
 
 #include "CRegisterClan.h"
 
 CRegisterClan::CRegisterClan(CControl * in_parent, CControl * in_alignTo)
 {
-	m_sfxClic = dksCreateSoundFromFile("main/sounds/Button.wav", false);
-	m_sfxOver = dksCreateSoundFromFile("main/sounds/ControlOver.wav", false);
+	m_sfxClic = dksCreateSoundFromFile(bv2::assetPath("sounds/Button"), false);
+	m_sfxOver = dksCreateSoundFromFile(bv2::assetPath("sounds/ControlOver"), false);
 
 	parent = in_parent;
 
