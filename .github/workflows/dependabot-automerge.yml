@@ -18,7 +18,6 @@ jobs:
     steps:
       - name: Dependabot metadata
         id: meta
-        continue-on-error: true  # on a push by someone else: no metadata, so the last step turns auto-merge off
         uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98  # v3.1.0
       - name: Turn on auto-merge (squash)
         if: github.actor == 'dependabot[bot]' && steps.meta.outputs.package-ecosystem == 'github_actions' && (steps.meta.outputs.update-type == 'version-update:semver-minor' || steps.meta.outputs.update-type == 'version-update:semver-patch')
@@ -27,7 +26,8 @@ jobs:
           GH_REPO: ${{ github.repository }}
           PR_URL: ${{ github.event.pull_request.html_url }}
         run: gh pr merge --auto --squash "$PR_URL"
-      # A PR that Dependabot rewrote to a major, or that a person pushed to, loses auto-merge an earlier run turned on
+      # A PR that Dependabot rewrote to a major, or that a person pushed to, loses auto-merge an earlier run turned on;
+      # always(): also when the metadata step failed (the job then shows red, it is not required)
       - name: Turn off auto-merge
         if: always() && !(github.actor == 'dependabot[bot]' && steps.meta.outputs.package-ecosystem == 'github_actions' && (steps.meta.outputs.update-type == 'version-update:semver-minor' || steps.meta.outputs.update-type == 'version-update:semver-patch'))
         env:
