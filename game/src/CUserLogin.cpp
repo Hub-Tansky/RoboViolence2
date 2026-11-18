@@ -16,6 +16,8 @@
 	BaboViolent 2 source code. If not, see http://www.gnu.org/licenses/.
 */
 
+#include "AssetRegistry.h"
+
 #ifndef CONSOLE
 
 #include "CUserLogin.h"
@@ -27,18 +29,18 @@
 
 CUserLogin::CUserLogin(CControl * in_parent, CControl * in_alignTo)
 {
-	m_sfxClic = dksCreateSoundFromFile("main/sounds/Button.wav", false);
-	m_sfxOver = dksCreateSoundFromFile("main/sounds/ControlOver.wav", false);
+	m_sfxClic = dksCreateSoundFromFile(bv2::assetPath("sounds/Button"), false);
+	m_sfxOver = dksCreateSoundFromFile(bv2::assetPath("sounds/ControlOver"), false);
 
 	qObj = gluNewQuadric();
-	tex_baboShadow = dktCreateTextureFromFile("main/textures/BaboShadow.tga", DKT_FILTER_BILINEAR);
+	tex_baboShadow = dktCreateTextureFromFile(bv2::assetPath("textures/BaboShadow"), DKT_FILTER_BILINEAR);
 
 	parent = in_parent;
 
 	//--- Da big frame
 	instance = new CControl(parent, CVector2i(0,0), CVector2i(in_parent->size.s[0]-20, 450), "", this, "FRAME", in_alignTo, CONTROL_SNAP_BOTTOM);
-	instance->texture = dktCreateTextureFromFile("main/textures/Menu1Back.tga", DKT_FILTER_LINEAR);
-//	instance->texture = dktCreateTextureFromFile("main/textures/Smoke2.tga", DKT_FILTER_LINEAR);
+	instance->texture = dktCreateTextureFromFile(bv2::assetPath("textures/Menu1Back"), DKT_FILTER_LINEAR);
+	//	instance->texture = dktCreateTextureFromFile("main/textures/Smoke2.tga", DKT_FILTER_LINEAR);
 	instance->borderColor.set(1,.5f,.25f);
 
 	//--- Labels and controls

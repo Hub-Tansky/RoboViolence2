@@ -16,6 +16,8 @@
 	BaboViolent 2 source code. If not, see http://www.gnu.org/licenses/.
 */
 
+#include "AssetRegistry.h"
+
 #ifndef CONSOLE
 
 #include "CMainTab.h"
@@ -33,8 +35,8 @@ extern Scene* scene;
 
 CMainTab::CMainTab(CControl * in_parent)
 {
-	m_sfxClic = dksCreateSoundFromFile("main/sounds/Button.wav", false);
-	m_sfxOver = dksCreateSoundFromFile("main/sounds/ControlOver.wav", false);
+	m_sfxClic = dksCreateSoundFromFile(bv2::assetPath("sounds/Button"), false);
+	m_sfxOver = dksCreateSoundFromFile(bv2::assetPath("sounds/ControlOver"), false);
 
 	parent = in_parent;
 
@@ -52,7 +54,7 @@ CMainTab::CMainTab(CControl * in_parent)
 
 	if(gameVar.r_animatedMenu)
 	{
-		unsigned int tex = dktCreateTextureFromFile("main/textures/Smoke2.tga", DKT_FILTER_NEAREST);
+		unsigned int tex = dktCreateTextureFromFile(bv2::assetPath("textures/Smoke2"), DKT_FILTER_NEAREST);
 		option->instance->superPanel = true;
 		//userLogin->instance->superPanel = true;
 		news->lst_news->superPanel = true;

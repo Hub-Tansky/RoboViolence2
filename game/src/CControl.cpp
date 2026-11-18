@@ -16,6 +16,8 @@
 	BaboViolent 2 source code. If not, see http://www.gnu.org/licenses/.
 */
 
+#include "AssetRegistry.h"
+
 #ifndef CONSOLE
 
 
@@ -317,19 +319,19 @@ CControl::CControl(CControl * in_parent,
 		vscroll->visible = false;
 		hscroll->visible = false;
 
-		vscrollB1->texture = dktCreateTextureFromFile("main/textures/ArrowU.tga", DKT_FILTER_LINEAR);
+		vscrollB1->texture = dktCreateTextureFromFile(bv2::assetPath("textures/ArrowU"), DKT_FILTER_LINEAR);
 		vscrollB1->perfectFitTexture = true;
 		vscrollB1->imgColor.set(0,0,0);
 
-		vscrollB2->texture = dktCreateTextureFromFile("main/textures/ArrowD.tga", DKT_FILTER_LINEAR);
+		vscrollB2->texture = dktCreateTextureFromFile(bv2::assetPath("textures/ArrowD"), DKT_FILTER_LINEAR);
 		vscrollB2->perfectFitTexture = true;
 		vscrollB2->imgColor.set(0,0,0);
 
-		hscrollB1->texture = dktCreateTextureFromFile("main/textures/ArrowL.tga", DKT_FILTER_LINEAR);
+		hscrollB1->texture = dktCreateTextureFromFile(bv2::assetPath("textures/ArrowL"), DKT_FILTER_LINEAR);
 		hscrollB1->perfectFitTexture = true;
 		hscrollB1->imgColor.set(0,0,0);
 
-		hscrollB2->texture = dktCreateTextureFromFile("main/textures/ArrowR.tga", DKT_FILTER_LINEAR);
+		hscrollB2->texture = dktCreateTextureFromFile(bv2::assetPath("textures/ArrowR"), DKT_FILTER_LINEAR);
 		hscrollB2->perfectFitTexture = true;
 		hscrollB2->imgColor.set(0,0,0);
 	}
@@ -339,14 +341,14 @@ CControl::CControl(CControl * in_parent,
 	{
 		spinU = new CControl(this, CVector2i(size[0] - 20, 0), CVector2i(20,size[1]/2),"",this,"BUTTON",0,1,5,false);
 		spinU->backColor = backColor * 1.4f;
-		spinU->texture = dktCreateTextureFromFile("main/textures/ArrowU.tga", DKT_FILTER_LINEAR);
+		spinU->texture = dktCreateTextureFromFile(bv2::assetPath("textures/ArrowU"), DKT_FILTER_LINEAR);
 		spinU->perfectFitTexture = true;
 		spinU->imgColor.set(0,0,0);
 		spinU->visible = true;
 
 		spinD = new CControl(this, CVector2i(size[0] - 20, size[1]/2), CVector2i(20,size[1]/2),"",this,"BUTTON",0,1,5,false);
 		spinD->backColor = backColor * 1.4f;
-		spinD->texture = dktCreateTextureFromFile("main/textures/ArrowD.tga", DKT_FILTER_LINEAR);
+		spinD->texture = dktCreateTextureFromFile(bv2::assetPath("textures/ArrowD"), DKT_FILTER_LINEAR);
 		spinD->perfectFitTexture = true;
 		spinD->imgColor.set(0,0,0);
 		spinD->visible = true;

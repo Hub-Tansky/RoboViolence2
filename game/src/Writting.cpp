@@ -16,6 +16,8 @@
 	BaboViolent 2 source code. If not, see http://www.gnu.org/licenses/.
 */
 
+#include "AssetRegistry.h"
+
 #ifndef CONSOLE
 #include "Writting.h"
 #include "Helper.h"
@@ -34,7 +36,7 @@ Writting::Writting()
 	m_cursorAnim = 0;
 	m_haveFocus = false;
 	m_isActivated = false;
-	m_sfxWrite = dksCreateSoundFromFile("main/sounds/Write.wav", false);
+	m_sfxWrite = dksCreateSoundFromFile(bv2::assetPath("sounds/Write"), false);
 	m_maxCarac = 79;
 }
 

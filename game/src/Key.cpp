@@ -16,6 +16,8 @@
 	BaboViolent 2 source code. If not, see http://www.gnu.org/licenses/.
 */
 
+#include "AssetRegistry.h"
+
 #ifndef CONSOLE
 #include "Key.h"
 #include "KeyManager.h"
@@ -29,7 +31,7 @@ Key::Key(CVector2i screenPosition, CString caption, unsigned int m_font, float t
 : Control(screenPosition, caption, m_font, textSize, justify)
 {
 	m_isWaitingForKey = false;
-	m_sfxClic = dksCreateSoundFromFile("main/sounds/Button.wav", false);
+	m_sfxClic = dksCreateSoundFromFile(bv2::assetPath("sounds/Button"), false);
 }
 
 

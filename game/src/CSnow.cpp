@@ -16,6 +16,8 @@
 	BaboViolent 2 source code. If not, see http://www.gnu.org/licenses/.
 */
 
+#include "AssetRegistry.h"
+
 #ifndef CONSOLE
 
 #include "CSnow.h"
@@ -28,8 +30,8 @@
 //
 CSnow::CSnow()
 {
-	m_sfxRain = dksCreateSoundFromFile("main/sounds/wind.wav", true);
-	tex_snow = dktCreateTextureFromFile("main/textures/snowflake.tga", DKT_FILTER_LINEAR);
+	m_sfxRain = dksCreateSoundFromFile(bv2::assetPath("sounds/wind"), true);
+	tex_snow = dktCreateTextureFromFile(bv2::assetPath("textures/snowflake"), DKT_FILTER_LINEAR);
 
 	//--- Start the sound
 	channel = dksPlaySound(m_sfxRain, -1, 50);

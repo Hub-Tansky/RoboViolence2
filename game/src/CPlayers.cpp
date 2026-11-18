@@ -16,14 +16,16 @@
 	BaboViolent 2 source code. If not, see http://www.gnu.org/licenses/.
 */
 
+#include "AssetRegistry.h"
+
 #ifndef CONSOLE
 
 #include "CPlayers.h"
 
 CPlayers::CPlayers(CControl * in_parent, CControl * in_alignTo)
 {
-	m_sfxClic = dksCreateSoundFromFile("main/sounds/Button.wav", false);
-	m_sfxOver = dksCreateSoundFromFile("main/sounds/ControlOver.wav", false);
+	m_sfxClic = dksCreateSoundFromFile(bv2::assetPath("sounds/Button"), false);
+	m_sfxOver = dksCreateSoundFromFile(bv2::assetPath("sounds/ControlOver"), false);
 
 	parent = in_parent;
 
@@ -39,7 +41,7 @@ CPlayers::CPlayers(CControl * in_parent, CControl * in_alignTo)
 	btn_refresh->toolTips = "Refresh the list of clans!";
 
 	lst_browseList = new CControl(instance, CVector2i(0,0), CVector2i(716,460), "", this, "LISTBOX", label, CONTROL_SNAP_BOTTOM, 5);
-	lst_browseList->texture = dktCreateTextureFromFile("main/textures/Menu2Back.tga", DKT_FILTER_LINEAR);
+	lst_browseList->texture = dktCreateTextureFromFile(bv2::assetPath("textures/Menu2Back"), DKT_FILTER_LINEAR);
 
 	instance->backColor.set(0,.3f,.7f);
 	instance->imgColor = instance->backColor;

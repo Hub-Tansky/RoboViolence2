@@ -45,8 +45,8 @@ Scene::Scene()
 #ifndef CONSOLE
 	mainTab = 0;
 	font = dkfCreateFont(bv2::assetPath("fonts/babo"));
-	tex_crosshair = dktCreateTextureFromFile("main/textures/Cross01.tga", DKT_FILTER_LINEAR);
-	tex_menuCursor = dktCreateTextureFromFile("main/textures/MenuCursor.tga", DKT_FILTER_LINEAR);
+	tex_crosshair = dktCreateTextureFromFile(bv2::assetPath("textures/Cross01"), DKT_FILTER_LINEAR);
+	tex_menuCursor = dktCreateTextureFromFile(bv2::assetPath("textures/MenuCursor"), DKT_FILTER_LINEAR);
 	//tex_miniHeadGames = dktCreateTextureFromFile("main/textures/miniHeadGames.tga", DKT_FILTER_LINEAR);
 #endif
 	server = 0;
