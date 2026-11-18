@@ -293,7 +293,7 @@ add_executable(test_asset_registry test_asset_registry.cpp ${CMAKE_SOURCE_DIR}/g
 target_include_directories(test_asset_registry PRIVATE ${CMAKE_SOURCE_DIR}/game/src)
 target_link_libraries(test_asset_registry PRIVATE zeven_core)
 bv2_target_defaults(test_asset_registry)
-add_test(NAME asset_registry COMMAND test_asset_registry)
+add_test(NAME asset_registry COMMAND test_asset_registry "${BV2_TEST_SCRATCH}")
 add_test(NAME asset_ids COMMAND ${Python3_EXECUTABLE} -B ${CMAKE_CURRENT_SOURCE_DIR}/test_asset_ids.py ${CMAKE_SOURCE_DIR})
 
 # ROBO-239: tools/gltf-to-dko.py output loads through engine/dko (dko_probe) with the meshes, materials and dummy expected

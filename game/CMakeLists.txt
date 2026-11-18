@@ -142,7 +142,8 @@ set(BV2_SERVER_SOURCES
   src/tinyxmlparser.cpp
 )
 
-# Asset ids (ROBO-232, ADR 0065): the id and file columns of content/base-pack.tsv, compiled in so the original BV2 data
+# Asset ids (ROBO-232, ADR 0065): the id and file columns of content/base-pack.tsv, and whether the row is a generated
+# placeholder (ADR 0069), compiled in so the original BV2 data
 # (no pack.tsv) resolves the same ids. Re-runs CMake when the manifest changes.
 set(BV2_BASE_PACK "${CMAKE_SOURCE_DIR}/content/base-pack.tsv")
 set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${BV2_BASE_PACK}")
@@ -156,8 +157,15 @@ foreach(line IN LISTS bv2_pack_lines)
   if(line MATCHES "[\"\\\\]")
     message(FATAL_ERROR "content/base-pack.tsv: a row has a quote or backslash, which BasePackIds.cpp can't hold: ${line}")
   endif()
-  if(line MATCHES "^([^\t]+)\t([^\t]+)\t")
-    string(APPEND BV2_BASE_PACK_ROWS "\t\t{\"${CMAKE_MATCH_1}\", \"${CMAKE_MATCH_2}\"},\n")
+  # columns: id, file, type, format, author, tool, licence, source; a generated placeholder is not art (ADR 0069)
+  if(line MATCHES "^([^\t]+)\t([^\t]+)\t[^\t]*\t[^\t]*\t[^\t]*\t[^\t]*\t[^\t]*\t([^\t]*)")
+    set(bv2_placeholder false)
+    if(CMAKE_MATCH_3 STREQUAL "generated placeholder")
+      set(bv2_placeholder true)
+    endif()
+    string(APPEND BV2_BASE_PACK_ROWS "\t\t{\"${CMAKE_MATCH_1}\", \"${CMAKE_MATCH_2}\", ${bv2_placeholder}},\n")
+  elseif(NOT line STREQUAL "")
+    message(FATAL_ERROR "content/base-pack.tsv: a row lacks the id to source columns: ${line}")
   endif()
 endforeach()
 configure_file(src/BasePackIds.cpp.in "${CMAKE_CURRENT_BINARY_DIR}/BasePackIds.cpp" @ONLY)
