@@ -99,3 +99,4 @@ What we do, in one or two sentences.
 | [0064](0064-nightly-flake-watch.md) | A nightly workflow repeats the e2e and bots tests and files one issue per flaky test | Accepted |
 | [0065](0065-asset-pack-manifest.md) | An asset pack is a folder with a pack.tsv manifest; the base pack's is content/base-pack.tsv | Accepted |
 | [0066](0066-game-loads-assets-by-id.md) | Game code loads assets by id; the base manifest's ids are compiled in | Accepted |
+| [0067](0067-docs-only-prs-skip-the-build.md) | A docs-only PR skips the build steps; its required checks still report success | Accepted |

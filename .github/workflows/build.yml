@@ -14,6 +14,8 @@ jobs:
   build:
     name: build (${{ matrix.preset }})
     runs-on: ${{ matrix.os }}
+    outputs:
+      docs: ${{ steps.docs.outputs.docs }}  # every matrix leg writes the same value
     # The release version: menu text, its check and the package (ADR 0046)
     env:
       BV2_VERSION: ${{ github.ref_type == 'tag' && github.ref_name || '0.0.0-dev' }}
@@ -26,22 +28,32 @@ jobs:
           - { os: ubuntu-24.04, preset: linux-x64 }
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 2  # the merge commit and the base: tools/docs-only.py diffs them
+      # A docs-only PR skips the rest; the job still reports success, so required checks pass (ROBO-246, ADR 0067)
+      - id: docs
+        uses: ./.github/actions/docs-only
       - uses: ./.github/actions/setup-vcpkg
+        if: env.DOCS_ONLY != 'true'
         with:
           cache-key: ${{ matrix.os }}-${{ matrix.preset }}  # image in the key: a new image (new compiler) must not exact-hit a cache it cannot use
       - name: MSVC environment
-        if: runner.os == 'Windows'
+        if: env.DOCS_ONLY != 'true' && runner.os == 'Windows'
         uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
         with:
           arch: x64
       - name: Configure
+        if: env.DOCS_ONLY != 'true'
         run: cmake --preset ${{ matrix.preset }}
       - name: Build (keep going, so one run lists every failure)
+        if: env.DOCS_ONLY != 'true'
         run: cmake --build --preset ${{ matrix.preset }} -- -k 0
       - name: Test
+        if: env.DOCS_ONLY != 'true'
         run: ctest --test-dir build/${{ matrix.preset }} --output-on-failure
       # The packages are Release: fullscreen by default, no debug C++ runtime.
       - name: Configure, build and test Release
+        if: env.DOCS_ONLY != 'true'
         run: |
           cmake --preset ${{ matrix.preset }}-release
           cmake --build --preset ${{ matrix.preset }}-release -- -k 0
@@ -53,6 +65,7 @@ jobs:
         run: ${{ runner.os == 'Windows' && 'python' || 'python3' }} tools/ci-test-summary.py build/${{ matrix.preset }} build/${{ matrix.preset }}-release
       # The job's BV2_VERSION, not CMake's copy of it, reaches the Release binary: ctest client_version cannot tell (ADR 0046)
       - name: The release binary holds this run's version
+        if: env.DOCS_ONLY != 'true'
         shell: bash
         run: |
           dir=build/${{ matrix.preset }}-release/runtime
@@ -67,13 +80,14 @@ jobs:
           if-no-files-found: ignore
       # dmgbuild lays out the disk image window (ADR 0030); a venv, since the runner's Python is externally managed
       - name: dmgbuild
-        if: runner.os == 'macOS'
+        if: env.DOCS_ONLY != 'true' && runner.os == 'macOS'
         run: |
           python3 -m venv "$RUNNER_TEMP/dmgbuild"
           "$RUNNER_TEMP/dmgbuild/bin/pip" install --quiet --require-hashes -r packaging/macos/requirements.txt
           echo "$RUNNER_TEMP/dmgbuild/bin" >> "$GITHUB_PATH"
       # Release symbols (.pdb, .dSYM, Linux .debug by build ID) leave the binaries before packaging (ROBO-188, ADR 0051)
       - name: Split debug symbols
+        if: env.DOCS_ONLY != 'true'
         shell: bash
         run: ${{ runner.os == 'Windows' && 'python' || 'python3' }} packaging/split-symbols.py build/${{ matrix.preset }}-release/runtime ${{ matrix.preset }} symbols "$BV2_VERSION"
       # Kept privately in the private vault repo rv2-docs, 30-dev/crash-debug/<tag>/, never in the public release or artifacts
@@ -98,11 +112,12 @@ jobs:
           exit 1
       # The archive on every OS, plus the installer (Windows), disk image (macOS) or .deb (Linux); ADR 0020, 0031
       - name: Package
+        if: env.DOCS_ONLY != 'true'
         shell: bash
         run: ${{ runner.os == 'Windows' && 'python' || 'python3' }} packaging/make-package.py build/${{ matrix.preset }}-release/runtime ${{ matrix.preset }} out "$BV2_VERSION"
       # Install, upgrade over it (the master's databases stay), uninstall (they stay too); ADR 0020
       - name: The installer installs, upgrades and uninstalls silently
-        if: runner.os == 'Windows'
+        if: env.DOCS_ONLY != 'true' && runner.os == 'Windows'
         shell: bash
         env:
           MSYS_NO_PATHCONV: "1"  # pass /VERYSILENT etc. through unchanged
@@ -120,10 +135,12 @@ jobs:
           ls "$dir/master.db" "$dir/web.db" > /dev/null
       # archive: false uploads each file as-is (no zip around the zip); the artifact takes the file's name.
       - uses: actions/upload-artifact@v7
+        if: env.DOCS_ONLY != 'true'
         with:
           path: out/roboviolence2-${{ matrix.preset }}.${{ runner.os == 'Linux' && 'tar.gz' || 'zip' }}
           archive: false
       - uses: actions/upload-artifact@v7
+        if: env.DOCS_ONLY != 'true'
         with:
           path: out/roboviolence2-${{ matrix.preset }}${{ runner.os == 'Windows' && '-setup.exe' || runner.os == 'macOS' && '.dmg' || '.deb' }}
           archive: false
@@ -131,6 +148,7 @@ jobs:
   # the macOS .zip carries the servers, which the .dmg leaves out, ADR 0030; the .deb, ADR 0031)
   release:
     needs: build
+    if: needs.build.outputs.docs != 'true'  # a docs-only PR built no packages (ADR 0067)
     runs-on: ubuntu-24.04
     permissions:
       contents: write
@@ -178,6 +196,7 @@ jobs:
   package-check:
     name: package-check (clean ubuntu:24.04)
     needs: build
+    if: needs.build.outputs.docs != 'true'  # a docs-only PR built no packages (ADR 0067)
     runs-on: ubuntu-24.04
     container: ubuntu:24.04
     steps:
@@ -212,6 +231,7 @@ jobs:
   deb-check:
     name: deb-check (${{ matrix.image }})
     needs: build
+    if: needs.build.outputs.docs != 'true'  # a docs-only PR built no packages (ADR 0067)
     runs-on: ubuntu-24.04
     container: ${{ matrix.image }}
     strategy:
@@ -242,6 +262,7 @@ jobs:
   package-smoke:
     name: package-smoke (${{ matrix.preset }})
     needs: build
+    if: needs.build.outputs.docs != 'true'  # a docs-only PR built no packages (ADR 0067)
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -314,14 +335,24 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 2  # the merge commit and the base: tools/docs-only.py diffs them
+      # A docs-only PR skips the rest; the job still reports success, so required checks pass (ROBO-246, ADR 0067)
+      - id: docs
+        uses: ./.github/actions/docs-only
       - uses: ./.github/actions/setup-vcpkg
+        if: env.DOCS_ONLY != 'true'
         with:
           cache-key: linux-x64-asan
       - name: Extra packages
+        if: env.DOCS_ONLY != 'true'
         run: sudo apt-get install -y xvfb libgl1-mesa-dri
-      - run: cmake --preset linux-x64-asan
-      - run: cmake --build --preset linux-x64-asan
+      - if: env.DOCS_ONLY != 'true'
+        run: cmake --preset linux-x64-asan
+      - if: env.DOCS_ONLY != 'true'
+        run: cmake --build --preset linux-x64-asan
       - name: Server smoke (loads the CTF launch script, quits) and unit tests
+        if: env.DOCS_ONLY != 'true'
         env:
           ASAN_OPTIONS: detect_leaks=0
         run: ctest --test-dir build/linux-x64-asan --output-on-failure
@@ -335,6 +366,7 @@ jobs:
           path: build/linux-x64-asan/test-scratch/screenshots/*.png
           if-no-files-found: ignore
       - name: Client reaches the main menu and survives 10 s
+        if: env.DOCS_ONLY != 'true'
         working-directory: build/linux-x64-asan/runtime
         env:
           ASAN_OPTIONS: detect_leaks=0
@@ -352,18 +384,28 @@ jobs:
     continue-on-error: true
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 2  # the merge commit and the base: tools/docs-only.py diffs them
+      # A docs-only PR skips the rest; the job still reports success, so required checks pass (ROBO-246, ADR 0067)
+      - id: docs
+        uses: ./.github/actions/docs-only
       - uses: ./.github/actions/setup-vcpkg
+        if: env.DOCS_ONLY != 'true'
         with:
           cache-key: linux-x64-tidy
       - name: Extra packages
+        if: env.DOCS_ONLY != 'true'
         run: sudo apt-get install -y clang-tidy
-      - run: cmake --preset linux-x64
+      - if: env.DOCS_ONLY != 'true'
+        run: cmake --preset linux-x64
       - name: clang-tidy over the engine libraries and the game (.clang-tidy)
+        if: env.DOCS_ONLY != 'true'
         run: |
           files=$(git ls-files 'engine/*/src/*.cpp' 'game/src/*.cpp' 'masterserver/src/*.cpp' | grep -v 'third_party')
           clang-tidy -p build/linux-x64 --quiet $files 2>&1 | tee tidy.log | tail -50
           echo "findings: $(grep -c 'warning:' tidy.log)"
       - uses: actions/upload-artifact@v7
+        if: env.DOCS_ONLY != 'true'
         with:
           name: clang-tidy-log
           path: tidy.log

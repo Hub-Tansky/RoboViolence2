@@ -66,6 +66,6 @@ One row per module directory. `tools/check-architecture.sh` fails when a directo
 | `config/` | Example configs with empty secrets; see [README](config/README.md) |
 | `content-seed/` | SQL schemas and defaults for generated databases |
 | `docs/` | Build guides (`build/`), ADRs (`decisions/`), runbook (`ops/`), agent skill config (`agents/`) |
-| `.github/` | CI workflows, the vcpkg setup action, Dependabot, issue and PR templates |
+| `.github/` | CI workflows, the vcpkg and docs-only setup actions, Dependabot, issue and PR templates |
 | `.githooks/` | Commit and push hooks (ADR 0045) |
 | `.claude/` | Agent skills shipped with the repo (`rv2-code-review`) |

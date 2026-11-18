@@ -54,6 +54,8 @@ ctest --test-dir build/<preset> --output-on-failure
 
 Workflows are in `.github/workflows/`. Run them locally with `tools/review.sh` (`--full <preset>` adds build and ctest).
 
+A PR that changes only docs-tier paths (`docs/` or `.md`, not `AGENTS.md`, `REVIEW.md`, `.claude/`, `.github/`) skips the build steps of `build`, `smoke`, `tidy` and `images`; the jobs still report success. Push to `main`, `release/*` and tags always runs everything ([ADR 0067](../decisions/0067-docs-only-prs-skip-the-build.md)). A new step in those jobs needs `if: env.DOCS_ONLY != 'true'` (ctest `docs_only` checks).
+
 Required (the repository ruleset "main protection", see [AGENTS.md](../../AGENTS.md#build)):
 
 - `build`: Windows, macOS, Linux; Debug and `-release` presets. Uploads the Release `roboviolence2-<preset>` packages, the Windows installer and the macOS `.dmg`. The separate `release` job (not required) checks on every run that the release files are there and publishes them on a `v*` tag (ADR 0020).
