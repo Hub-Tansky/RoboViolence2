@@ -105,3 +105,4 @@ What we do, in one or two sentences.
 | [0069](0069-asset-packs-stack-over-the-base-pack.md) | Asset packs stack over the base pack; the BV2 data is an optional pack on top | Accepted |
 | [0070](0070-gltf-converts-to-dko.md) | New models are authored as glTF and converted to .DKO offline | Accepted |
 | [ROBO-248](ROBO-248-adrs-named-by-scope-item.md) | Name new ADRs after their scope item, not the next number | Accepted |
+| [ROBO-249](ROBO-249-backlog-item-moves-on-merge.md) | A merged PR's backlog item moves to Done or Testing by workflow | Accepted |

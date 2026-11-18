@@ -1,0 +1,56 @@
+name: backlog-move
+# After a merge, the PR's backlog item in the private vault rv2-docs moves to Done (90-done/) or stays Testing
+# (30-inprogress/) while an unticked `(post-deploy)` criterion is left; tools/backlog-move.py (ROBO-249, ADR ROBO-249).
+# Never fails a merge: no ROBO id means nothing to do; no item file or no token gives a warning.
+# No concurrency group: it would cancel a pending run when a third merge queues. Parallel runs rebase and retry instead.
+on:
+  pull_request:
+    types: [closed]
+    branches: [main, 'release/**']  # not stacked PRs into feature branches
+permissions:
+  contents: read
+jobs:
+  backlog-move:
+    name: backlog-move (not required)
+    # Merged PRs from this repository only: a fork PR gets no secrets
+    if: github.event.pull_request.merged == true && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7  # the target branch after the merge, never the PR head
+        with:
+          ref: ${{ github.event.pull_request.base.ref }}
+          persist-credentials: false
+      - name: Move the item in rv2-docs
+        id: move
+        env:
+          # fine-grained, Contents write on Hub-Tansky/rv2-docs only; shared with release symbols (owner, 2026-11-18)
+          DOCS_TOKEN: ${{ secrets.SYMBOLS_TOKEN }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          if [ -z "$DOCS_TOKEN" ]; then
+            echo "::warning::no SYMBOLS_TOKEN secret: backlog item not moved"
+            exit 0
+          fi
+          vault="$RUNNER_TEMP/rv2-docs"
+          git clone -q --depth 1 "https://x-access-token:${DOCS_TOKEN}@github.com/Hub-Tansky/rv2-docs.git" "$vault"
+          git -C "$vault" config user.name Hub-Tansky  # also for the commits a rebase rewrites
+          git -C "$vault" config user.email 337104978+Hub-Tansky@users.noreply.github.com
+          git -C "$vault" remote set-url origin https://github.com/Hub-Tansky/rv2-docs.git  # no token in .git/config
+          DOCS_TOKEN= python3 -B tools/backlog-move.py "$vault" "$PR_NUMBER"
+      - name: Commit and push as Hub-Tansky
+        if: steps.move.outputs.message != ''
+        env:
+          DOCS_TOKEN: ${{ secrets.SYMBOLS_TOKEN }}
+          MESSAGE: ${{ steps.move.outputs.message }}
+        working-directory: ${{ runner.temp }}/rv2-docs
+        run: |
+          auth="http.https://github.com/.extraheader=AUTHORIZATION: basic $(printf 'x-access-token:%s' "$DOCS_TOKEN" | base64 -w0)"
+          git commit -q -m "$MESSAGE"
+          # Agents and other merges push to the same branch: rebase onto whoever pushed first and try again
+          for attempt in 1 2 3 4 5; do
+            git -c "$auth" push -q origin HEAD:main && exit 0
+            git -c "$auth" pull -q --rebase origin main || { git rebase --abort; exit 1; }
+          done
+          exit 1
