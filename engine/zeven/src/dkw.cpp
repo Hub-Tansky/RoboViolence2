@@ -18,6 +18,7 @@
 
 #include "dkw.h"
 #include "dikeys.h"
+#include "FontCodes.h"
 
 #include <SDL3/SDL.h>
 
@@ -212,12 +213,6 @@ namespace
 			SDL_SetWindowRelativeMouseMode(g_window, g_wantCapture && g_hasFocus);
 	}
 
-	// UTF-8 codepoint to the Latin-1 byte the bitmap font renders; 0 when it has no glyph.
-	unsigned int toLatin1(unsigned int cp)
-	{
-		return (cp >= 32 && cp <= 255 && cp != 127) ? cp : 0;
-	}
-
 	void textFromUtf8(const char * s)
 	{
 		const unsigned char * p = (const unsigned char *)s;
@@ -232,7 +227,7 @@ namespace
 			++p;
 			for (int i = 0; i < extra && (*p & 0xC0) == 0x80; ++i, ++p)
 				cp = (cp << 6) | (*p & 0x3F);
-			unsigned int c = toLatin1(cp);
+			unsigned int c = bv2::typedFontByte(cp); // ROBO-238: the font byte, 0 without a glyph
 			if (c && g_mainLoop)
 				g_mainLoop->textWrite(c);
 		}

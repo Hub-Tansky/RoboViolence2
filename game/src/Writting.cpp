@@ -58,45 +58,7 @@ Writting::~Writting()
 //
 void Writting::writeText(unsigned int caracter)
 {
-	// Bon y a des fucks là avec les caractères qui ont des accents
-	if (caracter > 127)
-	{
-		for (int i=0;i<1;++i) // Juste pour faire fonctionner le break là
-		{
-			if (caracter == 199) {caracter = 128;break;}
-			if (caracter == 252) {caracter = 129;break;}
-			if (caracter == 233) {caracter = 130;break;}
-			if (caracter == 226) {caracter = 131;break;}
-			if (caracter == 228) {caracter = 132;break;}
-			if (caracter == 224) {caracter = 133;break;}
-			if (caracter == 229) {caracter = 134;break;}
-			if (caracter == 231) {caracter = 135;break;}
-			if (caracter == 234) {caracter = 136;break;}
-			if (caracter == 235) {caracter = 137;break;}
-			if (caracter == 232) {caracter = 138;break;}
-			if (caracter == 239) {caracter = 139;break;}
-			if (caracter == 238) {caracter = 140;break;}
-			if (caracter == 236) {caracter = 141;break;}
-			if (caracter == 196) {caracter = 142;break;}
-			if (caracter == 197) {caracter = 143;break;}
-			if (caracter == 201) {caracter = 144;break;}
-			if (caracter == 230) {caracter = 145;break;}
-			if (caracter == 198) {caracter = 146;break;}
-			if (caracter == 244) {caracter = 147;break;}
-			if (caracter == 246) {caracter = 148;break;}
-			if (caracter == 242) {caracter = 149;break;}
-			if (caracter == 251) {caracter = 150;break;}
-			if (caracter == 249) {caracter = 151;break;}
-			if (caracter == 255) {caracter = 152;break;}
-			if (caracter == 214) {caracter = 153;break;}
-			if (caracter == 220) {caracter = 154;break;}
-			if (caracter == 248) {caracter = 155;break;}
-			if (caracter == 163) {caracter = 156;break;}
-			if (caracter == 216) {caracter = 157;break;}
-			if (caracter == 215) {caracter = 158;break;}
-			if (caracter == 170) {caracter = 159;break;}
-		}
-	}
+	// caracter is already a font byte (dkw maps typed letters through FontCodes.h, ROBO-238)
 
 	// On reset notre anim bien sur
 	m_cursorAnim = 0;

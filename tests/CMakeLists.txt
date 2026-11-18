@@ -218,6 +218,12 @@ if(TARGET zeven_client)
   target_include_directories(test_dkt_image SYSTEM PRIVATE "${BV2_STB_IMAGE_DIR}")
   bv2_target_defaults(test_dkt_image)
   add_test(NAME dkt_image COMMAND test_dkt_image "${BV2_TEST_SCRATCH}")
+
+  # ROBO-238: a TTF bakes to a CFont atlas with every font byte's glyph
+  add_executable(test_dkf_ttf test_dkf_ttf.cpp)
+  target_link_libraries(test_dkf_ttf PRIVATE zeven_client)
+  bv2_target_defaults(test_dkf_ttf)
+  add_test(NAME dkf_ttf COMMAND test_dkf_ttf "${CMAKE_CURRENT_SOURCE_DIR}/data/DejaVuSans-subset.ttf")
 endif()
 
 if(TARGET bv2_app_icon)
@@ -267,7 +273,7 @@ bv2_target_defaults(test_fileio)
 add_test(NAME fileio COMMAND test_fileio "${BV2_TEST_SCRATCH}")
 
 add_executable(test_lang test_lang.cpp ${CMAKE_SOURCE_DIR}/game/src/Lang.cpp)
-target_include_directories(test_lang PRIVATE ${CMAKE_SOURCE_DIR}/game/src)
+target_include_directories(test_lang PRIVATE ${CMAKE_SOURCE_DIR}/game/src ${CMAKE_SOURCE_DIR}/engine/zeven/include)  # FontCodes.h
 bv2_target_defaults(test_lang)
 add_test(NAME lang COMMAND test_lang "${BV2_TEST_SCRATCH}")
 add_executable(test_paths test_paths.cpp ${CMAKE_SOURCE_DIR}/game/src/Paths.cpp)
