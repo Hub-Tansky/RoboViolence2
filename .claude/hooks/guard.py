@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Claude Code PreToolUse guard (ROBO-256, ADR ROBO-256). Reads the hook's JSON on stdin.
 
-Bash: denies `--no-verify`, a force push to main, a `v*` release tag or its push, `gh auth switch`, `gh secret` and
+Bash: denies `--no-verify`, a force push to main, a `v*` release tag or its push, `gh auth switch`, `gh secret` and  # review: allow this rule refuses --no-verify
 write calls to `rulesets`, naming the rule. Edit and Write: asks before a change to a guard file (the GUARDS pattern
 of tools/merge-risk.py). Anything else: no output, so the normal permission flow applies. Python 3, stdlib only.
 """
@@ -18,7 +18,7 @@ _spec.loader.exec_module(_risk)
 GUARDS = _risk.GUARDS
 
 RULES = [
-    ("no --no-verify: hooks are never bypassed (AGENTS.md)", r"\bgit\b.*\s--no-verify\b"),
+    ("no --no-verify: hooks are never bypassed (AGENTS.md)", r"\bgit\b.*\s--no-verify\b"),  # review: allow this rule refuses --no-verify
     ("no force push to main (AGENTS.md)", r"\bgit\b.*\bpush\b(?=.*\s(-f|--force(-with-lease)?(=\S*)?|\+\S+)(\s|$))(?=.*(\s|:|\+)main(\s|$))"),
     ("no release tags: the owner tags releases (rv2-docs release.md)", r"\bgit\b.*\btag\b(\s+-\S+)*\s+v\d"),
     ("no push of release tags: the owner pushes them (rv2-docs release.md)", r"\bgit\b.*\bpush\b.*(\srefs/tags/v|\sv\d|\s--tags\b)"),

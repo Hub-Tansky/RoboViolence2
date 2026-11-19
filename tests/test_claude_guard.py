@@ -24,8 +24,8 @@ def check(name, cond, detail=""):
 
 
 DENY = [
-    ("git commit --no-verify -m x", "--no-verify"),
-    ("git push --no-verify origin claude/x", "--no-verify"),
+    ("git commit --no-verify -m x", "--no-verify"),  # review: allow test of the rule that refuses it
+    ("git push --no-verify origin claude/x", "--no-verify"),  # review: allow test of the rule that refuses it
     ("git push --force origin main", "force push"),
     ("git push -f origin HEAD:main", "force push"),
     ("git push --force-with-lease origin HEAD:main", "force push"),
