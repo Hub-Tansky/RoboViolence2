@@ -127,11 +127,20 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git remote add origin "https://github.com/$GITHUB_REPOSITORY.git"
-          # Runs at the same time add different directories: on a rejected push, commit again on whoever pushed first
+          # Cleans itself: each push is one fresh commit holding only the newest KEEP runs' images, so older runs and the
+          # history behind them go away (their summaries lose their images). The lease makes a concurrent run start over.
+          KEEP=20
           for attempt in 1 2 3 4 5; do
-            if git -c "$auth" fetch -q --depth 1 origin golden-preview; then git checkout -q -B golden-preview FETCH_HEAD; else git checkout -q --orphan "try-$attempt"; fi
+            git checkout -q --orphan "try-$attempt" && { git rm -rqf --cached . > /dev/null 2>&1 || true; } && git clean -fdxq
+            old=
+            if git -c "$auth" fetch -q --depth 1 origin golden-preview; then
+              old=$(git rev-parse FETCH_HEAD)
+              git checkout -q FETCH_HEAD -- .
+              drop=$(ls -d [0-9]* 2>/dev/null | sort -n | head -n -$((KEEP - 1)))
+              [ -z "$drop" ] || git rm -rqf $drop
+            fi
             mkdir -p "$GITHUB_RUN_ID" && cp ../preview/*.png "$GITHUB_RUN_ID/"
-            git add "$GITHUB_RUN_ID" && git commit -q -m "goldens preview, run $GITHUB_RUN_ID"
-            git -c "$auth" push -q origin HEAD:golden-preview && exit 0
+            git add -A && git commit -q -m "goldens preview: the newest $KEEP runs, latest $GITHUB_RUN_ID"
+            git -c "$auth" push -q --force-with-lease="golden-preview:$old" origin HEAD:golden-preview && exit 0
           done
           exit 1
