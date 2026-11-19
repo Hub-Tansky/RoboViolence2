@@ -1,15 +1,13 @@
 name: goldens
-# By hand: regenerate the screenshot goldens (tests/golden/*.png, ADR 0026) on a branch, in the configuration of the CI
-# job that checks them (`smoke`, linux-x64-asan under Xvfb), and show before, after and diff images in the run summary
-# (ROBO-254, ADR ROBO-254). The new PNGs are the artifact `goldens`; commit them to the branch yourself, so CI runs on
-# them. The job that runs the branch's code has a read-only token; the job that publishes the preview images builds
-# nothing.
+# By hand, on the branch to change (`gh workflow run goldens.yml --ref <branch>`): regenerate the screenshot goldens
+# (tests/golden/*.png, ADR 0026) in the configuration of the CI job that checks them (`smoke`, linux-x64-asan under
+# Xvfb) and show before, after and diff images in the run summary (ROBO-254, ADR ROBO-254). The new PNGs are the
+# artifact `goldens`; commit them to the branch yourself, so CI runs on them. Running on the branch's own ref keeps any
+# cache this run saves in that branch's scope, never main's. The job that runs the branch's code has a read-only
+# token; the job that publishes the preview images builds nothing.
 on:
   workflow_dispatch:
     inputs:
-      branch:
-        description: 'Branch to regenerate the goldens on'
-        required: true
       names:
         description: 'Golden names, space-separated (empty: all in tests/golden/)'
         required: false
@@ -18,24 +16,19 @@ permissions:
 jobs:
   render:
     name: goldens render (not required)
+    # Not on main: the cache this job saves would land in main's scope, where every PR and tag run restores from
+    if: github.ref_type == 'branch' && github.ref != 'refs/heads/main'
     runs-on: ubuntu-24.04
-    timeout-minutes: 90  # the first run builds every port
+    timeout-minutes: 60
     outputs:
       changed: ${{ steps.report.outputs.changed }}
-      unstable: ${{ steps.regen.outputs.unstable }}
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: ${{ inputs.branch }}
-          persist-credentials: false  # the branch's code runs below
-      - uses: actions/checkout@v7  # this workflow's own tools: the branch may predate them
-        with:
-          path: ci
           persist-credentials: false
       - uses: ./.github/actions/setup-vcpkg
         with:
-          # Not the smoke job's key: this job saves a cache built by unreviewed branch code, which smoke must never restore
-          cache-key: goldens-linux-x64-asan
+          cache-key: linux-x64-asan  # the smoke job's: restores main's cache, saves only in this branch's scope
       - name: Extra packages
         run: sudo apt-get install -y xvfb libgl1-mesa-dri
       - run: cmake --preset linux-x64-asan
@@ -69,19 +62,17 @@ jobs:
             [ "$passes" = 3 ] || unstable="$unstable $n"
           done
           echo "unstable=${unstable# }" >> "$GITHUB_OUTPUT"
-      - name: Report
+      - name: Report in the summary
         id: report
         shell: bash  # -eo pipefail: a crash of the tool fails the run
-        env:
-          BV2_TESTS_DIR: ${{ github.workspace }}/tests  # the branch's comparison, the one its CI will run
         run: |
           mkdir -p "$RUNNER_TEMP/preview"
           sha=$(git rev-parse HEAD)
           raw="https://raw.githubusercontent.com/$GITHUB_REPOSITORY"
           {
-            echo "## Screenshot goldens on \`$sha\`"
+            echo "## Screenshot goldens on \`$GITHUB_REF_NAME\` at \`$sha\`"
             echo
-            python3 -B ci/tools/golden-report.py "$RUNNER_TEMP/before" "$RUNNER_TEMP/after" "$RUNNER_TEMP/preview" \
+            python3 -B tools/golden-report.py "$RUNNER_TEMP/before" "$RUNNER_TEMP/after" "$RUNNER_TEMP/preview" \
               "$raw/$sha/tests/golden" "$raw/golden-preview/$GITHUB_RUN_ID"
             echo
             echo "### Stability"
@@ -89,7 +80,7 @@ jobs:
             sed 's/^/- /' "$RUNNER_TEMP/stability.txt"
             echo
             echo "To commit the new goldens: download the artifact \`goldens\` of this run, unzip it at the repository root on the branch (it holds \`tests/golden/<name>.png\`) and commit."
-          } > "$RUNNER_TEMP/preview/report.md"
+          } | tee -a "$GITHUB_STEP_SUMMARY"
           for n in $(sed -n 's/^changed=//p' "$GITHUB_OUTPUT"); do cp "$RUNNER_TEMP/after/$n.png" "$RUNNER_TEMP/commit/tests/golden/"; done
       - uses: actions/upload-artifact@v7
         with:
@@ -97,29 +88,40 @@ jobs:
           path: ${{ runner.temp }}/commit/
           if-no-files-found: ignore
       - uses: actions/upload-artifact@v7
+        if: steps.report.outputs.changed != ''
         with:
           name: golden-preview
           path: ${{ runner.temp }}/preview/
+      - name: Fail when a new golden is unstable
+        if: steps.regen.outputs.unstable != ''
+        env:
+          UNSTABLE: ${{ steps.regen.outputs.unstable }}
+        run: |
+          echo "::error::these new goldens failed their own comparison at least once: $UNSTABLE; do not commit them"
+          exit 1
   publish:
     name: goldens publish (not required)
     needs: render
+    # Also after an unstable golden failed render: the images show what went wrong
+    if: always() && needs.render.outputs.changed != ''
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     permissions:
       contents: write  # pushes golden-preview only; runs no branch code
-    concurrency:
-      group: golden-preview
-      cancel-in-progress: false
     steps:
       - uses: actions/download-artifact@v8
         with:
           name: golden-preview
           path: preview
       - name: Push the images to golden-preview
-        if: needs.render.outputs.changed != ''
         env:
           TOKEN: ${{ github.token }}
         run: |
+          # The images come from the job that ran the branch's code: PNG files of at most 5 MB only
+          for f in preview/*.png; do
+            [ "$(head -c 8 "$f" | od -An -tx1 | tr -d ' \n')" = 89504e470d0a1a0a ] || { echo "::error::$f is not a PNG"; exit 1; }
+            [ "$(stat -c %s "$f")" -le 5242880 ] || { echo "::error::$f is over 5 MB"; exit 1; }
+          done
           auth="http.https://github.com/.extraheader=AUTHORIZATION: basic $(printf 'x-access-token:%s' "$TOKEN" | base64 -w0)"
           git init -q site && cd site
           git config user.name 'github-actions[bot]'
@@ -128,13 +130,9 @@ jobs:
           if git -c "$auth" fetch -q --depth 1 origin golden-preview; then git checkout -q -b golden-preview FETCH_HEAD; else git checkout -q --orphan golden-preview; fi
           mkdir "$GITHUB_RUN_ID" && cp ../preview/*.png "$GITHUB_RUN_ID/"
           git add "$GITHUB_RUN_ID" && git commit -q -m "goldens preview, run $GITHUB_RUN_ID"
-          git -c "$auth" push -q origin HEAD:golden-preview
-      - name: Summary
-        run: cat preview/report.md >> "$GITHUB_STEP_SUMMARY"
-      - name: Fail when a new golden is unstable
-        if: needs.render.outputs.unstable != ''
-        env:
-          UNSTABLE: ${{ needs.render.outputs.unstable }}
-        run: |
-          echo "::error::these new goldens failed their own comparison at least once: $UNSTABLE; do not commit them"
+          # Runs at the same time add different directories: rebase onto whoever pushed first and try again
+          for attempt in 1 2 3 4 5; do
+            git -c "$auth" push -q origin HEAD:golden-preview && exit 0
+            git -c "$auth" fetch -q --depth 1 origin golden-preview && git rebase -q --onto FETCH_HEAD HEAD~1 || { git rebase --abort; exit 1; }
+          done
           exit 1
