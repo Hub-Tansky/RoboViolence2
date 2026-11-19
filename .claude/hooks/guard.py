@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Claude Code PreToolUse guard (ROBO-256, ADR ROBO-256). Reads the hook's JSON on stdin.
 
-Bash: denies `--no-verify`, a force push to main, a `v*` release tag or its push, `gh auth switch`, `gh secret` and  # review: allow this rule refuses --no-verify
+Bash: denies skipping hooks, a force push to main, a `v*` release tag or its push, `gh auth switch`, `gh secret` and
 write calls to `rulesets`, naming the rule. Edit and Write: asks before a change to a guard file (the GUARDS pattern
 of tools/merge-risk.py). Anything else: no output, so the normal permission flow applies. Python 3, stdlib only.
 """
