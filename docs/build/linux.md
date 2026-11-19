@@ -155,7 +155,9 @@ Goldens: `tests/golden/<name>.png` ([ADR 0026](../decisions/0026-screenshot-gold
 python3 -B tests/screenshots.py "$PWD/build/local/runtime/bv2" "$PWD/build/local/shots" <name> --update
 ```
 
-Then run `ctest --test-dir build/local -R screenshot_<name>` about 10 times: a golden that differs between runs fails CI at random. Placeholder data has no skins, so a frame that shows the Appearance ball needs `set cl_redDecal 0 0 0` (and green, blue) in its script, as `tests/golden/appearance.txt` does. Cvars in these scripts need the `set` prefix.
+Without a Linux build, run the `goldens` workflow on the branch (`gh workflow run goldens.yml --ref <branch> -f names=<name>`; empty names: all): it regenerates in the `smoke` job's configuration, compares each new golden 3 times, shows before, after and diff in the run summary, and leaves the PNGs in the artifact `goldens` to commit ([ADR ROBO-254](../decisions/ROBO-254-regenerate-goldens-in-ci.md)). A new golden also needs its name in the `screenshot_` list in `tests/CMakeLists.txt`.
+
+Locally, run `ctest --test-dir build/local -R screenshot_<name>` about 10 times: a golden that differs between runs fails CI at random. Placeholder data has no skins, so a frame that shows the Appearance ball needs `set cl_redDecal 0 0 0` (and green, blue) in its script, as `tests/golden/appearance.txt` does. Cvars in these scripts need the `set` prefix.
 
 ## Output and run
 
