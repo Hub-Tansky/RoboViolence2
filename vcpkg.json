@@ -2,7 +2,7 @@
   "name": "roboviolence2",
   "version-string": "0.0.0",
   "description": "Robo Violence 2, an unofficial fork of BaboViolent 2",
-  "builtin-baseline": "19e7a138440f005fea23d92b19df87f8040e66c1",
+  "builtin-baseline": "d13c536672dced4b8c671955ea7d057a1b7a1ff8",
   "dependencies": [
     "libsodium",
     "sqlite3"
