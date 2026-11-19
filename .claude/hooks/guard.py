@@ -21,13 +21,13 @@ SELF = re.compile(r"^\.claude/(hooks/|settings\.json$)")  # the guard and its wi
 RULES = [
     ("no --no-verify: hooks are never bypassed (AGENTS.md)", r"\bgit\b.*\s--no-verify\b"),  # review: allow this rule refuses --no-verify
     ("no commit -n: it skips the hooks (AGENTS.md)", r"\bgit\b.*\bcommit\b.*\s-[a-zA-Z]*n[a-zA-Z]*(\s|$)"),
-    ("no force push to main (AGENTS.md)", r"\bgit\b.*\bpush\b(?=.*\s(-f|--force(-with-lease)?(=\S*)?|\+\S+)(\s|$))(?=.*(\s|:|\+|refs/heads/)main(\s|$))"),
+    ("no force push to main (AGENTS.md)", r"\bgit\b.*\bpush\b(?=.*\s(-f|--force(-with-lease)?(=\S*)?|\+\S+)(\s|$))(?=.*(\s|:|\+|refs/heads/)main(\s|$|[\x22\x27]))"),
     ("no release tags: the owner tags releases (rv2-docs release.md)", r"\bgit\b.*\btag\b(?!.*\s(-l|--list|--contains|--merged|--no-merged|--points-at)\b)(\s+-\S+)*\s+v\d"),
-    ("no push of release tags: the owner pushes them (rv2-docs release.md)", r"\bgit\b.*\bpush\b.*(\srefs/tags/v|\sv\d+(\.\d+)*(\s|$)|\s--tags\b)"),
+    ("no push of release tags: the owner pushes them (rv2-docs release.md)", r"\bgit\b.*\bpush\b.*([\s:]refs/tags/v|[\s:]v\d+(\.\d+)*(\s|$)|\s--(tags|follow-tags|mirror)\b)"),
     ("no gh auth switch: other projects rely on the active account (AGENTS.md, Git identity)", r"\bgh\s+auth\s+switch\b"),
     ("no gh secret: secrets are the owner's (AGENTS.md)", r"\bgh\s+secret\b"),
     ("no writes to rulesets: only the owner changes them (AGENTS.md)",
-     r"\bgh\s+api\b(?=.*rulesets)(?=.*(\s(-X|--method)\s*(POST|PUT|PATCH|DELETE)\b|\s(-f|-F|--field|--raw-field|--input)\s))"),
+     r"\bgh\s+api\b(?=.*rulesets)(?=.*(\s(-X|--method)[\s=]*(POST|PUT|PATCH|DELETE)\b|\s(-f|-F|--field|--raw-field|--input)\s))"),
 ]
 SPLIT = re.compile(r"&&|\|\||[;|\n]")
 
