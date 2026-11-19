@@ -127,12 +127,11 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git remote add origin "https://github.com/$GITHUB_REPOSITORY.git"
-          if git -c "$auth" fetch -q --depth 1 origin golden-preview; then git checkout -q -b golden-preview FETCH_HEAD; else git checkout -q --orphan golden-preview; fi
-          mkdir "$GITHUB_RUN_ID" && cp ../preview/*.png "$GITHUB_RUN_ID/"
-          git add "$GITHUB_RUN_ID" && git commit -q -m "goldens preview, run $GITHUB_RUN_ID"
-          # Runs at the same time add different directories: rebase onto whoever pushed first and try again
+          # Runs at the same time add different directories: on a rejected push, commit again on whoever pushed first
           for attempt in 1 2 3 4 5; do
+            if git -c "$auth" fetch -q --depth 1 origin golden-preview; then git checkout -q -B golden-preview FETCH_HEAD; else git checkout -q --orphan "try-$attempt"; fi
+            mkdir -p "$GITHUB_RUN_ID" && cp ../preview/*.png "$GITHUB_RUN_ID/"
+            git add "$GITHUB_RUN_ID" && git commit -q -m "goldens preview, run $GITHUB_RUN_ID"
             git -c "$auth" push -q origin HEAD:golden-preview && exit 0
-            git -c "$auth" fetch -q --depth 1 origin golden-preview && git rebase -q --onto FETCH_HEAD HEAD~1 || { git rebase --abort; exit 1; }
           done
           exit 1
