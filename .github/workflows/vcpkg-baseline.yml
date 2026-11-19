@@ -1,0 +1,117 @@
+name: vcpkg-baseline
+# Monthly: a draft PR that moves vcpkg.json's builtin-baseline to the newest vcpkg commit, with the port version
+# changes and the osv-vcpkg result in its body (ROBO-251, ADR ROBO-251). A PR opened with GITHUB_TOKEN starts no CI:
+# whoever takes it over pushes to its branch, which runs the checks.
+on:
+  schedule:
+    - cron: '17 5 1 * *'  # 05:17 UTC on the 1st
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: vcpkg-baseline
+  cancel-in-progress: false
+jobs:
+  bump:
+    name: vcpkg-baseline (not required)
+    if: github.repository == 'Hub-Tansky/RoboViolence2'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    permissions:
+      contents: write       # push the branch
+      pull-requests: write  # open the draft PR
+    steps:
+      - uses: actions/checkout@v7
+      - name: Newest vcpkg commit
+        id: base
+        run: |
+          old=$(sed -n 's/.*"builtin-baseline": *"\([0-9a-f]*\)".*/\1/p' vcpkg.json)
+          new=$(git ls-remote https://github.com/microsoft/vcpkg refs/heads/master | cut -f1)
+          branch="bot/vcpkg-baseline-$(date -u +%Y-%m)"
+          echo "old=$old" >> "$GITHUB_OUTPUT"
+          echo "new=$new" >> "$GITHUB_OUTPUT"
+          echo "branch=$branch" >> "$GITHUB_OUTPUT"
+          if [ -z "$old" ] || ! [[ "$new" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "::error::baseline '$old' or newest vcpkg commit '$new' not found"
+            exit 1
+          elif [ "$old" = "$new" ]; then
+            echo "::notice::vcpkg.json is already at the newest vcpkg commit $new"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          elif git ls-remote --exit-code origin "refs/heads/$branch" > /dev/null; then
+            echo "::notice::$branch exists: this month's PR is already open or was handled"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Point vcpkg.json at it
+        if: steps.base.outputs.skip != 'true'
+        env:
+          OLD: ${{ steps.base.outputs.old }}
+          NEW: ${{ steps.base.outputs.new }}
+        run: |
+          sed -i "s/\"builtin-baseline\": *\"$OLD\"/\"builtin-baseline\": \"$NEW\"/" vcpkg.json
+          git diff --exit-code --quiet vcpkg.json && { echo "::error::vcpkg.json unchanged"; exit 1; }
+          git diff --stat
+      - uses: ./.github/actions/setup-vcpkg
+        if: steps.base.outputs.skip != 'true'
+        with:
+          cache-key: linux-x64
+      - name: Configure (installs the ports at the new baseline)
+        if: steps.base.outputs.skip != 'true'
+        run: cmake --preset linux-x64
+      - name: Port versions and OSV result
+        if: steps.base.outputs.skip != 'true'
+        env:
+          OLD: ${{ steps.base.outputs.old }}
+          NEW: ${{ steps.base.outputs.new }}
+        run: |
+          git -C "$VCPKG_INSTALLATION_ROOT" fetch --quiet origin "$OLD"
+          {
+            echo "Moves \`builtin-baseline\` in \`vcpkg.json\` from microsoft/vcpkg@${OLD:0:12} to @${NEW:0:12}"
+            echo "([changes](https://github.com/microsoft/vcpkg/compare/$OLD...$NEW)). Opened by the monthly \`vcpkg-baseline\` workflow ([ADR ROBO-251](docs/decisions/ROBO-251-monthly-vcpkg-baseline-pr.md))."
+            echo
+            echo "## Ports"
+            echo
+            python3 -B tools/vcpkg-ports-diff.py "$VCPKG_INSTALLATION_ROOT" "$OLD" "$NEW" build/linux-x64/vcpkg_installed
+            echo
+            echo "## osv-vcpkg at the new baseline"
+            echo
+          } > "$RUNNER_TEMP/body.md"
+          set +e  # the result goes into the PR body; a finding must not stop the PR
+          python3 -B tools/osv-vcpkg.py build/linux-x64/vcpkg_installed > "$RUNNER_TEMP/osv.txt" 2>&1
+          code=$?
+          set -e
+          case $code in
+            0) verdict="no known vulnerability" ;;
+            1) verdict="**vulnerabilities found**" ;;
+            *) verdict="**a port could not be checked** (exit $code)" ;;
+          esac
+          {
+            echo "Exit $code: $verdict."
+            echo
+            echo '```'
+            cat "$RUNNER_TEMP/osv.txt"
+            echo '```'
+            echo
+            echo "## To do before merge"
+            echo
+            echo "- [ ] Push to this branch to start CI (a PR opened by \`GITHUB_TOKEN\` runs no checks)."
+            echo "- [ ] If \`sdl3\` or \`miniaudio\` changed, update their versions in \`docs/build/linux.md\` (system-package build)."
+          } >> "$RUNNER_TEMP/body.md"
+          cat "$RUNNER_TEMP/body.md" >> "$GITHUB_STEP_SUMMARY"
+      - name: Open the draft PR
+        if: steps.base.outputs.skip != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NEW: ${{ steps.base.outputs.new }}
+          BRANCH: ${{ steps.base.outputs.branch }}
+        run: |
+          git checkout -q -b "$BRANCH"
+          git add vcpkg.json
+          git -c user.name=Hub-Tansky -c user.email=337104978+Hub-Tansky@users.noreply.github.com \
+            commit -q -m "chore: bump vcpkg baseline to ${NEW:0:12}"
+          git push -q origin "$BRANCH"
+          # Needs Settings > Actions > General > "Allow GitHub Actions to create and approve pull requests"
+          if ! gh pr create --draft --base main --head "$BRANCH" --title "chore: bump vcpkg baseline to ${NEW:0:12} ($(date -u +%Y-%m))" \
+            --body-file "$RUNNER_TEMP/body.md"; then
+            echo "::error::$BRANCH is pushed but the PR could not be opened: allow GitHub Actions to create pull requests, or open it by hand with the body from this run's summary"
+            exit 1
+          fi
