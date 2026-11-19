@@ -1,6 +1,6 @@
 # ROBO-251: A monthly workflow opens the vcpkg baseline PR
 
-- Status: Accepted
+- Status: Accepted; amended by [ROBO-251-2](ROBO-251-2-bot-pr-ci-on-reopen.md)
 - Date: 2026-11-19
 - Affects: `.github/workflows/vcpkg-baseline.yml`, `tools/vcpkg-ports-diff.py`, `docs/build/README.md`, ARCHITECTURE.md "Supply chain"; ROBO-251 (workflow audit WP-15 part 2, approved 2026-11-11)
 
