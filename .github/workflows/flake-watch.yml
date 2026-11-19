@@ -21,13 +21,16 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/setup-vcpkg
+        id: setup
         with:
           cache-key: linux-x64-asan
       - name: Extra packages
+        id: packages
         run: sudo apt-get install -y xvfb libgl1-mesa-dri
       - run: cmake --preset linux-x64-asan
       - run: cmake --build --preset linux-x64-asan
       - name: e2e and bots tests, 10 times each until one fails
+        id: tests
         timeout-minutes: 140  # a step timeout is a failure, so the issue and ntfy steps still run (a job timeout would skip them)
         env:
           ASAN_OPTIONS: detect_leaks=0
@@ -40,17 +43,29 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: python3 -B tools/flake-issues.py build/linux-x64-asan
-      # Same ntfy call as build.yml's notify job: the topic is a secret, so it reaches curl as config on stdin
+      # Same ntfy call as build.yml's notify job: the topic is a secret, so it reaches curl as config on stdin.
+      # The text says which part failed, so a runner or network outage doesn't read as a flaky test.
       - name: Ping the owner
         if: failure()
         shell: bash
         env:
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          SETUP: ${{ steps.setup.outcome }}/${{ steps.packages.outcome }}
+          TESTS: ${{ steps.tests.outcome }}
         run: |
           if [ -z "$NTFY_TOPIC" ]; then echo "No NTFY_TOPIC secret: no notification"; exit 0; fi
           url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
           failed=$(sed 's/^[0-9]*://' build/linux-x64-asan/Testing/Temporary/LastTestsFailed.log 2>/dev/null | paste -sd, -) || true
+          if [ -n "$failed" ]; then
+            title="RV2 flake watch failed"; what="flaky: $failed"
+          elif [ "$SETUP" != "success/success" ]; then
+            title="RV2 flake watch: setup failed"; what="setup failed (runner/network), not a flaky test"
+          elif [ "$TESTS" = "failure" ]; then
+            title="RV2 flake watch failed"; what="test step failed with no failed test listed (timeout?)"
+          else
+            title="RV2 flake watch: build failed"; what="ASan build failed, not a flaky test"
+          fi
           printf 'url = "https://ntfy.sh/%s"\n' "$NTFY_TOPIC" |
-            curl -fsS --max-time 10 -K - -H "Title: RV2 flake watch failed" -H "Click: $url" \
-              -d "${GITHUB_SHA::7} flaky: ${failed:-build or setup step}. $url" > /dev/null
-          echo "notified: ${failed:-build or setup step}"
+            curl -fsS --max-time 10 -K - -H "Title: $title" -H "Click: $url" \
+              -d "${GITHUB_SHA::7} $what. $url" > /dev/null
+          echo "notified: $what"
