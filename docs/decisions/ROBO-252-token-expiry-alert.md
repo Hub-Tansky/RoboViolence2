@@ -9,7 +9,7 @@
 - GitHub answers an API call made with an expiring token with the header `github-authentication-token-expiration`; a token without expiry gets no such header.
 
 ## Decision
-Every Monday (and by hand) `token-expiry.yml` calls `GET /repos/Hub-Tansky/rv2-docs` with the token and passes the status and headers to `tools/token-expiry.py`. 14 days or fewer left, a status other than 200 or a missing secret send one ntfy message to `NTFY_TOPIC` and fail the run; otherwise the run is green and its summary shows the date. Token and topic reach curl as config on stdin.
+Every Monday (and by hand) `token-expiry.yml` calls `GET /repos/Hub-Tansky/rv2-docs` with the token and passes the status and headers to `tools/token-expiry.py`. 14 whole days or fewer left, a status other than 200, an expiry header it can't read or a missing secret send one ntfy message to `NTFY_TOPIC` and fail the run; otherwise the run is green and its summary shows the date. Token and topic reach curl as config on stdin.
 
 ## Consequences
 - The owner hears of an expiry two weeks ahead, twice at most before the date, and a red weekly run stays visible until the secret is renewed.

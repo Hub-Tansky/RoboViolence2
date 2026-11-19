@@ -20,6 +20,7 @@ jobs:
           persist-credentials: false
       - name: Ask GitHub with the token
         id: check
+        shell: bash  # -eo pipefail: a crash of the tool fails the run instead of hiding behind tee
         env:
           TOKEN: ${{ secrets.SYMBOLS_TOKEN }}  # fine-grained, Contents write on Hub-Tansky/rv2-docs only
         run: |

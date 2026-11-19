@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""tools/token-expiry.py (ROBO-252): the expiry header in its two formats, the 14-day line, a missing header, a
+"""tools/token-expiry.py (ROBO-252): the expiry header in its two formats, an unreadable one, the 14-day line, a missing header, a
 failed request, and the CLI's `alert=` output (ADR ROBO-252)."""
 import datetime
 import importlib.util
@@ -37,6 +37,9 @@ CASES = [
     ("3 days left", 200, headers("2026-11-22 08:00:00 UTC"), True, "in 3 days"),
     ("+0000 offset, header case", 200, headers("2026-11-25 08:00:00 +0000").replace("github-authentication", "GitHub-Authentication"), True, "in 6 days"),
     ("+0200 offset", 200, headers("2026-11-25 10:00:00 +0200"), True, "2026-11-25 08:00 UTC"),
+    ("14.5 days: shown and compared as 14", 200, headers("2026-12-03 20:00:00 UTC"), True, "in 14 days"),
+    ("ISO format: unreadable", 200, headers("2026-12-31T08:00:00Z"), True, "unreadable expiry header (2026-12-31T08:00:00Z)"),
+    ("impossible date: unreadable", 200, headers("2026-13-45 08:00:00 UTC"), True, "unreadable expiry header"),
     ("no header: never expires", 200, "HTTP/2 200\r\ncontent-type: application/json\r\n\r\n", False, "no expiry date"),
     ("401", 401, "HTTP/2 401\r\n\r\n", True, "HTTP 401"),
     ("no answer", 0, "", True, "HTTP nothing"),
