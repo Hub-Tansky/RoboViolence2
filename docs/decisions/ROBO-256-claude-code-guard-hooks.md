@@ -2,14 +2,14 @@
 
 - Status: Accepted
 - Date: 2026-11-19
-- Affects: `.claude/settings.json`, `.claude/hooks/guard.py`, `.githooks/commit-msg`, `tools/cloud-setup.sh`, `AGENTS.md`; ROBO-256 (workflow audit WP-16, approved 2026-11-11)
+- Affects: `.claude/settings.json`, `.claude/hooks/guard.py`, `.githooks/commit-msg`, `tools/cloud-setup.sh`, `AGENTS.md`, `docs/build/linux.md`; ROBO-256 (workflow audit WP-16, approved 2026-11-11)
 
 ## Context
 - AGENTS.md forbids `--no-verify` and `gh auth switch`; releases are tagged by the owner (rv2-docs release.md); rulesets and secrets are the owner's; the owner forbids `Co-Authored-By: Claude` and `Claude-Session:` lines in commits. Only text enforced these.
 - Tested 2026-11-19 with `claude -p` in a cloud container: hooks in a repo's `.claude/settings.json` load when the session starts in the repo (Mac sessions), not when it starts in `/home/user` (cloud sessions with several repositories).
 
 ## Decision
-- `.claude/settings.json` runs `.claude/hooks/guard.py` before Bash, Edit and Write. Bash: deny, with the rule in the reason, `--no-verify`; a force push (`-f`, `--force`, `--force-with-lease`, `+refspec`) to `main`; `git tag v*`; a push of `v*` tags or `--tags`; `gh auth switch`; `gh secret`; `gh api` writes to `rulesets`. Edit and Write: ask before a guard file (the `GUARDS` pattern of `tools/merge-risk.py`, imported, not copied). `permissions.deny`: Read of `**/.env*`, `~/.ssh/**`, `/etc/rv2-prod.env`.
+- `.claude/settings.json` runs `.claude/hooks/guard.py` before Bash, Edit and Write. Bash: deny, with the rule in the reason, `--no-verify` and `git commit -n`; a force push (`-f`, `--force`, `--force-with-lease`, `+refspec`) to `main`; `git tag v*`; a push of `v*` tags or `--tags`; `gh auth switch`; `gh secret`; `gh api` writes to `rulesets`. Edit and Write: ask before a guard file (the `GUARDS` pattern of `tools/merge-risk.py`, imported, not copied) and before `.claude/hooks/` or `.claude/settings.json` (asked here only, so merge tiers don't change). `permissions.deny`: Read of `**/.env*`, `~/.ssh/**`, `/etc/rv2-prod.env`.
 - `tools/cloud-setup.sh` merges the same hook (absolute path) and deny rules into `~/.claude/settings.json`, so cloud sessions get them.
 - `.githooks/commit-msg` rejects a commit message with a `Co-Authored-By: Claude` or `Claude-Session:` line.
 
