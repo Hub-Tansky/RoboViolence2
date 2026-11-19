@@ -112,3 +112,4 @@ What we do, in one or two sentences.
 | [ROBO-251-2](ROBO-251-2-bot-pr-ci-on-reopen.md) | The owner starts CI on the bot's vcpkg PR by closing and reopening it | Accepted |
 | [ROBO-253](ROBO-253-weekly-workflow-metrics.md) | A weekly workflow appends PR and CI numbers to a CSV in rv2-docs | Accepted |
 | [ROBO-254](ROBO-254-regenerate-goldens-in-ci.md) | A workflow run by hand on a branch regenerates its screenshot goldens and shows before and after | Accepted |
+| [ROBO-256](ROBO-256-claude-code-guard-hooks.md) | A Claude Code hook refuses forbidden commands and a commit hook refuses Claude trailers | Accepted |

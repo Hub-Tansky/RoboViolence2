@@ -3,9 +3,9 @@
 # cloud container. The environment's setup script runs it (owner action O3), for example:
 #   bash /home/user/RoboViolence2/tools/cloud-setup.sh /home/user/RoboViolence2 /home/user/rv2-docs /home/user/rv2-website
 # Arguments: repository directories (default: the repository holding this script). Each gets the Hub-Tansky commit
-# identity; the ones with a .githooks/ directory also get core.hooksPath. Installs gitleaks (pinned, checksum checked)
-# and pre-commit. Prints one line per step. A failed step prints a WARNING and the script still exits 0, so a session
-# always starts; the hooks then refuse commits that need the missing tool, which is the safe direction.
+# identity; the ones with a .githooks/ directory also get core.hooksPath. Installs gitleaks (pinned, checksum checked),
+# pre-commit and the Claude guard hook (ROBO-256). Prints one line per step. A failed step prints a WARNING and the
+# script still exits 0, so a session always starts; the hooks then refuse commits that need the missing tool, which is the safe direction.
 set -u
 
 GITLEAKS_VERSION=8.30.1  # same as .github/workflows/secret-scan.yml
@@ -85,8 +85,31 @@ setup_repo() {
 	fi
 }
 
+# A cloud session starts in the parent of the repositories, so it never loads RoboViolence2/.claude/settings.json; its
+# guard hook and deny rules go into the user settings instead, with the script's absolute path (ROBO-256).
+install_claude_guard() {
+	local repo settings=$HOME/.claude/settings.json
+	repo=$(cd "$(dirname "$0")/.." && pwd)
+	mkdir -p "$HOME/.claude"
+	if python3 - "$repo" "$settings" <<'PY'
+import json, os, sys
+repo, path = sys.argv[1], sys.argv[2]
+project = json.load(open(os.path.join(repo, ".claude", "settings.json")))
+entry = project["hooks"]["PreToolUse"][0]
+entry = dict(entry, hooks=[dict(entry["hooks"][0], command=f'python3 "{repo}/.claude/hooks/guard.py"')])
+user = json.load(open(path)) if os.path.exists(path) else {}
+pre = user.setdefault("hooks", {}).setdefault("PreToolUse", [])
+pre[:] = [e for e in pre if "guard.py" not in json.dumps(e)] + [entry]
+deny = user.setdefault("permissions", {}).setdefault("deny", [])
+deny += [d for d in project["permissions"]["deny"] if d not in deny]
+json.dump(user, open(path, "w"), indent=2)
+PY
+	then ok "Claude guard hook and deny rules in $settings"; else warn "could not write the Claude guard hook to $settings"; fi
+}
+
 install_gitleaks
 install_pre_commit
+install_claude_guard
 [ $# -gt 0 ] || set -- "$(cd "$(dirname "$0")/.." && pwd)"
 for dir in "$@"; do setup_repo "$dir"; done
 exit 0
