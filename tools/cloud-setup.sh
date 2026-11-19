@@ -86,11 +86,12 @@ setup_repo() {
 }
 
 # A cloud session starts in the parent of the repositories, so it never loads RoboViolence2/.claude/settings.json; its
-# guard hook and deny rules go into the user settings instead, with the script's absolute path (ROBO-256).
+# guard hook and deny rules go into the managed settings instead, with the script's absolute path (ROBO-256). Not
+# ~/.claude/settings.json: the session start recreates ~/.claude after this script, which lost them (2026-11-19).
 install_claude_guard() {
-	local repo settings=$HOME/.claude/settings.json
+	local repo settings=${CLAUDE_GUARD_SETTINGS:-/etc/claude-code/managed-settings.json}
 	repo=$(cd "$(dirname "$0")/.." && pwd)
-	mkdir -p "$HOME/.claude"
+	mkdir -p "$(dirname "$settings")"
 	if python3 - "$repo" "$settings" <<'PY'
 import json, os, sys
 repo, path = sys.argv[1], sys.argv[2]

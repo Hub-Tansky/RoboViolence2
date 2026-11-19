@@ -10,7 +10,7 @@
 
 ## Decision
 - `.claude/settings.json` runs `.claude/hooks/guard.py` before Bash, Edit and Write. Bash: deny, with the rule in the reason, `--no-verify` (and its prefixes), `git commit -n`, `-c core.hooksPath` and `git config core.hooksPath`; reading `.env*` (not `.env.example`), any `.ssh/` directory or `/etc/rv2-prod.env`; a force push (`-f`, `--force`, `--force-with-lease`, `+refspec`) to `main`; `git tag v*` (also `-d`; listing is allowed); a push or delete of `v*` tags, `--tags`, `--follow-tags` or `--mirror`; `gh auth switch`; `gh secret`; `gh api` writes to `rulesets`. Edit and Write: ask before a guard file (the `GUARDS` pattern of `tools/merge-risk.py`, imported, not copied) and before `.claude/hooks/` or `.claude/settings.json` (asked here only, so merge tiers don't change). `permissions.deny`: Read of `**/.env*`, `~/.ssh/**`, `/etc/rv2-prod.env`.
-- `tools/cloud-setup.sh` merges the same hook (absolute path) and deny rules into `~/.claude/settings.json`, so cloud sessions get them.
+- `tools/cloud-setup.sh` merges the same hook (absolute path) and deny rules into `/etc/claude-code/managed-settings.json`, so cloud sessions get them. Amended 2026-11-19: first they went into `~/.claude/settings.json`, but a fresh cloud session had no such file (the session start recreates `~/.claude` after the setup script), so the post-deploy check failed. Managed settings load in every session whatever its directory; tested with `claude -p` from `/home/user`.
 - `.githooks/commit-msg` rejects a commit message with a `Co-Authored-By: Claude` or `Claude-Session:` line.
 
 ## Consequences
@@ -19,4 +19,4 @@
 - Edits through Bash (`sed -i`, `>`, `git checkout -- <file>`) to guard files are not asked about; only the Edit and Write tools are.
 - The check is text matching: a determined bypass (a script file, an alias) is not stopped; the rulesets and branch protection remain the real barrier.
 - The GSD hooks were removed (owner action O4), so nothing overlaps.
-- Rejected: `permissions.deny` patterns for the Bash rules (prefix matching misses `git -c x=y push -f`); a hook in each session's local settings only (lost in every fresh cloud container).
+- Rejected: `permissions.deny` patterns for the Bash rules (prefix matching misses `git -c x=y push -f`); a hook in each session's local settings only (lost in every fresh cloud container); `~/.claude/settings.json` from the setup script (overwritten at session start).
