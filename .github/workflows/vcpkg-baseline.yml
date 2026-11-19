@@ -1,7 +1,8 @@
 name: vcpkg-baseline
 # Monthly: a draft PR that moves vcpkg.json's builtin-baseline to the newest vcpkg commit, with the port version
 # changes and the osv-vcpkg result in its body (ROBO-251, ADR ROBO-251). A PR opened with GITHUB_TOKEN starts no CI:
-# whoever takes it over pushes to its branch, which runs the checks.
+# whoever takes it over pushes to its branch, which runs the checks. The job that runs the new, unreviewed vcpkg ports
+# has a read-only token; the job that pushes and opens the PR builds nothing.
 on:
   schedule:
     - cron: '17 5 1 * *'  # 05:17 UTC on the 1st
@@ -12,16 +13,19 @@ concurrency:
   group: vcpkg-baseline
   cancel-in-progress: false
 jobs:
-  bump:
-    name: vcpkg-baseline (not required)
+  prepare:
+    name: vcpkg-baseline prepare (not required)
     if: github.repository == 'Hub-Tansky/RoboViolence2'
     runs-on: ubuntu-24.04
     timeout-minutes: 60
-    permissions:
-      contents: write       # push the branch
-      pull-requests: write  # open the draft PR
+    outputs:
+      skip: ${{ steps.base.outputs.skip }}
+      new: ${{ steps.base.outputs.new }}
+      branch: ${{ steps.base.outputs.branch }}
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false  # portfiles from an unreviewed vcpkg commit run below
       - name: Newest vcpkg commit
         id: base
         run: |
@@ -38,7 +42,7 @@ jobs:
             echo "::notice::vcpkg.json is already at the newest vcpkg commit $new"
             echo "skip=true" >> "$GITHUB_OUTPUT"
           elif git ls-remote --exit-code origin "refs/heads/$branch" > /dev/null; then
-            echo "::notice::$branch exists: this month's PR is already open or was handled"
+            echo "::notice::$branch exists (its PR is open, was handled, or failed to open: see that run): nothing to do"
             echo "skip=true" >> "$GITHUB_OUTPUT"
           fi
       - name: Point vcpkg.json at it
@@ -53,7 +57,7 @@ jobs:
       - uses: ./.github/actions/setup-vcpkg
         if: steps.base.outputs.skip != 'true'
         with:
-          cache-key: linux-x64
+          cache-key: linux-x64-baseline-bump  # its own cache: binaries from an unreviewed baseline stay out of the others
       - name: Configure (installs the ports at the new baseline)
         if: steps.base.outputs.skip != 'true'
         run: cmake --preset linux-x64
@@ -97,13 +101,41 @@ jobs:
             echo "- [ ] If \`sdl3\` or \`miniaudio\` changed, update their versions in \`docs/build/linux.md\` (system-package build)."
           } >> "$RUNNER_TEMP/body.md"
           cat "$RUNNER_TEMP/body.md" >> "$GITHUB_STEP_SUMMARY"
-      - name: Open the draft PR
+      - name: Collect the changed vcpkg.json and the PR body
         if: steps.base.outputs.skip != 'true'
+        run: |
+          mkdir "$RUNNER_TEMP/out"
+          cp vcpkg.json "$RUNNER_TEMP/body.md" "$RUNNER_TEMP/out/"
+      - uses: actions/upload-artifact@v7
+        if: steps.base.outputs.skip != 'true'
+        with:
+          name: vcpkg-baseline
+          path: ${{ runner.temp }}/out
+          retention-days: 7
+  open-pr:
+    name: vcpkg-baseline open PR (not required)
+    needs: prepare
+    if: needs.prepare.outputs.skip != 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: write       # push the branch
+      pull-requests: write  # open the draft PR
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          name: vcpkg-baseline
+          path: ${{ runner.temp }}/prepared
+      - name: Open the draft PR
         env:
           GH_TOKEN: ${{ github.token }}
-          NEW: ${{ steps.base.outputs.new }}
-          BRANCH: ${{ steps.base.outputs.branch }}
+          NEW: ${{ needs.prepare.outputs.new }}
+          BRANCH: ${{ needs.prepare.outputs.branch }}
+          PREPARED: ${{ runner.temp }}/prepared
         run: |
+          cp "$PREPARED/vcpkg.json" vcpkg.json
+          [ "$(git diff --name-only)" = "vcpkg.json" ] || { echo "::error::expected a change to vcpkg.json only"; exit 1; }
           git checkout -q -b "$BRANCH"
           git add vcpkg.json
           git -c user.name=Hub-Tansky -c user.email=337104978+Hub-Tansky@users.noreply.github.com \
@@ -111,7 +143,7 @@ jobs:
           git push -q origin "$BRANCH"
           # Needs Settings > Actions > General > "Allow GitHub Actions to create and approve pull requests"
           if ! gh pr create --draft --base main --head "$BRANCH" --title "chore: bump vcpkg baseline to ${NEW:0:12} ($(date -u +%Y-%m))" \
-            --body-file "$RUNNER_TEMP/body.md"; then
+            --body-file "$PREPARED/body.md"; then
             echo "::error::$BRANCH is pushed but the PR could not be opened: allow GitHub Actions to create pull requests, or open it by hand with the body from this run's summary"
             exit 1
           fi

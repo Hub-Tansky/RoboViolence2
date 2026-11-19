@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""tools/vcpkg-ports-diff.py (ROBO-251): installed ports from a vcpkg status file, their versions at two commits of a
+"""tools/vcpkg-ports-diff.py (ROBO-251): installed ports from `<triplet>/share/<port>/vcpkg.spdx.json`, their versions at two commits of a
 throwaway vcpkg-like git repo, and the Markdown table with changed ports first (ADR ROBO-251)."""
 import importlib.util
 import json
@@ -68,18 +68,15 @@ try:
         "libsodium": {"version-semver": "1.0.20"},
     })
     installed = os.path.join(tmp, "installed")
-    os.makedirs(os.path.join(installed, "vcpkg"))
-    with open(os.path.join(installed, "vcpkg", "status"), "w") as f:
-        f.write("Package: sdl3\nVersion: 3.2.20\nArchitecture: x64-linux\nStatus: install ok installed\n\n"
-                "Package: sdl3\nFeature: vulkan\nArchitecture: x64-linux\nStatus: install ok installed\n\n"
-                "Package: sqlite3\nVersion: 3.49.1\nPort-Version: 2\nArchitecture: x64-linux\nStatus: install ok installed\n\n"
-                "Package: stb\nVersion: 2024-07-29\nArchitecture: x64-linux\nStatus: install ok installed\n\n"
-                "Package: vcpkg-cmake\nVersion: 2024-04-23\nArchitecture: x64-linux\nStatus: install ok installed\n\n"
-                "Package: libsodium\nVersion: 1.0.20\nArchitecture: x64-linux\nStatus: install ok installed\n\n"
-                "Package: curl\nVersion: 8.0.0\nArchitecture: x64-linux\nStatus: purge ok not-installed\n")
+    for triplet, names in {"x64-linux": ["sdl3", "sqlite3", "stb", "libsodium"], "x64-linux-host": ["vcpkg-cmake", "sqlite3"]}.items():
+        for name in names:
+            os.makedirs(os.path.join(installed, triplet, "share", name))
+            open(os.path.join(installed, triplet, "share", name, "vcpkg.spdx.json"), "w").write("{}")
+    os.makedirs(os.path.join(installed, "x64-linux", "share", "curl"))  # no spdx: not an installed port
+    os.makedirs(os.path.join(installed, "vcpkg", "info"))  # vcpkg's own database dir
 
     ports = tool.installed_ports(installed)
-    check("ports: packages, no feature paragraphs, no removed ports", ports == ["libsodium", "sdl3", "sqlite3", "stb", "vcpkg-cmake"], ports)
+    check("ports: every triplet once, only dirs with an spdx file", ports == ["libsodium", "sdl3", "sqlite3", "stb", "vcpkg-cmake"], ports)
     check("version with port-version", tool.version(repo, old, "sdl3") == "3.2.10#1", tool.version(repo, old, "sdl3"))
     check("version-date", tool.version(repo, old, "stb") == "2024-07-29")
     check("version-semver", tool.version(repo, new, "libsodium") == "1.0.20")

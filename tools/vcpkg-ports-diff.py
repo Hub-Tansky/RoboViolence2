@@ -2,10 +2,11 @@
 """Port versions at two vcpkg baselines, as a Markdown table for the monthly baseline PR (ROBO-251, ADR ROBO-251).
 
 Usage: tools/vcpkg-ports-diff.py <vcpkg root> <old baseline> <new baseline> <vcpkg_installed dir>
-The ports are those installed (the `Package:` paragraphs without `Feature:` in <vcpkg_installed>/vcpkg/status),
-host tools included. Each version is read from `ports/<port>/vcpkg.json` at each commit of the vcpkg checkout, which
+The ports are those installed in any triplet of <vcpkg_installed> (their `share/<port>/vcpkg.spdx.json`, as
+tools/osv-vcpkg.py reads them), host tools included. Each version is read from `ports/<port>/vcpkg.json` at each commit of the vcpkg checkout, which
 must hold both commits. Changed rows come first. Python 3, stdlib only.
 """
+import glob
 import json
 import os
 import subprocess
@@ -15,14 +16,9 @@ VERSION_KEYS = ("version", "version-semver", "version-date", "version-string")
 
 
 def installed_ports(installed):
-    with open(os.path.join(installed, "vcpkg", "status"), encoding="utf-8") as f:
-        paragraphs = f.read().split("\n\n")
-    ports = set()
-    for para in paragraphs:
-        fields = dict(line.split(": ", 1) for line in para.splitlines() if ": " in line)
-        if "Package" in fields and "Feature" not in fields and "not-installed" not in fields.get("Status", ""):
-            ports.add(fields["Package"])
-    return sorted(ports)
+    """Port names with a `<triplet>/share/<port>/vcpkg.spdx.json`, as tools/osv-vcpkg.py finds them."""
+    found = glob.glob(os.path.join(installed, "*", "share", "*", "vcpkg.spdx.json"))
+    return sorted({os.path.basename(os.path.dirname(f)) for f in found})
 
 
 def version(root, commit, port):
