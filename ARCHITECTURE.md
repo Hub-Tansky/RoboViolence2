@@ -68,4 +68,4 @@ One row per module directory. `tools/check-architecture.sh` fails when a directo
 | `docs/` | Build guides (`build/`), ADRs (`decisions/`), runbook (`ops/`), agent skill config (`agents/`) |
 | `.github/` | CI workflows, the vcpkg and docs-only setup actions, Dependabot, issue and PR templates |
 | `.githooks/` | Commit and push hooks (ADR 0045) |
-| `.claude/` | Agent skills shipped with the repo (`rv2-code-review`) |
+| `.claude/` | Agent skills shipped with the repo (`rv2-code-review`), Claude Code settings and the guard hook (`hooks/guard.py`) |

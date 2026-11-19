@@ -116,6 +116,7 @@ Kept only for compatibility; remove once the trigger holds, each removal with an
 - All commits, merges, pushes and GitHub actions for this project run as **`Hub-Tansky`**: `user.email = 337104978+Hub-Tansky@users.noreply.github.com`. Never `patpi`, never a personal email.
 - Run `gh` as `GH_TOKEN=$(gh auth token --user Hub-Tansky) gh …`. Don't run `gh auth switch`; other projects rely on `patpi` being active.
 - Setup and guard hook: `tools/setup-dev.sh` and `.githooks/`. Cloud sessions get the hooks from `tools/cloud-setup.sh`.
+- A Claude Code hook (`.claude/hooks/guard.py`) refuses `--no-verify`, force pushes to `main`, `v*` tags and their push, `gh auth switch`, `gh secret` and ruleset writes, and asks before a guard file is edited; `.githooks/commit-msg` refuses Claude commit trailers ([ADR ROBO-256](docs/decisions/ROBO-256-claude-code-guard-hooks.md)).
 
 ## Conventions and gotchas
 
