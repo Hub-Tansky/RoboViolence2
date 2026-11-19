@@ -6,13 +6,15 @@ Usage: tools/golden-report.py <before dir> <after dir> <preview dir> <before URL
 new golden that differs from the old one at all, writes <preview dir>/<name>-after.png and, when the sizes match,
 <name>-diff.png (changed pixels red, the rest the old golden dimmed, as tests/screenshots.py draws it). Prints Markdown:
 one row per golden with the share of pixels beyond the test's tolerance, then the three images of each changed one.
-Image links are <before URL>/<name>.png and <preview URL>/<name>-after.png / -diff.png. Python 3, stdlib only.
+$BV2_TESTS_DIR names the tests/ directory whose screenshots.py comparison to use (default: the one beside this
+tool). Image links are <before URL>/<name>.png and <preview URL>/<name>-after.png / -diff.png. Python 3, stdlib only.
 """
 import os
 import sys
 
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "tests"))
-from screenshots import MAX_CHANGED, compare, read_png, write_png  # noqa: E402  the test's own comparison
+# The comparison of the test that will judge the goldens: $BV2_TESTS_DIR (the branch's tests/), else this checkout's
+sys.path.insert(0, os.environ.get("BV2_TESTS_DIR") or os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "tests"))
+from screenshots import MAX_CHANGED, compare, read_png, write_png  # noqa: E402
 
 
 def report(before_dir, after_dir, preview_dir, before_url, preview_url):

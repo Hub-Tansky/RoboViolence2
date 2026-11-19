@@ -11,7 +11,7 @@
 
 ## Decision
 `goldens.yml` (`workflow_dispatch`: branch, optional names) has two jobs:
-- `render` (read-only token, `persist-credentials: false`) checks out the branch, builds `bv2` with the linux-x64-asan preset, runs `tests/screenshots.py --update` per golden, then compares each new golden 3 times, and runs `tools/golden-report.py` (from the workflow's own commit, since the branch may predate it) for the summary Markdown and the after and diff PNGs. The new PNGs go to the artifact `goldens`, laid out as `tests/golden/`.
+- `render` (read-only token, `persist-credentials: false`) checks out the branch, builds `bv2` with the linux-x64-asan preset (vcpkg cache key `goldens-linux-x64-asan`, which `smoke` never restores, since this job runs unreviewed branch code), runs `tests/screenshots.py --update` per golden, then compares each new golden 3 times, and runs `tools/golden-report.py` (from the workflow's own commit, since the branch may predate it, with the branch's `tests/screenshots.py` comparison) for the summary Markdown and the after and diff PNGs. The new PNGs go to the artifact `goldens`, laid out as `tests/golden/`.
 - `publish` (contents write, builds nothing) commits the after and diff PNGs to `golden-preview/<run id>/` on the branch `golden-preview` and writes the summary: per golden the share of pixels beyond the test's tolerance, then before (the branch's golden at its commit), after and diff images. A golden that failed one of its 3 comparisons fails the run.
 The person or agent who ran it commits the artifact to the branch, so CI runs on the new goldens.
 

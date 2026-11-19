@@ -19,7 +19,7 @@ jobs:
   render:
     name: goldens render (not required)
     runs-on: ubuntu-24.04
-    timeout-minutes: 60
+    timeout-minutes: 90  # the first run builds every port
     outputs:
       changed: ${{ steps.report.outputs.changed }}
       unstable: ${{ steps.regen.outputs.unstable }}
@@ -34,7 +34,8 @@ jobs:
           persist-credentials: false
       - uses: ./.github/actions/setup-vcpkg
         with:
-          cache-key: linux-x64-asan  # the smoke job's cache: same preset
+          # Not the smoke job's key: this job saves a cache built by unreviewed branch code, which smoke must never restore
+          cache-key: goldens-linux-x64-asan
       - name: Extra packages
         run: sudo apt-get install -y xvfb libgl1-mesa-dri
       - run: cmake --preset linux-x64-asan
@@ -71,6 +72,8 @@ jobs:
       - name: Report
         id: report
         shell: bash  # -eo pipefail: a crash of the tool fails the run
+        env:
+          BV2_TESTS_DIR: ${{ github.workspace }}/tests  # the branch's comparison, the one its CI will run
         run: |
           mkdir -p "$RUNNER_TEMP/preview"
           sha=$(git rev-parse HEAD)
@@ -103,7 +106,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     permissions:
-      contents: write  # the golden-preview branch only
+      contents: write  # pushes golden-preview only; runs no branch code
     concurrency:
       group: golden-preview
       cancel-in-progress: false
