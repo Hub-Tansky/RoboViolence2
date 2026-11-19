@@ -108,3 +108,4 @@ What we do, in one or two sentences.
 | [ROBO-249](ROBO-249-backlog-item-moves-on-merge.md) | A merged PR's backlog item moves to Done or Testing by workflow | Accepted |
 | [ROBO-250](ROBO-250-dependabot-actions-auto-merge.md) | Dependabot's GitHub Actions minor and patch updates merge themselves when green | Accepted |
 | [ROBO-251](ROBO-251-monthly-vcpkg-baseline-pr.md) | A monthly workflow opens a draft PR that bumps the vcpkg baseline | Accepted |
+| [ROBO-252](ROBO-252-token-expiry-alert.md) | A weekly check pings the owner 14 days before SYMBOLS_TOKEN expires | Accepted |

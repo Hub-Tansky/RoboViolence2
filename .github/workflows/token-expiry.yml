@@ -1,0 +1,49 @@
+name: token-expiry
+# Weekly: how long SYMBOLS_TOKEN has left, from GitHub's `github-authentication-token-expiration` response header.
+# 14 days or fewer, or a token GitHub rejects, pings the owner's phone through ntfy and turns the run red (ROBO-252,
+# ADR ROBO-252). The token and the ntfy topic reach curl as config on stdin, never on the command line.
+on:
+  schedule:
+    - cron: '23 7 * * 1'  # 07:23 UTC on Mondays
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  symbols-token:
+    name: token-expiry (not required)
+    if: github.repository == 'Hub-Tansky/RoboViolence2'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Ask GitHub with the token
+        id: check
+        shell: bash  # -eo pipefail: a crash of the tool fails the run instead of hiding behind tee
+        env:
+          TOKEN: ${{ secrets.SYMBOLS_TOKEN }}  # fine-grained, Contents write on Hub-Tansky/rv2-docs only
+        run: |
+          status=000
+          if [ -n "$TOKEN" ]; then
+            status=$(printf 'header = "Authorization: Bearer %s"\n' "$TOKEN" |
+              curl -sS --max-time 20 -K - -D "$RUNNER_TEMP/headers" -o /dev/null -w '%{http_code}' \
+                https://api.github.com/repos/Hub-Tansky/rv2-docs) || status=000
+          fi
+          touch "$RUNNER_TEMP/headers"
+          python3 -B tools/token-expiry.py SYMBOLS_TOKEN "$status" "$RUNNER_TEMP/headers" | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Ping the owner and fail
+        if: steps.check.outputs.alert != ''
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          ALERT: ${{ steps.check.outputs.alert }}
+        run: |
+          url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          if [ -n "$NTFY_TOPIC" ]; then
+            printf 'url = "https://ntfy.sh/%s"\n' "$NTFY_TOPIC" |
+              curl -fsS --max-time 10 -K - -H "Title: RV2 token expiring" -H "Click: $url" -d "$ALERT. $url" > /dev/null
+          else
+            echo "No NTFY_TOPIC secret: no phone notification"
+          fi
+          echo "::error::$ALERT"
+          exit 1
