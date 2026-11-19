@@ -1,0 +1,137 @@
+name: goldens
+# By hand: regenerate the screenshot goldens (tests/golden/*.png, ADR 0026) on a branch, in the configuration of the CI
+# job that checks them (`smoke`, linux-x64-asan under Xvfb), and show before, after and diff images in the run summary
+# (ROBO-254, ADR ROBO-254). The new PNGs are the artifact `goldens`; commit them to the branch yourself, so CI runs on
+# them. The job that runs the branch's code has a read-only token; the job that publishes the preview images builds
+# nothing.
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to regenerate the goldens on'
+        required: true
+      names:
+        description: 'Golden names, space-separated (empty: all in tests/golden/)'
+        required: false
+permissions:
+  contents: read
+jobs:
+  render:
+    name: goldens render (not required)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    outputs:
+      changed: ${{ steps.report.outputs.changed }}
+      unstable: ${{ steps.regen.outputs.unstable }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.branch }}
+          persist-credentials: false  # the branch's code runs below
+      - uses: actions/checkout@v7  # this workflow's own tools: the branch may predate them
+        with:
+          path: ci
+          persist-credentials: false
+      - uses: ./.github/actions/setup-vcpkg
+        with:
+          cache-key: linux-x64-asan  # the smoke job's cache: same preset
+      - name: Extra packages
+        run: sudo apt-get install -y xvfb libgl1-mesa-dri
+      - run: cmake --preset linux-x64-asan
+      - run: cmake --build --preset linux-x64-asan --target bv2
+      - name: Regenerate, then compare each new golden 3 times
+        id: regen
+        shell: bash
+        env:
+          NAMES: ${{ inputs.names }}
+          ASAN_OPTIONS: detect_leaks=0
+        run: |
+          names=$NAMES
+          [ -n "$names" ] || names=$(cd tests/golden && ls *.txt | sed 's/\.txt$//')
+          for n in $names; do
+            [[ $n =~ ^[a-z0-9-]+$ && -f tests/golden/$n.txt ]] || { echo "::error::no golden script tests/golden/$n.txt"; exit 1; }
+          done
+          before="$RUNNER_TEMP/before" after="$RUNNER_TEMP/after" shots="$RUNNER_TEMP/shots"
+          mkdir -p "$before" "$after" "$RUNNER_TEMP/commit/tests/golden"
+          cp tests/golden/*.png "$before/"
+          exe="$PWD/build/linux-x64-asan/runtime/bv2"
+          for n in $names; do
+            python3 -B tests/screenshots.py "$exe" "$shots" "$n" --update
+            cp "tests/golden/$n.png" "$after/"
+          done
+          # A golden that fails its own comparison fails CI at random (docs/build/linux.md)
+          unstable=
+          for n in $names; do
+            passes=0
+            for i in 1 2 3; do python3 -B tests/screenshots.py "$exe" "$shots" "$n" > /dev/null && passes=$((passes + 1)); done
+            echo "$n: $passes of 3 comparisons passed" >> "$RUNNER_TEMP/stability.txt"
+            [ "$passes" = 3 ] || unstable="$unstable $n"
+          done
+          echo "unstable=${unstable# }" >> "$GITHUB_OUTPUT"
+      - name: Report
+        id: report
+        shell: bash  # -eo pipefail: a crash of the tool fails the run
+        run: |
+          mkdir -p "$RUNNER_TEMP/preview"
+          sha=$(git rev-parse HEAD)
+          raw="https://raw.githubusercontent.com/$GITHUB_REPOSITORY"
+          {
+            echo "## Screenshot goldens on \`$sha\`"
+            echo
+            python3 -B ci/tools/golden-report.py "$RUNNER_TEMP/before" "$RUNNER_TEMP/after" "$RUNNER_TEMP/preview" \
+              "$raw/$sha/tests/golden" "$raw/golden-preview/$GITHUB_RUN_ID"
+            echo
+            echo "### Stability"
+            echo
+            sed 's/^/- /' "$RUNNER_TEMP/stability.txt"
+            echo
+            echo "To commit the new goldens: download the artifact \`goldens\` of this run, unzip it at the repository root on the branch (it holds \`tests/golden/<name>.png\`) and commit."
+          } > "$RUNNER_TEMP/preview/report.md"
+          for n in $(sed -n 's/^changed=//p' "$GITHUB_OUTPUT"); do cp "$RUNNER_TEMP/after/$n.png" "$RUNNER_TEMP/commit/tests/golden/"; done
+      - uses: actions/upload-artifact@v7
+        with:
+          name: goldens
+          path: ${{ runner.temp }}/commit/
+          if-no-files-found: ignore
+      - uses: actions/upload-artifact@v7
+        with:
+          name: golden-preview
+          path: ${{ runner.temp }}/preview/
+  publish:
+    name: goldens publish (not required)
+    needs: render
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: write  # the golden-preview branch only
+    concurrency:
+      group: golden-preview
+      cancel-in-progress: false
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: golden-preview
+          path: preview
+      - name: Push the images to golden-preview
+        if: needs.render.outputs.changed != ''
+        env:
+          TOKEN: ${{ github.token }}
+        run: |
+          auth="http.https://github.com/.extraheader=AUTHORIZATION: basic $(printf 'x-access-token:%s' "$TOKEN" | base64 -w0)"
+          git init -q site && cd site
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git remote add origin "https://github.com/$GITHUB_REPOSITORY.git"
+          if git -c "$auth" fetch -q --depth 1 origin golden-preview; then git checkout -q -b golden-preview FETCH_HEAD; else git checkout -q --orphan golden-preview; fi
+          mkdir "$GITHUB_RUN_ID" && cp ../preview/*.png "$GITHUB_RUN_ID/"
+          git add "$GITHUB_RUN_ID" && git commit -q -m "goldens preview, run $GITHUB_RUN_ID"
+          git -c "$auth" push -q origin HEAD:golden-preview
+      - name: Summary
+        run: cat preview/report.md >> "$GITHUB_STEP_SUMMARY"
+      - name: Fail when a new golden is unstable
+        if: needs.render.outputs.unstable != ''
+        env:
+          UNSTABLE: ${{ needs.render.outputs.unstable }}
+        run: |
+          echo "::error::these new goldens failed their own comparison at least once: $UNSTABLE; do not commit them"
+          exit 1
