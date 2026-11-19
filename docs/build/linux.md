@@ -101,7 +101,7 @@ A fresh Claude Code cloud container has no `core.hooksPath`, `gitleaks` or `pre-
 bash /home/user/RoboViolence2/tools/cloud-setup.sh /home/user/RoboViolence2 /home/user/rv2-docs /home/user/rv2-website
 ```
 
-It installs gitleaks (pinned, checksum checked) and pre-commit, sets the Hub-Tansky commit identity in each repository, and `core.hooksPath=.githooks` where the repository has hooks, and merges the Claude guard hook and deny rules into `~/.claude/settings.json` ([ADR ROBO-256](../decisions/ROBO-256-claude-code-guard-hooks.md)). A failed step prints a WARNING and the session still starts. The clang-tidy hook needs the macOS compile database, so cloud commits that touch C++ run `SKIP=clang-tidy git commit ...`.
+It installs gitleaks (pinned, checksum checked) and pre-commit, sets the Hub-Tansky commit identity in each repository, and `core.hooksPath=.githooks` where the repository has hooks, and merges the Claude guard hook and deny rules into `/etc/claude-code/managed-settings.json` (the session start replaces `~/.claude`) ([ADR ROBO-256](../decisions/ROBO-256-claude-code-guard-hooks.md)). A failed step prints a WARNING and the session still starts. The clang-tidy hook needs the macOS compile database, so cloud commits that touch C++ run `SKIP=clang-tidy git commit ...`.
 
 ## Without vcpkg (cloud sessions)
 

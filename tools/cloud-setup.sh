@@ -4,7 +4,8 @@
 #   bash /home/user/RoboViolence2/tools/cloud-setup.sh /home/user/RoboViolence2 /home/user/rv2-docs /home/user/rv2-website
 # Arguments: repository directories (default: the repository holding this script). Each gets the Hub-Tansky commit
 # identity; the ones with a .githooks/ directory also get core.hooksPath. Installs gitleaks (pinned, checksum checked),
-# pre-commit and the Claude guard hook (ROBO-256). Prints one line per step. A failed step prints a WARNING and the
+# pre-commit and the Claude guard hook (ROBO-256; into /etc/claude-code/managed-settings.json, so it needs root;
+# CLAUDE_GUARD_SETTINGS overrides the path for tests only). Prints one line per step. A failed step prints a WARNING and the
 # script still exits 0, so a session always starts; the hooks then refuse commits that need the missing tool, which is the safe direction.
 set -u
 
@@ -86,11 +87,12 @@ setup_repo() {
 }
 
 # A cloud session starts in the parent of the repositories, so it never loads RoboViolence2/.claude/settings.json; its
-# guard hook and deny rules go into the user settings instead, with the script's absolute path (ROBO-256).
+# guard hook and deny rules go into the managed settings instead, with the script's absolute path (ROBO-256). Not
+# ~/.claude/settings.json: the session start recreates ~/.claude after this script, which lost them (2026-11-19).
 install_claude_guard() {
-	local repo settings=$HOME/.claude/settings.json
+	local repo settings=${CLAUDE_GUARD_SETTINGS:-/etc/claude-code/managed-settings.json}
 	repo=$(cd "$(dirname "$0")/.." && pwd)
-	mkdir -p "$HOME/.claude"
+	mkdir -p "$(dirname "$settings")"
 	if python3 - "$repo" "$settings" <<'PY'
 import json, os, sys
 repo, path = sys.argv[1], sys.argv[2]
