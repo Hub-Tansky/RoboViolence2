@@ -31,6 +31,9 @@ DENY = [
     ("git commit --no-verif -m x", "hooks are never bypassed"),
     ("git -c core.hooksPath=/dev/null commit -m x", "core.hooksPath"),
     ("git push -uf origin main", "force push"),
+    ("git push --force origin 'main'", "force push"),
+    ("git config core.hooksPath /dev/null", "core.hooksPath"),
+    ("cat /home/user/.ssh/id_ed25519", "secret files"),
     ("git tag -m rel v1.2.0", "release tags"),
     ("git tag 'v1.2.0'", "release tags"),
     ("git push origin 'v1.2.0'", "push of release tags"),
@@ -69,6 +72,8 @@ ALLOW = [
     "git commit -m 'fix: x'",
     "git tag -l",
     "cat config/.env.example",
+    "git log --grep=commit -n 5",
+    "git config --get core.hooksPath",
     "ls .envrc-docs",
     "git tag --list v1*",
     "git tag --contains v0.1.0",
@@ -103,6 +108,17 @@ for event, want in [({"tool_name": "Bash", "tool_input": {"command": "gh secret 
 
 r = subprocess.run([sys.executable, "-B", GUARD], input="not json", capture_output=True, text=True)
 check("bad input fails closed", r.returncode == 0 and json.loads(r.stdout)["hookSpecificOutput"]["permissionDecision"] == "deny", (r.stdout, r.stderr))
+
+# A broken tools/merge-risk.py fails closed too
+import shutil
+with tempfile.TemporaryDirectory() as tmp:
+    os.makedirs(os.path.join(tmp, ".claude", "hooks"))
+    os.makedirs(os.path.join(tmp, "tools"))
+    shutil.copy(GUARD, os.path.join(tmp, ".claude", "hooks", "guard.py"))
+    open(os.path.join(tmp, "tools", "merge-risk.py"), "w").write("GUARDS = (\n")
+    for event in [{"tool_name": "Bash", "tool_input": {"command": "git push -f origin main"}}, {"tool_name": "Edit", "tool_input": {"file_path": os.path.join(tmp, "REVIEW.md")}}]:
+        r = subprocess.run([sys.executable, "-B", os.path.join(tmp, ".claude", "hooks", "guard.py")], input=json.dumps(event), capture_output=True, text=True)
+        check(f"broken merge-risk.py fails closed: {event['tool_name']}", r.returncode == 0 and r.stdout.strip() and json.loads(r.stdout)["hookSpecificOutput"]["permissionDecision"] == "deny", (r.stdout, r.stderr[-300:]))
 
 # .githooks/commit-msg: Claude trailers refused, other trailers kept
 hook = os.path.join(ROOT, ".githooks", "commit-msg")

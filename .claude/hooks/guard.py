@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Claude Code PreToolUse guard (ROBO-256, ADR ROBO-256). Reads the hook's JSON on stdin.
 
-Bash: denies skipping hooks, a force push to main, a `v*` release tag or its push, `gh auth switch`, `gh secret` and
-write calls to `rulesets`, naming the rule. Edit and Write: asks before a change to a guard file (the GUARDS pattern
-of tools/merge-risk.py). Anything else: no output, so the normal permission flow applies. Python 3, stdlib only.
+Bash: denies the commands in RULES, naming the rule (the list is in ADR ROBO-256). Edit and Write: asks before a
+change to a guard file (the GUARDS pattern of tools/merge-risk.py) or to this hook and its settings. Anything else: no
+output, so the normal permission flow applies. Fails closed: any error denies the call. Python 3, stdlib only.
 """
 import importlib.util
 import json
@@ -12,21 +12,17 @@ import re
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-_spec = importlib.util.spec_from_file_location("merge_risk", os.path.join(ROOT, "tools", "merge-risk.py"))
-_risk = importlib.util.module_from_spec(_spec)
-_spec.loader.exec_module(_risk)
-GUARDS = _risk.GUARDS
 SELF = re.compile(r"^\.claude/(hooks/|settings\.json$)")  # the guard and its wiring: ask too, without changing merge tiers
 
 RULES = [
     ("no --no-verify: hooks are never bypassed (AGENTS.md)", r"\bgit\b.*\s--no-ver\w*\b"),  # review: allow this rule refuses --no-verify
-    ("no commit -n: it skips the hooks (AGENTS.md)", r"\bgit\b.*\bcommit\b.*\s-[a-zA-Z]*n[a-zA-Z]*(\s|$)"),
-    ("no force push to main (AGENTS.md)", r"\bgit\b.*\bpush\b(?=.*\s(-[a-zA-Z]*f[a-zA-Z]*|--force(-with-lease)?(=\S*)?|\+\S+)(\s|$))(?=.*(\s|:|\+|refs/heads/)main(\s|$|[\x22\x27]))"),
+    ("no commit -n: it skips the hooks (AGENTS.md)", r"\bgit\b(\s+-c\s*\S+|\s+-C\s*\S+)*\s+commit\b.*\s-[a-zA-Z]*n[a-zA-Z]*(\s|$)"),
+    ("no force push to main (AGENTS.md)", r"\bgit\b.*\bpush\b(?=.*\s(-[a-zA-Z]*f[a-zA-Z]*|--force(-with-lease)?(=\S*)?|\+\S+)(\s|$))(?=.*(\s|:|\+|refs/heads/|[\x22\x27])main(\s|$|[\x22\x27]))"),
     ("no release tags: the owner tags releases (rv2-docs release.md)", r"\bgit\b.*\btag\b(?!.*\s(-l|--list|--contains|--merged|--no-merged|--points-at)\b)(?=.*\s[\x22\x27]?v\d)"),
     ("no push of release tags: the owner pushes them (rv2-docs release.md)", r"\bgit\b.*\bpush\b.*([\s:]refs/tags/v|[\s:][\x22\x27]?v\d+(\.\d+)*([\s\x22\x27]|$)|\s--(tags|follow-tags|mirror)\b)"),
-    ("no core.hooksPath override: hooks are never bypassed (AGENTS.md)", r"\bgit\b.*-c\s*core\.hookspath\b"),
+    ("no core.hooksPath override: hooks are never bypassed (AGENTS.md)", r"\bgit\b.*(-c\s*|\bconfig\b(?!.*\s--get\b).*\s)core\.hookspath\b"),
     ("no reading secret files: .env*, ~/.ssh, /etc/rv2-prod.env (AGENTS.md, Config and secrets)",
-     r"(/etc/rv2-prod\.env|(~|\$HOME|\$\{HOME\})/\.ssh\b|(^|[\s/\x22\x27])\.env(?!\.example)(\.[\w-]+)?([\s\x22\x27]|$))"),
+     r"(/etc/rv2-prod\.env|/\.ssh/|(~|\$HOME|\$\{HOME\})/\.ssh\b|(^|[\s/\x22\x27])\.env(?!\.example)(\.[\w-]+)?([\s\x22\x27]|$))"),
     ("no gh auth switch: other projects rely on the active account (AGENTS.md, Git identity)", r"\bgh\s+auth\s+switch\b"),
     ("no gh secret: secrets are the owner's (AGENTS.md)", r"\bgh\s+secret\b"),
     ("no writes to rulesets: only the owner changes them (AGENTS.md)",
@@ -45,6 +41,14 @@ def bash_verdict(command):
     return None
 
 
+def guards():
+    """GUARDS of tools/merge-risk.py, loaded per call so a broken file fails closed in main()"""
+    spec = importlib.util.spec_from_file_location("merge_risk", os.path.join(ROOT, "tools", "merge-risk.py"))
+    risk = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(risk)
+    return risk.GUARDS
+
+
 def decide(event):
     """(decision, reason) or None"""
     tool, data = event.get("tool_name", ""), event.get("tool_input", {}) or {}
@@ -54,7 +58,7 @@ def decide(event):
     if tool in ("Edit", "Write", "MultiEdit", "NotebookEdit"):
         path = data.get("file_path") or data.get("notebook_path") or ""
         rel = os.path.relpath(os.path.abspath(path), ROOT).replace(os.sep, "/")
-        if not rel.startswith("../") and (GUARDS.match(rel) or SELF.match(rel)):
+        if not rel.startswith("../") and (SELF.match(rel) or guards().match(rel)):
             return "ask", f"ROBO-256 guard: {rel} is a guard file; the owner approves changes to it (REVIEW.md)"
     return None
 
