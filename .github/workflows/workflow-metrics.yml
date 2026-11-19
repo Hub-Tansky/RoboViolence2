@@ -14,6 +14,10 @@ permissions:
   contents: read
   pull-requests: read
   actions: read
+# One run at a time: an overlapping second run would conflict on the same CSV line at its rebase; queued, it finds the row
+concurrency:
+  group: workflow-metrics
+  cancel-in-progress: false
 jobs:
   metrics:
     name: workflow-metrics (not required)

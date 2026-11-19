@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """tools/workflow-metrics.py (ROBO-253): the week window, the numbers on fixed PRs, commits and runs, the nearest-rank p90,
-an empty week, and a second append for the same week adding nothing (ADR ROBO-253)."""
+an empty week, a second append for the same week adding nothing, and a week that has not ended refused (ADR ROBO-253)."""
 import csv
 import datetime
 import importlib.util
 import os
+import subprocess
 import sys
 import tempfile
 
@@ -90,6 +91,12 @@ with tempfile.TemporaryDirectory() as tmp:
     check("one header, two rows", lines[0] == ",".join(tool.COLUMNS) and len(lines) == 3, lines)
     with open(path, newline="") as f:
         check("rows read back", [r["week_start"] for r in csv.DictReader(f)] == ["2026-11-09", "2026-11-16"])
+
+    # A week that has not ended is refused before any API call, and nothing is written
+    r = subprocess.run([sys.executable, "-B", os.path.join(ROOT, "tools", "workflow-metrics.py"), path, "2099-01-05"], capture_output=True, text=True)
+    check("future week refused", r.returncode != 0 and "has not ended yet" in r.stderr, (r.returncode, r.stderr))
+    with open(path, newline="") as f:
+        check("future week writes nothing", len(f.read().splitlines()) == 3)
 
 print("ok" if failures == 0 else f"{failures} failed")
 sys.exit(1 if failures else 0)

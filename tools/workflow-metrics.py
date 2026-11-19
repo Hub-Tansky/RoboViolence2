@@ -13,7 +13,8 @@ Columns:
   prs_merged                PRs merged in the week (any base)
   merge_hours_median/p90    hours from opened to merged (p90: nearest rank)
   review_commits_per_pr     commits whose subject has `review:`, per merged PR
-  main_merges_per_pr        merge commits (2+ parents) in the PR, per merged PR: merges from main to stay up to date
+  main_merges_per_pr        merge commits (2+ parents) in the PR, per merged PR; in this repo these are merges from main
+                            to stay up to date, a merge from another branch counts too
   build_runs                runs of the `build` workflow created in the week, by their latest attempt's conclusion:
   build_success/failure/cancelled/other
   build_reruns              of those, runs with more than one attempt
@@ -117,7 +118,10 @@ def main(argv):
     if len(argv) not in (2, 3):
         sys.exit(__doc__)
     end = datetime.date.fromisoformat(argv[2]) if len(argv) == 3 else None
+    last = week()[1]
     start, end = week(end)
+    if end > last:
+        sys.exit(f"week ending {end.date()} has not ended yet: a row now would stay partial for good")
     repo = os.environ.get("GITHUB_REPOSITORY") or "Hub-Tansky/RoboViolence2"
     values = row(start, end, *fetch(repo, start, end))
     added = append(argv[1], values)

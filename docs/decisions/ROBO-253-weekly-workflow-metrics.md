@@ -9,7 +9,7 @@
 - Every number comes from the public REST API of this repo (pulls, PR commits, `build` workflow runs), readable with `GITHUB_TOKEN`. The vault is private and already written by `backlog-move.yml` with `SYMBOLS_TOKEN` (ADR ROBO-249).
 
 ## Decision
-Every Monday (and by hand, optionally for an earlier week) `workflow-metrics.yml` runs `tools/workflow-metrics.py` for the Monday-to-Monday UTC week that just ended and appends one row to `30-dev/workflow-metrics.csv` in rv2-docs, pushed as Hub-Tansky with the same clone, rebase and retry steps as `backlog-move.yml`. The columns are listed in the tool's docstring. A row whose `week_start` is already in the file is not added again.
+Every Monday (and by hand, optionally for an earlier week) `workflow-metrics.yml` runs `tools/workflow-metrics.py` for the Monday-to-Monday UTC week that just ended and appends one row to `30-dev/workflow-metrics.csv` in rv2-docs, pushed as Hub-Tansky with the same clone, rebase and retry steps as `backlog-move.yml`. The columns are listed in the tool's docstring. A row whose `week_start` is already in the file is not added again, a week that has not ended is refused, and runs queue one after another. `main_merges_per_pr` counts every merge commit in a PR; here those are merges from `main`.
 
 ## Consequences
 - A CSV in the vault, readable in Obsidian or a spreadsheet; WP-19 compares weeks before and after the audit.
