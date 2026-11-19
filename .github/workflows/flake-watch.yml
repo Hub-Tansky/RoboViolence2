@@ -27,7 +27,8 @@ jobs:
       - name: Extra packages
         id: packages
         run: sudo apt-get install -y xvfb libgl1-mesa-dri
-      - run: cmake --preset linux-x64-asan
+      - id: configure  # also vcpkg's manifest install, which downloads port sources
+        run: cmake --preset linux-x64-asan
       - run: cmake --build --preset linux-x64-asan
       - name: e2e and bots tests, 10 times each until one fails
         id: tests
@@ -51,6 +52,7 @@ jobs:
         env:
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
           SETUP: ${{ steps.setup.outcome }}/${{ steps.packages.outcome }}
+          CONFIGURE: ${{ steps.configure.outcome }}
           TESTS: ${{ steps.tests.outcome }}
         run: |
           if [ -z "$NTFY_TOPIC" ]; then echo "No NTFY_TOPIC secret: no notification"; exit 0; fi
@@ -60,6 +62,8 @@ jobs:
             title="RV2 flake watch failed"; what="flaky: $failed"
           elif [ "$SETUP" != "success/success" ]; then
             title="RV2 flake watch: setup failed"; what="setup failed (runner/network), not a flaky test"
+          elif [ "$CONFIGURE" != "success" ]; then
+            title="RV2 flake watch: configure failed"; what="ASan configure failed (vcpkg download or CMake), not a flaky test"
           elif [ "$TESTS" = "failure" ]; then
             title="RV2 flake watch failed"; what="test step failed with no failed test listed (timeout?)"
           else
