@@ -4,7 +4,8 @@
 #   bash /home/user/RoboViolence2/tools/cloud-setup.sh /home/user/RoboViolence2 /home/user/rv2-docs /home/user/rv2-website
 # Arguments: repository directories (default: the repository holding this script). Each gets the Hub-Tansky commit
 # identity; the ones with a .githooks/ directory also get core.hooksPath. Installs gitleaks (pinned, checksum checked),
-# pre-commit and the Claude guard hook (ROBO-256). Prints one line per step. A failed step prints a WARNING and the
+# pre-commit and the Claude guard hook (ROBO-256; into /etc/claude-code/managed-settings.json, so it needs root;
+# CLAUDE_GUARD_SETTINGS overrides the path for tests only). Prints one line per step. A failed step prints a WARNING and the
 # script still exits 0, so a session always starts; the hooks then refuse commits that need the missing tool, which is the safe direction.
 set -u
 

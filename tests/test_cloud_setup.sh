@@ -36,6 +36,8 @@ expect "deny rules added after the existing one" '["Read(//tmp/a)", "Read(**/.en
 CLAUDE_GUARD_SETTINGS="$scratch/etc/claude-code/managed-settings.json" PATH="$scratch/bin:$PATH" bash "$script" "$scratch/game" > /dev/null
 expect "a second run adds nothing" '1 4' \
 	"$(python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); print(len(d["hooks"]["PreToolUse"]), len(d["permissions"]["deny"]))' "$settings")"
+expect "default target is the managed settings, not ~/.claude (ROBO-256 post-deploy failure)" 1 \
+	"$(grep -c 'CLAUDE_GUARD_SETTINGS:-/etc/claude-code/managed-settings.json}' "$script")"
 expect "every line is a step line" 0 "$(grep -vc '^cloud-setup: ' <<< "$out")"
 expect "gitleaks pin matches secret-scan.yml" 1 \
 	"$(grep -c "gitleaks/releases/download/v$(sed -n 's/^GITLEAKS_VERSION=\([0-9.]*\).*/\1/p' "$script")/" "$(dirname "$script")/../.github/workflows/secret-scan.yml")"
