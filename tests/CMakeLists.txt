@@ -333,6 +333,7 @@ add_test(NAME backlog_move COMMAND ${Python3_EXECUTABLE} -B ${CMAKE_CURRENT_SOUR
 add_test(NAME dependabot_automerge COMMAND ${Python3_EXECUTABLE} -B ${CMAKE_CURRENT_SOURCE_DIR}/test_dependabot_automerge.py)
 add_test(NAME vcpkg_ports_diff COMMAND ${Python3_EXECUTABLE} -B ${CMAKE_CURRENT_SOURCE_DIR}/test_vcpkg_ports_diff.py)
 add_test(NAME token_expiry COMMAND ${Python3_EXECUTABLE} -B ${CMAKE_CURRENT_SOURCE_DIR}/test_token_expiry.py)
+add_test(NAME workflow_metrics COMMAND ${Python3_EXECUTABLE} -B ${CMAKE_CURRENT_SOURCE_DIR}/test_workflow_metrics.py)
 find_program(BV2_DPKG_SHLIBDEPS dpkg-shlibdeps)  # dpkg-dev (build-essential pulls it in)
 if(UNIX AND NOT APPLE AND BV2_DPKG_SHLIBDEPS AND TARGET bv2 AND TARGET bv2dedicated)
   add_test(NAME make_deb COMMAND ${Python3_EXECUTABLE} -B ${CMAKE_CURRENT_SOURCE_DIR}/test_make_deb.py "${CMAKE_BINARY_DIR}" "${BV2_TEST_SCRATCH}")

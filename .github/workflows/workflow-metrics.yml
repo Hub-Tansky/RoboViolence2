@@ -1,0 +1,65 @@
+name: workflow-metrics
+# Weekly: one CSV row of PR and CI numbers for the week that just ended (PRs merged, hours to merge, `review:` commits and
+# merges from main per PR, `build` runs by conclusion and re-runs), appended to 30-dev/workflow-metrics.csv in the private
+# vault rv2-docs (ROBO-253, ADR ROBO-253). A second run for the same week adds nothing.
+on:
+  schedule:
+    - cron: '41 6 * * 1'  # 06:41 UTC on Mondays
+  workflow_dispatch:
+    inputs:
+      week_end:
+        description: 'Monday that ends the week, YYYY-MM-DD (empty: the week that just ended)'
+        required: false
+permissions:
+  contents: read
+  pull-requests: read
+  actions: read
+# One run at a time: an overlapping second run would conflict on the same CSV line at its rebase; queued, it finds the row
+concurrency:
+  group: workflow-metrics
+  cancel-in-progress: false
+jobs:
+  metrics:
+    name: workflow-metrics (not required)
+    if: github.repository == 'Hub-Tansky/RoboViolence2'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Count the week
+        id: count
+        shell: bash  # -eo pipefail: a crash of the tool fails the run instead of hiding behind tee
+        env:
+          # fine-grained, Contents write on Hub-Tansky/rv2-docs only; shared with release symbols (owner, 2026-11-18)
+          DOCS_TOKEN: ${{ secrets.SYMBOLS_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
+          WEEK_END: ${{ inputs.week_end }}
+        run: |
+          if [ -z "$DOCS_TOKEN" ]; then
+            echo "::error::no SYMBOLS_TOKEN secret: cannot write to rv2-docs"
+            exit 1
+          fi
+          vault="$RUNNER_TEMP/rv2-docs"
+          git clone -q --depth 1 "https://x-access-token:${DOCS_TOKEN}@github.com/Hub-Tansky/rv2-docs.git" "$vault"
+          git -C "$vault" config user.name Hub-Tansky  # also for the commits a rebase rewrites
+          git -C "$vault" config user.email 337104978+Hub-Tansky@users.noreply.github.com
+          git -C "$vault" remote set-url origin https://github.com/Hub-Tansky/rv2-docs.git  # no token in .git/config
+          DOCS_TOKEN= python3 -B tools/workflow-metrics.py "$vault/30-dev/workflow-metrics.csv" ${WEEK_END:+"$WEEK_END"} | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Commit and push as Hub-Tansky
+        if: steps.count.outputs.message != ''
+        env:
+          DOCS_TOKEN: ${{ secrets.SYMBOLS_TOKEN }}
+          MESSAGE: ${{ steps.count.outputs.message }}
+        working-directory: ${{ runner.temp }}/rv2-docs
+        run: |
+          auth="http.https://github.com/.extraheader=AUTHORIZATION: basic $(printf 'x-access-token:%s' "$DOCS_TOKEN" | base64 -w0)"
+          git add 30-dev/workflow-metrics.csv
+          git commit -q -m "$MESSAGE"
+          # Agents and backlog-move push to the same branch: rebase onto whoever pushed first and try again
+          for attempt in 1 2 3 4 5; do
+            git -c "$auth" push -q origin HEAD:main && exit 0
+            git -c "$auth" pull -q --rebase origin main || { git rebase --abort; exit 1; }
+          done
+          exit 1
