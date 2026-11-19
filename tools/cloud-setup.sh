@@ -99,10 +99,12 @@ entry = project["hooks"]["PreToolUse"][0]
 entry = dict(entry, hooks=[dict(entry["hooks"][0], command=f'python3 "{repo}/.claude/hooks/guard.py"')])
 user = json.load(open(path)) if os.path.exists(path) else {}
 pre = user.setdefault("hooks", {}).setdefault("PreToolUse", [])
-pre[:] = [e for e in pre if "guard.py" not in json.dumps(e)] + [entry]
+pre[:] = [e for e in pre if f"{repo}/.claude/hooks/guard.py" not in json.dumps(e)] + [entry]
 deny = user.setdefault("permissions", {}).setdefault("deny", [])
 deny += [d for d in project["permissions"]["deny"] if d not in deny]
-json.dump(user, open(path, "w"), indent=2)
+with open(path + ".tmp", "w") as f:
+    json.dump(user, f, indent=2)
+os.replace(path + ".tmp", path)
 PY
 	then ok "Claude guard hook and deny rules in $settings"; else warn "could not write the Claude guard hook to $settings"; fi
 }

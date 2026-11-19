@@ -28,6 +28,16 @@ DENY = [
     ("git commit --no-verify -m x", "--no-verify"),  # review: allow test of the rule that refuses it
     ("git push --no-verify origin claude/x", "--no-verify"),  # review: allow test of the rule that refuses it
     ("git commit -n -m x", "commit -n"),
+    ("git commit --no-verif -m x", "hooks are never bypassed"),
+    ("git -c core.hooksPath=/dev/null commit -m x", "core.hooksPath"),
+    ("git push -uf origin main", "force push"),
+    ("git tag -m rel v1.2.0", "release tags"),
+    ("git tag 'v1.2.0'", "release tags"),
+    ("git push origin 'v1.2.0'", "push of release tags"),
+    ("cat .env", "secret files"),
+    ("grep -r key ~/.ssh/", "secret files"),
+    ("cat /etc/rv2-prod.env", "secret files"),
+    ("cat config/.env.local", "secret files"),
     ("git commit -an -m x", "commit -n"),
     ("git push --force origin main", "force push"),
     ("git push -f origin HEAD:refs/heads/main", "force push"),
@@ -58,6 +68,8 @@ ALLOW = [
     "git push origin main",
     "git commit -m 'fix: x'",
     "git tag -l",
+    "cat config/.env.example",
+    "ls .envrc-docs",
     "git tag --list v1*",
     "git tag --contains v0.1.0",
     "git push origin v2-branch",
@@ -88,6 +100,9 @@ for event, want in [({"tool_name": "Bash", "tool_input": {"command": "gh secret 
     r = subprocess.run([sys.executable, "-B", GUARD], input=json.dumps(event), capture_output=True, text=True)
     out = json.loads(r.stdout)["hookSpecificOutput"] if r.stdout.strip() else None
     check(f"cli {want}", r.returncode == 0 and (out["permissionDecision"] == want and out["hookEventName"] == "PreToolUse" if want else out is None), (r.stdout, r.stderr))
+
+r = subprocess.run([sys.executable, "-B", GUARD], input="not json", capture_output=True, text=True)
+check("bad input fails closed", r.returncode == 0 and json.loads(r.stdout)["hookSpecificOutput"]["permissionDecision"] == "deny", (r.stdout, r.stderr))
 
 # .githooks/commit-msg: Claude trailers refused, other trailers kept
 hook = os.path.join(ROOT, ".githooks", "commit-msg")
