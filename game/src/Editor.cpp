@@ -23,7 +23,8 @@
 #include "CMenuManager.h"
 #include "FileIO.h"
 #include "Game.h"
-#include <algorithm>
+#	include "MapThemes.h"
+#	include <algorithm>
 #	include <memory>
 #	include "EditorTools.h"
 #	include "EditorDialogs.h"
@@ -910,11 +911,10 @@ void Editor2::Click(CControl * control)
 	}
 	if (control == btn_theme)
 	{
-		map->theme++;
-		if (map->theme > THEME_END)
-		{
-			map->theme = THEME_START;
-		}
+		// ROBO-259: cycle the four map looks; an old map's alias id moves on to the next look
+		const bv2::MapLook look = bv2::nextLook(bv2::themeLook(map->theme));
+		map->theme = bv2::LOOK_THEME_IDS[look];
+		console->add(CString("\x3> Map theme: %s", bv2::LOOK_LABELS[look]));
 		map->reloadTheme();
 		map->reloadWeather();
 		isDirty = true;

@@ -296,6 +296,12 @@ bv2_target_defaults(test_asset_registry)
 add_test(NAME asset_registry COMMAND test_asset_registry "${BV2_TEST_SCRATCH}")
 add_test(NAME asset_ids COMMAND ${Python3_EXECUTABLE} -B ${CMAKE_CURRENT_SOURCE_DIR}/test_asset_ids.py ${CMAKE_SOURCE_DIR})
 
+# ROBO-259: theme id aliases resolve to the four map looks, unknown ids to Wasteland
+add_executable(test_map_themes test_map_themes.cpp)
+target_include_directories(test_map_themes PRIVATE ${CMAKE_SOURCE_DIR}/game/src)
+bv2_target_defaults(test_map_themes)
+add_test(NAME map_themes COMMAND test_map_themes)
+
 # ROBO-239: tools/gltf-to-dko.py output loads through engine/dko (dko_probe) with the meshes, materials and dummy expected
 add_executable(dko_probe dko_probe.cpp)
 target_link_libraries(dko_probe PRIVATE dko zeven_console)  # dkt stand-ins: no GL context in tests

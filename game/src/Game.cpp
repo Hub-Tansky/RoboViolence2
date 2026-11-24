@@ -19,6 +19,7 @@
 #include "Paths.h"
 #include "AssetRegistry.h"
 #include "Game.h"
+#include "MapThemes.h"
 #include "netPacket.h"
 #include "Console.h"
 #include "GameVar.h"
@@ -702,7 +703,7 @@ void Game::update(float delay)
 		}
 
 		//--- Si on roule dans la lave, on spawn de la fumé :D
-		if (map->theme == THEME_LAVA)
+		if (bv2::themeLook(map->theme) == bv2::LOOK_FOUNDRY)
 		{
 			//--- Spawn des drip sous les players
 			for (int i=0;i<MAX_PLAYER;++i)

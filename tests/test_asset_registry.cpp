@@ -90,11 +90,13 @@ int main(int argc, char** argv)
 	check(bv2::assetKnown("sounds/Menu"), "a row with source missing is still an id");
 	check(bv2::assetUnknownCount() == 0, "a known id counted as unknown");
 
-	// ROBO-243: Map builds theme texture ids at runtime; every theme x texture must be a manifest id
-	for (int t = 0; t < bv2::THEME_NAME_COUNT; ++t)
+	// ROBO-243, ROBO-259: Map builds theme texture ids at runtime (look folder, then the old theme folder for BV2
+	// data); every one must be a manifest id
+	for (int t = 0; t < bv2::THEME_NAME_COUNT + bv2::LOOK_COUNT; ++t)
 		for (const char* tex : bv2::THEME_TEXTURES)
 		{
-			const std::string id = bv2::themeTextureId(bv2::THEME_NAMES[t], tex);
+			const char* folder = t < bv2::THEME_NAME_COUNT ? bv2::THEME_NAMES[t] : bv2::LOOK_FOLDERS[t - bv2::THEME_NAME_COUNT];
+			const std::string id = bv2::themeTextureId(folder, tex);
 			if (!bv2::assetKnown(id.c_str()))
 				std::printf("FAIL: theme texture %s is not in the manifest\n", id.c_str()), g_fail = 1;
 		}
