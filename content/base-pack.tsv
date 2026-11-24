@@ -222,3 +222,4 @@ sounds/shotgunReload	sounds/shotgunReload.wav	sound	WAV 1ch 8000 Hz 16-bit 0.17 
 sounds/wind	sounds/wind.wav	sound	WAV 1ch 8013 Hz 8-bit 4.04 s	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
 textures/sky	textures/sky.tga	texture	TGA 256×256×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
 textures/sniperScope	textures/sniperScope.tga	texture	TGA 256×256×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/splash	textures/splash.tga	texture	TGA 256×128×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
