@@ -1,0 +1,5 @@
+# Main menu on the fixture art pack (ROBO-264): PNG textures from a pack with its own pack.tsv, stacked over the base pack
+expect-scene menu
+wait 2
+screenshot art-pack-menu
+wait 1
