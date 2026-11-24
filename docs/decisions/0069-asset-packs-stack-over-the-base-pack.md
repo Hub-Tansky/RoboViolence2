@@ -1,6 +1,6 @@
 # 0069: Asset packs stack over the base pack; the BV2 data is an optional pack on top
 
-- Status: Accepted
+- Status: Accepted; amended by [ROBO-264](ROBO-264-art-pack-checks-and-fixture.md)
 - Date: 2026-11-18
 - Affects: `game/src/AssetRegistry.h`, `game/src/AssetRegistry.cpp`, `game/src/BasePackIds.h`, `game/src/BasePackIds.cpp.in`, `game/CMakeLists.txt`, `game/src/main.cpp`; ROBO-234 (refactor Phase 1 A4, [ADR 0062](0062-asset-packs-mode-modules-client-independent-server.md) asset seam); succeeds [0010](0010-bv2-asset-compat-and-gui-freeze.md) for asset loading; builds on [0065](0065-asset-pack-manifest.md), [0066](0066-game-loads-assets-by-id.md) and [0042](0042-game-assets-option-remembers-placeholders.md)
 

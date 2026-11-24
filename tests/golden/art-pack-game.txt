@@ -1,0 +1,14 @@
+# CTF on the fixture art pack (ROBO-264): the floor, the HUD flag icons and the minimap come from the pack's PNGs.
+# sv_ vars need a server, so the first host makes one and the second starts CTF. The player joins blue but stays
+# unspawned (forceplayerspawn is a dedicated-server command); e2e_ctf_capture_art_pack covers the flag carry.
+expect-scene menu
+host CTF-Placeholder
+expect-scene game
+set sv_gameType 2
+host CTF-Placeholder
+expect-console Server Created
+wait 2
+move 0 Unnamed Robo
+wait 3
+screenshot art-pack-game
+wait 1

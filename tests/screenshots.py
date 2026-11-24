@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Screenshot regression (Phase T7): run the autotest script tests/golden/<name>.txt, which takes `screenshot <name>`,
 with the config lines in tests/golden/<name>.cfg if there is one, and compare the frame with tests/golden/<name>.png
-within a tolerance.
+within a tolerance. A name starting with `art-pack-` runs on the fixture art pack stacked over the base pack
+(tests/art_pack_fixture.py, ROBO-264).
 
 Usage: screenshots.py <bv2> <scratch dir> <name> [--update]
 Passes and deletes the client's pref dir (screenshots included) when at most MAX_CHANGED of the pixels differ by more
@@ -14,6 +15,7 @@ import struct
 import sys
 import zlib
 
+import art_pack_fixture
 from autotest_client import run_client
 
 CHANNEL_TOLERANCE = 24  # per channel, 0-255: absorbs rasterizer rounding
@@ -85,6 +87,11 @@ def main():
     pref = os.path.join(scratch, name)
     config = os.path.join(here, "golden", name + ".cfg")  # config lines for this shot only, e.g. the window size
     extra = open(config).read() if os.path.exists(config) else ""
+    if name.startswith("art-pack-"):  # the client finds the fixture through BV2_DATA_DIR (ADR 0069)
+        pack = os.path.join(scratch, name + "-pack")
+        shutil.rmtree(pack, ignore_errors=True)
+        art_pack_fixture.make(os.path.join(here, "..", "content", "base-pack.tsv"), pack)
+        os.environ["BV2_DATA_DIR"] = pack
     returncode, out = run_client(exe, pref, script, "r_showStats false\n" + extra, own_xvfb=True)  # no FPS counter
     shot = os.path.join(pref, "screenshots", name + ".bmp")
     if returncode != 0 or not os.path.exists(shot):

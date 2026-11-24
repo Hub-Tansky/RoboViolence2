@@ -2,9 +2,10 @@
 """Phase T4: end-to-end scenarios: bv2dedicated with the admin API, plus bv2 autotest clients under Xvfb.
 
 Usage: e2e.py <runtime dir> <scratch dir> <scenario>
-Scenarios: join_leave, password, chat, kick, ban, master_list, browser_tab_list, ctf_capture, ghost, user_map, weapon_choice,
-grenade, rocket, flamethrower, photon_rifle, nuke. Each has one observable: the admin API's
-`GET /status` player count or score, the server's stdout, or a client's autotest result (ADR 0025). Linux only (Xvfb).
+Scenarios: join_leave, password, chat, kick, ban, master_list, browser_tab_list, ctf_capture, ctf_capture_art_pack,
+ghost, user_map, weapon_choice, grenade, rocket, flamethrower, photon_rifle, nuke.
+Each has one observable: the admin API's `GET /status` player count or score, the server's stdout, or a client's
+autotest result (ADR 0025). Linux only (Xvfb).
 """
 import os
 import re
@@ -17,6 +18,7 @@ import time
 import urllib.request
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+import art_pack_fixture  # noqa: E402
 from autotest_client import client_command, start_xvfb  # noqa: E402
 
 ADMIN_PASS = "e2e-admin-pass"
@@ -207,12 +209,12 @@ def ban(run):
     check(run.finished(again) == 0, "refused client sees the server disconnect it")
 
 
-def ctf_capture(run):
+def ctf_capture(run, **client_env):
     """The server moves the bot: blue team, spawned on the red flag pod, then on its own (CTF-Placeholder pods: blue
     at 3,8, red at 13,8; tools/gen-placeholder-content.py). Bots can't steer, and the server only checks positions.
     The CTF script plays content/maps, so the placeholder map is set here."""
     run.server(launch=b"set sv_gameType 2\nset sv_port 3333\ndedicate CTF-Placeholder\n")
-    client = run.client("e2e-a", JOIN + ["wait 40"])  # stays well past both 10 s waits below
+    client = run.client("e2e-a", JOIN + ["wait 40"], **client_env)  # stays well past both 10 s waits below
     run.joined("e2e-a")
     slot = re.search(r"^\[(\d+)\] e2e-a ", run.command("playerlist"), re.M)
     check(slot, "playerlist names e2e-a")
@@ -223,6 +225,15 @@ def ctf_capture(run):
     run.command(f"forceplayerspawn {slot} 3 8")
     wait(lambda: run.score() == (1, 0), 10, "/status score blue 1 red 0", API_INTERVAL)
     check(run.finished(client) == 0, "client script passed")
+
+
+def ctf_capture_art_pack(run):
+    """ctf_capture with the client on the fixture art pack (ROBO-264): it draws the flag carry and capture from the
+    pack's PNGs, stacked over the base pack, and its script still passes"""
+    pack = os.path.join(run.dir, "art-pack")
+    art_pack_fixture.make(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "content", "base-pack.tsv"),
+                          pack)
+    ctf_capture(run, BV2_DATA_DIR=pack)
 
 
 def ghost(run):
@@ -394,7 +405,8 @@ def nuke(run):
     no_dropped_messages(run, client)
 
 
-SCENARIOS = {f.__name__: f for f in (join_leave, password, chat, kick, ban, master_list, browser_tab_list, ctf_capture, ghost,
+SCENARIOS = {f.__name__: f for f in (join_leave, password, chat, kick, ban, master_list, browser_tab_list, ctf_capture,
+                                     ctf_capture_art_pack, ghost,
                                      user_map, weapon_choice, grenade, rocket, flamethrower, photon_rifle, nuke)}
 
 if __name__ == "__main__":
