@@ -98,7 +98,7 @@ What we do, in one or two sentences.
 | [0062](0062-asset-packs-mode-modules-client-independent-server.md) | Asset packs, mode modules and a client-independent server are the long-term direction | Accepted |
 | [0063](0063-architecture-lists-modules-not-files.md) | ARCHITECTURE.md lists module directories, not files | Accepted |
 | [0064](0064-nightly-flake-watch.md) | A nightly workflow repeats the e2e and bots tests and files one issue per flaky test | Accepted |
-| [0065](0065-asset-pack-manifest.md) | An asset pack is a folder with a pack.tsv manifest; the base pack's is content/base-pack.tsv | Accepted (amended by ROBO-264, ROBO-260) |
+| [0065](0065-asset-pack-manifest.md) | An asset pack is a folder with a pack.tsv manifest; the base pack's is content/base-pack.tsv | Accepted (amended by ROBO-264) |
 | [0066](0066-game-loads-assets-by-id.md) | Game code loads assets by id; the base manifest's ids are compiled in | Accepted |
 | [0067](0067-font-bytes-and-ttf-baking.md) | Text is one byte per glyph; bytes 160-255 hold 96 extra letters; a TTF is baked to babo.tga widths | Accepted |
 | [0068](0068-docs-only-prs-skip-the-build.md) | A docs-only PR skips the build steps; its required checks still report success | Accepted |

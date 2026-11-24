@@ -95,6 +95,7 @@ static bool autotestStart(int argc, char * argv[])
 // Every init failure exit: a result line for autotest callers, then the exit code
 static int initFailed()
 {
+	bv2::artDownloadStop(); // the download thread must not outlive main (ROBO-260)
 	if (autotest) printf("autotest: FAIL the client failed to start\n");
 	return exitCode;
 }

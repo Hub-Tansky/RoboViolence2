@@ -7,6 +7,7 @@
 #include <filesystem>
 #include <fstream>
 #include <string>
+#include <vector>
 
 namespace fs = std::filesystem;
 static int g_fail = 0;
@@ -80,6 +81,42 @@ int main(int argc, char** argv)
 		  "curl's argv ends with -o <file> <url>");
 	const auto tar = bv2::artExtractArgs("x.tar.gz", "out");
 	check(tar.size() == 5 && tar[1] == "-xzf" && tar[2] == "x.tar.gz" && tar[4] == "out", "tar's argv");
+
+	// The download sequence with fake commands: curl copies the "url" file, tar writes main/pack.tsv
+	const fs::path src = dir / "src.tar.gz", fetched = dir / "fetched", partial = dir / "fetched.partial";
+	write(src, "abc"); // its SHA-256 is abc below
+	bool tarOk = true, stopAfterTar = false, tarRan = false;
+	const bv2::ArtRunner fake = [&](const std::vector<std::string>& args)
+	{
+		if (args[1] == "-xzf")
+		{
+			write(fs::path(args.back()) / "main" / "pack.tsv", "id\n");
+			tarRan = true;
+			return tarOk;
+		}
+		std::error_code ec;
+		fs::copy_file(args.back(), args[args.size() - 2], fs::copy_options::overwrite_existing, ec);
+		return !ec;
+	};
+	const auto stopped = [&]
+	{ return stopAfterTar && tarRan; };
+	check(!bv2::fetchArtPack(partial.string(), src.string(), abc.substr(1) + "0", "7", fetched.string(), fake, stopped).empty() &&
+			  !fs::exists(fetched) && !tarRan,
+		  "a wrong hash is unpacked or installed");
+	tarOk = false;
+	check(!bv2::fetchArtPack(partial.string(), src.string(), abc, "7", fetched.string(), fake, stopped).empty() &&
+			  !fs::exists(fetched),
+		  "a failed unpack is installed");
+	tarOk = true;
+	stopAfterTar = true;
+	tarRan = false;
+	check(bv2::fetchArtPack(partial.string(), src.string(), abc, "7", fetched.string(), fake, stopped) == "stopped" &&
+			  !fs::exists(fetched),
+		  "a pack stopped while unpacking is installed");
+	stopAfterTar = false;
+	check(bv2::fetchArtPack(partial.string(), src.string(), abc, "7", fetched.string(), fake, stopped).empty() &&
+			  bv2::artPackInstalled(fetched.string(), "7") && !fs::exists(partial),
+		  "a good download is not installed, or its scratch folder stays");
 
 	if (!g_fail)
 		std::printf("art pack: all checks passed\n");

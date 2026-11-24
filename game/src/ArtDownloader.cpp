@@ -8,6 +8,7 @@
 
 #include <SDL3/SDL.h>
 
+#include <algorithm>
 #include <atomic>
 #include <cstdint>
 #include <cstdio>
@@ -30,7 +31,7 @@ namespace
 	};
 	std::atomic<int> g_state(IDLE);
 	std::atomic<bool> g_stop(false);
-	std::string g_archive; // set before the thread starts, read for the progress line
+	std::string g_archive; // the main thread's copy, for the progress line; the download thread has its own
 
 	// Runs args to the end; false when it could not start, exited non-zero or was stopped
 	bool run(const std::vector<std::string>& args)
@@ -61,29 +62,19 @@ namespace
 			SDL_Delay(50);
 		}
 		SDL_DestroyProcess(process);
+#ifdef BV2_PLATFORM_WINDOWS
+		return true; // background processes report no exit code there: the hash and pack.tsv checks are the verdict
+#else
 		return exitCode == 0;
+#endif
 	}
 
-	// In <artPackDir>.partial: download, check the archive's hash, unpack, install. Windows tools report no exit code
-	// (background process), so the hash and pack.tsv checks are the verdict there.
-	void download()
+	// Runs on the download thread with its own copies of the paths (main may return before it ends)
+	void download(std::string partial, std::string target)
 	{
-		const fs::path partial(bv2::artPackDir() + ".partial");
-		std::error_code ec;
-		fs::remove_all(partial, ec);
-		fs::create_directories(partial / "pack", ec);
-		std::string error;
-		run(bv2::artDownloadArgs(bv2::ART_PACK_URL, g_archive));
-		if (g_stop)
-			error = "stopped";
-		else if (!bv2::artArchiveValid(g_archive, bv2::ART_PACK_SHA256))
-			error = "the download failed or its SHA-256 is not the pinned one";
-		else
-		{
-			run(bv2::artExtractArgs(g_archive, (partial / "pack").string()));
-			error = bv2::installArtPack((partial / "pack").string(), bv2::ART_PACK_VERSION, bv2::artPackDir());
-		}
-		fs::remove_all(partial, ec);
+		const std::string error = bv2::fetchArtPack(partial, bv2::ART_PACK_URL, bv2::ART_PACK_SHA256, bv2::ART_PACK_VERSION,
+													target, run, []
+													{ return g_stop.load(); });
 		if (!error.empty())
 			std::fprintf(stderr, "art pack %s: %s; playing without it, retrying on the next start\n", bv2::ART_PACK_VERSION,
 						 error.c_str());
@@ -142,7 +133,7 @@ namespace bv2
 			return;
 		g_archive = artPackDir() + ".partial/rv2-art.tar.gz";
 		g_state = RUNNING;
-		std::thread(download).detach(); // an early exit must not wait for it; artDownloadStop ends it
+		std::thread(download, artPackDir() + ".partial", artPackDir()).detach(); // artDownloadStop ends it
 	}
 
 	void artSplashWait(double timeoutSeconds)
@@ -158,7 +149,13 @@ namespace bv2
 		{
 			SDL_Event e;
 			while (SDL_PollEvent(&e))
-				if (e.type == SDL_EVENT_QUIT || (e.type == SDL_EVENT_KEY_DOWN && e.key.key == SDLK_ESCAPE))
+				if (e.type == SDL_EVENT_QUIT || e.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED)
+				{
+					SDL_PushEvent(&e); // the main loop still has to see it and quit
+					skip = true;
+					break;
+				}
+				else if (e.type == SDL_EVENT_KEY_DOWN && e.key.key == SDLK_ESCAPE)
 					skip = true;
 			splashFrame(splash, progress());
 			SDL_Delay(33);

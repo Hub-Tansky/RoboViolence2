@@ -3,6 +3,7 @@
 // the check and the install.
 #pragma once
 
+#include <functional>
 #include <string>
 #include <vector>
 
@@ -21,7 +22,7 @@ namespace bv2
 
 	// True when the player turned the download off: --no-art-download in argv (remembered) or the remembered file
 	// <prefDir>/art-download-off. Writes that file when the flag is given. Also true, not remembered, for --placeholders
-	// (base pack only: tests and screenshots never download the art).
+	// (tests and screenshots never download the art).
 	bool artDownloadOff(int argc, const char* const* argv, const std::string& prefDir);
 
 	// curl's argv: url to file
@@ -31,6 +32,17 @@ namespace bv2
 
 	// True when the downloaded archive has the pinned SHA-256; checked before unpacking
 	bool artArchiveValid(const std::string& archive, const std::string& sha256);
+
+	// Runs one argv to its end: false when it could not start, failed or was stopped
+	using ArtRunner = std::function<bool(const std::vector<std::string>&)>;
+
+	// The whole download in the scratch folder partial (emptied first, removed at the end): run curl for url into
+	// partial/rv2-art.tar.gz, check its SHA-256, run tar into partial/pack, then installArtPack into target. stopped is
+	// asked after each command; a stop, a failed command, a wrong hash or a missing pack.tsv installs nothing.
+	// "" on success, else the reason.
+	std::string fetchArtPack(const std::string& partial, const std::string& url, const std::string& sha256,
+							 const std::string& version, const std::string& target, const ArtRunner& run,
+							 const std::function<bool()>& stopped);
 
 	// Writes VERSION into dir (the unpacked pack, holding main/pack.tsv) and moves it to target. "" on success, else
 	// the reason.
