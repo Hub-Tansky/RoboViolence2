@@ -11,7 +11,7 @@
 
 ## Decision
 - The art pack is a pack (ADR 0065) with its own `main/pack.tsv`, published as `rv2-art-<version>.tar.gz` on the `rv2-art` repo's release `rv2-art-<version>`. Each game build pins one version, its URL and the archive's SHA-256 (`game/src/ArtPack.cpp`); an empty pin downloads nothing.
-- Install folder: `artPackDir()`, `robo_art` beside `original/` (inside `BV2_PREF_DIR` when set). A `VERSION` file there names the installed version; only the pinned version is stacked.
+- Install folder: `artPackDir()`, `robo_art` beside `original/` (inside `BV2_PREF_DIR` when set); it replaces the `main/packs/rv2-art/` folder first proposed in ROBO-260, since the pack is downloaded, not shipped. A `VERSION` file there names the installed version; only the pinned version is stacked.
 - At start, before any asset loads, the client stacks `robo_art` (when it holds the pinned version) over the data root over the base pack. `setAssetPacks` takes the index of the working-directory pack, since the art pack now sits above it.
 - When the pinned version isn't installed, a detached thread runs `curl` into `robo_art.partial`, checks the archive's SHA-256 before unpacking, runs `tar -xzf` (a failed or stopped unpack installs nothing), requires `main/pack.tsv`, writes `VERSION` and renames the folder into place (ADR 0040's `replaceDir`).
 - After the GL context exists and before the lobby, console and scene load assets, `artSplashWait(60)` shows `textures/splash` (free, in the base pack) with a thin progress line while the download runs. It ends when the pack is installed (then restacks), after 60 s, or on Esc or window close. Assets load once, after the stack is final, so this is not the hot reload ADR 0042 rejected.
@@ -22,5 +22,5 @@
 - The pin changes with each art release (an art drop PR); the first is `rv2-art-1` (4 map looks, HUD textures, sky, splash). The archive is built reproducibly by the art repo's `tools/build-release.sh`. A build with an empty pin behaves as before this ADR.
 - The public repo and the source tarball never contain the art. How packages bundle it with the licence files is decided in the packaging PR (`packaging/`, HIGH tier).
 - After a pin bump the splash also waits (up to 60 s, Esc skips) while the new version downloads, since only the pinned version stacks; at 8.5 MB this is seconds. Showing an older pack while replacing its folder was rejected (files in use on Windows).
-- The Options entry to turn the download off, the per-file version fallback and the real splash image follow in later PRs of ROBO-260.
+- The Options entry to turn the download off, the per-file version fallback and the real splash image follow in ROBO-266.
 - Rejected: a first-run button (owner chose automatic); restarting after the download (owner: no restart); per-file hashes compiled in (the archive hash covers every file and needs one line per release); unpacking before the hash check (a hostile archive could write outside the folder).
