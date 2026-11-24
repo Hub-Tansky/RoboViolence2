@@ -16,10 +16,10 @@
 - When the pinned version isn't installed, a detached thread runs `curl` into `robo_art.partial`, checks the archive's SHA-256 before unpacking, runs `tar -xzf`, requires `main/pack.tsv`, writes `VERSION` and renames the folder into place (ADR 0040's `replaceDir`).
 - After the GL context exists and before the lobby, console and scene load assets, `artSplashWait(60)` shows `textures/splash` (free, in the base pack) with a thin progress line while the download runs. It ends when the pack is installed (then restacks), after 60 s, or on Esc or window close. Assets load once, after the stack is final, so this is not the hot reload ADR 0042 rejected.
 - A download still running after the splash continues in the background and is used on the next start; a failure is logged and retried on the next start.
-- `--no-art-download` turns the download off and is remembered as `<prefDir>/art-download-off`.
+- `--no-art-download` turns the download off and is remembered as `<prefDir>/art-download-off`. `--placeholders` (base pack only, used by every test and screenshot) also skips it, not remembered, so CI never fetches the art.
 
 ## Consequences
-- The pin changes with each art release (an art drop PR). A build with an empty pin behaves as before this ADR.
+- The pin changes with each art release (an art drop PR); the first is `rv2-art-1` (4 map looks, HUD textures, sky, splash). The archive is built reproducibly by the art repo's `tools/build-release.sh`. A build with an empty pin behaves as before this ADR.
 - Packages and the source tarball never contain the art; licence files in packages are a separate PR (`packaging/`, HIGH tier).
 - The Options entry to turn the download off, the per-file version fallback and the real splash image follow in later PRs of ROBO-260.
 - Rejected: a first-run button (owner chose automatic); restarting after the download (owner: no restart); per-file hashes compiled in (the archive hash covers every file and needs one line per release); unpacking before the hash check (a hostile archive could write outside the folder).
