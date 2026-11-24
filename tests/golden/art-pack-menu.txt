@@ -1,0 +1,5 @@
+# Main menu on the fixture art pack (ROBO-264): the layout stays as on the base pack (D1); only the cursor comes from the pack
+expect-scene menu
+wait 2
+screenshot art-pack-menu
+wait 1

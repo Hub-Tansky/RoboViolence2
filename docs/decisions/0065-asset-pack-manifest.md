@@ -1,6 +1,6 @@
 # 0065: An asset pack is a folder with a pack.tsv manifest; the base pack's is content/base-pack.tsv
 
-- Status: Accepted
+- Status: Accepted; amended by [ROBO-264](ROBO-264-art-pack-checks-and-fixture.md)
 - Date: 2026-11-17
 - Affects: `content/base-pack.tsv` (replaces `tools/placeholder-manifest.tsv`), `tools/gen-placeholder-content.py`, `tools/check-pack.py`, `tools/check-content-case.py`, root `CMakeLists.txt`; ROBO-231 (refactor Phase 1 A1, [ADR 0062](0062-asset-packs-mode-modules-client-independent-server.md) asset seam)
 

@@ -98,11 +98,11 @@ What we do, in one or two sentences.
 | [0062](0062-asset-packs-mode-modules-client-independent-server.md) | Asset packs, mode modules and a client-independent server are the long-term direction | Accepted |
 | [0063](0063-architecture-lists-modules-not-files.md) | ARCHITECTURE.md lists module directories, not files | Accepted |
 | [0064](0064-nightly-flake-watch.md) | A nightly workflow repeats the e2e and bots tests and files one issue per flaky test | Accepted |
-| [0065](0065-asset-pack-manifest.md) | An asset pack is a folder with a pack.tsv manifest; the base pack's is content/base-pack.tsv | Accepted |
+| [0065](0065-asset-pack-manifest.md) | An asset pack is a folder with a pack.tsv manifest; the base pack's is content/base-pack.tsv | Accepted (amended by ROBO-264) |
 | [0066](0066-game-loads-assets-by-id.md) | Game code loads assets by id; the base manifest's ids are compiled in | Accepted |
 | [0067](0067-font-bytes-and-ttf-baking.md) | Text is one byte per glyph; bytes 160-255 hold 96 extra letters; a TTF is baked to babo.tga widths | Accepted |
 | [0068](0068-docs-only-prs-skip-the-build.md) | A docs-only PR skips the build steps; its required checks still report success | Accepted |
-| [0069](0069-asset-packs-stack-over-the-base-pack.md) | Asset packs stack over the base pack; the BV2 data is an optional pack on top | Accepted |
+| [0069](0069-asset-packs-stack-over-the-base-pack.md) | Asset packs stack over the base pack; the BV2 data is an optional pack on top | Accepted (amended by ROBO-264) |
 | [0070](0070-gltf-converts-to-dko.md) | New models are authored as glTF and converted to .DKO offline | Accepted |
 | [ROBO-248](ROBO-248-adrs-named-by-scope-item.md) | Name new ADRs after their scope item, not the next number | Accepted |
 | [ROBO-249](ROBO-249-backlog-item-moves-on-merge.md) | A merged PR's backlog item moves to Done or Testing by workflow | Accepted |
@@ -113,3 +113,4 @@ What we do, in one or two sentences.
 | [ROBO-253](ROBO-253-weekly-workflow-metrics.md) | A weekly workflow appends PR and CI numbers to a CSV in rv2-docs | Accepted |
 | [ROBO-254](ROBO-254-regenerate-goldens-in-ci.md) | A workflow run by hand on a branch regenerates its screenshot goldens and shows before and after | Accepted |
 | [ROBO-256](ROBO-256-claude-code-guard-hooks.md) | A Claude Code hook refuses forbidden commands and a commit hook refuses Claude trailers | Accepted |
+| [ROBO-264](ROBO-264-art-pack-checks-and-fixture.md) | An art pack is checked against the base pack, and CI plays a generated fixture art pack | Accepted |
