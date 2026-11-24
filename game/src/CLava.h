@@ -35,8 +35,8 @@ public:
 	int channel;
 
 public:
-	//--- Constructor
-	CLava();
+	//--- Constructor: loops a sound for the map look (sounds/lava for Foundry, sounds/wind for Wasteland)
+	CLava(const char* soundId = "sounds/lava");
 
 	//--- Destructor
 	virtual ~CLava();

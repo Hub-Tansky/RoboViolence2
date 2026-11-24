@@ -18,10 +18,10 @@
 
 #ifndef CONSOLE
 #include "Game.h"
-#include "Console.h"
-#include "Scene.h"
-#include "ViewGeometry.h"
-
+#	include "MapThemes.h"
+#	include "Console.h"
+#	include "Scene.h"
+#	include "ViewGeometry.h"
 
 extern Scene * scene;
 
@@ -128,9 +128,9 @@ void Game::render()
 	#ifdef RENDER_LAYER_TOGGLE
 		if (renderToggle >= 0)
 	#endif
-		if (gameVar.r_reflection && (map->weather == WEATHER_RAIN || map->theme == THEME_SNOW))
-		{
-			glPushMatrix();
+			if (gameVar.r_reflection && (map->weather == WEATHER_RAIN || bv2::themeLook(map->theme) == bv2::LOOK_WINTER_COMING))
+			{
+				glPushMatrix();
 				glScalef(1,1,-1);
 				glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT | GL_LIGHTING_BIT);
 
@@ -260,7 +260,7 @@ void Game::render()
 			glPopMatrix();
 
 			glClear(GL_DEPTH_BUFFER_BIT);
-		}
+			}
 
 	//	glEnable(GL_LIGHTING);
 

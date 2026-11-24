@@ -113,4 +113,5 @@ What we do, in one or two sentences.
 | [ROBO-253](ROBO-253-weekly-workflow-metrics.md) | A weekly workflow appends PR and CI numbers to a CSV in rv2-docs | Accepted |
 | [ROBO-254](ROBO-254-regenerate-goldens-in-ci.md) | A workflow run by hand on a branch regenerates its screenshot goldens and shows before and after | Accepted |
 | [ROBO-256](ROBO-256-claude-code-guard-hooks.md) | A Claude Code hook refuses forbidden commands and a commit hook refuses Claude trailers | Accepted |
+| [ROBO-259](ROBO-259-four-map-looks-alias-theme-ids.md) | Four map looks; the 23 theme ids map files store are aliases, unknown ids get Wasteland | Accepted |
 | [ROBO-264](ROBO-264-art-pack-checks-and-fixture.md) | An art pack is checked against the base pack, and CI plays a generated fixture art pack | Accepted |

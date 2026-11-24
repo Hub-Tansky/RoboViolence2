@@ -18,6 +18,7 @@
 
 
 #include "Map.h"
+#include "MapThemes.h"
 #include "Game.h"
 #include "SpawnOverlay.h"
 
@@ -54,7 +55,7 @@ void Map::buildGround()
 	if (gameVar.r_terrainSplater)
 	{
 		//--- Reflections on?
-		if (gameVar.r_reflection && (weather == WEATHER_RAIN || theme == THEME_SNOW))
+		if (gameVar.r_reflection && (weather == WEATHER_RAIN || bv2::themeLook(theme) == bv2::LOOK_WINTER_COMING))
 		{
 			//--- Use a blended version
 			builder.bind(base_weather);

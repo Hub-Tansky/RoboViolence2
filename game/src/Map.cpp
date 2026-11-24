@@ -595,18 +595,11 @@ void Map::reloadWeather()
 
 	fogDensity = 0;
 
-	// Set weather to match theme
-	if (theme == THEME_GRAIN)
-		weather = WEATHER_FOG;
-	if ((theme == THEME_SNOW) || (theme == THEME_FROZEN) || (theme == THEME_WINTER))
-		weather = WEATHER_SNOW;
-	else if ((theme == THEME_SAND) || (theme == THEME_STREET))
-		weather = WEATHER_SANDSTORM;
-	else if ((theme == THEME_CITY) || (theme == THEME_RAINY) || (theme == THEME_ROAD))
-		weather = WEATHER_RAIN;
-	else if ((theme == THEME_LAVA) || (theme == THEME_CORE) || (theme == THEME_ROCK))
-		weather = WEATHER_LAVA;
-	else weather = WEATHER_NONE;
+	// Weather follows the look, not the old theme id (ROBO-259)
+	static_assert(bv2::LOOK_WEATHER_SANDSTORM == WEATHER_SANDSTORM && bv2::LOOK_WEATHER_LAVA == WEATHER_LAVA &&
+					  bv2::LOOK_WEATHER_SNOW == WEATHER_SNOW && bv2::LOOK_WEATHER_NONE == WEATHER_NONE,
+				  "MapThemes.h weather numbers match Map.h");
+	weather = bv2::lookWeather(bv2::themeLook(theme));
 
 	if (weather == WEATHER_RAIN)
 	{
@@ -630,6 +623,11 @@ void Map::reloadWeather()
 	{
 		fogDensity = 0;
 		m_weather = new CLava();
+	}
+	if (weather == WEATHER_SANDSTORM)
+	{
+		fogDensity = 0;
+		m_weather = new CLava("sounds/wind"); // CLava loops any ambient sound: Wasteland's wind
 	}
 }
 
@@ -943,40 +941,22 @@ void Map::reloadTheme()
 	if (tex_wall_top) dktDeleteTexture(&tex_wall_top);*/
 
 	static_assert(bv2::THEME_NAME_COUNT == THEME_END - THEME_START + 1, "MapThemes.h names every theme");
-	CString themeStr = theme >= THEME_START && theme <= THEME_END ? bv2::THEME_NAMES[theme - THEME_START] : "";
-	if(themeStr == "" || gameVar.cl_grassTextureForAllMaps)
+	// ROBO-259: the theme id is an alias for one of four looks; the map keeps its id. cl_grassTextureForAllMaps shows
+	// grass's look on every map without changing the map's id. Under the BV2 data the look's placeholder doesn't show
+	// through (ADR 0069), so its load fails and the map's own BV2 theme folder is used (ground rule 1).
+	const int shownTheme = gameVar.cl_grassTextureForAllMaps ? THEME_GRASS : theme;
+	const char* lookFolder = bv2::LOOK_FOLDERS[bv2::themeLook(shownTheme)];
+	const char* oldFolder = shownTheme >= THEME_START && shownTheme <= THEME_END ? bv2::THEME_NAMES[shownTheme - THEME_START]
+																				 : bv2::THEME_NAMES[bv2::LOOK_THEME_IDS[bv2::LOOK_FALLBACK]];
+	unsigned int* textures[] = {&tex_grass, &tex_dirt, &tex_wall};
+	for (int i = 0; i < 3; ++i)
 	{
-		theme = THEME_GRASS;
-		themeStr = bv2::THEME_NAMES[THEME_GRASS - THEME_START];
+		*textures[i] = dktCreateTextureFromFile(bv2::assetPath(bv2::themeTextureId(lookFolder, bv2::THEME_TEXTURES[i]).c_str()),
+												DKT_FILTER_BILINEAR);
+		if (*textures[i] == 0)
+			*textures[i] = dktCreateTextureFromFile(
+				bv2::assetPath(bv2::themeTextureId(oldFolder, bv2::THEME_TEXTURES[i]).c_str()), DKT_FILTER_BILINEAR);
 	}
-
-	// Les textures
-/*	tex_grass = dktCreateTextureFromFile("main/textures/grass.tga", DKT_FILTER_BILINEAR);
-	tex_dirt = dktCreateTextureFromFile("main/textures/dirt1.tga", DKT_FILTER_BILINEAR);
-	tex_wall = dktCreateTextureFromFile("main/textures/dirt2.tga", DKT_FILTER_BILINEAR);*/
-
-	tex_grass = dktCreateTextureFromFile(bv2::assetPath(bv2::themeTextureId(themeStr.s, bv2::THEME_TEXTURES[0]).c_str()), DKT_FILTER_BILINEAR);
-	if(tex_grass == 0)
-		tex_grass = dktCreateTextureFromFile(bv2::assetPath("textures/themes/grass/tex_floor"), DKT_FILTER_BILINEAR);
-	tex_dirt = dktCreateTextureFromFile(bv2::assetPath(bv2::themeTextureId(themeStr.s, bv2::THEME_TEXTURES[1]).c_str()), DKT_FILTER_BILINEAR);
-	if(tex_dirt == 0)
-		tex_dirt = dktCreateTextureFromFile(bv2::assetPath("textures/themes/grass/tex_floor_dirt"), DKT_FILTER_BILINEAR);
-//	tex_wall_bottom = dktCreateTextureFromFile((CString("main/textures/themes/") + themeStr + "/tex_wall_bottom.tga").s, DKT_FILTER_BILINEAR);
-	tex_wall = dktCreateTextureFromFile(bv2::assetPath(bv2::themeTextureId(themeStr.s, bv2::THEME_TEXTURES[2]).c_str()), DKT_FILTER_BILINEAR);
-	if(tex_wall == 0)
-		tex_wall = dktCreateTextureFromFile(bv2::assetPath("textures/themes/grass/tex_wall_center"), DKT_FILTER_BILINEAR);
-//	tex_wall_up = dktCreateTextureFromFile((CString("main/textures/themes/") + themeStr + "/tex_wall_up.tga").s, DKT_FILTER_BILINEAR);
-//	tex_wall_top = dktCreateTextureFromFile((CString("main/textures/themes/") + themeStr + "/tex_wall_top.tga").s, DKT_FILTER_BILINEAR);
-//	tex_wall_both = dktCreateTextureFromFile((CString("main/textures/themes/") + themeStr + "/tex_wall_both.tga").s, DKT_FILTER_BILINEAR);
-/*
-	tex_floor = dktCreateTextureFromFile((CString("main/textures/themes/") + themeStr + "/tex_floor.tga").s, DKT_FILTER_BILINEAR);
-	tex_floor_dirt = dktCreateTextureFromFile((CString("main/textures/themes/") + themeStr + "/tex_floor_dirt.tga").s, DKT_FILTER_BILINEAR);
-	tex_wall_bottom = dktCreateTextureFromFile((CString("main/textures/themes/") + themeStr + "/tex_wall_bottom.tga").s, DKT_FILTER_BILINEAR);
-	tex_wall_center = dktCreateTextureFromFile((CString("main/textures/themes/") + themeStr + "/tex_wall_center.tga").s, DKT_FILTER_BILINEAR);
-	tex_wall_up = dktCreateTextureFromFile((CString("main/textures/themes/") + themeStr + "/tex_wall_up.tga").s, DKT_FILTER_BILINEAR);
-	tex_wall_top = dktCreateTextureFromFile((CString("main/textures/themes/") + themeStr + "/tex_wall_top.tga").s, DKT_FILTER_BILINEAR);
-	tex_wall_both = dktCreateTextureFromFile((CString("main/textures/themes/") + themeStr + "/tex_wall_both.tga").s, DKT_FILTER_BILINEAR);
-*/
 	buildAll();
 }
 #endif

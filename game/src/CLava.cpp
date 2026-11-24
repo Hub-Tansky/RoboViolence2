@@ -28,9 +28,9 @@
 //
 //--- Constructor
 //
-CLava::CLava()
+CLava::CLava(const char* soundId)
 {
-	m_sfxRain = dksCreateSoundFromFile(bv2::assetPath("sounds/lava"), true);
+	m_sfxRain = dksCreateSoundFromFile(bv2::assetPath(soundId), true);
 
 	//--- Start the sound
 	channel = dksPlaySound(m_sfxRain, -1, 50);
