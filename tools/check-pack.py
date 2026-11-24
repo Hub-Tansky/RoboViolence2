@@ -24,9 +24,13 @@ def image_info(path):
     """(width, height, has alpha) of a PNG or TGA file, or None when it is neither"""
     with open(path, "rb") as f:
         data = f.read()
-    if data.startswith(b"\x89PNG\r\n\x1a\n") and data[12:16] == b"IHDR":
+    if data.startswith(b"\x89PNG\r\n\x1a\n") and data[12:16] == b"IHDR" and len(data) >= 26:
         width, height, _depth, colour = struct.unpack(">IIBB", data[16:26])
-        return width, height, colour in (4, 6) or b"tRNS" in data
+        pos, trns = 8, False
+        while pos + 8 <= len(data) and data[pos + 4:pos + 8] != b"IDAT":  # tRNS comes before the pixel data
+            trns = trns or data[pos + 4:pos + 8] == b"tRNS"
+            pos += struct.unpack(">I", data[pos:pos + 4])[0] + 12
+        return width, height, colour in (4, 6) or trns
     if path.lower().endswith(".tga") and len(data) >= 18:
         width, height, bits = struct.unpack("<HHB", data[12:17])
         return width, height, bits == 32

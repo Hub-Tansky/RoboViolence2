@@ -2,10 +2,10 @@
 """Phase T4: end-to-end scenarios: bv2dedicated with the admin API, plus bv2 autotest clients under Xvfb.
 
 Usage: e2e.py <runtime dir> <scratch dir> <scenario>
-Scenarios: join_leave, password, chat, kick, ban, master_list, browser_tab_list, ctf_capture,
-                                     ctf_capture_art_pack, ghost, user_map, weapon_choice,
-grenade, rocket, flamethrower, photon_rifle, nuke. Each has one observable: the admin API's
-`GET /status` player count or score, the server's stdout, or a client's autotest result (ADR 0025). Linux only (Xvfb).
+Scenarios: join_leave, password, chat, kick, ban, master_list, browser_tab_list, ctf_capture, ctf_capture_art_pack,
+ghost, user_map, weapon_choice, grenade, rocket, flamethrower, photon_rifle, nuke.
+Each has one observable: the admin API's `GET /status` player count or score, the server's stdout, or a client's
+autotest result (ADR 0025). Linux only (Xvfb).
 """
 import os
 import re

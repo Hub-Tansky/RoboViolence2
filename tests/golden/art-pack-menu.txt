@@ -1,4 +1,4 @@
-# Main menu on the fixture art pack (ROBO-264): PNG textures from a pack with its own pack.tsv, stacked over the base pack
+# Main menu on the fixture art pack (ROBO-264): the layout stays as on the base pack (D1); only the cursor comes from the pack
 expect-scene menu
 wait 2
 screenshot art-pack-menu

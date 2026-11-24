@@ -17,7 +17,7 @@ An asset pack is a folder whose root holds `pack.tsv`, a UTF-8 TAB-separated man
 | `file` | Path below the pack root |
 | `type` | `texture`, `sound`, `model` or `font` |
 | `format` | What the loader needs (TGA size and depth, WAV channels and rate, DKO meshes); placeholders copy it |
-| `author`, `tool`, `licence` | Who made it, with what, and the SPDX licence. Required except `tool` |
+| `author`, `tool`, `licence` | Who made it, with what, and the SPDX licence. Required except `tool` (required too under `LicenseRef-RV2-Art`, ROBO-264) |
 | `source` | Where it came from; `generated placeholder`, or `missing` when the pack has no file yet (the check allows it and prints a NOTE) |
 
 ## Consequences
