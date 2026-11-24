@@ -20,7 +20,8 @@ namespace bv2
 	bool artPackInstalled(const std::string& dir, const std::string& version);
 
 	// True when the player turned the download off: --no-art-download in argv (remembered) or the remembered file
-	// <prefDir>/art-download-off. Writes that file when the flag is given.
+	// <prefDir>/art-download-off. Writes that file when the flag is given. Also true, not remembered, for --placeholders
+	// (base pack only: tests and screenshots never download the art).
 	bool artDownloadOff(int argc, const char* const* argv, const std::string& prefDir);
 
 	// curl's argv: url to file

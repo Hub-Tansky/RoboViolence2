@@ -9,12 +9,12 @@
 
 namespace fs = std::filesystem;
 
-// Pinned per release by the art drop (ADR ROBO-260); empty until the first art pack is published. URL form:
+// Pinned per release by the art drop (ADR ROBO-260): Hub-Tansky/rv2-art release, built by its tools/build-release.sh. URL form:
 // https://github.com/Hub-Tansky/rv2-art/releases/download/rv2-art-<version>/rv2-art-<version>.tar.gz
-#define RV2_ART_PACK_VERSION ""
-#define RV2_ART_PACK_URL ""
-#define RV2_ART_PACK_SHA256 ""
-#define RV2_ART_PACK_BYTES 60.0e6
+#define RV2_ART_PACK_VERSION "1"
+#define RV2_ART_PACK_URL "https://github.com/Hub-Tansky/rv2-art/releases/download/rv2-art-1/rv2-art-1.tar.gz"
+#define RV2_ART_PACK_SHA256 "bbad5245969f1d8966ca67a6c56aa116ccebba9dc87fe9e263d53d7109a3f1b6"
+#define RV2_ART_PACK_BYTES 8450732.0
 
 namespace
 {
@@ -50,6 +50,9 @@ namespace bv2
 	bool artDownloadOff(int argc, const char* const* argv, const std::string& prefDir)
 	{
 		const fs::path off = fs::path(prefDir) / "art-download-off";
+		for (int i = 1; i < argc; ++i)
+			if (std::strcmp(argv[i], "--placeholders") == 0)
+				return true;
 		for (int i = 1; i < argc; ++i)
 			if (std::strcmp(argv[i], "--no-art-download") == 0)
 			{

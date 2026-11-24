@@ -68,6 +68,9 @@ int main(int argc, char** argv)
 	const char* none[] = {"bv2"};
 	const char* flag[] = {"bv2", "--no-art-download"};
 	check(!bv2::artDownloadOff(1, none, pref.string()), "the download is off by default");
+	const char* placeholders[] = {"bv2", "--placeholders"};
+	check(bv2::artDownloadOff(2, placeholders, pref.string()), "--placeholders does not turn it off");
+	check(!bv2::artDownloadOff(1, none, pref.string()), "--placeholders is remembered");
 	check(bv2::artDownloadOff(2, flag, pref.string()), "--no-art-download does not turn it off");
 	check(bv2::artDownloadOff(1, none, pref.string()), "--no-art-download is not remembered");
 
