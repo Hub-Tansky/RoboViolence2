@@ -595,22 +595,11 @@ void Map::reloadWeather()
 
 	fogDensity = 0;
 
-	// Weather follows the look, not the old theme id (ROBO-259): Wasteland wind, Foundry lava sound, Winter Coming snow
-	switch (bv2::themeLook(theme))
-	{
-		case bv2::LOOK_WASTELAND:
-			weather = WEATHER_SANDSTORM;
-			break;
-		case bv2::LOOK_FOUNDRY:
-			weather = WEATHER_LAVA;
-			break;
-		case bv2::LOOK_WINTER_COMING:
-			weather = WEATHER_SNOW;
-			break;
-		default:
-			weather = WEATHER_NONE;
-			break;
-	}
+	// Weather follows the look, not the old theme id (ROBO-259)
+	static_assert(bv2::LOOK_WEATHER_SANDSTORM == WEATHER_SANDSTORM && bv2::LOOK_WEATHER_LAVA == WEATHER_LAVA &&
+					  bv2::LOOK_WEATHER_SNOW == WEATHER_SNOW && bv2::LOOK_WEATHER_NONE == WEATHER_NONE,
+				  "MapThemes.h weather numbers match Map.h");
+	weather = bv2::lookWeather(bv2::themeLook(theme));
 
 	if (weather == WEATHER_RAIN)
 	{
@@ -638,7 +627,7 @@ void Map::reloadWeather()
 	if (weather == WEATHER_SANDSTORM)
 	{
 		fogDensity = 0;
-		m_weather = new CLava("sounds/wind");
+		m_weather = new CLava("sounds/wind"); // CLava loops any ambient sound: Wasteland's wind
 	}
 }
 

@@ -66,6 +66,17 @@ namespace bv2
 		return themeId >= 0 && themeId < THEME_NAME_COUNT ? THEME_LOOKS[themeId] : LOOK_FALLBACK;
 	}
 
+	// Weather of a look, as Map.h's WEATHER_* number (Map.cpp checks they match): Wasteland wind (WEATHER_SANDSTORM),
+	// Foundry lava sound, Winter Coming snow, Scrap Deck none
+	constexpr int LOOK_WEATHER_SANDSTORM = 4, LOOK_WEATHER_LAVA = 5, LOOK_WEATHER_SNOW = 2, LOOK_WEATHER_NONE = 0;
+	constexpr int lookWeather(MapLook look)
+	{
+		return look == LOOK_WASTELAND		? LOOK_WEATHER_SANDSTORM
+			   : look == LOOK_FOUNDRY		? LOOK_WEATHER_LAVA
+			   : look == LOOK_WINTER_COMING ? LOOK_WEATHER_SNOW
+											: LOOK_WEATHER_NONE;
+	}
+
 	// The look after this one, for the editor's Theme button
 	inline MapLook nextLook(MapLook look)
 	{

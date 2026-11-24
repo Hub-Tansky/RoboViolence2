@@ -18,6 +18,7 @@
 
 ## Consequences
 - The base pack keeps the 69 old theme rows (BV2 data fallback) and adds 12 look rows; the old rows go when BV2 data support ends.
+- `reloadTheme` no longer overwrites `theme` with grass for an unknown id or `cl_grassTextureForAllMaps`; ice slide, lava smoke and reflection follow the map's real id or look in both cases.
 - Fog and rain weathers are no longer picked by any map; their code stays.
 - A map saved by the editor on a look keeps a valid old id, so an older build shows its BV2 theme.
 - Rejected: new ids 23 to 26 (older builds would fall back to grass); migrating map files (owner chose alias).

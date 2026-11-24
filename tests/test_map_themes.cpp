@@ -70,6 +70,13 @@ int main()
 			  "textures/themes/winter-coming/tex_floor",
 		  "texture id uses the look folder");
 
+	// Weather per look (owner 2026-11-24): Wasteland wind, Foundry lava sound, Winter Coming snow, Scrap Deck none
+	check(bv2::lookWeather(bv2::themeLook(themeId("rock"))) == bv2::LOOK_WEATHER_SANDSTORM, "Wasteland has wind");
+	check(bv2::lookWeather(bv2::themeLook(themeId("wooden"))) == bv2::LOOK_WEATHER_LAVA, "Foundry has the lava sound");
+	check(bv2::lookWeather(bv2::themeLook(themeId("frozen"))) == bv2::LOOK_WEATHER_SNOW, "Winter Coming has snow");
+	check(bv2::lookWeather(bv2::themeLook(themeId("rainy"))) == bv2::LOOK_WEATHER_NONE, "Scrap Deck has none (no rain)");
+	check(bv2::lookWeather(bv2::themeLook(99)) == bv2::LOOK_WEATHER_SANDSTORM, "an unknown id gets Wasteland's wind");
+
 	// The editor cycles exactly the four looks and writes an old id that resolves back to the same look
 	bv2::MapLook look = bv2::LOOK_WASTELAND;
 	for (int i = 0; i < bv2::LOOK_COUNT; ++i)
