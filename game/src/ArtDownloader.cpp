@@ -131,7 +131,7 @@ namespace bv2
 		if (*ART_PACK_VERSION == 0 || artPackInstalled(artPackDir(), ART_PACK_VERSION) ||
 			artDownloadOff(argc, (const char* const*)argv, prefDir()))
 			return;
-		g_archive = artPackDir() + ".partial/rv2-art.tar.gz";
+		g_archive = artArchivePath(artPackDir() + ".partial");
 		g_state = RUNNING;
 		std::thread(download, artPackDir() + ".partial", artPackDir()).detach(); // artDownloadStop ends it
 	}

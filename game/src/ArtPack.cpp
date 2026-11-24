@@ -78,11 +78,16 @@ namespace bv2
 		return !sha256.empty() && sha256File(archive) == sha256;
 	}
 
+	std::string artArchivePath(const std::string& partial)
+	{
+		return (fs::path(partial) / "rv2-art.tar.gz").string();
+	}
+
 	std::string fetchArtPack(const std::string& partial, const std::string& url, const std::string& sha256,
 							 const std::string& version, const std::string& target, const ArtRunner& run,
 							 const std::function<bool()>& stopped)
 	{
-		const fs::path dir(partial), archive = fs::path(partial) / "rv2-art.tar.gz", pack = fs::path(partial) / "pack";
+		const fs::path dir(partial), archive(artArchivePath(partial)), pack = fs::path(partial) / "pack";
 		std::error_code ec;
 		fs::remove_all(dir, ec);
 		fs::create_directories(pack, ec);
@@ -103,8 +108,19 @@ namespace bv2
 	std::string installArtPack(const std::string& dir, const std::string& version, const std::string& target)
 	{
 		std::error_code ec;
-		if (!fs::is_regular_file(fs::path(dir) / "main" / "pack.tsv", ec))
+		const fs::path main = fs::path(dir) / "main";
+		if (!fs::is_regular_file(main / "pack.tsv", ec))
 			return "the archive has no main/pack.tsv";
+		std::ifstream manifest(main / "pack.tsv");
+		for (std::string line; std::getline(manifest, line);)
+		{
+			const size_t tab = line.find('\t');
+			if (line.empty() || line[0] == '#' || tab == std::string::npos || line.compare(0, tab, "id") == 0)
+				continue;
+			const std::string file = line.substr(tab + 1, line.find('\t', tab + 1) - tab - 1);
+			if (!fs::is_regular_file(main / file, ec)) // a short unpack (disk full) must not install
+				return "the archive lacks " + file;
+		}
 		std::ofstream(fs::path(dir) / "VERSION") << version << "\n";
 		return replaceDir(dir, target);
 	}

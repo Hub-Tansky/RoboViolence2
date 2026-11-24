@@ -45,6 +45,10 @@ int main(int argc, char** argv)
 	write(unpacked / "main" / "pack.tsv", "id\tfile\n");
 	check(bv2::installArtPack((dir / "partial" / "nopack").string(), "1", target.string()) != "",
 		  "a folder without main/pack.tsv installs");
+	write(unpacked / "main" / "pack.tsv", "id\tfile\ntextures/a\ttextures/a.png\ttexture\n");
+	check(bv2::installArtPack(unpacked.string(), "1", target.string()) != "" && !fs::exists(target),
+		  "a pack missing a listed file installs");
+	write(unpacked / "main" / "textures" / "a.png", "png");
 	check(bv2::installArtPack(unpacked.string(), "1", target.string()) == "", "a valid pack does not install");
 	check(bv2::artPackInstalled(target.string(), "1"), "an installed pack is not found");
 	check(!bv2::artPackInstalled(target.string(), "2"), "an older pack counts as this build's");

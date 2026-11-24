@@ -36,6 +36,9 @@ namespace bv2
 	// Runs one argv to its end: false when it could not start, failed or was stopped
 	using ArtRunner = std::function<bool(const std::vector<std::string>&)>;
 
+	// The downloaded archive's path inside the scratch folder partial
+	std::string artArchivePath(const std::string& partial);
+
 	// The whole download in the scratch folder partial (emptied first, removed at the end): run curl for url into
 	// partial/rv2-art.tar.gz, check its SHA-256, run tar into partial/pack, then installArtPack into target. stopped is
 	// asked after each command; a stop, a failed command, a wrong hash or a missing pack.tsv installs nothing.
@@ -44,7 +47,7 @@ namespace bv2
 							 const std::string& version, const std::string& target, const ArtRunner& run,
 							 const std::function<bool()>& stopped);
 
-	// Writes VERSION into dir (the unpacked pack, holding main/pack.tsv) and moves it to target. "" on success, else
+	// Writes VERSION into dir (the unpacked pack, holding main/pack.tsv and every file it lists) and moves it to target. "" on success, else
 	// the reason.
 	std::string installArtPack(const std::string& dir, const std::string& version, const std::string& target);
 }
