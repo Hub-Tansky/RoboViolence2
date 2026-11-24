@@ -111,15 +111,17 @@ namespace bv2
 		const fs::path main = fs::path(dir) / "main";
 		if (!fs::is_regular_file(main / "pack.tsv", ec))
 			return "the archive has no main/pack.tsv";
-		std::ifstream manifest(main / "pack.tsv");
-		for (std::string line; std::getline(manifest, line);)
-		{
-			const size_t tab = line.find('\t');
-			if (line.empty() || line[0] == '#' || tab == std::string::npos || line.compare(0, tab, "id") == 0)
-				continue;
-			const std::string file = line.substr(tab + 1, line.find('\t', tab + 1) - tab - 1);
-			if (!fs::is_regular_file(main / file, ec)) // a short unpack (disk full) must not install
-				return "the archive lacks " + file;
+		{ // closed before the rename: Windows can't move a folder holding an open file
+			std::ifstream manifest(main / "pack.tsv");
+			for (std::string line; std::getline(manifest, line);)
+			{
+				const size_t tab = line.find('\t');
+				if (line.empty() || line[0] == '#' || tab == std::string::npos || line.compare(0, tab, "id") == 0)
+					continue;
+				const std::string file = line.substr(tab + 1, line.find('\t', tab + 1) - tab - 1);
+				if (!fs::is_regular_file(main / file, ec)) // a short unpack (disk full) must not install
+					return "the archive lacks " + file;
+			}
 		}
 		std::ofstream(fs::path(dir) / "VERSION") << version << "\n";
 		return replaceDir(dir, target);
