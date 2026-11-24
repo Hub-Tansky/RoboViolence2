@@ -1,6 +1,6 @@
 # 0069: Asset packs stack over the base pack; the BV2 data is an optional pack on top
 
-- Status: Accepted
+- Status: Accepted; amended by [ROBO-264](ROBO-264-art-pack-checks-and-fixture.md)
 - Date: 2026-11-18
 - Affects: `game/src/AssetRegistry.h`, `game/src/AssetRegistry.cpp`, `game/src/BasePackIds.h`, `game/src/BasePackIds.cpp.in`, `game/CMakeLists.txt`, `game/src/main.cpp`; ROBO-234 (refactor Phase 1 A4, [ADR 0062](0062-asset-packs-mode-modules-client-independent-server.md) asset seam); succeeds [0010](0010-bv2-asset-compat-and-gui-freeze.md) for asset loading; builds on [0065](0065-asset-pack-manifest.md), [0066](0066-game-loads-assets-by-id.md) and [0042](0042-game-assets-option-remembers-placeholders.md)
 
@@ -21,5 +21,5 @@
 - When the owner replaces a row with art (`source` no longer `generated placeholder`), players on BV2 data get that file where their data lacks it, e.g. a real `textures/sky`.
 - Only two levels exist today (the chosen folder over the base pack). A list of packs (mods, map packs) is the same call with more roots and needs a place to choose them, which is new GUI and needs the owner's approval.
 - Maps, skins, launch scripts and languages are not manifest rows and keep their own lookups (ADRs 0016, 0054).
-- `test_asset_registry` covers the stack: top pack, fall-through, a `pack.tsv` override and added id, a missing file falling through, and placeholders hidden only under the BV2 data. The e2e join and capture scenarios run on the base pack alone (placeholders); `e2e_ctf_capture_art_pack` and the `art-pack-*` goldens stack a generated art pack (ROBO-264).
+- `test_asset_registry` covers the stack: top pack, fall-through, a `pack.tsv` override and added id, a missing file falling through, and placeholders hidden only under the BV2 data. The e2e join and capture scenarios run on the base pack alone (placeholders).
 - Rejected: hiding every base file under the BV2 data (new art would never reach those players); showing placeholders through it (a flat placeholder sky changed the floor reflections on CTF-Amazon by about 313,000 px).

@@ -1,6 +1,6 @@
 # 0065: An asset pack is a folder with a pack.tsv manifest; the base pack's is content/base-pack.tsv
 
-- Status: Accepted
+- Status: Accepted; amended by [ROBO-264](ROBO-264-art-pack-checks-and-fixture.md)
 - Date: 2026-11-17
 - Affects: `content/base-pack.tsv` (replaces `tools/placeholder-manifest.tsv`), `tools/gen-placeholder-content.py`, `tools/check-pack.py`, `tools/check-content-case.py`, root `CMakeLists.txt`; ROBO-231 (refactor Phase 1 A1, [ADR 0062](0062-asset-packs-mode-modules-client-independent-server.md) asset seam)
 
@@ -17,7 +17,7 @@ An asset pack is a folder whose root holds `pack.tsv`, a UTF-8 TAB-separated man
 | `file` | Path below the pack root |
 | `type` | `texture`, `sound`, `model` or `font` |
 | `format` | What the loader needs (TGA size and depth, WAV channels and rate, DKO meshes); placeholders copy it |
-| `author`, `tool`, `licence` | Who made it, with what, and the SPDX licence. Required except `tool` (required too under `LicenseRef-RV2-Art`, ROBO-264) |
+| `author`, `tool`, `licence` | Who made it, with what, and the SPDX licence. Required except `tool` |
 | `source` | Where it came from; `generated placeholder`, or `missing` when the pack has no file yet (the check allows it and prints a NOTE) |
 
 ## Consequences

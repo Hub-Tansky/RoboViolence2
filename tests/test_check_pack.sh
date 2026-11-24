@@ -79,6 +79,17 @@ manifest "$(art fonts/babo textures/sky.png texture)"
 expect_base "a type other than the base row's fails" 1 "type texture, base pack has font"
 manifest "$(art textures/themes/wasteland/tex_floor textures/sky.png texture)"
 expect_base "a new id passes and is listed" 0 "NOTE textures/themes/wasteland/tex_floor: new id"
+python3 - <<'PY' # an RGB PNG whose pixel data holds the bytes tRNS, and one with a real tRNS chunk before IDAT
+import struct, zlib
+def chunk(kind, body): return struct.pack(">I", len(body)) + kind + body + struct.pack(">I", zlib.crc32(kind + body))
+ihdr = chunk(b"IHDR", struct.pack(">IIBBBBB", 64, 64, 8, 2, 0, 0, 0))
+open("textures/fake.png", "wb").write(b"\x89PNG\r\n\x1a\n" + ihdr + chunk(b"IDAT", b"..tRNS..") + chunk(b"IEND", b""))
+open("textures/key.png", "wb").write(b"\x89PNG\r\n\x1a\n" + ihdr + chunk(b"tRNS", b"\0\0\0\0\0\0") + chunk(b"IDAT", b"") + chunk(b"IEND", b""))
+PY
+manifest "$(art textures/Halo textures/fake.png texture)"
+expect_base "tRNS bytes inside the pixel data are not alpha" 1 "no alpha"
+manifest "$(art textures/Halo textures/key.png texture)"
+expect_base "a tRNS chunk before the pixel data is alpha" 0 "ok: pack"
 manifest "$(art textures/Sky textures/A.tga texture)"
 expect_base "a texture that is not a PNG or TGA picture fails" 1 "is not a PNG or TGA"
 
