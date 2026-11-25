@@ -11,10 +11,10 @@ namespace fs = std::filesystem;
 
 // Pinned per release by the art drop (ADR ROBO-260): Hub-Tansky/rv2-art release, built by its tools/build-release.sh. URL form:
 // https://github.com/Hub-Tansky/rv2-art/releases/download/rv2-art-<version>/rv2-art-<version>.tar.gz
-#define RV2_ART_PACK_VERSION "3"
-#define RV2_ART_PACK_URL "https://github.com/Hub-Tansky/rv2-art/releases/download/rv2-art-3/rv2-art-3.tar.gz"
-#define RV2_ART_PACK_SHA256 "6ffd85077b2d1dfdfd979982d3ed09e8d3b0836763e81c647c305bc6e081d8d1"
-#define RV2_ART_PACK_BYTES 15129886.0
+#define RV2_ART_PACK_VERSION "4"
+#define RV2_ART_PACK_URL "https://github.com/Hub-Tansky/rv2-art/releases/download/rv2-art-4/rv2-art-4.tar.gz"
+#define RV2_ART_PACK_SHA256 "5be50226abdab0a001b21d5335a471604e066ddff68be4ddbd41523da7e39af3"
+#define RV2_ART_PACK_BYTES 15198972.0
 
 namespace
 {
