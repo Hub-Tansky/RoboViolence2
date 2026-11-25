@@ -2,12 +2,16 @@
 """ROBO-239: tools/gltf-to-dko.py turns a small glTF (as .gltf and as .glb) into a .DKO with the expected meshes,
 materials, material groups, vertices and dummy; engine/dko loads the result (through dko_probe, when given) and
 reports the same bounding box and dummy position; unsupported input fails with exit 1 instead of a broken file.
+ROBO-247: an animated flag (morph target weights and a moving dummy), a skinned strip and the sampling options
+(--fps, --frames, --no-loop, --animation, STEP and CUBICSPLINE keys) convert to DKO frames with the expected TIME_INFO
+and interpolated vertices, and engine/dko reads every frame.
 
 Usage: test_gltf_to_dko.py <repo root> <scratch dir> [<dko_probe executable>]
 """
 import base64
 import importlib.util
 import json
+import math
 import os
 import shutil
 import struct
@@ -143,7 +147,8 @@ def read_dko(path):
         if cid == c["VERSION"]:
             model["version"] = r.take("h")[0]
         elif cid == c["TIME_INFO"]:
-            model["frames"] = r.take("hhh")[2]
+            model["time_info"] = r.take("hhh")
+            model["frames"] = model["time_info"][2]
         elif cid == c["PROPERTIES"]:
             while (sub := r.chunk()) != c["END"]:
                 {c["NAME"]: r.string, c["POSITION"]: lambda: r.take("3f"), c["MATRIX"]: lambda: r.take("9f")}[sub]()
@@ -186,12 +191,14 @@ def read_dko(path):
                                 g["material"] = r.take("h")[0]
                             elif gc == c["NB_VERTEX"]:
                                 g["n"] = r.take("i")[0]
-                            elif gc == c["VERTEX_ARRAY"]:
-                                f = r.take(f"{g['n'] * 3}f")
-                                g["vertices"] = [f[i:i + 3] for i in range(0, len(f), 3)]
-                            elif gc == c["NORMAL_ARRAY"]:
-                                f = r.take(f"{g['n'] * 3}f")
-                                g["normals"] = [f[i:i + 3] for i in range(0, len(f), 3)]
+                            elif gc in (c["VERTEX_ARRAY"], c["NORMAL_ARRAY"]):
+                                # one array per frame, back to back (CdkoMesh::loadMatGroup)
+                                per = []
+                                for _ in range(model["frames"]):
+                                    f = r.take(f"{g['n'] * 3}f")
+                                    per.append([f[i:i + 3] for i in range(0, len(f), 3)])
+                                key = "vertices" if gc == c["VERTEX_ARRAY"] else "normals"
+                                g[key], g[key + "_frames"] = per[0], per
                             elif gc == c["TEXCOORD_ARRAY"]:
                                 f = r.take(f"{g['n'] * 2}f")
                                 g["uvs"] = [f[i:i + 2] for i in range(0, len(f), 2)]
@@ -207,9 +214,10 @@ def read_dko(path):
                 if sub == c["NAME"]:
                     d["name"] = r.string()
                 elif sub == c["POSITION"]:
-                    d["position"] = r.take("3f")
+                    d["positions"] = [r.take("3f") for _ in range(model["frames"])]
+                    d["position"] = d["positions"][0]
                 elif sub == c["MATRIX"]:
-                    d["matrix"] = r.take("9f")
+                    d["matrix"] = [r.take("9f") for _ in range(model["frames"])][0]
             model["dummies"].append(d)
         else:
             raise ValueError(f"top chunk {cid:#x}")
@@ -324,24 +332,210 @@ check(run(os.path.join(SCRATCH, "external.gltf"), os.path.join(ext_dir, "externa
 check(os.path.exists(os.path.join(ext_dir, "skin2.png")), "external: skin2.png copied beside the DKO")
 
 # unsupported input: exit 1 and no output file
-def animated(d):
+def no_keys(d):
     d["animations"] = [{"channels": [], "samplers": []}]
 
 
-def skinned(d):
+def skin_without_weights(d):
     d["skins"] = [{"joints": [2]}]
     d["nodes"][1]["skin"] = 0
 
 
-def morphed(d):
-    d["meshes"][1]["primitives"][0]["targets"] = [{"POSITION": d["meshes"][1]["primitives"][0]["attributes"]["POSITION"]}]
+def matrix_animated(d):
+    d["nodes"][2]["matrix"] = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    del d["nodes"][2]["translation"]
+    d["accessors"].append({"bufferView": 0, "componentType": 5126, "count": 2, "type": "SCALAR"})
+    d["accessors"].append({"bufferView": 0, "componentType": 5126, "count": 2, "type": "VEC3"})
+    n = len(d["accessors"])
+    d["animations"] = [{"samplers": [{"input": n - 2, "output": n - 1}],
+                        "channels": [{"sampler": 0, "target": {"node": 2, "path": "translation"}}]}]
 
 
-for label, kwargs in (("lines", {"mode": 1}), ("sparse", {"sparse": True}), ("animated", {"edit": animated}),
-                      ("skinned", {"edit": skinned}), ("morphed", {"edit": morphed})):
+for label, kwargs in (("lines", {"mode": 1}), ("sparse", {"sparse": True}), ("no-keys", {"edit": no_keys}),
+                      ("skin-no-weights", {"edit": skin_without_weights}),
+                      ("matrix-animated", {"edit": matrix_animated})):
     src, dst = os.path.join(SCRATCH, label + ".gltf"), os.path.join(SCRATCH, label + ".DKO")
     write_gltf(src, *build(**kwargs))
     check(run(src, dst) == 1 and not os.path.exists(dst), f"{label}: exit 1, no .DKO written")
+
+
+# --- ROBO-247: animated models
+class Blob:
+    """Accessors and buffer views of a glTF under construction."""
+    def __init__(self):
+        self.blob, self.views, self.accessors = bytearray(), [], []
+
+    def add(self, values, kind, fmt="f", ctype=5126):
+        while len(self.blob) % 4:
+            self.blob.append(0)
+        flat = [x for v in values for x in (v if isinstance(v, tuple) else (v,))]
+        data = struct.pack(f"<{len(flat)}{fmt}", *flat)
+        self.views.append({"buffer": 0, "byteOffset": len(self.blob), "byteLength": len(data)})
+        self.blob.extend(data)
+        acc = {"bufferView": len(self.views) - 1, "componentType": ctype, "count": len(values), "type": kind}
+        if kind == "SCALAR" and fmt == "f":
+            acc["min"], acc["max"] = [min(values)], [max(values)]
+        if kind == "VEC3" and fmt == "f":
+            acc["min"] = [min(v[i] for v in values) for i in range(3)]
+            acc["max"] = [max(v[i] for v in values) for i in range(3)]
+        self.accessors.append(acc)
+        return len(self.accessors) - 1
+
+    def doc(self, nodes, meshes, animations, skins=None):
+        d = {"asset": {"version": "2.0"}, "scene": 0, "scenes": [{"nodes": [0]}], "nodes": nodes, "meshes": meshes,
+             "materials": [{"name": "Cloth", "doubleSided": True}], "animations": animations,
+             "accessors": self.accessors, "bufferViews": self.views, "buffers": [{"byteLength": len(self.blob)}]}
+        if skins:
+            d["skins"] = skins
+        return d, bytes(self.blob)
+
+
+# a flag: a 2 x 1 cloth of 4 triangles, one morph target that ripples it along glTF z, its weight 0 -> 1 -> 0 over
+# 1 s, and "Dummy01" (no mesh) sliding 1 m along glTF x; two samplers share the key times
+FLAG = [(0, 0, 0), (1, 0, 0), (1, 1, 0), (0, 0, 0), (1, 1, 0), (0, 1, 0),
+        (1, 0, 0), (2, 0, 0), (2, 1, 0), (1, 0, 0), (2, 1, 0), (1, 1, 0)]
+RIPPLE = [(0, 0, 0.5 * v[0]) for v in FLAG]
+WAVE_T, WAVE_W = [0.0, 0.5, 1.0], [0.0, 1.0, 0.0]
+DUMMY_T = [(0, 0, 0), (1, 0, 0), (0, 0, 0)]
+
+
+def flag(interpolation="LINEAR", extra_animation=False):
+    b = Blob()
+    pos, nrm = b.add(FLAG, "VEC3"), b.add([(0, 0, 1)] * len(FLAG), "VEC3")
+    ripple = b.add(RIPPLE, "VEC3")
+    times = b.add(WAVE_T, "SCALAR")
+    if interpolation == "CUBICSPLINE":  # in-tangent, value, out-tangent per key; flat tangents
+        weights = b.add([x for w in WAVE_W for x in (0.0, w, 0.0)], "SCALAR")
+        slide = b.add([x for v in DUMMY_T for x in ((0, 0, 0), v, (0, 0, 0))], "VEC3")
+    else:
+        weights, slide = b.add(WAVE_W, "SCALAR"), b.add(DUMMY_T, "VEC3")
+    mesh = {"primitives": [{"attributes": {"POSITION": pos, "NORMAL": nrm}, "material": 0,
+                            "targets": [{"POSITION": ripple}]}], "weights": [0.0]}
+    nodes = [{"name": "Flag", "mesh": 0, "children": [1]}, {"name": "Dummy01", "translation": [0, 0, 0]}]
+    anims = [{"name": "wave", "samplers": [{"input": times, "output": weights, "interpolation": interpolation},
+                                           {"input": times, "output": slide, "interpolation": interpolation}],
+              "channels": [{"sampler": 0, "target": {"node": 0, "path": "weights"}},
+                           {"sampler": 1, "target": {"node": 1, "path": "translation"}}]}]
+    if extra_animation:
+        anims.append({"name": "still", "samplers": [{"input": times, "output": weights}],
+                      "channels": [{"sampler": 0, "target": {"node": 0, "path": "weights"}}]})
+    return b.doc(nodes, [mesh], anims)
+
+
+def flag_frame(w):
+    """The flag's vertices in game axes at morph weight w."""
+    return [game(tuple(p + w * r for p, r in zip(v, d))) for v, d in zip(FLAG, RIPPLE)]
+
+
+def flat(vs):
+    return [x for v in vs for x in v]
+
+
+def weight_at(t, interpolation="LINEAR"):
+    k = 0 if t < 0.5 else 1
+    u = (t - WAVE_T[k]) / 0.5
+    a, b = WAVE_W[k], WAVE_W[k + 1]
+    if interpolation == "STEP":
+        return a
+    if interpolation == "CUBICSPLINE":  # flat tangents: Hermite basis h00, h01
+        return (2 * u ** 3 - 3 * u ** 2 + 1) * a + (-2 * u ** 3 + 3 * u ** 2) * b
+    return a + (b - a) * u
+
+
+def convert_flag(label, doc_blob, *extra):
+    src, dst = os.path.join(SCRATCH, label + ".glb"), os.path.join(SCRATCH, label + ".DKO")
+    write_glb(src, *doc_blob)
+    rc = run(src, dst, *extra)
+    check(rc == 0, f"{label}: exit 0, got {rc}")
+    return read_dko(dst) if rc == 0 and os.path.exists(dst) else None
+
+
+# default: 10 frames a second, a loop (frame 9 plays back into frame 0), so 1 s gives TIME_INFO (0, 9, 10)
+m = convert_flag("flag", flag())
+if m:
+    check(m["time_info"] == (0, 9, 10), f"flag: TIME_INFO (0, 9, 10), got {m['time_info']}")
+    g = m["meshes"][0]["groups"][0]
+    check(len(g["vertices_frames"]) == 10 and len(g["normals_frames"]) == 10, "flag: 10 vertex and normal arrays")
+    # frame 3 is t = 0.3 s, between the keys at 0 and 0.5: weight 0.6
+    check(close(flat(g["vertices_frames"][3]), flat(flag_frame(0.6))), "flag: frame 3 is the ripple at weight 0.6")
+    check(close(flat(g["vertices_frames"][5]), flat(flag_frame(1.0))), "flag: frame 5 is the full ripple")
+    check(close(flat(g["vertices_frames"][0]), flat(flag_frame(0.0))), "flag: frame 0 is the flat cloth")
+    d = m["dummies"][0]
+    check(d["name"] == "Dummy01" and len(d["positions"]) == 10, "flag: Dummy01 has 10 positions")
+    check(close(d["positions"][3], game((0.6, 0, 0))), f"flag: Dummy01 at frame 3 {d['positions'][3]}")
+    if PROBE:
+        out = subprocess.run([PROBE, os.path.join(SCRATCH, "flag.DKO"), "Dummy01", "3"], capture_output=True,
+                             text=True)
+        check(out.returncode == 0, f"flag: dko_probe exit {out.returncode}: {out.stdout}{out.stderr}")
+        got = {line.split()[1]: [float(x) for x in line.split()[2:]] for line in out.stdout.splitlines()
+               if line.startswith("probe ")}
+        check(got.get("frames") == [10], f"flag: engine frame count {got.get('frames')}")
+        check(close(got.get("dummy", []), game((0.6, 0, 0))), f"flag: engine Dummy01 at frame 3 {got.get('dummy')}")
+
+# --frames resamples the whole animation; --no-loop keeps the end pose
+m = convert_flag("flag-frames", flag(), "--frames", "4")
+if m:
+    check(m["time_info"] == (0, 3, 4), f"--frames 4: TIME_INFO (0, 3, 4), got {m['time_info']}")
+    v = m["meshes"][0]["groups"][0]["vertices_frames"]
+    check(close(flat(v[1]), flat(flag_frame(0.5))), "--frames 4: frame 1 is t = 0.25 s, weight 0.5")
+m = convert_flag("flag-noloop", flag(), "--no-loop")
+if m:
+    check(m["time_info"] == (0, 10, 11), f"--no-loop: TIME_INFO (0, 10, 11), got {m['time_info']}")
+    v = m["meshes"][0]["groups"][0]["vertices_frames"]
+    check(close(flat(v[10]), flat(flag_frame(0.0))), "--no-loop: frame 10 is the end pose")
+m = convert_flag("flag-fps", flag(), "--fps", "20")
+if m:
+    check(m["time_info"] == (0, 19, 20), f"--fps 20: TIME_INFO (0, 19, 20), got {m['time_info']}")
+
+# STEP holds a key; CUBICSPLINE with flat tangents eases
+for interp in ("STEP", "CUBICSPLINE"):
+    m = convert_flag("flag-" + interp.lower(), flag(interp))
+    if m:
+        v = m["meshes"][0]["groups"][0]["vertices_frames"]
+        w = weight_at(0.3, interp)
+        check(close(flat(v[3]), flat(flag_frame(w))), f"{interp}: frame 3 at weight {w:.3f}")
+
+# two animations need --animation
+src, dst = os.path.join(SCRATCH, "flag-two.glb"), os.path.join(SCRATCH, "flag-two.DKO")
+write_glb(src, *flag(extra_animation=True))
+check(run(src, dst) == 1 and not os.path.exists(dst), "two animations: exit 1 without --animation")
+check(run(src, dst, "--animation", "wave") == 0 and read_dko(dst)["frames"] == 10, "two animations: --animation wave")
+check(run(src, dst, "--animation", "nope") == 1, "two animations: unknown --animation fails")
+
+
+# a skinned strip: two joints, the root still and "tip" turning 90 degrees about glTF z over 1 s; the far vertices
+# follow the tip, the middle ones half and half
+def skinned_strip():
+    b = Blob()
+    verts = [(0, 0, 0), (1, 0, 0), (2, 0, 0)]
+    pos = b.add(verts, "VEC3")
+    joints = b.add([(0, 0, 0, 0), (0, 1, 0, 0), (1, 0, 0, 0)], "VEC4", "B", 5121)
+    weights = b.add([(1, 0, 0, 0), (0.5, 0.5, 0, 0), (1, 0, 0, 0)], "VEC4")
+    # inverse bind: root at the origin, tip at x = 1
+    ibm = b.add([tuple([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]),
+                 tuple([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, -1, 0, 0, 1])], "MAT4")
+    times = b.add([0.0, 1.0], "SCALAR")
+    s = math.sin(math.pi / 4)
+    rot = b.add([(0, 0, 0, 1), (0, 0, s, s)], "VEC4")
+    mesh = {"primitives": [{"attributes": {"POSITION": pos, "JOINTS_0": joints, "WEIGHTS_0": weights},
+                            "material": 0}]}
+    nodes = [{"name": "rig", "children": [1, 2]}, {"name": "strip", "mesh": 0, "skin": 0},
+             {"name": "root", "children": [3]}, {"name": "tip", "translation": [1, 0, 0]}]
+    skins = [{"joints": [2, 3], "inverseBindMatrices": ibm}]
+    anims = [{"samplers": [{"input": times, "output": rot}],
+              "channels": [{"sampler": 0, "target": {"node": 3, "path": "rotation"}}]}]
+    return b.doc(nodes, [mesh], anims, skins)
+
+
+m = convert_flag("skinned", skinned_strip(), "--frames", "2", "--no-loop")
+if m:
+    v = m["meshes"][0]["groups"][0]["vertices_frames"]
+    check(close(flat(v[0]), flat([game((0, 0, 0)), game((1, 0, 0)), game((2, 0, 0))])), "skinned: bind pose")
+    # end: tip turned 90 degrees about z at x = 1, so (2, 0, 0) -> (1, 1, 0); (1, 0, 0) stays (both joints agree)
+    check(close(flat(v[1]), flat([game((0, 0, 0)), game((1, 0, 0)), game((1, 1, 0))])),
+          f"skinned: end pose, got {v[1]}")
+    dummies = [d["name"] for d in m["dummies"]]
+    check(dummies == ["rig", "root", "tip"], f"skinned: joints are dummies, got {dummies}")
 
 print("FAIL" if failures else "OK", f"({len(failures)} failures)")
 sys.exit(1 if failures else 0)

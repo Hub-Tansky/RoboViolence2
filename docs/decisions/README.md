@@ -113,6 +113,7 @@ What we do, in one or two sentences.
 | [ROBO-253](ROBO-253-weekly-workflow-metrics.md) | A weekly workflow appends PR and CI numbers to a CSV in rv2-docs | Accepted |
 | [ROBO-254](ROBO-254-regenerate-goldens-in-ci.md) | A workflow run by hand on a branch regenerates its screenshot goldens and shows before and after | Accepted |
 | [ROBO-256](ROBO-256-claude-code-guard-hooks.md) | A Claude Code hook refuses forbidden commands and a commit hook refuses Claude trailers | Accepted |
+| [ROBO-247](ROBO-247-animated-gltf-samples-into-dko-frames.md) | An animated glTF is sampled into DKO frames at 10 per second; morph targets and skins are baked per frame | Accepted |
 | [ROBO-258](ROBO-258-full-colour-skins-with-team-mask.md) | Full-colour ball skins from the art pack take team colour on a mask; BV2 skins stay the fallback | Accepted |
 | [ROBO-259](ROBO-259-four-map-looks-alias-theme-ids.md) | Four map looks; the 23 theme ids map files store are aliases, unknown ids get Wasteland | Accepted |
 | [ROBO-260](ROBO-260-art-pack-downloads-beside-the-gpl-game.md) | The proprietary art pack downloads in the background into robo_art/ and stacks over the base pack, with no restart | Accepted |

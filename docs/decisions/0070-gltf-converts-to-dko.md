@@ -16,12 +16,12 @@ New models are authored as glTF and converted offline by `tools/gltf-to-dko.py` 
 - texture v is flipped (glTF rows run top-down, the game's textures bottom-up);
 - alpha is stored as DKO transparency, which `engine/dko` reads but does not draw today.
 
-Static models only: animations, skins, morph targets, sparse accessors and non-triangle primitives fail with exit 1 and no output.
+Sparse accessors and non-triangle primitives fail with exit 1 and no output. Animations, morph targets and skins become DKO frames ([ADR ROBO-247](ROBO-247-animated-gltf-samples-into-dko-frames.md)); they failed until then.
 
 ## Consequences
 - No new code or dependency in the client or the server, and one draw path: a converted model goes through the same loader, culling and ray tests as the BV2 models, and the BV2 data loads as before.
 - The converted `.DKO` ships in the pack; the `.glb` stays the source. The pack manifest (ADR 0065) lists the `.DKO`.
 - `test_gltf_to_dko` builds a small glTF (as `.gltf` and `.glb`), converts it and checks meshes, materials, groups, vertices, uv, normals and the dummy with its own reader, then loads the result through `engine/dko` (`dko_probe`) and compares the bounding box, radius and dummy position.
 - Prototype check (2026-11-18, not automated): a procedural `.glb` weapon converted to `models/SMG.DKO` in a copy of the BV2 data drew in the player's hand where the BV2 SMG draws; the same run on placeholder data passed its autotest; the screenshot and the weapon generator are in the ROBO-239 notes.
-- The BV2 weapons are static (one DKO frame); the flags, flag pole, knives and shields are vertex-animated. Converting animated glTF into DKO frames is ROBO-247.
+- The BV2 weapons are static (one DKO frame); the flags, flag pole, knives and shields are vertex-animated. Converting animated glTF into DKO frames: ADR ROBO-247.
 - Rejected: a runtime glTF loader. It adds a parser (cgltf or tinygltf) to client and server, a second draw path for the same scene code, and a second set of ray and sphere tests for collisions, for no gain at runtime; the game would still need every DKO feature (dummies, two-sided materials) mapped from glTF either way.
