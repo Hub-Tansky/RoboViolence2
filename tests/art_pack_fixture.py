@@ -4,7 +4,8 @@
 Usage: art_pack_fixture.py <base manifest> <out dir>
 Writes <out dir>/main/pack.tsv and one flat-colour PNG per texture id of the base pack, the size of the base texture and
 with alpha where it is 32-bit, under licence LicenseRef-RV2-Art. Stacked over the base pack (BV2_DATA_DIR, ADR 0069), it
-makes the game draw PNGs from a pack with its own manifest, as the art will. Fonts stay with the base pack (ROBO-265).
+makes the game draw PNGs from a pack with its own manifest, as the art will. It has no font: the real pack carries
+fonts/babo as a TTF (Teko, ROBO-271), and text_fit tests that bake.
 It also holds one full-colour skin with its team mask, skins/skin10 (ROBO-258): grey above, dark below, a red equator
 band the mask covers and a red stripe above it that the mask leaves out, so a frame shows team colour lands on the mask only.
 Then it runs tools/check-pack.py --base on it; exit 0 when the pack passes.
