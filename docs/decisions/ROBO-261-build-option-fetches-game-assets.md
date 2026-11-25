@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-11-25
-- Affects: `cmake/RV2Assets.cmake`, `CMakeLists.txt` (cache variables, install check), `packaging/make-package.py` (stage check), `bv2::buildPacksDir` and `detectDataDir` in `game/src/Paths.cpp`, `bv2::assetPackStack` in `game/src/ArtPack.cpp`, `game/src/ArtDownloader.cpp`, `tests/assets_fetch.cmake`; ROBO-261 (owner request 2026-11-24); builds on [0040](0040-first-run-downloads-original-data.md), [0065](0065-asset-pack-manifest.md), [ROBO-260](ROBO-260-art-pack-downloads-beside-the-gpl-game.md)
+- Affects: `cmake/RV2Assets.cmake`, `tools/safe-extract.py`, `CMakeLists.txt` (cache variables, install check), `packaging/make-package.py` (stage check), `bv2::buildPacksDir` and `detectDataDir` in `game/src/Paths.cpp`, `bv2::assetPackStack` in `game/src/ArtPack.cpp`, `game/src/ArtDownloader.cpp`, `tests/assets_fetch.cmake`; ROBO-261 (owner request 2026-11-24); builds on [0040](0040-first-run-downloads-original-data.md), [0065](0065-asset-pack-manifest.md), [ROBO-260](ROBO-260-art-pack-downloads-beside-the-gpl-game.md)
 
 ## Context
 - A source build runs on placeholders until the client downloads the art pack (ADR ROBO-260) or the player fetches the original data (ADR 0040). The owner wants real assets in the build folder without that step.
@@ -23,5 +23,5 @@
 
 ## Consequences
 - A developer's first configure downloads the art pack (13 MB for pack 2), once per pin. CI builds fetch nothing; `tests/assets_fetch.cmake` (ctest `assets_fetch`) runs the fetch against local fixtures in every CI job instead of a separate job: robo_art with its cache, wrong hash, unreachable URL, url with and without `pack.tsv`, a broken archive, original data that fails the hash list, combined kinds, `none`, and the install check; `package_originals` covers the package builder's check.
-- `url` and `original` archives are unpacked before their contents are checked (`original` by its file hashes afterwards, `url` not at all). `url` is a build the user points at a source they chose, so that is accepted; the client never sees a URL.
+- `url` and `original` archives have no archive hash, so they unpack through `tools/safe-extract.py`, which refuses the whole archive when a member is absolute, has a `..` segment or is a link (`cmake -E tar` would write outside the folder); `original` then keeps only the files its hash list names. These kinds need Python 3. A `url` pack's content is trusted as served, redirects included, and its cache keys on the URL; the client never sees a URL.
 - Rejected: fetching at build time through a custom target (every build runs it, and offline builds would need care in each generator); copying packs into `runtime/main` (installs would ship them and the goldens would change); a separate CI job for the smoke (the ctest runs on every OS already).
