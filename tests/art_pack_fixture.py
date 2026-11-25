@@ -70,7 +70,8 @@ def make(base, out):
     for line in open(base, encoding="utf-8"):
         cols = line.rstrip("\n").split("\t")
         size = re.match(r"TGA (\d+)×(\d+)×(24|32)$", cols[3]) if len(cols) >= 4 and cols[2] == "texture" else None
-        if line.startswith("#") or not size:
+        # BV2 skins stay with the base pack: the art replaces them with full-colour skins (below), not by id
+        if line.startswith("#") or not size or cols[0].startswith("skins/legacy/"):
             continue
         file = os.path.splitext(cols[1])[0] + ".png"
         png(os.path.join(out, "main", file), int(size[1]), int(size[2]), colour(cols[0]), size[3] == "32")

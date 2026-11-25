@@ -1,6 +1,5 @@
 # Appearance tab of the main menu: the Player name field above the skin (issue #117).
-# The placeholder data has no skins, so the preview texture is undefined memory; black on all three layers
-# makes the spinning ball uniform and the frame repeatable.
+# Black on all three layers makes the placeholder skin's spinning ball uniform and the frame repeatable.
 expect-scene menu
 set cl_redDecal 0 0 0
 set cl_greenDecal 0 0 0

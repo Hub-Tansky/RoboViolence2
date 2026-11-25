@@ -70,8 +70,10 @@ namespace bv2
 			return;
 		}
 		DecodedImage legacy;
-		const std::string path = "main/skins/" + skins::legacyName(valid) + ".tga";
-		if (!decodeImageFile(path.c_str(), legacy) || legacy.width <= 0 || legacy.height <= 0 || legacy.bytesPerPixel < 3)
+		std::string id = skins::legacyId(skins::legacyName(valid));
+		if (!assetKnown(id.c_str())) // a valid name that isn't a BV2 skin either
+			id = skins::legacyId(skins::DEFAULT_SKIN);
+		if (!decodeImageFile(assetPath(id.c_str()), legacy) || legacy.width <= 0 || legacy.height <= 0 || legacy.bytesPerPixel < 3)
 		{
 			legacy.width = 64;
 			legacy.height = 32;

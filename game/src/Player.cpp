@@ -714,8 +714,9 @@ void Player::updateSkin()
 	blueDecal = blueDecalT;
 	lastSkin = skin;
 
-	//--- Celon son team, on set la couleur du babo en consequence. A full-colour skin (ROBO-258) takes the team colour
-	//--- on its mask only; outside team games its mask takes the player's layer 1 colour.
+	//--- Celon son team, on set la couleur du babo en cons�uence
+	//--- A full-colour skin (ROBO-258) takes the team colour on its mask only; outside team games its mask takes the
+	//--- player's layer 1 colour.
 	CColor3f maskColour = redDecal;
 	if ((game->gameType != GAME_TYPE_DM) && (game->gameType != GAME_TYPE_SND) && gameVar.cl_teamIndicatorType == 0)
 	{

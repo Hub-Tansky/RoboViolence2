@@ -215,6 +215,12 @@ void CUserLogin::updateSkin()
 	sld_layer3_g->value = (int)(gameVar.cl_blueDecal[1] * 255);
 	sld_layer3_b->value = (int)(gameVar.cl_blueDecal[2] * 255);
 
+	//--- The art pack can finish after the menu is built: list its faces once they load (ROBO-258)
+	if (bv2::fullColourSkinsInstalled() != (skinChoices.size() > (size_t)bv2::skins::LEGACY_COUNT))
+	{
+		skinChoices = bv2::skins::choices(bv2::fullColourSkinsInstalled());
+		sld_skin->valueMax = (int)skinChoices.size();
+	}
 	sld_skin->value = bv2::skins::indexOf(skinChoices, gameVar.cl_skin.s) + 1;
 
 	//--- The name may change from the console too

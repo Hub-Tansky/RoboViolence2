@@ -36,6 +36,13 @@ namespace bv2
 			return "skins/" + name + "_mask";
 		}
 
+		// Base pack id of a BV2 skin (main/skins/skinNN.tga, ADR ROBO-258): its own prefix, so it never meets the art
+		// pack's full-colour skins/<name>
+		inline std::string legacyId(const std::string& name)
+		{
+			return "skins/legacy/" + name;
+		}
+
 		// A name a packet may carry: 1 to 6 lower-case letters and digits. Anything else (a path, an empty name) is
 		// drawn as the default skin, so a peer can't make the game open a file outside main/skins/.
 		inline bool validName(const std::string& name)
