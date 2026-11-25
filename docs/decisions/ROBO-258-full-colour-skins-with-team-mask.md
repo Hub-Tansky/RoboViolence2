@@ -23,5 +23,5 @@
 - The art pack pin moves to `rv2-art-2`. Installed packs show the splash once while it downloads (ADR ROBO-260).
 - Full-colour skins live only in the art pack, so the GPL game ships no new art. The fixture art pack has one full-colour `skin10` with a band and an unmasked stripe; the `art-pack-appearance` golden checks that layer 1 lands on the mask only.
 - Players without the art pack see bots in BV2 skins. With it, a player who picks `skin10` shows face 08; the other BV2 skins look as before.
-- `GAME_VERSION_SV/CL` is unchanged, so a client from before this change can join. It has no `faceNN` fallback: its bots and face-wearing players are drawn from an unloaded texture (undefined colours) until it updates. Accepted as cosmetic; a version bump would lock those clients out instead.
+- The game version in `Server.h` and `Client.h` is unchanged, so a client from before this change can join. It has no `faceNN` fallback: its bots and face-wearing players are drawn from an unloaded texture (undefined colours) until it updates. Accepted as cosmetic; a version bump would lock those clients out instead.
 - Rejected: a team-colour alpha channel (an RGBA skin can't be checked by eye as easily as a separate mask); recolouring the whole ball as BV2 does (the faces would be lost).
