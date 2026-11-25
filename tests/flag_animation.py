@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """ROBO-247: helpers for the e2e scenario ctf_flag_animation (tests/e2e/e2e.py): a large flag as glTF, converted by
 tools/gltf-to-dko.py into a pack that holds models/BlueFlag.DKO and models/RedFlag.DKO, stacked over the placeholders
-through BV2_DATA_DIR (ADR 0069), and the share of pixels two frames differ in.
+through BV2_DATA_DIR (ADR 0069).
 
 The flag is a 6 x 4 m cloth lying flat 0.5 m above the floor, so the camera above sees it whole, and its one morph
 target shears it 3 m along x; the weight goes 0 -> 1 -> 0 over 1 s.
@@ -13,8 +13,9 @@ import shutil
 import struct
 
 
-def flag_glb(path):
-    """The flag as .glb: 12 x 4 quads in glTF's XZ plane (the game's XY plane)."""
+def flag_glb(path, animated=True):
+    """The flag as .glb: 12 x 4 quads in glTF's XZ plane (the game's XY plane); without its animation when not
+    animated."""
     cols, rows, width, height = 12, 4, 6.0, 4.0
     pos, ripple = [], []
     for r in range(rows):
@@ -50,6 +51,8 @@ def flag_glb(path):
            "animations": [{"name": "wave", "samplers": [{"input": times, "output": weights}],
                            "channels": [{"sampler": 0, "target": {"node": 0, "path": "weights"}}]}],
            "accessors": accessors, "bufferViews": views, "buffers": [{"byteLength": len(blob)}]}
+    if not animated:
+        del doc["animations"]
     js = json.dumps(doc).encode()
     js += b" " * (-len(js) % 4)
     blob += b"\0" * (-len(blob) % 4)
@@ -58,19 +61,8 @@ def flag_glb(path):
         f.write(struct.pack("<III", 0x46546C67, 2, 12 + len(body)) + body)
 
 
-def changed(a, b):
-    """Fraction of pixels that differ by more than 24 in a channel."""
-    (w, h, rows_a), (_, _, rows_b) = a, b
-    count = 0
-    for ra, rb in zip(rows_a, rows_b):
-        for x in range(0, len(ra), 3):
-            if max(abs(ra[x] - rb[x]), abs(ra[x + 1] - rb[x + 1]), abs(ra[x + 2] - rb[x + 2])) > 24:
-                count += 1
-    return count / (w * h)
-
-
-def make_pack(root, glb, pack, extra=()):
-    """Writes <pack>/main with both flag models converted from glb (extra: converter options) and their pack.tsv."""
+def make_pack(root, glb, pack):
+    """Writes <pack>/main with both flag models converted from glb and their pack.tsv."""
     spec = importlib.util.spec_from_file_location("gltf_to_dko", os.path.join(root, "tools", "gltf-to-dko.py"))
     conv = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(conv)
@@ -79,7 +71,7 @@ def make_pack(root, glb, pack, extra=()):
     os.makedirs(os.path.join(pack, "main", "textures"))  # the client takes BV2_DATA_DIR as a data root only with it
     rows = ["id\tfile\ttype\tformat\tauthor\ttool\tlicence\tsource"]
     for name in ("BlueFlag", "RedFlag"):
-        if conv.main([glb, os.path.join(pack, "main", "models", name + ".DKO"), *extra]) != 0:
+        if conv.main([glb, os.path.join(pack, "main", "models", name + ".DKO")]) != 0:
             raise AssertionError(f"gltf-to-dko failed on {glb}")
         rows.append(f"models/{name}\tmodels/{name}.DKO\tmodel\tDKO v2\tRV2 tests\ttools/gltf-to-dko.py\t"
                     "LicenseRef-RV2-Art\tgenerated fixture")

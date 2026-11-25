@@ -2,9 +2,9 @@
 """ROBO-239: tools/gltf-to-dko.py turns a small glTF (as .gltf and as .glb) into a .DKO with the expected meshes,
 materials, material groups, vertices and dummy; engine/dko loads the result (through dko_probe, when given) and
 reports the same bounding box and dummy position; unsupported input fails with exit 1 instead of a broken file.
-ROBO-247: an animated flag (morph target weights and a moving dummy), a skinned strip and the sampling options
-(--fps, --frames, --no-loop, --animation, STEP and CUBICSPLINE keys) convert to DKO frames with the expected TIME_INFO
-and interpolated vertices, and engine/dko reads every frame.
+ROBO-247: an animated flag (morph target weights, a moving mesh node and a moving dummy, LINEAR, STEP and CUBICSPLINE
+keys, a late start) and a skinned strip convert to DKO frames with the expected TIME_INFO and interpolated vertices,
+and engine/dko reads every frame; two animations fail.
 
 Usage: test_gltf_to_dko.py <repo root> <scratch dir> [<dko_probe executable>]
 """
@@ -399,11 +399,12 @@ WAVE_T, WAVE_W = [0.0, 0.5, 1.0], [0.0, 1.0, 0.0]
 DUMMY_T = [(0, 0, 0), (1, 0, 0), (0, 0, 0)]
 
 
-def flag(interpolation="LINEAR", extra_animation=False):
+def flag(interpolation="LINEAR", extra_animation=False, start=0.0, lift=False):
+    """start: the first key's time; lift: the Flag node also rises 2 m along glTF y and back."""
     b = Blob()
     pos, nrm = b.add(FLAG, "VEC3"), b.add([(0, 0, 1)] * len(FLAG), "VEC3")
     ripple = b.add(RIPPLE, "VEC3")
-    times = b.add(WAVE_T, "SCALAR")
+    times = b.add([t + start for t in WAVE_T], "SCALAR")
     if interpolation == "CUBICSPLINE":  # in-tangent, value, out-tangent per key; flat tangents
         weights = b.add([x for w in WAVE_W for x in (0.0, w, 0.0)], "SCALAR")
         slide = b.add([x for v in DUMMY_T for x in ((0, 0, 0), v, (0, 0, 0))], "VEC3")
@@ -416,6 +417,9 @@ def flag(interpolation="LINEAR", extra_animation=False):
                                            {"input": times, "output": slide, "interpolation": interpolation}],
               "channels": [{"sampler": 0, "target": {"node": 0, "path": "weights"}},
                            {"sampler": 1, "target": {"node": 1, "path": "translation"}}]}]
+    if lift:
+        anims[0]["samplers"].append({"input": times, "output": b.add([(0, 0, 0), (0, 2, 0), (0, 0, 0)], "VEC3")})
+        anims[0]["channels"].append({"sampler": 2, "target": {"node": 0, "path": "translation"}})
     if extra_animation:
         anims.append({"name": "still", "samplers": [{"input": times, "output": weights}],
                       "channels": [{"sampler": 0, "target": {"node": 0, "path": "weights"}}]})
@@ -472,20 +476,20 @@ if m:
         check(got.get("frames") == [10], f"flag: engine frame count {got.get('frames')}")
         check(close(got.get("dummy", []), game((0.6, 0, 0))), f"flag: engine Dummy01 at frame 3 {got.get('dummy')}")
 
-# --frames resamples the whole animation; --no-loop keeps the end pose
-m = convert_flag("flag-frames", flag(), "--frames", "4")
+# a late first key: frames from 0.5 s, TIME_INFO's first frame is 5
+m = convert_flag("flag-late", flag(start=0.5))
 if m:
-    check(m["time_info"] == (0, 3, 4), f"--frames 4: TIME_INFO (0, 3, 4), got {m['time_info']}")
+    check(m["time_info"] == (5, 14, 10), f"late start: TIME_INFO (5, 14, 10), got {m['time_info']}")
     v = m["meshes"][0]["groups"][0]["vertices_frames"]
-    check(close(flat(v[1]), flat(flag_frame(0.5))), "--frames 4: frame 1 is t = 0.25 s, weight 0.5")
-m = convert_flag("flag-noloop", flag(), "--no-loop")
+    check(close(flat(v[3]), flat(flag_frame(0.6))), "late start: frame 3 is 0.3 s after the first key")
+
+# an animated mesh node: its translation moves the vertices (and its child dummy) with the ripple
+m = convert_flag("flag-lift", flag(lift=True))
 if m:
-    check(m["time_info"] == (0, 10, 11), f"--no-loop: TIME_INFO (0, 10, 11), got {m['time_info']}")
     v = m["meshes"][0]["groups"][0]["vertices_frames"]
-    check(close(flat(v[10]), flat(flag_frame(0.0))), "--no-loop: frame 10 is the end pose")
-m = convert_flag("flag-fps", flag(), "--fps", "20")
-if m:
-    check(m["time_info"] == (0, 19, 20), f"--fps 20: TIME_INFO (0, 19, 20), got {m['time_info']}")
+    want = [tuple(a + b for a, b in zip(p, game((0, 1.2, 0)))) for p in flag_frame(0.6)]
+    check(close(flat(v[3]), flat(want)), "mesh node translation: frame 3 raised 1.2 m along glTF y")
+    check(close(m["dummies"][0]["positions"][3], game((0.6, 1.2, 0))), "mesh node translation: child dummy follows")
 
 # STEP holds a key; CUBICSPLINE with flat tangents eases
 for interp in ("STEP", "CUBICSPLINE"):
@@ -495,16 +499,14 @@ for interp in ("STEP", "CUBICSPLINE"):
         w = weight_at(0.3, interp)
         check(close(flat(v[3]), flat(flag_frame(w))), f"{interp}: frame 3 at weight {w:.3f}")
 
-# two animations need --animation
+# a .DKO holds one animation
 src, dst = os.path.join(SCRATCH, "flag-two.glb"), os.path.join(SCRATCH, "flag-two.DKO")
 write_glb(src, *flag(extra_animation=True))
-check(run(src, dst) == 1 and not os.path.exists(dst), "two animations: exit 1 without --animation")
-check(run(src, dst, "--animation", "wave") == 0 and read_dko(dst)["frames"] == 10, "two animations: --animation wave")
-check(run(src, dst, "--animation", "nope") == 1, "two animations: unknown --animation fails")
+check(run(src, dst) == 1 and not os.path.exists(dst), "two animations: exit 1, no .DKO written")
 
 
-# a skinned strip: two joints, the root still and "tip" turning 90 degrees about glTF z over 1 s; the far vertices
-# follow the tip, the middle ones half and half
+# a skinned strip: two joints, the root still and "tip" turning 90 degrees about glTF z over 1 s; the far vertex
+# follows the tip, the middle one is weighted half and half
 def skinned_strip():
     b = Blob()
     verts = [(0, 0, 0), (1, 0, 0), (2, 0, 0)]
@@ -527,13 +529,16 @@ def skinned_strip():
     return b.doc(nodes, [mesh], anims, skins)
 
 
-m = convert_flag("skinned", skinned_strip(), "--frames", "2", "--no-loop")
+m = convert_flag("skinned", skinned_strip())
 if m:
+    check(m["frames"] == 10, f"skinned: 10 frames, got {m['frames']}")
     v = m["meshes"][0]["groups"][0]["vertices_frames"]
     check(close(flat(v[0]), flat([game((0, 0, 0)), game((1, 0, 0)), game((2, 0, 0))])), "skinned: bind pose")
-    # end: tip turned 90 degrees about z at x = 1, so (2, 0, 0) -> (1, 1, 0); (1, 0, 0) stays (both joints agree)
-    check(close(flat(v[1]), flat([game((0, 0, 0)), game((1, 0, 0)), game((1, 1, 0))])),
-          f"skinned: end pose, got {v[1]}")
+    # frame 5 (0.5 s): tip turned 45 degrees about z at x = 1, so (2, 0, 0) -> (1 + c, c, 0); (1, 0, 0) stays (both
+    # joints agree there)
+    c = math.sqrt(0.5)
+    check(close(flat(v[5]), flat([game((0, 0, 0)), game((1, 0, 0)), game((1 + c, c, 0))])),
+          f"skinned: frame 5, got {v[5]}")
     dummies = [d["name"] for d in m["dummies"]]
     check(dummies == ["rig", "root", "tip"], f"skinned: joints are dummies, got {dummies}")
 

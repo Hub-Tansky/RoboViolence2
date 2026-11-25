@@ -11,15 +11,14 @@ The art format is glTF (owner decision D2); the game keeps loading .DKO through 
   - glTF's Y-up axes as the game's Z-up: (x, y, z) -> (x, -z, y), which are Blender's axes again (Blender exports
     (x, y, z) as glTF (x, z, -y)): author in Blender as the BV2 models were built, Z up, a weapon's muzzle along +Y,
   - metres times --scale (default 200): the game draws models at 0.005, so 1 m in Blender is 1 game unit (a map tile).
-Animation (ROBO-247): a model with one animation (or the one --animation names) becomes a vertex-animated DKO, as the
-BV2 flags, flag pole, knives and shields are. The animation is sampled at --fps (default 10, the rate the game plays
-the flags at) or into exactly --frames frames; node transforms, morph target weights and skins are all baked into the
-vertices, normals and dummies of every frame. TIME_INFO holds the first frame, the last frame and the frame count.
-The engine plays frame n-1 back into frame 0, so by default the last sample is one step before the end (a loop);
---no-loop adds the end pose as the last frame. Without an animation the DKO has one frame.
-Sparse accessors, non-triangle primitives and animated node matrices fail (exit 1).
+Animation (ROBO-247): a model with one animation becomes a vertex-animated DKO, as the BV2 flags, flag pole, knives
+and shields are. It is sampled every 1/10 s (the rate the game plays the flags at) from its first key, the last sample
+one step before its end, since the engine plays the last frame back into frame 0: author a 1 s loop for 10 frames.
+Node transforms, morph target weights and skins are baked into the vertices, normals and dummies of every frame.
+TIME_INFO holds the first frame, the last frame and the frame count. Without an animation the DKO has one frame.
+Sparse accessors, non-triangle primitives, more than one animation and animated node matrices fail (exit 1).
 
-Usage: gltf-to-dko.py <in.glb|in.gltf> <out.DKO> [--scale S] [--fps F | --frames N] [--animation A] [--no-loop]
+Usage: gltf-to-dko.py <in.glb|in.gltf> <out.DKO> [--scale S]  (S DKO units per metre, default 200)
 Python 3, stdlib only.
 """
 import argparse
@@ -43,7 +42,7 @@ CHUNK = {
 DKO_VERSION = 2
 MAX_DUMMIES = 64  # CDkoModel::dummies
 DEFAULT_SCALE = 200.0  # DKO units per metre: the game draws models at 0.005
-DEFAULT_FPS = 10.0  # game/src/Map.cpp plays the flags at 10 frames a second
+FPS = 10  # game/src/Map.cpp plays the flags at 10 frames a second
 MAX_FRAMES = 32767  # TIME_INFO holds shorts
 COMPONENTS = {"SCALAR": 1, "VEC2": 2, "VEC3": 3, "VEC4": 4, "MAT4": 16}
 FORMATS = {5120: "b", 5121: "B", 5122: "h", 5123: "H", 5125: "I", 5126: "f"}
@@ -210,35 +209,25 @@ def slerp(a, b, u):
     return tuple(sa * x + sb * y for x, y in zip(a, b))
 
 
-def pick_animation(doc, choice):
-    """The animation to sample (None for a static model): the only one, or the one --animation names."""
+def pick_animation(doc):
+    """The animation to sample, None for a static model."""
     animations = doc.get("animations", [])
-    if choice is not None:
-        for i, a in enumerate(animations):
-            if choice == a.get("name") or choice == str(i):
-                return a
-        raise GltfError(f"no animation {choice!r} (have {[a.get('name', str(i)) for i, a in enumerate(animations)]})")
     if len(animations) > 1:
-        raise GltfError(f"{len(animations)} animations: choose one with --animation (name or index)")
+        raise GltfError(f"{len(animations)} animations: a .DKO holds one")
     return animations[0] if animations else None
 
 
-def frame_times(doc, buffers, animation, fps, frames, loop):
-    """([sample time per frame], first frame number) of the animation; one frame at time None without one."""
+def frame_times(doc, buffers, animation):
+    """([sample time per frame], first frame number): every 1/FPS s from the first key, the last one before the end (a
+    loop: the engine plays the last frame back into frame 0); one frame at time None without an animation."""
     if animation is None:
         return [None], 0
     keys = [t for s in animation["samplers"] for t in accessor(doc, buffers, s["input"])]
     if not keys:
         raise GltfError("the animation has no keys")
     start, end = min(keys), max(keys)
-    length = end - start
-    if frames is None:
-        steps = max(1, round(length * fps))
-        frames = steps if loop else steps + 1
-    if length <= 0 or frames == 1:
-        return [start], round(start * fps)
-    step = length / (frames if loop else frames - 1)
-    return [start + i * step for i in range(frames)], round(start / step)
+    frames = max(1, round((end - start) * FPS))
+    return [start + i / FPS for i in range(frames)], round(start * FPS)
 
 
 def posed(doc, buffers, animation, t):
@@ -268,7 +257,7 @@ def world_matrices(doc, pose, scale):
     return out
 
 
-def convert(doc, buffers, folder, scale=DEFAULT_SCALE, fps=DEFAULT_FPS, frames=None, animation=None, loop=True):
+def convert(doc, buffers, folder, scale=DEFAULT_SCALE):
     """The DKO's parts: (materials, meshes, dummies, images, (first frame, frame count)), images as {file name beside
     the .DKO: bytes}. Each group's vertices and normals and each dummy's position and matrix are lists, one per frame."""
     unsupported(doc)
@@ -283,8 +272,8 @@ def convert(doc, buffers, folder, scale=DEFAULT_SCALE, fps=DEFAULT_FPS, frames=N
                 texture, images[texture] = image_file(doc, buffers, folder, image_index)
         materials.append({"name": m.get("name") or f"material{i}", "diffuse": colour, "texture": texture,
                           "two_sided": bool(m.get("doubleSided"))})
-    anim = pick_animation(doc, animation)
-    times, first = frame_times(doc, buffers, anim, fps, frames, loop)
+    anim = pick_animation(doc)
+    times, first = frame_times(doc, buffers, anim)
     poses = [posed(doc, buffers, anim, t) for t in times]
     worlds = [world_matrices(doc, p, scale) for p in poses]
     default_material = None
@@ -469,20 +458,11 @@ def main(argv):
     parser.add_argument("src", help="input .glb, or .gltf with its buffers")
     parser.add_argument("dst", help="output .DKO; embedded images are written and external ones copied beside it")
     parser.add_argument("--scale", type=float, default=DEFAULT_SCALE, help="DKO units per metre (default 200)")
-    rate = parser.add_mutually_exclusive_group()
-    rate.add_argument("--fps", type=float, default=DEFAULT_FPS, help="frames per second of animation (default 10)")
-    rate.add_argument("--frames", type=int, help="sample the whole animation into exactly this many frames")
-    parser.add_argument("--animation", help="name or index of the animation, when the model has more than one")
-    parser.add_argument("--no-loop", action="store_true", help="keep the end pose as the last frame (no wrap)")
     args = parser.parse_args(argv)
     src, dst = args.src, args.dst
-    if args.fps <= 0 or (args.frames is not None and not 1 <= args.frames <= MAX_FRAMES):
-        print(f"gltf-to-dko: --fps must be above 0 and --frames 1 to {MAX_FRAMES}")
-        return 1
     try:
         doc, buffers, folder = load(src)
-        materials, meshes, dummies, images, timing = convert(doc, buffers, folder, args.scale, args.fps,
-                                                             args.frames, args.animation, not args.no_loop)
+        materials, meshes, dummies, images, timing = convert(doc, buffers, folder, args.scale)
         out_dir = os.path.dirname(os.path.abspath(dst))
         for name, data in images.items():
             with open(os.path.join(out_dir, name), "wb") as f:
