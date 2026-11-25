@@ -26,8 +26,8 @@ int main()
 
 	float step = flagtrail::angle(0, 0, 3, 1 / 30.0f);
 	check(step > 270 && step < 360, "one frame turns only part of the way, the short way from 0 toward 270");
-	float across = flagtrail::angle(350, -3, 0.5f, 1 / 30.0f);
-	check(across > 350 || across < 10, "350 toward about 9 turns the short way across 0");
+	float across = flagtrail::angle(350, -3, -0.5f, 1 / 30.0f);
+	check(across > 350 || across < 10, "350 toward about 9.5 turns the short way across 0");
 	check(near(flagtrail::angle(10, 3, 0, 1), 180), "a full second's step ends on the target");
 
 	std::printf(failures ? "FAIL (%d)\n" : "OK\n", failures);

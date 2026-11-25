@@ -8,6 +8,7 @@ namespace flagtrail
 {
 	const float MIN_SPEED = 0.5f; // map units per second; slower carriers keep the flag's direction
 	const float TURN_RATE = 6.0f; // share of the remaining turn made per second
+	const float DEGREES_PER_RADIAN = 57.2957795f; // TO_DEGREE in zeven's CVector.h; this header stays plain C++
 
 	// a in [0, 360)
 	inline float wrap(float a)
@@ -22,7 +23,7 @@ namespace flagtrail
 	{
 		if (vx * vx + vy * vy < MIN_SPEED * MIN_SPEED)
 			return current;
-		float target = std::atan2(-vy, -vx) * 57.2957795f;
+		float target = std::atan2(-vy, -vx) * DEGREES_PER_RADIAN;
 		float diff = wrap(target - current + 180.0f) - 180.0f;
 		float step = TURN_RATE * delay < 1.0f ? TURN_RATE * delay : 1.0f;
 		return wrap(current + diff * step);
