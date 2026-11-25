@@ -120,3 +120,4 @@ What we do, in one or two sentences.
 | [ROBO-264](ROBO-264-art-pack-checks-and-fixture.md) | An art pack is checked against the base pack, and CI plays a generated fixture art pack | Accepted |
 | [ROBO-268](ROBO-268-macos-builds-on-main-and-nightly.md) | macOS builds run on main, release branches, tags and nightly, not on PRs | Accepted |
 | [ROBO-247](ROBO-247-animated-gltf-samples-into-dko-frames.md) | An animated glTF is sampled into DKO frames at 10 per second; morph targets and skins are baked per frame | Accepted |
+| [ROBO-265](ROBO-265-ttf-missing-letter-draws-plain-letter.md) | A TTF font without a letter draws its plain letter; Teko may make text up to 20 % wider | Accepted |

@@ -1,6 +1,6 @@
 # 0067: Text is one byte per glyph; bytes 160-255 hold 96 extra letters; a TTF is baked to babo.tga widths
 
-- Status: Accepted
+- Status: Accepted; missing TTF letters amended by [ROBO-265](ROBO-265-ttf-missing-letter-draws-plain-letter.md)
 - Date: 2026-11-17
 - Affects: `engine/zeven/include/FontCodes.h`, `engine/zeven/src/dkf_ttf.cpp`, `engine/zeven/src/CFont.cpp`, `engine/zeven/src/dkw.cpp`, `game/src/Lang.cpp`, `game/src/Writting.cpp`, `game/src/COption.cpp`, `tools/lang-check.py`, `content/languages/README.md`; ROBO-238 (refactor Phase 1 A3, [ADR 0062](0062-asset-packs-mode-modules-client-independent-server.md))
 
