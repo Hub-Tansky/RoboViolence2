@@ -332,6 +332,11 @@ if(TARGET bv2_original_hashes)
   add_test(NAME art_pack COMMAND test_art_pack "${BV2_TEST_SCRATCH}")
 endif()
 
+# ROBO-261: RV2_ASSETS fetches (cmake/RV2Assets.cmake) from local fixtures, and the install's original-file check
+find_package(Python3 REQUIRED COMPONENTS Interpreter)
+add_test(NAME assets_fetch COMMAND ${CMAKE_COMMAND} -DSOURCE=${CMAKE_SOURCE_DIR} -DSCRATCH=${BV2_TEST_SCRATCH}
+  -DPYTHON=${Python3_EXECUTABLE} -P ${CMAKE_CURRENT_SOURCE_DIR}/assets_fetch.cmake)
+
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
 add_test(NAME example_cfg COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test_example_cfg.py)
 add_test(NAME app_icon COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test_app_icon.py)

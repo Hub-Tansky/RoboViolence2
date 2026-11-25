@@ -1,5 +1,5 @@
 // ROBO-260: the art pack's install checks, without SDL or network: installed version, the off switch, the archive
-// hash, the install with VERSION, and the curl and tar command lines
+// hash, the install with VERSION, and the curl and tar command lines; the pack stack with the build's packs (ROBO-261)
 #include "ArtPack.h"
 #include "DataDownload.h"
 
@@ -121,6 +121,31 @@ int main(int argc, char** argv)
 	check(bv2::fetchArtPack(partial.string(), src.string(), abc, "7", fetched.string(), fake, stopped).empty() &&
 			  bv2::artPackInstalled(fetched.string(), "7") && !fs::exists(partial),
 		  "a good download is not installed, or its scratch folder stays");
+
+	// ROBO-261: the stack with the build's packs (url on top, its art pack over the player's) and without them
+	{
+		const fs::path build = dir / "packs", pref = dir / "pref-art";
+		write(pref / "main" / "pack.tsv", "id\n");
+		write(pref / "VERSION", "7\n");
+		const std::string b = build.generic_string() + "/", p = pref.generic_string();
+		bv2::PackStack s = bv2::assetPackStack(b, true, p, "7", "data/", "pkg/");
+		check(s.roots.size() == 3 && s.roots[0] == p && s.cwdPack == 1 && !s.buildArt, "no build packs: the player's art pack");
+		write(build / "robo_art" / "main" / "pack.tsv", "id\n");
+		write(build / "robo_art" / "VERSION", "6\n");
+		s = bv2::assetPackStack(b, true, p, "7", "data/", "pkg/");
+		check(s.roots[0] == p && !s.buildArt, "the build's art pack of another version is stacked");
+		write(build / "robo_art" / "VERSION", "7\n");
+		write(build / "url" / "main" / "pack.tsv", "id\n");
+		s = bv2::assetPackStack(b, true, p, "7", "data/", "pkg/");
+		check(s.roots.size() == 4 && s.roots[0] == (build / "url").generic_string() &&
+				  s.roots[1] == (build / "robo_art").generic_string() && s.roots[2] == "data/" && s.roots[3] == "pkg/" &&
+				  s.cwdPack == 2 && s.buildArt,
+			  "url over the build's art pack over the data root over the base pack");
+		s = bv2::assetPackStack(b, false, p, "7", "data/", "pkg/");
+		check(s.roots.size() == 3 && s.roots[0] == p && s.cwdPack == 1 && !s.buildArt, "--placeholders leaves the build's packs out");
+		s = bv2::assetPackStack("", true, (dir / "none").generic_string(), "7", "data/", "pkg/");
+		check(s.roots.size() == 2 && s.cwdPack == 0, "no art pack at all: data root over base pack");
+	}
 
 	if (!g_fail)
 		std::printf("art pack: all checks passed\n");

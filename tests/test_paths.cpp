@@ -196,6 +196,22 @@ int main(int argc, char ** argv)
 	check(bv2::savedDataDir().empty(), "a saved folder that no longer holds data is ignored");
 	check(bv2::startDataDir().dir.empty() && bv2::startDataDir().ask, "no data anywhere: the first-run box");
 
+	// ROBO-261: the build's packs/ sits beside the real folder of the package's main/
+	{
+		const fs::path runtime = base / "runtime", bundle = base / "app" / "Resources";
+		touch(runtime / "main" / "pack.tsv");
+		check(bv2::buildPacksDir(root(runtime)).empty(), "no packs/ folder: no build packs");
+		check(bv2::buildPacksDir("").empty(), "no package root: no build packs");
+		fs::create_directories(runtime / "packs" / "original");
+		check(bv2::buildPacksDir(root(runtime)) == root(runtime / "packs"), "packs/ beside main/");
+		std::error_code ec;
+		fs::create_directories(bundle);
+		fs::create_directory_symlink(runtime / "main", bundle / "main", ec);
+		if (!ec) // Windows without symlink rights skips this part
+			check(bv2::buildPacksDir(root(bundle)) == fs::canonical(runtime / "packs").generic_string() + "/",
+				  "the macOS development bundle finds the build tree's packs through its main/ link");
+	}
+
 	if (!failures) std::printf("ok: paths\n");
 	return failures ? 1 : 0;
 }

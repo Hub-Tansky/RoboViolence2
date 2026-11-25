@@ -12,6 +12,7 @@
 #include <atomic>
 #include <cstdint>
 #include <cstdio>
+#include <cstring>
 #include <filesystem>
 #include <mutex>
 #include <string>
@@ -30,6 +31,9 @@ namespace
 		FAILED
 	};
 	std::atomic<int> g_state(IDLE);
+	// Packs the build fetched (RV2_ASSETS, ROBO-261): used unless --placeholders; g_buildArt when its art pack is stacked
+	bool g_useBuildPacks = true;
+	bool g_buildArt = false;
 	std::atomic<bool> g_stop(false);
 	std::string g_archive; // the main thread's copy, for the progress line; the download thread has its own
 
@@ -120,15 +124,23 @@ namespace bv2
 {
 	void stackAssetPacks()
 	{
-		if (artPackInstalled(artPackDir(), ART_PACK_VERSION))
-			setAssetPacks({artPackDir(), dataRoot(), packageRoot()}, 1); // the data root stays the working directory
-		else
-			setAssetPacks({dataRoot(), packageRoot()}); // ADR 0069: the player's BV2 data stacks over the base pack
+		const PackStack stack = assetPackStack(buildPacksDir(packageRoot()), g_useBuildPacks, artPackDir(), ART_PACK_VERSION,
+											   dataRoot(), packageRoot());
+		g_buildArt = stack.buildArt;
+		setAssetPacks(stack.roots, stack.cwdPack); // ADR 0069: art pack over the player's BV2 data over the base pack
+	}
+
+	void stackAssetPacks(int argc, char** argv)
+	{
+		for (int i = 1; i < argc; ++i)
+			if (std::strcmp(argv[i], "--placeholders") == 0)
+				g_useBuildPacks = false; // tests and screenshots: only what the pref dir holds, as before ROBO-261
+		stackAssetPacks();
 	}
 
 	void artDownloadStart(int argc, char** argv)
 	{
-		if (*ART_PACK_VERSION == 0 || artPackInstalled(artPackDir(), ART_PACK_VERSION) ||
+		if (*ART_PACK_VERSION == 0 || g_buildArt || artPackInstalled(artPackDir(), ART_PACK_VERSION) ||
 			artDownloadOff(argc, (const char* const*)argv, prefDir()))
 			return;
 		g_archive = artArchivePath(artPackDir() + ".partial");

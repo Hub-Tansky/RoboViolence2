@@ -47,6 +47,27 @@ namespace bv2
 		return have == version;
 	}
 
+	PackStack assetPackStack(const std::string& buildPacks, bool useBuildPacks, const std::string& artDir,
+							 const std::string& version, const std::string& dataRoot, const std::string& packageRoot)
+	{
+		PackStack stack;
+		std::error_code ec;
+		const bool build = useBuildPacks && !buildPacks.empty();
+		if (build && fs::is_regular_file(fs::path(buildPacks) / "url" / "main" / "pack.tsv", ec))
+			stack.roots.push_back((fs::path(buildPacks) / "url").generic_string());
+		if (build && artPackInstalled((fs::path(buildPacks) / "robo_art").generic_string(), version))
+		{
+			stack.roots.push_back((fs::path(buildPacks) / "robo_art").generic_string());
+			stack.buildArt = true;
+		}
+		else if (artPackInstalled(artDir, version))
+			stack.roots.push_back(artDir);
+		stack.cwdPack = stack.roots.size(); // the data root stays the working directory
+		stack.roots.push_back(dataRoot);
+		stack.roots.push_back(packageRoot);
+		return stack;
+	}
+
 	bool artDownloadOff(int argc, const char* const* argv, const std::string& prefDir)
 	{
 		const fs::path off = fs::path(prefDir) / "art-download-off";

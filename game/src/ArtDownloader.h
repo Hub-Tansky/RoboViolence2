@@ -3,10 +3,13 @@
 
 namespace bv2
 {
-	// Stacks the asset packs: artPackDir() when it holds this build's art pack, then the data root, then the base pack
+	// Stacks the asset packs (assetPackStack): the build's packs (ROBO-261), artPackDir() when it holds this build's art
+	// pack, then the data root, then the base pack
 	void stackAssetPacks();
+	// The first stack at start: also notes --placeholders, which leaves out the build's packs for the whole run
+	void stackAssetPacks(int argc, char** argv);
 
-	// Starts the background download when this build pins an art pack, it isn't installed and the player didn't turn
+	// Starts the background download when this build pins an art pack, neither the build nor artPackDir() holds it, and the player didn't turn
 	// the download off. Call after pathsInit().
 	void artDownloadStart(int argc, char** argv);
 
