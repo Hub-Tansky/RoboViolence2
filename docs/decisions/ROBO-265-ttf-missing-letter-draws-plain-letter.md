@@ -13,6 +13,6 @@
 A `.ttf` that lacks the code point of a byte from 160 to 255 bakes that byte from the plain letter in `FONT_EXTRA`, as `babo.tga` does. The `text_fit` test holds every English string within 20 % of its `babo.tga` width with both Teko weights.
 
 ## Consequences
-- Every font byte draws something with any TTF that has ASCII; the test fails if a font lacks both a letter and its plain letter.
+- Every byte from 160 to 255 draws something with any TTF that has ASCII. Bytes 128-159 (BV2's Latin-1 letters) have no plain letter and still need the font's own glyph; `text_fit` fails a font that lacks one, as it does a font without a letter and its plain letter.
 - A new font or new English text that grows a string past 20 % fails `text_fit`; that string or the budget is then a decision for the owner.
 - Rejected: narrowing capitals or the whole font to babo.tga's A-Z width (letters 13-21 % thinner, off the approved look); a blank glyph (loses letters).
