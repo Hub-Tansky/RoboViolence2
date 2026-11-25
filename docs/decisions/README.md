@@ -118,3 +118,4 @@ What we do, in one or two sentences.
 | [ROBO-260](ROBO-260-art-pack-downloads-beside-the-gpl-game.md) | The proprietary art pack downloads in the background into robo_art/ and stacks over the base pack, with no restart | Accepted |
 | [ROBO-261](ROBO-261-build-option-fetches-game-assets.md) | `-DRV2_ASSETS` fetches the art pack, the original data or a pack URL at configure time into runtime/packs/, never packaged | Accepted |
 | [ROBO-264](ROBO-264-art-pack-checks-and-fixture.md) | An art pack is checked against the base pack, and CI plays a generated fixture art pack | Accepted |
+| [ROBO-268](ROBO-268-macos-builds-on-main-and-nightly.md) | macOS builds run on main, release branches, tags and nightly, not on PRs | Accepted |

@@ -6,7 +6,7 @@ Robo Violence 2: unofficial fork of BaboViolent 2, a top-down multiplayer shoote
 
 | Topic | Fact |
 |---|---|
-| Deliverables | `bv2` (client), `bv2dedicated` (headless server, `CONSOLE`) and `bv2master`. CI builds and tests all three on Windows, macOS and Linux; the client runs 10 s under xvfb (ASan). Real games on each OS: not yet verified (Phase B step 2). |
+| Deliverables | `bv2` (client), `bv2dedicated` (headless server, `CONSOLE`) and `bv2master`. CI builds and tests all three on Windows, macOS and Linux (macOS on main, `release/**`, tags and nightly only, ADR ROBO-268); the client runs 10 s under xvfb (ASan). Real games on each OS: not yet verified (Phase B step 2). |
 | Build | CMake 3.25+, Ninja presets (`CMakePresets.json`), vcpkg manifest. Output in `build/<preset>/runtime/` ([ADR 0005](docs/decisions/0005-runtime-main-data-root.md)). |
 | Platforms | Targets: Linux x64, macOS 12+ arm64, Windows 10 22H2 or later x64 ([ADR 0012](docs/decisions/0012-windows-10-22h2-minimum.md)); Windows API level pinned to Windows 10 20H1 (`NTDDI_VERSION`). `engine/zeven/include/platform.h` defines `BV2_PLATFORM_*`, `BV2_POSIX`; CMake force-includes it. |
 | Modules | `game` (client, server, editor); `engine/babonet` networking (`bb_*`, `CThread` on `std::thread`); `engine/zeven` utilities (`zeven_core`: `dkc dksvar` + `CString/CVector/CMatrix`; `zeven_console`: no-op `dkt` for the server; `zeven_client`: `dkw dki dkgl dkt dkf dkp dks`); `engine/dko` model loader; `engine/credentials` password HMAC proofs (libsodium); `masterserver`. |
