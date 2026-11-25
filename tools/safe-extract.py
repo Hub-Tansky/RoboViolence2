@@ -4,7 +4,7 @@ the destination.
 
 Usage: safe-extract.py <archive> <dest dir> [<member prefix>]
 Refuses the whole archive, writing nothing, when any member is absolute, has a `..` segment, a backslash or a drive
-letter, or is a link, device or FIFO. With a prefix, only members under it are unpacked. Reads .zip, .tar, .tar.gz.
+letter or a `;`, or is a link, device or FIFO. With a prefix, only members under it are unpacked. Reads .zip, .tar, .tar.gz.
 Exit 0 on success, 1 with the reason on stderr. Python 3, stdlib only.
 """
 import os
@@ -20,6 +20,8 @@ def bad_name(name):
         return "absolute or Windows path"
     if ".." in name.split("/"):
         return "'..' segment"
+    if ";" in name:
+        return "';' (CMake would split the name)"
     return None
 
 
@@ -58,7 +60,11 @@ def extract(archive, dest, prefix):
     else:
         with tarfile.open(archive) as t:
             for name in wanted:
-                t.extract(t.getmember(name), dest, set_attrs=False)
+                member = t.getmember(name)
+                if hasattr(tarfile, "data_filter"):  # the same on every Python, and a second net under check()
+                    t.extract(member, dest, set_attrs=False, filter="data")
+                else:
+                    t.extract(member, dest, set_attrs=False)
 
 
 def main():
