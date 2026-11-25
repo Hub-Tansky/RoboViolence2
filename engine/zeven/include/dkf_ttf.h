@@ -15,7 +15,7 @@ namespace bv2
 	{
 		float u1 = 0, v1 = 0, u2 = 0, v2 = 0; // texture rectangle, v1 at the top of the line (v grows upwards, as in CFont)
 		float w = 0; // advance in line heights
-		bool present = false; // the font has this character
+		bool present = false; // the font has this character, or the plain letter drawn for it (ROBO-265)
 	};
 
 	struct BakedFont

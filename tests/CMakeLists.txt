@@ -229,6 +229,12 @@ if(TARGET zeven_client)
   target_link_libraries(test_dkf_ttf PRIVATE zeven_client)
   bv2_target_defaults(test_dkf_ttf)
   add_test(NAME dkf_ttf COMMAND test_dkf_ttf "${CMAKE_CURRENT_SOURCE_DIR}/data/DejaVuSans-subset.ttf")
+  # ROBO-264, ROBO-265: Teko, the new art's font, keeps every string within 20 % of BV2's text widths and bakes every font byte
+  add_executable(test_text_fit test_text_fit.cpp)
+  target_link_libraries(test_text_fit PRIVATE zeven_client)
+  bv2_target_defaults(test_text_fit)
+  add_test(NAME text_fit COMMAND test_text_fit "${CMAKE_SOURCE_DIR}/content/languages/en.lang"
+    "${CMAKE_CURRENT_SOURCE_DIR}/data/Teko-SemiBold-subset.ttf" "${CMAKE_CURRENT_SOURCE_DIR}/data/Teko-Bold-subset.ttf")
 endif()
 
 if(TARGET bv2_app_icon)

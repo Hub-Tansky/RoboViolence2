@@ -14,6 +14,15 @@
 
 namespace bv2
 {
+	// The code point a font byte bakes: its own, or when the font lacks it, the plain letter babo.tga draws for it (ROBO-265)
+	static int bakedCodepoint(const stbtt_fontinfo& info, int b)
+	{
+		const int cp = (int)fontByteCodepoint(b);
+		if (stbtt_FindGlyphIndex(&info, cp) == 0 && b >= FONT_BV2_BYTE_END && b < FONT_FIRST_BYTE + FONT_BYTE_COUNT)
+			return (unsigned char)FONT_EXTRA[b - FONT_BV2_BYTE_END].plain;
+		return cp;
+	}
+
 	bool bakeTtf(const unsigned char* ttf, size_t size, int lineHeight, BakedFont& out)
 	{
 		stbtt_fontinfo info;
@@ -36,6 +45,9 @@ namespace bv2
 		}
 		const float scaleX = lowerAdvance > BV2_LOWERCASE_ADVANCE ? scaleY * BV2_LOWERCASE_ADVANCE / lowerAdvance : scaleY;
 		const int pad = 2;
+		int codepoint[256] = {}; // what each font byte bakes, looked up once
+		for (int b = FONT_FIRST_BYTE; b < FONT_FIRST_BYTE + FONT_BYTE_COUNT; ++b)
+			codepoint[b] = bakedCodepoint(info, b);
 
 		// Lay the cells out in rows; grow the atlas until they fit
 		int atlas = 256;
@@ -47,9 +59,9 @@ namespace bv2
 			for (int b = FONT_FIRST_BYTE; b < FONT_FIRST_BYTE + FONT_BYTE_COUNT && fits; ++b)
 			{
 				int advance = 0, lsb = 0;
-				stbtt_GetCodepointHMetrics(&info, (int)fontByteCodepoint(b), &advance, &lsb);
+				stbtt_GetCodepointHMetrics(&info, codepoint[b], &advance, &lsb);
 				int x0 = 0, y0 = 0, x1 = 0, y1 = 0;
-				stbtt_GetCodepointBitmapBox(&info, (int)fontByteCodepoint(b), scaleX, scaleY, &x0, &y0, &x1, &y1);
+				stbtt_GetCodepointBitmapBox(&info, codepoint[b], scaleX, scaleY, &x0, &y0, &x1, &y1);
 				// the cell holds the advance and any ink outside it
 				int left = x0 < 0 ? x0 : 0;
 				int right = std::max((int)std::ceil((float)advance * scaleX), x1);
@@ -83,7 +95,7 @@ namespace bv2
 		std::vector<unsigned char> bitmap;
 		for (int b = FONT_FIRST_BYTE; b < FONT_FIRST_BYTE + FONT_BYTE_COUNT; ++b)
 		{
-			const int cp = (int)fontByteCodepoint(b);
+			const int cp = codepoint[b];
 			BakedGlyph& g = out.glyphs[b];
 			g.present = stbtt_FindGlyphIndex(&info, cp) != 0;
 			int advance = 0, lsb = 0;
