@@ -246,7 +246,11 @@ install(DIRECTORY ${bv2_link_sources} DESTINATION ${CMAKE_INSTALL_DATADIR}/bv2/m
 install(CODE "
   include(\"${CMAKE_SOURCE_DIR}/cmake/RV2Assets.cmake\")
   rv2_original_hashes(\"${CMAKE_SOURCE_DIR}\" rv2_hashes)
-  rv2_original_files_in(\"\${CMAKE_INSTALL_MANIFEST_FILES}\" \"\${rv2_hashes}\" rv2_found)
+  set(rv2_installed \${CMAKE_INSTALL_MANIFEST_FILES})
+  if(DEFINED ENV{DESTDIR}) # the manifest lists paths without DESTDIR (the .deb installs with one)
+    list(TRANSFORM rv2_installed PREPEND \"\$ENV{DESTDIR}\")
+  endif()
+  rv2_original_files_in(\"\${rv2_installed}\" \"\${rv2_hashes}\" rv2_found)
   if(rv2_found)
     message(FATAL_ERROR \"Original BV2 files in the install, which may not be redistributed (ROBO-261): \${rv2_found}\")
   endif()

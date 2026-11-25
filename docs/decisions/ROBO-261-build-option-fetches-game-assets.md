@@ -7,7 +7,7 @@
 ## Context
 - A source build runs on placeholders until the client downloads the art pack (ADR ROBO-260) or the player fetches the original data (ADR 0040). The owner wants real assets in the build folder without that step.
 - Owner, 2026-11-24: one variable with the RV2_ prefix, `RV2_ASSETS` = `robo_art` (default), `original`, `url` or `none`, plus `RV2_ASSETS_URL`; offline never fails the build; packages never carry the original data.
-- CMake 3.25 (the project minimum) downloads with `file(DOWNLOAD)` and unpacks with `cmake -E tar`, so no new tool or library.
+- CMake 3.25 (the project minimum) downloads with `file(DOWNLOAD)`; `cmake -E tar` unpacks the hash-pinned `robo_art`, and Python 3 (already needed for the placeholders) unpacks the others safely, so no new tool or library.
 
 ## Decision
 - **Variables:** `RV2_ASSETS` is a list of `robo_art`, `original`, `url`, `none` (default `robo_art`, or `none` when the environment has `CI`, which GitHub Actions sets). `RV2_ASSETS_URL` is the archive for `url`. `RV2_ASSETS_CACHE` is the download cache, outside the build tree (`~/.cache/roboviolence2/assets`, `~/Library/Caches/RoboViolence2/assets`, `%LOCALAPPDATA%\RoboViolence2\assets-cache`).

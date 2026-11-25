@@ -123,6 +123,19 @@ foreach(evil dotdot link)
   check_missing("${out}/url" "an archive with a ${evil} member is installed")
 endforeach()
 check_missing("${out}/escaped.txt" "a '..' member is written outside the folder")
+
+# original: a zip with a symlink under Content/main is refused as a whole
+execute_process(COMMAND "${PYTHON}" -I -c "
+import sys, zipfile
+inner = 'BaboViolent2-' + sys.argv[2] + '/BaboViolent2/Content/main/'
+with zipfile.ZipFile(sys.argv[1], 'w') as z:
+    z.writestr(inner + 'bv2.cfg', 'x')
+    link = zipfile.ZipInfo(inner + 'out'); link.external_attr = (0o120777 << 16); z.writestr(link, '../../..')
+" "${dir}/uplink.zip" "1111111111111111111111111111111111111111")
+file_url("${dir}/uplink.zip" uplink_url)
+rv2_fetch_assets(KINDS original OUT "${out}" CACHE "${cache}" SOURCE "${SOURCE}" ORIGINAL_URL "${uplink_url}"
+                 COMMIT "1111111111111111111111111111111111111111" PYTHON "${PYTHON}")
+check_missing("${out}/original" "an original zip with a symlink is installed")
 check_missing("${out}/url.partial" "a refused archive leaves its scratch folder")
 
 file(WRITE "${dir}/broken.zip" "not an archive\n")
