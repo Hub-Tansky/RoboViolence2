@@ -31,7 +31,8 @@ namespace
 		FAILED
 	};
 	std::atomic<int> g_state(IDLE);
-	// Packs the build fetched (RV2_ASSETS, ROBO-261): used unless --placeholders; g_buildArt when its art pack is stacked
+	// Packs the build fetched (RV2_ASSETS, ROBO-261): used unless --placeholders; g_buildArt when its art pack is stacked.
+	// Main thread only (stackAssetPacks); the download thread touches only g_state and g_stop.
 	bool g_useBuildPacks = true;
 	bool g_buildArt = false;
 	std::atomic<bool> g_stop(false);

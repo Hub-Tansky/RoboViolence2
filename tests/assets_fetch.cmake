@@ -106,6 +106,25 @@ execute_process(COMMAND "${CMAKE_COMMAND}" -E tar czf "${dir}/badtsv.tar.gz" mai
 file_url("${dir}/badtsv.tar.gz" badtsv_url)
 rv2_fetch_assets(KINDS url OUT "${out}" CACHE "${cache}" SOURCE "${SOURCE}" URL "${badtsv_url}" PYTHON "${PYTHON}")
 check_missing("${out}/url" "a pack that fails check-pack.py is not installed")
+# An unpinned archive with a member that leaves the folder, or a link, writes nothing at all (tools/safe-extract.py)
+execute_process(COMMAND "${PYTHON}" -I -c "
+import io, sys, tarfile
+for path, kind in ((sys.argv[1], 'dotdot'), (sys.argv[2], 'link')):
+    with tarfile.open(path, 'w:gz') as t:
+        good = tarfile.TarInfo('main/pack.tsv'); data = b'id\\n'; good.size = len(data); t.addfile(good, io.BytesIO(data))
+        if kind == 'dotdot':
+            bad = tarfile.TarInfo('../escaped.txt'); bad.size = 1; t.addfile(bad, io.BytesIO(b'x'))
+        else:
+            bad = tarfile.TarInfo('main/out'); bad.type = tarfile.SYMTYPE; bad.linkname = '../../..'; t.addfile(bad)
+" "${dir}/dotdot.tar.gz" "${dir}/link.tar.gz")
+foreach(evil dotdot link)
+  file_url("${dir}/${evil}.tar.gz" evil_url)
+  rv2_fetch_assets(KINDS url OUT "${out}" CACHE "${cache}" SOURCE "${SOURCE}" URL "${evil_url}" PYTHON "${PYTHON}")
+  check_missing("${out}/url" "an archive with a ${evil} member is installed")
+endforeach()
+check_missing("${out}/escaped.txt" "a '..' member is written outside the folder")
+check_missing("${out}/url.partial" "a refused archive leaves its scratch folder")
+
 file(WRITE "${dir}/broken.zip" "not an archive\n")
 file_url("${dir}/broken.zip" broken_url)
 rv2_fetch_assets(KINDS url OUT "${out}" CACHE "${cache}" SOURCE "${SOURCE}" URL "${broken_url}" PYTHON "${PYTHON}")
@@ -115,10 +134,12 @@ check_missing("${out}/url" "a broken archive is not installed and does not stop 
 set(commit "0123456789abcdef0123456789abcdef01234567")
 set(inner "BaboViolent2-${commit}/BaboViolent2/Content/main")
 file(WRITE "${dir}/up/${inner}/bv2.cfg" "not the original\n")
+file(WRITE "${dir}/up/${inner}/extra.txt" "unlisted\n")
 execute_process(COMMAND "${CMAKE_COMMAND}" -E tar cf "${dir}/up.zip" --format=zip "BaboViolent2-${commit}"
                 WORKING_DIRECTORY "${dir}/up")
 file_url("${dir}/up.zip" up_url)
-rv2_fetch_assets(KINDS original OUT "${out}" CACHE "${cache}" SOURCE "${SOURCE}" ORIGINAL_URL "${up_url}" COMMIT "${commit}")
+rv2_fetch_assets(KINDS original OUT "${out}" CACHE "${cache}" SOURCE "${SOURCE}" ORIGINAL_URL "${up_url}" COMMIT "${commit}"
+                 PYTHON "${PYTHON}")
 check_missing("${out}/original" "original data that fails the hash list is not installed")
 check_missing("${cache}/BaboViolent2-${commit}.zip" "a bad original archive leaves the cache")
 
@@ -126,8 +147,9 @@ check_missing("${cache}/BaboViolent2-${commit}.zip" "a bad original archive leav
 file(SHA256 "${dir}/up/${inner}/bv2.cfg" cfg_hash)
 file(WRITE "${dir}/up-hashes.sha256" "${cfg_hash}  BaboViolent2/Content/main/bv2.cfg\n")
 rv2_fetch_assets(KINDS original OUT "${out}" CACHE "${cache}" SOURCE "${SOURCE}" ORIGINAL_URL "${up_url}" COMMIT "${commit}"
-                 ORIGINAL_HASHES "${dir}/up-hashes.sha256")
+                 ORIGINAL_HASHES "${dir}/up-hashes.sha256" PYTHON "${PYTHON}")
 check_exists("${out}/original/main/bv2.cfg" "original data that matches the hash list is installed as original/main")
+check_missing("${out}/original/main/extra.txt" "a file the hash list doesn't name is not installed")
 
 # Combined kinds, then none removes every pack and touches no URL
 rv2_fetch_assets(KINDS "robo_art;url" OUT "${out}" CACHE "${cache}" SOURCE "${SOURCE}" URL "${pack_url}" PYTHON "${PYTHON}"

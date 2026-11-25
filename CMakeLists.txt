@@ -190,7 +190,7 @@ if("url" IN_LIST RV2_ASSETS AND RV2_ASSETS_URL AND NOT RV2_ASSETS_URL MATCHES "^
   set(RV2_ASSETS_URL "") # file:// is for tests/assets_fetch.cmake only
 endif()
 set(rv2_assets_python "")
-if("url" IN_LIST RV2_ASSETS)
+if("url" IN_LIST RV2_ASSETS OR "original" IN_LIST RV2_ASSETS) # check-pack.py, safe-extract.py
   find_package(Python3 COMPONENTS Interpreter)
   if(Python3_FOUND)
     set(rv2_assets_python "${Python3_EXECUTABLE}")
