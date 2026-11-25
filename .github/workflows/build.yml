@@ -4,6 +4,9 @@ on:
     branches: [main, 'release/**']  # release/*: the production hotfix line, every merge gets a run too (ADR 0061)
     tags: ['v*']
   pull_request:
+  # Nightly on main: a merge whose macOS jobs never got a runner still gets a macOS result within a day (ROBO-266)
+  schedule:
+    - cron: '23 1 * * *'
 # A newer commit cancels a PR's run; runs on main and tags each finish, so every merge gets a result (ROBO-221, ADR 0056)
 concurrency:
   group: build-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
@@ -21,11 +24,9 @@ jobs:
       BV2_VERSION: ${{ github.ref_type == 'tag' && github.ref_name || '0.0.0-dev' }}
     strategy:
       fail-fast: false
+      # macOS only on main, release/*, tags and nightly, not on PRs: hosted arm64 runners often never start (ROBO-266)
       matrix:
-        include:
-          - { os: windows-2025, preset: win-x64-msvc }  # pinned (PNS-27): ADR 0012 names this image
-          - { os: macos-15, preset: macos-arm64 }
-          - { os: ubuntu-24.04, preset: linux-x64 }
+        include: ${{ fromJSON(github.event_name == 'pull_request' && '[{"os":"windows-2025","preset":"win-x64-msvc"},{"os":"ubuntu-24.04","preset":"linux-x64"}]' || '[{"os":"windows-2025","preset":"win-x64-msvc"},{"os":"macos-15","preset":"macos-arm64"},{"os":"ubuntu-24.04","preset":"linux-x64"}]') }}  # windows-2025 pinned (PNS-27): ADR 0012 names this image
     steps:
       - uses: actions/checkout@v7
         with:
@@ -168,7 +169,12 @@ jobs:
       # Every run checks the files a tag would publish, so a broken list shows up on main, not after the tag
       - name: Release files are all there
         shell: bash
-        run: ls -l $RELEASE_FILES  # unquoted: one name per word
+        env:
+          PR: ${{ github.event_name == 'pull_request' }}
+        run: |
+          files=$RELEASE_FILES
+          [ "$PR" != true ] || files=$(tr ' ' '\n' <<< "$files" | grep -v macos-arm64)  # a PR builds no macOS package (ROBO-266)
+          ls -l $files  # unquoted: one name per word
       - name: Source tarball and release
         if: github.ref_type == 'tag' && startsWith(github.ref_name, 'v')
         shell: bash
@@ -266,10 +272,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
-      matrix:
-        include:
-          - { os: windows-2025, preset: win-x64-msvc }
-          - { os: macos-15, preset: macos-arm64 }
+      matrix:  # macOS not on PRs, as in build (ROBO-266)
+        include: ${{ fromJSON(github.event_name == 'pull_request' && '[{"os":"windows-2025","preset":"win-x64-msvc"}]' || '[{"os":"windows-2025","preset":"win-x64-msvc"},{"os":"macos-15","preset":"macos-arm64"}]') }}
     defaults:
       run:
         shell: bash

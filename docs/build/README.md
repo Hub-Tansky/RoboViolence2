@@ -66,7 +66,7 @@ A PR that changes only docs-tier paths (the review gate's docs tier, REVIEW.md s
 
 Required (the repository ruleset "main protection", see [AGENTS.md](../../AGENTS.md#build)):
 
-- `build`: Windows, macOS, Linux; Debug and `-release` presets. Uploads the Release `roboviolence2-<preset>` packages, the Windows installer and the macOS `.dmg`. The separate `release` job (not required) checks on every run that the release files are there and publishes them on a `v*` tag (ADR 0020).
+- `build`: Windows and Linux on PRs; also macOS on pushes to `main`, `release/*`, tags and a nightly run on `main` (01:23 UTC), since hosted macOS runners often never start ([ADR ROBO-268](../decisions/ROBO-268-macos-builds-on-main-and-nightly.md)). Debug and `-release` presets. Uploads the Release `roboviolence2-<preset>` packages, the Windows installer and the macOS `.dmg`. The separate `release` job (not required) checks on every run that the release files are there and publishes them on a `v*` tag (ADR 0020).
 - `smoke`: Linux ASan, ctest and a 10 s client run under xvfb.
 - `scan`: `secret-scan.yml`.
 - `architecture`.
@@ -78,7 +78,7 @@ Not required:
 
 - `codeql`, `clang-tidy`.
 - `package-check`: Linux package in a clean `ubuntu:24.04`.
-- `package-smoke`: Windows and macOS packages: server, master, and client for 10 s; Mesa llvmpipe on Windows.
+- `package-smoke`: Windows and macOS packages (macOS only where `build` builds it, ADR ROBO-268): server, master, and client for 10 s; Mesa llvmpipe on Windows.
 - `containers`: server images and the compose example; pushes `:<sha>` and `:latest` to GHCR from `main`, `:<sha>` only from `release/**` ([ADR 0061](../decisions/0061-release-branch-for-production-hotfixes.md)).
 - `ci-retry`: re-runs a `build` whose job never got a hosted runner (a PR run only while it is the branch head, `main` and tag runs always; [ADR 0041](../decisions/0041-macos-ci-runner-not-acquired-retry.md)).
 - `dependabot-automerge`: turns on auto-merge for Dependabot's GitHub Actions minor and patch PRs; majors and Docker stay manual, and a push by anyone else, a major or a Docker update turns auto-merge off ([ADR ROBO-250](../decisions/ROBO-250-dependabot-actions-auto-merge.md)).
