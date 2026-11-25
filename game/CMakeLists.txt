@@ -73,6 +73,7 @@ set(BV2_GAME_SOURCES
   src/PacketCheck.cpp
   src/ArtDownloader.cpp
   src/ArtPack.cpp
+  src/SkinTexture.cpp
   src/DataDirPicker.cpp
   src/DataDownload.cpp
   src/Paths.cpp

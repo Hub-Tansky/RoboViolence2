@@ -302,6 +302,12 @@ target_include_directories(test_map_themes PRIVATE ${CMAKE_SOURCE_DIR}/game/src)
 bv2_target_defaults(test_map_themes)
 add_test(NAME map_themes COMMAND test_map_themes)
 
+# ROBO-258: skin names, bot faces, picker order and the team mask recolour
+add_executable(test_skins test_skins.cpp)
+target_include_directories(test_skins PRIVATE ${CMAKE_SOURCE_DIR}/game/src)
+bv2_target_defaults(test_skins)
+add_test(NAME skins COMMAND test_skins)
+
 # ROBO-239: tools/gltf-to-dko.py output loads through engine/dko (dko_probe) with the meshes, materials and dummy expected
 add_executable(dko_probe dko_probe.cpp)
 target_link_libraries(dko_probe PRIVATE dko zeven_console)  # dkt stand-ins: no GL context in tests
@@ -395,7 +401,7 @@ endif()
 
 # Phase T7: screenshots against tests/golden/*.png (screenshots.py; Xvfb, so Linux only: goldens are Mesa llvmpipe frames)
 if(TARGET bv2 AND ROBOVIOLENCE2_XVFB AND NOT APPLE)
-  foreach(shot main-menu options scoreboard appearance desktop options-custom art-pack-menu art-pack-game)
+  foreach(shot main-menu options scoreboard appearance desktop options-custom art-pack-menu art-pack-game art-pack-appearance)
     add_test(NAME screenshot_${shot} COMMAND ${Python3_EXECUTABLE} -B ${CMAKE_CURRENT_SOURCE_DIR}/screenshots.py $<TARGET_FILE:bv2> "${BV2_TEST_SCRATCH}/screenshots" ${shot})
     set_tests_properties(screenshot_${shot} PROPERTIES TIMEOUT 180 RESOURCE_LOCK bv2_server_port)
   endforeach()

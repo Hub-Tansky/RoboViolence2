@@ -18,6 +18,8 @@
 
 #include <cfloat>
 #include "AssetRegistry.h"
+#include "SkinTexture.h"
+#include "Skins.h"
 #include "Player.h"
 #include "GameVar.h"
 #include "Console.h"
@@ -165,7 +167,6 @@ Player::Player(char pPlayerID, Map * pMap, Game * pGame): pingLogInterval(0.05f)
 	//--- on load un skin par default
 	skin = "skin10";
 #ifndef CONSOLE
-	tex_skinOriginal = dktCreateTextureFromFile((CString("main/skins/") + skin + ".tga").s, DKT_FILTER_BILINEAR);
 	tex_skin = dktCreateEmptyTexture(64, 32, 3, DKT_FILTER_BILINEAR);
 #endif
 }
@@ -182,7 +183,6 @@ Player::~Player()
 	ZEVEN_SAFE_DELETE(weapon);
 	dktDeleteTexture(&tex_baboShadow);
 	dktDeleteTexture(&tex_baboHalo);
-	dktDeleteTexture(&tex_skinOriginal);
 	dktDeleteTexture(&tex_skin);
 #endif
 	if (minibot) delete minibot;
@@ -706,26 +706,19 @@ void Player::updateSkin()
 		skinT = skin;
 	}
 
-	//--- On reload le skin si � chang�
 	if (lastSkin != skinT)
-	{
 		skin = skinT;
-		dktDeleteTexture(&tex_skinOriginal);
-		tex_skinOriginal = dktCreateTextureFromFile(CString("main/skins/%s.tga", skin.s).s, DKT_FILTER_BILINEAR);
-	}
 
 	redDecal = redDecalT;
 	greenDecal = greenDecalT;
 	blueDecal = blueDecalT;
 	lastSkin = skin;
 
-	//--- Hey oui, on recr�une texture ogl �chaque fois pour chaque babo qui spawn!!!!
-	//--- On est en ogl, faq � kick ass MOUHOUHOUHAHAHA
-	unsigned char imgData[64*32*3];
-	dktGetTextureData(tex_skinOriginal, imgData);
-
 	//--- Celon son team, on set la couleur du babo en cons�uence
-   if ((game->gameType != GAME_TYPE_DM) && (game->gameType != GAME_TYPE_SND) && gameVar.cl_teamIndicatorType == 0)
+	//--- A full-colour skin (ROBO-258) takes the team colour on its mask only; outside team games its mask takes the
+	//--- player's layer 1 colour.
+	CColor3f maskColour = redDecal;
+	if ((game->gameType != GAME_TYPE_DM) && (game->gameType != GAME_TYPE_SND) && gameVar.cl_teamIndicatorType == 0)
 	{
 		switch (teamID)
 		{
@@ -734,6 +727,7 @@ void Player::updateSkin()
 				redDecalT.set(1,.5f,.5f);
 				greenDecalT.set(1,.0f,.0f);
 				blueDecalT.set(.5f,0,0);
+				maskColour.set(bv2::skins::TEAM_RED[0], bv2::skins::TEAM_RED[1], bv2::skins::TEAM_RED[2]);
 				break;
 			}
 		case PLAYER_TEAM_BLUE:
@@ -741,38 +735,13 @@ void Player::updateSkin()
 				redDecalT.set(.5f,.5f,1);
 				greenDecalT.set(0,0,1);
 				blueDecalT.set(0,0,.5f);
+				maskColour.set(bv2::skins::TEAM_BLUE[0], bv2::skins::TEAM_BLUE[1], bv2::skins::TEAM_BLUE[2]);
 				break;
 			}
 		}
 	}
-	else
-	{
-		//--- Sinon on prend les couleurs que le gars a mis
-		redDecalT = redDecal;
-		greenDecalT = greenDecal;
-		blueDecalT = blueDecal;
-	}
 
-	int i,j,k;
-	float r,g,b;
-	CColor3f finalColor;
-	for (j=0;j<32;++j)
-	{
-		for (i=0;i<64;++i)
-		{
-			k = ((j*64) + i) * 3;
-			r = (float)imgData[k + 0] / 255.0f;
-			g = (float)imgData[k + 1] / 255.0f;
-			b = (float)imgData[k + 2] / 255.0f;
-			finalColor = (redDecalT * r + greenDecalT * g + blueDecalT * b) / (r+g+b);
-			imgData[k + 0] = (unsigned char)(finalColor[0] * 255.0f);
-			imgData[k + 1] = (unsigned char)(finalColor[1] * 255.0f);
-			imgData[k + 2] = (unsigned char)(finalColor[2] * 255.0f);
-		}
-	}
-
-	// update
-	dktCreateTextureFromBuffer(&tex_skin, imgData, 64, 32, 3, DKT_FILTER_BILINEAR);
+	bv2::paintSkinTexture(&tex_skin, skin, maskColour, redDecalT, greenDecalT, blueDecalT);
 }
 #endif
 

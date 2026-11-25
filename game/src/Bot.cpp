@@ -6,6 +6,7 @@
 #include "Map.h"
 #include "Server.h"
 #include "netPacket.h"
+#include "Skins.h"
 
 #include <algorithm>
 #include <cmath>
@@ -1171,10 +1172,8 @@ void Bot::update(Server& server, const bots::World& world, float delay)
 				return; // no main weapon enabled: the validator would kick the bot for any choice
 			spawn.weaponID = (int8_t)weapon;
 			spawn.meleeID = WEAPON_KNIVES;
-			const int skin = rosterIndex % 23 + 1; // skin01..skin23
-			memcpy(spawn.skin, "skin", 4);
-			spawn.skin[4] = (char)('0' + skin / 10);
-			spawn.skin[5] = (char)('0' + skin % 10);
+			// a random approved face (Server::updateBots, ROBO-258); a client without the art pack draws a BV2 skin instead
+			snprintf(spawn.skin, sizeof(spawn.skin), "%s", bv2::skins::faceSkin(face));
 			const uint8_t i = (uint8_t)rosterIndex;
 			const uint8_t red[3] = {(uint8_t)(200 + i * 17), 80, 120}, green[3] = {80, (uint8_t)(200 + i * 23), 100}, blue[3] = {100, 80, (uint8_t)(200 + i * 29)};
 			memcpy(spawn.redDecal, red, 3);

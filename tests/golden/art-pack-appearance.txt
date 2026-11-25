@@ -1,0 +1,12 @@
+# Appearance tab on the fixture art pack (ROBO-258): skin10 is the fixture's full-colour skin. Layer 1 is green, so the
+# masked equator band shows green while the unmasked red stripe above it stays red. The skin is rows only, so the
+# spinning ball gives the same frame every time.
+expect-scene menu
+set cl_skin skin10
+set cl_redDecal 0 1 0
+set cl_greenDecal 0 0 0
+set cl_blueDecal 0 0 0
+menutab profile
+wait 2
+screenshot art-pack-appearance
+wait 1

@@ -17,6 +17,8 @@
 */
 
 #include "AssetRegistry.h"
+#include "SkinTexture.h"
+#include "Skins.h"
 
 #ifndef CONSOLE
 
@@ -102,7 +104,11 @@ CUserLogin::CUserLogin(CControl * in_parent, CControl * in_alignTo)
 
 	//--- His skin
 	CControl * label1 = new CControl(instance, CVector2i(32,100), CVector2i(40,20),"Skin:", this, "LABEL", pic_babo, CONTROL_SNAP_RIGHT, 32);
-	sld_skin = new CControl(instance, CVector2i(32,100),CVector2i(256,15),"",this,"SLIDER", label1, CONTROL_SNAP_RIGHT); sld_skin->valueMax = 23; sld_skin->valueMin = 1;
+	sld_skin = new CControl(instance, CVector2i(32, 100), CVector2i(256, 15), "", this, "SLIDER", label1, CONTROL_SNAP_RIGHT);
+	//--- ROBO-258: the art pack's faces first, then the BV2 skins
+	skinChoices = bv2::skins::choices(bv2::fullColourSkinsInstalled());
+	sld_skin->valueMax = (int)skinChoices.size();
+	sld_skin->valueMin = 1;
 
 	//--- To choose babo color
 	label1 = new CControl(instance, CVector2i(32,225), CVector2i(200,20),"Layer 1 (red/green/blue):", this, "LABEL", sld_skin, CONTROL_SNAP_BOTTOM, 10);
@@ -143,7 +149,6 @@ CUserLogin::CUserLogin(CControl * in_parent, CControl * in_alignTo)
 	rollingAngle = 0;
 
 	//--- For skin purpose
-	tex_skinOriginal = dktCreateTextureFromFile(CString("main/skins/%s.tga", gameVar.cl_skin.s).s, DKT_FILTER_BILINEAR);
 	tex_skin = dktCreateEmptyTexture(64, 32, 3, DKT_FILTER_BILINEAR);
 	m_medals = 1430;
 	updateSkinInt = 0;
@@ -158,7 +163,6 @@ CUserLogin::~CUserLogin()
 	dktDeleteTexture(&tex_baboShadow);
 	dksDeleteSound(m_sfxClic);
 	dksDeleteSound(m_sfxOver);
-	dktDeleteTexture(&tex_skinOriginal);
 	dktDeleteTexture(&tex_skin);
 }
 
@@ -169,10 +173,6 @@ void CUserLogin::updateSkin()
 	CColor3f redDecalT;
 	CColor3f greenDecalT;
 	CColor3f blueDecalT;
-
-	int i,j,k;
-	float r,g,b;
-	CColor3f finalColor;
 
 /*	for (i=0;i<11;++i)
 	{
@@ -215,42 +215,20 @@ void CUserLogin::updateSkin()
 	sld_layer3_g->value = (int)(gameVar.cl_blueDecal[1] * 255);
 	sld_layer3_b->value = (int)(gameVar.cl_blueDecal[2] * 255);
 
-	CString skinStr = gameVar.cl_skin;
-	skinStr.resizeInverse(skinStr.len() - 4);
-	sld_skin->value = skinStr.toInt();
+	//--- The art pack can finish after the menu is built: list its faces once they load (ROBO-258)
+	if (bv2::fullColourSkinsInstalled() != (skinChoices.size() > (size_t)bv2::skins::LEGACY_COUNT))
+	{
+		skinChoices = bv2::skins::choices(bv2::fullColourSkinsInstalled());
+		sld_skin->valueMax = (int)skinChoices.size();
+	}
+	sld_skin->value = bv2::skins::indexOf(skinChoices, gameVar.cl_skin.s) + 1;
 
 	//--- The name may change from the console too
 	if (!txt_playerName->haveFocus())
 		txt_playerName->text = gameVar.cl_playerName;
 
-	//--- On reload le skin si ça changé
-	dktDeleteTexture(&tex_skinOriginal);
-	tex_skinOriginal = dktCreateTextureFromFile(CString("main/skins/%s.tga", gameVar.cl_skin.s).s, DKT_FILTER_BILINEAR);
-//	dktBlurTexture(tex_skinOriginal, 1);
-
-	//--- Hey oui, un recré une texture ogl à chaque fois pour chaque babo qui spawn!!!!
-	//--- On est en ogl, faq ça kick ass MOUHOUHOUHAHAHA
-	unsigned char imgData[64*32*3];
-	dktGetTextureData(tex_skinOriginal, imgData);
-
-	//--- Celon son team, on set la couleur du babo en conséquence
-	for (j=0;j<32;++j)
-	{
-		for (i=0;i<64;++i)
-		{
-			k = ((j*64) + i) * 3;
-			r = (float)imgData[k + 0] / 255.0f;
-			g = (float)imgData[k + 1] / 255.0f;
-			b = (float)imgData[k + 2] / 255.0f;
-			finalColor = (redDecalT * r + greenDecalT * g + blueDecalT * b) / (r+g+b);
-			imgData[k + 0] = (unsigned char)(finalColor[0] * 255.0f);
-			imgData[k + 1] = (unsigned char)(finalColor[1] * 255.0f);
-			imgData[k + 2] = (unsigned char)(finalColor[2] * 255.0f);
-		}
-	}
-
-	// update
-	dktCreateTextureFromBuffer(&tex_skin, imgData, 64, 32, 3, DKT_FILTER_BILINEAR);
+	//--- The preview has no team: a full-colour skin's mask shows layer 1, as in a deathmatch (ROBO-258)
+	bv2::paintSkinTexture(&tex_skin, gameVar.cl_skin, redDecalT, redDecalT, greenDecalT, blueDecalT);
 }
 
 
@@ -357,7 +335,8 @@ void CUserLogin::Validate(CControl * control)
 		}
 		if (control == sld_skin)
 		{
-			gameVar.cl_skin.set("skin%02i", sld_skin->value);
+			if (sld_skin->value >= 1 && sld_skin->value <= (int)skinChoices.size())
+				gameVar.cl_skin = skinChoices[sld_skin->value - 1].c_str();
 		}
 	}
 }

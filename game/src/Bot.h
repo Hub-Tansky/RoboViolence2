@@ -152,13 +152,14 @@ namespace bots
 class Bot
 {
 public:
-	Bot(int slot, int rosterIndex, int team)
-		: slot(slot), rosterIndex(rosterIndex), team(team) {}
+	Bot(int slot, int rosterIndex, int team, int face = 0)
+		: slot(slot), rosterIndex(rosterIndex), team(team), face(face) {}
 	// One server frame: spawn when allowed, think, move, and send this frame's messages
 	void update(Server& server, const bots::World& world, float delay);
 
 	int slot, rosterIndex;
 	int team; // blue or red: the team it plays for, kept while an admin moves it to spectator
+	int face; // index into bv2::skins::FACES (ROBO-258)
 	bots::Brain brain;
 
 private:
