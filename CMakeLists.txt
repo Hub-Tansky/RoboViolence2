@@ -185,6 +185,10 @@ set(RV2_ASSETS_URL "" CACHE STRING "https URL of a pack archive (.tar.gz or .zip
 include(cmake/RV2Assets.cmake)
 rv2_default_assets_cache(rv2_assets_cache_default)
 set(RV2_ASSETS_CACHE "${rv2_assets_cache_default}" CACHE PATH "Download cache for RV2_ASSETS, outside the build tree")
+if("url" IN_LIST RV2_ASSETS AND RV2_ASSETS_URL AND NOT RV2_ASSETS_URL MATCHES "^https://")
+  message(WARNING "RV2_ASSETS: RV2_ASSETS_URL must be an https:// URL; url skipped")
+  set(RV2_ASSETS_URL "") # file:// is for tests/assets_fetch.cmake only
+endif()
 set(rv2_assets_python "")
 if("url" IN_LIST RV2_ASSETS)
   find_package(Python3 COMPONENTS Interpreter)
