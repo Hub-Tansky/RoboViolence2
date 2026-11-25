@@ -23,6 +23,7 @@
 #include "netPacket.h"
 #include "CCurl.h"
 #include "ReportGen.h"
+#include "Skins.h"
 #include <time.h>
 #include <fstream>
 #include <algorithm>
@@ -1520,7 +1521,12 @@ void Server::updateBots(float delay)
 			p->name = bots::name(botNames, pick >= 0 ? pick : index).c_str();
 			joined.insert(id);
 			validator.join(*p);
-			bots[slot].reset(new Bot(slot, index, team));
+			// a random face no other bot wears (ROBO-258)
+			std::vector<int> faces;
+			for (int i = 0; i < MAX_PLAYER; ++i)
+				if (bots[i])
+					faces.push_back(bots[i]->face);
+			bots[slot].reset(new Bot(slot, index, team, bv2::skins::pickFace(faces, rand())));
 			net_clsv_svcl_player_info info = {};
 			info.playerID = (int8_t)slot;
 			snprintf(info.playerName, sizeof(info.playerName), "%s", p->name.s);

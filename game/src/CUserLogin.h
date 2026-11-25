@@ -23,6 +23,8 @@
 
 #include "CPanel.h"
 
+#		include <string>
+#		include <vector>
 
 class CUserLogin : public CPanel
 {
@@ -44,7 +46,8 @@ public:
 	// Son shadow
 	unsigned int tex_baboShadow;
 	unsigned int tex_skin;
-	unsigned int tex_skinOriginal;
+	// Skin names the slider steps through (ROBO-258)
+	std::vector<std::string> skinChoices;
 
 	float rollingAngle;
 

@@ -402,7 +402,6 @@ public:
 	//--- Notre skin
 #ifndef CONSOLE
 	unsigned int tex_skin;
-	unsigned int tex_skinOriginal;
 #endif
 	CString skin;
 	CString lastSkin;
