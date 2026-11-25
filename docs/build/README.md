@@ -22,6 +22,7 @@ Pick your OS: [macOS](macos.md), [Linux](linux.md), [Windows](windows.md). Each 
   - `original`: the original BV2 data at `BV2_UPSTREAM_COMMIT`, checked against `tools/original-assets.sha256`; only the listed `Content/main` files are kept.
   - `url` with `-DRV2_ASSETS_URL=<https URL of a .tar.gz or .zip>`: any pack holding `main/pack.tsv` that passes `tools/check-pack.py`; it has no hash pin, and a warning says so.
   - `none`: no network access at all (distro and CI builds).
+  - `original` and `url` need Python 3: `tools/safe-extract.py` unpacks them, refusing members that would land outside the folder.
   - Combine with a list, e.g. `-DRV2_ASSETS="original;robo_art"`. A failed or offline download warns and keeps the placeholders; downloads are cached in `RV2_ASSETS_CACHE` (outside the build tree), so a clean build doesn't download again. `--placeholders` (every test) leaves these packs out. They are never installed or packaged: `cmake --install` (and so the `.deb`) fails when a file it writes matches an original asset, and `packaging/make-package.py` checks its stage the same way for the `.zip`, `.tar.gz`, `.dmg` and installer.
 - The game server reads only `BV2_DATA_DIR` for original data: it loads its maps from there, and from the package's `main/maps` (the game's own maps, `content/maps`, [ADR 0054](../decisions/0054-game-ships-its-own-maps.md)), and sends missing maps to clients.
 - Launch scripts, language files, `bv2.example.cfg` and the game's own maps always come from the package's own `main/`.

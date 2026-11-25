@@ -171,6 +171,7 @@ endif()
 #   -DRV2_ASSETS=robo_art   the pinned Robo Violence 2 art pack (default; CI builds default to none)
 #   -DRV2_ASSETS=original   the original BV2 data at BV2_UPSTREAM_COMMIT, checked against tools/original-assets.sha256
 #   -DRV2_ASSETS=url        any pack at -DRV2_ASSETS_URL=<https URL of a .tar.gz or .zip> holding main/pack.tsv; no pin
+#   original and url need Python 3 (tools/safe-extract.py unpacks archives that have no hash pin)
 #   -DRV2_ASSETS=none       no network access (distro and CI builds)
 # Kinds combine as a list, e.g. "original;robo_art"; the game stacks them placeholders < original < robo_art < url.
 # A failed or offline download warns and keeps the placeholders. Downloads are cached in RV2_ASSETS_CACHE.
@@ -250,6 +251,11 @@ install(CODE "
   if(DEFINED ENV{DESTDIR}) # the manifest lists paths without DESTDIR (the .deb installs with one)
     list(TRANSFORM rv2_installed PREPEND \"\$ENV{DESTDIR}\")
   endif()
+  foreach(rv2_f IN LISTS rv2_installed)
+    if(NOT EXISTS \"\${rv2_f}\" AND NOT IS_SYMLINK \"\${rv2_f}\")
+      message(FATAL_ERROR \"ROBO-261 original-file check: \${rv2_f} is in the install manifest but not on disk\")
+    endif()
+  endforeach()
   rv2_original_files_in(\"\${rv2_installed}\" \"\${rv2_hashes}\" rv2_found)
   if(rv2_found)
     message(FATAL_ERROR \"Original BV2 files in the install, which may not be redistributed (ROBO-261): \${rv2_found}\")
