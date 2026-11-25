@@ -1172,7 +1172,7 @@ void Bot::update(Server& server, const bots::World& world, float delay)
 				return; // no main weapon enabled: the validator would kick the bot for any choice
 			spawn.weaponID = (int8_t)weapon;
 			spawn.meleeID = WEAPON_KNIVES;
-			// the approved faces in turn (ROBO-258); a client without the art pack draws a BV2 skin instead
+			// a random approved face (Server::updateBots, ROBO-258); a client without the art pack draws a BV2 skin instead
 			snprintf(spawn.skin, sizeof(spawn.skin), "%s", bv2::skins::faceSkin(face));
 			const uint8_t i = (uint8_t)rosterIndex;
 			const uint8_t red[3] = {(uint8_t)(200 + i * 17), 80, 120}, green[3] = {80, (uint8_t)(200 + i * 23), 100}, blue[3] = {100, 80, (uint8_t)(200 + i * 29)};

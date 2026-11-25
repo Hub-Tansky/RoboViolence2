@@ -10,7 +10,7 @@
 - Ground rule 1 (ADR 0010): BV2 skins keep loading and look as before. Packets carry a skin name in 7 bytes (`netPacket.h`).
 
 ## Decision
-- **Format:** two art pack ids per skin. `skins/<name>` is a 512x256 RGB equirectangular PNG, the same unwrap `gluSphere` uses for the BV2 skins. `skins/<name>_mask` is a same-size greyscale PNG, white where team colour goes (band and armour panels, never the face). Both are rows in the art pack's `pack.tsv`, not files in the base pack.
+- **Format:** two art pack ids per skin. `skins/<name>` is a 512x256 RGB equirectangular PNG (RGBA also loads; its alpha is ignored), the same unwrap `gluSphere` uses for the BV2 skins. `skins/<name>_mask` is a same-size greyscale PNG, white where team colour goes (band and armour panels, never the face). Both are rows in the art pack's `pack.tsv`, not files in the base pack.
 - **Names:** `faceNN` for the 17 approved faces. Face 08 is `skin10`, so the default `cl_skin` and older clients keep working. Names fit the 6-character packet field.
 - **Colour:** a masked pixel keeps its brightness relative to the paint red (232, 52, 58) and takes the colour, as the art export made the blue previews (`design/tools/export_assets.py` `recolour`). Team games with `cl_teamIndicatorType 0` use team red (232, 52, 58) or blue (47, 123, 255). Otherwise the mask takes the player's layer 1 colour, so the colour sliders still do something. Unmasked pixels are drawn as painted.
 - **Fallback:** without both files (no art pack, `--placeholders`), the BV2 skin is drawn with the old layer recolour: `faceNN` shows `skinNN` (wrapping past 23), a BV2 name shows itself, any other name `skin10`. A name that isn't 1 to 6 lower-case letters or digits gets `skin10` too, so wire text never builds a path.
@@ -22,6 +22,6 @@
 ## Consequences
 - The art pack pin moves to `rv2-art-2`. Installed packs show the splash once while it downloads (ADR ROBO-260).
 - Full-colour skins live only in the art pack, so the GPL game ships no new art. The fixture art pack has one full-colour `skin10` with a band and an unmasked stripe; the `art-pack-appearance` golden checks that layer 1 lands on the mask only.
-- Players without the art pack see bots in BV2 skins. Players with it see faces, also for players who pick BV2 skins.
+- Players without the art pack see bots in BV2 skins. With it, a player who picks `skin10` shows face 08; the other BV2 skins look as before.
 - `GAME_VERSION_SV/CL` is unchanged, so a client from before this change can join. It has no `faceNN` fallback: its bots and face-wearing players are drawn from an unloaded texture (undefined colours) until it updates. Accepted as cosmetic; a version bump would lock those clients out instead.
 - Rejected: a team-colour alpha channel (an RGBA skin can't be checked by eye as easily as a separate mask); recolouring the whole ball as BV2 does (the faces would be lost).
