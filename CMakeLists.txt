@@ -236,12 +236,13 @@ endforeach()
 install(DIRECTORY "${BV2_DATA_DIR}/" DESTINATION ${CMAKE_INSTALL_DATADIR}/bv2/main ${bv2_link_excludes})
 list(TRANSFORM BV2_CONTENT_LINKS PREPEND "${CMAKE_SOURCE_DIR}/content/" OUTPUT_VARIABLE bv2_link_sources)
 install(DIRECTORY ${bv2_link_sources} DESTINATION ${CMAKE_INSTALL_DATADIR}/bv2/main)
-# ROBO-261: an install (every package is one) fails when a file matches an original BV2 asset; the original data is
-# not redistributable, and RV2_ASSETS packs in runtime/packs are never installed
+# ROBO-261: an install (and so the .deb) fails when a file it wrote matches an original BV2 asset; the original data is
+# not redistributable, and RV2_ASSETS packs in runtime/packs are never installed. packaging/make-package.py checks its
+# stage the same way for the other packages.
 install(CODE "
   include(\"${CMAKE_SOURCE_DIR}/cmake/RV2Assets.cmake\")
   rv2_original_hashes(\"${CMAKE_SOURCE_DIR}\" rv2_hashes)
-  rv2_original_files_in(\"\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}\" \"\${rv2_hashes}\" rv2_found)
+  rv2_original_files_in(\"\${CMAKE_INSTALL_MANIFEST_FILES}\" \"\${rv2_hashes}\" rv2_found)
   if(rv2_found)
     message(FATAL_ERROR \"Original BV2 files in the install, which may not be redistributed (ROBO-261): \${rv2_found}\")
   endif()

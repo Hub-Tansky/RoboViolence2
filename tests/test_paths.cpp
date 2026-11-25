@@ -196,6 +196,15 @@ int main(int argc, char ** argv)
 	check(bv2::savedDataDir().empty(), "a saved folder that no longer holds data is ignored");
 	check(bv2::startDataDir().dir.empty() && bv2::startDataDir().ask, "no data anywhere: the first-run box");
 
+	// ROBO-261: original data a source build fetched (runtime/packs/original) is found on first start, without the box
+	{
+		const fs::path built = pkg / "packs" / "original";
+		touch(built / "main" / "textures" / "a.tga");
+		check(bv2::detectDataDir() == root(built), "auto-detect finds the build's packs/original");
+		check(bv2::startDataDir().dir == root(built) && !bv2::startDataDir().ask, "first start uses the build's original data");
+		fs::remove_all(pkg / "packs");
+	}
+
 	// ROBO-261: the build's packs/ sits beside the real folder of the package's main/
 	{
 		const fs::path runtime = base / "runtime", bundle = base / "app" / "Resources";

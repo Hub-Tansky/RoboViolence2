@@ -4,8 +4,8 @@
 # top CMakeLists.txt; tests/assets_fetch.cmake runs it in script mode (cmake -P) against a local fixture.
 #
 # rv2_fetch_assets(KINDS <list> OUT <runtime>/packs CACHE <dir> SOURCE <repo root> [URL <url>] [PYTHON <exe>]
-#                  [ART_URL <url> ART_SHA256 <hex> ART_VERSION <v>] [ORIGINAL_URL <url> COMMIT <sha>])
-# ART_*, ORIGINAL_URL and COMMIT override the pins read from game/src/ArtPack.cpp and DataDownload.cpp (tests only).
+#                  [ART_URL <url> ART_SHA256 <hex> ART_VERSION <v>] [ORIGINAL_URL <url> COMMIT <sha> ORIGINAL_HASHES <file>])
+# ART_*, ORIGINAL_URL, COMMIT and ORIGINAL_HASHES override the pins read from game/src/ArtPack.cpp and DataDownload.cpp (tests only).
 
 if(CMAKE_SCRIPT_MODE_FILE)
   cmake_policy(VERSION 3.25) # script mode (cmake -P, the install script) has no project policies
@@ -123,7 +123,7 @@ endfunction()
 
 # original: BV2's Content/main at the pinned upstream commit (ADR 0040); every Content/main file of
 # tools/original-assets.sha256 must match, or nothing is installed
-function(rv2_fetch_original out cache source commit url)
+function(rv2_fetch_original out cache hash_list commit url)
   set(dest "${out}/original")
   set(stamp "original ${commit}")
   rv2_pack_current("${dest}" "${stamp}" current)
@@ -142,7 +142,7 @@ function(rv2_fetch_original out cache source commit url)
     file(REMOVE "${zip}")
     return()
   endif()
-  file(STRINGS "${source}/tools/original-assets.sha256" rows REGEX "  BaboViolent2/Content/main/")
+  file(STRINGS "${hash_list}" rows REGEX "  BaboViolent2/Content/main/")
   set(bad "")
   foreach(row IN LISTS rows)
     string(SUBSTRING "${row}" 0 64 want)
@@ -244,7 +244,7 @@ function(rv2_fetch_url out cache source url python)
 endfunction()
 
 function(rv2_fetch_assets)
-  cmake_parse_arguments(A "" "OUT;CACHE;SOURCE;URL;PYTHON;ART_URL;ART_SHA256;ART_VERSION;ORIGINAL_URL;COMMIT" "KINDS" ${ARGN})
+  cmake_parse_arguments(A "" "OUT;CACHE;SOURCE;URL;PYTHON;ART_URL;ART_SHA256;ART_VERSION;ORIGINAL_URL;COMMIT;ORIGINAL_HASHES" "KINDS" ${ARGN})
   set(known none robo_art original url)
   foreach(kind IN LISTS A_KINDS)
     if(NOT kind IN_LIST known)
@@ -269,7 +269,10 @@ function(rv2_fetch_assets)
     if(NOT A_ORIGINAL_URL)
       set(A_ORIGINAL_URL "https://github.com/Daivuk/BaboViolent2/archive/${commit}.zip")
     endif()
-    rv2_fetch_original("${A_OUT}" "${A_CACHE}" "${A_SOURCE}" "${commit}" "${A_ORIGINAL_URL}")
+    if(NOT A_ORIGINAL_HASHES)
+      set(A_ORIGINAL_HASHES "${A_SOURCE}/tools/original-assets.sha256")
+    endif()
+    rv2_fetch_original("${A_OUT}" "${A_CACHE}" "${A_ORIGINAL_HASHES}" "${commit}" "${A_ORIGINAL_URL}")
   endif()
   if("robo_art" IN_LIST A_KINDS)
     set(pin "${A_SOURCE}/game/src/ArtPack.cpp")
@@ -316,12 +319,12 @@ function(rv2_original_hashes source out)
   set(${out} "${list}" PARENT_SCOPE)
 endfunction()
 
-# Files under dir whose SHA-256 is in hashes: release installs refuse them (the original data is not redistributable)
-function(rv2_original_files_in dir hashes out)
-  file(GLOB_RECURSE files LIST_DIRECTORIES false "${dir}/*")
+# Of files (a list of paths, e.g. CMAKE_INSTALL_MANIFEST_FILES), those whose SHA-256 is in hashes: installs refuse
+# them (the original data is not redistributable)
+function(rv2_original_files_in files hashes out)
   set(found "")
   foreach(f IN LISTS files)
-    if(NOT IS_SYMLINK "${f}")
+    if(EXISTS "${f}" AND NOT IS_DIRECTORY "${f}" AND NOT IS_SYMLINK "${f}")
       file(SHA256 "${f}" h)
       if(h IN_LIST hashes)
         list(APPEND found "${f}")
@@ -335,5 +338,5 @@ endfunction()
 if(CMAKE_SCRIPT_MODE_FILE STREQUAL CMAKE_CURRENT_LIST_FILE)
   rv2_fetch_assets(KINDS ${KINDS} OUT "${OUT}" CACHE "${CACHE}" SOURCE "${SOURCE}" URL "${URL}" PYTHON "${PYTHON}"
                    ART_URL "${ART_URL}" ART_SHA256 "${ART_SHA256}" ART_VERSION "${ART_VERSION}"
-                   ORIGINAL_URL "${ORIGINAL_URL}" COMMIT "${COMMIT}")
+                   ORIGINAL_URL "${ORIGINAL_URL}" COMMIT "${COMMIT}" ORIGINAL_HASHES "${ORIGINAL_HASHES}")
 endif()

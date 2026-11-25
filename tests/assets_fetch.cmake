@@ -45,6 +45,7 @@ endif()
 execute_process(COMMAND "${CMAKE_COMMAND}" -E tar czf "${dir}/rv2-art-9.tar.gz" main WORKING_DIRECTORY "${dir}/art")
 file(SHA256 "${dir}/rv2-art-9.tar.gz" art_sha)
 file_url("${dir}/rv2-art-9.tar.gz" art_url)
+file_url("${dir}/never-there.tar.gz" missing_url_early)
 
 # robo_art: installed with VERSION
 rv2_fetch_assets(KINDS robo_art OUT "${out}" CACHE "${cache}" SOURCE "${SOURCE}"
@@ -55,7 +56,19 @@ if(NOT version STREQUAL "9")
   fail("robo_art writes VERSION")
 endif()
 
+# A reconfigure with the same pin does nothing: the stamp matches, so neither the cache nor the pack is touched
+string(SUBSTRING "${art_sha}" 0 12 short)
+file(REMOVE "${cache}/rv2-art-9-${short}.tar.gz")
+file(WRITE "${out}/robo_art/marker" "kept\n")
+rv2_fetch_assets(KINDS robo_art OUT "${out}" CACHE "${cache}" SOURCE "${SOURCE}"
+                 ART_URL "${missing_url_early}" ART_SHA256 "${art_sha}" ART_VERSION 9)
+check_exists("${out}/robo_art/marker" "an unchanged pin leaves the installed pack alone")
+check_missing("${cache}/rv2-art-9-${short}.tar.gz" "an unchanged pin downloads nothing")
+
 # Rebuild from scratch with the source archive gone: the cache serves it
+file(REMOVE_RECURSE "${out}") # refills the cache first
+rv2_fetch_assets(KINDS robo_art OUT "${out}" CACHE "${cache}" SOURCE "${SOURCE}"
+                 ART_URL "${art_url}" ART_SHA256 "${art_sha}" ART_VERSION 9)
 file(RENAME "${dir}/rv2-art-9.tar.gz" "${dir}/moved.tar.gz")
 file(REMOVE_RECURSE "${out}")
 rv2_fetch_assets(KINDS robo_art OUT "${out}" CACHE "${cache}" SOURCE "${SOURCE}"
@@ -87,6 +100,12 @@ file_url("${dir}/nopack.tar.gz" nopack_url)
 file(REMOVE_RECURSE "${out}/url")
 rv2_fetch_assets(KINDS url OUT "${out}" CACHE "${cache}" SOURCE "${SOURCE}" URL "${nopack_url}" PYTHON "${PYTHON}")
 check_missing("${out}/url" "a pack without pack.tsv is not installed")
+file(MAKE_DIRECTORY "${dir}/badtsv/main")
+file(WRITE "${dir}/badtsv/main/pack.tsv" "id\tfile\n../x\t../x.png\n")
+execute_process(COMMAND "${CMAKE_COMMAND}" -E tar czf "${dir}/badtsv.tar.gz" main WORKING_DIRECTORY "${dir}/badtsv")
+file_url("${dir}/badtsv.tar.gz" badtsv_url)
+rv2_fetch_assets(KINDS url OUT "${out}" CACHE "${cache}" SOURCE "${SOURCE}" URL "${badtsv_url}" PYTHON "${PYTHON}")
+check_missing("${out}/url" "a pack that fails check-pack.py is not installed")
 file(WRITE "${dir}/broken.zip" "not an archive\n")
 file_url("${dir}/broken.zip" broken_url)
 rv2_fetch_assets(KINDS url OUT "${out}" CACHE "${cache}" SOURCE "${SOURCE}" URL "${broken_url}" PYTHON "${PYTHON}")
@@ -102,6 +121,13 @@ file_url("${dir}/up.zip" up_url)
 rv2_fetch_assets(KINDS original OUT "${out}" CACHE "${cache}" SOURCE "${SOURCE}" ORIGINAL_URL "${up_url}" COMMIT "${commit}")
 check_missing("${out}/original" "original data that fails the hash list is not installed")
 check_missing("${cache}/BaboViolent2-${commit}.zip" "a bad original archive leaves the cache")
+
+# original: the same zip with a hash list that matches it is installed as packs/original/main
+file(SHA256 "${dir}/up/${inner}/bv2.cfg" cfg_hash)
+file(WRITE "${dir}/up-hashes.sha256" "${cfg_hash}  BaboViolent2/Content/main/bv2.cfg\n")
+rv2_fetch_assets(KINDS original OUT "${out}" CACHE "${cache}" SOURCE "${SOURCE}" ORIGINAL_URL "${up_url}" COMMIT "${commit}"
+                 ORIGINAL_HASHES "${dir}/up-hashes.sha256")
+check_exists("${out}/original/main/bv2.cfg" "original data that matches the hash list is installed as original/main")
 
 # Combined kinds, then none removes every pack and touches no URL
 rv2_fetch_assets(KINDS "robo_art;url" OUT "${out}" CACHE "${cache}" SOURCE "${SOURCE}" URL "${pack_url}" PYTHON "${PYTHON}"
@@ -122,11 +148,12 @@ list(LENGTH hashes n)
 if(NOT n GREATER 300)
   fail("the hash list loads")
 endif()
-rv2_original_files_in("${dir}/install" "${hashes}" found)
+file(GLOB_RECURSE installed "${dir}/install/*")
+rv2_original_files_in("${installed}" "${hashes}" found)
 if(found)
   fail("a clean install passes")
 endif()
-rv2_original_files_in("${dir}/install" "${hashes};${fake_hash}" found)
+rv2_original_files_in("${installed}" "${hashes};${fake_hash}" found)
 if(NOT found MATCHES "fake.wav$")
   fail("a file with an original hash is found")
 endif()

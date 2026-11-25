@@ -12,8 +12,10 @@ Also writes roboviolence2-<preset>-setup.exe on Windows (Inno Setup, packaging/w
 roboviolence2-<preset>.dmg on macOS: only the app and an Applications link, laid out over
 packaging/macos/dmg-background.png (dmgbuild, ADR 0030), and roboviolence2-<preset>.deb on Linux (dpkg-deb, ADR 0031).
 <version> (e.g. a v1.2.0 tag or 0.0.0-dev) goes into the installer and the .deb.
-Fails if the build is not Release, or if anything the package must hold is missing.
+Fails if the build is not Release, if anything the package must hold is missing, or if a staged file matches an original
+BV2 asset in tools/original-assets.sha256 (not redistributable, ADR ROBO-261).
 """
+import hashlib
 import json
 import re
 import shutil
@@ -30,6 +32,16 @@ SCRIPTS = PACKAGING / "scripts"
 GLAD = PACKAGING.parent / "engine" / "zeven" / "third_party" / "glad"
 ISCC = r"C:\Program Files (x86)\Inno Setup 6\ISCC.exe"  # its default install, as on the GitHub Windows runner
 APP = "Robo Violence 2.app"  # the bundle's name in the package and the .dmg: what Finder, Launchpad and the Dock show
+
+
+def original_files(stage, sha_list=PACKAGING.parent / "tools" / "original-assets.sha256"):
+    """Staged files whose SHA-256 is an original BV2 asset's (ADR ROBO-261), relative to stage"""
+    hashes = {line.split("  ", 1)[0] for line in sha_list.read_text().splitlines() if line.strip()}
+    found = []
+    for f in sorted(stage.rglob("*")):
+        if f.is_file() and not f.is_symlink() and hashlib.sha256(f.read_bytes()).hexdigest() in hashes:
+            found.append(f.relative_to(stage).as_posix())
+    return found
 
 
 def run(*cmd):
@@ -179,6 +191,10 @@ def main():
     missing = [f for f in required if not (stage / f).is_file()]
     if missing:
         sys.exit(f"package {name} is missing: {', '.join(missing)}")
+
+    originals = original_files(stage)
+    if originals:
+        sys.exit(f"package {name} holds original BV2 files, which may not be redistributed: {', '.join(originals)}")
 
     written = platform.ship(runtime, stage, out, name, version)
     shutil.rmtree(stage)
