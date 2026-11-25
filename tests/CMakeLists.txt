@@ -333,6 +333,12 @@ if(TARGET bv2_original_hashes)
 endif()
 
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
+# ROBO-261: RV2_ASSETS fetches (cmake/RV2Assets.cmake) from local fixtures, the install's original-file check, and the
+# same check in the package builder
+add_test(NAME assets_fetch COMMAND ${CMAKE_COMMAND} -DSOURCE=${CMAKE_SOURCE_DIR} -DSCRATCH=${BV2_TEST_SCRATCH}
+  -DPYTHON=${Python3_EXECUTABLE} -P ${CMAKE_CURRENT_SOURCE_DIR}/assets_fetch.cmake)
+add_test(NAME package_originals COMMAND ${Python3_EXECUTABLE} -B ${CMAKE_CURRENT_SOURCE_DIR}/test_package_originals.py
+  "${BV2_TEST_SCRATCH}")
 add_test(NAME example_cfg COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test_example_cfg.py)
 add_test(NAME app_icon COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test_app_icon.py)
 add_test(NAME app_name COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test_app_name.py)

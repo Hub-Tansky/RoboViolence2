@@ -166,6 +166,43 @@ if(BV2_PLACEHOLDER_CONTENT)
   add_custom_target(bv2_placeholder_content DEPENDS "${BV2_DATA_DIR}/maps/CTF-Placeholder.bvm")
 endif()
 
+# Game assets fetched at configure time (ROBO-261, ADR ROBO-261) into runtime/packs/<kind>, which the game stacks over the
+# placeholders when it runs from the build tree (not with --placeholders). Never installed or packaged.
+#   -DRV2_ASSETS=robo_art   the pinned Robo Violence 2 art pack (default; CI builds default to none)
+#   -DRV2_ASSETS=original   the original BV2 data at BV2_UPSTREAM_COMMIT, checked against tools/original-assets.sha256
+#   -DRV2_ASSETS=url        any pack at -DRV2_ASSETS_URL=<https URL of a .tar.gz or .zip> holding main/pack.tsv; no pin
+#   original and url need Python 3 (tools/safe-extract.py unpacks archives that have no hash pin)
+#   -DRV2_ASSETS=none       no network access (distro and CI builds)
+# Kinds combine as a list, e.g. "original;robo_art"; the game stacks them placeholders < original < robo_art < url.
+# A failed or offline download warns and keeps the placeholders. Downloads are cached in RV2_ASSETS_CACHE.
+if(DEFINED ENV{CI})
+  set(rv2_assets_default none)
+else()
+  set(rv2_assets_default robo_art)
+endif()
+set(RV2_ASSETS "${rv2_assets_default}" CACHE STRING "Game assets to fetch: robo_art, original, url, none, or a list")
+set_property(CACHE RV2_ASSETS PROPERTY STRINGS robo_art original url none "original;robo_art")
+set(RV2_ASSETS_URL "" CACHE STRING "https URL of a pack archive (.tar.gz or .zip) for RV2_ASSETS=url")
+include(cmake/RV2Assets.cmake)
+rv2_default_assets_cache(rv2_assets_cache_default)
+set(RV2_ASSETS_CACHE "${rv2_assets_cache_default}" CACHE PATH "Download cache for RV2_ASSETS, outside the build tree")
+if("url" IN_LIST RV2_ASSETS AND RV2_ASSETS_URL AND NOT RV2_ASSETS_URL MATCHES "^https://")
+  message(WARNING "RV2_ASSETS: RV2_ASSETS_URL must be an https:// URL; url skipped")
+  set(RV2_ASSETS_URL "") # file:// is for tests/assets_fetch.cmake only
+endif()
+set(rv2_assets_python "")
+if("url" IN_LIST RV2_ASSETS OR "original" IN_LIST RV2_ASSETS) # check-pack.py, safe-extract.py
+  find_package(Python3 COMPONENTS Interpreter)
+  if(Python3_FOUND)
+    set(rv2_assets_python "${Python3_EXECUTABLE}")
+  endif()
+endif()
+# a pin bump re-runs the configure step, so the build fetches the new version
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/game/src/ArtPack.cpp"
+             "${CMAKE_SOURCE_DIR}/game/src/DataDownload.cpp")
+rv2_fetch_assets(KINDS ${RV2_ASSETS} OUT "${BV2_RUNTIME_DIR}/packs" CACHE "${RV2_ASSETS_CACHE}"
+                 SOURCE "${CMAKE_SOURCE_DIR}" URL "${RV2_ASSETS_URL}" PYTHON "${rv2_assets_python}")
+
 add_subdirectory(engine/zeven)
 add_subdirectory(engine/babonet)
 add_subdirectory(engine/dko)
@@ -204,6 +241,26 @@ endforeach()
 install(DIRECTORY "${BV2_DATA_DIR}/" DESTINATION ${CMAKE_INSTALL_DATADIR}/bv2/main ${bv2_link_excludes})
 list(TRANSFORM BV2_CONTENT_LINKS PREPEND "${CMAKE_SOURCE_DIR}/content/" OUTPUT_VARIABLE bv2_link_sources)
 install(DIRECTORY ${bv2_link_sources} DESTINATION ${CMAKE_INSTALL_DATADIR}/bv2/main)
+# ROBO-261: an install (and so the .deb) fails when a file it wrote matches an original BV2 asset; the original data is
+# not redistributable, and RV2_ASSETS packs in runtime/packs are never installed. packaging/make-package.py checks its
+# stage the same way for the other packages.
+install(CODE "
+  include(\"${CMAKE_SOURCE_DIR}/cmake/RV2Assets.cmake\")
+  rv2_original_hashes(\"${CMAKE_SOURCE_DIR}\" rv2_hashes)
+  set(rv2_installed \${CMAKE_INSTALL_MANIFEST_FILES})
+  if(DEFINED ENV{DESTDIR}) # the manifest lists paths without DESTDIR (the .deb installs with one)
+    list(TRANSFORM rv2_installed PREPEND \"\$ENV{DESTDIR}\")
+  endif()
+  foreach(rv2_f IN LISTS rv2_installed)
+    if(NOT EXISTS \"\${rv2_f}\" AND NOT IS_SYMLINK \"\${rv2_f}\")
+      message(FATAL_ERROR \"ROBO-261 original-file check: \${rv2_f} is in the install manifest but not on disk\")
+    endif()
+  endforeach()
+  rv2_original_files_in(\"\${rv2_installed}\" \"\${rv2_hashes}\" rv2_found)
+  if(rv2_found)
+    message(FATAL_ERROR \"Original BV2 files in the install, which may not be redistributed (ROBO-261): \${rv2_found}\")
+  endif()
+  message(STATUS \"No original BV2 files in the install (ROBO-261)\")")
 if(UNIX AND NOT APPLE)
   install(FILES packaging/linux/roboviolence2.desktop DESTINATION ${CMAKE_INSTALL_DATADIR}/applications)
   install(DIRECTORY packaging/icons/hicolor DESTINATION ${CMAKE_INSTALL_DATADIR}/icons COMPONENT icons)

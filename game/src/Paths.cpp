@@ -321,6 +321,9 @@ namespace bv2
 	std::string detectDataDir()
 	{
 		std::vector<fs::path> places(1, fs::path(originalDataDir()));
+		const std::string built = buildPacksDir(packageRoot());
+		if (!built.empty())
+			places.push_back(fs::path(built) / "original"); // RV2_ASSETS=original (ROBO-261)
 		std::string home = getEnv("HOME");
 #ifdef BV2_PLATFORM_WINDOWS
 		if (home.empty())
@@ -351,6 +354,20 @@ namespace bv2
 				return found;
 		}
 		return "";
+	}
+
+	std::string buildPacksDir(const std::string& packageRoot)
+	{
+		if (packageRoot.empty())
+			return "";
+		std::error_code ec;
+		const fs::path main = fs::canonical(fs::path(packageRoot) / "main", ec);
+		if (ec)
+			return "";
+		const fs::path packs = main.parent_path() / "packs";
+		if (!fs::is_directory(packs, ec))
+			return "";
+		return rootString(packs);
 	}
 
 	const std::string & dataRoot() { return g_dataRoot; }

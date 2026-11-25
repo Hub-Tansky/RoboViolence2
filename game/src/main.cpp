@@ -563,7 +563,7 @@ int main(int argc, char* argv[])
 	crashreport::install(bv2::prefDir(), g_releaseVersion); // ROBO-186, ADR 0048
 	if (!autotestStart(argc, argv)) return exitCode;
 	bv2::chooseDataDir(argc, argv);
-	bv2::stackAssetPacks(); // ADR 0069, ROBO-260: art pack (when installed) over the BV2 data over the base pack
+	bv2::stackAssetPacks(argc, argv); // ADR 0069, ROBO-260/261: art pack (when installed) over the BV2 data over the base pack
 	bv2::artDownloadStart(argc, argv); // ROBO-260: the art pack downloads in the background
 	dksvarInit(&stringInterface);
 	std::string configPath = bv2::loadConfigLayers(argc, (const char* const*)argv);

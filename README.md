@@ -19,6 +19,8 @@ Code: GPLv3 ([LICENSE.txt](LICENSE.txt)).
 
 Download a package from CI or build from source: [docs/build/](docs/build/README.md) ([macOS](docs/build/macos.md), [Linux](docs/build/linux.md), [Windows](docs/build/windows.md)).
 
+A source build fetches the game's art pack into its build folder; `-DRV2_ASSETS=robo_art|original|url|none` (with `-DRV2_ASSETS_URL=` for `url`) chooses what it fetches ([details](docs/build/README.md#game-data-required)).
+
 ## Where to read more
 - [AGENTS.md](AGENTS.md): project rules for fellow robots, agents and even human contributors
 - [Issues](https://github.com/Hub-Tansky/RoboViolence2/issues): bug reports and feature requests (public intake); the backlog lives in a private repo

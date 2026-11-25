@@ -116,4 +116,5 @@ What we do, in one or two sentences.
 | [ROBO-258](ROBO-258-full-colour-skins-with-team-mask.md) | Full-colour ball skins from the art pack take team colour on a mask; BV2 skins stay the fallback | Accepted |
 | [ROBO-259](ROBO-259-four-map-looks-alias-theme-ids.md) | Four map looks; the 23 theme ids map files store are aliases, unknown ids get Wasteland | Accepted |
 | [ROBO-260](ROBO-260-art-pack-downloads-beside-the-gpl-game.md) | The proprietary art pack downloads in the background into robo_art/ and stacks over the base pack, with no restart | Accepted |
+| [ROBO-261](ROBO-261-build-option-fetches-game-assets.md) | `-DRV2_ASSETS` fetches the art pack, the original data or a pack URL at configure time into runtime/packs/, never packaged | Accepted |
 | [ROBO-264](ROBO-264-art-pack-checks-and-fixture.md) | An art pack is checked against the base pack, and CI plays a generated fixture art pack | Accepted |

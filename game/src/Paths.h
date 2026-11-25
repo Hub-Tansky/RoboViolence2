@@ -87,7 +87,11 @@ namespace bv2
 	// Where the Robo Violence 2 art pack is downloaded (ROBO-260): "robo_art" beside originalDataDir()
 	const std::string& artPackDir();
 
-	// BV2 data in usual places: originalDataDir(), BaboViolent2-master or BaboViolent2 in ~/Downloads, ~/Desktop, ~/Documents;
+	// Packs the build fetched (ROBO-261, ADR ROBO-261): "packs/" beside the real folder of packageRoot's main/ (symlinks
+	// resolved, so the macOS development bundle finds the build tree's), with a trailing '/'; "" when there is none
+	std::string buildPacksDir(const std::string& packageRoot);
+
+	// BV2 data in usual places: originalDataDir(), the build's packs/original (ROBO-261), BaboViolent2-master or BaboViolent2 in ~/Downloads, ~/Desktop, ~/Documents;
 	// on Windows also "BaboViolent 2" or BaboViolent2 in Program Files; "" when none
 	std::string detectDataDir();
 

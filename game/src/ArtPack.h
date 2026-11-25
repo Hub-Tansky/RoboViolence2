@@ -20,6 +20,20 @@ namespace bv2
 	// True when dir holds main/pack.tsv and a VERSION file equal to version (and version isn't empty)
 	bool artPackInstalled(const std::string& dir, const std::string& version);
 
+	// The asset pack stack (ADR 0069, ROBO-260, ROBO-261), top first, and the index of the data root (the working
+	// directory). buildPacks is buildPacksDir() ("" when none); it is used only when useBuildPacks (not under
+	// --placeholders): its url/ pack goes on top when it holds main/pack.tsv, and its robo_art/ replaces artDir when it
+	// holds version. Then the art pack (when installed), the data root and the base pack. buildArt says the build's art
+	// pack is stacked, so nothing needs downloading.
+	struct PackStack
+	{
+		std::vector<std::string> roots;
+		size_t cwdPack = 0;
+		bool buildArt = false;
+	};
+	PackStack assetPackStack(const std::string& buildPacks, bool useBuildPacks, const std::string& artDir,
+							 const std::string& version, const std::string& dataRoot, const std::string& packageRoot);
+
 	// True when the player turned the download off: --no-art-download in argv (remembered) or the remembered file
 	// <prefDir>/art-download-off. Writes that file when the flag is given. Also true, not remembered, for --placeholders
 	// (tests and screenshots never download the art).
