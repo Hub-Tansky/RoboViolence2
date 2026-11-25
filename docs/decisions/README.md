@@ -103,7 +103,7 @@ What we do, in one or two sentences.
 | [0067](0067-font-bytes-and-ttf-baking.md) | Text is one byte per glyph; bytes 160-255 hold 96 extra letters; a TTF is baked to babo.tga widths | Accepted |
 | [0068](0068-docs-only-prs-skip-the-build.md) | A docs-only PR skips the build steps; its required checks still report success | Accepted |
 | [0069](0069-asset-packs-stack-over-the-base-pack.md) | Asset packs stack over the base pack; the BV2 data is an optional pack on top | Accepted (amended by ROBO-264, ROBO-260) |
-| [0070](0070-gltf-converts-to-dko.md) | New models are authored as glTF and converted to .DKO offline | Accepted |
+| [0070](0070-gltf-converts-to-dko.md) | New models are authored as glTF and converted to .DKO offline | Accepted (amended by ROBO-247) |
 | [ROBO-248](ROBO-248-adrs-named-by-scope-item.md) | Name new ADRs after their scope item, not the next number | Accepted |
 | [ROBO-249](ROBO-249-backlog-item-moves-on-merge.md) | A merged PR's backlog item moves to Done or Testing by workflow | Accepted |
 | [ROBO-250](ROBO-250-dependabot-actions-auto-merge.md) | Dependabot's GitHub Actions minor and patch updates merge themselves when green | Accepted |
@@ -119,3 +119,4 @@ What we do, in one or two sentences.
 | [ROBO-261](ROBO-261-build-option-fetches-game-assets.md) | `-DRV2_ASSETS` fetches the art pack, the original data or a pack URL at configure time into runtime/packs/, never packaged | Accepted |
 | [ROBO-264](ROBO-264-art-pack-checks-and-fixture.md) | An art pack is checked against the base pack, and CI plays a generated fixture art pack | Accepted |
 | [ROBO-268](ROBO-268-macos-builds-on-main-and-nightly.md) | macOS builds run on main, release branches, tags and nightly, not on PRs | Accepted |
+| [ROBO-247](ROBO-247-animated-gltf-samples-into-dko-frames.md) | An animated glTF is sampled into DKO frames at 10 per second; morph targets and skins are baked per frame | Accepted |

@@ -1,6 +1,6 @@
 # 0070: New models are authored as glTF and converted to .DKO offline
 
-- Status: Accepted
+- Status: Accepted (amended by ROBO-247)
 - Date: 2026-11-18
 - Affects: `tools/gltf-to-dko.py`, `engine/dko/README.md`, `tests/test_gltf_to_dko.py`, `tests/dko_probe.cpp`; ROBO-239 (refactor Phase 1 A3; [ADR 0062](0062-asset-packs-mode-modules-client-independent-server.md) asset seam, owner decision D2: glTF)
 

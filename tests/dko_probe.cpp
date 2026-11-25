@@ -1,15 +1,17 @@
 // ROBO-239: loads a .DKO through engine/dko (the game's loader) and prints what tests/test_gltf_to_dko.py checks:
-// the bounding box, the radius and the position of one dummy. Exit 1 when the file does not load.
-// Usage: dko_probe <file.DKO> <dummy name>
+// the bounding box, the radius, the frame count and the position of one dummy (at one frame, ROBO-247). Exit 1 when the
+// file does not load.
+// Usage: dko_probe <file.DKO> <dummy name> [<frame>]
 #include "dko.h"
 
 #include <cstdio>
+#include <cstdlib>
 
 int main(int argc, char** argv)
 {
-	if (argc != 3)
+	if (argc != 3 && argc != 4)
 	{
-		std::printf("usage: dko_probe <file.DKO> <dummy name>\n");
+		std::printf("usage: dko_probe <file.DKO> <dummy name> [<frame>]\n");
 		return 2;
 	}
 	dkoInit();
@@ -23,13 +25,17 @@ int main(int argc, char** argv)
 	dkoGetOABB(model, box);
 	std::printf("probe oabb %g %g %g %g %g %g\n", box[0], box[1], box[2], box[3], box[4], box[5]);
 	std::printf("probe radius %g\n", dkoGetRadius(model));
+	std::printf("probe frames %d\n", dkoGetTotalFrame(model));
 	if (!dkoGetDummy(argv[2], model))
 	{
 		std::printf("FAIL: no dummy %s\n", argv[2]);
 		return 1;
 	}
 	float pos[3] = {0, 0, 0};
-	dkoGetDummyPosition(argv[2], model, pos);
+	if (argc == 4)
+		dkoGetDummyPosition(argv[2], model, pos, (short)std::atoi(argv[3]));
+	else
+		dkoGetDummyPosition(argv[2], model, pos);
 	std::printf("probe dummy %g %g %g\n", pos[0], pos[1], pos[2]);
 	dkoDeleteModel(&model);
 	dkoShutDown();

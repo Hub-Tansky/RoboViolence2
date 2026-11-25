@@ -3,7 +3,7 @@
 
 Usage: e2e.py <runtime dir> <scratch dir> <scenario>
 Scenarios: join_leave, password, chat, kick, ban, master_list, browser_tab_list, ctf_capture, ctf_capture_art_pack,
-ghost, user_map, weapon_choice, grenade, rocket, flamethrower, photon_rifle, nuke.
+ctf_flag_animation, ghost, user_map, weapon_choice, grenade, rocket, flamethrower, photon_rifle, nuke.
 Each has one observable: the admin API's `GET /status` player count or score, the server's stdout, or a client's
 autotest result (ADR 0025). Linux only (Xvfb).
 """
@@ -19,7 +19,9 @@ import urllib.request
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 import art_pack_fixture  # noqa: E402
+import flag_animation  # noqa: E402
 from autotest_client import client_command, start_xvfb  # noqa: E402
+from screenshots import compare, read_bmp  # noqa: E402
 
 ADMIN_PASS = "e2e-admin-pass"
 ADMIN_PORT = 18080
@@ -236,6 +238,33 @@ def ctf_capture_art_pack(run):
     ctf_capture(run, BV2_DATA_DIR=pack)
 
 
+def ctf_flag_animation(run):
+    """ROBO-247: a flag converted from an animated glTF plays in game like the BV2 flag. Two clients in turn, spawned
+    over the flag at the blue pod (3,8), each take two frames 0.3 s apart: one on the flag converted as 10 frames (as BV2's
+    flags), one on the same flag without its animation (one frame). The animated flag changes many more pixels between its frames than
+    the still one (the clock and other moving parts change both alike)."""
+    root = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
+    run.server(launch=b"set sv_gameType 2\nset sv_port 3333\ndedicate CTF-Placeholder\n")
+    changed = {}
+    for name in ("animated", "still"):
+        glb, pack = os.path.join(run.dir, name + ".glb"), os.path.join(run.dir, name + "-pack")
+        flag_animation.flag_glb(glb, animated=name == "animated")
+        flag_animation.make_pack(root, glb, pack)
+        # wait 12: well past joined, move and forceplayerspawn below (the client logs no line to wait for)
+        client = run.client(name, JOIN + ["wait 12", "screenshot flag-a", "wait 0.3", "screenshot flag-b", "wait 1"],
+                            BV2_DATA_DIR=pack)
+        run.joined(name)
+        slot = re.search(rf"^\[(\d+)\] {name} ", run.command("playerlist"), re.M)
+        check(slot, f"playerlist names {name}")
+        run.command(f"move 0 {name}")
+        run.command(f"forceplayerspawn {slot.group(1)} 6 6")
+        check(run.finished(client) == 0, f"{name}: client script passed")
+        shots = [os.path.join(run.dir, name, "screenshots", f"flag-{s}.bmp") for s in "ab"]
+        changed[name] = compare(*(read_bmp(s) for s in shots))[0]
+    print(f"animated flag: {changed['animated']:.2%} of the frame changed in 0.3 s; still: {changed['still']:.2%}")
+    check(changed["animated"] >= changed["still"] + 0.01, "the animated flag changes at least 1% more of the frame")
+
+
 def ghost(run):
     """A TCP client that never answers the join handshake (a port scanner) loses its slot after the join timeout"""
     run.server()
@@ -406,7 +435,7 @@ def nuke(run):
 
 
 SCENARIOS = {f.__name__: f for f in (join_leave, password, chat, kick, ban, master_list, browser_tab_list, ctf_capture,
-                                     ctf_capture_art_pack, ghost,
+                                     ctf_capture_art_pack, ctf_flag_animation, ghost,
                                      user_map, weapon_choice, grenade, rocket, flamethrower, photon_rifle, nuke)}
 
 if __name__ == "__main__":

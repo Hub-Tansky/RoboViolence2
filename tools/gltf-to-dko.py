@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Convert a glTF 2.0 model (.glb, or .gltf with its .bin) to a static .DKO the game draws (ROBO-239, ADR 0070).
+"""Convert a glTF 2.0 model (.glb, or .gltf with its .bin) to a .DKO the game draws (ROBO-239, ADR 0070; animation:
+ROBO-247, ADR ROBO-247).
 
 The art format is glTF (owner decision D2); the game keeps loading .DKO through engine/dko. This converter writes:
   - one DKO material per glTF material: name, diffuse colour (baseColorFactor), diffuse texture (the image file name
@@ -10,7 +11,12 @@ The art format is glTF (owner decision D2); the game keeps loading .DKO through 
   - glTF's Y-up axes as the game's Z-up: (x, y, z) -> (x, -z, y), which are Blender's axes again (Blender exports
     (x, y, z) as glTF (x, z, -y)): author in Blender as the BV2 models were built, Z up, a weapon's muzzle along +Y,
   - metres times --scale (default 200): the game draws models at 0.005, so 1 m in Blender is 1 game unit (a map tile).
-Static only: animations, skins, morph targets, sparse accessors and non-triangle primitives fail (exit 1).
+Animation (ROBO-247): a model with one animation becomes a vertex-animated DKO, as the BV2 flags, flag pole, knives
+and shields are. It is sampled every 1/10 s (the rate the game plays the flags at) from its first key, the last sample
+one step before its end, since the engine plays the last frame back into frame 0: author a 1 s loop for 10 frames.
+Node transforms, morph target weights and skins are baked into the vertices, normals and dummies of every frame.
+TIME_INFO holds the first frame, the last frame and the frame count. Without an animation the DKO has one frame.
+Sparse accessors, non-triangle primitives, more than one animation and animated node matrices fail (exit 1).
 
 Usage: gltf-to-dko.py <in.glb|in.gltf> <out.DKO> [--scale S]  (S DKO units per metre, default 200)
 Python 3, stdlib only.
@@ -36,6 +42,8 @@ CHUNK = {
 DKO_VERSION = 2
 MAX_DUMMIES = 64  # CDkoModel::dummies
 DEFAULT_SCALE = 200.0  # DKO units per metre: the game draws models at 0.005
+FPS = 10  # game/src/Map.cpp plays the flags at 10 frames a second
+MAX_FRAMES = 32767  # TIME_INFO holds shorts
 COMPONENTS = {"SCALAR": 1, "VEC2": 2, "VEC3": 3, "VEC4": 4, "MAT4": 16}
 FORMATS = {5120: "b", 5121: "B", 5122: "h", 5123: "H", 5125: "I", 5126: "f"}
 TRIANGLES = 4
@@ -115,8 +123,7 @@ def mat_mul(a, b):
 
 def node_matrix(node):
     if "matrix" in node:
-        m = node["matrix"]  # column-major
-        return [[m[c * 4 + r] for c in range(4)] for r in range(4)]
+        return column_major(node["matrix"])
     tx, ty, tz = node.get("translation", (0, 0, 0))
     qx, qy, qz, qw = node.get("rotation", (0, 0, 0, 1))
     sx, sy, sz = node.get("scale", (1, 1, 1))
@@ -142,31 +149,117 @@ def normalise(v):
     return tuple(x / length for x in v)
 
 
-def walk(doc):
-    """(node index, world matrix in game axes) for every node of the default scene, depth first."""
+def walk(doc, pose=None):
+    """(node index, world matrix in game axes) for every node of the default scene, depth first, at a pose
+    ({node: {path: value}}, see posed)."""
     scenes = doc.get("scenes", [])
     roots = scenes[doc.get("scene", 0)]["nodes"] if scenes else range(len(doc.get("nodes", [])))
     stack = [(i, AXES) for i in reversed(list(roots))]
     while stack:
         i, parent = stack.pop()
         node = doc["nodes"][i]
-        world = mat_mul(parent, node_matrix(node))
+        world = mat_mul(parent, node_matrix(dict(node, **(pose or {}).get(i, {}))))
         yield i, world
         stack.extend((c, world) for c in reversed(node.get("children", [])))
 
 
-def unsupported(doc):
-    """Raises GltfError for what a static .DKO can't hold, instead of writing a bind pose that looks valid."""
-    if doc.get("animations"):
-        raise GltfError("animations are not supported (static models only)")
-    if doc.get("skins") or any("skin" in n for n in doc.get("nodes", [])):
-        raise GltfError("skins are not supported (static models only)")
-    if any("targets" in p for m in doc.get("meshes", []) for p in m.get("primitives", [])):
-        raise GltfError("morph targets are not supported (static models only)")
+def interpolate(doc, buffers, sampler, t, path):
+    """A sampler's value at time t: a tuple (one per weight for "weights"), clamped outside its keys."""
+    times = accessor(doc, buffers, sampler["input"])
+    values = accessor(doc, buffers, sampler["output"])
+    mode = sampler.get("interpolation", "LINEAR")
+    cubic = mode == "CUBICSPLINE"
+    per_key = len(values) // len(times) // (3 if cubic else 1)  # 1, or the morph target count for weights
+
+    def key(k, part=1):  # part 0 in-tangent, 1 value, 2 out-tangent (cubic spline only)
+        base = (k * 3 + part) * per_key if cubic else k * per_key
+        vals = values[base:base + per_key]
+        return tuple(x for v in vals for x in (v if isinstance(v, tuple) else (v,)))
+
+    if t <= times[0]:
+        return key(0)
+    if t >= times[-1]:
+        return key(len(times) - 1)
+    k = max(i for i in range(len(times) - 1) if times[i] <= t)
+    t0, t1 = times[k], times[k + 1]
+    dt = t1 - t0
+    u = (t - t0) / dt if dt > 0 else 0.0
+    if mode == "STEP":
+        return key(k)
+    if cubic:
+        p0, m0, p1, m1 = key(k), key(k, 2), key(k + 1), key(k + 1, 0)
+        u2, u3 = u * u, u * u * u
+        out = tuple((2 * u3 - 3 * u2 + 1) * a + (u3 - 2 * u2 + u) * dt * b + (-2 * u3 + 3 * u2) * c + (u3 - u2) * dt * d
+                    for a, b, c, d in zip(p0, m0, p1, m1))
+        return normalise(out) if path == "rotation" else out
+    a, b = key(k), key(k + 1)
+    if path == "rotation":
+        return slerp(a, b, u)
+    return tuple(x + (y - x) * u for x, y in zip(a, b))
+
+
+def slerp(a, b, u):
+    dot = sum(x * y for x, y in zip(a, b))
+    if dot < 0:
+        b, dot = tuple(-x for x in b), -dot
+    if dot > 0.9995:
+        return normalise(tuple(x + (y - x) * u for x, y in zip(a, b)))
+    theta = math.acos(dot)
+    sa, sb = math.sin((1 - u) * theta) / math.sin(theta), math.sin(u * theta) / math.sin(theta)
+    return tuple(sa * x + sb * y for x, y in zip(a, b))
+
+
+def pick_animation(doc):
+    """The animation to sample, None for a static model."""
+    animations = doc.get("animations", [])
+    if len(animations) > 1:
+        raise GltfError(f"{len(animations)} animations: a .DKO holds one")
+    return animations[0] if animations else None
+
+
+def frame_times(doc, buffers, animation):
+    """([sample time per frame], first frame number): every 1/FPS s from the first key, the last one before the end (a
+    loop: the engine plays the last frame back into frame 0); one frame at time None without an animation."""
+    if animation is None:
+        return [None], 0
+    keys = [t for s in animation["samplers"] for t in accessor(doc, buffers, s["input"])]
+    if not keys:
+        raise GltfError("the animation has no keys")
+    start, end = min(keys), max(keys)
+    frames = max(1, round((end - start) * FPS))
+    return [start + i / FPS for i in range(frames)], round(start * FPS)
+
+
+def posed(doc, buffers, animation, t):
+    """{node index: {"translation"|"rotation"|"scale"|"weights": value}} at time t."""
+    pose = {}
+    if animation is None:
+        return pose
+    for ch in animation["channels"]:
+        target = ch["target"]
+        path = target.get("path")
+        if path not in ("translation", "rotation", "scale", "weights"):
+            raise GltfError(f"animation channel path {path!r} is not supported")
+        if "node" not in target:
+            continue
+        if "matrix" in doc["nodes"][target["node"]] and path != "weights":
+            raise GltfError(f"node {target['node']} has a matrix: animated nodes need translation, rotation, scale")
+        pose.setdefault(target["node"], {})[path] = interpolate(doc, buffers, animation["samplers"][ch["sampler"]],
+                                                                t, path)
+    return pose
+
+
+def world_matrices(doc, pose, scale):
+    """{node index: world matrix in game axes and DKO units} for the default scene at a pose."""
+    out = {}
+    for i, world in walk(doc, pose):
+        out[i] = [[x * scale for x in row[:3]] + [row[3] * scale] for row in world[:3]] + [world[3]]
+    return out
 
 
 def convert(doc, buffers, folder, scale=DEFAULT_SCALE):
-    """The DKO's parts: (materials, meshes, dummies, images), images as {file name beside the .DKO: bytes}."""
+    """The DKO's parts: (materials, meshes, dummies, images, (first frame, frame count)), images as {file name beside
+    the .DKO: bytes}. Each group's vertices and normals and each dummy's position and matrix are lists, one per frame."""
     unsupported(doc)
     materials, images = [], {}
     for i, m in enumerate(doc.get("materials", [])):
@@ -179,19 +272,27 @@ def convert(doc, buffers, folder, scale=DEFAULT_SCALE):
                 texture, images[texture] = image_file(doc, buffers, folder, image_index)
         materials.append({"name": m.get("name") or f"material{i}", "diffuse": colour, "texture": texture,
                           "two_sided": bool(m.get("doubleSided"))})
+    anim = pick_animation(doc)
+    times, first = frame_times(doc, buffers, anim)
+    poses = [posed(doc, buffers, anim, t) for t in times]
+    worlds = [world_matrices(doc, p, scale) for p in poses]
     default_material = None
     meshes, dummies = [], []
-    for i, world in walk(doc):
+    for i, _ in walk(doc, {}):
         node = doc["nodes"][i]
         name = node.get("name") or f"node{i}"
-        world = [[x * scale for x in row[:3]] + [row[3] * scale] for row in world[:3]] + [world[3]]
         if "mesh" not in node:
-            pos = apply(world, (0, 0, 0), 1)
-            axes = [normalise(apply(world, a, 0)) for a in ((1, 0, 0), (0, 1, 0), (0, 0, 1))]
-            dummies.append({"name": name, "position": pos, "matrix": [x for a in axes for x in a]})
+            pos, mats = [], []
+            for w in worlds:
+                pos.append(apply(w[i], (0, 0, 0), 1))
+                axes = [normalise(apply(w[i], a, 0)) for a in ((1, 0, 0), (0, 1, 0), (0, 0, 1))]
+                mats.append([x for a in axes for x in a])
+            dummies.append({"name": name, "position": pos, "matrix": mats})
             continue
+        mesh = doc["meshes"][node["mesh"]]
+        skin = doc["skins"][node["skin"]] if "skin" in node else None
         groups = []
-        for p, prim in enumerate(doc["meshes"][node["mesh"]]["primitives"]):
+        for p, prim in enumerate(mesh["primitives"]):
             if prim.get("mode", TRIANGLES) != TRIANGLES:
                 raise GltfError(f"node {name} primitive {p}: only triangle lists are supported")
             attrs = prim["attributes"]
@@ -201,6 +302,16 @@ def convert(doc, buffers, folder, scale=DEFAULT_SCALE):
             order = accessor(doc, buffers, prim["indices"]) if "indices" in prim else range(len(positions))
             if len(order) % 3:
                 raise GltfError(f"node {name} primitive {p}: index count is not a multiple of 3")
+            targets = [(accessor(doc, buffers, tg["POSITION"]) if "POSITION" in tg else None,
+                        accessor(doc, buffers, tg["NORMAL"]) if "NORMAL" in tg else None)
+                       for tg in prim.get("targets", [])]
+            if skin is not None:
+                if "JOINTS_0" not in attrs or "WEIGHTS_0" not in attrs:
+                    raise GltfError(f"node {name} primitive {p}: a skinned mesh needs JOINTS_0 and WEIGHTS_0")
+                if "JOINTS_1" in attrs:
+                    raise GltfError(f"node {name} primitive {p}: more than 4 joints per vertex are not supported")
+                joints = accessor(doc, buffers, attrs["JOINTS_0"])
+                weights = accessor(doc, buffers, attrs["WEIGHTS_0"])
             mat = prim.get("material")
             if mat is None:
                 if default_material is None:
@@ -208,20 +319,66 @@ def convert(doc, buffers, folder, scale=DEFAULT_SCALE):
                     materials.append({"name": "default", "diffuse": [1, 1, 1, 1], "texture": None,
                                       "two_sided": False})
                 mat = default_material
-            verts, norms, coords = [], [], []
+            coords = []
             for k in order:
-                verts.append(apply(world, positions[k], 1))
-                # world matrix, not its inverse transpose: normals tilt under non-uniform node scale
-                norms.append(normalise(apply(world, normals[k], 0)) if normals else (0.0, 0.0, 1.0))
                 u, v = uvs[k] if uvs else (0.0, 0.0)
                 coords.append((u, 1.0 - v))  # glTF v runs down the image, the game's TGA rows run up
-            groups.append({"material": mat, "vertices": verts, "normals": norms, "uvs": coords})
+            frame_verts, frame_norms = [], []
+            for pose, w in zip(poses, worlds):
+                morph = pose.get(i, {}).get("weights") or tuple(node.get("weights") or mesh.get("weights")
+                                                               or [0.0] * len(targets))
+                if skin is not None:
+                    inverse = (accessor(doc, buffers, skin["inverseBindMatrices"])
+                               if "inverseBindMatrices" in skin else None)
+                    joint_mats = [mat_mul(w[j], column_major(inverse[n]) if inverse else IDENTITY)
+                                  for n, j in enumerate(skin["joints"])]
+                verts, norms = [], []
+                for k in order:
+                    pos, nrm = positions[k], normals[k] if normals else None
+                    if targets and any(morph):
+                        pos = tuple(pos[c] + sum(wt * tp[k][c] for wt, (tp, _) in zip(morph, targets) if tp)
+                                    for c in range(3))
+                        if nrm:
+                            nrm = tuple(nrm[c] + sum(wt * tn[k][c] for wt, (_, tn) in zip(morph, targets) if tn)
+                                        for c in range(3))
+                    if skin is not None:
+                        m = blend([joint_mats[j] for j in joints[k]], weights[k])
+                    else:
+                        m = w[i]
+                    verts.append(apply(m, pos, 1))
+                    # the matrix, not its inverse transpose: normals tilt under non-uniform node scale
+                    norms.append(normalise(apply(m, nrm, 0)) if nrm else (0.0, 0.0, 1.0))
+                frame_verts.append(verts)
+                frame_norms.append(norms)
+            groups.append({"material": mat, "vertices": frame_verts, "normals": frame_norms, "uvs": coords})
         meshes.append({"name": name, "groups": groups})
     if not meshes:
         raise GltfError("the scene has no mesh")
     if len(dummies) > MAX_DUMMIES:
         raise GltfError(f"{len(dummies)} nodes without a mesh, engine/dko keeps at most {MAX_DUMMIES} dummies")
-    return materials, meshes, dummies, images
+    if len(times) > MAX_FRAMES:
+        raise GltfError(f"{len(times)} frames, a DKO holds at most {MAX_FRAMES}")
+    return materials, meshes, dummies, images, (first, len(times))
+
+
+IDENTITY = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
+
+
+def column_major(m):
+    return [[m[c * 4 + r] for c in range(4)] for r in range(4)]
+
+
+def blend(mats, weights):
+    """The weighted sum of joint matrices (linear blend skinning)."""
+    total = sum(weights) or 1.0
+    return [[sum(wt * m[r][c] for m, wt in zip(mats, weights)) / total for c in range(4)] for r in range(4)]
+
+
+def unsupported(doc):
+    """Raises GltfError for what a .DKO can't hold, instead of writing a file that looks valid."""
+    for i, s in enumerate(doc.get("skins", [])):
+        if not s.get("joints"):
+            raise GltfError(f"skin {i} has no joints")
 
 
 def image_file(doc, buffers, folder, index):
@@ -255,10 +412,11 @@ def floats(values):
     return struct.pack(f"<{len(values)}f", *values)
 
 
-def write_dko(materials, meshes, dummies, name="model"):
-    """Bytes of a one-frame DKO v2 in engine/dko's chunk layout."""
+def write_dko(materials, meshes, dummies, name="model", timing=(0, 1)):
+    """Bytes of a DKO v2 in engine/dko's chunk layout; timing is (first frame, frame count)."""
+    first, count = timing
     out = chunk("VERSION") + struct.pack("<h", DKO_VERSION)
-    out += chunk("TIME_INFO") + struct.pack("<hhh", 0, 0, 1)
+    out += chunk("TIME_INFO") + struct.pack("<hhh", first, first + count - 1, count)
     identity = [1, 0, 0, 0, 1, 0, 0, 0, 1]
     out += chunk("PROPERTIES") + chunk("NAME") + string(name) + chunk("POSITION") + floats([0, 0, 0])
     out += chunk("MATRIX") + floats(identity) + chunk("END")
@@ -281,39 +439,42 @@ def write_dko(materials, meshes, dummies, name="model"):
         out += chunk("NB_MAT_GROUP") + struct.pack("<h", len(mesh["groups"]))
         for g in mesh["groups"]:
             out += chunk("MAT_ID") + struct.pack("<h", g["material"])
-            out += chunk("NB_VERTEX") + struct.pack("<i", len(g["vertices"]))
-            out += chunk("VERTEX_ARRAY") + floats([x for v in g["vertices"] for x in v])
-            out += chunk("NORMAL_ARRAY") + floats([x for v in g["normals"] for x in v])
+            out += chunk("NB_VERTEX") + struct.pack("<i", len(g["uvs"]))
+            # engine/dko reads TIME_INFO's count of arrays back to back (CdkoMesh::loadMatGroup)
+            out += chunk("VERTEX_ARRAY") + floats([x for f in g["vertices"] for v in f for x in v])
+            out += chunk("NORMAL_ARRAY") + floats([x for f in g["normals"] for v in f for x in v])
             out += chunk("TEXCOORD_ARRAY") + floats([x for v in g["uvs"] for x in v])
             out += chunk("END")
         out += chunk("END")
     for d in dummies:
         out += chunk("DUMMY") + chunk("NAME") + string(d["name"])
-        out += chunk("POSITION") + floats(list(d["position"])) + chunk("MATRIX") + floats(d["matrix"]) + chunk("END")
+        out += chunk("POSITION") + floats([x for p in d["position"] for x in p])
+        out += chunk("MATRIX") + floats([x for m in d["matrix"] for x in m]) + chunk("END")
     return out + chunk("END")
 
 
 def main(argv):
-    parser = argparse.ArgumentParser(prog="gltf-to-dko.py", description="Convert a glTF 2.0 model to a static .DKO.")
+    parser = argparse.ArgumentParser(prog="gltf-to-dko.py", description="Convert a glTF 2.0 model to a .DKO.")
     parser.add_argument("src", help="input .glb, or .gltf with its buffers")
     parser.add_argument("dst", help="output .DKO; embedded images are written and external ones copied beside it")
     parser.add_argument("--scale", type=float, default=DEFAULT_SCALE, help="DKO units per metre (default 200)")
     args = parser.parse_args(argv)
-    src, dst, scale = args.src, args.dst, args.scale
+    src, dst = args.src, args.dst
     try:
         doc, buffers, folder = load(src)
-        materials, meshes, dummies, images = convert(doc, buffers, folder, scale)
+        materials, meshes, dummies, images, timing = convert(doc, buffers, folder, args.scale)
         out_dir = os.path.dirname(os.path.abspath(dst))
         for name, data in images.items():
             with open(os.path.join(out_dir, name), "wb") as f:
                 f.write(data)
         with open(dst, "wb") as f:
-            f.write(write_dko(materials, meshes, dummies, os.path.splitext(os.path.basename(dst))[0]))
+            f.write(write_dko(materials, meshes, dummies, os.path.splitext(os.path.basename(dst))[0], timing))
     except (GltfError, KeyError, IndexError, ValueError, OSError, struct.error) as e:
         print(f"gltf-to-dko: {src}: {e}")
         return 1
-    n = sum(len(g["vertices"]) for m in meshes for g in m["groups"])
-    print(f"{dst}: {len(meshes)} meshes, {len(materials)} materials, {n // 3} triangles, {len(dummies)} dummies")
+    n = sum(len(g["uvs"]) for m in meshes for g in m["groups"])
+    print(f"{dst}: {len(meshes)} meshes, {len(materials)} materials, {n // 3} triangles, {len(dummies)} dummies, "
+          f"{timing[1]} frames")
     return 0
 
 
