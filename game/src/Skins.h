@@ -13,7 +13,7 @@ namespace bv2
 	namespace skins
 	{
 		// Network packets carry a skin name in 7 bytes, so a name has at most 6 characters
-		const size_t NAME_MAX = 6;
+		const size_t SKIN_NAME_MAX = 6;
 		// The BV2 skins skin01..skin23 (64x32 colour masks in the player's data)
 		const int LEGACY_COUNT = 23;
 		// The default skin (cl_skin). With the art pack it is face 08, Ivory Serenity (owner 2026-11-24).
@@ -47,7 +47,7 @@ namespace bv2
 		// drawn as the default skin, so a peer can't make the game open a file outside main/skins/.
 		inline bool validName(const std::string& name)
 		{
-			if (name.empty() || name.size() > NAME_MAX)
+			if (name.empty() || name.size() > SKIN_NAME_MAX)
 				return false;
 			for (char c : name)
 				if (!((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9')))
