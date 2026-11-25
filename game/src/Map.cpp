@@ -20,6 +20,7 @@
 #include "AssetRegistry.h"
 #include "Map.h"
 #include "MapThemes.h"
+#include "FlagTrail.h"
 #include "Helper.h"
 #include "FileIO.h"
 #include "Console.h"
@@ -1203,6 +1204,12 @@ void Map::update(float delay, Player * thisPlayer)
 		if (flagState[1] == -2) flagPos[1] = flagPodPos[1];
 		if (flagState[0] >= 0) if (game->players[flagState[0]]) flagPos[0] = game->players[flagState[0]]->currentCF.position;
 		if (flagState[1] >= 0) if (game->players[flagState[1]]) flagPos[1] = game->players[flagState[1]]->currentCF.position;
+		for (int i = 0; i < 2; ++i) // a carried flag trails behind its carrier (ROBO-269)
+			if (flagState[i] >= 0 && game->players[flagState[i]])
+			{
+				const CVector3f& vel = game->players[flagState[i]]->currentCF.vel;
+				flagAngle[i] = flagtrail::angle(flagAngle[i], vel[0], vel[1], delay);
+			}
 
 /*
 	CVector3f newAccel[2];

@@ -601,25 +601,6 @@ void Player::render()
 				glPopMatrix();
 			}
 
-			// Le flag si c'est le cas
-			if (game->gameType == GAME_TYPE_CTF)
-			{
-				if (game->map)
-				{
-					if (game->map->flagState[0] == playerID)
-					{
-						game->map->flagAngle[0] = currentCF.angle-90;
-						//game->map->renderFlag(0);
-						//dkoRender(game->map->dko_flag[0], game->map->flagAnim);
-					}
-					if (game->map->flagState[1] == playerID)
-					{
-						game->map->flagAngle[1] = currentCF.angle-90;
-						//game->map->renderFlag(1);
-						//dkoRender(game->map->dko_flag[1], game->map->flagAnim);
-					}
-				}
-			}
 		glPopAttrib();
 	}
 }
