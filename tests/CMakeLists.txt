@@ -316,6 +316,14 @@ if(TARGET bv2_original_hashes)
   target_link_libraries(test_data_download PRIVATE zeven_core credentials bv2_original_hashes ${BV2_SQLITE_TARGET})
   bv2_target_defaults(test_data_download)
   add_test(NAME data_download COMMAND test_data_download "${BV2_TEST_SCRATCH}")
+
+  # ROBO-260: the art pack's install checks (no SDL, no network)
+  add_executable(test_art_pack test_art_pack.cpp ${CMAKE_SOURCE_DIR}/game/src/ArtPack.cpp
+    ${CMAKE_SOURCE_DIR}/game/src/DataDownload.cpp)
+  target_include_directories(test_art_pack PRIVATE ${CMAKE_SOURCE_DIR}/game/src)
+  target_link_libraries(test_art_pack PRIVATE zeven_core credentials bv2_original_hashes)
+  bv2_target_defaults(test_art_pack)
+  add_test(NAME art_pack COMMAND test_art_pack "${BV2_TEST_SCRATCH}")
 endif()
 
 find_package(Python3 REQUIRED COMPONENTS Interpreter)

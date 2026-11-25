@@ -20,7 +20,9 @@ namespace bv2
 	// files (and may add ids); a pack without one (the BV2 data) uses the base pack's file names. The top pack is the
 	// working directory, so its paths stay "main/<file>"; lower packs give "<root>main/<file>". When no pack holds
 	// the file, the path is "main/<file>" as before stacking. Until this is called every id gives "main/<file>".
-	void setAssetPacks(const std::vector<std::string>& roots);
+	// cwdPack names the pack that is the working directory when it isn't the top one (ROBO-260: the art pack sits
+	// above the data root); every other pack gives "<root>main/<file>".
+	void setAssetPacks(const std::vector<std::string>& roots, size_t cwdPack = 0);
 
 	// True when the base manifest or a stacked pack's pack.tsv has this id
 	bool assetKnown(const char* id);

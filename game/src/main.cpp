@@ -30,6 +30,7 @@
 #include "AssetRegistry.h"
 #include "FramePacing.h"
 #include "DataDirPicker.h"
+#include "ArtDownloader.h"
 #ifndef CONSOLE
 #	include "CrashReport.h"
 #	include "ReleaseVersion.h"
@@ -94,6 +95,7 @@ static bool autotestStart(int argc, char * argv[])
 // Every init failure exit: a result line for autotest callers, then the exit code
 static int initFailed()
 {
+	bv2::artDownloadStop(); // the download thread must not outlive main (ROBO-260)
 	if (autotest) printf("autotest: FAIL the client failed to start\n");
 	return exitCode;
 }
@@ -561,7 +563,8 @@ int main(int argc, char* argv[])
 	crashreport::install(bv2::prefDir(), g_releaseVersion); // ROBO-186, ADR 0048
 	if (!autotestStart(argc, argv)) return exitCode;
 	bv2::chooseDataDir(argc, argv);
-	bv2::setAssetPacks({bv2::dataRoot(), bv2::packageRoot()}); // ADR 0069: the player's BV2 data stacks over the base pack
+	bv2::stackAssetPacks(); // ADR 0069, ROBO-260: art pack (when installed) over the BV2 data over the base pack
+	bv2::artDownloadStart(argc, argv); // ROBO-260: the art pack downloads in the background
 	dksvarInit(&stringInterface);
 	std::string configPath = bv2::loadConfigLayers(argc, (const char* const*)argv);
 	roboviolence2ApplyNetlogFromEnv();
@@ -678,6 +681,9 @@ int main(int argc, char* argv[])
 		return initFailed();
 	}
 
+	// ROBO-260: on first run the free splash shows while the art pack downloads, then the game loads with it
+	bv2::artSplashWait(60);
+
 	// On cree le lobby
 	lobby = new CLobby();
 
@@ -703,8 +709,8 @@ int main(int argc, char* argv[])
 			++i; // handled by the config layers or autotestStart
 			continue;
 		}
-		if (std::strcmp(argv[i], "--placeholders") == 0)
-			continue; // handled by chooseDataDir
+		if (std::strcmp(argv[i], "--placeholders") == 0 || std::strcmp(argv[i], "--no-art-download") == 0)
+			continue; // handled by chooseDataDir and artDownloadStart
 		if (str.len() > 0) str += " ";
 		str += argv[i];
 	}
@@ -716,6 +722,7 @@ int main(int argc, char* argv[])
 	// La loop principal
 	dkwMainLoop();
 	if (autotest) printf("%s\n", autotest->report().c_str()); // the loop ended before the script did
+	bv2::artDownloadStop();
 
 	// On efface la scene
 	delete scene;

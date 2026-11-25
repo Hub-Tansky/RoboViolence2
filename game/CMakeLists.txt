@@ -71,6 +71,8 @@ set(BV2_GAME_SOURCES
   src/MapRender.cpp
   src/MemIO.cpp
   src/PacketCheck.cpp
+  src/ArtDownloader.cpp
+  src/ArtPack.cpp
   src/DataDirPicker.cpp
   src/DataDownload.cpp
   src/Paths.cpp

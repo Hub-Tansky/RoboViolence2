@@ -128,8 +128,9 @@ namespace
 	}
 
 	std::string g_originalDataDir;
+	std::string g_artPackDir;
 
-	// Also sets g_originalDataDir: "original" beside the pref dir, or inside BV2_PREF_DIR when that overrides it
+	// Also sets g_originalDataDir and g_artPackDir: "original" and "robo_art" beside the pref dir, or inside BV2_PREF_DIR when that overrides it
 	std::string computePrefDir()
 	{
 		std::string over = getEnv("BV2_PREF_DIR");
@@ -138,6 +139,7 @@ namespace
 		{
 			base = over;
 			g_originalDataDir = (base / "original").generic_string();
+			g_artPackDir = (base / "robo_art").generic_string();
 		}
 		else
 		{
@@ -152,6 +154,7 @@ namespace
 #endif
 			base = app / "bv2";
 			g_originalDataDir = (app / "original").generic_string();
+			g_artPackDir = (app / "robo_art").generic_string();
 		}
 		std::error_code ec;
 		fs::create_directories(base, ec);
@@ -310,6 +313,10 @@ namespace bv2
 	}
 
 	const std::string & originalDataDir() { return g_originalDataDir; }
+	const std::string& artPackDir()
+	{
+		return g_artPackDir;
+	}
 
 	std::string detectDataDir()
 	{

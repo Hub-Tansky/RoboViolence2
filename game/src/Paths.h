@@ -84,6 +84,9 @@ namespace bv2
 	// (%APPDATA%/BaboViolent2/original on Windows), or inside it when BV2_PREF_DIR overrides it
 	const std::string & originalDataDir();
 
+	// Where the Robo Violence 2 art pack is downloaded (ROBO-260): "robo_art" beside originalDataDir()
+	const std::string& artPackDir();
+
 	// BV2 data in usual places: originalDataDir(), BaboViolent2-master or BaboViolent2 in ~/Downloads, ~/Desktop, ~/Documents;
 	// on Windows also "BaboViolent 2" or BaboViolent2 in Program Files; "" when none
 	std::string detectDataDir();

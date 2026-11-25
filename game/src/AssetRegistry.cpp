@@ -27,6 +27,7 @@ namespace
 	{
 		std::map<std::string, std::string> base; // id -> file under main/, from the compiled-in base manifest
 		std::map<std::string, bool> placeholder; // id -> its base file is a generated placeholder
+		std::string cwdRoot; // the pack root that is the working directory: its paths stay relative
 		std::vector<Pack> packs; // top first; empty until setAssetPacks: every id is "main/<file>" (ADR 0066)
 		std::map<std::string, const char*> resolved; // id -> path, cleared when the stack changes
 		std::deque<std::string> paths; // every path handed out; never shrinks, so returned pointers stay valid
@@ -125,10 +126,11 @@ namespace
 
 namespace bv2
 {
-	void setAssetPacks(const std::vector<std::string>& roots)
+	void setAssetPacks(const std::vector<std::string>& roots, size_t cwdPack)
 	{
 		Registry& r = registry();
 		r.packs.clear();
+		r.cwdRoot = cwdPack < roots.size() ? withSlash(roots[cwdPack]) : std::string();
 		r.resolved.clear();
 		std::vector<std::string> unique;
 		for (const std::string& dir : roots)
@@ -184,7 +186,7 @@ namespace bv2
 				if (i + 1 == r.packs.size() && legacyAbove && placeholderFile(r, key))
 					continue;
 				// the top pack is the working directory (pathsInit changes into the data root): keep its paths relative
-				path = r.keep(i == 0 ? DATA_FOLDER + file : r.packs[i].root + DATA_FOLDER + file);
+				path = r.keep(r.packs[i].root == r.cwdRoot ? DATA_FOLDER + file : r.packs[i].root + DATA_FOLDER + file);
 			}
 			if (!path && !firstFile.empty())
 			{

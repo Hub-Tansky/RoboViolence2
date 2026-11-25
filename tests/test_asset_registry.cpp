@@ -77,6 +77,11 @@ static void packStacking(const std::string& scratch)
 	bv2::setAssetPacks({mod, base});
 	same(bv2::assetPath("models/Grenade"), base + "main/models/Grenade.DKO", "a pack with pack.tsv: placeholders show through");
 	check(std::strcmp(before, "main/models/Grenade.DKO") == 0, "a path handed out before stacking changed");
+
+	// ROBO-260: the art pack sits above the data root, which stays the working directory (relative paths)
+	bv2::setAssetPacks({mod, bv2, base}, 1);
+	same(bv2::assetPath("models/Rocket"), mod + "main/models/Shiny.DKO", "the art pack above the working directory: full path");
+	same(bv2::assetPath("sounds/Siren"), "main/sounds/Siren.WAV", "the working-directory pack keeps relative paths");
 	check(bv2::assetUnknownCount() == 1, "stacking counted a known id as unknown");
 }
 
