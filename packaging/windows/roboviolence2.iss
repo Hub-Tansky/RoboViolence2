@@ -15,8 +15,8 @@ ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 ; Windows 10 22H2 (ADR 0012)
 MinVersion=10.0.19045
-; GPLv3 needs no acceptance to run the program (section 9): shown, not agreed to. InfoFile is LICENSE.txt with each
-; paragraph on one line (make-package.py reflow_licence), so the text fills the box
+; GPLv3 needs no acceptance to run the program (section 9): shown, not agreed to. InfoFile is NOTICE.txt, LICENSE.txt and
+; licenses/LICENSE-ART.txt with each paragraph on one line (make-package.py installer_text), so the text fills the box
 InfoBeforeFile={#InfoFile}
 OutputDir={#OutputDir}
 OutputBaseFilename={#OutputName}

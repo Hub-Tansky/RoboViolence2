@@ -117,7 +117,7 @@ def build_deb(build, licences, deb, version):
     doc = usr / "share" / "doc" / PACKAGE
     shutil.copytree(licences, doc / "licenses")
     (doc / "copyright").write_text(COPYRIGHT, encoding="utf-8")
-    shutil.copy2(Path(__file__).resolve().parent.parent / "NOTICE.txt", doc)
+    shutil.copy2(PACKAGING.parent / "NOTICE.txt", doc)
     v = deb_version(version)
     changelog = CHANGELOG.format(package=PACKAGE, version=v, repo=REPO, tag=version, maintainer=MAINTAINER,
                                  date=email.utils.formatdate())

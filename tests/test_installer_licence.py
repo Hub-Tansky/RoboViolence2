@@ -35,6 +35,9 @@ with tempfile.TemporaryDirectory() as tmp:
     for f in make_package.LEGAL:
         shutil.copy2(root / "packaging" / "legal" / f, stage / "licenses")
     page = make_package.installer_text(stage)
+    make_package.write_installer_info(stage / "info.txt", stage)
+    if not (stage / "info.txt").read_bytes().startswith(b"\xef\xbb\xbf"):
+        failures.append("the installer info file has no UTF-8 BOM, so Inno Setup would show non-ASCII names wrongly")
 notice = (root / "NOTICE.txt").read_text(encoding="utf-8")
 art = (root / "packaging" / "legal" / "LICENSE-ART.txt").read_text(encoding="utf-8")
 if page.split() != (notice + licence + art).split():

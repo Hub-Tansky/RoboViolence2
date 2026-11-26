@@ -10,7 +10,7 @@ program downloads on first start; it is not part of this package.
    https://github.com/Hub-Tansky/RoboViolence2
 
 2. THE ART PACK (downloaded on first start from https://github.com/Hub-Tansky/rv2-art/releases
-   into the robo_art folder beside the game's user data; every file listed there with
+   into the robo_art folder in the game's user data folder; every file listed there with
    "LicenseRef-RV2-Art" in pack.tsv): Copyright (c) 2026 Piotr Pełzowski.
    Licence: Robo Violence 2 Art Licence (licenses/LICENSE-ART.txt). Not free software;
    not covered by the GPL. The downloaded pack carries its own copy of its licences, including

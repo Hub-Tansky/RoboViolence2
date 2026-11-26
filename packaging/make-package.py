@@ -121,6 +121,12 @@ def reflow_licence(text):
                        for p in text.rstrip("\n").split("\n\n"))
 
 
+def write_installer_info(path, stage):
+    """installer_text as UTF-8 with a BOM: Inno Setup reads a .txt info file as UTF-8 only with one (else the ANSI
+    code page), and NOTICE.txt has non-ASCII names"""
+    path.write_text(installer_text(stage), encoding="utf-8-sig")
+
+
 def installer_text(stage):
     """The Windows installer's info page: NOTICE.txt, then the GPL and the art licence, each paragraph on one line"""
     read = lambda f: (stage / f).read_text(encoding="utf-8")
@@ -132,8 +138,8 @@ def ship_windows(runtime, stage, out, name, version):
     archive = shutil.make_archive(str(out / name), "zip", out, name)
     with tempfile.TemporaryDirectory() as tmp:
         # The installer shows a reflowed copy; the package keeps the licence files verbatim
-        info = Path(tmp) / "LICENSE.txt"
-        info.write_text(installer_text(stage), encoding="utf-8")
+        info = Path(tmp) / "info.txt"
+        write_installer_info(info, stage)
         run(ISCC, "/Q", f"/DSourceDir={stage.resolve()}", f"/DInfoFile={info}", f"/DOutputDir={out.resolve()}",
             f"/DOutputName={name}-setup", f"/DAppVersion={version.removeprefix('v')}",
             PACKAGING / "windows" / "roboviolence2.iss")
