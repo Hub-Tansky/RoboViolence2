@@ -1,0 +1,53 @@
+ROBO VIOLENCE 2 ART LICENCE, version 1.0 (2026-11-24)
+
+Copyright (c) 2026 Piotr Pełzowski. All rights reserved, except as granted below.
+
+1. WHAT THIS LICENCE COVERS
+"The Art" means every file in the Robo Violence 2 art pack: the textures, skins, models,
+sounds, music, fonts, icons, maps and other media listed with the licence identifier
+"LicenseRef-RV2-Art" in the pack manifest (pack.tsv), and the selection and arrangement
+of those files as a collection. The Art is NOT part of the Robo Violence 2 program. The
+program's source code is licensed separately under the GNU General Public License,
+version 3 or later; this licence does not change the GPL for the code, and the GPL does
+not apply to the Art.
+
+2. WHAT YOU MAY DO, free of charge
+a) Use the Art to play Robo Violence 2, and to run Robo Violence 2 servers, public or private.
+b) Redistribute the Art, unmodified and complete with this licence file, as part of an
+   official Robo Violence 2 release or a package built from one (for example a .tar.gz,
+   .zip, .exe or .dmg installer, .deb, Flatpak, Snap or similar package, or a mirror of
+   them), whether or not you charge for the medium or the download.
+c) Make screenshots, videos, streams, reviews and other recordings of the game showing the
+   Art, and publish or monetise them.
+d) Make mods, skins and maps for Robo Violence 2 that use or change the Art, and share them
+   free of charge for use with Robo Violence 2 only, with a note that they contain Robo
+   Violence 2 art used under this licence.
+
+3. WHAT YOU MAY NOT DO without written permission from the copyright holder
+a) Sell the Art, or modified versions of it, on its own or as part of any product other
+   than Robo Violence 2.
+b) Use the Art, or anything derived from it, in another game, program, product or service.
+c) Extract the Art to build or train a machine-learning model, dataset or asset library.
+d) Remove or change copyright notices, this licence or the pack manifest's author and
+   licence entries.
+e) Suggest that a modified version is official or endorsed by the Robo Violence 2 project.
+
+4. NAMES AND LOGOS
+This licence grants no right to use the name "Robo Violence 2", its logo or other marks,
+except to truthfully say that a package contains or is compatible with Robo Violence 2.
+See TRADEMARKS.md.
+
+5. NO WARRANTY
+The Art is provided "as is", without warranty of any kind. In no event shall the copyright
+holder be liable for any claim, damages or other liability arising from the Art or its use,
+to the extent permitted by law.
+
+6. TERMINATION
+Any use that breaks this licence ends your rights under it. Your rights come back if you
+stop the breach within 30 days of being told about it, the first time it happens.
+
+7. LAW
+This licence is governed by the law of the Republic of Poland. Where a provision is
+unenforceable, the rest stays in force.
+
+Contact for permissions: floss@pelzowski.eu

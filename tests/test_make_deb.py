@@ -53,9 +53,12 @@ for path, mode in (("/usr/games/bv2", "-rwxr-xr-x"), ("/usr/games/bv2dedicated",
                    ("/usr/share/applications/roboviolence2.desktop", "-rw-r--r--"),
                    ("/usr/share/icons/hicolor/128x128/apps/roboviolence2.png", "-rw-r--r--"),
                    ("/usr/share/doc/roboviolence2/copyright", "-rw-r--r--"),
+                   ("/usr/share/doc/roboviolence2/NOTICE.txt", "-rw-r--r--"),
                    ("/usr/share/doc/roboviolence2/changelog.gz", "-rw-r--r--"),
                    ("/usr/share/doc/roboviolence2/licenses/glad.txt", "-rw-r--r--")):
     check(entries.get(path, ("missing",))[0] == mode, f"{path}: {entries.get(path, ('missing',))[0]}, expected {mode}")
+check("License: GPL-3+" in make_deb.COPYRIGHT and "License: LicenseRef-RV2-Art" in make_deb.COPYRIGHT,
+      "copyright does not list both the GPL and the art licence")
 check(all(owner == "root/root" for _, owner in entries.values()), "files not owned by root/root")
 check(not any("bv2master" in p for p in entries), "bv2master is in the .deb (it belongs to the .tar.gz)")
 runtime_main = build / "runtime" / "main"

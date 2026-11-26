@@ -122,3 +122,4 @@ What we do, in one or two sentences.
 | [ROBO-247](ROBO-247-animated-gltf-samples-into-dko-frames.md) | An animated glTF is sampled into DKO frames at 10 per second; morph targets and skins are baked per frame | Accepted |
 | [ROBO-265](ROBO-265-ttf-missing-letter-draws-plain-letter.md) | A TTF font without a letter draws its plain letter; Teko may make text up to 20 % wider | Accepted |
 | [ROBO-274](ROBO-274-art-pack-hits-oil-and-coolant.md) | Art pack hits spray oil and coolant; BV2 blood stays red | Accepted |
+| [ROBO-266](ROBO-266-packages-ship-the-art-licence-texts.md) | Packages ship the art licence texts and a NOTICE; the art stays downloaded | Accepted |

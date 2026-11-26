@@ -51,6 +51,17 @@ License: GPL-3+
  On Debian systems the full text of the GNU General Public License version 3
  is in /usr/share/common-licenses/GPL-3. The libraries built into the binaries
  come with their own licences in /usr/share/doc/{PACKAGE}/licenses/.
+Comment: The game's art pack is not in this package. On first start the game
+ downloads it from https://github.com/Hub-Tansky/rv2-art into the user's data
+ folder. It is a separate work, Copyright 2026 Piotr Pełzowski, under the
+ LicenseRef-RV2-Art licence below; see /usr/share/doc/{PACKAGE}/NOTICE.txt.
+ The names and logo are covered by
+ /usr/share/doc/{PACKAGE}/licenses/TRADEMARKS.md.
+
+License: LicenseRef-RV2-Art
+ Robo Violence 2 Art Licence, version 1.0. Not a free software licence; it
+ covers only the downloaded art pack, not the files in this package. Full text
+ in /usr/share/doc/{PACKAGE}/licenses/LICENSE-ART.txt.
 """
 
 CHANGELOG = """\
@@ -105,7 +116,8 @@ def build_deb(build, licences, deb, version):
     point_launcher_at_games(usr / "share" / "applications" / f"{PACKAGE}.desktop")
     doc = usr / "share" / "doc" / PACKAGE
     shutil.copytree(licences, doc / "licenses")
-    (doc / "copyright").write_text(COPYRIGHT)
+    (doc / "copyright").write_text(COPYRIGHT, encoding="utf-8")
+    shutil.copy2(Path(__file__).resolve().parent.parent / "NOTICE.txt", doc)
     v = deb_version(version)
     changelog = CHANGELOG.format(package=PACKAGE, version=v, repo=REPO, tag=version, maintainer=MAINTAINER,
                                  date=email.utils.formatdate())
