@@ -42,6 +42,8 @@ build, scratch = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2]) / "make_de
 shutil.rmtree(scratch, ignore_errors=True)
 (scratch / "licenses").mkdir(parents=True)
 (scratch / "licenses" / "glad.txt").write_text("stand-in\n")
+for f in ("LICENSE-ART.txt", "TRADEMARKS.md"):  # make-package.py LEGAL, staged into licenses/
+    shutil.copy2(root / "packaging" / "legal" / f, scratch / "licenses")
 deb = make_deb.build_deb(build, scratch / "licenses", scratch / "test.deb", "v0.1.0-rc1")
 
 entries = {}
@@ -54,6 +56,9 @@ for path, mode in (("/usr/games/bv2", "-rwxr-xr-x"), ("/usr/games/bv2dedicated",
                    ("/usr/share/icons/hicolor/128x128/apps/roboviolence2.png", "-rw-r--r--"),
                    ("/usr/share/doc/roboviolence2/copyright", "-rw-r--r--"),
                    ("/usr/share/doc/roboviolence2/NOTICE.txt", "-rw-r--r--"),
+                   ("/usr/share/doc/roboviolence2/LICENSE.txt", "-rw-r--r--"),
+                   ("/usr/share/doc/roboviolence2/licenses/LICENSE-ART.txt", "-rw-r--r--"),
+                   ("/usr/share/doc/roboviolence2/licenses/TRADEMARKS.md", "-rw-r--r--"),
                    ("/usr/share/doc/roboviolence2/changelog.gz", "-rw-r--r--"),
                    ("/usr/share/doc/roboviolence2/licenses/glad.txt", "-rw-r--r--")):
     check(entries.get(path, ("missing",))[0] == mode, f"{path}: {entries.get(path, ('missing',))[0]}, expected {mode}")

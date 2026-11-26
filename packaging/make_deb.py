@@ -117,7 +117,8 @@ def build_deb(build, licences, deb, version):
     doc = usr / "share" / "doc" / PACKAGE
     shutil.copytree(licences, doc / "licenses")
     (doc / "copyright").write_text(COPYRIGHT, encoding="utf-8")
-    shutil.copy2(PACKAGING.parent / "NOTICE.txt", doc)
+    for f in ("LICENSE.txt", "NOTICE.txt"):  # NOTICE.txt points at LICENSE.txt beside it (ADR ROBO-266)
+        shutil.copy2(PACKAGING.parent / f, doc)
     v = deb_version(version)
     changelog = CHANGELOG.format(package=PACKAGE, version=v, repo=REPO, tag=version, maintainer=MAINTAINER,
                                  date=email.utils.formatdate())

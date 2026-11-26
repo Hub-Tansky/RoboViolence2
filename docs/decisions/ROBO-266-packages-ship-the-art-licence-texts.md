@@ -11,7 +11,7 @@
 
 ## Decision
 - The repo holds `NOTICE.txt` (the program is GPL; the downloaded art pack is a separate proprietary work by Piotr Pełzowski; contact) and verbatim copies of rv2-art's `LICENSE-ART.txt` and `TRADEMARKS.md` in `packaging/legal/`.
-- Every package carries `LICENSE.txt`, `NOTICE.txt`, `licenses/LICENSE-ART.txt` and `licenses/TRADEMARKS.md` (the macOS app in `Contents/Resources`, the `.deb` in `/usr/share/doc/roboviolence2/`); `make-package.py` fails a package missing one.
+- Every package carries `LICENSE.txt`, `NOTICE.txt`, `licenses/LICENSE-ART.txt` and `licenses/TRADEMARKS.md` (the macOS app in `Contents/Resources`, the `.deb` in `/usr/share/doc/roboviolence2/`, beside its `copyright`); `make-package.py` fails a package missing one.
 - The Windows installer's info page shows NOTICE.txt, then the GPL, then the art licence, each paragraph on one line. Shown, not agreed to: the GPL needs no acceptance, and the art licence's grants need none either.
 - The `.deb` `copyright` file lists `GPL-3+` for its files and a standalone `LicenseRef-RV2-Art` paragraph for the downloaded pack.
 
