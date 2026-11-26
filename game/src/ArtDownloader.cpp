@@ -4,6 +4,7 @@
 #include "AssetRegistry.h"
 #include "Helper.h"
 #include "Paths.h"
+#include "SplashFit.h"
 #include "Zeven.h"
 
 #include <SDL3/SDL.h>
@@ -93,7 +94,8 @@ namespace
 		return ec ? 0.0 : std::min(0.99, (double)bytes / bv2::ART_PACK_BYTES);
 	}
 
-	// One splash frame: the splash texture over the window, a thin progress line at the bottom
+	// One splash frame: the splash texture covering the window at its own shape (SplashFit.h), a thin progress line at the
+	// bottom
 	void splashFrame(unsigned int splash, double fraction)
 	{
 		glClearColor(0, 0, 0, 1);
@@ -106,7 +108,10 @@ namespace
 		glDisable(GL_CULL_FACE);
 		glColor3f(1, 1, 1);
 		if (splash)
-			renderTexturedQuadSmooth(0, 0, 800, 600, splash);
+		{
+			const splashfit::Rect r = splashfit::cover(res[0], res[1]);
+			renderTexturedQuadSmooth((int)r.x, (int)r.y, (int)r.w, (int)r.h, splash);
+		}
 		glDisable(GL_TEXTURE_2D);
 		glColor3f(0.9f, 0.63f, 0.16f);
 		glBegin(GL_QUADS);

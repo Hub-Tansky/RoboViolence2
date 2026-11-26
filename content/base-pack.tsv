@@ -222,7 +222,7 @@ sounds/shotgunReload	sounds/shotgunReload.wav	sound	WAV 1ch 8000 Hz 16-bit 0.17 
 sounds/wind	sounds/wind.wav	sound	WAV 1ch 8013 Hz 8-bit 4.04 s	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
 textures/sky	textures/sky.tga	texture	TGA 256×256×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
 textures/sniperScope	textures/sniperScope.tga	texture	TGA 256×256×32	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
-textures/splash	textures/splash.tga	texture	TGA 256×128×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
+textures/splash	textures/splash.png	texture	PNG 2048×1024×24	Piotr Pełzowski	image model; resized to 2048×1024 with Pillow	GPL-3.0-or-later	content/textures/splash.png (ROBO-275)
 skins/legacy/skin01	skins/skin01.tga	texture	TGA 64×32×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
 skins/legacy/skin02	skins/skin02.tga	texture	TGA 64×32×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder
 skins/legacy/skin03	skins/skin03.tga	texture	TGA 64×32×24	Robo Violence 2 contributors	tools/gen-placeholder-content.py	GPL-3.0-or-later	generated placeholder

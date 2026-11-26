@@ -123,3 +123,4 @@ What we do, in one or two sentences.
 | [ROBO-265](ROBO-265-ttf-missing-letter-draws-plain-letter.md) | A TTF font without a letter draws its plain letter; Teko may make text up to 20 % wider | Accepted |
 | [ROBO-274](ROBO-274-art-pack-hits-oil-and-coolant.md) | Art pack hits spray oil and coolant; BV2 blood stays red | Accepted |
 | [ROBO-266](ROBO-266-packages-ship-the-art-licence-texts.md) | Packages ship the art licence texts and a NOTICE; the art stays downloaded | Accepted |
+| [ROBO-275](ROBO-275-free-splash-in-content-textures.md) | The free first-run splash is a real image in content/textures, drawn at 16:9 covering the window | Accepted |
