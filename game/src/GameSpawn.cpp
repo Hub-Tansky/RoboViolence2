@@ -19,30 +19,39 @@
 #include "Game.h"
 #include "Console.h"
 #include "GameVar.h"
+#include "HitSpray.h"
 #ifndef CONSOLE
 #include "Client.h"
 
+static CColor4f toColor(const hitspray::Color& c)
+{
+	return CColor4f(c.r, c.g, c.b, c.a);
+}
 
+static CColor4f playerSpray(float alpha)
+{
+	return toColor(hitspray::player(rand() % hitspray::COOLANT_ONE_IN, rand(hitspray::OIL_SHADE_MIN, hitspray::OIL_SHADE_MAX), alpha));
+}
 
 //
-// Pour spawner du sang quand on touche quelqu'un
+// Pour spawner du sang quand on touche quelqu'un (ROBO-274: oil and coolant, HitSpray.h)
 //
 void Game::spawnBlood(CVector3f & position, float damage)
 {
-	float bloodColor;
-
 	if (damage > 2.0) damage = 2.0;
 
 	for (int i=0;i<(int)(damage*10);++i)
 	{
-		bloodColor = rand(0.3f, 1.0f);
+		CColor4f spray = playerSpray(1);
+		CColor4f sprayEnd = spray;
+		sprayEnd[3] = 0;
 
 		dkpCreateParticleEx(
 			position, //CVector3f & positionFrom,
 			position, //CVector3f & positionTo,
-			CVector3f(0,0,1), //CVector3f & direction,
+			CVector3f(0, 0, 1), //CVector3f & direction,
 			damage, //float speedFrom,
-			damage*2, //float speedTo,
+			damage * 2, //float speedTo,
 			0, //float pitchFrom,
 			90, //float pitchTo,
 			.25f, //float startSizeFrom,
@@ -51,10 +60,10 @@ void Game::spawnBlood(CVector3f & position, float damage)
 			.25f, //float endSizeTo,
 			2, //float durationFrom,
 			2, //float durationTo,
-			CColor4f(bloodColor,0,0,1), //CColor4f & startColorFrom,
-			CColor4f(bloodColor,0,0,1), //CColor4f & startColorTo,
-			CColor4f(bloodColor,0,0,0), //CColor4f & endColorFrom,
-			CColor4f(bloodColor,0,0,0), //CColor4f & endColorTo,
+			spray, //CColor4f & startColorFrom,
+			spray, //CColor4f & startColorTo,
+			sprayEnd, //CColor4f & endColorFrom,
+			sprayEnd, //CColor4f & endColorTo,
 			0, //float angleFrom,
 			360, //float angleTo,
 			-30, //float angleSpeedFrom,
@@ -63,10 +72,10 @@ void Game::spawnBlood(CVector3f & position, float damage)
 			0, //float airResistanceInfluence,
 			1, //unsigned int particleCountFrom,
 			1, //unsigned int particleCountTo,
-			gameVar.tex_blood + rand()%10,
+			gameVar.tex_blood + rand() % 10,
 			0, //int textureFrameCount,
 			DKP_SRC_ALPHA, //unsigned int srcBlend,
-			DKP_ONE_MINUS_SRC_ALPHA);//unsigned int dstBlend);
+			DKP_ONE_MINUS_SRC_ALPHA); //unsigned int dstBlend);
 
 		// On cré les marks de sang au sol
 		CVector3f pos(1,0,0);
@@ -76,26 +85,26 @@ void Game::spawnBlood(CVector3f & position, float damage)
 		pos *= distance;
 		pos += position;
 		pos[2] = 0;
-		floorMarks[getNextFloorMark()].set(pos,rand(0.0f, 360.0f),rand(.05f,sizeMax),30,distance*0.5f,gameVar.tex_blood[rand()%10], CVector4f(rand(.25f,0.5f),0,0,rand(.5f,1.0f)));
+		floorMarks[getNextFloorMark()].set(pos, rand(0.0f, 360.0f), rand(.05f, sizeMax), 30, distance * 0.5f, gameVar.tex_blood[rand() % 10], playerSpray(rand(.5f, 1.0f)));
 	}
 }
 
 void Game::spawnBloodMinibot(CVector3f & position, float damage)
 {
-	float bloodColor;
-
 	if (damage > 2.0) damage = 2.0;
 
 	for (int i=0;i<(int)(damage*10);++i)
 	{
-		bloodColor = rand(0.3f, 1.0f);
+		CColor4f spray = toColor(hitspray::minibot(rand(0.3f, 1.0f), 1));
+		CColor4f sprayEnd = spray;
+		sprayEnd[3] = 0;
 
 		dkpCreateParticleEx(
 			position, //CVector3f & positionFrom,
 			position, //CVector3f & positionTo,
-			CVector3f(0,0,1), //CVector3f & direction,
+			CVector3f(0, 0, 1), //CVector3f & direction,
 			damage, //float speedFrom,
-			damage*2, //float speedTo,
+			damage * 2, //float speedTo,
 			0, //float pitchFrom,
 			90, //float pitchTo,
 			.25f, //float startSizeFrom,
@@ -104,10 +113,10 @@ void Game::spawnBloodMinibot(CVector3f & position, float damage)
 			.25f, //float endSizeTo,
 			2, //float durationFrom,
 			2, //float durationTo,
-			CColor4f(bloodColor,0,0,1), //CColor4f & startColorFrom,
-			CColor4f(bloodColor,0,0,1), //CColor4f & startColorTo,
-			CColor4f(bloodColor,0,0,0), //CColor4f & endColorFrom,
-			CColor4f(bloodColor,0,0,0), //CColor4f & endColorTo,
+			spray, //CColor4f & startColorFrom,
+			spray, //CColor4f & startColorTo,
+			sprayEnd, //CColor4f & endColorFrom,
+			sprayEnd, //CColor4f & endColorTo,
 			0, //float angleFrom,
 			360, //float angleTo,
 			-30, //float angleSpeedFrom,
@@ -116,10 +125,10 @@ void Game::spawnBloodMinibot(CVector3f & position, float damage)
 			0, //float airResistanceInfluence,
 			1, //unsigned int particleCountFrom,
 			1, //unsigned int particleCountTo,
-			gameVar.tex_blood + rand()%10,
+			gameVar.tex_blood + rand() % 10,
 			0, //int textureFrameCount,
 			DKP_SRC_ALPHA, //unsigned int srcBlend,
-			DKP_ONE);//unsigned int dstBlend);
+			DKP_ONE); //unsigned int dstBlend);
 
 		// On cré les marks de sang au sol
 		CVector3f pos(1,0,0);
@@ -129,7 +138,7 @@ void Game::spawnBloodMinibot(CVector3f & position, float damage)
 		pos *= distance;
 		pos += position;
 		pos[2] = 0;
-		floorMarks[getNextFloorMark()].set(pos,rand(0.0f, 360.0f),rand(.05f,sizeMax),30,distance*0.5f,gameVar.tex_blood[rand()%10], CVector4f(rand(0.5f,1.0f),0,0,rand(.5f,1.0f)));
+		floorMarks[getNextFloorMark()].set(pos, rand(0.0f, 360.0f), rand(.05f, sizeMax), 30, distance * 0.5f, gameVar.tex_blood[rand() % 10], toColor(hitspray::minibot(1, rand(.5f, 1.0f))));
 	}
 }
 #endif

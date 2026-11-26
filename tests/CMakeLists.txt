@@ -19,6 +19,12 @@ target_include_directories(test_flag_trail PRIVATE ${CMAKE_SOURCE_DIR}/game/src)
 bv2_target_defaults(test_flag_trail)
 add_test(NAME flag_trail COMMAND test_flag_trail)
 
+# ROBO-274: hit spray colours (oil and coolant, no red)
+add_executable(test_hit_spray test_hit_spray.cpp)
+target_include_directories(test_hit_spray PRIVATE ${CMAKE_SOURCE_DIR}/game/src)
+bv2_target_defaults(test_hit_spray)
+add_test(NAME hit_spray COMMAND test_hit_spray)
+
 add_executable(test_spawn_overlay test_spawn_overlay.cpp)
 target_include_directories(test_spawn_overlay PRIVATE ${CMAKE_SOURCE_DIR}/game/src)
 bv2_target_defaults(test_spawn_overlay)
