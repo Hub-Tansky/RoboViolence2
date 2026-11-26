@@ -28,9 +28,20 @@ static CColor4f toColor(const hitspray::Color& c)
 	return CColor4f(c.r, c.g, c.b, c.a);
 }
 
-static CColor4f playerSpray(float alpha)
+// BV2 and placeholder blood keeps its red (ground rule 1): red is the old tint's red channel
+static CColor4f playerSpray(float red, float alpha)
 {
+	if (!gameVar.tex_bloodOil)
+		return CColor4f(red, 0, 0, alpha);
 	return toColor(hitspray::player(rand() % hitspray::COOLANT_ONE_IN, rand(hitspray::OIL_SHADE_MIN, hitspray::OIL_SHADE_MAX), alpha));
+}
+
+static CColor4f minibotMark()
+{
+	const float glow = rand(0.5f, 1.0f), alpha = rand(.5f, 1.0f);
+	if (!gameVar.tex_bloodOil)
+		return CColor4f(glow, 0, 0, alpha);
+	return toColor(hitspray::minibot(glow, alpha));
 }
 
 //
@@ -42,7 +53,7 @@ void Game::spawnBlood(CVector3f & position, float damage)
 
 	for (int i=0;i<(int)(damage*10);++i)
 	{
-		CColor4f spray = playerSpray(1);
+		CColor4f spray = playerSpray(rand(0.3f, 1.0f), 1);
 		CColor4f sprayEnd = spray;
 		sprayEnd[3] = 0;
 
@@ -85,7 +96,7 @@ void Game::spawnBlood(CVector3f & position, float damage)
 		pos *= distance;
 		pos += position;
 		pos[2] = 0;
-		floorMarks[getNextFloorMark()].set(pos, rand(0.0f, 360.0f), rand(.05f, sizeMax), 30, distance * 0.5f, gameVar.tex_blood[rand() % 10], playerSpray(rand(.5f, 1.0f)));
+		floorMarks[getNextFloorMark()].set(pos, rand(0.0f, 360.0f), rand(.05f, sizeMax), 30, distance * 0.5f, gameVar.tex_blood[rand() % 10], playerSpray(rand(.25f, 0.5f), rand(.5f, 1.0f)));
 	}
 }
 
@@ -95,7 +106,8 @@ void Game::spawnBloodMinibot(CVector3f & position, float damage)
 
 	for (int i=0;i<(int)(damage*10);++i)
 	{
-		CColor4f spray = toColor(hitspray::minibot(rand(0.3f, 1.0f), 1));
+		const float glow = rand(0.3f, 1.0f);
+		CColor4f spray = gameVar.tex_bloodOil ? toColor(hitspray::minibot(glow, 1)) : CColor4f(glow, 0, 0, 1);
 		CColor4f sprayEnd = spray;
 		sprayEnd[3] = 0;
 
@@ -138,7 +150,7 @@ void Game::spawnBloodMinibot(CVector3f & position, float damage)
 		pos *= distance;
 		pos += position;
 		pos[2] = 0;
-		floorMarks[getNextFloorMark()].set(pos, rand(0.0f, 360.0f), rand(.05f, sizeMax), 30, distance * 0.5f, gameVar.tex_blood[rand() % 10], toColor(hitspray::minibot(1, rand(.5f, 1.0f))));
+		floorMarks[getNextFloorMark()].set(pos, rand(0.0f, 360.0f), rand(.05f, sizeMax), 30, distance * 0.5f, gameVar.tex_blood[rand() % 10], minibotMark());
 	}
 }
 #endif
