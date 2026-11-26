@@ -152,6 +152,13 @@ foreach(map ${bv2_own_maps})
   get_filename_component(map_file "${map}" NAME)
   configure_file("${map}" "${BV2_DATA_DIR}/maps/${map_file}" COPYONLY)
 endforeach()
+# The base pack's few real images (content/textures, GPL, e.g. the first-run splash, ROBO-275) replace the generator's
+# placeholders: their pack.tsv rows name a PNG, which tools/gen-placeholder-content.py skips.
+file(GLOB bv2_own_textures CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/content/textures/*.png")
+foreach(texture ${bv2_own_textures})
+  get_filename_component(texture_file "${texture}" NAME)
+  configure_file("${texture}" "${BV2_DATA_DIR}/textures/${texture_file}" COPYONLY)
+endforeach()
 # Defaults only: the game keeps the user's settings in its pref directory (ADR 0007).
 configure_file("${CMAKE_SOURCE_DIR}/config/bv2.example.cfg" "${BV2_DATA_DIR}/bv2.example.cfg" COPYONLY)
 

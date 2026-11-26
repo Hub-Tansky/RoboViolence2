@@ -25,6 +25,12 @@ target_include_directories(test_hit_spray PRIVATE ${CMAKE_SOURCE_DIR}/game/src)
 bv2_target_defaults(test_hit_spray)
 add_test(NAME hit_spray COMMAND test_hit_spray)
 
+# ROBO-275: the first-run splash keeps its shape and covers the window
+add_executable(test_splash_fit test_splash_fit.cpp)
+target_include_directories(test_splash_fit PRIVATE ${CMAKE_SOURCE_DIR}/game/src)
+bv2_target_defaults(test_splash_fit)
+add_test(NAME splash_fit COMMAND test_splash_fit)
+
 add_executable(test_spawn_overlay test_spawn_overlay.cpp)
 target_include_directories(test_spawn_overlay PRIVATE ${CMAKE_SOURCE_DIR}/game/src)
 bv2_target_defaults(test_spawn_overlay)

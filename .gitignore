@@ -120,7 +120,9 @@ MasterServer/Source/src/linuxmaster
 # content/maps/ is tracked: the game's own maps (owner-made); tools/check-original-assets.py refuses original ones
 /content/models/
 /content/skins/
-/content/textures/
+# content/textures/ holds only the free splash (ADR ROBO-275); anything else there stays ignored
+/content/textures/*
+!/content/textures/splash.png
 /content/fonts/
 /content/sounds/
 
