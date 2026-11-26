@@ -29,6 +29,8 @@ from make_deb import build_deb
 
 PACKAGING = Path(__file__).resolve().parent
 SCRIPTS = PACKAGING / "scripts"
+# The art licence and trademark policy, verbatim copies of Hub-Tansky/rv2-art's (packaging/legal/README.md)
+LEGAL = ("LICENSE-ART.txt", "TRADEMARKS.md")
 GLAD = PACKAGING.parent / "engine" / "zeven" / "third_party" / "glad"
 ISCC = r"C:\Program Files (x86)\Inno Setup 6\ISCC.exe"  # its default install, as on the GitHub Windows runner
 APP = "Robo Violence 2.app"  # the bundle's name in the package and the .dmg: what Finder, Launchpad and the Dock show
@@ -67,6 +69,7 @@ def ship_macos(runtime, stage, out, name, version):
     app = stage / APP
     # The .dmg holds only the app, so the app carries the licences; signed last, after every change to the bundle
     shutil.copy2(stage / "LICENSE.txt", app / "Contents" / "Resources")
+    shutil.copy2(stage / "NOTICE.txt", app / "Contents" / "Resources")
     shutil.copytree(stage / "licenses", app / "Contents" / "Resources" / "licenses")
     run("codesign", "--force", "--sign", "-", app)
     # ditto keeps exec bits and the bundle signature, and writes no ._ files
@@ -118,12 +121,25 @@ def reflow_licence(text):
                        for p in text.rstrip("\n").split("\n\n"))
 
 
+def write_installer_info(path, stage):
+    """installer_text as UTF-8 with a BOM: Inno Setup reads a .txt info file as UTF-8 only with one (else the ANSI
+    code page), and NOTICE.txt has non-ASCII names"""
+    path.write_text(installer_text(stage), encoding="utf-8-sig")
+
+
+def installer_text(stage):
+    """The Windows installer's info page: NOTICE.txt, then the GPL and the art licence, each paragraph on one line"""
+    read = lambda f: (stage / f).read_text(encoding="utf-8")
+    return "\n\n".join((read("NOTICE.txt").rstrip("\n"), reflow_licence(read("LICENSE.txt")),
+                        reflow_licence(read("licenses/LICENSE-ART.txt"))))
+
+
 def ship_windows(runtime, stage, out, name, version):
     archive = shutil.make_archive(str(out / name), "zip", out, name)
     with tempfile.TemporaryDirectory() as tmp:
-        # The installer shows a reflowed copy; the package keeps LICENSE.txt verbatim
-        info = Path(tmp) / "LICENSE.txt"
-        info.write_text(reflow_licence((stage / "LICENSE.txt").read_text(encoding="utf-8")), encoding="utf-8")
+        # The installer shows a reflowed copy; the package keeps the licence files verbatim
+        info = Path(tmp) / "info.txt"
+        write_installer_info(info, stage)
         run(ISCC, "/Q", f"/DSourceDir={stage.resolve()}", f"/DInfoFile={info}", f"/DOutputDir={out.resolve()}",
             f"/DOutputName={name}-setup", f"/DAppVersion={version.removeprefix('v')}",
             PACKAGING / "windows" / "roboviolence2.iss")
@@ -150,10 +166,14 @@ PLATFORMS = {
 
 
 def stage_licences(runtime, stage):
-    """LICENSE.txt, each vcpkg port's copyright (helper ports vcpkg-* ship no code) and glad's notice"""
+    """LICENSE.txt, NOTICE.txt, the art licence and trademark policy (the art pack is downloaded, ADR ROBO-266),
+    each vcpkg port's copyright (helper ports vcpkg-* ship no code) and glad's notice"""
     shutil.copy2(PACKAGING.parent / "LICENSE.txt", stage)
+    shutil.copy2(PACKAGING.parent / "NOTICE.txt", stage)
     licences = stage / "licenses"
     licences.mkdir()
+    for f in LEGAL:
+        shutil.copy2(PACKAGING / "legal" / f, licences)
     for f in sorted((runtime.parent / "vcpkg_installed").glob("*/share/*/copyright")):
         if not f.parent.name.startswith("vcpkg-"):
             shutil.copy2(f, licences / (f.parent.name + ".txt"))
@@ -187,7 +207,7 @@ def main():
 
     # sqlite3 is a dependency on every OS: its licence proves the vcpkg glob found the ports
     required = [client, *servers_and_dbs, *scripts, "main/LaunchScript/CTF.cfg", "main/languages/en.lang",
-                "LICENSE.txt", "licenses/sqlite3.txt", "licenses/glad.txt"]
+                "LICENSE.txt", "NOTICE.txt", *("licenses/" + f for f in LEGAL), "licenses/sqlite3.txt", "licenses/glad.txt"]
     missing = [f for f in required if not (stage / f).is_file()]
     if missing:
         sys.exit(f"package {name} is missing: {', '.join(missing)}")

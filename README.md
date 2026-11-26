@@ -9,7 +9,9 @@ Robo Violence 2 is a fork of **BaboViolent 2** built on its GPLv3 source release
 The GPL covers the code only. The original assets (maps, models, textures, sounds, music, fonts),  the non-English translations and the name "BaboViolent 2" are not part of this project and are not redistributed here. Replacements will be created by this project later.
 
 ## License
-Code: GPLv3 ([LICENSE.txt](LICENSE.txt)). 
+- Code and the free placeholder pack: GPLv3 ([LICENSE.txt](LICENSE.txt)).
+- Art: the game downloads its art pack from [Hub-Tansky/rv2-art](https://github.com/Hub-Tansky/rv2-art) on first start. The art is proprietary, under the [Robo Violence 2 Art Licence](packaging/legal/LICENSE-ART.txt), and is not in this repository or the packages ([NOTICE.txt](NOTICE.txt)).
+- The name "Robo Violence 2" and its logo are trademarks of Piotr Pełzowski ([TRADEMARKS.md](packaging/legal/TRADEMARKS.md)).
 
 ## Supported platforms
 

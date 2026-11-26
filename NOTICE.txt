@@ -1,0 +1,23 @@
+Robo Violence 2
+
+This package contains the Robo Violence 2 program. The game's art is a separate work that the
+program downloads on first start; it is not part of this package.
+
+1. THE PROGRAM (client, servers, tools, launch scripts, translations, the project's own maps and
+   the free placeholder pack in main/): Copyright (c) 2012 bitHeads inc. and the Robo Violence 2
+   contributors. Maintained by Piotr Pełzowski.
+   Licence: GNU General Public License, version 3 or later (LICENSE.txt). Source code:
+   https://github.com/Hub-Tansky/RoboViolence2
+
+2. THE ART PACK (downloaded on first start from https://github.com/Hub-Tansky/rv2-art/releases
+   into the robo_art folder in the game's user data folder; every file listed there with
+   "LicenseRef-RV2-Art" in pack.tsv): Copyright (c) 2026 Piotr Pełzowski.
+   Licence: Robo Violence 2 Art Licence (licenses/LICENSE-ART.txt). Not free software;
+   not covered by the GPL. The downloaded pack carries its own copy of its licences, including
+   the SIL Open Font License 1.1 of its Teko font.
+
+The program also runs without the art pack, using the free placeholder pack (main/pack.tsv,
+GPL-3.0-or-later). Third-party licences are in licenses/.
+
+"Robo Violence 2" and its logo: see licenses/TRADEMARKS.md.
+Contact: floss@pelzowski.eu
