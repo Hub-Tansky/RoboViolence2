@@ -29,7 +29,7 @@ cmake --build --preset <preset> --target bv2dedicated bv2master
 ## Assets
 
 - The original assets are removed. Never re-add them; `tools/check-original-assets.py` rejects them by hash.
-- With your own copy of the original data, keep it outside the repo; the client offers to download it on first start ([ADR 0040](docs/decisions/0040-first-run-downloads-original-data.md)), or set `BV2_DATA_DIR` ([ADR 0016](docs/decisions/0016-player-data-lookup-and-package-content.md)). Without it, CI and contributors use generated placeholders (`--placeholders` skips the dialog).
+- Original BV2 data is unsupported ([ADR ROBO-278](docs/decisions/ROBO-278-drop-bv2-asset-compatibility.md)): add no code, test, doc or fallback for it. The code that still reads it (first-run download, folder search, `RV2_ASSETS=original`) is removed by ROBO-279; don't extend it. CI and contributors use generated placeholders (`--placeholders` skips the first-run box) and the art pack.
 
 ## Config and secrets
 
@@ -55,7 +55,7 @@ cmake --build --preset <preset> --target bv2dedicated bv2master
 - Propose Minimal Changes: Provide only the simplest, most direct code or solution required to make the item work or fix the bug.
 - Ignore Corner Cases: Do not write defensive code for rare edge cases, scale considerations, or downstream exceptions.
 - Deliverables: Your output must reflect a "Minimum Viable Product" mindset for scope of item or bug. Keep the diff or response as small and readable as possible.
-- Order when rules conflict: the scope item, then the three rules above, then the ground rules. Ground rules 3 and 4 apply only in items of kind `refactor`. A reviewer does not raise a case the scope item does not name unless it is reachable from the network.
+- Order when rules conflict: the scope item, then the three rules above, then the ground rules. Ground rule 3 applies only in items that rewrite a file or module in a big way, ground rule 4 only in items of kind `refactor`. A reviewer does not raise a case the scope item does not name unless it is reachable from the network.
 - Commit subjects are `<kind>: <summary>` with kind `feat`, `fix`, `refactor`, `ci`, `docs`, `test` or `chore`; review fixes are `<kind>: review: <summary>`. One PR per item, with `Closes #n` when the scope item's `issue:` links one. Branch names and the number of commits are not reviewed.
 - Never commit secrets, real hosts or IPs. Never use `--no-verify`.
 - Finish every PR by updating `ARCHITECTURE.md` (changed facts, and a row for a new module directory) and running `tools/check-architecture.sh`. Files get no rows (ADR 0063).
@@ -83,9 +83,9 @@ Multi-context: `CONTEXT-MAP.md` lists the glossaries (root `CONTEXT.md` for code
 
 ## Ground rules
 
-1. **BV2 asset compatibility** ([ADR 0010](docs/decisions/0010-bv2-asset-compat-and-gui-freeze.md); asset loading: [ADR 0069](docs/decisions/0069-asset-packs-stack-over-the-base-pack.md), the BV2 data stacks over the base pack). Until replacement assets ship (PNS-20, H.1), the game runs on original BV2 data (`BV2_DATA_DIR`) unchanged: same file formats (`.DKO`, `.bvm`, textures, sounds, fonts, `.lang`), names and paths under `main/`, and map download sends `.bvm` unchanged. New formats are added beside old ones, never instead. A PR touching a loader is tested locally with original data; CI keeps using placeholders.
-2. **GUI freeze** (same ADR). Menus, HUD, layout, fonts and visible text stay as in BV2. Work marked **[GUI]** changes what the player sees and needs the owner's explicit approval, noted in its scope item (`gui: true`), before work starts. If unmarked work turns out to change the interface, stop and ask.
-3. In items of kind `refactor` only: **Internal renaming** ([ADR 0009](docs/decisions/0009-rename-internal-identifiers-continuously.md)). Replace `bv2`/`babo` with `roboviolence2` in code symbols, namespaces, source file and class names, internal CMake targets and variables, and comments, in files a PR already touches. Binaries (`bv2`, `bv2dedicated`, `bv2master`), `BV2_*` env vars and CMake options, cvars, config and pref paths, `bv2.db`, file formats, protocol and master-server IDs, and visible strings wait for the rebrand (PNS-20, H.7). Renames are separate mechanical commits; tests stay green.
+1. **No BV2 compatibility** ([ADR ROBO-278](docs/decisions/ROBO-278-drop-bv2-asset-compatibility.md)). The original BV2 assets, maps and config are unsupported: no new code, test, doc or fallback considers them. The original-asset hash checks stay. A loader change is tested on the base pack and the art pack. Formats those packs or `content/maps/` use (`.DKO`, `.bvm`, TGA, WAV, the bitmap font, `.lang`) keep their loaders; a new format may replace an old one.
+2. **GUI freeze** ([ADR 0010](docs/decisions/0010-bv2-asset-compat-and-gui-freeze.md), kept by ADR ROBO-278). Menus, HUD, layout, fonts and visible text stay as they are. Work marked **[GUI]** changes what the player sees and needs the owner's explicit approval, noted in its scope item (`gui: true`), before work starts. If unmarked work turns out to change the interface, stop and ask.
+3. **Renaming only with big rewrites** ([ADR ROBO-278](docs/decisions/ROBO-278-drop-bv2-asset-compatibility.md), ROBO-282). Names players and admins see become `RoboViolence` / `roboviolence` (folders, files, binaries, packages); names inside become `robo` / `ROBO_` (namespace `robo::`, env vars `ROBO_*`, CMake options and targets), also the existing `RV2_*` names. Only an item that rewrites a file or module in a big way renames the `bv2`/`babo`/`RV2_` names in it, in its own `git mv` or mechanical commit listed in `.git-blame-ignore-revs`; tests and goldens unchanged by that commit. A renamed env var or CMake option keeps its old name working with one warning line. Never a standalone rename PR. The user folder move is ROBO-281; cvars, protocol version and master IDs stay until ROBO-017.
 4. In items of kind `refactor` only: **Touch-and-improve** (PNS-19). In files a PR already touches, replace raw `sprintf`/`strcpy`/`strcat` with `snprintf` or `std::string`, and use `std::unique_ptr` where ownership is clear. Add a test with each fix.
 
 Rules 5 to 9 keep new code from adding debt against the long-term direction ([ADR 0062](docs/decisions/0062-asset-packs-mode-modules-client-independent-server.md)); they apply to every PR, and moving old code is for `refactor` items.
@@ -104,7 +104,7 @@ Kept only for compatibility; remove once the trigger holds, each removal with an
 
 | Item | Kept for | Remove when |
 |---|---|---|
-| `.lang` language files and their loader (`game/src/GameVar.cpp` `loadLanguage`) | Original BV2 data (ADR 0010, ADR 0011) | BV2 assets are no longer supported (after PNS-20 H.1); `.po` becomes the only format and `en.po` replaces `en.lang` as the source for `en.pot` |
+| `.lang` language files and their loader (`game/src/GameVar.cpp` `loadLanguage`) | `content/languages/en.lang`, the source of `en.pot` (ADR 0011); BV2 data is unsupported since ADR ROBO-278 | `en.po` replaces `en.lang` as the source for `en.pot` (old-format cleanup, ROBO-285); `.po` becomes the only format |
 
 ## Compile-time variants
 

@@ -1,6 +1,6 @@
 # 0042: Options "Game assets" sets the BV2 data folder, and "Use placeholders" is remembered
 
-- Status: Accepted
+- Status: Accepted; amended by [ROBO-278](ROBO-278-drop-bv2-asset-compatibility.md): BV2 data unsupported, the field's meaning changes with ROBO-279 and ROBO-280
 - Date: 2026-10-29
 - Affects: `game/src/COption.cpp`, `startDataDir`, `saveDataDirField` and `findRoot` in `game/src/Paths.cpp`, `chooseDataDir` in `game/src/DataDirPicker.cpp`, paste in `engine/zeven/src/dkw.cpp`; Project item "[GUI] Options: Game assets path field" (owner-approved design, 2026-10-29); amends [0016](0016-player-data-lookup-and-package-content.md) and [0040](0040-first-run-downloads-original-data.md)
 

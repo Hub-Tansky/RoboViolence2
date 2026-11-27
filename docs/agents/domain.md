@@ -19,4 +19,4 @@ Name domain concepts (issue titles, refactor proposals, test names) with the ter
 
 If your output contradicts an ADR, say so explicitly instead of overriding it:
 
-> _Contradicts ADR 0010 (BV2 asset compatibility), but worth reopening because…_
+> _Contradicts ADR 0062 (asset packs, mode modules), but worth reopening because…_

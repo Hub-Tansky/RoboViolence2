@@ -1,6 +1,6 @@
 # 0010: Keep BV2 asset compatibility and the BV2 interface until replacement assets ship
 
-- Status: Accepted; amended by [0019](0019-in-game-name-and-fork-credits.md), [0038](0038-dead-accounts-hidden-admin-and-ban-secrets-hardened.md); asset loading superseded by [0069](0069-asset-packs-stack-over-the-base-pack.md)
+- Status: Superseded for assets by [ROBO-278](ROBO-278-drop-bv2-asset-compatibility.md); the GUI freeze stays in force (amended by [0019](0019-in-game-name-and-fork-credits.md), [0038](0038-dead-accounts-hidden-admin-and-ban-secrets-hardened.md), [0046](0046-main-menu-shows-release-version-from-tag.md)); asset loading earlier superseded by [0069](0069-asset-packs-stack-over-the-base-pack.md)
 - Date: 2026-10-06
 - Affects: [roadmap ground rules](https://github.com/Hub-Tansky/RoboViolence2/blob/58c91b2a660db2b290b0b5f504381980a6aedba2/docs/roadmap/README.md#ground-rules-every-phase) 1–2, [PNS-18](https://github.com/Hub-Tansky/RoboViolence2/blob/58c91b2a660db2b290b0b5f504381980a6aedba2/docs/roadmap/possible-new-scope.md#pns-18-renderer-isolation-and-replacement), [PNS-20](https://github.com/Hub-Tansky/RoboViolence2/blob/58c91b2a660db2b290b0b5f504381980a6aedba2/docs/roadmap/possible-new-scope.md#pns-20-replacement-assets-and-rebrand) H.1
 

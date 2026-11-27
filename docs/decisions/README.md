@@ -42,8 +42,8 @@ What we do, in one or two sentences.
 | [0006](0006-sdl3-miniaudio-glad-platform-layer.md) | SDL3, miniaudio and glad behind the unchanged dk* APIs | Accepted |
 | [0007](0007-data-root-pref-dir-config-layers.md) | Data root, per-user pref dir and layered config | Accepted (amended by 0016, 0028) |
 | [0008](0008-display-name-robo-violence-2.md) | Spell the display name "Robo Violence 2" | Accepted (identifier timing amended by 0009; in-game name by 0017) |
-| [0009](0009-rename-internal-identifiers-continuously.md) | Rename internal identifiers continuously; interface names wait for §H | Accepted (refactor items only since 0058) |
-| [0010](0010-bv2-asset-compat-and-gui-freeze.md) | Keep BV2 asset compatibility and the BV2 interface until replacement assets ship | Accepted (amended by 0017, 0038; asset loading superseded by 0069) |
+| [0009](0009-rename-internal-identifiers-continuously.md) | Rename internal identifiers continuously; interface names wait for §H | Accepted (refactor items only since 0058; prefix and timing amended by ROBO-278) |
+| [0010](0010-bv2-asset-compat-and-gui-freeze.md) | Keep BV2 asset compatibility and the BV2 interface until replacement assets ship | Superseded for assets by ROBO-278; GUI freeze kept (amended by 0019, 0038, 0046) |
 | [0011](0011-gettext-po-translations.md) | Use gettext PO for translations, keep .lang loading, default to the OS language | Accepted |
 | [0012](0012-windows-10-22h2-minimum.md) | Support Windows 10 22H2 and later as the minimum Windows target | Accepted |
 | [0013](0013-r3-restore-normal-and-pro-rulesets.md) | Restore the Normal and Pro rulesets (fix R3) | Accepted (amended by 0052) |
@@ -73,9 +73,9 @@ What we do, in one or two sentences.
 | [0037](0037-review-rubric-single-repo-copy.md) | The review rubric has one repo copy, and the gate checks its hash | Superseded by 0047 |
 | [0038](0038-dead-accounts-hidden-admin-and-ban-secrets-hardened.md) | Dead account pages are hidden; admin and master ban secrets meet NIST SP 800-63B-4 | Accepted |
 | [0039](0039-widescreen-stretch-shows-more-map.md) | Widescreen (Stretch) shows more map sideways instead of stretching a 4:3 view | Accepted |
-| [0040](0040-first-run-downloads-original-data.md) | The first-run box downloads the original BV2 data with the OS's own curl and unzip tools | Accepted (amended by 0042) |
+| [0040](0040-first-run-downloads-original-data.md) | The first-run box downloads the original BV2 data with the OS's own curl and unzip tools | Accepted (amended by 0042, ROBO-278) |
 | [0041](0041-macos-ci-runner-not-acquired-retry.md) | Build branches through their PR only, and re-run a build whose job never got a runner | Accepted (amended by 0056) |
-| [0042](0042-game-assets-option-remembers-placeholders.md) | Options "Game assets" sets the BV2 data folder, and "Use placeholders" is remembered | Accepted |
+| [0042](0042-game-assets-option-remembers-placeholders.md) | Options "Game assets" sets the BV2 data folder, and "Use placeholders" is remembered | Accepted (amended by ROBO-278) |
 | [0043](0043-first-start-fullscreen-desktop-and-game-browser.md) | A new player starts fullscreen at the desktop resolution, on the Game Browser tab | Accepted (amended by 0055) |
 | [0044](0044-backlog-in-the-rv2-docs-vault.md) | The backlog is one Markdown file per scope item in the private rv2-docs vault | Accepted |
 | [0045](0045-cpp-lint-pre-commit-on-changed-lines.md) | clang-format and clang-tidy run on commit through pre-commit, on changed lines only; clang-format also in CI | Accepted |
@@ -91,18 +91,18 @@ What we do, in one or two sentences.
 | [0055](0055-browser-refresh-uses-a-fresh-master-session.md) | The server browser's Refresh uses a fresh master session | Accepted |
 | [0056](0056-main-ci-runs-finish-notify-nightly-fuzz.md) | Main CI runs finish, a red main notifies the owner, fuzz runs nightly | Accepted |
 | [0057](0057-review-record-keyed-to-patch-id-post-deploy-criteria.md) | The review record is keyed to the diff's patch-id; post-deploy criteria don't block | Accepted |
-| [0058](0058-agent-rule-order-ground-rules-3-4-refactor-only.md) | Agent rules have an order; ground rules 3 and 4 apply only in refactor items | Accepted |
+| [0058](0058-agent-rule-order-ground-rules-3-4-refactor-only.md) | Agent rules have an order; ground rules 3 and 4 apply only in refactor items | Accepted (rule 3 amended by ROBO-278) |
 | [0059](0059-slim-review-docs-gate-only-incremental-rounds.md) | Docs PRs get no review worker; later rounds review only the new commits | Accepted |
 | [0060](0060-merge-by-risk-tier-with-owner-brief.md) | Merge by risk tier; MEDIUM and HIGH PRs carry an owner brief | Accepted (amended by ROBO-250) |
 | [0061](0061-release-branch-for-production-hotfixes.md) | Refactor on main; production hotfixes on a release branch | Accepted |
-| [0062](0062-asset-packs-mode-modules-client-independent-server.md) | Asset packs, mode modules and a client-independent server are the long-term direction | Accepted |
+| [0062](0062-asset-packs-mode-modules-client-independent-server.md) | Asset packs, mode modules and a client-independent server are the long-term direction | Accepted (R6 superseded by ROBO-278) |
 | [0063](0063-architecture-lists-modules-not-files.md) | ARCHITECTURE.md lists module directories, not files | Accepted |
 | [0064](0064-nightly-flake-watch.md) | A nightly workflow repeats the e2e and bots tests and files one issue per flaky test | Accepted |
 | [0065](0065-asset-pack-manifest.md) | An asset pack is a folder with a pack.tsv manifest; the base pack's is content/base-pack.tsv | Accepted (amended by ROBO-264) |
 | [0066](0066-game-loads-assets-by-id.md) | Game code loads assets by id; the base manifest's ids are compiled in | Accepted |
 | [0067](0067-font-bytes-and-ttf-baking.md) | Text is one byte per glyph; bytes 160-255 hold 96 extra letters; a TTF is baked to babo.tga widths | Accepted |
 | [0068](0068-docs-only-prs-skip-the-build.md) | A docs-only PR skips the build steps; its required checks still report success | Accepted |
-| [0069](0069-asset-packs-stack-over-the-base-pack.md) | Asset packs stack over the base pack; the BV2 data is an optional pack on top | Accepted (amended by ROBO-264, ROBO-260) |
+| [0069](0069-asset-packs-stack-over-the-base-pack.md) | Asset packs stack over the base pack; the BV2 data is an optional pack on top | Accepted (amended by ROBO-264, ROBO-260, ROBO-278) |
 | [0070](0070-gltf-converts-to-dko.md) | New models are authored as glTF and converted to .DKO offline | Accepted (amended by ROBO-247) |
 | [ROBO-248](ROBO-248-adrs-named-by-scope-item.md) | Name new ADRs after their scope item, not the next number | Accepted |
 | [ROBO-249](ROBO-249-backlog-item-moves-on-merge.md) | A merged PR's backlog item moves to Done or Testing by workflow | Accepted |
@@ -116,7 +116,7 @@ What we do, in one or two sentences.
 | [ROBO-258](ROBO-258-full-colour-skins-with-team-mask.md) | Full-colour ball skins from the art pack take team colour on a mask; BV2 skins stay the fallback | Accepted |
 | [ROBO-259](ROBO-259-four-map-looks-alias-theme-ids.md) | Four map looks; the 23 theme ids map files store are aliases, unknown ids get Wasteland | Accepted |
 | [ROBO-260](ROBO-260-art-pack-downloads-beside-the-gpl-game.md) | The proprietary art pack downloads in the background into robo_art/ and stacks over the base pack, with no restart | Accepted |
-| [ROBO-261](ROBO-261-build-option-fetches-game-assets.md) | `-DRV2_ASSETS` fetches the art pack, the original data or a pack URL at configure time into runtime/packs/, never packaged | Accepted |
+| [ROBO-261](ROBO-261-build-option-fetches-game-assets.md) | `-DRV2_ASSETS` fetches the art pack, the original data or a pack URL at configure time into runtime/packs/, never packaged | Accepted (amended by ROBO-278) |
 | [ROBO-264](ROBO-264-art-pack-checks-and-fixture.md) | An art pack is checked against the base pack, and CI plays a generated fixture art pack | Accepted |
 | [ROBO-268](ROBO-268-macos-builds-on-main-and-nightly.md) | macOS builds run on main, release branches, tags and nightly, not on PRs | Accepted |
 | [ROBO-247](ROBO-247-animated-gltf-samples-into-dko-frames.md) | An animated glTF is sampled into DKO frames at 10 per second; morph targets and skins are baked per frame | Accepted |
@@ -124,3 +124,4 @@ What we do, in one or two sentences.
 | [ROBO-274](ROBO-274-art-pack-hits-oil-and-coolant.md) | Art pack hits spray oil and coolant; BV2 blood stays red | Accepted |
 | [ROBO-266](ROBO-266-packages-ship-the-art-licence-texts.md) | Packages ship the art licence texts and a NOTICE; the art stays downloaded | Accepted |
 | [ROBO-275](ROBO-275-free-splash-in-content-textures.md) | The free first-run splash is a real image in content/textures, drawn at 16:9 covering the window | Accepted |
+| [ROBO-278](ROBO-278-drop-bv2-asset-compatibility.md) | Drop BV2 data compatibility; name things RoboViolence outside and robo inside; rename only with big rewrites | Accepted |

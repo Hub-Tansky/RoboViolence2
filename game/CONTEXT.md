@@ -54,6 +54,18 @@ _Avoid_: Data dir, mod
 The asset pack the game ships with and always loads first.
 _Avoid_: Default assets, original data
 
+**Default art pack**:
+The Robo Violence 2 art pack the client downloads and stacks over the base pack (`robo_art/`, ADR ROBO-260); what players see unless they choose a theme pack.
+_Avoid_: Original data, BV2 data
+
+**Theme pack**:
+A player-chosen asset pack stacked over the default art pack, client-side only, that replaces some of its ids: a theme, an event (for example Christmas skins), a test or a music pack (ROBO-280).
+_Avoid_: Mod, skin pack, data dir
+
+**BV2 data**:
+The original BaboViolent 2 assets, maps and config. Unsupported (ADR ROBO-278): no code, test or doc is added for it; its files stay blocked by hash.
+_Avoid_: Original data (as something the game uses), game assets
+
 **Mode**:
 A rule set for a match (`GAME_TYPE_*` in `game/src/Game.h`), selected by `sv_gameType`.
 _Avoid_: Game type (in prose); ruleset means `sv_serverType` (Normal, Pro)

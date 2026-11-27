@@ -1,6 +1,6 @@
 # 0062: Asset packs, mode modules and a client-independent server are the long-term direction
 
-- Status: Accepted
+- Status: Accepted; R6 superseded by [ROBO-278](ROBO-278-drop-bv2-asset-compatibility.md)
 - Date: 2026-11-17
 - Affects: [AGENTS.md](../../AGENTS.md) "Ground rules" 5 to 9, [REVIEW.md](../../REVIEW.md) section 2, [game/CONTEXT.md](../../game/CONTEXT.md); amends the direction of [ADR 0003](0003-keep-opengl-2.1-then-sdl-gpu.md); ROBO-230 (refactor direction Phase 0, owner started 2026-11-17)
 
