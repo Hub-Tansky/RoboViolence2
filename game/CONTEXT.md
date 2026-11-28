@@ -94,7 +94,7 @@ _Avoid_: Wall tile, wall texture
 
 **Decal**:
 A flat mark laid on the floor or on a wall: a crack, an oil stain, a grate. Visual only.
-_Avoid_: Sticker, splat (the editor's splat tool paints dirt)
+_Avoid_: Sticker, splat (a hit mark left in a match, or the editor's dirt tool)
 
 **Spray**:
 A decal of text painted on a wall face, a line from the spray list. Rare by design.
