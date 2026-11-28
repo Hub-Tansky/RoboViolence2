@@ -81,3 +81,29 @@ _Avoid_: Client (when not the game client)
 **Protocol version**:
 The number a server and a front compare on connect (`GAME_VERSION_SV/CL`) to know they can talk.
 _Avoid_: Game version, build version
+
+### Maps
+
+**Map look**:
+One of the visual sets a map is drawn with: Wasteland, Foundry, Winter Coming or Scrap Deck. It picks the floor, wall pieces, decals and wall-top props.
+_Avoid_: Theme (that is a theme pack), map type, biome, Cryo Yard
+
+**Wall piece**:
+The art picked for one wall face from its neighbours and its place in a wall run: corner, end, T-join, plain run, pillar or panel.
+_Avoid_: Wall tile, wall texture
+
+**Decal**:
+A flat mark laid on the floor or on a wall: a crack, an oil stain, a grate. Visual only.
+_Avoid_: Sticker, splat (the editor's splat tool paints dirt)
+
+**Spray**:
+A decal of text painted on a wall face, a line from the spray list. Rare by design.
+_Avoid_: Graffiti, tag
+
+**Wall-top prop**:
+A visual-only object on top of a wall (pipes, vents, cables, sandbags, snow). It never blocks shots or movement and never hides a player or a flag.
+_Avoid_: Decoration, prop (alone), doodad
+
+**Decoration override**:
+An editor choice stored in the map that replaces what the game would pick on its own for one cell (wall piece, decal, spray or prop). Without one, the game decides from the cell pattern and the map.
+_Avoid_: Manual tile, paint layer
