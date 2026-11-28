@@ -126,3 +126,4 @@ What we do, in one or two sentences.
 | [ROBO-275](ROBO-275-free-splash-in-content-textures.md) | The free first-run splash is a real image in content/textures, drawn at 16:9 covering the window | Accepted |
 | [ROBO-278](ROBO-278-drop-bv2-asset-compatibility.md) | Drop BV2 data compatibility; name things RoboViolence outside and robo inside; rename only with big rewrites | Accepted |
 | [ROBO-288](ROBO-288-red-hit-spray-again.md) | Hit spray and floor splats are red again; the art pack's splats are smaller | Accepted |
+| [ROBO-289](ROBO-289-automatic-map-decoration-and-faked-lighting.md) | Map decoration is automatic with optional overrides; map lighting is faked without shaders | Accepted |
