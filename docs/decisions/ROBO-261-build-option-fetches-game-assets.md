@@ -1,6 +1,6 @@
 # ROBO-261: `RV2_ASSETS` fetches game assets at configure time into the build's runtime/packs/
 
-- Status: Accepted
+- Status: Accepted; amended by [ROBO-278](ROBO-278-drop-bv2-asset-compatibility.md): `original` is unsupported, removed by ROBO-279; `RV2_*` names move to `ROBO_*` with ROBO-282
 - Date: 2026-11-25
 - Affects: `cmake/RV2Assets.cmake`, `tools/safe-extract.py`, `CMakeLists.txt` (cache variables, install check), `packaging/make-package.py` (stage check), `bv2::buildPacksDir` and `detectDataDir` in `game/src/Paths.cpp`, `bv2::assetPackStack` in `game/src/ArtPack.cpp`, `game/src/ArtDownloader.cpp`, `tests/assets_fetch.cmake`; ROBO-261 (owner request 2026-11-24); builds on [0040](0040-first-run-downloads-original-data.md), [0065](0065-asset-pack-manifest.md), [ROBO-260](ROBO-260-art-pack-downloads-beside-the-gpl-game.md)
 

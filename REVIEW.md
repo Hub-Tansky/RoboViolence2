@@ -24,7 +24,8 @@ In a draft or bot PR without an Allowed paths row, changes to guard files (`tool
 
 **Blockers:**
 
-- The ground rules hold ([AGENTS.md](AGENTS.md#ground-rules)): BV2 assets still load, no unapproved **[GUI]** change, renames only in separate mechanical commits.
+- The ground rules hold ([AGENTS.md](AGENTS.md#ground-rules)): no unapproved **[GUI]** change, renames only in separate mechanical commits of an item that rewrites that code.
+- No added code, test, doc or fallback supports the original BV2 data ([ADR ROBO-278](docs/decisions/ROBO-278-drop-bv2-asset-compatibility.md)); the original-asset hash checks stay.
 - New behaviour has a test. A fix has a test with **fix proof**. A missing test in tooling (`tools/**`, `.githooks/**`, `.github/**`, `.claude/**`) is a suggestion instead, unless the scope item asks for it.
 - `ARCHITECTURE.md` facts and module rows, every affected README and the ADRs are updated (files get no rows, ADR 0063). Every non-obvious decision has an ADR.
 - Mechanical rewrites (encoding, renames, formatting) are not mixed with functional changes in one commit.

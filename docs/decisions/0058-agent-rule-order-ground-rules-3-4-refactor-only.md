@@ -1,6 +1,6 @@
 # 0058: Agent rules have an order; ground rules 3 and 4 apply only in refactor items
 
-- Status: Accepted
+- Status: Accepted; amended by [ROBO-278](ROBO-278-drop-bv2-asset-compatibility.md): ground rule 3 applies in items that rewrite a file or module in a big way
 - Date: 2026-11-17
 - Affects: [AGENTS.md](../../AGENTS.md) "Agent rules" and "Ground rules" 3 and 4; amends [ADR 0009](0009-rename-internal-identifiers-continuously.md); ROBO-226 (workflow audit WP-05, owner approved 2026-11-11)
 

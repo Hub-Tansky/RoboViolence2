@@ -1,6 +1,6 @@
 # 0009: Rename internal identifiers continuously; interface names wait for §H
 
-- Status: Accepted (amended by [0058](0058-agent-rule-order-ground-rules-3-4-refactor-only.md): applies only in items of kind `refactor`)
+- Status: Accepted (amended by [0058](0058-agent-rule-order-ground-rules-3-4-refactor-only.md): applies only in items of kind `refactor`; amended by [ROBO-278](ROBO-278-drop-bv2-asset-compatibility.md): prefix `robo`, renames only with big rewrites)
 - Date: 2026-10-06
 - Affects: [roadmap ground rules](https://github.com/Hub-Tansky/RoboViolence2/blob/58c91b2a660db2b290b0b5f504381980a6aedba2/docs/roadmap/README.md#ground-rules-every-phase) 3–4, [PNS-19](https://github.com/Hub-Tansky/RoboViolence2/blob/58c91b2a660db2b290b0b5f504381980a6aedba2/docs/roadmap/possible-new-scope.md#pns-19-code-modernisation-continuous), [PNS-20](https://github.com/Hub-Tansky/RoboViolence2/blob/58c91b2a660db2b290b0b5f504381980a6aedba2/docs/roadmap/possible-new-scope.md#pns-20-replacement-assets-and-rebrand) H.7; amends [0008](0008-display-name-robo-violence-2.md)
 
