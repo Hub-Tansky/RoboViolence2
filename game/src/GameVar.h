@@ -319,7 +319,6 @@ public:
 	unsigned int tex_shotGlow;
 	unsigned int tex_smokeTrail;
 	unsigned int tex_blood[10];
-	bool tex_bloodOil = false; // the art pack's white blood shapes, tinted oil and coolant (HitSpray.h)
 	unsigned int tex_explosionMark;
 	unsigned int tex_sniperScope;
 	unsigned int tex_medals[32];

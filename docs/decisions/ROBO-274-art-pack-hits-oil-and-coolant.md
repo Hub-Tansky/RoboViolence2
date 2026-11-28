@@ -1,6 +1,6 @@
 # ROBO-274: Art pack hits spray oil and coolant; BV2 blood stays red
 
-- Status: Accepted
+- Status: Superseded by [ROBO-288](ROBO-288-red-hit-spray-again.md)
 - Date: 2026-11-26
 - Affects: ROBO-274, `game/src/HitSpray.h`, `game/src/GameSpawn.cpp` (`spawnBlood`, `spawnBloodMinibot`), `game/src/GameVar.cpp`, `tests/test_hit_spray.cpp`
 

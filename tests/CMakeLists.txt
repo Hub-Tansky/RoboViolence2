@@ -19,12 +19,6 @@ target_include_directories(test_flag_trail PRIVATE ${CMAKE_SOURCE_DIR}/game/src)
 bv2_target_defaults(test_flag_trail)
 add_test(NAME flag_trail COMMAND test_flag_trail)
 
-# ROBO-274: hit spray colours (oil and coolant, no red)
-add_executable(test_hit_spray test_hit_spray.cpp)
-target_include_directories(test_hit_spray PRIVATE ${CMAKE_SOURCE_DIR}/game/src)
-bv2_target_defaults(test_hit_spray)
-add_test(NAME hit_spray COMMAND test_hit_spray)
-
 # ROBO-275: the first-run splash keeps its shape and covers the window
 add_executable(test_splash_fit test_splash_fit.cpp)
 target_include_directories(test_splash_fit PRIVATE ${CMAKE_SOURCE_DIR}/game/src)

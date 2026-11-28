@@ -121,7 +121,8 @@ What we do, in one or two sentences.
 | [ROBO-268](ROBO-268-macos-builds-on-main-and-nightly.md) | macOS builds run on main, release branches, tags and nightly, not on PRs | Accepted |
 | [ROBO-247](ROBO-247-animated-gltf-samples-into-dko-frames.md) | An animated glTF is sampled into DKO frames at 10 per second; morph targets and skins are baked per frame | Accepted |
 | [ROBO-265](ROBO-265-ttf-missing-letter-draws-plain-letter.md) | A TTF font without a letter draws its plain letter; Teko may make text up to 20 % wider | Accepted |
-| [ROBO-274](ROBO-274-art-pack-hits-oil-and-coolant.md) | Art pack hits spray oil and coolant; BV2 blood stays red | Accepted |
+| [ROBO-274](ROBO-274-art-pack-hits-oil-and-coolant.md) | Art pack hits spray oil and coolant; BV2 blood stays red | Superseded by ROBO-288 |
 | [ROBO-266](ROBO-266-packages-ship-the-art-licence-texts.md) | Packages ship the art licence texts and a NOTICE; the art stays downloaded | Accepted |
 | [ROBO-275](ROBO-275-free-splash-in-content-textures.md) | The free first-run splash is a real image in content/textures, drawn at 16:9 covering the window | Accepted |
 | [ROBO-278](ROBO-278-drop-bv2-asset-compatibility.md) | Drop BV2 data compatibility; name things RoboViolence outside and robo inside; rename only with big rewrites | Accepted |
+| [ROBO-288](ROBO-288-red-hit-spray-again.md) | Hit spray and floor splats are red again; the art pack's splats are smaller | Accepted |

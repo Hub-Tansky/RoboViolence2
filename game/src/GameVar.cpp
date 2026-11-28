@@ -20,7 +20,6 @@
 #include "AssetRegistry.h"
 #include "Paths.h"
 #include "GameVar.h"
-#include "HitSpray.h"
 #include "netPacket.h"
 #ifndef CONSOLE
 #include "KeyManager.h"
@@ -951,7 +950,6 @@ void GameVar::loadModels()
 	tex_blood[7] = dktCreateTextureFromFile(bv2::assetPath("textures/blood08"), DKT_FILTER_LINEAR);
 	tex_blood[8] = dktCreateTextureFromFile(bv2::assetPath("textures/blood09"), DKT_FILTER_LINEAR);
 	tex_blood[9] = dktCreateTextureFromFile(bv2::assetPath("textures/blood10"), DKT_FILTER_LINEAR);
-	tex_bloodOil = hitspray::oilTextures(bv2::assetPath("textures/blood01"));
 	tex_explosionMark = dktCreateTextureFromFile(bv2::assetPath("textures/ExplosionMark"), DKT_FILTER_LINEAR);
 
 	//tex_sniperScope = dktCreateTextureFromFile("main/textures/sniperScope.tga", DKT_FILTER_LINEAR);
